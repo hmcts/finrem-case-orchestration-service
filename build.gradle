@@ -1,0 +1,43 @@
+buildscript {
+	ext {
+		springBootVersion = '2.0.3.RELEASE'
+	}
+	repositories {
+		mavenLocal()
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+plugins {
+	id 'net.ltgt.apt' version '0.10'
+	id 'io.franzbecker.gradle-lombok' version '1.14'
+}
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+group = 'uk.gov.hmcts.reform.finrem'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+def versions = [
+		lombokVersion: '1.18.0'
+]
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter-web')
+	compile("org.springframework.boot:spring-boot-starter-actuator")
+	compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
+	compile group: 'org.projectlombok', name: 'lombok', version:versions.lombokVersion
+	apt group: 'org.projectlombok', name: 'lombok', version:versions.lombokVersion
+
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
