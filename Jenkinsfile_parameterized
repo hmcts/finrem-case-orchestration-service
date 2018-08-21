@@ -14,7 +14,7 @@ properties([
 ])
 
 List<LinkedHashMap<String, Object>> secrets = [
-        secret("fcp-s2s-token", "FCP_S2S_TOKEN")
+        secret("auth-provider-service-client-key", "AUTH_PROVIDER_SERVICE_CLIENT_KEY")
 ]
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
