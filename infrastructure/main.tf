@@ -14,6 +14,7 @@ module "finrem-case-progression" {
   subscription    = "${var.subscription}"
   is_frontend     = false
   capacity        = "${var.capacity}"
+  common_tags     = "${var.common_tags}"
 
   app_settings = {
     REFORM_ENVIRONMENT                                    = "${var.env}"
