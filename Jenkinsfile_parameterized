@@ -4,7 +4,7 @@
 properties([
   parameters([
     string(name: 'PRODUCT_NAME', defaultValue: 'finrem', description: 'Financial Remedy Application'),
-    string(name: 'APP', defaultValue: 'case-progreskon', description: 'CCD case progression'),
+    string(name: 'APP', defaultValue: 'case-progression', description: 'CCD case progression'),
     string(name: 'TYPE', defaultValue: 'java', description: ''),
     string(name: 'ENVIRONMENT', defaultValue: 'sandbox', description: 'Environment where code should be build and deployed'),
     choice(name: 'SUBSCRIPTION', choices: 'sandbox\nnonprod\nprod', description: 'Azure subscriptions available to build in')
