@@ -7,7 +7,7 @@ def product = "fr"
 def app = "case-progression"
 
 List<LinkedHashMap<String, Object>> secrets = [
-        secret("auth-provider-service-client-key", "AUTH_PROVIDER_SERVICE_CLIENT_KEY")
+        secret("fcp-s2s-token", "FCP_S2S_TOKEN")
 ]
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {

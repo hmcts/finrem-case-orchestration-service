@@ -20,7 +20,7 @@ module "finrem-case-progression" {
     REFORM_ENVIRONMENT                                    = "${var.env}"
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL                  = "${local.idam_s2s_url}"
     AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE             = "${var.auth_provider_service_client_microservice}"
-    AUTH_PROVIDER_SERVICE_CLIENT_KEY                      = "${data.vault_generic_secret.auth-provider-service-client-key.data["value"]}"
+    FCP_S2S_TOKEN                                         = "${data.vault_generic_secret.fcp-s2s-token.data["value"]}"
     AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS = "${var.auth_provider_service_client_tokentimetoliveinseconds}"
     AUTH_PROVIDER_HEALTH_URI                              = "${local.idam_s2s_url}/health"
   }
@@ -45,13 +45,13 @@ provider "vault" {
   address = "https://vault.reform.hmcts.net:6200"
 }
 
-data "vault_generic_secret" "auth-provider-service-client-key" {
+data "vault_generic_secret" "fcp-s2s-token" {
   path = "secret/${var.vault_section}/ccidam/service-auth-provider/api/microservice-keys/finrem-case-progression"
 }
 
-resource "azurerm_key_vault_secret" "auth-provider-service-client-key" {
-  name      = "auth-provider-service-client-key"
-  value     = "${data.vault_generic_secret.auth-provider-service-client-key.data["value"]}"
+resource "azurerm_key_vault_secret" "fcp-s2s-token" {
+  name      = "fcp-s2s-token"
+  value     = "${data.vault_generic_secret.fcp-s2s-token.data["value"]}"
   vault_uri = "${module.key-vault.key_vault_uri}"
 }
 
