@@ -5,7 +5,7 @@ locals {
   idam_s2s_url    = "http://rpe-service-auth-provider-${local.local_env}.service.${local.local_ase}.internal"
 }
 
-module "fr-cp" {
+module "finrem-case-progression" {
   source          = "git@github.com:hmcts/moj-module-webapp?ref=master"
   product         = "${var.product}-${var.app}"
   location        = "${var.location}"
@@ -18,11 +18,11 @@ module "fr-cp" {
 
   app_settings = {
     REFORM_ENVIRONMENT                                    = "${var.env}"
-    AUTH_PROVIDER_SERVICE_CLIENT_BASEURL                  = "${local.idam_s2s_url}"
-    AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE             = "${var.auth_provider_service_client_microservice}"
-    AUTH_PROVIDER_SERVICE_CLIENT_KEY                      = "${data.vault_generic_secret.auth-provider-service-client-key.data["value"]}"
-    AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS = "${var.auth_provider_service_client_tokentimetoliveinseconds}"
-    AUTH_PROVIDER_HEALTH_URI                              = "${local.idam_s2s_url}/health"
+//    AUTH_PROVIDER_SERVICE_CLIENT_BASEURL                  = "${local.idam_s2s_url}"
+//    AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE             = "${var.auth_provider_service_client_microservice}"
+//    AUTH_PROVIDER_SERVICE_CLIENT_KEY                      = "${data.vault_generic_secret.auth-provider-service-client-key.data["value"]}"
+//    AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS = "${var.auth_provider_service_client_tokentimetoliveinseconds}"
+//    AUTH_PROVIDER_HEALTH_URI                              = "${local.idam_s2s_url}/health"
   }
 }
 
@@ -34,7 +34,7 @@ module "key-vault" {
   env                 = "${var.env}"
   tenant_id           = "${var.tenant_id}"
   object_id           = "${var.jenkins_AAD_objectId}"
-  resource_group_name = "${module.fr-cp.resource_group_name}"
+  resource_group_name = "${module.finrem-case-progression.resource_group_name}"
 
   # dcd_cc-dev group object ID
   product_group_object_id = "94ac8962-b614-441b-aa4c-9be878a6bf17"
@@ -46,7 +46,7 @@ provider "vault" {
 }
 
 data "vault_generic_secret" "auth-provider-service-client-key" {
-  path = "secret/${var.vault_section}/ccidam/service-auth-provider/api/microservice-keys/fr-cp"
+  path = "secret/${var.vault_section}/ccidam/service-auth-provider/api/microservice-keys/finrem-case-progression"
 }
 
 resource "azurerm_key_vault_secret" "auth-provider-service-client-key" {
