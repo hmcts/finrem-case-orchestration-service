@@ -1,6 +1,6 @@
 variable "product" {
   type = "string"
-  default = "fr"
+  default = "finrem"
 }
 
 variable "app" {

@@ -3,7 +3,7 @@
 @Library("Infrastructure")
 
 def type = "java"
-def product = "fr"
+def product = "finrem"
 def app = "case-progression"
 
 List<LinkedHashMap<String, Object>> secrets = [
