@@ -1,11 +1,11 @@
 variable "product" {
   type = "string"
-  default = "finrem"
+  default = "fr"
 }
 
 variable "app" {
   type = "string"
-  default = "case-progression"
+  default = "cp"
 }
 
 variable "location" {

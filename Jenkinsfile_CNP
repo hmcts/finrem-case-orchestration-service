@@ -3,8 +3,8 @@
 @Library("Infrastructure")
 
 def type = "java"
-def product = "finrem"
-def app = "case-progression"
+def product = "fr"
+def app = "cp"
 
 List<LinkedHashMap<String, Object>> secrets = [
         secret("auth-provider-service-client-key", "AUTH_PROVIDER_SERVICE_CLIENT_KEY")
