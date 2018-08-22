@@ -45,14 +45,14 @@ provider "vault" {
   address = "https://vault.reform.hmcts.net:6200"
 }
 
-data "vault_generic_secret" "auth-provider-service-client-key" {
-  path = "secret/${var.vault_section}/ccidam/service-auth-provider/api/microservice-keys/finrem-case-progression"
-}
-
-resource "azurerm_key_vault_secret" "auth-provider-service-client-key" {
-  name      = "auth-provider-service-client-key"
-  value     = "${data.vault_generic_secret.auth-provider-service-client-key.data["value"]}"
-  vault_uri = "${module.key-vault.key_vault_uri}"
-}
+//data "vault_generic_secret" "auth-provider-service-client-key" {
+//  path = "secret/${var.vault_section}/ccidam/service-auth-provider/api/microservice-keys/finrem-case-progression"
+//}
+//
+//resource "azurerm_key_vault_secret" "auth-provider-service-client-key" {
+//  name      = "auth-provider-service-client-key"
+//  value     = "${data.vault_generic_secret.auth-provider-service-client-key.data["value"]}"
+//  vault_uri = "${module.key-vault.key_vault_uri}"
+//}
 
 
