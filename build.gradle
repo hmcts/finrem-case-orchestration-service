@@ -41,3 +41,12 @@ dependencies {
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
+
+
+jar {
+	archiveName 'finrem-case-progression.jar'
+	manifest {
+		attributes 'Implementation-Title': project.name,
+				'Implementation-Version': project.version
+	}
+}
