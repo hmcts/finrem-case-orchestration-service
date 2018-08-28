@@ -23,7 +23,7 @@ withPipeline(type, product, app) {
     // TODO: create a channel
     // enableSlackNotifications('#financialremedy-tech')
 
-    loadVaultSecrets(secrets)
+//    loadVaultSecrets(secrets)
 
     after('functionalTest:aat') {
         error('Halting pipeline before prod stages')
