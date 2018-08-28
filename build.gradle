@@ -20,8 +20,8 @@ apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
-group = 'uk.gov.hmcts.reform.finrem'
-version = '0.0.1-SNAPSHOT'
+group = 'uk.gov.hmcts.reform'
+version = '0.0.1'
 sourceCompatibility = 1.8
 
 repositories {
