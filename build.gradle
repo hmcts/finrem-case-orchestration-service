@@ -28,6 +28,25 @@ repositories {
 	mavenCentral()
 }
 
+sourceSets {
+	test {
+		java.srcDir 'src/test/java'
+	}
+	functional {
+		java.srcDir 'src/functional/java'
+		resources.srcDir 'src/functional/resources'
+		compileClasspath += main.output + test.output
+		runtimeClasspath += main.output + test.output
+	}
+
+	integrationTest {
+		java.srcDir 'src/integrationTest/java'
+		resources.srcDir 'src/integrationTest/resources'
+		compileClasspath += main.output + test.output
+		runtimeClasspath += main.output + test.output
+	}
+}
+
 def versions = [
 		lombokVersion: '1.18.0'
 ]
