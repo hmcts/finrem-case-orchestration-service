@@ -31,8 +31,6 @@ repositories {
 sourceSets {
 	test {
 		java.srcDir 'src/test/java'
-		compileClasspath += main.output + test.output
-		runtimeClasspath += main.output + test.output
 	}
 //	functional {
 //		java.srcDir 'src/functional/java'
