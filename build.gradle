@@ -31,20 +31,22 @@ repositories {
 sourceSets {
 	test {
 		java.srcDir 'src/test/java'
-	}
-	functional {
-		java.srcDir 'src/functional/java'
-		resources.srcDir 'src/functional/resources'
 		compileClasspath += main.output + test.output
 		runtimeClasspath += main.output + test.output
 	}
-
-	integrationTest {
-		java.srcDir 'src/integrationTest/java'
-		resources.srcDir 'src/integrationTest/resources'
-		compileClasspath += main.output + test.output
-		runtimeClasspath += main.output + test.output
-	}
+//	functional {
+//		java.srcDir 'src/functional/java'
+//		resources.srcDir 'src/functional/resources'
+//		compileClasspath += main.output + test.output
+//		runtimeClasspath += main.output + test.output
+//	}
+//
+//	integrationTest {
+//		java.srcDir 'src/integrationTest/java'
+//		resources.srcDir 'src/integrationTest/resources'
+//		compileClasspath += main.output + test.output
+//		runtimeClasspath += main.output + test.output
+//	}
 }
 
 def versions = [
@@ -72,21 +74,11 @@ jar {
 
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
-	testClassesDirs = sourceSets.functional.output.classesDirs
-	classpath = sourceSets.functional.runtimeClasspath
-
-	useJUnit {
-		includeCategories 'uk.gov.hmcts.reform.finrem.finremcaseprogression.FinremCaseProgressionApplicationTests'
-	}
 }
 
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
-	testClassesDirs = sourceSets.functional.output.classesDirs
-	classpath = sourceSets.functional.runtimeClasspath
 }
 
 
 task integrationTest(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
-	testClassesDirs = sourceSets.integrationTest.output.classesDirs
-	classpath = sourceSets.integrationTest.runtimeClasspath
 }
