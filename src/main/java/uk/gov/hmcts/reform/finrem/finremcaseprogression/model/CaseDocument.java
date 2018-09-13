@@ -6,11 +6,11 @@ import lombok.Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
-public class CaseDetails {
-    @JsonProperty("jurisdiction")
-    private String jurisdiction;
-    @JsonProperty("state")
-    private String state;
-    @JsonProperty("case_data")
-    private CaseData caseData;
+public class CaseDocument {
+    @JsonProperty("document_url")
+    private String documentUrl;
+    @JsonProperty("document_filename")
+    private String documentFilename;
+    @JsonProperty("document_binary_url")
+    private String documentBinaryUrl;
 }
