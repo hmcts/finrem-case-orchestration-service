@@ -6,9 +6,9 @@ import lombok.Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
-public class PensionType {
-    @JsonProperty("typeOfDocument")
-    private String typeOfDocument;
-    @JsonProperty("uploadedDocument")
-    private CaseDocument uploadedDocument;
+public class OrderRefusalData {
+    @JsonProperty("id")
+    private String id;
+    @JsonProperty("value")
+    private OrderRefusal orderRefusal;
 }

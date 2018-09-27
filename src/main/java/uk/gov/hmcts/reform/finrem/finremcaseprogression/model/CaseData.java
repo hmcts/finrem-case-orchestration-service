@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,16 +17,8 @@ public class CaseData {
     private String solicitorFirm;
     @JsonProperty("solicitorReference")
     private String solicitorReference;
-    @JsonProperty("solicitorAddress1")
-    private String solicitorAddress1;
-    @JsonProperty("solicitorAddress2")
-    private String solicitorAddress2;
-    @JsonProperty("solicitorAddress3")
-    private String solicitorAddress3;
-    @JsonProperty("solicitorAddress4")
-    private String solicitorAddress4;
-    @JsonProperty("solicitorAddress5")
-    private String solicitorAddress5;
+    @JsonProperty("solicitorAddress")
+    private Address solicitorAddress;
     @JsonProperty("solicitorPhone")
     private String solicitorPhone;
     @JsonProperty("solicitorEmail")
@@ -69,16 +59,8 @@ public class CaseData {
     private String rSolicitorFirm;
     @JsonProperty("rSolicitorReference")
     private String rSolicitorReference;
-    @JsonProperty("rSolicitorAddress1")
-    private String rSolicitorAddress1;
-    @JsonProperty("rSolicitorAddress2")
-    private String rSolicitorAddress2;
-    @JsonProperty("rSolicitorAddress3")
-    private String rSolicitorAddress3;
-    @JsonProperty("rSolicitorAddress4")
-    private String rSolicitorAddress4;
-    @JsonProperty("rSolicitorAddress5")
-    private String rSolicitorAddress5;
+    @JsonProperty("rSolicitorAddress")
+    private Address rSolicitorAddress;
     @JsonProperty("rSolicitorPhone")
     private String rSolicitorPhone;
     @JsonProperty("rSolicitorEmail")
@@ -87,18 +69,8 @@ public class CaseData {
     private String rSolicitorDXnumber;
 
     // RESPONDENT SERVICE ADDRESS DETAILS
-    @JsonProperty("respondentAddress1")
-    private String respondentAddress1;
-    @JsonProperty("respondentAddress2")
-    private String respondentAddress2;
-    @JsonProperty("respondentAddress3")
-    private String respondentAddress3;
-    @JsonProperty("respondentAddress4")
-    private String respondentAddress4;
-    @JsonProperty("respondentAddress5")
-    private String respondentAddress5;
-    @JsonProperty("respondentAddress6")
-    private String respondentAddress6;
+    @JsonProperty("respondentAddress")
+    private Address respondentAddress;
     @JsonProperty("respondentPhone")
     private String respondentPhone;
     @JsonProperty("respondentEmail")
@@ -150,15 +122,17 @@ public class CaseData {
 
     // OPTIONAL DOCUMENTS
     @JsonProperty("pensionCollection")
-    private List<PensionType> pensionCollection;
+    private List<DocumentData> pensionCollection;
     @JsonProperty("otherCollection")
-    private List<PensionType> otherCollection;
+    private List<DocumentData> otherCollection;
 
     // PAYMENT DETAILS
     @JsonProperty("helpWithFeesQuestion")
     private String helpWithFeesQuestion;
     @JsonProperty("HWFNumber")
     private String HWFNumber;
+    @JsonProperty("feeAmountToPay")
+    private String feeAmountToPay;
     @JsonProperty("PBANumber")
     private String PBANumber;
     @JsonProperty("PBAreference")
@@ -182,11 +156,15 @@ public class CaseData {
     @JsonProperty("orderDirectionAddComments")
     private String orderDirectionAddComments;
     @JsonProperty("orderRefusalCollection")
-    private List<String> orderRefusalCollection;
+    private List<OrderRefusalData> orderRefusalCollection;
     @JsonProperty("dueDate")
     private LocalDate dueDate;
     @JsonProperty("issueDate")
     private LocalDate issueDate;
+    @JsonProperty("assignedToJudgeReason")
+    private String assignedToJudgeReason;
+    @JsonProperty("assignedToJudge")
+    private String assignedToJudge;
     @JsonProperty("referToJudgeText")
     private String referToJudgeText;
     @JsonProperty("referToJudgeTextFromAwaitingResponse")
@@ -198,73 +176,132 @@ public class CaseData {
     @JsonProperty("referToJudgeTextFromConsOrdMade")
     private String referToJudgeTextFromConsOrdMade;
     @JsonProperty("uploadConsentOrderDocuments")
-    private List<ConsentOrder> uploadConsentOrderDocuments;
+    private List<ConsentOrderData> uploadConsentOrderDocuments;
     @JsonProperty("uploadOrder")
-    private List<ConsentOrder> uploadOrder;
+    private List<ConsentOrderData> uploadOrder;
     @JsonProperty("uploadDocuments")
-    private List<ConsentOrder> uploadDocuments;
+    private List<ConsentOrderData> uploadDocuments;
     @JsonProperty("generalOrderCollection")
-    private List<ConsentOrder> generalOrderCollection;
+    private List<GeneralOrderData> generalOrderCollection;
 }
 
 /**
  "case_data": {
-     "d81Joint":{
-         "document_url":"http://document-management-store:8080/documents/810e3c4b-4a79-4faa-aafd-0661da9da0e4",
-         "document_filename":"WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-         "document_binary_url":"http://document-management-store:8080/documents/810e3c4b-4a79-4faa-aafd-0661da9da0e4/binary"
-     },
-     "HWFNumber":"1212121",
-     "d81Question":"Yes",
+     "PBANumber":"PBA123456",
+     "d81Question":"No",
+     "PBAreference":"ABCD",
      "consentOrder":{
-         "document_url":"http://document-management-store:8080/documents/6ad58b2c-ff30-4181-abd1-02e728fdaafc",
+         "document_url":"http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
          "document_filename":"WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-         "document_binary_url":"http://document-management-store:8080/documents/6ad58b2c-ff30-4181-abd1-02e728fdaafc/binary"
+         "document_binary_url":"http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
+     },
+     "d81Applicant":{
+         "document_url":"http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
+         "document_filename":"WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+         "document_binary_url":"http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b/binary"
+     },
+     "d81Respondent":{
+         "document_url":"http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f",
+         "document_filename":"WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+         "document_binary_url":"http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
      },
      "solicitorFirm":"Mr",
      "solicitorName":"Solictor",
      "applicantLName":"Guy",
-     "authorisation3":"2000-01-01",
+     "authorisation3":"2010-01-01",
+     "feeAmountToPay":"150",
      "solicitorEmail":"test@admin.com",
-     "solicitorPhone":null,
+     "solicitorPhone":"9963472494",
      "applicantFMName":"Poor",
-     "authorisation2b":"Sol3",
-     "otherCollection":[],
+     "authorisation2b":"test",
+     "otherCollection":[
+         {
+             "id":"c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
+             "value":{
+             "typeOfDocument":"ScheduleOfAssets",
+             "uploadedDocument":{
+                 "document_url":"http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee",
+                 "document_filename":"WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+                 "document_binary_url":"http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee/binary"
+                 }
+             }
+         }
+     ],
      "respondentEmail":null,
-     "respondentPhone":null,
+     "respondentPhone":"9963472494",
      "appRespondentRep":"No",
+     "consentOrderText":{
+         "document_url":"http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
+         "document_filename":"WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+         "document_binary_url":"http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
+     },
+     "solicitorAddress":{
+         "County":"test",
+         "Country":"United Kingdom",
+         "PostCode":"b1 1ab",
+         "PostTown":"SRIKALAHASTI",
+         "AddressLine1":"House no: 6-354-2, Gandhi Street",
+         "AddressLine2":"Srikalahasti, Chittor District",
+         "AddressLine3":"test"
+     },
      "authorisationFirm":"test",
      "authorisationName":"test",
      "divorceCaseNumber":"DD12D12345",
-     "pensionCollection":[],
-     "solicitorAddress1":"Allen Road",
-     "solicitorAddress2":null,
-     "solicitorAddress3":null,
-     "solicitorAddress4":"dfd",
-     "solicitorAddress5":"b1 1ab",
+     "pensionCollection":[
+         {
+         "id":"ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",
+         "value":{
+             "typeOfDocument":"Form P2",
+             "uploadedDocument":{
+                 "document_url":"http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589",
+                 "document_filename":"WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+                 "document_binary_url":"http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589/binary"
+                 }
+             }
+         }
+     ],
+     "respondentAddress":{
+         "County":"Essex",
+         "Country":"United Kingdom",
+         "PostCode":"SE12 9SE",
+         "PostTown":"London",
+         "AddressLine1":"252 Marvels Lane",
+         "AddressLine2":"AddressGlobalUK",
+         "AddressLine3":"London"
+     },
      "solicitorDXnumber":null,
-     "appRespondentLName":"Bharatamma",
-     "respondentAddress1":"dfdf",
-     "respondentAddress2":"dfdf",
-     "respondentAddress3":null,
-     "respondentAddress4":"test",
-     "respondentAddress5":"e61hq",
-     "respondentAddress6":null,
-     "solicitorReference":null,
+     "appRespondentLName":"Korivi",
+     "solicitorReference":"LL01",
      "appRespondentFMName":"test",
      "divorceStageReached":"Decree Nisi",
-     "helpWithFeesQuestion":"Yes",
+     "helpWithFeesQuestion":"No",
      "natureOfApplication2":[
-        "Periodical Payment Order"
+         "Lump Sum Order",
+         "Periodical Payment Order",
+         "Pension Sharing Order",
+         "Pension Attachment Order",
+         "Pension Compensation Sharing Order",
+         "Pension Compensation Attachment Order",
+         "A settlement or a transfer of property",
+         "Property Adjustment  Order"
      ],
-     "natureOfApplication3a":null,
-     "natureOfApplication3b":null,
+     "natureOfApplication5":"No",
+     "natureOfApplication6":[
+         "Step Child or Step Children",
+         "disability expenses",
+         "In addition to child support",
+         "training",
+         "When not habitually resident"
+     ],
+     "natureOfApplication7":"test",
+     "natureOfApplication3a":"test",
+     "natureOfApplication3b":"test",
      "divorceUploadEvidence1":{
-         "document_url":"http://document-management-store:8080/documents/4ce5bc61-d4b2-475f-8070-f1bb0c89f6b3",
+         "document_url":"http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
          "document_filename":"WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-         "document_binary_url":"http://document-management-store:8080/documents/4ce5bc61-d4b2-475f-8070-f1bb0c89f6b3/binary"
+         "document_binary_url":"http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
      },
-     "orderForChildrenQuestion1":"No",
+     "orderForChildrenQuestion1":"Yes",
      "solicitorAgreeToReceiveEmails":"No"
      }
  */

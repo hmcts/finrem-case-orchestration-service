@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class ConsentOrder {
     @JsonProperty("DocumentType")
-    private List<String> DocumentType;
+    private String DocumentType;
     @JsonProperty("DocumentEmailContent")
     private String DocumentEmailContent;
     @JsonProperty("DocumentLink")
