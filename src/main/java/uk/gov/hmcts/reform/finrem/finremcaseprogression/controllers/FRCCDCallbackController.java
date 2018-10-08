@@ -18,7 +18,7 @@ import javax.ws.rs.core.MediaType;
 @Slf4j
 public class FRCCDCallbackController {
 
-    @PostMapping(path = "/case-added", consumes = MediaType.APPLICATION_JSON,
+    @PostMapping(path = "/fee-lookup", consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON)
     public ResponseEntity<CCDCallbackResponse> addCase(@RequestHeader(value = "Authorization", required = false) String authorizationToken,
                                                        @RequestBody CCDRequest caseDetailsRequest) {

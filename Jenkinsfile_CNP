@@ -3,7 +3,7 @@
 @Library("Infrastructure")
 
 def type = "java"
-def product = "fr"
+def product = "finrem"
 def app = "cp"
 
 List<LinkedHashMap<String, Object>> secrets = [
@@ -25,7 +25,7 @@ withPipeline(type, product, app) {
 
 //    loadVaultSecrets(secrets)
 
-    after('functionalTest:aat') {
-        error('Halting pipeline before prod stages')
+    before('buildinfra:prod') {
+        error('Halting pipeline before PROD.')
     }
 }
