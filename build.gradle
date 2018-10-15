@@ -57,6 +57,7 @@ def versions = [
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile("org.springframework.boot:spring-boot-starter-actuator")
+	compile("org.springframework.boot:spring-boot-configuration-processor")
 	compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
 	compile group: 'org.projectlombok', name: 'lombok', version:versions.lombokVersion
 	apt group: 'org.projectlombok', name: 'lombok', version:versions.lombokVersion
