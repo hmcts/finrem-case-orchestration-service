@@ -34,6 +34,7 @@ repositories {
 sourceSets {
 	test {
 		java.srcDir 'src/test/java'
+        resources.srcDir 'src/test/resources'
 	}
 //	functional {
 //		java.srcDir 'src/functional/java'
