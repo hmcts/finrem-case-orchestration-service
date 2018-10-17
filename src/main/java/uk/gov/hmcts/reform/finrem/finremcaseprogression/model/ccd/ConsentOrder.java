@@ -10,15 +10,15 @@ import java.time.LocalDate;
 @Data
 public class ConsentOrder {
     @JsonProperty("DocumentType")
-    private String DocumentType;
+    private String documentType;
     @JsonProperty("DocumentEmailContent")
-    private String DocumentEmailContent;
+    private String documentEmailContent;
     @JsonProperty("DocumentLink")
-    private CaseDocument DocumentLink;
+    private CaseDocument documentLink;
     @JsonProperty("DocumentDateAdded")
-    private LocalDate DocumentDateAdded;
+    private LocalDate documentDateAdded;
     @JsonProperty("DocumentComment")
-    private String DocumentComment;
+    private String documentComment;
     @JsonProperty("DocumentFileName")
-    private String DocumentFileName;
+    private String documentFileName;
 }
