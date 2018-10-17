@@ -6,14 +6,8 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "fees.api")
-public class FeeServiceConfiguration {
+@ConfigurationProperties(prefix = "pba.api")
+public class PBAServiceConfiguration {
     private String url;
     private String api;
-    private String channel;
-    private String event;
-    private String jurisdiction1;
-    private String jurisdiction2;
-    private String keyword;
-    private String service;
 }

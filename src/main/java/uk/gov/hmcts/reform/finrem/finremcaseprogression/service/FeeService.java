@@ -14,7 +14,7 @@ import java.net.URI;
 @Service
 @RequiredArgsConstructor
 public class FeeService {
-    private final FeeServiceConfiguration feeServiceConfiguration;
+    private final FeeServiceConfiguration serviceConfig;
     private final RestTemplate restTemplate;
 
 
@@ -25,13 +25,13 @@ public class FeeService {
     }
 
     private URI buildUri() {
-        return UriComponentsBuilder.fromHttpUrl(feeServiceConfiguration.getUrl() + feeServiceConfiguration.getApi())
-                .queryParam("service", feeServiceConfiguration.getService())
-                .queryParam("jurisdiction1", feeServiceConfiguration.getJurisdiction1())
-                .queryParam("jurisdiction2", feeServiceConfiguration.getJurisdiction2())
-                .queryParam("channel", feeServiceConfiguration.getChannel())
-                .queryParam("event", feeServiceConfiguration.getEvent())
-                .queryParam("keyword", feeServiceConfiguration.getKeyword())
+        return UriComponentsBuilder.fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi())
+                .queryParam("service", serviceConfig.getService())
+                .queryParam("jurisdiction1", serviceConfig.getJurisdiction1())
+                .queryParam("jurisdiction2", serviceConfig.getJurisdiction2())
+                .queryParam("channel", serviceConfig.getChannel())
+                .queryParam("event", serviceConfig.getEvent())
+                .queryParam("keyword", serviceConfig.getKeyword())
                 .build().encode().toUri();
     }
 }
