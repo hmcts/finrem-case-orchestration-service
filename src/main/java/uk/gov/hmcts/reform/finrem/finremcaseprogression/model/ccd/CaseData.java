@@ -129,13 +129,13 @@ public class CaseData {
     // PAYMENT DETAILS
     @JsonProperty("helpWithFeesQuestion")
     private String helpWithFeesQuestion;
-    @JsonProperty("hwfNumber")
+    @JsonProperty("HWFNumber")
     private String hwfNumber;
     @JsonProperty("feeAmountToPay")
     private String feeAmountToPay;
-    @JsonProperty("pbaNumber")
+    @JsonProperty("PBANumber")
     private String pbaNumber;
-    @JsonProperty("pbaReference")
+    @JsonProperty("PBAreference")
     private String pbaReference;
 
     // ORDER DETAILS
