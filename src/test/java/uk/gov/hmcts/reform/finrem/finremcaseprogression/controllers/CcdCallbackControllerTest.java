@@ -17,9 +17,9 @@ import uk.gov.hmcts.reform.finrem.finremcaseprogression.FinremCaseProgressionApp
 import uk.gov.hmcts.reform.finrem.finremcaseprogression.model.fee.Fee;
 import uk.gov.hmcts.reform.finrem.finremcaseprogression.service.FeeService;
 
-import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.math.BigDecimal;
+import javax.ws.rs.core.MediaType;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
