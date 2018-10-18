@@ -16,6 +16,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.finrem.finremcaseprogression.FinremCaseProgressionApplication;
 import uk.gov.hmcts.reform.finrem.finremcaseprogression.model.fee.Fee;
 import uk.gov.hmcts.reform.finrem.finremcaseprogression.service.FeeService;
+import uk.gov.hmcts.reform.finrem.finremcaseprogression.service.PaymentByAccountService;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -25,6 +26,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,33 +35,48 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = FinremCaseProgressionApplication.class)
 public class CcdCallbackControllerTest {
 
+    private static final String PBA_NUMBER = "PBA";
     private static final String ADD_CASE_URL = "/case-progression/fee-lookup";
+    private static final String PBA_VALIDATE_URL = "/case-progression/pba-validate/" + PBA_NUMBER;
     private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
     @Autowired
     private WebApplicationContext applicationContext;
 
     @MockBean
-    private FeeService service;
+    private FeeService feeService;
+
+    @MockBean
+    private PaymentByAccountService paymentByAccountService;
     private MockMvc mvc;
 
     private JsonNode requestContent;
 
+
     @Before
     public void setUp() throws Exception {
         mvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
+    }
 
+    private static Fee fee() {
+        Fee fee = new Fee();
+        fee.setFeeAmount(new BigDecimal(10d));
+
+        return fee;
+    }
+
+    private void doAddCaseSetUp() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/add-case.json").toURI()));
 
-        Fee fee = new Fee();
-        fee.setFeeAmount(new BigDecimal(10d));
-        when(service.getApplicationFee()).thenReturn(fee);
+        when(feeService.getApplicationFee()).thenReturn(fee());
     }
 
     @Test
     public void shouldAddCase() throws Exception {
+        doAddCaseSetUp();
+
         mvc.perform(post(ADD_CASE_URL)
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
@@ -68,5 +85,20 @@ public class CcdCallbackControllerTest {
                 .andExpect(jsonPath("$.data.feeAmountToPay", is("10")))
                 .andExpect(jsonPath("$.errors", hasSize(0)))
                 .andExpect(jsonPath("$.warnings", hasSize(0)));
+    }
+
+    private void doValidatePbaSetUp() {
+        when(paymentByAccountService.isValidPBA(BEARER_TOKEN, PBA_NUMBER)).thenReturn(true);
+    }
+
+    @Test
+    public void shouldDoPbaValidation() throws Exception {
+        doValidatePbaSetUp();
+
+        mvc.perform(post(PBA_VALIDATE_URL)
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string("true"));
     }
 }
