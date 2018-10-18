@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PBAccount {
+public class PaymentByAccount {
     @JsonProperty(value = "payment_accounts")
     private List<String> accountList;
 }

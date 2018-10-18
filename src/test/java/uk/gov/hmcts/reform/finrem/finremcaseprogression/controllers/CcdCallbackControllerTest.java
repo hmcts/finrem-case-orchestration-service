@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = FinremCaseProgressionApplication.class)
 public class CcdCallbackControllerTest {
 
-    private static final String ADD_CASE_URL = "/caseprogression/fee-lookup";
+    private static final String ADD_CASE_URL = "/case-progression/fee-lookup";
     private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
     @Autowired

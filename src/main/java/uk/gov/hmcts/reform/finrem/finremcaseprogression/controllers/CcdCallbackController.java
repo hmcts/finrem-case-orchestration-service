@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.finremcaseprogression.controllers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -12,8 +13,7 @@ import uk.gov.hmcts.reform.finrem.finremcaseprogression.model.ccd.CCDCallbackRes
 import uk.gov.hmcts.reform.finrem.finremcaseprogression.model.ccd.CCDRequest;
 import uk.gov.hmcts.reform.finrem.finremcaseprogression.model.fee.Fee;
 import uk.gov.hmcts.reform.finrem.finremcaseprogression.service.FeeService;
-import uk.gov.hmcts.reform.finrem.finremcaseprogression.service.IDAMService;
-import uk.gov.hmcts.reform.finrem.finremcaseprogression.service.PBAService;
+import uk.gov.hmcts.reform.finrem.finremcaseprogression.service.PaymentByAccountService;
 
 import java.util.ArrayList;
 import javax.ws.rs.core.MediaType;
@@ -24,11 +24,12 @@ import javax.ws.rs.core.MediaType;
 @Slf4j
 public class CcdCallbackController {
     private final FeeService feeService;
-    private final PBAService pbaService;
+    private final PaymentByAccountService paymentByAccountService;
 
     @PostMapping(path = "/fee-lookup", consumes = MediaType.APPLICATION_JSON, produces = MediaType.APPLICATION_JSON)
-    public ResponseEntity<CCDCallbackResponse> feeLookup(@RequestHeader(value = "Authorization", required = false) String authToken,
-                                                         @RequestBody CCDRequest ccdRequest) {
+    public ResponseEntity<CCDCallbackResponse> feeLookup(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestBody CCDRequest ccdRequest) {
         log.info("Received request for FEE lookup. Auth token: {}, Case request : {}", authToken, ccdRequest);
 
         Fee fee = feeService.getApplicationFee();
@@ -40,14 +41,17 @@ public class CcdCallbackController {
     }
 
 
-    @PostMapping(path = "/pba-validate/{pbaNumber}", consumes = MediaType.APPLICATION_JSON, produces = MediaType.APPLICATION_JSON)
-    public ResponseEntity<Boolean> pbaValidate(@RequestHeader(value = "Authorization", required = false) String authToken,
-                                               @PathVariable String pbaNumber) {
+    @PostMapping(
+            path = "/pba-validate/{pbaNumber}",
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON)
+    public ResponseEntity<Boolean> pbaValidate(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @PathVariable String pbaNumber) {
         log.info("Received request for PBA validate. Auth token: {}, Case request : {}", authToken, pbaNumber);
 
-        boolean validPBA = pbaService.isValidPBA(authToken, pbaNumber);
+        boolean validPBA = paymentByAccountService.isValidPBA(authToken, pbaNumber);
         log.info("validPBA:  {}", validPBA);
-
 
         return ResponseEntity.ok(validPBA);
     }
