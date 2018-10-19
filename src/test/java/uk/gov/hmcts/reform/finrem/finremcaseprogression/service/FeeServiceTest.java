@@ -51,7 +51,7 @@ public class FeeServiceTest {
         assertThat(fee.getFeeAmount(), is(new BigDecimal("10")));
     }
 
-    private String toUri() {
+    private static String toUri() {
         return new StringBuilder("http://test/api")
                 .append("?service=other")
                 .append("&jurisdiction1=family")
