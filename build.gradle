@@ -155,13 +155,11 @@ pitest {
 	targetClasses = ['uk.gov.hmcts.reform.finrem.finremcaseprogression.*']
 	excludedClasses = ['uk.gov.hmcts.reform.finrem.finremcaseprogression.FinremCaseProgressionApplication',
 					   'uk.gov.hmcts.reform.finrem.finremcaseprogression.model.*',
-					   'uk.gov.hmcts.reform.finrem.finremcaseprogression.config.*',
-					   'uk.gov.hmcts.reform.finrem.finremcaseprogression.PaymentByAccountStub',
-						'uk.gov.hmcts.reform.finrem.finremcaseprogression.FinremCaseProgressionApplicationTests']
+					   'uk.gov.hmcts.reform.finrem.finremcaseprogression.config.*']
 	threads = 4
 	outputFormats = ['XML', 'HTML']
 	timestampedReports = false
-	mutationThreshold = 30
+	mutationThreshold = 80
 }
 
 
