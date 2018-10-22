@@ -18,15 +18,17 @@ import uk.gov.hmcts.reform.finrem.finremcaseprogression.model.fee.Fee;
 import uk.gov.hmcts.reform.finrem.finremcaseprogression.service.FeeService;
 import uk.gov.hmcts.reform.finrem.finremcaseprogression.service.PaymentByAccountService;
 
-import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.math.BigDecimal;
+import javax.ws.rs.core.MediaType;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(FeePaymentController.class)

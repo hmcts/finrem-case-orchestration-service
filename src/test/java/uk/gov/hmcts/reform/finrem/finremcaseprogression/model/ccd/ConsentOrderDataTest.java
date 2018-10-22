@@ -21,7 +21,7 @@ public class ConsentOrderDataTest {
     }
 
     @Test
-    public void shouldCreateConsentOrderDataFromJSON() {
+    public void shouldCreateConsentOrderDataFromJson() {
         assertThat(order.getId(), is("1"));
         assertThat(order.getConsentOrder().getDocumentType(), is("pdf"));
         assertThat(order.getConsentOrder().getDocumentLink().getDocumentUrl(), is("http://doc1"));

@@ -20,7 +20,7 @@ public class FeeTest {
     }
 
     @Test
-    public void shouldCreateFeeFromJSON() {
+    public void shouldCreateFeeFromJson() {
         assertThat(fee.getCode(), is("FEE0640"));
         assertThat(fee.getFeeAmount(), is(BigDecimal.valueOf(50)));
     }

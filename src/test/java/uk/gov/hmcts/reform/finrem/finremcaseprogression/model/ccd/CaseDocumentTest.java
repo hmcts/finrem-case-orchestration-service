@@ -12,17 +12,17 @@ public class CaseDocumentTest {
 
     @Before
     public void setUp() throws Exception {
-        String json = "{" +
-                " \"document_url\" : \"http://doc1\", " +
-                " \"document_filename\" : \"doc1\", " +
-                " \"document_binary_url\" : \"http//doc1.binary\" " +
-                "} ";
+        String json = "{"
+                + " \"document_url\" : \"http://doc1\", "
+                + " \"document_filename\" : \"doc1\", "
+                + " \"document_binary_url\" : \"http//doc1.binary\" "
+                + "} ";
         ObjectMapper mapper = new ObjectMapper();
         document = mapper.readValue(json, CaseDocument.class);
     }
 
     @Test
-    public void shouldCreateCaseDocumentFromJSON() {
+    public void shouldCreateCaseDocumentFromJson() {
         assertThat(document.getDocumentUrl(), is("http://doc1"));
         assertThat(document.getDocumentFilename(), is("doc1"));
         assertThat(document.getDocumentBinaryUrl(), is("http//doc1.binary"));

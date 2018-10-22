@@ -22,7 +22,7 @@ public class OrderRefusalDataTest {
     }
 
     @Test
-    public void shouldCreateOrderRefusalDataFromJSON() {
+    public void shouldCreateOrderRefusalDataFromJson() {
         assertThat(order.getId(), is("1"));
         assertThat(order.getOrderRefusal().getOrderRefusal(), hasItems("Other"));
         assertThat(order.getOrderRefusal().getOrderRefusalDate(), is(Date.valueOf("2003-02-01")));

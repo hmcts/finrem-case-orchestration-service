@@ -20,7 +20,7 @@ public class DocumentTypeTest {
     }
 
     @Test
-    public void shouldCreateDocumentTypeFromJSON() {
+    public void shouldCreateDocumentTypeFromJson() {
         assertThat(doc.getTypeOfDocument(), is("pdf"));
         assertThat(doc.getUploadedDocument().getDocumentUrl(), is("http://doc1"));
         assertThat(doc.getUploadedDocument().getDocumentFilename(), is("doc1"));

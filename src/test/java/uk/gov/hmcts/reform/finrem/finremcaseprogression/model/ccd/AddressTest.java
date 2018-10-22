@@ -12,21 +12,21 @@ public class AddressTest {
 
     @Before
     public void setUp() throws Exception {
-        String json = "{" +
-                " \"AddressLine1\" : \"Unit 14\", " +
-                " \"AddressLine2\" : \"3 Edgar Buildings\", " +
-                " \"AddressLine3\" : \"George Street\", " +
-                " \"PostTown\" : \"Bath\", " +
-                " \"County\" : \"Somerset\", " +
-                " \"PostCode\" : \"BA1 2FJ\", " +
-                " \"Country\" : \"England\" " +
-                "} ";
+        String json = "{"
+                + " \"AddressLine1\" : \"Unit 14\", "
+                + " \"AddressLine2\" : \"3 Edgar Buildings\", "
+                + " \"AddressLine3\" : \"George Street\", "
+                + " \"PostTown\" : \"Bath\", "
+                + " \"County\" : \"Somerset\", "
+                + " \"PostCode\" : \"BA1 2FJ\", "
+                + " \"Country\" : \"England\" "
+                + "} ";
         ObjectMapper mapper = new ObjectMapper();
         address = mapper.readValue(json, Address.class);
     }
 
     @Test
-    public void shouldCreateAddressFromJSON() {
+    public void shouldCreateAddressFromJson() {
         assertThat(address.getAddressLine1(), is("Unit 14"));
         assertThat(address.getAddressLine2(), is("3 Edgar Buildings"));
         assertThat(address.getAddressLine3(), is("George Street"));

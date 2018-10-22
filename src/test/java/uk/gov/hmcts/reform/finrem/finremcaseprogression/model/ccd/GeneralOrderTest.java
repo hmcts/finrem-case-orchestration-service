@@ -21,7 +21,7 @@ public class GeneralOrderTest {
     }
 
     @Test
-    public void shouldCreateGeneralOrderFromJSON() {
+    public void shouldCreateGeneralOrderFromJson() {
         assertThat(order.getGeneralOrder(), is("order1"));
         assertThat(order.getGeneralOrderDocumentUpload().getDocumentUrl(), is("http://doc1"));
         assertThat(order.getGeneralOrderDocumentUpload().getDocumentFilename(), is("doc1"));

@@ -18,7 +18,7 @@ public class PaymentByAccountTest {
     }
 
     @Test
-    public void shouldCreatePaymentFromJSON() {
+    public void shouldCreatePaymentFromJson() {
         assertThat(pba.getAccountList(), hasItems("PBA123", "PBA456"));
     }
 }
