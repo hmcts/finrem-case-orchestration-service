@@ -20,7 +20,7 @@ public class DocumentDataTest {
     }
 
     @Test
-    public void shouldCreateDocumentDataFromJSON() {
+    public void shouldCreateDocumentDataFromJson() {
         assertThat(doc.getId(), is("1"));
         assertThat(doc.getDocumentType().getTypeOfDocument(), is("pdf"));
         assertThat(doc.getDocumentType().getUploadedDocument().getDocumentUrl(), is("http://doc1"));
