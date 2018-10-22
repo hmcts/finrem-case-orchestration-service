@@ -48,7 +48,7 @@ public class FeeServiceTest {
 
         Fee fee = feeService.getApplicationFee();
         assertThat(fee.getCode(), is("TEST"));
-        assertThat(fee.getFeeAmount(), is(new BigDecimal("10")));
+        assertThat(fee.getFeeAmount(), is(BigDecimal.TEN));
     }
 
     private static String toUri() {

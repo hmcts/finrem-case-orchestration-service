@@ -31,8 +31,7 @@ public class IdamService {
     private HttpEntity<String> buildAuthRequest(String authToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", authToken);
-        HttpEntity<String> request = new HttpEntity<>(headers);
-        return request;
+        return new HttpEntity<>(headers);
     }
 
     private URI buildUri() {

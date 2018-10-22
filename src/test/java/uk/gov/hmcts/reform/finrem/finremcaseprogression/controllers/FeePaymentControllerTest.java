@@ -18,22 +18,20 @@ import uk.gov.hmcts.reform.finrem.finremcaseprogression.model.fee.Fee;
 import uk.gov.hmcts.reform.finrem.finremcaseprogression.service.FeeService;
 import uk.gov.hmcts.reform.finrem.finremcaseprogression.service.PaymentByAccountService;
 
+import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.math.BigDecimal;
-import javax.ws.rs.core.MediaType;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(CcdCallbackController.class)
+@WebMvcTest(FeePaymentController.class)
 @ContextConfiguration(classes = FinremCaseProgressionApplication.class)
-public class CcdCallbackControllerTest {
+public class FeePaymentControllerTest {
 
     private static final String PBA_NUMBER = "PBA";
     private static final String ADD_CASE_URL = "/case-progression/fee-lookup";
@@ -54,7 +52,7 @@ public class CcdCallbackControllerTest {
 
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         mvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
     }
 
@@ -65,17 +63,17 @@ public class CcdCallbackControllerTest {
         return fee;
     }
 
-    private void doAddCaseSetUp() throws Exception {
+    private void doFeeLookupSetUp() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/add-case.json").toURI()));
+                .getResource("/fixtures/fee-lookup.json").toURI()));
 
         when(feeService.getApplicationFee()).thenReturn(fee());
     }
 
     @Test
-    public void shouldAddCase() throws Exception {
-        doAddCaseSetUp();
+    public void shouldDoFeeLookup() throws Exception {
+        doFeeLookupSetUp();
 
         mvc.perform(post(ADD_CASE_URL)
                 .content(requestContent.toString())

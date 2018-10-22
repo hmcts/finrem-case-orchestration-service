@@ -5,7 +5,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.finrem.finremcaseprogression.controllers.CcdCallbackController;
+import uk.gov.hmcts.reform.finrem.finremcaseprogression.controllers.FeePaymentController;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,10 +14,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SmokeTest {
 
     @Autowired
-    private CcdCallbackController ccdCallbackController;
+    private FeePaymentController feePaymentController;
 
     @Test
     public void contextLoads() {
-        assertThat(ccdCallbackController).isNotNull();
+        assertThat(feePaymentController).isNotNull();
     }
 }

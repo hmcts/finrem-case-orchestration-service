@@ -22,7 +22,7 @@ import javax.ws.rs.core.MediaType;
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-progression")
 @Slf4j
-public class CcdCallbackController {
+public class FeePaymentController {
     private final FeeService feeService;
     private final PaymentByAccountService paymentByAccountService;
 

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.finremcaseprogression.service;
 
-import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +25,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 public class IdamServiceTest {
 
     @Autowired
-    private  IdamService idamService;
+    private IdamService idamService;
 
     private MockRestServiceServer mockServer;
 
