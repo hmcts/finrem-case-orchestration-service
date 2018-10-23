@@ -18,6 +18,8 @@ plugins {
 	id 'org.owasp.dependencycheck' version '3.2.1'
 }
 
+
+apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
@@ -54,6 +56,8 @@ def versions = [
 		lombokVersion: '1.18.0'
 ]
 
+mainClassName = 'uk.gov.hmcts.reform.finrem.finremcaseprogression.FinremCaseProgressionApplication'
+
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile("org.springframework.boot:spring-boot-starter-actuator")
@@ -65,7 +69,6 @@ dependencies {
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }
 
-
 jar {
 	archiveName 'finrem-case-progression.jar'
 	manifest {
@@ -73,7 +76,6 @@ jar {
 				'Implementation-Version': project.version
 	}
 }
-
 sonarqube {
 	println "echo sonarqube"
 	properties {
