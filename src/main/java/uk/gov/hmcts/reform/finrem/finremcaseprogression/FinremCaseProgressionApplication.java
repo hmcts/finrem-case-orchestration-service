@@ -8,19 +8,19 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter;
 @SpringBootApplication
 public class FinremCaseProgressionApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(FinremCaseProgressionApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(FinremCaseProgressionApplication.class, args);
+    }
 
-	@Bean
-	public CommonsRequestLoggingFilter requestLoggingFilter() {
-		CommonsRequestLoggingFilter loggingFilter = new CommonsRequestLoggingFilter();
-		loggingFilter.setIncludeClientInfo(false);
-		loggingFilter.setIncludeQueryString(true);
-		loggingFilter.setIncludePayload(true);
-		loggingFilter.setIncludeHeaders(true);
-		loggingFilter.setMaxPayloadLength(10240);
-		return loggingFilter;
-	}
+    @Bean
+    public CommonsRequestLoggingFilter requestLoggingFilter() {
+        CommonsRequestLoggingFilter loggingFilter = new CommonsRequestLoggingFilter();
+        loggingFilter.setIncludeClientInfo(false);
+        loggingFilter.setIncludeQueryString(true);
+        loggingFilter.setIncludePayload(true);
+        loggingFilter.setIncludeHeaders(true);
+        loggingFilter.setMaxPayloadLength(10240);
+        return loggingFilter;
+    }
 
 }

@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import uk.gov.hmcts.reform.finrem.finremcaseprogression.config.IDAMServiceConfiguration;
+import uk.gov.hmcts.reform.finrem.finremcaseprogression.config.IdamServiceConfiguration;
 
 import java.net.URI;
 import java.util.Map;
@@ -16,8 +16,8 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class IDAMService {
-    private final IDAMServiceConfiguration serviceConfig;
+public class IdamService {
+    private final IdamServiceConfiguration idamServiceConfiguration;
     private final RestTemplate restTemplate;
 
     public String getUserEmailId(String authToken) {
@@ -31,12 +31,11 @@ public class IDAMService {
     private HttpEntity<String> buildAuthRequest(String authToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", authToken);
-        HttpEntity<String> request = new HttpEntity<>(headers);
-        return request;
+        return new HttpEntity<>(headers);
     }
 
     private URI buildUri() {
-        return UriComponentsBuilder.fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi())
+        return UriComponentsBuilder.fromHttpUrl(idamServiceConfiguration.getUrl() + idamServiceConfiguration.getApi())
                 .build().toUri();
     }
 }

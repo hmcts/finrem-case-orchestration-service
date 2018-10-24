@@ -1,0 +1,12 @@
+{
+  "generalOrder_order": "order1",
+  "generalOrder_documentUpload": {
+    "document_url": "http://doc1",
+    "document_filename": "doc1",
+    "document_binary_url": "http://doc1.binary"
+  },
+  "generalOrder_judgeList": "district judge",
+  "generalOrder_judgeName": "judge1",
+  "generalOrder_dateOfOrder": "2010-01-02",
+  "generalOrder_comments": "comment1"
+}

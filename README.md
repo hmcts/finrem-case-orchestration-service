@@ -16,6 +16,17 @@ Start CCD using docker-compose:
 ./compose-frontend.sh up -d
 ```
 
+Run the unit tests :
+
+``` /gradlew test```
+
+
+### Mutation tests
+ To run all mutation tests execute the following command:
+ ```
+/gradlew pitest
+ ```
+ 
 In the Excel definition file specify a callback for some event and put the following url:
 host.docker.internal:9000/caseprogression/case-added
 

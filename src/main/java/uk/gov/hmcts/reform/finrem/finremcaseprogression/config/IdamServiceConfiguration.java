@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Data
 @Component
 @ConfigurationProperties(prefix = "idam.api")
-public class IDAMServiceConfiguration {
+public class IdamServiceConfiguration {
     private String url;
     private String api;
 }
