@@ -12,7 +12,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 
 public class OrderRefusalTest {
-    OrderRefusal order;
+    protected OrderRefusal order;
 
     @Before
     public void setUp() throws Exception {

@@ -10,7 +10,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class DocumentTypeTest {
-    DocumentType doc;
+    protected DocumentType doc;
 
     @Before
     public void setUp() throws Exception {

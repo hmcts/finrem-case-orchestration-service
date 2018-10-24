@@ -11,7 +11,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class ConsentOrderTest {
-    ConsentOrder order;
+    protected ConsentOrder order;
 
     @Before
     public void setUp() throws Exception {

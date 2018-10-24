@@ -11,7 +11,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class GeneralOrderTest {
-    GeneralOrder order;
+    protected GeneralOrder order;
 
     @Before
     public void setUp() throws Exception {
