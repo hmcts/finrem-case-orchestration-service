@@ -1,0 +1,8 @@
+{
+  "typeOfDocument": "pdf",
+  "uploadedDocument": {
+    "document_url": "http://doc1",
+    "document_filename": "doc1",
+    "document_binary_url": "http://doc1.binary"
+  }
+}
