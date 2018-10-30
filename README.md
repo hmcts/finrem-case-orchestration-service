@@ -1,39 +1,123 @@
-# Financial Remedy callback services POC
+# Financial Remedy Case Progression Service
 
-### Starting
+This application orchestrates a workflow based on the requested business requirement.
 
-Start the service as usual with Spring Boot
+## Getting started
+
+### Prerequisites
+
+- [JDK 8](https://www.oracle.com/java)
+
+### Building
+
+The project uses [Gradle](https://gradle.org) as a build tool but you don't have to install it locally since there is a
+`./gradlew` wrapper script.
+
+To build project please execute the following command:
 
 ```bash
-./gradlew clean bootRun
+    ./gradlew build
 ```
-This will run the service on the port specified in application.properties: 9000
 
-Start CCD using docker-compose:
-**https://github.com/hmcts/ccd-docker**
+To get the project to build in IntelliJ IDEA, you have to:
+
+ - Install the Lombok plugin: Preferences -> Plugins
+ - Enable Annotation Processing: Preferences -> Build, Execution, Deployment -> Compiler -> Annotation Processors
+
+### Running
+
+You can run the application by executing following command:
 
 ```bash
-./compose-frontend.sh up -d
+    ./gradlew bootRun
 ```
 
-Run the unit tests :
+The application will start locally on `http://localhost:9000`
 
-``` /gradlew test```
+## Docker container
 
+### Docker image
+
+Build the docker image
+
+```bash
+    docker build . -t hmcts/finrem-case-progression:latest
+```
+
+### Docker compose 
+
+Run the service with all its dependencies
+
+```bash
+    docker-compose -f docker/app.yml up -d
+```
+
+To stop the service
+
+```bash
+    docker-compose -f docker/app.yml down
+```
+
+Run the service for functional tests
+
+```bash
+    docker-compose -f docker/test.yml up -d
+```
+
+To stop the service
+
+```bash
+    docker-compose -f docker/test.yml down
+```
+
+## Setup User/Roles, CCD definition file
+
+### Create User/Roles
+
+To create the users/role run the following command:
+
+```bash
+    ./bin/create-roles-users.sh
+```
+### Import definition file
+
+To import the Financial Remedy CCD definition file, run the following command:
+
+```bash
+    ./bin/ccd-import-definition.sh <<Finrem_Definition_File_Path>>
+```
+
+## Developing
+
+### Unit tests
+
+To run all unit tests please execute following command:
+
+```bash
+    ./gradlew test
+```
+
+### Coding style tests
+
+To run all checks (including unit tests) please execute following command:
+
+```bash
+    ./gradlew check
+```
 
 ### Mutation tests
- To run all mutation tests execute the following command:
- ```
-/gradlew pitest
- ```
- 
-In the Excel definition file specify a callback for some event and put the following url:
-host.docker.internal:9000/caseprogression/case-added
 
-Import the file and attach the debugger to FR service to see the request data coming to the service.
+To run all mutation tests execute the following command:
 
-Trigger the event the callback is attached to and see the payload. Happy coding!
+```bash
+    ./gradlew pitest
+```
 
-## LICENSE
+## Versioning
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
+We use [SemVer](http://semver.org/) for versioning.
+For the versions available, see the tags on this repository.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.

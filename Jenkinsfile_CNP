@@ -20,8 +20,10 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 withPipeline(type, product, app) {
-    // TODO: create a channel
-    // enableSlackNotifications('#financialremedy-tech')
+    enableDockerBuild()
+//    enableDeployToAKS()
+    enableSlackNotifications('#finrem-dev')
+    setVaultName('finrem')
 
 //    loadVaultSecrets(secrets)
 

@@ -1,6 +1,6 @@
 FROM hmcts/cnp-java-base:openjdk-jre-8-alpine-1.4
 
-COPY build/install/finrem-case-progression /opt/app/
+COPY build/libs/finrem-case-progression.jar /opt/app/
 
 WORKDIR /opt/app
 
