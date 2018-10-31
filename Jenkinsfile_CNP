@@ -21,11 +21,10 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 
 withPipeline(type, product, app) {
     enableDockerBuild()
-//    enableDeployToAKS()
-    enableSlackNotifications('#finrem-dev')
-    setVaultName('finrem')
-
+    enableDeployToAKS()
+    setVaultName(product)
 //    loadVaultSecrets(secrets)
+    enableSlackNotifications('#finrem-dev')
 
     before('buildinfra:prod') {
         error('Halting pipeline before PROD.')
