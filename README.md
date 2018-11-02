@@ -1,4 +1,4 @@
-# Financial Remedy Case Progression Service
+# Financial Remedy Case Orchestration Service
 
 This application orchestrates a workflow based on the requested business requirement.
 
@@ -41,7 +41,7 @@ The application will start locally on `http://localhost:9000`
 Build the docker image
 
 ```bash
-    docker build . -t hmcts/finrem-case-progression:latest
+    docker build . -t hmcts/finrem-case-orchestration:latest
 ```
 
 ### Docker compose 

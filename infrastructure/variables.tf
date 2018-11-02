@@ -5,7 +5,7 @@ variable "product" {
 
 variable "app" {
   type = "string"
-  default = "cp"
+  default = "cos"
 }
 
 variable "location" {
@@ -55,7 +55,7 @@ variable "common_tags" {
 
 //if possible move this to application.property
 variable "auth_provider_service_client_microservice" {
-  default = "finrem_case_progression"
+  default = "finrem_case_orchestration"
 }
 
 //if possible move this to application.property

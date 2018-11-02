@@ -4,7 +4,7 @@
 
 def type = "java"
 def product = "finrem"
-def app = "cp"
+def app = "cos"
 
 List<LinkedHashMap<String, Object>> secrets = [
         secret("auth-provider-service-client-key", "AUTH_PROVIDER_SERVICE_CLIENT_KEY")

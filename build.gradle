@@ -35,9 +35,9 @@ apply plugin: 'org.owasp.dependencycheck'
 apply plugin: 'info.solidsoft.pitest'
 
 
-group = 'uk.gov.hmcts.reform.finrem.finremcaseprogression'
+group = 'uk.gov.hmcts.reform.finrem.caseorchestration'
 version = '0.0.1'
-mainClassName = 'uk.gov.hmcts.reform.finrem.finremcaseprogression.FinremCaseProgressionApplication'
+mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -84,7 +84,7 @@ dependencies {
 sonarqube {
     println "echo sonarqube"
     properties {
-        property "sonar.projectKey", "finrem-case-progression"
+        property "sonar.projectKey", "finrem-case-orchestration"
         property "sonar.host.url", "https://sonarcloud.io/"
         property "sonar.dynamicAnalysis", "reuseReports"
         property "sonar.java.coveragePlugin", "jacoco"
@@ -149,11 +149,11 @@ jacocoTestCoverageVerification {
 }
 
 pitest {
-    targetClasses = ['uk.gov.hmcts.reform.finrem.finremcaseprogression.*']
-    excludedClasses = ['uk.gov.hmcts.reform.finrem.finremcaseprogression.FinremCaseProgressionApplication',
-                       'uk.gov.hmcts.reform.finrem.finremcaseprogression.model.*',
-                       'uk.gov.hmcts.reform.finrem.finremcaseprogression.config.*',
-                       'uk.gov.hmcts.reform.finrem.finremcaseprogression.controllers.PaymentByAccountStub']
+    targetClasses = ['uk.gov.hmcts.reform.finrem.caseorchestration.*']
+    excludedClasses = ['uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication',
+                       'uk.gov.hmcts.reform.finrem.caseorchestration.model.*',
+                       'uk.gov.hmcts.reform.finrem.caseorchestration.config.*',
+                       'uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PaymentByAccountStub']
     threads = 4
     outputFormats = ['XML', 'HTML']
     timestampedReports = false
@@ -169,7 +169,7 @@ bootJar {
         attributes 'Implementation-Title': project.name,
                 'Implementation-Version': project.version
     }
-    archiveName 'finrem-case-progression.jar'
+    archiveName 'finrem-case-orchestration.jar'
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
