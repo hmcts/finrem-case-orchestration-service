@@ -4,12 +4,12 @@
 properties([
   parameters([
     string(name: 'PRODUCT_NAME', defaultValue: 'finrem', description: 'Financial Remedy Application'),
-    string(name: 'APP', defaultValue: 'cp', description: 'CCD case progression'),
+    string(name: 'APP', defaultValue: 'cos', description:  'Financial Remedy Case Orchestration Service'),
     string(name: 'TYPE', defaultValue: 'java', description: ''),
     string(name: 'ENVIRONMENT', defaultValue: 'sandbox', description: 'Environment where code should be build and deployed'),
     choice(name: 'SUBSCRIPTION', choices: 'sandbox\nnonprod\nprod', description: 'Azure subscriptions available to build in')
   ]),
-  [$class: 'GithubProjectProperty', projectUrlStr: 'github.com/hmcts/finrem-case-progression'],
+  [$class: 'GithubProjectProperty', projectUrlStr: 'github.com/hmcts/finrem-case-orchestration'],
   pipelineTriggers([[$class: 'GitHubPushTrigger']])
 ])
 

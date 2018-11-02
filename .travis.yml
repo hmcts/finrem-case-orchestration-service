@@ -4,21 +4,19 @@ services:
   - docker
 
 before_cache:
-- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
-
-cache:
-  directories:
-  - $HOME/.gradle/caches/
-  - $HOME/.gradle/wrapper/
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 
 before_install:
-#  - curl https://raw.githubusercontent.com/hmcts/reform-api-docs/master/bin/publish-swagger-docs.sh > publish-swagger-docs.sh
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
 
 script:
-  - ./gradlew build
-  - ./gradlew test
+  - ./gradlew check
+  - ./gradlew functional
+  - ./gradlew jacocoTestReport
 
 after_success:
-  - ./gradlew jacocoTestReport
-#  - test "$TRAVIS_BRANCH" = "master" && test "$TRAVIS_PULL_REQUEST" = "false" && sh ./publish-swagger-docs.sh
+  - bash <(curl -s https://codecov.io/bash)

@@ -2,9 +2,9 @@
 version: '3'
 
 services:
-  finrem-case-progression:
-    image: "hmcts/finrem-case-progression:latest"
-    container_name: finrem-case-progression
+  finrem-case-orchestration:
+    image: "hmcts/finrem-case-orchestration:latest"
+    container_name: finrem-case-orchestration
     ports:
       - 9000:9000
     depends_on:
