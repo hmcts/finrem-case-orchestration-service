@@ -47,7 +47,7 @@ variable "idam_s2s_url_prefix" {
 }
 
 variable "auth_provider_service_client_microservice" {
-  default = "finrem-case-orchestration-service"
+    default = "finrem-case-orchestration"
 }
 
 variable "auth_provider_service_client_tokentimetoliveinseconds" {
