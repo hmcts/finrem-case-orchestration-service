@@ -9,6 +9,7 @@ buildscript {
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath group: 'org.sonarsource.scanner.gradle', name: 'sonarqube-gradle-plugin', version: '2.6.2'
+        classpath("net.serenity-bdd:serenity-gradle-plugin:1.5.2")
     }
 }
 
@@ -30,6 +31,7 @@ apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'org.sonarqube'
+apply plugin: 'net.serenity-bdd.aggregator'
 apply plugin: 'jacoco'
 apply plugin: 'org.owasp.dependencycheck'
 apply plugin: 'info.solidsoft.pitest'
@@ -46,10 +48,20 @@ repositories {
     mavenCentral()
 }
 
+
 sourceSets {
     test {
         java.srcDir 'src/test/java'
         resources.srcDir 'src/test/resources'
+    }
+
+    testFunctional {
+        java {
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+            srcDir file('src/test/functionalTest/java')
+        }
+        resources.srcDir file('src/test/functionalTest/resources')
     }
 //	functional {
 //		java.srcDir 'src/functional/java'
@@ -79,6 +91,12 @@ dependencies {
     apt group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-core', version: '1.5.2'
+    testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: '1.5.2'
+    testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '1.5.2'
+    testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '1.0.26'
+    testFunctionalCompile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
+    testFunctionalCompile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '0.6.0'
 }
 
 sonarqube {
@@ -175,7 +193,11 @@ bootJar {
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
 }
 
-task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
+task functional(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
+   // description = "Runs functional Tests"
+    testClassesDirs = sourceSets.testFunctional.output.classesDirs
+    classpath = sourceSets.testFunctional.runtimeClasspath
+    finalizedBy aggregate
 }
 
 

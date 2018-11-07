@@ -1,0 +1,68 @@
+package uk.gov.hmcts.probate.functional.feelookuptests;
+
+import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
+import net.serenitybdd.junit.runners.SerenityRunner;
+import net.serenitybdd.rest.SerenityRest;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import uk.gov.hmcts.probate.functional.IntegrationTestBase;
+
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.junit.Assert.assertEquals;
+
+@RunWith(SerenityRunner.class)
+public class FRFeeLookupTests extends IntegrationTestBase {
+
+    private static final String FEE_LOOKUP_URL = "/case-orchestration/fee-lookup";
+
+
+    @Test
+    public void verifyFeeAmount() {
+
+        SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(utils.getHeaders())
+                .body(utils.getJsonFromFile("feelookup.json"))
+                .when().post(FEE_LOOKUP_URL).then().statusCode(200)
+                .and().body("data.feeAmountToPay", equalToIgnoringCase("50.00"));
+
+    }
+
+    @Test
+    public void verifyEmptyRequest() {
+
+        SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(utils.getHeaders())
+                .body("")
+                .when().post(FEE_LOOKUP_URL).then().statusCode(400)
+                .and().body("message", containsString("Required request body is missing:"));
+
+    }
+
+    private void validatePostFailure(String jsonFileName, String errorMessage, Integer statusCode, String URL) {
+        Response response = SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(utils.getHeaders())
+                .body(utils.getJsonFromFile(jsonFileName))
+                .when().post(URL)
+                .thenReturn();
+
+        if (statusCode == 200) {
+            response.then().assertThat().statusCode(statusCode)
+                    .and().body("errors", hasSize(greaterThanOrEqualTo(1)))
+                    .and().body("errors", hasItem(containsString(errorMessage)));
+        } else if (statusCode == 400) {
+            response.then().assertThat().statusCode(statusCode)
+                    .and().body("error", equalTo("Invalid Request"))
+                    .and().body("fieldErrors", hasSize(greaterThanOrEqualTo(1)))
+                    .and().body("fieldErrors[0].message", equalTo(errorMessage));
+        } else {
+            assert false;
+        }
+    }
+
+}
