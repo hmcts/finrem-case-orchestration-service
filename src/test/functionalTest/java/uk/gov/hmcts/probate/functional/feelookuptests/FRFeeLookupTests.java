@@ -21,7 +21,6 @@ public class FRFeeLookupTests extends IntegrationTestBase {
 
     @Test
     public void verifyFeeAmount() {
-
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())
@@ -33,7 +32,6 @@ public class FRFeeLookupTests extends IntegrationTestBase {
 
     @Test
     public void verifyEmptyRequest() {
-
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())
@@ -43,26 +41,17 @@ public class FRFeeLookupTests extends IntegrationTestBase {
 
     }
 
-    private void validatePostFailure(String jsonFileName, String errorMessage, Integer statusCode, String URL) {
-        Response response = SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(utils.getHeaders())
-                .body(utils.getJsonFromFile(jsonFileName))
-                .when().post(URL)
-                .thenReturn();
 
-        if (statusCode == 200) {
-            response.then().assertThat().statusCode(statusCode)
-                    .and().body("errors", hasSize(greaterThanOrEqualTo(1)))
-                    .and().body("errors", hasItem(containsString(errorMessage)));
-        } else if (statusCode == 400) {
-            response.then().assertThat().statusCode(statusCode)
-                    .and().body("error", equalTo("Invalid Request"))
-                    .and().body("fieldErrors", hasSize(greaterThanOrEqualTo(1)))
-                    .and().body("fieldErrors[0].message", equalTo(errorMessage));
-        } else {
-            assert false;
-        }
-    }
+//    @Test
+//    public void verifyEmptyCaseDataRequest() {
+//        SerenityRest.given()
+//                .relaxedHTTPSValidation()
+//                .headers(utils.getHeaders())
+//                .body(utils.getJsonFromFile("emptyCaseData.json"))
+//                .when().post(FEE_LOOKUP_URL).then().statusCode(400)
+//                .and().body("message", containsString("Required request body is missing:"));
+//
+//    }
+
 
 }
