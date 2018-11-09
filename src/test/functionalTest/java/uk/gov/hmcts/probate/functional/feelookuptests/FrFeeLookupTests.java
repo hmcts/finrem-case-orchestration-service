@@ -9,12 +9,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.hmcts.probate.functional.IntegrationTestBase;
 
-import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SerenityRunner.class)
-public class FRFeeLookupTests extends IntegrationTestBase {
+public class FrFeeLookupTests extends IntegrationTestBase {
 
     private static final String FEE_LOOKUP_URL = "/case-orchestration/fee-lookup";
 
@@ -40,18 +40,5 @@ public class FRFeeLookupTests extends IntegrationTestBase {
                 .and().body("message", containsString("Required request body is missing:"));
 
     }
-
-
-//    @Test
-//    public void verifyEmptyCaseDataRequest() {
-//        SerenityRest.given()
-//                .relaxedHTTPSValidation()
-//                .headers(utils.getHeaders())
-//                .body(utils.getJsonFromFile("emptyCaseData.json"))
-//                .when().post(FEE_LOOKUP_URL).then().statusCode(400)
-//                .and().body("message", containsString("Required request body is missing:"));
-//
-//    }
-
 
 }

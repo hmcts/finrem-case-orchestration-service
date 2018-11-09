@@ -95,8 +95,6 @@ dependencies {
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: '1.5.2'
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '1.5.2'
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '1.0.26'
-    testFunctionalCompile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
-    testFunctionalCompile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '0.6.0'
 }
 
 sonarqube {
@@ -194,7 +192,7 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
 }
 
 task functional(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
-   // description = "Runs functional Tests"
+    // description = "Runs functional Tests"
     testClassesDirs = sourceSets.testFunctional.output.classesDirs
     classpath = sourceSets.testFunctional.runtimeClasspath
     finalizedBy aggregate
