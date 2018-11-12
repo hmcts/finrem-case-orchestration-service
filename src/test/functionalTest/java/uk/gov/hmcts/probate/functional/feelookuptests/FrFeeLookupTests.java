@@ -1,8 +1,7 @@
 package uk.gov.hmcts.probate.functional.feelookuptests;
 
-import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
+
+import io.restassured.RestAssured;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
 import org.junit.Test;
@@ -21,6 +20,7 @@ public class FrFeeLookupTests extends IntegrationTestBase {
 
     @Test
     public void verifyFeeAmount() {
+        System.out.println("test base url ..." + RestAssured.baseURI);
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())
