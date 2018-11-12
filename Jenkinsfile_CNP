@@ -11,11 +11,11 @@ List<LinkedHashMap<String, Object>> secrets = [
 ]
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
-    [ $class: 'AzureKeyVaultSecret',
-      secretType: 'Secret',
-      name: secretName,
-      version: '',
-      envVariable: envVar
+    [$class     : 'AzureKeyVaultSecret',
+     secretType : 'Secret',
+     name       : secretName,
+     version    : '',
+     envVariable: envVar
     ]
 }
 
@@ -28,5 +28,24 @@ withPipeline(type, product, app) {
 
     before('buildinfra:prod') {
         error('Halting pipeline before PROD.')
+    }
+
+
+    after('functionalTest:aat') {
+        publishHTML target: [
+                reportDir            : "target/site/serenity/",
+                reportFiles          : "index.html",
+                reportName           : "AAT Functional Tests",
+                alwaysLinkToLastBuild: true
+        ]
+    }
+
+    after('functionalTest:preview') {
+        publishHTML target: [
+                reportDir            : "target/site/serenity/",
+                reportFiles          : "index.html",
+                reportName           : "Preview Functional Tests",
+                alwaysLinkToLastBuild: true
+        ]
     }
 }
