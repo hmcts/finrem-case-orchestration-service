@@ -23,13 +23,7 @@ withPipeline(type, product, app) {
     enableDockerBuild()
     enableDeployToAKS()
     setVaultName(product)
-//    loadVaultSecrets(secrets)
-    enableSlackNotifications('#finrem-dev')
-
-    before('buildinfra:prod') {
-        error('Halting pipeline before PROD.')
-    }
-
+    archiveArtifacts 'target/site/serenity/index.html'
 
     after('functionalTest:aat') {
         publishHTML target: [
@@ -47,5 +41,12 @@ withPipeline(type, product, app) {
                 reportName           : "Preview Functional Tests",
                 alwaysLinkToLastBuild: true
         ]
+    }
+
+//    loadVaultSecrets(secrets)
+    enableSlackNotifications('#finrem-dev')
+
+    before('buildinfra:prod') {
+        error('Halting pipeline before PROD.')
     }
 }
