@@ -23,7 +23,7 @@ withPipeline(type, product, app) {
     enableDockerBuild()
     enableDeployToAKS()
     setVaultName(product)
-    archiveArtifacts 'target/site/serenity/index.html'
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
 
     after('functionalTest:aat') {
         publishHTML target: [
