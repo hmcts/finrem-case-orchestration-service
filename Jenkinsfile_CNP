@@ -23,18 +23,20 @@ withPipeline(type, product, app) {
     enableDockerBuild()
     enableDeployToAKS()
     setVaultName(product)
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
 
     after('functionalTest:aat') {
+        steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
         publishHTML target: [
                 reportDir            : "target/site/serenity/",
                 reportFiles          : "index.html",
                 reportName           : "AAT Functional Tests",
                 alwaysLinkToLastBuild: true
         ]
+
     }
 
     after('functionalTest:preview') {
+        steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
         publishHTML target: [
                 reportDir            : "target/site/serenity/",
                 reportFiles          : "index.html",
