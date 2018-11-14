@@ -26,7 +26,14 @@ public class NotificationService {
         NotificationRequest notificationRequest = buildNotificationRequest(ccdRequest);
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
-        restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
+        try {
+            restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
+        } catch (Exception ex) {
+            log.error("Failed to send notification email for case id : ",
+                    notificationRequest.getCaseReferenceNumber(), " for solicitor email",
+                    notificationRequest.getNotificationEmail(),
+                    "exception :", ex.getMessage());
+        }
     }
 
     private NotificationRequest buildNotificationRequest(CCDRequest ccdRequest) {

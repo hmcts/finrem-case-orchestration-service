@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,19 +24,14 @@ public class NotificationsController {
     private NotificationService notificationService;
 
     @PostMapping(value = "/case-orchestration/notify/hwfSuccessful", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> sendHwfSuccessfulConfirmationEmail(
+    @ApiOperation(value = "send e-mail for HWF Successful.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "HWFSuccessful e-mail sent successfully")})
+    public ResponseEntity<Void> sendHwfSuccessfulConfirmationEmail(
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization")String userToken) {
-        try {
             log.info("received notification request for case reference :    ", ccdRequest.getCaseId());
             notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, userToken);
-            return ResponseEntity.noContent().build();
-        } catch (Exception exception) {
-            log.error("HWFSuccessful Confirmation Email failed for case reference Number ",
-                    ccdRequest.getCaseId(),
-                    exception.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(exception.getMessage());
-        }
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -55,22 +54,6 @@ public class NotificationsControllerTest {
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
-
-        verify(notificationService, times(1))
-                .sendHWFSuccessfulConfirmationEmail(any(CCDRequest.class), any());
-
-    }
-
-    @Test
-    public void throwsExceptionWhenSendHwfSuccessfulConfirmationEmail() throws Exception {
-        doThrow(new RuntimeException("500 - InternalServerError")).when(notificationService)
-                .sendHWFSuccessfulConfirmationEmail(any(CCDRequest.class), any(String.class));
-        buildCcdRequest();
-        mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
-                .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is5xxServerError());
 
         verify(notificationService, times(1))
                 .sendHWFSuccessfulConfirmationEmail(any(CCDRequest.class), any());
