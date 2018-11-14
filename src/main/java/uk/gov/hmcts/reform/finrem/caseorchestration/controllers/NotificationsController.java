@@ -29,9 +29,9 @@ public class NotificationsController {
             @ApiResponse(code = 204, message = "HWFSuccessful e-mail sent successfully")})
     public ResponseEntity<Void> sendHwfSuccessfulConfirmationEmail(
             @RequestBody CCDRequest ccdRequest,
-            @RequestHeader(value = "Authorization")String userToken) {
-            log.info("received notification request for case reference :    ", ccdRequest.getCaseId());
-            notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, userToken);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            @RequestHeader(value = "Authorization") String userToken) {
+        log.info("received notification request for case reference :    ", ccdRequest.getCaseId());
+        notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, userToken);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
