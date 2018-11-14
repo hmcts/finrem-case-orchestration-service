@@ -19,7 +19,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentByAccountService;
 
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
 import javax.ws.rs.core.MediaType;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -60,12 +62,12 @@ public class FeePaymentControllerTest {
 
     private static Fee fee() {
         Fee fee = new Fee();
-        fee.setFeeAmount(new BigDecimal(10d));
+        fee.setFeeAmount(BigDecimal.valueOf(10d));
 
         return fee;
     }
 
-    private void doFeeLookupSetUp() throws Exception {
+    private void doFeeLookupSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/fee-lookup.json").toURI()));
@@ -76,13 +78,13 @@ public class FeePaymentControllerTest {
     @Test
     public void shouldDoFeeLookup() throws Exception {
         doFeeLookupSetUp();
-
         mvc.perform(post(ADD_CASE_URL)
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.feeAmountToPay", is("10")))
+
+                .andExpect(jsonPath("$.data.feeAmountToPay", is("10.0")))
                 .andExpect(jsonPath("$.errors", hasSize(0)))
                 .andExpect(jsonPath("$.warnings", hasSize(0)));
     }

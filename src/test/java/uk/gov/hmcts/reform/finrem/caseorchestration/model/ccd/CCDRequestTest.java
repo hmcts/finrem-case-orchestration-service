@@ -25,6 +25,7 @@ public class CCDRequestTest extends CaseDetailsTest {
 
     @Test
     public void shouldCreateCCDRequestFromJson() {
+        assertThat(ccdRequest.getCaseId(), is("12345678"));
         assertThat(ccdRequest.getToken(), is("test_token"));
         assertThat(ccdRequest.getEventId(), is("event1"));
     }
