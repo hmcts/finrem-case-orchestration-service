@@ -70,7 +70,7 @@ sourceSets {
 
 def versions = [
         lombokVersion: '1.18.0',
-        springfoxSwagger: '2.9.0',
+        springfoxSwagger: '2.9.2',
         commonsIo: '2.5'
 ]
 
@@ -82,8 +82,13 @@ dependencies {
     compile group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
     apt group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
     compile group: 'commons-io', name: 'commons-io', version: versions.commonsIo
-    compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
-    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
+    compile(group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger)
+    {
+        exclude group: 'com.google.guava', module: 'guava'
+    }
+    compile (group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger) {
+        exclude group: 'com.google.guava', module: 'guava'
+    }
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-core', version: '1.5.2'
