@@ -224,5 +224,10 @@ services:
     volumes:
       - ccd-docker-ccd-shared-database-data:/var/lib/postgresql/data
 
+  finrem-notification-service:
+    image: hmcts/finrem-notification-service:latest
+    container_name: finrem-notification-service
+    ports:
+    - 8086:8086
 volumes:
   ccd-docker-ccd-shared-database-data:
