@@ -70,7 +70,7 @@ sourceSets {
 
 def versions = [
         lombokVersion           : '1.18.0',
-        springfoxSwagger        : '2.9.0',
+        springfoxSwagger        : '2.9.2',
         commonsIo               : '2.5',
         feignHttpClient         : '9.5.1'
 ]
@@ -83,15 +83,20 @@ dependencies {
     compile group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
     apt group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
     compile group: 'commons-io', name: 'commons-io', version: versions.commonsIo
-    compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
-    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
+    compile(group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger)
+    {
+        exclude group: 'com.google.guava', module: 'guava'
+    }
+    compile (group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger) {
+        exclude group: 'com.google.guava', module: 'guava'
+    }
     compile (group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign')
-            {
-                exclude group: 'io.reactivex', module: 'io.reactivex'
-                exclude group: 'io.reactivex', module: 'rxnetty'
-                exclude group: 'io.reactivex', module: 'rxnetty-contexts'
-                exclude group: 'io.reactivex', module: 'rxnetty-servo'
-            }
+    {
+        exclude group: 'io.reactivex', module: 'io.reactivex'
+        exclude group: 'io.reactivex', module: 'rxnetty'
+        exclude group: 'io.reactivex', module: 'rxnetty-contexts'
+        exclude group: 'io.reactivex', module: 'rxnetty-servo'
+    }
 
     compile group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.feignHttpClient
     testCompile('org.springframework.boot:spring-boot-starter-test')
@@ -100,12 +105,16 @@ dependencies {
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '1.5.2'
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '1.0.26'
 }
+def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
+        '**/uk/gov/hmcts/reform/finrem/caseorchestration/config/model/**',
+        '**/uk/gov/hmcts/reform/finrem/caseorchestration/config/CaseOrchestrationApplication'
+ ]
 
 sonarqube {
     println "echo sonarqube"
     properties {
+        property "sonar.exclusions", sonarExclusions.join(', ')
         property "sonar.projectKey", "finrem-case-orchestration"
-        property "sonar.host.url", "https://sonarcloud.io/"
         property "sonar.dynamicAnalysis", "reuseReports"
         property "sonar.java.coveragePlugin", "jacoco"
         property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec"
