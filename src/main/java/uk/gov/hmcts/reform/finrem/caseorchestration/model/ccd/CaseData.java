@@ -120,6 +120,10 @@ public class CaseData {
     @JsonProperty("d81Respondent")
     private CaseDocument d81Respondent;
 
+    // Mini Form A
+    @JsonProperty("miniFormA")
+    private CaseDocument miniFormA;
+
     // OPTIONAL DOCUMENTS
     @JsonProperty("pensionCollection")
     private List<DocumentData> pensionCollection;
