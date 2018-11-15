@@ -1,7 +1,5 @@
 package uk.gov.hmcts.probate.functional.feelookuptests;
 
-
-import io.restassured.RestAssured;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
 import org.junit.Test;
@@ -10,7 +8,6 @@ import uk.gov.hmcts.probate.functional.IntegrationTestBase;
 
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
 
 @RunWith(SerenityRunner.class)
 public class FrFeeLookupTests extends IntegrationTestBase {
@@ -20,7 +17,6 @@ public class FrFeeLookupTests extends IntegrationTestBase {
 
     @Test
     public void verifyFeeAmount() {
-        System.out.println("test base url ..." + RestAssured.baseURI);
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())
