@@ -83,12 +83,7 @@ dependencies {
     apt group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
     compile group: 'commons-io', name: 'commons-io', version: versions.commonsIo
     compile(group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger)
-    {
-        exclude group: 'com.google.guava', module: 'guava'
-    }
-    compile (group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger) {
-        exclude group: 'com.google.guava', module: 'guava'
-    }
+    compile (group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger)
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-core', version: '1.5.2'
@@ -180,7 +175,7 @@ pitest {
     mutationThreshold = 80
 }
 
-
+compileJava.dependsOn(processResources)
 check.dependsOn dependencyCheckAnalyze
 build.dependsOn jacocoTestReport
 
