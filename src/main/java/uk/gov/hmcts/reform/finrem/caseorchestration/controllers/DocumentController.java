@@ -36,7 +36,7 @@ public class DocumentController {
                     response = CCDCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
-    })
+        })
     public ResponseEntity<CCDCallbackResponse> generateMiniFormA(
             @RequestHeader(value = "Authorization") String authorisationToken,
             @RequestBody @ApiParam("CaseData") CCDRequest request) {

@@ -1,9 +1,13 @@
 buildscript {
     ext {
-        springBootVersion = '2.0.3.RELEASE'
+        springBootVersion = '2.0.5.RELEASE'
     }
     repositories {
+        mavenLocal()
         mavenCentral()
+        jcenter()
+
+        maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
@@ -15,37 +19,50 @@ buildscript {
 plugins {
     id 'application'
     id 'checkstyle'
+    id 'com.github.ben-manes.versions' version '0.17.0'
+    id 'io.spring.dependency-management' version '1.0.6.RELEASE'
     id 'jacoco'
     id 'net.ltgt.apt' version '0.10'
     id 'io.franzbecker.gradle-lombok' version '1.14'
     id 'org.owasp.dependencycheck' version '3.2.1'
+    id 'com.jfrog.bintray' version '1.8.0'
     id 'org.sonarqube' version '2.6.2'
+    id 'org.springframework.boot' version '2.0.5.RELEASE'
     id 'pmd'
     id "info.solidsoft.pitest" version "1.3.0"
 
 }
 
-
-apply plugin: 'java'
-apply plugin: 'org.springframework.boot'
-apply plugin: 'io.spring.dependency-management'
-apply plugin: 'org.sonarqube'
+//apply plugin: 'java'
+//apply plugin: 'org.springframework.boot'
+//apply plugin: 'io.spring.dependency-management'
+//apply plugin: 'org.sonarqube'
 apply plugin: 'net.serenity-bdd.aggregator'
-apply plugin: 'jacoco'
-apply plugin: 'org.owasp.dependencycheck'
-apply plugin: 'info.solidsoft.pitest'
+//apply plugin: 'jacoco'
+//apply plugin: 'org.owasp.dependencycheck'
+//apply plugin: 'info.solidsoft.pitest'
 
 
-group = 'uk.gov.hmcts.reform.finrem.caseorchestration'
+group = 'uk.gov.hmcts.reform.finrem'
 version = '0.0.1'
-mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+bootJar {
+    manifest {
+        attributes 'Implementation-Title': project.name,
+                'Implementation-Version': project.version
+    }
+    archiveName 'finrem-case-orchestration.jar'
+}
+
+mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 
 repositories {
     mavenLocal()
+    mavenCentral()
     jcenter()
+
     maven { url "https://dl.bintray.com/hmcts/hmcts-maven" }
     maven { url "http://repo.maven.apache.org/maven2" }
     maven { url 'https://repo.spring.io/libs-milestone' }
@@ -68,37 +85,85 @@ sourceSets {
     }
 }
 
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
 def versions = [
-        lombokVersion           : '1.18.0',
-        springfoxSwagger        : '2.9.2',
-        commonsIo               : '2.5',
-        feignHttpClient         : '9.5.1'
+        commonsIo                       : '2.5',
+        commonsLang3                    : '3.7',
+        springfoxSwagger                : '2.7.0',
+        lombok                          : '1.16.16',
+        puppyCrawl                      : '7.6',
+        reformsJavaLogging              : '3.0.1',
+        serviceTokenGenerator           : '1.0.4',
+        hmctsNotify                     : '3.8.0-RELEASE',
+        feignHttpClient                 : '9.5.1',
+        reformSpringBootAutoConfigure   : '1.1.0',
+        wiremockVersion                 : '2.8.0',
+        restAssured                     : '3.0.3',
+        serenity                        : '1.5.2',
+        serenityCucumber                : '1.1.3',
+        unirest                         : '1.4.9',
+        jsonAssert                      : '1.2.3',
+        pitest                          : '1.3.2',
+        gradlePitest                    : '1.3.0',
+        sonarPitest                     : '0.5',
+        ccdStoreClient                  : '4.1.0',
+        javaxWsRs                       : '2.1.1',
+        jsonPathAssert                  : '2.2.0'
 ]
 
 dependencies {
+    compile('org.springframework.boot:spring-boot-starter-actuator')
     compile('org.springframework.boot:spring-boot-starter-web')
-    compile("org.springframework.boot:spring-boot-starter-actuator")
     compile("org.springframework.boot:spring-boot-configuration-processor")
-    compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
-    compile group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
-    apt group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
     compile group: 'commons-io', name: 'commons-io', version: versions.commonsIo
-    compile(group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger)
-    {
-        exclude group: 'com.google.guava', module: 'guava'
-    }
-    compile (group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger) {
-        exclude group: 'com.google.guava', module: 'guava'
-    }
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
+    compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: versions.javaxWsRs
+
+    compile group: 'org.springframework', name: 'spring-context-support'
     compile (group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign')
-    {
-        exclude group: 'io.reactivex', module: 'io.reactivex'
-        exclude group: 'io.reactivex', module: 'rxnetty'
-        exclude group: 'io.reactivex', module: 'rxnetty-contexts'
-        exclude group: 'io.reactivex', module: 'rxnetty-servo'
-    }
+            {
+                exclude group: 'io.reactivex', module: 'io.reactivex'
+                exclude group: 'io.reactivex', module: 'rxnetty'
+                exclude group: 'io.reactivex', module: 'rxnetty-contexts'
+                exclude group: 'io.reactivex', module: 'rxnetty-servo'
+            }
 
     compile group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.feignHttpClient
+    compile group: 'uk.gov.hmcts.reform', name: 'http-proxy-spring-boot-autoconfigure', version: versions.reformSpringBootAutoConfigure
+    compile group: 'uk.gov.hmcts.reform', name: 'send-letter-client', version: '2.1.0'
+
+    compile group: 'uk.gov.service.notify', name: 'notifications-java-client', version: versions.hmctsNotify
+    compile group: 'uk.gov.hmcts.reform', name: 'java-logging', version: versions.reformsJavaLogging
+    compile group: 'uk.gov.hmcts.reform', name: 'java-logging-appinsights', version: versions.reformsJavaLogging
+    compile group: 'uk.gov.hmcts.reform', name: 'java-logging-httpcomponents', version: versions.reformsJavaLogging
+    compile group: 'uk.gov.hmcts.reform', name: 'java-logging-spring', version: versions.reformsJavaLogging
+    compile (group: 'uk.gov.hmcts.reform', name:'service-auth-provider-client', version: versions.serviceTokenGenerator)
+            {
+                exclude group: 'io.reactivex', module: 'io.reactivex'
+                exclude group: 'io.reactivex', module: 'rxnetty'
+                exclude group: 'io.reactivex', module: 'rxnetty-contexts'
+                exclude group: 'io.reactivex', module: 'rxnetty-servo'
+            }
+
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+
+    testCompile(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
+        exclude(module: 'commons-logging')
+    }
+    testCompile group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremockVersion
+    testCompile group: 'com.jayway.jsonpath', name:'json-path-assert', version: versions.jsonPathAssert
+
+    runtime('org.springframework.boot:spring-boot-devtools')
+
+    compile group: 'org.pitest', name: 'pitest', version: versions.pitest
+    compile group:'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
+    compile group:'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
+
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-core', version: '1.5.2'
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: '1.5.2'
@@ -193,13 +258,7 @@ pitest {
 check.dependsOn dependencyCheckAnalyze
 build.dependsOn jacocoTestReport
 
-bootJar {
-    manifest {
-        attributes 'Implementation-Title': project.name,
-                'Implementation-Version': project.version
-    }
-    archiveName 'finrem-case-orchestration.jar'
-}
+
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
 }
