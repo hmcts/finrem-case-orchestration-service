@@ -33,8 +33,8 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("Financial Remedy Case Orchestration Service")
-                .description("Given a case data, This service will orchestrate the financial remedy features " +
-                        "like notifications, fee lookUp and DocumentGenerator")
+                .description("Given a case data, This service will orchestrate the financial remedy features "
+                        + "like notifications, fee lookUp and DocumentGenerator")
                 .build();
     }
 
