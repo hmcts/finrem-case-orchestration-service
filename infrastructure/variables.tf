@@ -46,6 +46,10 @@ variable "idam_s2s_url_prefix" {
   default = "rpe-service-auth-provider"
 }
 
+variable "finrem_ns_url_prefix" {
+  default = "finrem-ns"
+}
+
 variable "auth_provider_service_client_microservice" {
     default = "finrem-case-orchestration"
 }
