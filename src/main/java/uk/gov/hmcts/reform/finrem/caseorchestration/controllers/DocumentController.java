@@ -40,7 +40,7 @@ public class DocumentController {
     public ResponseEntity<CCDCallbackResponse> generateMiniFormA(
             @RequestHeader(value = "Authorization") String authorisationToken,
             @RequestBody @ApiParam("CaseData") CCDRequest request) {
-        CaseDocument document = service.generateMiniFormA(authorisationToken, request);
+        CaseDocument document = service.generateMiniFormA(authorisationToken, request.getCaseDetails());
 
         CaseData caseData = request.getCaseDetails().getCaseData();
         caseData.setMiniFormA(document);
