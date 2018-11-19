@@ -23,7 +23,7 @@ public class NotificationsController {
     @Autowired
     private NotificationService notificationService;
 
-    @PostMapping(value = "/case-orchestration/notify/hwfSuccessful", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for HWF Successful.")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "HWFSuccessful e-mail sent successfully")})
