@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
@@ -23,6 +22,7 @@ public class DocumentServiceTest {
 
     private static final String AUTH_TOKEN = "Bearer nkjnYBJB";
     private static final String URL = "http://url/file";
+    private static final String BINARY_URL = URL + "/BINARY";
     private static final String FILE_NAME = "file";
 
     @Mock
@@ -33,11 +33,12 @@ public class DocumentServiceTest {
 
     @Test
     public void generateMiniFormA() {
-        Document document = Document.builder().fileName(FILE_NAME).url(URL).build();
+        Document document = Document.builder().fileName(FILE_NAME).url(URL).binaryUrl(BINARY_URL).build();
         when(documentGeneratorClient.generatePDF(isA(DocumentRequest.class), eq(AUTH_TOKEN))).thenReturn(document);
 
         CaseDocument result = service.generateMiniFormA(AUTH_TOKEN, new CaseDetails());
         assertThat(result.getDocumentFilename(), Matchers.is(FILE_NAME));
         assertThat(result.getDocumentUrl(), Matchers.is(URL));
+        assertThat(result.getDocumentBinaryUrl(), Matchers.is(BINARY_URL));
     }
 }

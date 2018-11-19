@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -37,8 +36,7 @@ public class DocumentService {
                         authorisationToken);
 
         CaseDocument caseDocument = new CaseDocument();
-        // TODO what is binary URL?
-//        caseDocument.setDocumentBinaryUrl(miniFormA.ge);
+        caseDocument.setDocumentBinaryUrl(miniFormA.getBinaryUrl());
         caseDocument.setDocumentFilename(miniFormA.getFileName());
         caseDocument.setDocumentUrl(miniFormA.getUrl());
         return caseDocument;
