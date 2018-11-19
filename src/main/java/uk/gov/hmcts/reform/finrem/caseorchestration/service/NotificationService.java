@@ -26,6 +26,7 @@ public class NotificationService {
         NotificationRequest notificationRequest = buildNotificationRequest(ccdRequest);
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
+        log.info("notification service url ", uri.toString());
         try {
             restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
         } catch (Exception ex) {

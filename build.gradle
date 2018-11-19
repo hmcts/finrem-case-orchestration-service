@@ -86,12 +86,7 @@ dependencies {
     apt group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
     compile group: 'commons-io', name: 'commons-io', version: versions.commonsIo
     compile(group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger)
-    {
-        exclude group: 'com.google.guava', module: 'guava'
-    }
-    compile (group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger) {
-        exclude group: 'com.google.guava', module: 'guava'
-    }
+    compile (group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger)
     compile (group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.0.1.RELEASE')
             {
                 exclude group: 'io.reactivex', module: 'io.reactivex'
@@ -101,6 +96,7 @@ dependencies {
             }
 
     compile group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.feignHttpClient
+
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-core', version: '1.5.2'
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: '1.5.2'
@@ -108,8 +104,8 @@ dependencies {
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '1.0.26'
 }
 def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
-        '**/uk/gov/hmcts/reform/finrem/caseorchestration/config/model/**',
-        '**/uk/gov/hmcts/reform/finrem/caseorchestration/config/CaseOrchestrationApplication'
+        '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
+        '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication'
  ]
 
 sonarqube {
@@ -191,7 +187,7 @@ pitest {
     mutationThreshold = 80
 }
 
-
+compileJava.dependsOn(processResources)
 check.dependsOn dependencyCheckAnalyze
 build.dependsOn jacocoTestReport
 
