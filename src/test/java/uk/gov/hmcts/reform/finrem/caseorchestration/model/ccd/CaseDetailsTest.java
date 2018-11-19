@@ -28,6 +28,7 @@ public class CaseDetailsTest extends CaseDataTest {
     }
 
     protected void assertCaseDetails() {
+        assertThat(caseDetails.getCaseId(), is("12345678"));
         assertThat(caseDetails.getJurisdiction(), is("divorce"));
         assertThat(caseDetails.getState(), is("created"));
     }

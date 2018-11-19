@@ -30,7 +30,7 @@ public class NotificationsController {
     public ResponseEntity<Void> sendHwfSuccessfulConfirmationEmail(
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
-        log.info("received notification request for case reference :    ", ccdRequest.getCaseId());
+        log.info("received notification request for case reference :    ", ccdRequest.getCaseDetails().getCaseId());
         notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, userToken);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
