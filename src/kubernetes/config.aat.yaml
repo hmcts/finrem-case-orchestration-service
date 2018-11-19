@@ -15,3 +15,4 @@ data:
   VAULTURI : "https://finrem-aat.vault.azure.net/"
   IDAM_S2S_URL : "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
   APPINSIGHTS_INSTRUMENTATIONKEY : "97f6a0e1-6be6-44b0-97bf-d03852b7791f"
+  DOCUMENT_GENERATOR_SERVICE_API_BASEURL : "http://finrem-dgcs-aat.service.core-compute-aat.internal"

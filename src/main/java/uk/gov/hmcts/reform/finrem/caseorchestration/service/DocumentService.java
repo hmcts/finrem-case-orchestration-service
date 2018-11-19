@@ -35,6 +35,10 @@ public class DocumentService {
                                 .build(),
                         authorisationToken);
 
+        return caseDocument(miniFormA);
+    }
+
+    private CaseDocument caseDocument(Document miniFormA) {
         CaseDocument caseDocument = new CaseDocument();
         caseDocument.setDocumentBinaryUrl(miniFormA.getBinaryUrl());
         caseDocument.setDocumentFilename(miniFormA.getFileName());
