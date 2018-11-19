@@ -7,8 +7,13 @@ services:
     container_name: finrem-case-orchestration
     ports:
       - 9000:9000
+    environment:
+      FINREM_NOTIFICATION_SERVICE_BASE_URL: http://finrem-notification-service:8086
     depends_on:
       - ccd-case-management-web
+      - finrem-notification-service
+    links:
+      - finrem-notification-service
 
   ccd-case-management-web:
     image: "hmcts/ccd-case-management-web:${CCD_CASE_MANAGEMENT_WEB_TAG:-latest}"
@@ -298,8 +303,15 @@ services:
   finrem-notification-service:
     image: hmcts/finrem-notification-service:latest
     container_name: finrem-notification-service
+    environment:
+      UK_GOV_NOTIFY_API_KEY: "finrem_notification_service_whitelist-6532e009-5f74-40f3-a4ad-0f330b10e54c-22c4fdab-fb82-43f6-bdec-50fbbead4516"
     ports:
-    - 8086:8086
+     - 8086:8086
+    depends_on:
+     - smtp-server
+    links:
+     - smtp-server
+
 volumes:
   ccd-docker-ccd-shared-database-data:
   ccd-docker-azure-blob-data:

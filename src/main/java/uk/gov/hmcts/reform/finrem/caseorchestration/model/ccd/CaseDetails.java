@@ -7,6 +7,8 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class CaseDetails {
+    @JsonProperty("id")
+    private String caseId;
     @JsonProperty("jurisdiction")
     private String jurisdiction;
     @JsonProperty("state")

@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(NotificationsController.class)
 public class NotificationsControllerTest {
     private static final String AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
-    private static final String HWF_SUCCESSFUL_EMAIL_URL = "/case-orchestration/notify/hwfSuccessful";
+    private static final String HWF_SUCCESSFUL_EMAIL_URL = "/case-orchestration/notify/hwf-successful";
     @Autowired
     private WebApplicationContext applicationContext;
 

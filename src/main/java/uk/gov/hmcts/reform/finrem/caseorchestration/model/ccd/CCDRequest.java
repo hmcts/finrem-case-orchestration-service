@@ -16,9 +16,6 @@ public class CCDRequest {
     @JsonProperty("event_id")
     private String eventId;
 
-    @JsonProperty("id")
-    private String caseId;
-
     @JsonProperty("case_details")
     private CaseDetails caseDetails;
 }
