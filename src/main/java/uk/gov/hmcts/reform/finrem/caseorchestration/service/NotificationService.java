@@ -39,7 +39,7 @@ public class NotificationService {
 
     private NotificationRequest buildNotificationRequest(CCDRequest ccdRequest) {
         NotificationRequest notificationRequest = new NotificationRequest();
-        notificationRequest.setCaseReferenceNumber(ccdRequest.getCaseId());
+        notificationRequest.setCaseReferenceNumber(ccdRequest.getCaseDetails().getCaseId());
         notificationRequest.setSolicitorReferenceNumber(
                 ccdRequest.getCaseDetails().getCaseData().getSolicitorReference());
         notificationRequest.setName(ccdRequest.getCaseDetails().getCaseData().getSolicitorName());

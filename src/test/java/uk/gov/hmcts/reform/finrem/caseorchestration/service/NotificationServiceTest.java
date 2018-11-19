@@ -51,9 +51,9 @@ public class NotificationServiceTest {
         caseData.setSolicitorName("Padmaja");
         caseData.setSolicitorReference("56789");
         CCDRequest ccdRequest = new CCDRequest();
-        ccdRequest.setCaseId("12345");
         CaseDetails caseDetails = new CaseDetails();
         caseDetails.setCaseData(caseData);
+        caseDetails.setCaseId("12345");
         ccdRequest.setCaseDetails(caseDetails);
 
         notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, AUTH_TOKEN);
@@ -71,9 +71,9 @@ public class NotificationServiceTest {
         caseData.setSolicitorReference("56789");
         CaseDetails caseDetails = new CaseDetails();
         caseDetails.setCaseData(caseData);
+        caseDetails.setCaseId("12345");
         CCDRequest ccdRequest = new CCDRequest();
         ccdRequest.setCaseDetails(caseDetails);
-        ccdRequest.setCaseId("12345");
 
         try {
             notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, AUTH_TOKEN);

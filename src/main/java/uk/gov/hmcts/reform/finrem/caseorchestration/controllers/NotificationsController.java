@@ -23,14 +23,14 @@ public class NotificationsController {
     @Autowired
     private NotificationService notificationService;
 
-    @PostMapping(value = "/case-orchestration/notify/hwfSuccessful", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for HWF Successful.")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "HWFSuccessful e-mail sent successfully")})
     public ResponseEntity<Void> sendHwfSuccessfulConfirmationEmail(
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
-        log.info("received notification request for case reference :    ", ccdRequest.getCaseId());
+        log.info("received notification request for case reference :    ", ccdRequest.getCaseDetails().getCaseId());
         notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, userToken);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
