@@ -18,11 +18,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.Fee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentByAccountService;
 
+import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
-import javax.ws.rs.core.MediaType;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -75,6 +75,27 @@ public class FeePaymentControllerTest {
         when(feeService.getApplicationFee()).thenReturn(fee());
     }
 
+    private void doEmtpyCaseDataSetUp() throws IOException, URISyntaxException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/empty-casedata.json").toURI()));
+
+        when(feeService.getApplicationFee()).thenReturn(fee());
+    }
+
+
+    @Test
+    public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
+        doEmtpyCaseDataSetUp();
+        mvc.perform(post(ADD_CASE_URL)
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(is("Missing case data from CCD request.")));
+    }
+
+
     @Test
     public void shouldDoFeeLookup() throws Exception {
         doFeeLookupSetUp();
@@ -83,7 +104,6 @@ public class FeePaymentControllerTest {
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-
                 .andExpect(jsonPath("$.data.feeAmountToPay", is("10.0")))
                 .andExpect(jsonPath("$.errors", hasSize(0)))
                 .andExpect(jsonPath("$.warnings", hasSize(0)));

@@ -19,10 +19,12 @@ services:
       CCD_ACTIVITY_BASE_URL:
       DM_GATEWAY_BASE_URL: https://api-gateway.dev.dm.reform.hmcts.net
       OAUTH2_CLIENT_ID: ccd_gateway
+      DM_GATEWAY_BASE_URL: http://ccd-api-gateway:3453
     ports:
       - 3451:3451
     depends_on:
       - ccd-api-gateway
+      - dm-store
 
   ccd-api-gateway:
     image: "hmcts/ccd-api-gateway:${CCD_API_GATEWAY_TAG:-latest}"
@@ -42,12 +44,14 @@ services:
       PROXY_DEFINITION_DATA: http://ccd-definition-store-api:4451/api/data
       PROXY_DEFINITION_DISPLAY: http://ccd-definition-store-api:4451/api/display
       APPINSIGHTS_INSTRUMENTATIONKEY: key
+      PROXY_DOCUMENT_MANAGEMENT: http://dm-store:8080
     ports:
       - 3453:3453
     depends_on:
       - ccd-user-profile-api
       - ccd-definition-store-api
       - ccd-data-store-api
+      - dm-store
 
   authentication-web:
     image: docker.artifactory.reform.hmcts.net/auth/authentication-web:latest
@@ -133,6 +137,7 @@ services:
       REFORM_TEAM: ccd
       REFORM_ENVIRONMENT: local
       APPINSIGHTS_INSTRUMENTATIONKEY: key
+      CCD_DM_DOMAIN: http://dm-store:8080
     ports:
       - 4452:4452
     depends_on:
@@ -206,6 +211,72 @@ services:
       MICROSERVICE_KEYS_CCD_DEFINITION: "${IDAM_KEY_CCD_DEFINITION_STORE}"
       MICROSERVICE_KEYS_CCD_ADMIN: "${IDAM_KEY_CCD_ADMIN}"
       TESTING_SUPPORT_ENABLED: "true"
+      MICROSERVICE_KEYS_EM_GW: "${IDAM_KEY_DM_STORE}"
+
+  dm-store:
+    image: "hmcts/dm-store:${DM_STORE_TAG:-latest}"
+    command: --wait-for-database 30
+    healthcheck:
+      disable: true
+    environment:
+      SERVER_PORT: 8080
+      IDAM_SUPERUSER_EMAIL:
+      IDAM_SECRET_KEY: "${IDAM_KEY_DM_STORE}"
+      GOV_NOTIFY_API_KEY:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ccd-shared-database:5432/evidence
+      SPRING_DATASOURCE_USERNAME: "${DB_USERNAME}"
+      SPRING_DATASOURCE_PASSWORD: "${DB_PASSWORD}"
+      #ENABLE_AZURE_STORAGE_CONTAINER: "false"
+      #ENABLE_POSTGRES_BLOB_STORAGE: "true"
+      STORAGEACCOUNT_PRIMARY_CONNECTION_STRING: "${STORAGEACCOUNT_PRIMARY_CONNECTION_STRING:-DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azure-storage-emulator-azurite:10000/devstoreaccount1}"
+      STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME: "${STORAGE_CONTAINER_DOCUMENT_CONTAINER_NAME:-hmctstestcontainer}"
+      BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY_REQUIRED: "${BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY_REQUIRED:-false}"
+      BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY: "${BLOBSTORE_MIGRATE_CCD_PUBLIC_KEY:-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDiQ//gc/G53d9dLCtf123fIYo49gUySuJuxOcw2GtieWTMSy+O7RNtsAIjVf3mCOdDNuN69tZNPEWMdaW8n11s9MwYFahtxDecyn0KIP9MvPsfSMSbxhp/f7kfbdB/H/S5eYea66JTyeJS6uNd76RdHttx0mLO30ZkRcXB25c2SIXhRYsdoeKS5GXHDdNejkQM0S/Ev94x2UunApmYHjWN1XcDhsEsAeF4WHnvYh2XiMn9vHY44AqvbWLlAmCgzaXpz8Xhl0fO7jDKSeReDyuM3UTMaiFFaxuvliGol7aIXq/aVe/miiD2SLxHZ6RxAPW80bhXrzJMTLTCqhCEhzfv someone@somewhere.sometime}"
+      SPRING_PROFILES_ACTIVE: dev
+      IDAM_TESTING_SUPPORT_ENABLED: "true"
+      LOGGING_LEVEL_UK_GOV_HMCTS_IDAM: DEBUG
+      IDAM_USER_BASE_URI: http://idam-api:8080
+      IDAM_S2S_BASE_URI: http://service-auth-provider-api:8080
+      S2S_NAMES_WHITELIST: sscs,divorce,ccd,em_gw,document-management-store,ccd_gw,idam-api
+      http_proxy:
+      https_proxy:
+      no_proxy:
+      #      logging env vars
+      ROOT_APPENDER: JSON_CONSOLE
+      JSON_CONSOLE_PRETTY_PRINT: "false"
+      REFORM_SERVICE_TYPE: java
+      REFORM_SERVICE_NAME: document-management-store
+      REFORM_TEAM: cc
+      REFORM_ENVIRONMENT: docker
+      #      healthcheck env vars
+      PACKAGES_ENVIRONMENT: docker
+      PACKAGES_PROJECT: evidence
+      PACKAGES_NAME: document-management-store
+      PACKAGES_VERSION: unknown
+    #      debug mode
+    #    JAVA_OPTS: -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+    links:
+      - ccd-shared-database
+      - idam-api
+      - service-auth-provider-api
+    depends_on:
+      - ccd-shared-database
+      - idam-api
+      - service-auth-provider-api
+      - azure-storage-emulator-azurite
+    ports:
+      - 4506:8080
+    #   debug port exposed
+    #   - 5006:5005
+
+  azure-storage-emulator-azurite:
+    image: arafato/azurite
+    ports:
+      - 10000:10000
+    environment:
+      executable: "blob"
+    volumes:
+      - ccd-docker-azure-blob-data:/opt/azurite/folder
 
   smtp-server:
     image: mailhog/mailhog
@@ -231,3 +302,5 @@ services:
     - 8086:8086
 volumes:
   ccd-docker-ccd-shared-database-data:
+  ccd-docker-azure-blob-data:
+

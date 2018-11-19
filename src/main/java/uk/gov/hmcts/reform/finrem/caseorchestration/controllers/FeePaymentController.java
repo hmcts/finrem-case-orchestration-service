@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,8 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.Fee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentByAccountService;
 
-import java.util.ArrayList;
 import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,12 +33,22 @@ public class FeePaymentController {
             @RequestBody CCDRequest ccdRequest) {
         log.info("Received request for FEE lookup. Auth token: {}, Case request : {}", authToken, ccdRequest);
 
+        if (!isValidCaseData(ccdRequest)) {
+            return new ResponseEntity("Missing case data from CCD request.", HttpStatus.BAD_REQUEST);
+        }
+
         Fee fee = feeService.getApplicationFee();
 
         ccdRequest.getCaseDetails().getCaseData().setFeeAmountToPay(fee.getFeeAmount().toString());
 
         return ResponseEntity.ok(new CCDCallbackResponse(ccdRequest.getCaseDetails().getCaseData(),
                 new ArrayList<>(), new ArrayList<>()));
+    }
+
+    private boolean isValidCaseData(CCDRequest ccdRequest) {
+        return ccdRequest != null && ccdRequest.getCaseDetails() != null
+                && ccdRequest.getCaseDetails().getCaseData() != null
+                && ccdRequest.getCaseDetails().getCaseData().getDivorceCaseNumber() != null;
     }
 
 
