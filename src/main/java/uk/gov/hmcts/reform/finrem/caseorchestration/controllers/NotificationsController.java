@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,13 +27,13 @@ public class NotificationsController {
     @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for HWF Successful.")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "HWFSuccessful e-mail sent successfully")})
+            @ApiResponse(code = 200, message = "HWFSuccessful e-mail sent successfully")})
     public ResponseEntity<CCDCallbackResponse> sendHwfSuccessfulConfirmationEmail(
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info("received notification request for case reference :    ", ccdRequest.getCaseDetails().getCaseId());
         notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, userToken);
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(CCDCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
 }
