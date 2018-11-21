@@ -53,7 +53,7 @@ public class NotificationsControllerTest {
                 .content(requestContent.toString())
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
 
         verify(notificationService, times(1))
                 .sendHWFSuccessfulConfirmationEmail(any(CCDRequest.class), any());
