@@ -44,6 +44,18 @@ Build the docker image
     docker build . -t hmcts/finrem-case-orchestration:latest
 ```
 
+Also, make sure finrem-notification-service:latest image is built already, 
+otherwise run on finrem-notification-service,
+
+Build the docker image
+
+```bash
+    docker build . -t hmcts/finrem-notification-service:latest
+    
+```
+
+Also make sure UK_GOV_NOTIFY_API_KEY is set in the environment properties.
+
 ### Docker compose 
 
 Run the service with all its dependencies
