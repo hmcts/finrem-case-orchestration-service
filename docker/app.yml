@@ -305,7 +305,7 @@ services:
     image: hmcts/finrem-notification-service:latest
     container_name: finrem-notification-service
     environment:
-      UK_GOV_NOTIFY_API_KEY: "${UK_GOV_NOTIFY_API_KEY}:apikey"
+      UK_GOV_NOTIFY_API_KEY: "${UK_GOV_NOTIFY_API_KEY:apikey}"
     ports:
      - 8086:8086
 
