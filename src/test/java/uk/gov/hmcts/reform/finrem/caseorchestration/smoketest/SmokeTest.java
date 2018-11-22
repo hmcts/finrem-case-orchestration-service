@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.FeePaymentController;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.NotificationsController;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,8 +17,12 @@ public class SmokeTest {
     @Autowired
     private FeePaymentController feePaymentController;
 
+    @Autowired
+    private NotificationsController notificationsController;
+
     @Test
     public void contextLoads() {
         assertThat(feePaymentController).isNotNull();
+        assertThat(notificationsController).isNotNull();
     }
 }

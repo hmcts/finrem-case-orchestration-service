@@ -155,7 +155,7 @@ services:
       - ccd-definition-store-api
       - idam-api
       - service-auth-provider-api
-
+#
   idam-api:
     image: docker.artifactory.reform.hmcts.net/auth/idam-api:latest
     healthcheck:
@@ -284,10 +284,8 @@ services:
       - ccd-docker-azure-blob-data:/opt/azurite/folder
 
   smtp-server:
-            image: mailhog/mailhog
-            ports:
-            - 1025:1025
-            - 8025:8025
+    image: mailhog/mailhog
+
 
   ccd-shared-database:
     build: ../database
@@ -307,7 +305,7 @@ services:
     image: hmcts/finrem-notification-service:latest
     container_name: finrem-notification-service
     environment:
-      UK_GOV_NOTIFY_API_KEY: "finrem_notification_service_whitelist-6532e009-5f74-40f3-a4ad-0f330b10e54c-22c4fdab-fb82-43f6-bdec-50fbbead4516"
+      UK_GOV_NOTIFY_API_KEY: "${UK_GOV_NOTIFY_API_KEY}:apikey"
     ports:
      - 8086:8086
 
