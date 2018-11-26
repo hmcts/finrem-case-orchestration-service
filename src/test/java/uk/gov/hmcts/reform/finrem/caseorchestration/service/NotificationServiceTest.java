@@ -28,24 +28,33 @@ import static org.junit.Assert.assertThat;
 @Slf4j
 public class NotificationServiceTest {
     private static final String AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
-    private static final String END_POINT = "http://localhost:8086/notify/hwfSuccessful";
+    private static final String END_POINT_HWF_SUCCESSFUL = "http://localhost:8086/notify/hwf-successful";
+    private static final String END_POINT_ASSIGNED_TO_JUDGE = "http://localhost:8086/notify/assign-to-judge";
+    private static final String END_POINT_CONSENT_ORDER_MADE = "http://localhost:8086/notify/consent-order-made";
 
     @Autowired
     private NotificationService notificationService;
     @Autowired
     private RestTemplate restTemplate;
     private MockRestServiceServer mockServer;
+    private CCDRequest ccdRequest;
 
     @Before
     public void setUp() {
         mockServer = MockRestServiceServer.createServer(restTemplate);
+        ccdRequest = getCcdRequest();
     }
 
     @Test
     public void sendHwfSuccessfulNotificationEmail() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT))
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_HWF_SUCCESSFUL))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, AUTH_TOKEN);
+        mockServer.verify();
+    }
+
+    private CCDRequest getCcdRequest() {
         CaseData caseData = new CaseData();
         caseData.setSolicitorEmail("test@test.com");
         caseData.setSolicitorName("Padmaja");
@@ -55,14 +64,35 @@ public class NotificationServiceTest {
         caseDetails.setCaseData(caseData);
         caseDetails.setCaseId("12345");
         ccdRequest.setCaseDetails(caseDetails);
-
-        notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, AUTH_TOKEN);
-        mockServer.verify();
+        return ccdRequest;
     }
 
     @Test
     public void throwExceptionWhenHwfSuccessfulNotificationEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT))
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_HWF_SUCCESSFUL))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+        try {
+            notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, AUTH_TOKEN);
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
+            log.info(ex.toString());
+        }
+
+    }
+
+    @Test
+    public void sendAssignToJudgeNotificationEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_ASSIGNED_TO_JUDGE))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendAssignToJudgeConfirmationEmail(ccdRequest, AUTH_TOKEN);
+        mockServer.verify();
+    }
+
+    @Test
+    public void throwExceptionWhenAssignToJudgeNotificationEmailIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_ASSIGNED_TO_JUDGE))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         CaseData caseData = new CaseData();
@@ -76,7 +106,30 @@ public class NotificationServiceTest {
         ccdRequest.setCaseDetails(caseDetails);
 
         try {
-            notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, AUTH_TOKEN);
+            notificationService.sendAssignToJudgeConfirmationEmail(ccdRequest, AUTH_TOKEN);
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
+            log.info(ex.toString());
+        }
+
+    }
+
+    @Test
+    public void sendConsentOrderMadeNotificationEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_MADE))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendConsentOrderMadeConfirmationEmail(ccdRequest, AUTH_TOKEN);
+        mockServer.verify();
+    }
+
+    @Test
+    public void throwExceptionWhenConsentOrderMadeNotificationEmailIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_MADE))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+        try {
+            notificationService.sendConsentOrderMadeConfirmationEmail(ccdRequest, AUTH_TOKEN);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
             log.info(ex.toString());

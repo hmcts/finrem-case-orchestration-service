@@ -11,4 +11,6 @@ public class NotificationServiceConfiguration {
     private String url;
     private String api;
     private String hwfSuccessful;
+    private String assignToJudge;
+    private String consentOrderMade;
 }
