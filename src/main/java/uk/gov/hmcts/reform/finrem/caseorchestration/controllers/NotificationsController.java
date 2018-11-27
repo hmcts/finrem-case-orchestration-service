@@ -21,7 +21,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Slf4j
 public class NotificationsController {
 
-    public static final String MSG_RECEIVED = "received notification request for case reference :    ";
+    public static final String LOG_MESSAGE = "received notification request for case reference :    ";
 
     @Autowired
     private NotificationService notificationService;
@@ -34,7 +34,7 @@ public class NotificationsController {
     public ResponseEntity<CCDCallbackResponse> sendHwfSuccessfulConfirmationEmail(
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
-        log.info(MSG_RECEIVED, ccdRequest.getCaseDetails().getCaseId());
+        log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
         notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, userToken);
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
@@ -48,7 +48,7 @@ public class NotificationsController {
     public ResponseEntity<CCDCallbackResponse> sendAssignToJudgeConfirmationEmail(
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
-        log.info(MSG_RECEIVED, ccdRequest.getCaseDetails().getCaseId());
+        log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
         notificationService.sendAssignToJudgeConfirmationEmail(ccdRequest, userToken);
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
@@ -62,7 +62,7 @@ public class NotificationsController {
     public ResponseEntity<CCDCallbackResponse> sendConsentOrderMadeConfirmationEmail(
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
-        log.info(MSG_RECEIVED, ccdRequest.getCaseDetails().getCaseId());
+        log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
         notificationService.sendConsentOrderMadeConfirmationEmail(ccdRequest, userToken);
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
