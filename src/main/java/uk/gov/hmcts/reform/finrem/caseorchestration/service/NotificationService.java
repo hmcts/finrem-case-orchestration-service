@@ -7,18 +7,23 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 
 import java.net.URI;
 
+import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class NotificationService {
 
+    private static final String NOTIFICATION_SERVICE_URL = "notification service url ";
+    private static final String MESSAGE = "Failed to send notification email for case id : ";
+    private static final String MSG_SOLICITOR_EMAIL = " for solicitor email";
+    public static final String EXCEPTION = "exception :";
     private final NotificationServiceConfiguration notificationServiceConfiguration;
     private final RestTemplate restTemplate;
 
@@ -26,14 +31,44 @@ public class NotificationService {
         NotificationRequest notificationRequest = buildNotificationRequest(ccdRequest);
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
-        log.info("notification service url ", uri.toString());
+        log.info(NOTIFICATION_SERVICE_URL, uri.toString());
         try {
             restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
         } catch (Exception ex) {
-            log.error("Failed to send notification email for case id : ",
-                    notificationRequest.getCaseReferenceNumber(), " for solicitor email",
+            log.error(MESSAGE,
+                    notificationRequest.getCaseReferenceNumber(), MSG_SOLICITOR_EMAIL,
                     notificationRequest.getNotificationEmail(),
-                    "exception :", ex.getMessage());
+                    EXCEPTION, ex.getMessage());
+        }
+    }
+
+    public void sendAssignToJudgeConfirmationEmail(CCDRequest ccdRequest, String authToken) {
+        NotificationRequest notificationRequest = buildNotificationRequest(ccdRequest);
+        HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));
+        URI uri = buildUri(notificationServiceConfiguration.getAssignToJudge());
+        log.info(NOTIFICATION_SERVICE_URL, uri.toString());
+        try {
+            restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
+        } catch (Exception ex) {
+            log.error(MESSAGE,
+                    notificationRequest.getCaseReferenceNumber(), MSG_SOLICITOR_EMAIL,
+                    notificationRequest.getNotificationEmail(),
+                    EXCEPTION, ex.getMessage());
+        }
+    }
+
+    public void sendConsentOrderMadeConfirmationEmail(CCDRequest ccdRequest, String authToken) {
+        NotificationRequest notificationRequest = buildNotificationRequest(ccdRequest);
+        HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));
+        URI uri = buildUri(notificationServiceConfiguration.getConsentOrderMade());
+        log.info(NOTIFICATION_SERVICE_URL, uri.toString());
+        try {
+            restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
+        } catch (Exception ex) {
+            log.error(MESSAGE,
+                    notificationRequest.getCaseReferenceNumber(), MSG_SOLICITOR_EMAIL,
+                    notificationRequest.getNotificationEmail(),
+                    EXCEPTION, ex.getMessage());
         }
     }
 
@@ -48,7 +83,7 @@ public class NotificationService {
     }
 
     private URI buildUri(String endPoint) {
-        return UriComponentsBuilder.fromHttpUrl(notificationServiceConfiguration.getUrl()
+        return fromHttpUrl(notificationServiceConfiguration.getUrl()
                 + notificationServiceConfiguration.getApi()
                 + endPoint)
                 .build()

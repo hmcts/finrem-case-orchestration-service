@@ -21,7 +21,9 @@ public class NotificationServiceConfigurationTest {
     @Test
     public void shouldReturnTheConfiguration() {
         assertEquals("/notify", underTest.getApi());
-        assertEquals("/hwfSuccessful", underTest.getHwfSuccessful());
+        assertEquals("/hwf-successful", underTest.getHwfSuccessful());
+        assertEquals("/assign-to-judge", underTest.getAssignToJudge());
+        assertEquals("/consent-order-made", underTest.getConsentOrderMade());
         assertEquals("http://localhost:8086/", underTest.getUrl());
     }
 }
