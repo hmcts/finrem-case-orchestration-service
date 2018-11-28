@@ -9,11 +9,13 @@ services:
       - 9000:9000
     environment:
       FINREM_NOTIFICATION_SERVICE_BASE_URL: http://finrem-notification-service:8086
+      DOCUMENT_GENERATOR_SERVICE_API_BASEURL: http://finrem-document-generator-client:4009
     depends_on:
       - ccd-case-management-web
-      - finrem-notification-service
-    links:
-      - finrem-notification-service
+#      - finrem-notification-service
+      - finrem-document-generator-client
+#    links:
+#      - finrem-notification-service
 
   ccd-case-management-web:
     image: "hmcts/ccd-case-management-web:${CCD_CASE_MANAGEMENT_WEB_TAG:-latest}"
@@ -217,6 +219,8 @@ services:
       MICROSERVICE_KEYS_CCD_ADMIN: "${IDAM_KEY_CCD_ADMIN}"
       TESTING_SUPPORT_ENABLED: "true"
       MICROSERVICE_KEYS_EM_GW: "${IDAM_KEY_DM_STORE}"
+      MICROSERVICE_KEYS_FINREM_DOCUMENT_GENERATOR: "AAAAAAAAAAAAAAAA"
+      MICROSERVICE_KEYS_DIVORCE: "AAAAAAAAAAAAAAAA"
 
   dm-store:
     image: "hmcts/dm-store:${DM_STORE_TAG:-latest}"
@@ -242,7 +246,7 @@ services:
       LOGGING_LEVEL_UK_GOV_HMCTS_IDAM: DEBUG
       IDAM_USER_BASE_URI: http://idam-api:8080
       IDAM_S2S_BASE_URI: http://service-auth-provider-api:8080
-      S2S_NAMES_WHITELIST: sscs,divorce,ccd,em_gw,document-management-store,ccd_gw,idam-api
+      S2S_NAMES_WHITELIST: sscs,divorce,ccd,em_gw,document-management-store,ccd_gw,idam-api,finrem_document_generator
       http_proxy:
       https_proxy:
       no_proxy:
@@ -305,9 +309,35 @@ services:
     image: hmcts/finrem-notification-service:latest
     container_name: finrem-notification-service
     environment:
-      UK_GOV_NOTIFY_API_KEY: "${UK_GOV_NOTIFY_API_KEY:apikey}"
+      UK_GOV_NOTIFY_API_KEY: "${UK_GOV_NOTIFY_API_KEY}"
     ports:
      - 8086:8086
+
+  finrem-document-generator-client:
+    image: hmcts/finrem-document-generator-client:latest
+    container_name: finrem-document-generator-client
+    environment:
+      PDF_SERVICE_ACCESS_KEY: "${PDF_SERVICE_ACCESS_KEY}"
+      EVIDENCE_MANAGEMENT_CLIENT_API_BASEURL: http://evidence-management-client-api:4006
+    ports:
+      - 4009:4009
+    depends_on:
+      - finrem-evidence-management-client-api
+
+  finrem-evidence-management-client-api:
+    image: hmcts/finrem-evidence-management-client-api:latest
+    container_name: evidence-management-client-api
+    environment:
+      - AUTH_PROVIDER_SERVICE_CLIENT_BASEURL=http://service-auth-provider-api:8080
+      - DOCUMENT_MANAGEMENT_STORE_URL=http://dm-store:8080
+      - IDAM_API_URL=http://idam-api:8080
+      - AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE=finrem_document_generator
+    ports:
+      - 4006:4006
+    depends_on:
+      - service-auth-provider-api
+      - dm-store
+      - idam-api
 
 volumes:
   ccd-docker-ccd-shared-database-data:
