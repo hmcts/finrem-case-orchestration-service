@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,7 +40,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError
 public class DocumentControllerTest {
 
     private static final String AUTH_TOKEN = "Bearer eyJhbGJbpjciOiJIUzI1NiJ9";
-    private static final String GEN_DOC_URL = "/case-orchestration/generateMiniFormA";
+    private static final String GEN_DOC_URL = "/case-orchestration/generate-mini-form-a";
     private static final String DOC_URL = "http://test/file";
     private static final String BIN_DOC_URL = DOC_URL + "/binary";
     private static final String DOC_NAME = "doc_name";
@@ -87,8 +88,8 @@ public class DocumentControllerTest {
                 .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
                 .andExpect(jsonPath("$.data.miniFormA.document_filename", is(DOC_NAME)))
                 .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BIN_DOC_URL)))
-                .andExpect(jsonPath("$.errors", is(nullValue())))
-                .andExpect(jsonPath("$.warnings", is(nullValue())));
+                .andExpect(jsonPath("$.errors", hasSize(0)))
+                .andExpect(jsonPath("$.warnings", hasSize(0)));
     }
 
     @Test

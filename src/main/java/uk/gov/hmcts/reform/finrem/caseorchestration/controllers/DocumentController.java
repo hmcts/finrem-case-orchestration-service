@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentService;
 
+import java.util.ArrayList;
+
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
@@ -28,7 +30,7 @@ public class DocumentController {
     @Autowired
     private DocumentService service;
 
-    @PostMapping(path = "/generateMiniFormA", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/generate-mini-form-a", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Mini Form A generation. Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
@@ -44,7 +46,9 @@ public class DocumentController {
 
         CaseData caseData = request.getCaseDetails().getCaseData();
         caseData.setMiniFormA(document);
+        caseData.setAuthorisation3(null);
 
-        return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(new CCDCallbackResponse(caseData,
+                new ArrayList<>(), new ArrayList<>()));
     }
 }
