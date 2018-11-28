@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.Fee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentByAccountService;
 
