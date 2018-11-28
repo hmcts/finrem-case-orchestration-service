@@ -37,10 +37,6 @@ public class FeePaymentController {
             return new ResponseEntity("Missing case data from CCD request.", HttpStatus.BAD_REQUEST);
         }
 
-        Fee fee = feeService.getApplicationFee();
-
-        ccdRequest.getCaseDetails().getCaseData().setFeeAmountToPay(fee.getFeeAmount().toString());
-
         return ResponseEntity.ok(new CCDCallbackResponse(ccdRequest.getCaseDetails().getCaseData(),
                 new ArrayList<>(), new ArrayList<>()));
     }

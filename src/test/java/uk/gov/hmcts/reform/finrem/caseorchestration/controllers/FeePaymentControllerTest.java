@@ -104,7 +104,6 @@ public class FeePaymentControllerTest {
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.feeAmountToPay", is("10.0")))
                 .andExpect(jsonPath("$.errors", hasSize(0)))
                 .andExpect(jsonPath("$.warnings", hasSize(0)));
     }
