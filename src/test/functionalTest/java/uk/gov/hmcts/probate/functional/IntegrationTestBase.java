@@ -23,7 +23,6 @@ public abstract class IntegrationTestBase {
     @Autowired
     public void finServiceUrl(@Value("${fin.service.base.url}") String finServiceUrl) {
         this.finServiceUrl = finServiceUrl;
-        System.out.println("Test url from test..." + finServiceUrl);
         RestAssured.baseURI = finServiceUrl;
     }
 
