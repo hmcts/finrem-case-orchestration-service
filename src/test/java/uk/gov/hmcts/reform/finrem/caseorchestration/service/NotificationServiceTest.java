@@ -31,6 +31,8 @@ public class NotificationServiceTest {
     private static final String END_POINT_HWF_SUCCESSFUL = "http://localhost:8086/notify/hwf-successful";
     private static final String END_POINT_ASSIGNED_TO_JUDGE = "http://localhost:8086/notify/assign-to-judge";
     private static final String END_POINT_CONSENT_ORDER_MADE = "http://localhost:8086/notify/consent-order-made";
+    private static final String END_POINT_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/"
+            + "consent-order-not-approved";
 
     @Autowired
     private NotificationService notificationService;
@@ -130,6 +132,29 @@ public class NotificationServiceTest {
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
             notificationService.sendConsentOrderMadeConfirmationEmail(ccdRequest, AUTH_TOKEN);
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
+            log.info(ex.toString());
+        }
+
+    }
+
+    @Test
+    public void sendConsentOrderNotApprovedNotificationEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_NOT_APPROVED))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendConsentOrderNotApprovedEmail(ccdRequest, AUTH_TOKEN);
+        mockServer.verify();
+    }
+
+    @Test
+    public void throwExceptionWhenConsentOrderNotApprovedNotificationEmailIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_NOT_APPROVED))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+        try {
+            notificationService.sendConsentOrderNotApprovedEmail(ccdRequest, AUTH_TOKEN);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
             log.info(ex.toString());

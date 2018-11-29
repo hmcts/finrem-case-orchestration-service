@@ -24,6 +24,7 @@ public class NotificationServiceConfigurationTest {
         assertEquals("/hwf-successful", underTest.getHwfSuccessful());
         assertEquals("/assign-to-judge", underTest.getAssignToJudge());
         assertEquals("/consent-order-made", underTest.getConsentOrderMade());
+        assertEquals("/consent-order-not-approved", underTest.getConsentOrderNotApproved());
         assertEquals("http://localhost:8086/", underTest.getUrl());
     }
 }
