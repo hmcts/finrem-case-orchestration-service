@@ -170,7 +170,6 @@ public class CaseDataTest {
     private void assertPayment() {
         assertThat(data.getHelpWithFeesQuestion(), is("No"));
         assertThat(data.getHwfNumber(), is(nullValue()));
-        assertThat(data.getFeeAmountToPay(), is("150"));
         assertThat(data.getPbaNumber(), is("PBA123456"));
         assertThat(data.getPbaReference(), is("ABCD"));
     }

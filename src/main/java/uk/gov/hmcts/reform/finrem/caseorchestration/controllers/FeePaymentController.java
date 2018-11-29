@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.Fee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentByAccountService;
 
@@ -36,10 +35,6 @@ public class FeePaymentController {
         if (!isValidCaseData(ccdRequest)) {
             return new ResponseEntity("Missing case data from CCD request.", HttpStatus.BAD_REQUEST);
         }
-
-        Fee fee = feeService.getApplicationFee();
-
-        ccdRequest.getCaseDetails().getCaseData().setFeeAmountToPay(fee.getFeeAmount().toString());
 
         return ResponseEntity.ok(new CCDCallbackResponse(ccdRequest.getCaseDetails().getCaseData(),
                 new ArrayList<>(), new ArrayList<>()));

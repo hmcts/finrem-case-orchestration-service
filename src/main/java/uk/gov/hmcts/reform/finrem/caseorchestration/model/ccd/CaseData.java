@@ -135,8 +135,6 @@ public class CaseData {
     private String helpWithFeesQuestion;
     @JsonProperty("HWFNumber")
     private String hwfNumber;
-    @JsonProperty("feeAmountToPay")
-    private String feeAmountToPay;
     @JsonProperty("PBANumber")
     private String pbaNumber;
     @JsonProperty("PBAreference")

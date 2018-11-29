@@ -46,7 +46,6 @@ public class DocumentController {
 
         CaseData caseData = request.getCaseDetails().getCaseData();
         caseData.setMiniFormA(document);
-        caseData.setAuthorisation3(null);
 
         return ResponseEntity.ok(new CCDCallbackResponse(caseData,
                 new ArrayList<>(), new ArrayList<>()));
