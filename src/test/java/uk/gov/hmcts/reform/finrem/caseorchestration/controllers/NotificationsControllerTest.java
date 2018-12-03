@@ -36,6 +36,8 @@ public class NotificationsControllerTest {
     private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
     private static final String CONSENT_ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/"
                                                         + "consent-order-not-approved";
+    private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/"
+            + "consent-order-available";
 
     @Autowired
     private WebApplicationContext applicationContext;
@@ -104,6 +106,20 @@ public class NotificationsControllerTest {
 
         verify(notificationService, times(1))
                 .sendConsentOrderNotApprovedEmail(any(CCDRequest.class), any());
+
+    }
+
+    @Test
+    public void sendConsentOrderAvailableEmail() throws Exception {
+        buildCcdRequest();
+        mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+                .sendConsentOrderAvailableEmail(any(CCDRequest.class), any());
 
     }
 

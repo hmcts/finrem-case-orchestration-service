@@ -57,6 +57,11 @@ public class NotificationService {
         sendNotificationEmail(ccdRequest, authToken, uri);
     }
 
+    public void sendConsentOrderAvailableEmail(CCDRequest ccdRequest, String authToken) {
+        URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailable());
+        sendNotificationEmail(ccdRequest, authToken, uri);
+    }
+
     private void sendNotificationEmail(CCDRequest ccdRequest, String authToken, URI uri) {
         NotificationRequest notificationRequest = buildNotificationRequest(ccdRequest);
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));

@@ -81,4 +81,18 @@ public class NotificationsController {
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
+
+    @PostMapping(value = "/case-orchestration/notify/consent-order-available", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send e-mail for Consent order available.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "Consent order available e-mail sent successfully",
+                    response = CCDCallbackResponse.class)})
+    public ResponseEntity<CCDCallbackResponse> sendConsentOrderAvailableEmail(
+            @RequestBody CCDRequest ccdRequest,
+            @RequestHeader(value = "Authorization") String userToken) {
+        log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
+        notificationService.sendConsentOrderAvailableEmail(ccdRequest, userToken);
+        CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
+        return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
+    }
 }

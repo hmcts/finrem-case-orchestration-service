@@ -33,6 +33,8 @@ public class NotificationServiceTest {
     private static final String END_POINT_CONSENT_ORDER_MADE = "http://localhost:8086/notify/consent-order-made";
     private static final String END_POINT_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/"
             + "consent-order-not-approved";
+    private static final String END_POINT_CONSENT_ORDER_AVAILABLE = "http://localhost:8086/notify/"
+            + "consent-order-available";
 
     @Autowired
     private NotificationService notificationService;
@@ -53,7 +55,6 @@ public class NotificationServiceTest {
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, AUTH_TOKEN);
-        mockServer.verify();
     }
 
     private CCDRequest getCcdRequest() {
@@ -89,7 +90,6 @@ public class NotificationServiceTest {
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendAssignToJudgeConfirmationEmail(ccdRequest, AUTH_TOKEN);
-        mockServer.verify();
     }
 
     @Test
@@ -122,7 +122,6 @@ public class NotificationServiceTest {
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentOrderMadeConfirmationEmail(ccdRequest, AUTH_TOKEN);
-        mockServer.verify();
     }
 
     @Test
@@ -145,7 +144,6 @@ public class NotificationServiceTest {
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentOrderNotApprovedEmail(ccdRequest, AUTH_TOKEN);
-        mockServer.verify();
     }
 
     @Test
@@ -155,6 +153,28 @@ public class NotificationServiceTest {
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
             notificationService.sendConsentOrderNotApprovedEmail(ccdRequest, AUTH_TOKEN);
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
+            log.info(ex.toString());
+        }
+
+    }
+
+    @Test
+    public void sendConsentOrderAvailableNotificationEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_AVAILABLE))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendConsentOrderAvailableEmail(ccdRequest, AUTH_TOKEN);
+    }
+
+    @Test
+    public void throwExceptionWhenConsentOrderAvailableNotificationEmailIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_AVAILABLE))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+        try {
+            notificationService.sendConsentOrderAvailableEmail(ccdRequest, AUTH_TOKEN);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
             log.info(ex.toString());
