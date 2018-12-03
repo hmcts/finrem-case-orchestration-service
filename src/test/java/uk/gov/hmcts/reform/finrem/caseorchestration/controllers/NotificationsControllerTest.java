@@ -32,6 +32,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class NotificationsControllerTest {
     private static final String AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
     private static final String HWF_SUCCESSFUL_EMAIL_URL = "/case-orchestration/notify/hwf-successful";
+    private static final String ASSIGN_TO_JUDGE_URL = "/case-orchestration/notify/assign-to-judge";
+    private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
+    private static final String CONSENT_ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/"
+                                                        + "consent-order-not-approved";
+    private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/"
+            + "consent-order-available";
+
     @Autowired
     private WebApplicationContext applicationContext;
 
@@ -57,6 +64,62 @@ public class NotificationsControllerTest {
 
         verify(notificationService, times(1))
                 .sendHWFSuccessfulConfirmationEmail(any(CCDRequest.class), any());
+
+    }
+
+    @Test
+    public void sendAssignToJudgeConfirmationEmail() throws Exception {
+        buildCcdRequest();
+        mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+                .sendAssignToJudgeConfirmationEmail(any(CCDRequest.class), any());
+
+    }
+
+    @Test
+    public void sendConsentOrderMadeConfirmationEmail() throws Exception {
+        buildCcdRequest();
+        mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+                .sendConsentOrderMadeConfirmationEmail(any(CCDRequest.class), any());
+
+    }
+
+    @Test
+    public void sendConsentOrderNotApprovedEmail() throws Exception {
+        buildCcdRequest();
+        mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+                .sendConsentOrderNotApprovedEmail(any(CCDRequest.class), any());
+
+    }
+
+    @Test
+    public void sendConsentOrderAvailableEmail() throws Exception {
+        buildCcdRequest();
+        mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+                .sendConsentOrderAvailableEmail(any(CCDRequest.class), any());
 
     }
 

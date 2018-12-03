@@ -21,7 +21,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Slf4j
 public class NotificationsController {
 
-    public static final String LOG_MESSAGE = "received notification request for case reference :    ";
+    private static final String LOG_MESSAGE = "received notification request for case reference :    ";
 
     @Autowired
     private NotificationService notificationService;
@@ -64,6 +64,34 @@ public class NotificationsController {
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
         notificationService.sendConsentOrderMadeConfirmationEmail(ccdRequest, userToken);
+        CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
+        return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
+    }
+
+    @PostMapping(value = "/case-orchestration/notify/consent-order-not-approved", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send e-mail for Consent order not approved.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "Consent order not approved e-mail sent successfully",
+                    response = CCDCallbackResponse.class)})
+    public ResponseEntity<CCDCallbackResponse> sendConsentOrderNotApprovedEmail(
+            @RequestBody CCDRequest ccdRequest,
+            @RequestHeader(value = "Authorization") String userToken) {
+        log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
+        notificationService.sendConsentOrderNotApprovedEmail(ccdRequest, userToken);
+        CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
+        return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
+    }
+
+    @PostMapping(value = "/case-orchestration/notify/consent-order-available", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send e-mail for Consent order available.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "Consent order available e-mail sent successfully",
+                    response = CCDCallbackResponse.class)})
+    public ResponseEntity<CCDCallbackResponse> sendConsentOrderAvailableEmail(
+            @RequestBody CCDRequest ccdRequest,
+            @RequestHeader(value = "Authorization") String userToken) {
+        log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
+        notificationService.sendConsentOrderAvailableEmail(ccdRequest, userToken);
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }

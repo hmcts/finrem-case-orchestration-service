@@ -23,7 +23,7 @@ public class NotificationService {
     private static final String NOTIFICATION_SERVICE_URL = "notification service url ";
     private static final String MESSAGE = "Failed to send notification email for case id : ";
     private static final String MSG_SOLICITOR_EMAIL = " for solicitor email";
-    public static final String EXCEPTION = "exception :";
+    private static final String EXCEPTION = "exception :";
     private final NotificationServiceConfiguration notificationServiceConfiguration;
     private final RestTemplate restTemplate;
 
@@ -43,24 +43,28 @@ public class NotificationService {
     }
 
     public void sendAssignToJudgeConfirmationEmail(CCDRequest ccdRequest, String authToken) {
-        NotificationRequest notificationRequest = buildNotificationRequest(ccdRequest);
-        HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));
         URI uri = buildUri(notificationServiceConfiguration.getAssignToJudge());
-        log.info(NOTIFICATION_SERVICE_URL, uri.toString());
-        try {
-            restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
-        } catch (Exception ex) {
-            log.error(MESSAGE,
-                    notificationRequest.getCaseReferenceNumber(), MSG_SOLICITOR_EMAIL,
-                    notificationRequest.getNotificationEmail(),
-                    EXCEPTION, ex.getMessage());
-        }
+        sendNotificationEmail(ccdRequest, authToken, uri);
     }
 
     public void sendConsentOrderMadeConfirmationEmail(CCDRequest ccdRequest, String authToken) {
+        URI uri = buildUri(notificationServiceConfiguration.getConsentOrderMade());
+        sendNotificationEmail(ccdRequest, authToken, uri);
+    }
+
+    public void sendConsentOrderNotApprovedEmail(CCDRequest ccdRequest, String authToken) {
+        URI uri = buildUri(notificationServiceConfiguration.getConsentOrderNotApproved());
+        sendNotificationEmail(ccdRequest, authToken, uri);
+    }
+
+    public void sendConsentOrderAvailableEmail(CCDRequest ccdRequest, String authToken) {
+        URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailable());
+        sendNotificationEmail(ccdRequest, authToken, uri);
+    }
+
+    private void sendNotificationEmail(CCDRequest ccdRequest, String authToken, URI uri) {
         NotificationRequest notificationRequest = buildNotificationRequest(ccdRequest);
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));
-        URI uri = buildUri(notificationServiceConfiguration.getConsentOrderMade());
         log.info(NOTIFICATION_SERVICE_URL, uri.toString());
         try {
             restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
