@@ -81,7 +81,7 @@ public class GenerateMiniFormATest {
 
     @Test
     public void generateMiniFormA() throws Exception {
-        generateDocumentStub();
+        generateDocumentServiceSuccessStub();
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
                 .content(objectMapper.writeValueAsString(request))
@@ -90,6 +90,18 @@ public class GenerateMiniFormATest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedCaseData()));
+    }
+
+    @Test
+    public void documentGeneratorServiceError() throws Exception {
+        generateDocumentServiceErrorStub();
+
+        webClient.perform(MockMvcRequestBuilders.post(API_URL)
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
     }
 
     private String expectedCaseData() throws JsonProcessingException {
@@ -113,7 +125,6 @@ public class GenerateMiniFormATest {
                 .template(miniFormATemplate)
                 .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
                 .build();
-
     }
 
     private Document document() {
@@ -125,16 +136,9 @@ public class GenerateMiniFormATest {
         document.setUrl(URL);
 
         return document;
-
-//        return Document.builder()
-//                .mimeType("application/pdf")
-//                .url(URL)
-//                .fileName(FILE_NAME)
-//                .createdOn("22 Oct 2018")
-//                .binaryUrl(BINARY_URL).build();
     }
 
-    private void generateDocumentStub() throws JsonProcessingException {
+    private void generateDocumentServiceSuccessStub() throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
                 .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest()), true, true))
                 .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
@@ -143,5 +147,15 @@ public class GenerateMiniFormATest {
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
                         .withBody(objectMapper.writeValueAsString(document()))));
+    }
+
+    private void generateDocumentServiceErrorStub() throws JsonProcessingException {
+        documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
+                .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest()), true, true))
+                .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+                .withHeader(CONTENT_TYPE, equalTo("application/json"))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)));
     }
 }
