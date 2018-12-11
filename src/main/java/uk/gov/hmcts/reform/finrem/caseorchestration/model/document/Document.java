@@ -1,14 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.document;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 
 @Data
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Builder
-@EqualsAndHashCode
+@RequiredArgsConstructor
 public class Document {
     private String url;
     private String mimeType;

@@ -35,12 +35,13 @@ public class DocumentTest {
     }
 
     private Document document() {
-        return Document.builder()
-                .binaryUrl(BINARY_URL)
-                .createdOn(CREATED_ON)
-                .fileName(FILE_NAME)
-                .url(URL)
-                .mimeType(MIME_TYPE)
-                .build();
+        Document document = new Document();
+        document.setBinaryUrl(BINARY_URL);
+        document.setCreatedOn(CREATED_ON);
+        document.setFileName(FILE_NAME);
+        document.setMimeType(MIME_TYPE);
+        document.setUrl(URL);
+
+        return document;
     }
 }
