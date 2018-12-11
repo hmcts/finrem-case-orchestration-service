@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.e2etest;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
@@ -21,8 +20,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -30,7 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentReque
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -96,7 +95,9 @@ public class GenerateMiniFormATest {
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getCaseData().setMiniFormA(caseDocument());
-        return objectMapper.writeValueAsString(caseDetails);
+
+        return objectMapper.writeValueAsString(new CCDCallbackResponse(caseDetails.getCaseData(),
+                new ArrayList<>(), new ArrayList<>()));
     }
 
     private CaseDocument caseDocument() {
@@ -116,11 +117,21 @@ public class GenerateMiniFormATest {
     }
 
     private Document document() {
-        return Document.builder()
-                .mimeType("application/pdf")
-                .url(URL)
-                .fileName(FILE_NAME)
-                .binaryUrl(BINARY_URL).build();
+        Document document = new Document();
+        document.setBinaryUrl(BINARY_URL);
+        document.setCreatedOn("22 Oct 2018");
+        document.setFileName(FILE_NAME);
+        document.setMimeType("application/pdf");
+        document.setUrl(URL);
+
+        return document;
+
+//        return Document.builder()
+//                .mimeType("application/pdf")
+//                .url(URL)
+//                .fileName(FILE_NAME)
+//                .createdOn("22 Oct 2018")
+//                .binaryUrl(BINARY_URL).build();
     }
 
     private void generateDocumentStub() throws JsonProcessingException {

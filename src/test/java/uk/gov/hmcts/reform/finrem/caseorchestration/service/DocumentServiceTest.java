@@ -33,7 +33,11 @@ public class DocumentServiceTest {
 
     @Test
     public void generateMiniFormA() {
-        Document document = Document.builder().fileName(FILE_NAME).url(URL).binaryUrl(BINARY_URL).build();
+        Document document = new Document();
+        document.setBinaryUrl(BINARY_URL);
+        document.setFileName(FILE_NAME);
+        document.setUrl(URL);
+
         when(documentGeneratorClient.generatePDF(isA(DocumentRequest.class), eq(AUTH_TOKEN))).thenReturn(document);
 
         CaseDocument result = service.generateMiniFormA(AUTH_TOKEN, new CaseDetails());
