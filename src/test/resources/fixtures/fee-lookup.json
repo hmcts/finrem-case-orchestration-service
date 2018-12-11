@@ -1,4 +1,5 @@
 {
+  "token": "token_test"
   "event_id": "some_event_id",
   "case_details": {
     "jurisdiction": "DIVORCE",
