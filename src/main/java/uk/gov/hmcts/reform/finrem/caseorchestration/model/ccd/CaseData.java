@@ -167,16 +167,21 @@ public class CaseData {
     private String assignedToJudgeReason;
     @JsonProperty("assignedToJudge")
     private String assignedToJudge;
+
     @JsonProperty("referToJudgeText")
     private String referToJudgeText;
     @JsonProperty("referToJudgeTextFromAwaitingResponse")
     private String referToJudgeTextFromAwaitingResponse;
     @JsonProperty("referToJudgeTextFromOrderMade")
     private String referToJudgeTextFromOrderMade;
-    @JsonProperty("referToJudgeTextFromConsentOrdApproved")
-    private String referToJudgeTextFromConsentOrdApproved;
+    @JsonProperty("referToJudgeTextFromConsOrdApproved")
+    private String referToJudgeTextFromConsOrdApproved;
     @JsonProperty("referToJudgeTextFromConsOrdMade")
     private String referToJudgeTextFromConsOrdMade;
+    @JsonProperty("referToJudgeTextFromClose")
+    private String referToJudgeTextFromClose;
+    @JsonProperty("referToJudgeTextFromRespondToOrder")
+    private String referToJudgeTextFromRespondToOrder;
     @JsonProperty("uploadConsentOrderDocuments")
     private List<ConsentOrderData> uploadConsentOrderDocuments;
     @JsonProperty("uploadOrder")
