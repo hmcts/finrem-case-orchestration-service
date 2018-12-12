@@ -209,7 +209,7 @@ public class CaseDataTest {
         assertThat(data.getAssignedToJudgeReason(), is("test"));
         assertThat(data.getReferToJudgeText(), is("test"));
         assertThat(data.getReferToJudgeTextFromAwaitingResponse(), is("test"));
-        assertThat(data.getReferToJudgeTextFromConsentOrdApproved(), is("test"));
+        assertThat(data.getReferToJudgeTextFromConsOrdApproved(), is("test"));
         assertThat(data.getReferToJudgeTextFromConsOrdMade(), is("test"));
         assertThat(data.getReferToJudgeTextFromOrderMade(), is("test"));
 
