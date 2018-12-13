@@ -138,7 +138,7 @@
       "referToJudgeText":"test",
       "referToJudgeTextFromAwaitingResponse":"test",
       "referToJudgeTextFromOrderMade":"test",
-      "referToJudgeTextFromConsentOrdApproved":"test",
+      "referToJudgeTextFromConsOrdApproved":"test",
       "referToJudgeTextFromConsOrdMade":"test",
       "orderRefusalCollection":[
          {
