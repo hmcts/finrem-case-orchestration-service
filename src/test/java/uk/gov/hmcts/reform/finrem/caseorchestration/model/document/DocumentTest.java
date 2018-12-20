@@ -5,14 +5,14 @@ import org.junit.Test;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.CREATED_ON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.MIME_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 
 public class DocumentTest {
-
-    public static final String BINARY_URL = "test/binary";
-    public static final String CREATED_ON = "2nd October";
-    public static final String FILE_NAME = "doc";
-    public static final String URL = "/test";
-    public static final String MIME_TYPE = "app/text";
 
     @Test
     public void properties() {
@@ -25,23 +25,11 @@ public class DocumentTest {
         assertThat(doc.getMimeType(), is(MIME_TYPE));
     }
 
-
     @Test
     public void equality() {
         Document doc = document();
         Document doc1 = document();
 
         assertThat(doc, is(equalTo(doc1)));
-    }
-
-    private Document document() {
-        Document document = new Document();
-        document.setBinaryUrl(BINARY_URL);
-        document.setCreatedOn(CREATED_ON);
-        document.setFileName(FILE_NAME);
-        document.setMimeType(MIME_TYPE);
-        document.setUrl(URL);
-
-        return document;
     }
 }
