@@ -150,7 +150,7 @@ public class GenerateMiniFormATest {
 
     private void deleteDocumentServiceStubWith(HttpStatus status) {
         documentGeneratorService.stubFor(
-                delete(urlMatching(DELETE_DOCUMENT_CONTEXT_PATH.concat("\\?fileUrl=").concat(TEMP_URL_BINARY)))
+                delete(urlMatching(DELETE_DOCUMENT_CONTEXT_PATH.concat("\\?fileUrl=").concat(TEMP_URL)))
                 .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
                 .willReturn(aResponse().withStatus(status.value())));
     }
