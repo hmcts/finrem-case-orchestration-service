@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -13,6 +14,7 @@ import java.net.URI;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FeeService {
     private final FeeServiceConfiguration serviceConfig;
     private final RestTemplate restTemplate;
@@ -20,6 +22,7 @@ public class FeeService {
 
     public Fee getApplicationFee() {
         URI uri = buildUri();
+        log.info("Inside getApplicationFee, Fee API uri : {} ", uri);
         ResponseEntity<Fee> responseEntity = restTemplate.getForEntity(uri, Fee.class);
         return responseEntity.getBody();
     }

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -12,11 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.Fee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentByAccountService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.util.Arrays;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,7 +26,7 @@ import java.util.ArrayList;
 @Slf4j
 public class FeePaymentController {
     private final FeeService feeService;
-    private final PaymentByAccountService paymentByAccountService;
+    private final PBAValidationService pbaValidationService;
 
     @PostMapping(path = "/fee-lookup", consumes = MediaType.APPLICATION_JSON, produces = MediaType.APPLICATION_JSON)
     public ResponseEntity<CCDCallbackResponse> feeLookup(
@@ -36,30 +38,50 @@ public class FeePaymentController {
             return new ResponseEntity("Missing case data from CCD request.", HttpStatus.BAD_REQUEST);
         }
 
-        return ResponseEntity.ok(new CCDCallbackResponse(ccdRequest.getCaseDetails().getCaseData(),
-                new ArrayList<>(), new ArrayList<>()));
+        Fee fee = feeService.getApplicationFee();
+        CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
+        String amountToPay = String.valueOf(fee.getFeeAmount().multiply(BigDecimal.valueOf(100)).longValue());
+        caseData.setAmountToPay(amountToPay);
+        return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
 
     private boolean isValidCaseData(CCDRequest ccdRequest) {
         return ccdRequest != null && ccdRequest.getCaseDetails() != null
-                && ccdRequest.getCaseDetails().getCaseData() != null
-                && ccdRequest.getCaseDetails().getCaseData().getDivorceCaseNumber() != null;
+                && ccdRequest.getCaseDetails().getCaseData() != null;
+    }
+
+
+    private boolean isPBAPayment(CaseData caseData) {
+        return caseData.getHelpWithFeesQuestion() != null && caseData.getHelpWithFeesQuestion().equalsIgnoreCase("no");
     }
 
 
     @PostMapping(
-            path = "/pba-validate/{pbaNumber}",
+            path = "/pba-validate",
             consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON)
-    public ResponseEntity<Boolean> pbaValidate(
+    public ResponseEntity<CCDCallbackResponse> pbaValidate(
             @RequestHeader(value = "Authorization", required = false) String authToken,
-            @PathVariable String pbaNumber) {
-        log.info("Received request for PBA validate. Auth token: {}, Case request : {}", authToken, pbaNumber);
+            @RequestBody CCDRequest ccdRequest) {
+        log.info("Received request for PBA validate. Auth token: {}, Case request : {}", authToken, ccdRequest);
 
-        boolean validPBA = paymentByAccountService.isValidPBA(authToken, pbaNumber);
-        log.info("validPBA:  {}", validPBA);
+        if (!isValidCaseData(ccdRequest)) {
+            return new ResponseEntity("Missing case data from CCD request.", HttpStatus.BAD_REQUEST);
+        }
 
-        return ResponseEntity.ok(validPBA);
+        CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
+        if (isPBAPayment(caseData)) {
+            log.info("Validate PBA Number :  {}", caseData.getPbaNumber());
+            if (!pbaValidationService.isValidPBA(authToken, caseData.getPbaNumber())) {
+                log.info("PBA number is invalid.");
+                return ResponseEntity.ok(CCDCallbackResponse.builder()
+                        .errors(Arrays.asList("PBA Account Number is not valid, please enter a valid one."))
+                        .build());
+            }
+            log.info("PBA number is valid.");
+        }
+
+        return ResponseEntity.ok(CCDCallbackResponse.builder().build());
     }
 
 }

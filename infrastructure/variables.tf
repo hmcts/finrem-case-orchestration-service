@@ -42,6 +42,18 @@ variable "appinsights_instrumentation_key" {
   default = ""
 }
 
+variable "idam_api_url" {
+  default = "http://betaDevBccidamAppLB.reform.hmcts.net"
+}
+
+variable "fees_api_url" {
+  default = "http://fees-register-api-aat.service.core-compute-aat.internal"
+}
+
+variable "prd_api_url" {
+  default = "http://rpa-rd-professional-aat.service.core-compute-aat.internal"
+}
+
 variable "idam_s2s_url_prefix" {
   default = "rpe-service-auth-provider"
 }

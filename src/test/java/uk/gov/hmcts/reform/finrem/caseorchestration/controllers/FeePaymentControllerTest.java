@@ -16,7 +16,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.Fee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentByAccountService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
@@ -25,8 +25,13 @@ import java.math.BigDecimal;
 import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -37,9 +42,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 public class FeePaymentControllerTest {
 
-    private static final String PBA_NUMBER = "PBA";
+    private static final String PBA_NUMBER = "PBA123";
     private static final String ADD_CASE_URL = "/case-orchestration/fee-lookup";
-    private static final String PBA_VALIDATE_URL = "/case-orchestration/pba-validate/" + PBA_NUMBER;
+    private static final String PBA_VALIDATE_URL = "/case-orchestration/pba-validate";
     private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
     @Autowired
@@ -49,7 +54,7 @@ public class FeePaymentControllerTest {
     private FeeService feeService;
 
     @MockBean
-    private PaymentByAccountService paymentByAccountService;
+    private PBAValidationService pbaValidationService;
     private MockMvc mvc;
 
     private JsonNode requestContent;
@@ -104,22 +109,61 @@ public class FeePaymentControllerTest {
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors", hasSize(0)))
-                .andExpect(jsonPath("$.warnings", hasSize(0)));
+                .andExpect(jsonPath("$.data.amountToPay", is("1000")))
+                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
 
-    private void doValidatePbaSetUp() {
-        when(paymentByAccountService.isValidPBA(BEARER_TOKEN, PBA_NUMBER)).thenReturn(true);
+    private void doValidatePBASetUp(boolean isValidPBA) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/pba-validate.json").toURI()));
+
+        when(pbaValidationService.isValidPBA(BEARER_TOKEN, PBA_NUMBER)).thenReturn(isValidPBA);
+    }
+
+    private void doHWFSetUp() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/hwf.json").toURI()));
+    }
+
+    @Test
+    public void shouldNotDoPBAValidationWhenPaymentIsDoneWithHWF() throws Exception {
+        doHWFSetUp();
+        mvc.perform(post(PBA_VALIDATE_URL)
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+        verify(pbaValidationService, never()).isValidPBA(anyString(), anyString());
+    }
+
+    @Test
+    public void shouldReturnErrorWhenPbaValidationFails() throws Exception {
+        doValidatePBASetUp(false);
+        mvc.perform(post(PBA_VALIDATE_URL)
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errors", hasSize(1)))
+                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+        verify(pbaValidationService, times(1)).isValidPBA(BEARER_TOKEN, PBA_NUMBER);
     }
 
     @Test
     public void shouldDoPbaValidation() throws Exception {
-        doValidatePbaSetUp();
-
+        doValidatePBASetUp(true);
         mvc.perform(post(PBA_VALIDATE_URL)
+                .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("true"));
+                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+        verify(pbaValidationService, times(1)).isValidPBA(BEARER_TOKEN, PBA_NUMBER);
     }
 }
