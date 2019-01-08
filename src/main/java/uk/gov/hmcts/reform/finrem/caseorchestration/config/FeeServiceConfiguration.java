@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "fees.api")
+@ConfigurationProperties(prefix = "fees")
 public class FeeServiceConfiguration {
     private String url;
     private String api;

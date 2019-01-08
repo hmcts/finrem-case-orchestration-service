@@ -8,6 +8,9 @@ services:
     ports:
       - 9000:9000
     environment:
+      IDAM_API_URL: http://idam-api:8080
+      FEES_API_URL: http://fees-register-api-aat.service.core-compute-aat.internal
+      PRD_API_URL: http://rpa-rd-professional-aat.service.core-compute-aat.internal
       FINREM_NOTIFICATION_SERVICE_BASE_URL: http://finrem-notification-service:8086
       DOCUMENT_GENERATOR_SERVICE_API_BASEURL: http://finrem-document-generator-client:4009
     depends_on:

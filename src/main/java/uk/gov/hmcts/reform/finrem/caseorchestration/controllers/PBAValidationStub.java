@@ -15,10 +15,10 @@ import javax.ws.rs.core.MediaType;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/case-orchestration")
+@RequestMapping(value = "/search")
 @Slf4j
-public class PaymentByAccountStub {
-    @GetMapping(path = "/organisations/pba/{emailId}", consumes = MediaType.APPLICATION_JSON,
+public class PBAValidationStub {
+    @GetMapping(path = "/pba/{emailId}", consumes = MediaType.APPLICATION_JSON,
             produces = MediaType.APPLICATION_JSON)
     public ResponseEntity pbaList(
             @RequestHeader(value = "Authorization", required = false) String authorizationToken,

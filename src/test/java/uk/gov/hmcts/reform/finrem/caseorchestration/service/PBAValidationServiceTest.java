@@ -25,13 +25,13 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class PaymentByAccountServiceTest {
+public class PBAValidationServiceTest {
 
     private static final String EMAIL = "test@test.com";
     private static final String AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
     @Autowired
-    private PaymentByAccountService paymentByAccountService;
+    private PBAValidationService pbaValidationService;
 
     @MockBean
     private IdamService idamService;
@@ -59,7 +59,7 @@ public class PaymentByAccountServiceTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(requestContent.toString(), MediaType.APPLICATION_JSON));
 
-        assertThat(paymentByAccountService.isValidPBA(AUTH_TOKEN, "NUM1"), is(true));
+        assertThat(pbaValidationService.isValidPBA(AUTH_TOKEN, "NUM1"), is(true));
     }
 
     @Test
@@ -68,7 +68,7 @@ public class PaymentByAccountServiceTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess(requestContent.toString(), MediaType.APPLICATION_JSON));
 
-        assertThat(paymentByAccountService.isValidPBA(AUTH_TOKEN, "NUM3"), is(false));
+        assertThat(pbaValidationService.isValidPBA(AUTH_TOKEN, "NUM3"), is(false));
     }
 
     @Test
@@ -77,7 +77,7 @@ public class PaymentByAccountServiceTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess("{\"payment_accounts\": []}", MediaType.APPLICATION_JSON));
 
-        assertThat(paymentByAccountService.isValidPBA(AUTH_TOKEN, "NUM1"), is(false));
+        assertThat(pbaValidationService.isValidPBA(AUTH_TOKEN, "NUM1"), is(false));
     }
 
     private static String toUri() {

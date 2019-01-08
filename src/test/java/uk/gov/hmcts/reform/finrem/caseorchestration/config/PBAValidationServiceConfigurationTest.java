@@ -15,10 +15,10 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @TestPropertySource(locations = "/application.properties")
-public class PaymentByAccountServiceConfigurationTest {
+public class PBAValidationServiceConfigurationTest {
 
     @Autowired
-    private PaymentByAccountServiceConfiguration config;
+    private PBAValidationServiceConfiguration config;
 
 
     @Test

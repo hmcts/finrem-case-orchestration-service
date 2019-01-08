@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "pba.api")
-public class PaymentByAccountServiceConfiguration {
+@ConfigurationProperties(prefix = "pba.validation")
+public class PBAValidationServiceConfiguration {
     private String url;
     private String api;
 }
