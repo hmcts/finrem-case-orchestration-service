@@ -1,3 +1,8 @@
+# Temporary fix for template API version error on deployment
+provider "azurerm" {
+  version = "1.19.0"
+}
+
 locals {
   ase_name = "${data.terraform_remote_state.core_apps_compute.ase_name[0]}"
   local_env = "${(var.env == "preview" || var.env == "spreview") ? (var.env == "preview" ) ? "aat" : "saat" : var.env}"
@@ -42,7 +47,6 @@ module "finrem-cos" {
     AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS = "${var.auth_provider_service_client_tokentimetoliveinseconds}"
     FINREM_NOTIFICATION_SERVICE_BASE_URL                  = "${local.finrem_ns_url}"
     DOCUMENT_GENERATOR_SERVICE_API_BASEURL                = "${local.document_generator_baseurl}"
-    DUMMY                                                 = "dummy1"
   }
 }
 
