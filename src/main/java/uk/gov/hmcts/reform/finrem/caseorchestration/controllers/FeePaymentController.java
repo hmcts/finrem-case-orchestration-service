@@ -105,7 +105,8 @@ public class FeePaymentController {
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         if (isPBAPayment(caseData)) {
             log.info("Payment by PBA Number :  {}", caseData.getPbaNumber());
-            boolean success = pbaPaymentService.makePayment(authToken, caseData.getPbaNumber(), Long.valueOf(caseData.getAmountToPay()));
+            boolean success = pbaPaymentService.makePayment(authToken,
+                    caseData.getPbaNumber(), Long.valueOf(caseData.getAmountToPay()));
 
             if (!pbaValidationService.isValidPBA(authToken, caseData.getPbaNumber())) {
                 log.info("Payment by PBA number {} failed.", caseData.getPbaNumber());

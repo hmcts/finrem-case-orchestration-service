@@ -10,11 +10,11 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGeneratorFactory;
+import uk.gov.hmcts.reform.authorisation.healthcheck.ServiceAuthHealthIndicator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
 
-@SpringBootApplication
-@EnableFeignClients(basePackageClasses = {ServiceAuthorisationApi.class, DocumentGeneratorClient.class})
-@EnableRetry(proxyTargetClass=true)
+@SpringBootApplication(exclude = {ServiceAuthHealthIndicator.class})
+@EnableFeignClients(basePackageClasses = {DocumentGeneratorClient.class})
 public class CaseOrchestrationApplication {
 
     public static void main(String[] args) {
@@ -31,15 +31,4 @@ public class CaseOrchestrationApplication {
         loggingFilter.setMaxPayloadLength(10240);
         return loggingFilter;
     }
-
-    @Bean
-    public AuthTokenGenerator serviceAuthTokenGenerator(
-            @Value("${idam.s2s-auth.totp_secret}") final String secret,
-            @Value("${idam.s2s.microservice}") final String microService,
-            final ServiceAuthorisationApi serviceAuthorisationApi
-    ) {
-        return AuthTokenGeneratorFactory.createDefaultGenerator(secret, microService, serviceAuthorisationApi);
-    }
-
-
 }

@@ -27,8 +27,8 @@ public class PBAValidationService {
         log.info("Inside isValidPBA, PRD API uri : {}, emailId : {}", uri, emailId);
         try {
             ResponseEntity<PBAAccount> responseEntity = restTemplate.getForEntity(uri, PBAAccount.class);
-            PBAAccount PBAAccount = responseEntity.getBody();
-            return PBAAccount.getAccountList().contains(pbaNumber);
+            PBAAccount pbaAccount = responseEntity.getBody();
+            return pbaAccount.getAccountList().contains(pbaNumber);
         } catch (HttpClientErrorException ex) {
             return false;
         }
