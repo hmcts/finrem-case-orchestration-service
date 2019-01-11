@@ -2,20 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.Fee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 
 import javax.ws.rs.core.MediaType;
@@ -37,33 +29,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(FeePaymentController.class)
-@ContextConfiguration(classes = CaseOrchestrationApplication.class)
-public class FeePaymentControllerTest {
+public class FeePaymentControllerTest extends BaseControllerTest {
 
     private static final String PBA_NUMBER = "PBA123";
     private static final String ADD_CASE_URL = "/case-orchestration/fee-lookup";
     private static final String PBA_VALIDATE_URL = "/case-orchestration/pba-validate";
     private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
-    @Autowired
-    private WebApplicationContext applicationContext;
-
     @MockBean
     private FeeService feeService;
 
     @MockBean
     private PBAValidationService pbaValidationService;
-    private MockMvc mvc;
+
+    @MockBean
+    private PBAPaymentService pbaPaymentService;
 
     private JsonNode requestContent;
-
-
-    @Before
-    public void setUp() {
-        mvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
-    }
 
     private static Fee fee() {
         Fee fee = new Fee();
@@ -99,7 +82,6 @@ public class FeePaymentControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(is("Missing case data from CCD request.")));
     }
-
 
     @Test
     public void shouldDoFeeLookup() throws Exception {

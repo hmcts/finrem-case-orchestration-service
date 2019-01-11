@@ -1,32 +1,21 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
-import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 
 import static org.junit.Assert.assertThat;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = CaseOrchestrationApplication.class)
-@TestPropertySource(locations = "/application.properties")
-@Slf4j
-public class NotificationServiceTest {
+public class NotificationServiceTest extends BaseServiceTest {
     private static final String AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
     private static final String END_POINT_HWF_SUCCESSFUL = "http://localhost:8086/notify/hwf-successful";
     private static final String END_POINT_ASSIGNED_TO_JUDGE = "http://localhost:8086/notify/assign-to-judge";
@@ -38,14 +27,11 @@ public class NotificationServiceTest {
 
     @Autowired
     private NotificationService notificationService;
-    @Autowired
-    private RestTemplate restTemplate;
-    private MockRestServiceServer mockServer;
     private CCDRequest ccdRequest;
 
     @Before
     public void setUp() {
-        mockServer = MockRestServiceServer.createServer(restTemplate);
+        super.setUp();
         ccdRequest = getCcdRequest();
     }
 
@@ -79,7 +65,6 @@ public class NotificationServiceTest {
             notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, AUTH_TOKEN);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
-            log.info(ex.toString());
         }
 
     }
@@ -111,7 +96,6 @@ public class NotificationServiceTest {
             notificationService.sendAssignToJudgeConfirmationEmail(ccdRequest, AUTH_TOKEN);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
-            log.info(ex.toString());
         }
 
     }
@@ -133,7 +117,6 @@ public class NotificationServiceTest {
             notificationService.sendConsentOrderMadeConfirmationEmail(ccdRequest, AUTH_TOKEN);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
-            log.info(ex.toString());
         }
 
     }
@@ -155,7 +138,6 @@ public class NotificationServiceTest {
             notificationService.sendConsentOrderNotApprovedEmail(ccdRequest, AUTH_TOKEN);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
-            log.info(ex.toString());
         }
 
     }
@@ -177,7 +159,6 @@ public class NotificationServiceTest {
             notificationService.sendConsentOrderAvailableEmail(ccdRequest, AUTH_TOKEN);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
-            log.info(ex.toString());
         }
 
     }

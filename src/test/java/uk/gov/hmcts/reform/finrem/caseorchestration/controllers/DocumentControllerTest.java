@@ -4,16 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentService;
@@ -25,6 +17,7 @@ import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -33,10 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(DocumentController.class)
-@ContextConfiguration(classes = CaseOrchestrationApplication.class)
-public class DocumentControllerTest {
+public class DocumentControllerTest extends BaseControllerTest {
 
     private static final String AUTH_TOKEN = "Bearer eyJhbGJbpjciOiJIUzI1NiJ9";
     private static final String GEN_DOC_URL = "/case-orchestration/generate-mini-form-a";
@@ -44,19 +35,19 @@ public class DocumentControllerTest {
     private static final String BIN_DOC_URL = DOC_URL + "/binary";
     private static final String DOC_NAME = "doc_name";
 
-    @Autowired
-    private WebApplicationContext applicationContext;
+    private JsonNode requestContent;
 
     @MockBean
     private DocumentService documentService;
 
-    private MockMvc mvc;
-    private JsonNode requestContent;
-
     @Before
-    public void setUp() throws Exception {
-        mvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
-        doRequestSetUp();
+    public void setUp()  {
+        super.setUp();
+        try {
+            doRequestSetUp();
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
     }
 
     private static CaseDocument caseDocument() {

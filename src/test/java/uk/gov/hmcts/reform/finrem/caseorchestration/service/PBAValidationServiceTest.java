@@ -4,28 +4,23 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestTemplate;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 
 import java.io.File;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class PBAValidationServiceTest {
+public class PBAValidationServiceTest extends BaseServiceTest {
 
     private static final String EMAIL = "test@test.com";
     private static final String AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
@@ -36,19 +31,19 @@ public class PBAValidationServiceTest {
     @MockBean
     private IdamService idamService;
 
-    @Autowired
-    private RestTemplate restTemplate;
-
-    private MockRestServiceServer mockServer;
     private JsonNode requestContent;
 
     @Before
-    public void setUp() throws Exception {
-        mockServer = MockRestServiceServer.createServer(restTemplate);
+    public void setUp() {
+        super.setUp();
         ObjectMapper objectMapper = new ObjectMapper();
 
-        requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/payment-by-account.json").toURI()));
+        try {
+            requestContent = objectMapper.readTree(new File(getClass()
+                    .getResource("/fixtures/payment-by-account.json").toURI()));
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
 
         when(idamService.getUserEmailId(AUTH_TOKEN)).thenReturn(EMAIL);
     }

@@ -27,9 +27,8 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
-public class NotificationsControllerTest {
+public class NotificationsControllerTest extends BaseControllerTest {
     private static final String AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
     private static final String HWF_SUCCESSFUL_EMAIL_URL = "/case-orchestration/notify/hwf-successful";
     private static final String ASSIGN_TO_JUDGE_URL = "/case-orchestration/notify/assign-to-judge";
@@ -39,24 +38,15 @@ public class NotificationsControllerTest {
     private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/"
             + "consent-order-available";
 
-    @Autowired
-    private WebApplicationContext applicationContext;
-
     @MockBean
     private NotificationService notificationService;
-    private MockMvc mockMvc;
 
     private JsonNode requestContent;
-
-    @Before
-    public void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
-    }
 
     @Test
     public void sendHwfSuccessfulConfirmationEmail() throws Exception {
         buildCcdRequest();
-        mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
+        mvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
                 .content(requestContent.toString())
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -70,7 +60,7 @@ public class NotificationsControllerTest {
     @Test
     public void sendAssignToJudgeConfirmationEmail() throws Exception {
         buildCcdRequest();
-        mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
+        mvc.perform(post(ASSIGN_TO_JUDGE_URL)
                 .content(requestContent.toString())
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -84,7 +74,7 @@ public class NotificationsControllerTest {
     @Test
     public void sendConsentOrderMadeConfirmationEmail() throws Exception {
         buildCcdRequest();
-        mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
+        mvc.perform(post(CONSENT_ORDER_MADE_URL)
                 .content(requestContent.toString())
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -98,7 +88,7 @@ public class NotificationsControllerTest {
     @Test
     public void sendConsentOrderNotApprovedEmail() throws Exception {
         buildCcdRequest();
-        mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
+        mvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
                 .content(requestContent.toString())
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -112,7 +102,7 @@ public class NotificationsControllerTest {
     @Test
     public void sendConsentOrderAvailableEmail() throws Exception {
         buildCcdRequest();
-        mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
+        mvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
                 .content(requestContent.toString())
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
