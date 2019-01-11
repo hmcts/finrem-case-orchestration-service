@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.Fee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 
 import javax.ws.rs.core.MediaType;
@@ -27,6 +28,7 @@ import java.util.Arrays;
 public class FeePaymentController {
     private final FeeService feeService;
     private final PBAValidationService pbaValidationService;
+    private final PBAPaymentService pbaPaymentService;
 
     @PostMapping(path = "/fee-lookup", consumes = MediaType.APPLICATION_JSON, produces = MediaType.APPLICATION_JSON)
     public ResponseEntity<CCDCallbackResponse> feeLookup(
@@ -82,6 +84,39 @@ public class FeePaymentController {
         }
 
         return ResponseEntity.ok(CCDCallbackResponse.builder().build());
+    }
+
+
+
+    @PostMapping(
+            path = "/pba-payment",
+            consumes = MediaType.APPLICATION_JSON,
+            produces = MediaType.APPLICATION_JSON)
+    public ResponseEntity<CCDCallbackResponse> pbaPayment(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestBody CCDRequest ccdRequest) {
+        log.info("Received request for PBA payment. Auth token: {}, Case request : {}", authToken, ccdRequest);
+
+        if (!isValidCaseData(ccdRequest)) {
+            return new ResponseEntity("Missing case data from CCD request.", HttpStatus.BAD_REQUEST);
+        }
+
+
+        CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
+        if (isPBAPayment(caseData)) {
+            log.info("Payment by PBA Number :  {}", caseData.getPbaNumber());
+            boolean success = pbaPaymentService.makePayment(authToken, caseData.getPbaNumber(), Long.valueOf(caseData.getAmountToPay()));
+
+            if (!pbaValidationService.isValidPBA(authToken, caseData.getPbaNumber())) {
+                log.info("Payment by PBA number {} failed.", caseData.getPbaNumber());
+                return ResponseEntity.ok(CCDCallbackResponse.builder()
+                        .errors(Arrays.asList("PBA Account payment failed."))
+                        .build());
+            }
+            log.info("Payment by PBA number succeeded.");
+        }
+        return ResponseEntity.ok(CCDCallbackResponse.builder().build());
+
     }
 
 }

@@ -10,6 +10,10 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class CaseData {
+    // Case State
+    @JsonProperty("state")
+    private String state;
+
     // SOLICITOR DETAILS
     @JsonProperty("solicitorName")
     private String solicitorName;

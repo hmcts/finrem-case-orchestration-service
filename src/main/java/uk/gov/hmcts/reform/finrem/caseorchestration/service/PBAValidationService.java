@@ -8,7 +8,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.PBAValidationServiceConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.PaymentByAccount;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.validation.PBAAccount;
 
 import java.net.URI;
 
@@ -26,9 +26,9 @@ public class PBAValidationService {
         URI uri = buildUri(emailId);
         log.info("Inside isValidPBA, PRD API uri : {}, emailId : {}", uri, emailId);
         try {
-            ResponseEntity<PaymentByAccount> responseEntity = restTemplate.getForEntity(uri, PaymentByAccount.class);
-            PaymentByAccount paymentByAccount = responseEntity.getBody();
-            return paymentByAccount.getAccountList().contains(pbaNumber);
+            ResponseEntity<PBAAccount> responseEntity = restTemplate.getForEntity(uri, PBAAccount.class);
+            PBAAccount PBAAccount = responseEntity.getBody();
+            return PBAAccount.getAccountList().contains(pbaNumber);
         } catch (HttpClientErrorException ex) {
             return false;
         }

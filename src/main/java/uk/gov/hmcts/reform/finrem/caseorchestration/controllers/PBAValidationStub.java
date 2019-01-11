@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.PaymentByAccount;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.validation.PBAAccount;
 
 import java.util.Arrays;
 import javax.ws.rs.core.MediaType;
@@ -25,7 +25,7 @@ public class PBAValidationStub {
             @PathVariable String emailId) {
         log.info("Received request for PBA check. Auth token: {}, emailId : {}", authorizationToken, emailId);
 
-        return ResponseEntity.ok(new PaymentByAccount(Arrays.asList("PBA123", "PBA456")));
+        return ResponseEntity.ok(new PBAAccount(Arrays.asList("PBA123", "PBA456")));
     }
 
 }

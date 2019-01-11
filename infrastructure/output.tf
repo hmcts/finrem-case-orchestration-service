@@ -10,6 +10,10 @@ output "fees_api_url" {
   value = "${var.fees_api_url}"
 }
 
+output "payment_api_url" {
+  value = "${var.payment_api_url}"
+}
+
 output "prd_api_url" {
   value = "${var.prd_api_url}"
 }

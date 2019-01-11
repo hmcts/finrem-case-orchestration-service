@@ -50,6 +50,10 @@ variable "fees_api_url" {
   default = "http://fees-register-api-aat.service.core-compute-aat.internal"
 }
 
+variable "payment_api_url" {
+  default = "https://payment-api-aat.service.core-compute-aat.internal"
+}
+
 variable "prd_api_url" {
   default = "http://rpa-rd-professional-aat.service.core-compute-aat.internal"
 }
