@@ -50,8 +50,10 @@ public class FeePaymentControllerTest extends BaseControllerTest {
 
     private static Fee fee() {
         Fee fee = new Fee();
+        fee.setCode("FEE0640");
+        fee.setDescription("finrem");
         fee.setFeeAmount(BigDecimal.valueOf(10d));
-
+        fee.setVersion("v1");
         return fee;
     }
 
@@ -91,7 +93,10 @@ public class FeePaymentControllerTest extends BaseControllerTest {
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.feeCode", is("FEE0640")))
+                .andExpect(jsonPath("$.data.feeDescription", is("finrem")))
                 .andExpect(jsonPath("$.data.amountToPay", is("1000")))
+                .andExpect(jsonPath("$.data.feeVersion", is("v1")))
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }

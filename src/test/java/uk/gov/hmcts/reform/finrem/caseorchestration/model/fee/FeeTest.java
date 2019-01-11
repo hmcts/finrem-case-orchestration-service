@@ -14,7 +14,8 @@ public class FeeTest {
 
     @Before
     public void setUp() throws Exception {
-        String json = "{ \"code\" : \"FEE0640\", \"fee_amount\" : 50 }";
+        String json = "{ \"code\" : \"FEE0640\", \"fee_amount\" : 50, \"description\" : \"finrem\", "
+                +  "\"version\" : \"v1\" }";
         ObjectMapper mapper = new ObjectMapper();
         fee = mapper.readValue(json, Fee.class);
     }
@@ -22,6 +23,8 @@ public class FeeTest {
     @Test
     public void shouldCreateFeeFromJson() {
         assertThat(fee.getCode(), is("FEE0640"));
+        assertThat(fee.getDescription(), is("finrem"));
+        assertThat(fee.getVersion(), is("v1"));
         assertThat(fee.getFeeAmount(), is(BigDecimal.valueOf(50)));
     }
 

@@ -18,14 +18,32 @@ public class PaymentRequest {
     @JsonProperty(value = "account_number")
     private String accountNumber;
 
+    @JsonProperty(value = "case_reference")
+    private String caseReference;
+
+    @JsonProperty(value = "ccd_case_number")
+    private String ccdCaseNumber;
+
+    @JsonProperty(value = "customer_reference")
+    private String customerReference;
+
+    @JsonProperty(value = "organisation_name")
+    private String organisationNname;
+
     @JsonProperty(value = "amount")
     private long amount;
 
     @JsonProperty(value = "currency")
+    @Builder.Default
     private String currency = "GBP";
 
     @JsonProperty(value = "service")
+    @Builder.Default
     private String service = "FINREM";
+
+    @JsonProperty(value = "site_id")
+    @Builder.Default
+    private String siteId = "CTSC";
 
     @JsonProperty(value = "fees")
     private List<FeeRequest> feesList;

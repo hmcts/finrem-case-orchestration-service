@@ -19,7 +19,6 @@ public class FeeService {
     private final FeeServiceConfiguration serviceConfig;
     private final RestTemplate restTemplate;
 
-
     public Fee getApplicationFee() {
         URI uri = buildUri();
         log.info("Inside getApplicationFee, Fee API uri : {} ", uri);

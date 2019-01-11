@@ -2,15 +2,21 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Data
 public class CaseData {
-    // Case State
+    // State
     @JsonProperty("state")
     private String state;
 
@@ -139,8 +145,14 @@ public class CaseData {
     private String helpWithFeesQuestion;
     @JsonProperty("HWFNumber")
     private String hwfNumber;
+    @JsonProperty("feeCode")
+    private String feeCode;
+    @JsonProperty("feeDescription")
+    private String feeDescription;
     @JsonProperty("amountToPay")
     private String amountToPay;
+    @JsonProperty("feeVersion")
+    private String feeVersion;
     @JsonProperty("PBANumber")
     private String pbaNumber;
     @JsonProperty("PBAreference")

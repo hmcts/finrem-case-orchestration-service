@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.Fee;
 
 import java.util.List;
 
@@ -15,17 +14,17 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FeeRequest {
-    @JsonProperty(value = "calculated_amount")
-    private long calculatedAmount;
+public class PaymentResponse {
+    @JsonProperty(value = "reference")
+    private String reference;
 
-    @JsonProperty(value = "code")
-    private String code;
+    @JsonProperty(value = "status")
+    private String status;
 
-    @JsonProperty(value = "version")
-    private String version;
+    @JsonProperty(value = "status_histories")
+    private List<PaymentStatusHistory> statusHistories;
 
-    @JsonProperty(value = "volume")
-    @Builder.Default
-    private int volume = 1;
+    public boolean isPaymentSuccess() {
+        return status.equalsIgnoreCase("Success");
+    }
 }
