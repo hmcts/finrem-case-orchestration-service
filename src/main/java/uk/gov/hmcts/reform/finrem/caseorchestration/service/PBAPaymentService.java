@@ -42,7 +42,8 @@ public class PBAPaymentService {
         URI uri = buildUri();
         log.info("Inside makePayment, PRD API uri : {}, request : {} ", uri, request);
         try {
-            ResponseEntity<PaymentResponse> responseEntity = restTemplate.postForEntity(uri, request, PaymentResponse.class);
+            ResponseEntity<PaymentResponse> responseEntity = restTemplate.postForEntity(uri, request,
+                    PaymentResponse.class);
             log.info("Payment response: {} ", responseEntity);
             return responseEntity.getBody();
         } catch (HttpClientErrorException ex) {
@@ -82,31 +83,34 @@ public class PBAPaymentService {
         return UriComponentsBuilder.fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi()).build().toUri();
     }
 
-//    public static void main(String[] args) throws Exception {
-//        System.out.println("Inside main");
-//
-//        CaseData caseData = CaseData.builder()
-//                .pbaNumber("PBA0072626")
-//                .divorceCaseNumber("Divorce1")
-//                .solicitorReference("Sol1")
-//                .solicitorFirm("Sol Firm")
-//                .feeCode("FEE0640")
-//                .feeDescription("finrem")
-//                .amountToPay("9373")
-//                .feeVersion("v1")
-//                .build();
-//
-//        PaymentRequest pbaAccount = buildPaymentRequest(caseData);
-//        System.out.println("pbaAccount  = " + pbaAccount);
-//
-//
-//        JsonNode jsonNode = mapper.convertValue(pbaAccount, JsonNode.class);
-//        System.out.println("jsonNode  = " + jsonNode);
-//
-//        String json = "{\"account_number\":\"PBA0072626\",\"case_reference\":\"Divorce1\",\"ccd_case_number\":null,\"customer_reference\":\"Sol1\",\"organisation_name\":\"Sol Firm\",\"amount\":9373,\"currency\":\"GBP\",\"service\":\"FINREM\",\"site_id\":\"CTSC\",\"fees\":[{\"calculated_amount\":9373,\"code\":\"FEE0640\",\"version\":\"v1\",\"volume\":1}]}\n";
-//
-//        PaymentRequest object = mapper.readValue(json, PaymentRequest.class);
-//        System.out.println("object  = " + object);
-//
-//    }
+    public static void main(String[] args) throws Exception {
+        System.out.println("Inside main");
+
+        CaseData caseData = CaseData.builder()
+                .pbaNumber("PBA0072626")
+                .divorceCaseNumber("Divorce1")
+                .solicitorReference("Sol1")
+                .solicitorFirm("Sol Firm")
+                .feeCode("FEE0640")
+                .feeDescription("finrem")
+                .amountToPay("9373")
+                .feeVersion("v1")
+                .build();
+
+        PaymentRequest pbaAccount = buildPaymentRequest(caseData);
+        System.out.println("pbaAccount  = " + pbaAccount);
+
+
+        JsonNode jsonNode = mapper.convertValue(pbaAccount, JsonNode.class);
+        System.out.println("jsonNode  = " + jsonNode);
+
+        String json = "{\"account_number\":\"PBA0072626\",\"case_reference\":\"Divorce1\",\"ccd_case_number\":null,"
+                + "\"customer_reference\":\"Sol1\",\"organisation_name\":\"Sol Firm\",\"amount\":9373,"
+                + "\"currency\":\"GBP\",\"service\":\"FINREM\",\"site_id\":\"CTSC\","
+                + "\"fees\":[{\"calculated_amount\":9373,\"code\":\"FEE0640\",\"version\":\"v1\",\"volume\":1}]}\n";
+
+        PaymentRequest object = mapper.readValue(json, PaymentRequest.class);
+        System.out.println("object  = " + object);
+
+    }
 }
