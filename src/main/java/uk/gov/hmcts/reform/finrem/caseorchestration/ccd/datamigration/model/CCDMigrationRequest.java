@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod.ProdCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 
 @Data
 @AllArgsConstructor

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.service;
 
-import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,6 +39,7 @@ public class MigrationServiceTest {
         assertThat(caseData.getApplicantFMName(), is(prodCaseData.getApplicantFMName()));
         assertThat(caseData.getAppRespondentLName(), is(prodCaseData.getAppRespondentLName()));
         assertThat(caseData.getD81Question(), is(prodCaseData.getD81Question()));
+        assertThat(caseData.getSolicitorEmail(), is(prodCaseData.getSolicitorEmail()));
 
         Address solicitorAddress = caseData.getSolicitorAddress();
         Address prodSolicitorAddress = prodCaseData.getSolicitorAddress();
@@ -49,13 +49,13 @@ public class MigrationServiceTest {
         assertThat(solicitorAddress.getPostTown(), is(prodSolicitorAddress.getPostTown()));
         assertThat(solicitorAddress.getPostCode(), is(prodSolicitorAddress.getPostCode()));
 
-        Address respondantAddress = caseData.getRespondentAddress();
-        Address prodRespSolicitorAddress = prodCaseData.getRespondentSolicitorAddress();
-        assertThat(respondantAddress.getAddressLine1(), is(prodRespSolicitorAddress.getAddressLine1()));
-        assertThat(respondantAddress.getAddressLine2(), is(prodRespSolicitorAddress.getAddressLine2()));
-        assertThat(respondantAddress.getAddressLine3(), is(prodRespSolicitorAddress.getAddressLine3()));
-        assertThat(respondantAddress.getPostTown(), is(prodRespSolicitorAddress.getPostTown()));
-        assertThat(respondantAddress.getPostCode(), is(prodRespSolicitorAddress.getPostCode()));
+        Address respondentAddress = caseData.getRespondentAddress();
+        Address prodRespondentAddress = prodCaseData.getRespondentAddress();
+        assertThat(respondentAddress.getAddressLine1(), is(prodRespondentAddress.getAddressLine1()));
+        assertThat(respondentAddress.getAddressLine2(), is(prodRespondentAddress.getAddressLine2()));
+        assertThat(respondentAddress.getAddressLine3(), is(prodRespondentAddress.getAddressLine3()));
+        assertThat(respondentAddress.getPostTown(), is(prodRespondentAddress.getPostTown()));
+        assertThat(respondentAddress.getPostCode(), is(prodRespondentAddress.getPostCode()));
     }
 
     private ProdCaseDetails setProdCaseDetails() {
@@ -72,13 +72,14 @@ public class MigrationServiceTest {
         solicitorAddress.setAddressLine2("Ilford");
         solicitorAddress.setPostCode("IG11NL");
         solicitorAddress.setPostTown("Ilford");
+        prodCaseData.setSolicitorEmail("test@test.com");
 
         Address respondentAddress = new Address();
         respondentAddress.setAddressLine1("Flat 197");
         respondentAddress.setAddressLine2("Ilford");
         respondentAddress.setPostCode("IG11NL");
         respondentAddress.setPostTown("Ilford");
-        prodCaseData.setSolicitorAddress(respondentAddress);
+        prodCaseData.setSolicitorAddress(solicitorAddress);
         prodCaseData.setRespondentAddress(respondentAddress);
 
         prodCaseData.setSolicitorAddress1("Flat 199");
