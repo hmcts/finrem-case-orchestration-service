@@ -30,12 +30,12 @@ public class MigrationServiceTest {
         assertThat(caseDetails.getCaseId(), is(prodCaseDetails.getCaseId()));
         assertThat(caseDetails.getJurisdiction(), is(prodCaseDetails.getJurisdiction()));
         assertThat(caseDetails.getState(), is(prodCaseDetails.getState()));
-        ProdCaseData prodCaseData = prodCaseDetails.getCaseData();
-        CaseData caseData = caseDetails.getCaseData();
         assertThat(caseDetails.getCaseId(), is(prodCaseDetails.getCaseId()));
         assertThat(caseDetails.getCaseId(), is(prodCaseDetails.getCaseId()));
         assertThat(caseDetails.getCaseId(), is(prodCaseDetails.getCaseId()));
 
+        ProdCaseData prodCaseData = prodCaseDetails.getCaseData();
+        CaseData caseData = caseDetails.getCaseData();
         assertThat(caseData.getApplicantFMName(), is(prodCaseData.getApplicantFMName()));
         assertThat(caseData.getAppRespondentLName(), is(prodCaseData.getAppRespondentLName()));
         assertThat(caseData.getD81Question(), is(prodCaseData.getD81Question()));
