@@ -38,10 +38,10 @@ public class CcdDataMigrationController {
     public ResponseEntity<CCDMigrationCallbackResponse> migrate(
             @RequestHeader(value = "Authorization") String authorisationToken,
             @RequestBody @ApiParam("ProdCaseData") CCDMigrationRequest ccdRequest) {
-        log.info("ccdMigrationRequest >>> case Id {}", ccdRequest.getCaseDetails().getCaseId());
+        log.info("ccdMigrationRequest >>> case Id {}", ccdRequest.getCaseDetails());
         CaseDetails migratedCaseDetails = migrationService.migrateTov1(ccdRequest.getCaseDetails());
+        log.info("migrated CaseDetails {}" , migratedCaseDetails.getCaseData());
         return ResponseEntity.ok(new CCDMigrationCallbackResponse(migratedCaseDetails.getCaseData(),
                 new ArrayList<>(), new ArrayList<>()));
     }
-
 }

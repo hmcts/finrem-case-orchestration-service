@@ -216,12 +216,12 @@ public class ProdCaseData {
     private String respondantSolicitorAddress1;
     @JsonProperty("rSolicitorAddress2")
     private String respondantSolicitorAddress2;
-    @JsonProperty("responsdantSolicitorAddress3")
+    @JsonProperty("rSolicitorAddress3")
     private String respondantSolicitorAddress3;
     @JsonProperty("rSolicitorAddress4")
-    private String responsdantSolicitorAddress4;
+    private String respondantSolicitorAddress4;
     @JsonProperty("rSolicitorAddress5")
-    private String responsdantSolicitorAddress5;
+    private String respondantSolicitorAddress5;
     @JsonProperty("rSolicitorAddress6")
-    private String responsdantSolicitorAddress6;
+    private String respondantSolicitorAddress6;
 }
