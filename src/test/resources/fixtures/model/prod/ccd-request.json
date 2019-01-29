@@ -3,8 +3,8 @@
   "event_id": "event1",
   "case_details": {
     "id" : "12345678",
-    "jurisdiction": "divorce",
-    "state": "created",
+    "jurisdiction":"divorce",
+    "state":"created",
     "case_data": {
       "PBANumber": "PBA123456",
       "d81Question": "No",
@@ -169,16 +169,8 @@
             },
             "orderRefusalJudge": "District Judge",
             "orderRefusalOther": "test1",
-            "otherHearingDetails": "test2",
             "orderRefusalJudgeName": "test3",
-            "orderRefusalNotEnough": [
-              "reason1"
-            ],
-            "estimateLengthOfHearing": "10",
-            "orderRefusalAddComments": "comment1",
-            "orderRefusalNotEnoughOther": "test",
-            "whenShouldHearingTakePlace": "today",
-            "whereShouldHearingTakePlace": "EZ801"
+            "orderRefusalAddComments": "comment1"
           }
         }
       ],

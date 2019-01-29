@@ -1,16 +1,21 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
+package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 
 import java.io.File;
 import java.sql.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.hasItems;
 
 public class CaseDataTest {
     protected CaseData data;
@@ -19,7 +24,7 @@ public class CaseDataTest {
     public void setUp() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         data = mapper.readValue(new File(getClass()
-                .getResource("/fixtures/model/case-data.json").toURI()), CaseData.class);
+                .getResource("/fixtures/model/prod/case-data.json").toURI()), CaseData.class);
     }
 
     @Test
@@ -197,20 +202,14 @@ public class CaseDataTest {
         assertThat(order.getOrderRefusal().getOrderRefusalDocs().getDocumentBinaryUrl(), is("http://doc1.binary"));
         assertThat(order.getOrderRefusal().getOrderRefusalJudge(), is("District Judge"));
         assertThat(order.getOrderRefusal().getOrderRefusalOther(), is("test1"));
-        assertThat(order.getOrderRefusal().getOtherHearingDetails(), is("test2"));
         assertThat(order.getOrderRefusal().getOrderRefusalJudgeName(), is("test3"));
-        assertThat(order.getOrderRefusal().getOrderRefusalNotEnough(), hasItems("reason1"));
-        assertThat(order.getOrderRefusal().getEstimateLengthOfHearing(), is("10"));
         assertThat(order.getOrderRefusal().getOrderRefusalAddComments(), is("comment1"));
-        assertThat(order.getOrderRefusal().getWhenShouldHearingTakePlace(), is("today"));
-        assertThat(order.getOrderRefusal().getWhereShouldHearingTakePlace(), is("EZ801"));
 
         assertThat(data.getDueDate(), is(Date.valueOf("2010-01-01")));
         assertThat(data.getIssueDate(), is(Date.valueOf("2010-01-01")));
         assertThat(data.getAssignedToJudge(), is("judge1"));
         assertThat(data.getAssignedToJudgeReason(), is("test"));
 
-        assertThat(data.getReferToJudgeDate(), is(Date.valueOf("2010-01-01")));
         assertThat(data.getReferToJudgeDate(), is(Date.valueOf("2010-01-01")));
         assertThat(data.getReferToJudgeText(), is("test"));
         assertThat(data.getReferToJudgeDateFromAwaitingResponse(), is(Date.valueOf("2010-01-01")));
@@ -249,7 +248,6 @@ public class CaseDataTest {
         assertThat(uploadOrder.getConsentOrder().getDocumentDateAdded(), is(Date.valueOf("2010-01-02")));
         assertThat(uploadOrder.getConsentOrder().getDocumentComment(), is("doc-comment"));
         assertThat(uploadOrder.getConsentOrder().getDocumentFileName(), is("file1"));
-
 
         assertThat(data.getUploadDocuments().size(), is(1));
         ConsentOrderData uploadDoc = data.getUploadDocuments().get(0);

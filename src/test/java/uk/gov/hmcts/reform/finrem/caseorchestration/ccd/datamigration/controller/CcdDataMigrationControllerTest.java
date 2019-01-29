@@ -1,102 +1,76 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod.ProdCaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.v1.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.service.MigrationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod.CCDMigrationCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod.CCDMigrationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod.CaseDetails;
 
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.io.InputStream;
 
-import java.io.File;
-
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(CcdDataMigrationController.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 public class CcdDataMigrationControllerTest {
-
-    private static final String CCD_DATA_MIGRATION_URL = "/ccd-data-migration/migrate";
-    private static final String AUTH_TOKEN = "Bearer eyJhbGJbpjciOiJIUzI1NiJ9";
-    private static final String CASE_WITH_REDUNDANT_ADDRESS_LINES =
-            "/fixtures/migration/caseWithRedundantAddressLines.json";
-    private static final String CASE_WITHOUT__REDUNDANT_ADDRESS_LINES =
-            "/fixtures/migration/caseWithRedundantAddressLines.json";
+    private static final String MIGRATE_URL = "/ccd-data-migration/migrate";
+    private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
     @Autowired
     private WebApplicationContext applicationContext;
 
-    @MockBean
-    private MigrationService migrationService;
-    private MockMvc mockMvc;
-    private ProdCaseDetails prodCaseDetails;
-    private CaseDetails caseDetails;
-    private JsonNode requestContent;
-
-    private ObjectMapper objectMapper;
-
+    private MockMvc mvc;
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private CCDMigrationRequest request;
 
     @Before
-    public void setUp() {
-        objectMapper = new ObjectMapper();
-        mockMvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
-        prodCaseDetails = new ProdCaseDetails();
-        prodCaseDetails.setCaseId("111111");
-        caseDetails = new CaseDetails();
-        caseDetails.setCaseId("111111");
+    public void setUp() throws IOException {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/ccd-migrate-request.json")) {
+            request = objectMapper.readValue(resourceAsStream, CCDMigrationRequest.class);
+        }
+    }
+
+    private String expectedCaseData() throws JsonProcessingException {
+        CaseDetails caseDetails = request.getCaseDetails();
+        String response = objectMapper.writeValueAsString(CCDMigrationCallbackResponse.builder()
+                .data(caseDetails.getCaseData()).build());
+        return response;
+    }
+
+    private void doMigrateSetup() {
+        mvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
     }
 
     @Test
-    public void shouldRemoveRedundantAddressFields_whenRedundantFieldsAreAvailable() throws Exception {
-        buildCcdRequest(CASE_WITH_REDUNDANT_ADDRESS_LINES);
-        when(migrationService.migrateTov1(any(ProdCaseDetails.class))).thenReturn(caseDetails);
-        mockMvc.perform(post(CCD_DATA_MIGRATION_URL)
-                .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
+    public void shouldDoMigration() throws Exception {
+        doMigrateSetup();
+
+        mvc.perform(post(MIGRATE_URL)
+                .content(objectMapper.writeValueAsString(request))
+                .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors", hasSize(0)))
-                .andExpect(jsonPath("$.warnings", hasSize(0)));
-        verify(migrationService, times(1)).migrateTov1(any(ProdCaseDetails.class));
-    }
-
-    @Test
-    public void shouldRemoveRedundantAddressFields_whenRedundantFieldsAreNotAvailable() throws Exception {
-        buildCcdRequest(CASE_WITHOUT__REDUNDANT_ADDRESS_LINES);
-        when(migrationService.migrateTov1(any(ProdCaseDetails.class))).thenReturn(caseDetails);
-        mockMvc.perform(post(CCD_DATA_MIGRATION_URL)
-                .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors", hasSize(0)))
-                .andExpect(jsonPath("$.warnings", hasSize(0)));
-        verify(migrationService, times(1)).migrateTov1(any(ProdCaseDetails.class));
-    }
-
-    private void buildCcdRequest(String path) throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-                .getResource(path).toURI()));
+                .andExpect(content().json(expectedCaseData()))
+                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
 
 

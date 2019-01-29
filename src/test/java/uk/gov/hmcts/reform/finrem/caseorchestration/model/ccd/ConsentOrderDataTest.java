@@ -8,6 +8,7 @@ import java.io.File;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 public class ConsentOrderDataTest extends ConsentOrderTest {
     ConsentOrderData orderData;
@@ -23,5 +24,6 @@ public class ConsentOrderDataTest extends ConsentOrderTest {
     @Test
     public void shouldCreateConsentOrderDataFromJson() {
         assertThat(orderData.getId(), is("1"));
+        assertThat(orderData.getConsentOrder(), is(notNullValue()));
     }
 }

@@ -1,17 +1,16 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.v1;
+package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderData;
-
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 
 import java.util.Date;
 import java.util.List;
@@ -19,7 +18,6 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class CaseData {
     // SOLICITOR DETAILS
     @JsonProperty("solicitorName")
@@ -46,14 +44,18 @@ public class CaseData {
     private String divorceStageReached;
     @JsonProperty("divorceUploadEvidence1")
     private CaseDocument divorceUploadEvidence1;
+    @JsonProperty("divorceDecreeNisiDate")
+    private Date divorceDecreeNisiDate;
     @JsonProperty("divorceUploadEvidence2")
     private CaseDocument divorceUploadEvidence2;
+    @JsonProperty("divorceDecreeAbsoluteDate")
+    private Date divorceDecreeAbsoluteDate;
 
     // APPLICANT’S DETAILS
-    @JsonProperty("applicantLName")
-    private String applicantLName;
     @JsonProperty("applicantFMName")
     private String applicantFMName;
+    @JsonProperty("applicantLName")
+    private String applicantLName;
 
     // RESPONDENT DETAILS
     @JsonProperty("appRespondentFMName")
@@ -131,10 +133,6 @@ public class CaseData {
     @JsonProperty("d81Respondent")
     private CaseDocument d81Respondent;
 
-    // Mini Form A
-    @JsonProperty("miniFormA")
-    private CaseDocument miniFormA;
-
     // OPTIONAL DOCUMENTS
     @JsonProperty("pensionCollection")
     private List<DocumentData> pensionCollection;
@@ -146,8 +144,6 @@ public class CaseData {
     private String helpWithFeesQuestion;
     @JsonProperty("HWFNumber")
     private String hwfNumber;
-    @JsonProperty("amountToPay")
-    private String amountToPay;
     @JsonProperty("PBANumber")
     private String pbaNumber;
     @JsonProperty("PBAreference")
@@ -176,25 +172,44 @@ public class CaseData {
     private Date dueDate;
     @JsonProperty("issueDate")
     private Date issueDate;
+
+    // ASSIGN TO JUDGE
     @JsonProperty("assignedToJudgeReason")
     private String assignedToJudgeReason;
     @JsonProperty("assignedToJudge")
     private String assignedToJudge;
 
+    // REFER TO JUDGE DETAILS
+    @JsonProperty("referToJudgeDate")
+    private Date referToJudgeDate;
     @JsonProperty("referToJudgeText")
     private String referToJudgeText;
-    @JsonProperty("referToJudgeTextFromAwaitingResponse")
-    private String referToJudgeTextFromAwaitingResponse;
+    @JsonProperty("referToJudgeDateFromOrderMade")
+    private Date referToJudgeDateFromOrderMade;
     @JsonProperty("referToJudgeTextFromOrderMade")
     private String referToJudgeTextFromOrderMade;
+    @JsonProperty("referToJudgeDateFromConsOrdApproved")
+    private Date referToJudgeDateFromConsOrdApproved;
     @JsonProperty("referToJudgeTextFromConsOrdApproved")
     private String referToJudgeTextFromConsOrdApproved;
+    @JsonProperty("referToJudgeDateFromConsOrdMade")
+    private Date referToJudgeDateFromConsOrdMade;
     @JsonProperty("referToJudgeTextFromConsOrdMade")
     private String referToJudgeTextFromConsOrdMade;
+    @JsonProperty("referToJudgeDateFromClose")
+    private Date referToJudgeDateFromClose;
     @JsonProperty("referToJudgeTextFromClose")
     private String referToJudgeTextFromClose;
+    @JsonProperty("referToJudgeDateFromAwaitingResponse")
+    private Date referToJudgeDateFromAwaitingResponse;
+    @JsonProperty("referToJudgeTextFromAwaitingResponse")
+    private String referToJudgeTextFromAwaitingResponse;
+    @JsonProperty("referToJudgeDateFromRespondToOrder")
+    private Date referToJudgeDateFromRespondToOrder;
     @JsonProperty("referToJudgeTextFromRespondToOrder")
     private String referToJudgeTextFromRespondToOrder;
+
+    // DIFFERENT DOCUMENT COLLECTIONS
     @JsonProperty("uploadConsentOrderDocuments")
     private List<ConsentOrderData> uploadConsentOrderDocuments;
     @JsonProperty("uploadOrder")
@@ -203,4 +218,8 @@ public class CaseData {
     private List<ConsentOrderData> uploadDocuments;
     @JsonProperty("generalOrderCollection")
     private List<GeneralOrderData> generalOrderCollection;
+    @JsonProperty("respondToOrderDocuments")
+    private List<RespondToOrderData> respondToOrderDocuments;
+    @JsonProperty("amendedConsentOrderCollection")
+    private List<AmendedConsentOrderData> amendedConsentOrderCollection;
 }

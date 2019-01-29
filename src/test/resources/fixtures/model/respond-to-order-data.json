@@ -1,0 +1,13 @@
+{
+  "id": "1",
+  "value": {
+    "DocumentType": "pdf",
+    "DocumentLink": {
+      "document_url": "http://doc1",
+      "document_filename": "doc1",
+      "document_binary_url": "http://doc1.binary"
+    },
+    "DocumentDateAdded": "2010-01-02",
+    "DocumentFileName": "file1"
+  }
+}
