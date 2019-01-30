@@ -1,0 +1,18 @@
+{
+  "id": "1",
+  "value": {
+    "orderRefusal": [
+      "Other"
+    ],
+    "orderRefusalDate": "2003-02-01",
+    "orderRefusalDocs": {
+      "document_url": "http://doc1",
+      "document_filename": "doc1",
+      "document_binary_url": "http://doc1.binary"
+    },
+    "orderRefusalJudge": "District Judge",
+    "orderRefusalOther": "test1",
+    "orderRefusalJudgeName": "test3",
+    "orderRefusalAddComments": "comment1"
+  }
+}

@@ -10,20 +10,20 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-public class OrderRefusalDataTest extends OrderRefusalTest {
-    OrderRefusalData orderData;
+public class RespondToOrderDataTest  extends  RespondToOrderTest {
+    RespondToOrderData orderData;
 
     @Before
     public void setUp() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         orderData = mapper.readValue(new File(getClass()
-                .getResource("/fixtures/model/order-refusal-data.json").toURI()), OrderRefusalData.class);
-        order = orderData.getOrderRefusal();
+                .getResource("/fixtures/model/respond-to-order-data.json").toURI()), RespondToOrderData.class);
+        order = orderData.getRespondToOrder();
     }
 
     @Test
-    public void shouldCreateOrderRefusalDataFromJson() {
+    public void shouldCreateAmendedConsentOrderDataFromJson() {
         assertThat(orderData.getId(), is("1"));
-        assertThat(orderData.getOrderRefusal(), is(notNullValue()));
+        assertThat(orderData.getRespondToOrder(), is(notNullValue()));
     }
 }

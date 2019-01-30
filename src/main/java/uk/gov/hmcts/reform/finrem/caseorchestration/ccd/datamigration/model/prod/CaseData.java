@@ -1,14 +1,23 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
+package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 
 import java.util.Date;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
+@NoArgsConstructor
 public class CaseData {
     // SOLICITOR DETAILS
     @JsonProperty("solicitorName")
@@ -36,17 +45,17 @@ public class CaseData {
     @JsonProperty("divorceUploadEvidence1")
     private CaseDocument divorceUploadEvidence1;
     @JsonProperty("divorceDecreeNisiDate")
-    private Date  divorceDecreeNisiDate;
+    private Date divorceDecreeNisiDate;
     @JsonProperty("divorceUploadEvidence2")
     private CaseDocument divorceUploadEvidence2;
     @JsonProperty("divorceDecreeAbsoluteDate")
-    private Date  divorceDecreeAbsoluteDate;
+    private Date divorceDecreeAbsoluteDate;
 
     // APPLICANT’S DETAILS
-    @JsonProperty("applicantLName")
-    private String applicantLName;
     @JsonProperty("applicantFMName")
     private String applicantFMName;
+    @JsonProperty("applicantLName")
+    private String applicantLName;
 
     // RESPONDENT DETAILS
     @JsonProperty("appRespondentFMName")
@@ -124,10 +133,6 @@ public class CaseData {
     @JsonProperty("d81Respondent")
     private CaseDocument d81Respondent;
 
-    // Mini Form A
-    @JsonProperty("miniFormA")
-    private CaseDocument miniFormA;
-
     // OPTIONAL DOCUMENTS
     @JsonProperty("pensionCollection")
     private List<DocumentData> pensionCollection;
@@ -139,8 +144,6 @@ public class CaseData {
     private String helpWithFeesQuestion;
     @JsonProperty("HWFNumber")
     private String hwfNumber;
-    @JsonProperty("amountToPay")
-    private String amountToPay;
     @JsonProperty("PBANumber")
     private String pbaNumber;
     @JsonProperty("PBAreference")
@@ -169,6 +172,8 @@ public class CaseData {
     private Date dueDate;
     @JsonProperty("issueDate")
     private Date issueDate;
+
+    // ASSIGN TO JUDGE
     @JsonProperty("assignedToJudgeReason")
     private String assignedToJudgeReason;
     @JsonProperty("assignedToJudge")
@@ -204,6 +209,7 @@ public class CaseData {
     @JsonProperty("referToJudgeTextFromRespondToOrder")
     private String referToJudgeTextFromRespondToOrder;
 
+    // DIFFERENT DOCUMENT COLLECTIONS
     @JsonProperty("uploadConsentOrderDocuments")
     private List<ConsentOrderData> uploadConsentOrderDocuments;
     @JsonProperty("uploadOrder")
