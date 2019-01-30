@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Fee {
+public class FeeResponse {
     @JsonProperty(value = "code")
     private String code;
     @JsonProperty(value = "description")

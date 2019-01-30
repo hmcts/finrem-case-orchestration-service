@@ -9,23 +9,23 @@ import java.math.BigDecimal;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-public class FeeTest {
-    Fee fee;
+public class FeeResponseTest {
+    FeeResponse feeResponse;
 
     @Before
     public void setUp() throws Exception {
         String json = "{ \"code\" : \"FEE0640\", \"fee_amount\" : 50, \"description\" : \"finrem\", "
                 +  "\"version\" : \"v1\" }";
         ObjectMapper mapper = new ObjectMapper();
-        fee = mapper.readValue(json, Fee.class);
+        feeResponse = mapper.readValue(json, FeeResponse.class);
     }
 
     @Test
-    public void shouldCreateFeeFromJson() {
-        assertThat(fee.getCode(), is("FEE0640"));
-        assertThat(fee.getDescription(), is("finrem"));
-        assertThat(fee.getVersion(), is("v1"));
-        assertThat(fee.getFeeAmount(), is(BigDecimal.valueOf(50)));
+    public void shouldCreateFeeResponseFromJson() {
+        assertThat(feeResponse.getCode(), is("FEE0640"));
+        assertThat(feeResponse.getDescription(), is("finrem"));
+        assertThat(feeResponse.getVersion(), is("v1"));
+        assertThat(feeResponse.getFeeAmount(), is(BigDecimal.valueOf(50)));
     }
 
 }

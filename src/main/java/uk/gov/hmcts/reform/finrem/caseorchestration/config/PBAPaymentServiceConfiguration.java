@@ -10,4 +10,6 @@ import org.springframework.stereotype.Component;
 public class PBAPaymentServiceConfiguration {
     private String url;
     private String api;
+    private String description;
+    private String siteId;
 }

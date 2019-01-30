@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-public class FeeServiceConfigurationTest extends BaseServiceTest {
+public class FeeResponseServiceConfigurationTest extends BaseServiceTest {
 
     @Autowired
     private FeeServiceConfiguration config;

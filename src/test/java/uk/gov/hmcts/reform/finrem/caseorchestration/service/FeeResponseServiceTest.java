@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.Fee;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
 import java.math.BigDecimal;
 
@@ -15,7 +15,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-public class FeeServiceTest extends BaseServiceTest {
+public class FeeResponseServiceTest extends BaseServiceTest {
 
     @Autowired
     private FeeService feeService;
@@ -26,9 +26,9 @@ public class FeeServiceTest extends BaseServiceTest {
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess("{\"code\": \"TEST\", \"fee_amount\": \"10\"}", MediaType.APPLICATION_JSON));
 
-        Fee fee = feeService.getApplicationFee();
-        assertThat(fee.getCode(), is("TEST"));
-        assertThat(fee.getFeeAmount(), is(BigDecimal.TEN));
+        FeeResponse feeResponse = feeService.getApplicationFee();
+        assertThat(feeResponse.getCode(), is("TEST"));
+        assertThat(feeResponse.getFeeAmount(), is(BigDecimal.TEN));
     }
 
     private static String toUri() {

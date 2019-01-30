@@ -15,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
@@ -78,8 +78,8 @@ public class DocumentControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
                 .andExpect(jsonPath("$.data.miniFormA.document_filename", is(DOC_NAME)))
                 .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BIN_DOC_URL)))
-                .andExpect(jsonPath("$.errors", hasSize(0)))
-                .andExpect(jsonPath("$.warnings", hasSize(0)));
+                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
 
     @Test
