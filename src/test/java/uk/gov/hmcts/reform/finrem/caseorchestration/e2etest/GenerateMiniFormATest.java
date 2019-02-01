@@ -124,6 +124,7 @@ public class GenerateMiniFormATest {
     private DocumentRequest documentRequest() {
         return DocumentRequest.builder()
                 .template(documentConfiguration.getMiniFormTemplate())
+                .fileName(documentConfiguration.getMiniFormFileName())
                 .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
                 .build();
     }
