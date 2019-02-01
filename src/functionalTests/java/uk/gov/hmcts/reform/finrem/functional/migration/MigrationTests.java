@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.functional.MigrationTests;
+package uk.gov.hmcts.reform.finrem.functional.migration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,8 +38,17 @@ public class MigrationTests extends IntegrationTestBase {
         Response response = getResponseForMigration("ccd-request.json");
 
         try {
-            fromResponse = parser.parse(response.prettyPrint().toString().replace("\\", "")).getAsJsonObject().get("data");
-            fromFile = parser.parse(utils.getJsonFromFile("ccd-request_CheckDataReturnedCorrectly.json")).getAsJsonObject().get("case_details").getAsJsonObject().get("case_data");
+            fromResponse = parser.parse(response.prettyPrint()
+                           .replace("\\", ""))
+                           .getAsJsonObject()
+                           .get("data");
+
+            fromFile = parser.parse(utils.getJsonFromFile("ccd-request_CheckDataReturnedCorrectly.json"))
+                             .getAsJsonObject()
+                             .get("case_details")
+                             .getAsJsonObject()
+                             .get("case_data");
+
             mapper = new ObjectMapper();
 
             tree1 = mapper.readTree(fromFile.getAsJsonObject().toString());
