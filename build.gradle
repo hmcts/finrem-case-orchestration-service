@@ -36,6 +36,7 @@ apply plugin: 'net.serenity-bdd.aggregator'
 apply plugin: 'jacoco'
 apply plugin: 'org.owasp.dependencycheck'
 apply plugin: 'info.solidsoft.pitest'
+apply plugin: 'net.serenity-bdd.aggregator'
 
 
 group = 'uk.gov.hmcts.reform.finrem'
@@ -68,6 +69,19 @@ sourceSets {
         }
         resources.srcDir file('src/test/functionalTest/resources')
     }
+    functionalTests {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDirs = ['src/functionalTests/java']
+
+
+        }
+        resources {
+            srcDirs = ['src/functionalTests/resources']
+        }
+
+    }
 }
 
 def versions = [
@@ -76,7 +90,8 @@ def versions = [
         commonsIo               : '2.5',
         feignHttpClient         : '9.5.1',
         wiremockVersion         : '2.8.0',
-        reformsJavaLogging      : '3.0.1'
+        reformsJavaLogging      : '3.0.1',
+        serenityCucumber        : '1.1.3'
 ]
 
 dependencies {
@@ -99,6 +114,7 @@ dependencies {
             }
 
     compile group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.feignHttpClient
+    compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '1.0.4'
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremockVersion
@@ -107,6 +123,29 @@ dependencies {
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: '1.5.2'
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '1.5.2'
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '1.0.26'
+
+
+    functionalTestsCompile group: 'junit', name: 'junit', version: versions.junit
+    functionalTestsCompile group: 'net.serenity-bdd', name: 'serenity-core', version: '2.0.11'
+    functionalTestsCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: '2.0.11'
+    functionalTestsCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '2.0.11'
+    functionalTestsCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '2.0.11'
+    functionalTestsCompile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
+    functionalTestsCompile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '1.0.4'
+    functionalTestsCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
+    functionalTestsCompile group: 'junit', name: 'junit', version: versions.junit
+    functionalTestsCompile group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber
+    functionalTestsCompile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
+    functionalTestsCompile group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    functionalTestsCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+    functionalTestsCompile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    functionalTestsCompile group: 'org.pdfbox', name: 'com.springsource.org.pdfbox', version: '0.7.3'
+    functionalTestsCompile group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
+    functionalTestsCompile(group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger)
+    functionalTestsCompile (group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger)
+    functionalTestsCompile (group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0')
+    functionalTestsCompile (group: 'com.google.code.gson', name: 'gson', version: '2.8.5')
+
 }
 def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
         '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
@@ -212,6 +251,13 @@ task functional(type: Test, description: 'Runs the smoke tests.', group: 'Verifi
     // description = "Runs functional Tests"
     testClassesDirs = sourceSets.testFunctional.output.classesDirs
     classpath = sourceSets.testFunctional.runtimeClasspath
+    finalizedBy aggregate
+}
+
+
+task functionalTests(type: Test, description : "Runs functional Tests") {
+    testClassesDirs=sourceSets.functionalTests.output.classesDirs
+    classpath=sourceSets.functionalTests.runtimeClasspath
     finalizedBy aggregate
 }
 
