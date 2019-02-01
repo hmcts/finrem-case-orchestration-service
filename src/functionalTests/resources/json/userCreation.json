@@ -1,0 +1,8 @@
+{
+    "email":"test.CaseWorker@yahoo.com",
+    "forename":"test",
+    "surname":"'CaseWorker",
+    "password":"password123",
+    "levelOfAccess":1,
+    "userGroup": {"code": "caseworker"}
+}
