@@ -20,6 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
@@ -52,7 +53,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class GenerateMiniFormATest {
 
     private static final String AUTH_TOKEN = "LIUGBYUFUYVbnvhchvUFJHVJBlBJHBUYCUV";
-    private static final String API_URL = "/case-orchestration/generate-mini-form-a";
+    private static final String API_URL = "/case-orchestration/documents/generate-mini-form-a";
     private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generatePDF";
     private static final String URL = "http://dm-store/lhjbyuivu87y989hijbb";
     private static final String BINARY_URL = "http://dm-store/lhjbyuivu87y989hijbb/binary";
@@ -64,8 +65,8 @@ public class GenerateMiniFormATest {
     @Autowired
     private MockMvc webClient;
 
-    @Value("${document.miniFormA.template}")
-    private String miniFormATemplate;
+    @Autowired
+    private DocumentConfiguration documentConfiguration;
 
     @ClassRule
     public static WireMockClassRule documentGeneratorService = new WireMockClassRule(4009);
@@ -122,7 +123,7 @@ public class GenerateMiniFormATest {
 
     private DocumentRequest documentRequest() {
         return DocumentRequest.builder()
-                .template(miniFormATemplate)
+                .template(documentConfiguration.getMiniFormTemplate())
                 .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
                 .build();
     }

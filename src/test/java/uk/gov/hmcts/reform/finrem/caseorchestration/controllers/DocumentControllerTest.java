@@ -39,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError
 public class DocumentControllerTest {
 
     private static final String AUTH_TOKEN = "Bearer eyJhbGJbpjciOiJIUzI1NiJ9";
-    private static final String GEN_DOC_URL = "/case-orchestration/generate-mini-form-a";
+    private static final String GEN_DOC_URL = "/case-orchestration/documents/generate-mini-form-a";
     private static final String DOC_URL = "http://test/file";
     private static final String BIN_DOC_URL = DOC_URL + "/binary";
     private static final String DOC_NAME = "doc_name";
