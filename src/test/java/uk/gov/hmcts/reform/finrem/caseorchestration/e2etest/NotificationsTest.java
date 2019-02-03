@@ -78,7 +78,7 @@ public class NotificationsTest {
 
     @Before
     public void setUp() throws IOException {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/fee-lookup.json")) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/notify-casedata.json")) {
             request = objectMapper.readValue(resourceAsStream, CCDRequest.class);
         }
     }
