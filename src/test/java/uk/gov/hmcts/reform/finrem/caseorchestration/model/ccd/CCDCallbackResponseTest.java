@@ -10,7 +10,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 
 public class CCDCallbackResponseTest extends CaseDataTest {
-
     protected CCDCallbackResponse ccdResponse;
 
     @Before

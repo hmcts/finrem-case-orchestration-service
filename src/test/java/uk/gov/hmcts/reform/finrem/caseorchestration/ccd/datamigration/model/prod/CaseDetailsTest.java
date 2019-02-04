@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
+package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
@@ -9,14 +9,14 @@ import java.io.File;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-public class CaseDetailsTest extends CaseDataTest {
+public class CaseDetailsTest  extends CaseDataTest {
     protected CaseDetails caseDetails;
 
     @Before
     public void setUp() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         caseDetails = mapper.readValue(new File(getClass()
-                .getResource("/fixtures/model/case-details.json").toURI()), CaseDetails.class);
+                .getResource("/fixtures/model/prod/case-details.json").toURI()), CaseDetails.class);
         data = caseDetails.getCaseData();
     }
 

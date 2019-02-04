@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
+package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
@@ -6,9 +6,9 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 public class OrderRefusalDataTest extends OrderRefusalTest {
     OrderRefusalData orderData;
@@ -17,7 +17,7 @@ public class OrderRefusalDataTest extends OrderRefusalTest {
     public void setUp() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         orderData = mapper.readValue(new File(getClass()
-                .getResource("/fixtures/model/order-refusal-data.json").toURI()), OrderRefusalData.class);
+                .getResource("/fixtures/model/prod/order-refusal-data.json").toURI()), OrderRefusalData.class);
         order = orderData.getOrderRefusal();
     }
 
@@ -26,4 +26,5 @@ public class OrderRefusalDataTest extends OrderRefusalTest {
         assertThat(orderData.getId(), is("1"));
         assertThat(orderData.getOrderRefusal(), is(notNullValue()));
     }
+
 }

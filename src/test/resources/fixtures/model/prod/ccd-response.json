@@ -171,16 +171,8 @@
           },
           "orderRefusalJudge": "District Judge",
           "orderRefusalOther": "test1",
-          "otherHearingDetails": "test2",
           "orderRefusalJudgeName": "test3",
-          "orderRefusalNotEnough": [
-            "reason1"
-          ],
-          "estimateLengthOfHearing": "10",
-          "orderRefusalAddComments": "comment1",
-          "orderRefusalNotEnoughOther": "test",
-          "whenShouldHearingTakePlace": "today",
-          "whereShouldHearingTakePlace": "EZ801"
+          "orderRefusalAddComments": "comment1"
         }
       }
     ],
