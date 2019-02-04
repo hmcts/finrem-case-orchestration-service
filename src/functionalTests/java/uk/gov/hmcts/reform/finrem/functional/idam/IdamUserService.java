@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import uk.gov.hmcts.reform.finrem.functional.domain.UserDetails;
 
-@FeignClient(name = "idam-api", url = "${auth.idam.client.baseUrl}")
+@FeignClient(name = "idam-api", url = "${idam.api.url}")
 public interface IdamUserService {
 
     @RequestMapping(method = RequestMethod.GET, value = "/details")

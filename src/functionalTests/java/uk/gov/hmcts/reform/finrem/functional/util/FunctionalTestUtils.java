@@ -18,12 +18,11 @@ import uk.gov.hmcts.reform.finrem.functional.SolCCDServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-
-import javax.annotation.PostConstruct;
 
 import static io.restassured.RestAssured.given;
 
@@ -46,9 +45,8 @@ public class FunctionalTestUtils {
     @Value("${user.id.url}")
     private String userId;
 
-    @Value("${auth.idam.client.baseUrl}")
+    @Value("${idam.api.url}")
     private String baseServiceOauth2Url = "";
-
 
 
     private String serviceToken;
@@ -75,20 +73,21 @@ public class FunctionalTestUtils {
     }
 
 
+    public Headers getNewHeaders() {
+        return Headers.headers(
+                new Header("Authorization", idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
+                new Header("Content-Type", ContentType.JSON.toString()));
+    }
+
     public Headers getHeaders() {
         return getHeaders(clientToken);
     }
 
-    public Headers getNewHeaders() {
-        return Headers.headers(
-                new Header("Authorization", idamUtils.generateUserTokenWithNoRoles(idamUserName,idamUserPassword)),
-                new Header("Content-Type", ContentType.JSON.toString()));
-    }
 
     public Headers getHeaders(String clientToken) {
         return Headers.headers(
-            new Header("Authorization", clientToken),
-            new Header("Content-Type", ContentType.JSON.toString()));
+                new Header("Authorization", clientToken),
+                new Header("Content-Type", ContentType.JSON.toString()));
     }
 
     public Headers getHeadersWithUserId() {
@@ -97,17 +96,17 @@ public class FunctionalTestUtils {
 
     private Headers getHeadersWithUserId(String serviceToken, String userId) {
         return Headers.headers(
-            new Header("ServiceAuthorization", serviceToken),
-            new Header("user-roles", "caseworker-divorce"),
-            new Header("user-id", userId));
+                new Header("ServiceAuthorization", serviceToken),
+                new Header("user-roles", "caseworker-divorce"),
+                new Header("user-id", userId));
     }
 
 
     public String downloadPdfAndParseToString(String documentUrl) {
         Response document = SerenityRest.given()
-            .relaxedHTTPSValidation()
-            .headers(getHeadersWithUserId())
-            .when().get(documentUrl).andReturn();
+                .relaxedHTTPSValidation()
+                .headers(getHeadersWithUserId())
+                .when().get(documentUrl).andReturn();
 
         return parsePDFToString(document.getBody().asInputStream());
     }
@@ -153,8 +152,8 @@ public class FunctionalTestUtils {
 
     public void createNewUser() {
         given().headers("Content-type", "application/json")
-            .relaxedHTTPSValidation()
-            .body(getJsonFromFile("userCreation.json"))
-            .post(baseServiceOauth2Url + "/testing-support/accounts");
+                .relaxedHTTPSValidation()
+                .body(getJsonFromFile("userCreation.json"))
+                .post(baseServiceOauth2Url + "/testing-support/accounts");
     }
 }

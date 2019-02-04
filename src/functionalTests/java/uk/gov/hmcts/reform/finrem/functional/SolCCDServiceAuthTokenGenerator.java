@@ -30,13 +30,13 @@ public class SolCCDServiceAuthTokenGenerator {
     @Value("${auth.idam.client.redirectUri}")
     private String redirectUri = "";
 
-    @Value("${service.name}")
+    @Value("${idam.s2s-auth.microservice}")
     private String serviceName = "";
 
     @Value("${idam.s2s-auth.url}")
     private String baseServiceAuthUrl = "";
 
-    @Value("${auth.idam.client.baseUrl}")
+    @Value("${idam.api.url}")
     private String baseServiceOauth2Url = "";
 
     @Value("${clientCode.authorization}")

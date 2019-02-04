@@ -10,7 +10,7 @@ import java.util.Base64;
 @Component
 public class IdamUtils implements IdamUserClient {
 
-    @Value("${auth.idam.client.baseUrl}")
+    @Value("${idam.api.url}")
     private String idamUserBaseUrl;
 
     @Value("${idam.whitelist.url}")
@@ -18,7 +18,7 @@ public class IdamUtils implements IdamUserClient {
 
 
 
-    @Value("${idam.auth.secret}")
+    @Value("${idam.api.secret}")
     private String idamSecret;
 
     public String generateUserTokenWithNoRoles(String username, String password) {
@@ -29,6 +29,7 @@ public class IdamUtils implements IdamUserClient {
                 .header("Authorization", authHeader)
                 .relaxedHTTPSValidation()
                 .post(idamCodeUrl());
+
         if (response.getStatusCode() >= 300) {
             throw new IllegalStateException("Token generation failed with code: " + response.getStatusCode()
                     + " body: " + response.getBody().prettyPrint());

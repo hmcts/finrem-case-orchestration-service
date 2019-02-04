@@ -2,15 +2,15 @@ package uk.gov.hmcts.reform.finrem.functional.migration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.google.gson.Gson;
-import org.json.JSONException;
-import org.json.JSONObject;
 import io.restassured.response.Response;
 import io.restassured.response.ResponseBody;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
@@ -27,7 +27,7 @@ public class MigrationTests extends IntegrationTestBase {
     private ObjectMapper mapper;
     private JsonNode tree1;
     private JsonNode tree2;
-    private  Gson gson= new Gson();
+    private Gson gson = new Gson();
 
 
     @Test
@@ -37,10 +37,10 @@ public class MigrationTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyOriginalDataisNotAffectedAfterMigration()
-    {
-       verifyOriginalDataIsNotAffected("ccd-request-solicitor-rSolicitor-address.json");
-       verifyOriginalDataIsNotAffected("ccd-request-solicitor-respondent-address.json");
+    public void verifyOriginalDataisNotAffectedAfterMigration() {
+
+        verifyOriginalDataIsNotAffected("ccd-request-solicitor-rSolicitor-address.json");
+        verifyOriginalDataIsNotAffected("ccd-request-solicitor-respondent-address.json");
 
     }
 
@@ -100,47 +100,48 @@ public class MigrationTests extends IntegrationTestBase {
     public Response getResponseForMigration(String jsonFileName) {
         return SerenityRest.given()
                 .relaxedHTTPSValidation()
-                .headers(utils.getHeaders())
+                .headers(utils.getNewHeaders())
                 .body(utils.getJsonFromFile(jsonFileName))
                 .when().post();
 
     }
 
-    public JSONObject getJsonFromFileWithPropertiesRemoved(String fileName) throws JSONException
-    {
+    public JSONObject getJsonFromFileWithPropertiesRemoved(String fileName) throws JSONException {
+
         JSONObject jo2 = new JSONObject(utils.getJsonFromFile(fileName));
 
-        try{
+        try {
 
-        jo2= (JSONObject) jo2.get("case_details");
-        jo2= (JSONObject) jo2.get("case_data");
-        jo2.remove("solicitorAddress1");
-        jo2.remove("solicitorAddress2");
-        jo2.remove("solicitorAddress3");
-        jo2.remove("solicitorAddress4");
-        jo2.remove("solicitorAddress5");
-        jo2.remove("rSolicitorAddress1");
-        jo2.remove("rSolicitorAddress2");
-        jo2.remove("rSolicitorAddress3");
-        jo2.remove("rSolicitorAddress4");
-        jo2.remove("rSolicitorAddress5");
-        jo2.remove("respondentAddress1");
-        jo2.remove("respondentAddress2");
-        jo2.remove("respondentAddress3");
-        jo2.remove("respondentAddress4");
-        jo2.remove("respondentAddress5");
+            jo2 = (JSONObject) jo2.get("case_details");
+            jo2 = (JSONObject) jo2.get("case_data");
+            jo2.remove("solicitorAddress1");
+            jo2.remove("solicitorAddress2");
+            jo2.remove("solicitorAddress3");
+            jo2.remove("solicitorAddress4");
+            jo2.remove("solicitorAddress5");
+            jo2.remove("rSolicitorAddress1");
+            jo2.remove("rSolicitorAddress2");
+            jo2.remove("rSolicitorAddress3");
+            jo2.remove("rSolicitorAddress4");
+            jo2.remove("rSolicitorAddress5");
+            jo2.remove("respondentAddress1");
+            jo2.remove("respondentAddress2");
+            jo2.remove("respondentAddress3");
+            jo2.remove("respondentAddress4");
+            jo2.remove("respondentAddress5");
 
-    } catch (Throwable t) {
-        throw new Error(t);
-    }
+        } catch (Throwable t) {
+            throw new Error(t);
+        }
         return jo2;
     }
 
 
-// "estimateLengthOfHearing": "10","orderRefusalNotEnough": ["reason1"],,
-//            "orderRefusalNotEnoughOther": "test",
-//            "whenShouldHearingTakePlace": "today",
-//            "whereShouldHearingTakePlace": "EZ801",            "orderRefusalOther": "test1", otherHearingDetails
+    //             "estimateLengthOfHearing": "10","orderRefusalNotEnough": ["reason1"],,
+    //            "orderRefusalNotEnoughOther": "test",
+    //            "whenShouldHearingTakePlace": "today",
+    //            "whereShouldHearingTakePlace": "EZ801",
+    //            "orderRefusalOther": "test1", otherHearingDetails
 
 }
 
