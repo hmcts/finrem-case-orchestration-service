@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.integrationTest;
+package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
