@@ -55,7 +55,6 @@ public class RejectedOrderDocumentController {
 
         caseData.getUploadOrder().add(consentOrderData);
 
-        log.info("setting case document {}", caseData.getUploadOrder());
         return ResponseEntity.ok(new CCDCallbackResponse(caseData,
                 new ArrayList<>(), new ArrayList<>()));
     }

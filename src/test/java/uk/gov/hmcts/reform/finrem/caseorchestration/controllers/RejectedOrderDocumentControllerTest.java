@@ -15,15 +15,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentService;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Date;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -36,11 +33,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BIN_DOC_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.REJECTED_ORDER_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.consentOrderData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
 
 @RunWith(SpringRunner.class)
@@ -74,7 +71,7 @@ public class RejectedOrderDocumentControllerTest {
     @Test
     public void generateConsentOrderNotApprovedSuccess() throws Exception {
         when(documentService.generateConsentOrderNotApproved(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-                .thenReturn(consentOrderData());
+                .thenReturn(consentOrderData(UUID.randomUUID().toString()));
 
         mvc.perform(post(API_URL)
                 .content(requestContent.toString())
@@ -86,25 +83,12 @@ public class RejectedOrderDocumentControllerTest {
                 .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentDateAdded", is(notNullValue())))
                 .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_url", is(DOC_URL)))
                 .andExpect(
-                        jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_filename", is(DOC_NAME)))
+                        jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_filename", is(FILE_NAME)))
                 .andExpect(
                         jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_binary_url",
-                                is(BIN_DOC_URL)))
+                                is(BINARY_URL)))
                 .andExpect(jsonPath("$.errors", hasSize(0)))
                 .andExpect(jsonPath("$.warnings", hasSize(0)));
-    }
-
-    private ConsentOrderData consentOrderData() {
-        ConsentOrder consentOrder = new ConsentOrder();
-        consentOrder.setDocumentType(REJECTED_ORDER_TYPE);
-        consentOrder.setDocumentLink(caseDocument());
-        consentOrder.setDocumentDateAdded(new Date());
-
-        ConsentOrderData consentOrderData = new ConsentOrderData();
-        consentOrderData.setId(UUID.randomUUID().toString());
-        consentOrderData.setConsentOrder(consentOrder);
-
-        return consentOrderData;
     }
 
     @Test

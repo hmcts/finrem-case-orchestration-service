@@ -21,8 +21,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BIN_DOC_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.REJECTED_ORDER_TYPE;
 
@@ -47,8 +47,8 @@ public class DocumentServiceTest {
         when(documentConfiguration.getRejectedOrderDocType()).thenReturn(REJECTED_ORDER_TYPE);
 
         Document document = new Document();
-        document.setBinaryUrl(BIN_DOC_URL);
-        document.setFileName(DOC_NAME);
+        document.setBinaryUrl(BINARY_URL);
+        document.setFileName(FILE_NAME);
         document.setUrl(DOC_URL);
 
         when(documentGeneratorClient.generatePDF(isA(DocumentRequest.class), eq(AUTH_TOKEN))).thenReturn(document);
@@ -70,8 +70,8 @@ public class DocumentServiceTest {
     }
 
     private static void doCaseDocumentAssert(CaseDocument result) {
-        assertThat(result.getDocumentFilename(), is(DOC_NAME));
+        assertThat(result.getDocumentFilename(), is(FILE_NAME));
         assertThat(result.getDocumentUrl(), is(DOC_URL));
-        assertThat(result.getDocumentBinaryUrl(), is(BIN_DOC_URL));
+        assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
     }
 }
