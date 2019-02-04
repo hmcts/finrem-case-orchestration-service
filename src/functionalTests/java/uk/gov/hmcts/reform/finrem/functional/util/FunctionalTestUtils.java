@@ -16,6 +16,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.finrem.functional.SolCCDServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration;
+import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,12 +34,22 @@ public class FunctionalTestUtils {
     @Autowired
     protected SolCCDServiceAuthTokenGenerator serviceAuthTokenGenerator;
 
+    @Autowired
+    private IdamUtils idamUtils;
+
+    @Value("${idam.username}")
+    private String idamUserName;
+
+    @Value("${idam.userpassword}")
+    private String idamUserPassword;
 
     @Value("${user.id.url}")
     private String userId;
 
     @Value("${auth.idam.client.baseUrl}")
     private String baseServiceOauth2Url = "";
+
+
 
     private String serviceToken;
     private String clientToken;
@@ -66,6 +77,12 @@ public class FunctionalTestUtils {
 
     public Headers getHeaders() {
         return getHeaders(clientToken);
+    }
+
+    public Headers getNewHeaders() {
+        return Headers.headers(
+                new Header("Authorization", idamUtils.generateUserTokenWithNoRoles(idamUserName,idamUserPassword)),
+                new Header("Content-Type", ContentType.JSON.toString()));
     }
 
     public Headers getHeaders(String clientToken) {

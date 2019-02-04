@@ -59,6 +59,7 @@
         }
       ],
       "respondentEmail": "test@test.com",
+      "respondentAddress": null,
       "respondentPhone": "9963472494",
       "appRespondentRep": "No",
       "consentOrderText": {
@@ -73,9 +74,7 @@
         "PostTown": "london",
         "AddressLine1": "line1",
         "AddressLine2": "line2",
-        "AddressLine3": "line3",
-        "AddressLine4": "line4",
-        "AddressLine5": "line5"
+        "AddressLine3": "line3"
       },
       "authorisationFirm": "test",
       "authorisationName": "test",
@@ -93,20 +92,6 @@
           }
         }
       ],
-      "respondentAddress1": "line1",
-      "respondentAddress2": "line2",
-      "respondentAddress3": "line3",
-      "respondentAddress4": "line4",
-      "respondentAddress5": "line5",
-      "respondentAddress": {
-        "County": "essex",
-        "Country": "UK",
-        "PostCode": "b1 1ab",
-        "PostTown": "london",
-        "AddressLine1": "line1",
-        "AddressLine2": "line2",
-        "AddressLine3": "line3"
-      },
       "rSolicitorName": "rSolName",
       "rSolicitorFirm": "rSolFirm",
       "rSolicitorDXnumber": "dx1",
@@ -125,9 +110,7 @@
         "PostTown": "london",
         "AddressLine1": "line1",
         "AddressLine2": "line2",
-        "AddressLine3": "line3",
-        "AddressLine4": "line4",
-        "AddressLine5": "line5"
+        "AddressLine3": "line3"
       },
       "appRespondentLName": "smith",
       "solicitorReference": "LL01",
@@ -204,17 +187,12 @@
               "document_binary_url": "http://doc1.binary"
             },
             "orderRefusalJudge": "District Judge",
-            "orderRefusalOther": "test1",
-            "otherHearingDetails": "test2",
+
             "orderRefusalJudgeName": "test3",
-            "orderRefusalNotEnough": [
-              "reason1"
-            ],
-            "estimateLengthOfHearing": "10",
-            "orderRefusalAddComments": "comment1",
-            "orderRefusalNotEnoughOther": "test",
-            "whenShouldHearingTakePlace": "today",
-            "whereShouldHearingTakePlace": "EZ801"
+            "orderRefusalOther" : "test4",
+
+
+            "orderRefusalAddComments": "comment1"
           }
         }
       ],

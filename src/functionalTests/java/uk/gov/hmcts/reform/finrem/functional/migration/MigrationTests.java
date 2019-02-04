@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.google.gson.Gson;
+import org.json.JSONException;
+import org.json.JSONObject;
 import io.restassured.response.Response;
 import io.restassured.response.ResponseBody;
 import net.serenitybdd.junit.runners.SerenityRunner;
@@ -24,30 +27,34 @@ public class MigrationTests extends IntegrationTestBase {
     private ObjectMapper mapper;
     private JsonNode tree1;
     private JsonNode tree2;
+    private  Gson gson= new Gson();
 
 
     @Test
     public void verifyMigrationRequestShouldReturnOkResponseCode() {
 
-        validatePostmigrationSuccess("ccd-request.json");
+        validatePostmigrationSuccess("ccd-request-solicitor-rSolicitor-address.json");
     }
 
     @Test
-    public void verifyOriginalDataIsNotAffected() {
+    public void verifyOriginalDataisNotAffectedAfterMigration()
+    {
+       verifyOriginalDataIsNotAffected("ccd-request-solicitor-rSolicitor-address.json");
+       verifyOriginalDataIsNotAffected("ccd-request-solicitor-respondent-address.json");
 
-        Response response = getResponseForMigration("ccd-request.json");
+    }
+
+    public void verifyOriginalDataIsNotAffected(String fileName) {
+
+        Response response = getResponseForMigration(fileName);
 
         try {
             fromResponse = parser.parse(response.prettyPrint()
-                           .replace("\\", ""))
-                           .getAsJsonObject()
-                           .get("data");
+                    .replace("\\", ""))
+                    .getAsJsonObject()
+                    .get("data");
 
-            fromFile = parser.parse(utils.getJsonFromFile("ccd-request_CheckDataReturnedCorrectly.json"))
-                             .getAsJsonObject()
-                             .get("case_details")
-                             .getAsJsonObject()
-                             .get("case_data");
+            fromFile = gson.fromJson(getJsonFromFileWithPropertiesRemoved(fileName).toString(), JsonElement.class);
 
             mapper = new ObjectMapper();
 
@@ -71,11 +78,11 @@ public class MigrationTests extends IntegrationTestBase {
         assertFalse(bodyAsString.contains("solicitorAddress1"));
         assertFalse(bodyAsString.contains("solicitorAddress2"));
         assertFalse(bodyAsString.contains("solicitorAddress3"));
-        assertFalse(bodyAsString.contains("solicitorAddress3"));
-        assertFalse(bodyAsString.contains("solicitorAddress3"));
+        assertFalse(bodyAsString.contains("solicitorAddress4"));
+        assertFalse(bodyAsString.contains("solicitorAddress5"));
 
         assertFalse(bodyAsString.contains("rSolicitorAddress1"));
-        assertFalse(bodyAsString.contains("rSolicitorAddres2"));
+        assertFalse(bodyAsString.contains("rSolicitorAddress2"));
         assertFalse(bodyAsString.contains("rSolicitorAddress3"));
         assertFalse(bodyAsString.contains("rSolicitorAddress4"));
         assertFalse(bodyAsString.contains("rSolicitorAddress5"));
@@ -98,6 +105,42 @@ public class MigrationTests extends IntegrationTestBase {
                 .when().post();
 
     }
+
+    public JSONObject getJsonFromFileWithPropertiesRemoved(String fileName) throws JSONException
+    {
+        JSONObject jo2 = new JSONObject(utils.getJsonFromFile(fileName));
+
+        try{
+
+        jo2= (JSONObject) jo2.get("case_details");
+        jo2= (JSONObject) jo2.get("case_data");
+        jo2.remove("solicitorAddress1");
+        jo2.remove("solicitorAddress2");
+        jo2.remove("solicitorAddress3");
+        jo2.remove("solicitorAddress4");
+        jo2.remove("solicitorAddress5");
+        jo2.remove("rSolicitorAddress1");
+        jo2.remove("rSolicitorAddress2");
+        jo2.remove("rSolicitorAddress3");
+        jo2.remove("rSolicitorAddress4");
+        jo2.remove("rSolicitorAddress5");
+        jo2.remove("respondentAddress1");
+        jo2.remove("respondentAddress2");
+        jo2.remove("respondentAddress3");
+        jo2.remove("respondentAddress4");
+        jo2.remove("respondentAddress5");
+
+    } catch (Throwable t) {
+        throw new Error(t);
+    }
+        return jo2;
+    }
+
+
+// "estimateLengthOfHearing": "10","orderRefusalNotEnough": ["reason1"],,
+//            "orderRefusalNotEnoughOther": "test",
+//            "whenShouldHearingTakePlace": "today",
+//            "whereShouldHearingTakePlace": "EZ801",            "orderRefusalOther": "test1", otherHearingDetails
 
 }
 
