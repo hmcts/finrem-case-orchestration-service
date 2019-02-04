@@ -216,7 +216,3 @@ task functional(type: Test, description: 'Runs the functional tests.', group: 'V
     classpath = sourceSets.testFunctional.runtimeClasspath
     finalizedBy aggregate
 }
-
-
-task integrationTest(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
-}
