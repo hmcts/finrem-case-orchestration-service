@@ -108,8 +108,7 @@ dependencies {
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '1.5.2'
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '1.0.26'
 }
-def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
-        '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
+def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
         '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
         '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication'
  ]
@@ -208,7 +207,7 @@ bootJar {
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
 }
 
-task functional(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
+task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
     // description = "Runs functional Tests"
     testClassesDirs = sourceSets.testFunctional.output.classesDirs
     classpath = sourceSets.testFunctional.runtimeClasspath
