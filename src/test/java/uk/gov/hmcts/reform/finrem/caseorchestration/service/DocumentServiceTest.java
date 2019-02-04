@@ -15,19 +15,19 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BIN_DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.REJECTED_ORDER_TYPE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DocumentServiceTest {
-
-    private static final String AUTH_TOKEN = "Bearer nkjnYBJB";
-    private static final String URL = "http://url/file";
-    private static final String BINARY_URL = URL + "/BINARY";
-    private static final String FILE_NAME = "file";
-    public static final String DOC_TYPE = "oder_type";
 
     @Mock
     private DocumentGeneratorClient documentGeneratorClient;
@@ -44,12 +44,12 @@ public class DocumentServiceTest {
         when(documentConfiguration.getMiniFormFileName()).thenReturn("file_name");
         when(documentConfiguration.getRejectedOrderTemplate()).thenReturn("test_template");
         when(documentConfiguration.getRejectedOrderFileName()).thenReturn("test_file");
-        when(documentConfiguration.getRejectedOrderDocType()).thenReturn(DOC_TYPE);
+        when(documentConfiguration.getRejectedOrderDocType()).thenReturn(REJECTED_ORDER_TYPE);
 
         Document document = new Document();
-        document.setBinaryUrl(BINARY_URL);
-        document.setFileName(FILE_NAME);
-        document.setUrl(URL);
+        document.setBinaryUrl(BIN_DOC_URL);
+        document.setFileName(DOC_NAME);
+        document.setUrl(DOC_URL);
 
         when(documentGeneratorClient.generatePDF(isA(DocumentRequest.class), eq(AUTH_TOKEN))).thenReturn(document);
     }
@@ -62,14 +62,16 @@ public class DocumentServiceTest {
     @Test
     public void generateConsentOrderNotApproved() {
         ConsentOrderData consentOrderData = service.generateConsentOrderNotApproved(AUTH_TOKEN, new CaseDetails());
-        assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(DOC_TYPE));
+        assertThat(consentOrderData.getId(), is(notNullValue()));
+        assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(REJECTED_ORDER_TYPE));
+        assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));
 
         doCaseDocumentAssert(consentOrderData.getConsentOrder().getDocumentLink());
     }
 
     private static void doCaseDocumentAssert(CaseDocument result) {
-        assertThat(result.getDocumentFilename(), is(FILE_NAME));
-        assertThat(result.getDocumentUrl(), is(URL));
-        assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
+        assertThat(result.getDocumentFilename(), is(DOC_NAME));
+        assertThat(result.getDocumentUrl(), is(DOC_URL));
+        assertThat(result.getDocumentBinaryUrl(), is(BIN_DOC_URL));
     }
 }

@@ -42,7 +42,7 @@ public class RejectedOrderDocumentController {
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
             })
-    public ResponseEntity<CCDCallbackResponse> generateMiniFormA(
+    public ResponseEntity<CCDCallbackResponse> generateConsentOrderNotApproved(
             @RequestHeader(value = "Authorization") String authorisationToken,
             @RequestBody @ApiParam("CaseData") CCDRequest request) {
 

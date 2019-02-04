@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
 import java.util.Collections;
+import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class DocumentService {
@@ -43,9 +45,11 @@ public class DocumentService {
 
         ConsentOrder consentOrder = new ConsentOrder();
         consentOrder.setDocumentType(documentConfiguration.getRejectedOrderDocType());
+        consentOrder.setDocumentDateAdded(new Date());
         consentOrder.setDocumentLink(caseDocument);
 
         ConsentOrderData consentOrderData = new ConsentOrderData();
+        consentOrderData.setId(UUID.randomUUID().toString());
         consentOrderData.setConsentOrder(consentOrder);
 
         return consentOrderData;
