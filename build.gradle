@@ -205,6 +205,9 @@ bootJar {
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
+    useJUnit {
+        includeCategories 'uk.gov.hmcts.reform.finrem.caseorchestration.smoketest.SmokeTest'
+    }
 }
 
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
