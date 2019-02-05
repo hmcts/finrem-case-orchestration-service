@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,7 +36,7 @@ public class NotificationsControllerTest {
     private static final String ASSIGN_TO_JUDGE_URL = "/case-orchestration/notify/assign-to-judge";
     private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
     private static final String CONSENT_ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/"
-                                                        + "consent-order-not-approved";
+            + "consent-order-not-approved";
     private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/"
             + "consent-order-available";
 
@@ -68,6 +69,19 @@ public class NotificationsControllerTest {
     }
 
     @Test
+    public void shouldNotSendHwfSuccessfulConfirmationEmail() throws Exception {
+        buildRequest();
+        mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verifyNoMoreInteractions(notificationService);
+
+    }
+
+    @Test
     public void sendAssignToJudgeConfirmationEmail() throws Exception {
         buildCcdRequest();
         mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
@@ -78,6 +92,19 @@ public class NotificationsControllerTest {
 
         verify(notificationService, times(1))
                 .sendAssignToJudgeConfirmationEmail(any(CCDRequest.class), any());
+
+    }
+
+    @Test
+    public void shouldNotSendAssignToJudgeConfirmationEmail() throws Exception {
+        buildRequest();
+        mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verifyNoMoreInteractions(notificationService);
 
     }
 
@@ -96,6 +123,18 @@ public class NotificationsControllerTest {
     }
 
     @Test
+    public void shouldNotSendConsentOrderMadeConfirmationEmail() throws Exception {
+        buildRequest();
+        mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verifyNoMoreInteractions(notificationService);
+    }
+
+    @Test
     public void sendConsentOrderNotApprovedEmail() throws Exception {
         buildCcdRequest();
         mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
@@ -106,6 +145,19 @@ public class NotificationsControllerTest {
 
         verify(notificationService, times(1))
                 .sendConsentOrderNotApprovedEmail(any(CCDRequest.class), any());
+
+    }
+
+    @Test
+    public void shouldNotSendConsentOrderNotApprovedEmail() throws Exception {
+        buildRequest();
+        mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verifyNoMoreInteractions(notificationService);
 
     }
 
@@ -123,7 +175,27 @@ public class NotificationsControllerTest {
 
     }
 
+    @Test
+    public void shouldNotSendConsentOrderAvailableEmail() throws Exception {
+        buildRequest();
+        mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+                .sendConsentOrderAvailableEmail(any(CCDRequest.class), any());
+
+    }
+
     private void buildCcdRequest() throws IOException, URISyntaxException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/ccd-request-with-solicitor-email-consent.json").toURI()));
+    }
+
+    private void buildRequest() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/model/ccd-request.json").toURI()));
