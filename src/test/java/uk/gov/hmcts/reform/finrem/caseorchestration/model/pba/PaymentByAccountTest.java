@@ -8,7 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 
 public class PaymentByAccountTest {
-    PaymentByAccount pba;
+    private PaymentByAccount pba;
 
     @Before
     public void setUp() throws Exception {

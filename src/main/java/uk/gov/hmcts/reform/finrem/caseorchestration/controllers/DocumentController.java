@@ -48,7 +48,6 @@ public class DocumentController {
         CaseData caseData = request.getCaseDetails().getCaseData();
         caseData.setMiniFormA(document);
 
-        return ResponseEntity.ok(new CCDCallbackResponse(caseData,
-                new ArrayList<>(), new ArrayList<>()));
+        return ResponseEntity.ok(new CCDCallbackResponse(caseData, new ArrayList<>(), new ArrayList<>()));
     }
 }

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -42,17 +41,7 @@ public class DocumentService {
                 generateDocument(authorisationToken, caseDetails,
                         documentConfiguration.getRejectedOrderTemplate(),
                         documentConfiguration.getRejectedOrderFileName());
-
-        ConsentOrder consentOrder = new ConsentOrder();
-        consentOrder.setDocumentType(documentConfiguration.getRejectedOrderDocType());
-        consentOrder.setDocumentDateAdded(new Date());
-        consentOrder.setDocumentLink(caseDocument);
-
-        ConsentOrderData consentOrderData = new ConsentOrderData();
-        consentOrderData.setId(UUID.randomUUID().toString());
-        consentOrderData.setConsentOrder(consentOrder);
-
-        return consentOrderData;
+        return consentOrderData(caseDocument);
     }
 
     private CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
@@ -67,6 +56,19 @@ public class DocumentService {
                         authorisationToken);
 
         return caseDocument(miniFormA);
+    }
+
+    private ConsentOrderData consentOrderData(CaseDocument caseDocument) {
+        ConsentOrder consentOrder = new ConsentOrder();
+        consentOrder.setDocumentType(documentConfiguration.getRejectedOrderDocType());
+        consentOrder.setDocumentDateAdded(new Date());
+        consentOrder.setDocumentLink(caseDocument);
+
+        ConsentOrderData consentOrderData = new ConsentOrderData();
+        consentOrderData.setId(UUID.randomUUID().toString());
+        consentOrderData.setConsentOrder(consentOrder);
+
+        return consentOrderData;
     }
 
     private CaseDocument caseDocument(Document miniFormA) {

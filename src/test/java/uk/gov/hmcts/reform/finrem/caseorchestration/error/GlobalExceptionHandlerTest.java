@@ -10,7 +10,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.STATUS_COD
 
 public class GlobalExceptionHandlerTest {
 
-    GlobalExceptionHandler exceptionHandler = new GlobalExceptionHandler();
+    private GlobalExceptionHandler exceptionHandler = new GlobalExceptionHandler();
 
     @Test
     public void handleFeignException() {
