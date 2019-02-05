@@ -184,8 +184,7 @@ public class NotificationsControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
-        verify(notificationService, times(1))
-                .sendConsentOrderAvailableEmail(any(CCDRequest.class), any());
+        verifyNoMoreInteractions(notificationService);
 
     }
 
