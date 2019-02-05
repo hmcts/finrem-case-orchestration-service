@@ -9,7 +9,6 @@ import io.restassured.response.Response;
 import io.restassured.response.ResponseBody;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,7 +23,7 @@ public class MigrationTests extends IntegrationTestBase {
     private JsonParser parser = new JsonParser();
     private JsonElement fromFile;
     private JsonElement fromResponse;
-    private ObjectMapper mapper;
+    private ObjectMapper mapper = new ObjectMapper();
     private JsonNode tree1;
     private JsonNode tree2;
     private Gson gson = new Gson();
@@ -33,20 +32,23 @@ public class MigrationTests extends IntegrationTestBase {
     @Test
     public void verifyMigrationRequestShouldReturnOkResponseCode() {
 
-        validatePostmigrationSuccess("ccd-request-solicitor-rSolicitor-address.json");
+        validatePostMigrationSuccess("ccd-request-solicitor-rSolicitor-address.json");
     }
 
     @Test
     public void verifyOriginalDataisNotAffectedAfterMigration() {
 
-        verifyOriginalDataIsNotAffected("ccd-request-solicitor-rSolicitor-address.json");
-        verifyOriginalDataIsNotAffected("ccd-request-solicitor-respondent-address.json");
+        verifyOriginalDataIsNotAffected("ccd-request-solicitor-rSolicitor-address.json",
+                "ccd-request-solicitor-rSolicitor-address_ValidateOutput.json");
+
+        verifyOriginalDataIsNotAffected("ccd-request-solicitor-respondent-address.json",
+                "ccd-request-solicitor-respondent-address_ValidateOutput.json");
 
     }
 
-    public void verifyOriginalDataIsNotAffected(String fileName) {
+    public void verifyOriginalDataIsNotAffected(String originalFileName, String expectedOutputFileName) {
 
-        Response response = getResponseForMigration(fileName);
+        Response response = getResponseForMigration(originalFileName);
 
         try {
             fromResponse = parser.parse(response.prettyPrint()
@@ -54,9 +56,11 @@ public class MigrationTests extends IntegrationTestBase {
                     .getAsJsonObject()
                     .get("data");
 
-            fromFile = gson.fromJson(getJsonFromFileWithPropertiesRemoved(fileName).toString(), JsonElement.class);
+            JSONObject jo2 = new JSONObject(utils.getJsonFromFile(expectedOutputFileName));
+            jo2 = (JSONObject) jo2.get("case_details");
+            jo2 = (JSONObject) jo2.get("case_data");
 
-            mapper = new ObjectMapper();
+            fromFile = gson.fromJson(jo2.toString(), JsonElement.class);
 
             tree1 = mapper.readTree(fromFile.getAsJsonObject().toString());
             tree2 = mapper.readTree(fromResponse.getAsJsonObject().toString());
@@ -69,7 +73,7 @@ public class MigrationTests extends IntegrationTestBase {
     }
 
 
-    public void validatePostmigrationSuccess(String jsonFileName) {
+    public void validatePostMigrationSuccess(String jsonFileName) {
 
         Response response = getResponseForMigration(jsonFileName);
         ResponseBody body = response.getBody();
@@ -105,43 +109,6 @@ public class MigrationTests extends IntegrationTestBase {
                 .when().post();
 
     }
-
-    public JSONObject getJsonFromFileWithPropertiesRemoved(String fileName) throws JSONException {
-
-        JSONObject jo2 = new JSONObject(utils.getJsonFromFile(fileName));
-
-        try {
-
-            jo2 = (JSONObject) jo2.get("case_details");
-            jo2 = (JSONObject) jo2.get("case_data");
-            jo2.remove("solicitorAddress1");
-            jo2.remove("solicitorAddress2");
-            jo2.remove("solicitorAddress3");
-            jo2.remove("solicitorAddress4");
-            jo2.remove("solicitorAddress5");
-            jo2.remove("rSolicitorAddress1");
-            jo2.remove("rSolicitorAddress2");
-            jo2.remove("rSolicitorAddress3");
-            jo2.remove("rSolicitorAddress4");
-            jo2.remove("rSolicitorAddress5");
-            jo2.remove("respondentAddress1");
-            jo2.remove("respondentAddress2");
-            jo2.remove("respondentAddress3");
-            jo2.remove("respondentAddress4");
-            jo2.remove("respondentAddress5");
-
-        } catch (Throwable t) {
-            throw new Error(t);
-        }
-        return jo2;
-    }
-
-
-    //             "estimateLengthOfHearing": "10","orderRefusalNotEnough": ["reason1"],,
-    //            "orderRefusalNotEnoughOther": "test",
-    //            "whenShouldHearingTakePlace": "today",
-    //            "whereShouldHearingTakePlace": "EZ801",
-    //            "orderRefusalOther": "test1", otherHearingDetails
 
 }
 
