@@ -61,15 +61,7 @@ sourceSets {
         resources.srcDir 'src/test/resources'
     }
 
-    testFunctional {
-        java {
-            compileClasspath += main.output
-            runtimeClasspath += main.output
-            srcDir file('src/test/functionalTest/java')
-        }
-        resources.srcDir file('src/test/functionalTest/resources')
-    }
-    functionalTests {
+    functionalTest {
         java {
             compileClasspath += main.output + test.output
             runtimeClasspath += main.output + test.output
@@ -118,33 +110,25 @@ dependencies {
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremockVersion
-
-    testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-core', version: '1.5.2'
-    testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: '1.5.2'
-    testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '1.5.2'
-    testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '1.0.26'
-
-
-    functionalTestsCompile group: 'junit', name: 'junit', version: versions.junit
-    functionalTestsCompile group: 'net.serenity-bdd', name: 'serenity-core', version: '2.0.11'
-    functionalTestsCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: '2.0.11'
-    functionalTestsCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '2.0.11'
-    functionalTestsCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '2.0.11'
-    functionalTestsCompile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
-    functionalTestsCompile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '1.0.4'
-    functionalTestsCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
-    functionalTestsCompile group: 'junit', name: 'junit', version: versions.junit
-    functionalTestsCompile group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber
-    functionalTestsCompile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
-    functionalTestsCompile group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-    functionalTestsCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    functionalTestsCompile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-    functionalTestsCompile group: 'org.pdfbox', name: 'com.springsource.org.pdfbox', version: '0.7.3'
-    functionalTestsCompile group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
-    functionalTestsCompile(group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger)
-    functionalTestsCompile (group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger)
-    functionalTestsCompile (group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0')
-    functionalTestsCompile (group: 'com.google.code.gson', name: 'gson', version: '2.8.5')
+    
+    functionalTestCompile group: 'net.serenity-bdd', name: 'serenity-core', version: '2.0.11'
+    functionalTestCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: '2.0.11'
+    functionalTestCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '2.0.11'
+    functionalTestCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '2.0.11'
+    functionalTestCompile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
+    functionalTestCompile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '1.0.4'
+    functionalTestCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
+    functionalTestCompile group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber
+    functionalTestCompile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
+    functionalTestCompile group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    functionalTestCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+    functionalTestCompile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    functionalTestCompile group: 'org.pdfbox', name: 'com.springsource.org.pdfbox', version: '0.7.3'
+    functionalTestCompile group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
+    functionalTestCompile(group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger)
+    functionalTestCompile (group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger)
+    functionalTestCompile (group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0')
+    functionalTestCompile (group: 'com.google.code.gson', name: 'gson', version: '2.8.5')
 
 }
 def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
@@ -247,17 +231,10 @@ bootJar {
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
 }
 
-task functional(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
-    // description = "Runs functional Tests"
-    testClassesDirs = sourceSets.testFunctional.output.classesDirs
-    classpath = sourceSets.testFunctional.runtimeClasspath
-    finalizedBy aggregate
-}
 
-
-task functionalTests(type: Test, description : "Runs functional Tests") {
-    testClassesDirs=sourceSets.functionalTests.output.classesDirs
-    classpath=sourceSets.functionalTests.runtimeClasspath
+task functionalTest(type: Test, description : "Runs functional Tests") {
+    testClassesDirs=sourceSets.functionalTest.output.classesDirs
+    classpath=sourceSets.functionalTest.runtimeClasspath
     finalizedBy aggregate
 }
 
