@@ -33,12 +33,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class CcdDataMigrationControllerTest {
     private static final String MIGRATE_URL = "/ccd-data-migration/migrate";
     private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
+    private static ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     private WebApplicationContext applicationContext;
 
     private MockMvc mvc;
-    private ObjectMapper objectMapper = new ObjectMapper();
     private CCDMigrationRequest request;
 
     @Before
@@ -50,9 +50,8 @@ public class CcdDataMigrationControllerTest {
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
-        String response = objectMapper.writeValueAsString(CCDMigrationCallbackResponse.builder()
+        return objectMapper.writeValueAsString(CCDMigrationCallbackResponse.builder()
                 .data(caseDetails.getCaseData()).build());
-        return response;
     }
 
     private void doMigrateSetup() {
