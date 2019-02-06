@@ -35,7 +35,9 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
-        notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, userToken);
+        if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
+            notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, userToken);
+        }
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
@@ -49,7 +51,9 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
-        notificationService.sendAssignToJudgeConfirmationEmail(ccdRequest, userToken);
+        if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
+            notificationService.sendAssignToJudgeConfirmationEmail(ccdRequest, userToken);
+        }
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
@@ -63,7 +67,9 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
-        notificationService.sendConsentOrderMadeConfirmationEmail(ccdRequest, userToken);
+        if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
+            notificationService.sendConsentOrderMadeConfirmationEmail(ccdRequest, userToken);
+        }
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
@@ -77,7 +83,9 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
-        notificationService.sendConsentOrderNotApprovedEmail(ccdRequest, userToken);
+        if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
+            notificationService.sendConsentOrderNotApprovedEmail(ccdRequest, userToken);
+        }
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
@@ -91,8 +99,14 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
-        notificationService.sendConsentOrderAvailableEmail(ccdRequest, userToken);
+        if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
+            notificationService.sendConsentOrderAvailableEmail(ccdRequest, userToken);
+        }
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
+    }
+
+    private boolean isSolicitorAgreedToReceiveEmails(CCDRequest ccdRequest) {
+        return "Yes".equalsIgnoreCase(ccdRequest.getCaseDetails().getCaseData().getSolicitorAgreeToReceiveEmails());
     }
 }
