@@ -8,7 +8,7 @@ data:
   AUTH_PROVIDER_SERVICE_CLIENT_BASEURL : "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
   SLOT : "PRODUCTION"
   REFORM_ENVIRONMENT : "aat"
-  REFORM_SERVICE_NAME : "cp"
+  REFORM_SERVICE_NAME : "cos"
   REFORM_TEAM : "finrem"
   ENVIRONMENT_NAME : "aat"
   VAULTNAME : "finrem-aat"
