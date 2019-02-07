@@ -96,8 +96,8 @@ dependencies {
     apt group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
     compile group: 'commons-io', name: 'commons-io', version: versions.commonsIo
     compile(group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger)
-    compile(group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger)
-    compile(group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.0.1.RELEASE')
+    compile (group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger)
+    compile (group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.0.1.RELEASE')
             {
                 exclude group: 'io.reactivex', module: 'io.reactivex'
                 exclude group: 'io.reactivex', module: 'rxnetty'
@@ -106,10 +106,9 @@ dependencies {
             }
 
     compile group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.feignHttpClient
-    compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '1.0.4'
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
-    testCompile group: 'com.github.tomakehurst', name: 'wiremock', version: versions.wiremockVersion
+    testCompile group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremockVersion
 
 
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
@@ -127,11 +126,10 @@ dependencies {
     testFunctionalCompile (group: 'com.google.code.gson', name: 'gson', version: '2.8.5')
 
 }
-def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication'
-]
+def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
+        '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
+        '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication'
+ ]
 
 sonarqube {
     println "echo sonarqube"
@@ -225,6 +223,9 @@ bootJar {
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
+    useJUnit {
+        includeCategories 'uk.gov.hmcts.reform.finrem.caseorchestration.smoketest.SmokeTest'
+    }
 }
 
 
@@ -232,8 +233,4 @@ task testFunctional(type: Test, description: "Runs functional Tests") {
     testClassesDirs = sourceSets.testFunctional.output.classesDirs
     classpath = sourceSets.testFunctional.runtimeClasspath
     finalizedBy aggregate
-}
-
-
-task integrationTest(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
 }
