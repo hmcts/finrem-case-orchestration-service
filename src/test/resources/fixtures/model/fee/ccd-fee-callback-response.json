@@ -1,0 +1,27 @@
+{
+  "errors":[
+    "error1",
+    "error2"
+  ],
+  "warnings":[
+    "warning1",
+    "warning2"
+  ],
+  "data":{
+    "amountToPay":"1000",
+    "orderSummary":{
+      "PaymentReference":"Ref1",
+      "PaymentTotal":"1000",
+      "Fees":[
+        {
+          "value":{
+            "FeeDescription":"desc",
+            "FeeVersion":"v1",
+            "FeeCode":"code1",
+            "FeeAmount":"1000"
+          }
+        }
+      ]
+    }
+  }
+}

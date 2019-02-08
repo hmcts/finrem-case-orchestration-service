@@ -20,5 +20,4 @@ public class PBAPaymentConfirmationServiceTest extends BaseServiceTest {
                 containsString("Your application has now been submitted to the Court."));
     }
 
-
 }

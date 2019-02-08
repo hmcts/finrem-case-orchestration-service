@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.error;
 public class InvalidCaseDataException extends RuntimeException {
 
     private static final long serialVersionUID = 0;
-    private int status;
+    private final int status;
 
     public InvalidCaseDataException(int status, String message) {
         super(message);

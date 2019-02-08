@@ -56,31 +56,28 @@ public class FeeLookupController extends AbstractBaseController {
     }
 
     private OrderSummary createOrderSummary(CaseData caseRequestData, FeeItem feeItem) {
-        OrderSummary orderSummary = OrderSummary.builder()
+        return OrderSummary.builder()
                 .paymentTotal(feeItem.getValue().getFeeAmount())
                 .paymentReference(caseRequestData.getPbaReference())
                 .fees(ImmutableList.of(feeItem))
                 .build();
-        return orderSummary;
     }
 
     private FeeItem createFeeItem(FeeResponse feeResponse) {
         FeeValue feeValue = createFeeValue(feeResponse);
-        FeeItem feeItem = FeeItem.builder()
+        return FeeItem.builder()
                 .value(feeValue)
                 .build();
-        return feeItem;
     }
 
     private FeeValue createFeeValue(FeeResponse feeResponse) {
         String amountToPay = String.valueOf(feeResponse.getFeeAmount().multiply(BigDecimal.valueOf(100)).longValue());
-        FeeValue feeValue = FeeValue.builder()
+        return FeeValue.builder()
                 .feeCode(feeResponse.getCode())
                 .feeAmount(amountToPay)
                 .feeVersion(feeResponse.getVersion())
                 .feeDescription(feeResponse.getDescription())
                 .build();
-        return feeValue;
     }
 
 }

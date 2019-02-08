@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '2.0.5.RELEASE'
+        springBootVersion = '2.0.8.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -74,11 +74,10 @@ def versions = [
         lombokVersion           : '1.18.0',
         springfoxSwagger        : '2.9.2',
         commonsIo               : '2.5',
+        feignHttpClient         : '9.5.1',
         wiremockVersion         : '2.8.0',
-        reformsJavaLogging      : '3.0.1',
-        serviceTokenGenerator   : '1.0.4',
-        springRetry             : '1.2.1.RELEASE'
-
+        reformsJavaLogging      : '4.0.1',
+        serviceTokenGenerator   : '1.0.4'
 ]
 
 dependencies {
@@ -92,9 +91,16 @@ dependencies {
     compile group: 'commons-io', name: 'commons-io', version: versions.commonsIo
     compile(group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger)
     compile (group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger)
-    compile group: 'org.springframework.retry', name: 'spring-retry', version: versions.springRetry
+    compile (group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.0.1.RELEASE')
+            {
+                exclude group: 'io.reactivex', module: 'io.reactivex'
+                exclude group: 'io.reactivex', module: 'rxnetty'
+                exclude group: 'io.reactivex', module: 'rxnetty-contexts'
+                exclude group: 'io.reactivex', module: 'rxnetty-servo'
+            }
 
     compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
+    compile group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.feignHttpClient
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremockVersion
@@ -105,9 +111,9 @@ dependencies {
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '1.0.26'
 }
 def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
-        '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
-        '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication'
- ]
+                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
+                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
+                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication']
 
 sonarqube {
     println "echo sonarqube"
@@ -201,15 +207,14 @@ bootJar {
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
+    useJUnit {
+        includeCategories 'uk.gov.hmcts.reform.finrem.caseorchestration.smoketest.SmokeTest'
+    }
 }
 
-task functional(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
+task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
     // description = "Runs functional Tests"
     testClassesDirs = sourceSets.testFunctional.output.classesDirs
     classpath = sourceSets.testFunctional.runtimeClasspath
     finalizedBy aggregate
-}
-
-
-task integrationTest(type: Test, description: 'Runs the integration tests.', group: 'Verification') {
 }

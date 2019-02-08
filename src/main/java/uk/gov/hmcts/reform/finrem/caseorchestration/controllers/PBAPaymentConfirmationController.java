@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDAfterSubmitCall
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentConfirmationService;
 
+import java.io.IOException;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @RestController
@@ -26,7 +28,7 @@ public class PBAPaymentConfirmationController extends AbstractBaseController {
     @PostMapping(path = "/pba-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<CCDAfterSubmitCallbackResponse> pbaConfirmation(
             @RequestHeader(value = "Authorization", required = false) String authToken,
-            @RequestBody CCDRequest ccdRequest) throws Exception {
+            @RequestBody CCDRequest ccdRequest) throws IOException {
         log.info("Received request for PBA confirmation. Auth token: {}, Case request : {}", authToken, ccdRequest);
 
         validateCaseData(ccdRequest);

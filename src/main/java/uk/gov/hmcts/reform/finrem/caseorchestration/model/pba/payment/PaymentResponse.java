@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Locale.ENGLISH;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -43,7 +45,7 @@ public class PaymentResponse {
     public boolean isPaymentSuccess() {
         ImmutableList<String> paymentSuccess = ImmutableList.of("success", "pending");
         return Optional.ofNullable(status)
-                .map(s -> paymentSuccess.contains(s.toLowerCase()))
+                .map(s -> paymentSuccess.contains(s.toLowerCase(ENGLISH)))
                 .orElse(false);
     }
 }

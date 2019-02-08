@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.FeeRequest
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 
+import java.io.IOException;
 import java.net.URI;
 
 
@@ -37,7 +38,7 @@ public class PBAPaymentService {
     private final AuthTokenGenerator authTokenGenerator;
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    public PaymentResponse makePayment(String authToken, String ccdCaseId, CaseData caseData) throws Exception {
+    public PaymentResponse makePayment(String authToken, String ccdCaseId, CaseData caseData) throws IOException {
         PaymentRequest paymentRequest = buildPaymenRequest(ccdCaseId, caseData);
         HttpEntity<PaymentRequest> request = buildPaymentHttpRequest(authToken, paymentRequest);
         URI uri = buildUri();

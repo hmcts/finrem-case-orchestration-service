@@ -8,6 +8,7 @@ import java.io.File;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 public class OrderRefusalDataTest extends OrderRefusalTest {
     OrderRefusalData orderData;
@@ -23,6 +24,6 @@ public class OrderRefusalDataTest extends OrderRefusalTest {
     @Test
     public void shouldCreateOrderRefusalDataFromJson() {
         assertThat(orderData.getId(), is("1"));
+        assertThat(orderData.getOrderRefusal(), is(notNullValue()));
     }
-
 }

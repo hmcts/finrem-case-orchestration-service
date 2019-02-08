@@ -10,7 +10,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class CaseDetailsTest extends CaseDataTest {
-
     protected CaseDetails caseDetails;
 
     @Before
@@ -32,6 +31,4 @@ public class CaseDetailsTest extends CaseDataTest {
         assertThat(caseDetails.getJurisdiction(), is("divorce"));
         assertThat(caseDetails.getState(), is("created"));
     }
-
-
 }

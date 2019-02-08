@@ -13,7 +13,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
 public class CaseDataTest {
-
     protected CaseData data;
 
     @Before
@@ -68,9 +67,11 @@ public class CaseDataTest {
         assertThat(data.getDivorceUploadEvidence1().getDocumentFilename(), is("file1"));
         assertThat(data.getDivorceUploadEvidence1().getDocumentUrl(), is("http://file1"));
         assertThat(data.getDivorceUploadEvidence1().getDocumentBinaryUrl(), is("http://file1.binary"));
+        assertThat(data.getDivorceDecreeNisiDate(), is(Date.valueOf("2010-01-01")));
         assertThat(data.getDivorceUploadEvidence2().getDocumentFilename(), is("file2"));
         assertThat(data.getDivorceUploadEvidence2().getDocumentUrl(), is("http://file2"));
         assertThat(data.getDivorceUploadEvidence2().getDocumentBinaryUrl(), is("http://file2.binary"));
+        assertThat(data.getDivorceDecreeAbsoluteDate(), is(Date.valueOf("2010-01-01")));
     }
 
     private void assertApplicantDetails() {
@@ -206,12 +207,24 @@ public class CaseDataTest {
 
         assertThat(data.getDueDate(), is(Date.valueOf("2010-01-01")));
         assertThat(data.getIssueDate(), is(Date.valueOf("2010-01-01")));
+        assertThat(data.getAssignedToJudge(), is("judge1"));
         assertThat(data.getAssignedToJudgeReason(), is("test"));
+
+        assertThat(data.getReferToJudgeDate(), is(Date.valueOf("2010-01-01")));
+        assertThat(data.getReferToJudgeDate(), is(Date.valueOf("2010-01-01")));
         assertThat(data.getReferToJudgeText(), is("test"));
+        assertThat(data.getReferToJudgeDateFromAwaitingResponse(), is(Date.valueOf("2010-01-01")));
         assertThat(data.getReferToJudgeTextFromAwaitingResponse(), is("test"));
+        assertThat(data.getReferToJudgeDateFromConsOrdApproved(), is(Date.valueOf("2010-01-01")));
         assertThat(data.getReferToJudgeTextFromConsOrdApproved(), is("test"));
+        assertThat(data.getReferToJudgeDateFromConsOrdMade(), is(Date.valueOf("2010-01-01")));
         assertThat(data.getReferToJudgeTextFromConsOrdMade(), is("test"));
+        assertThat(data.getReferToJudgeDateFromOrderMade(), is(Date.valueOf("2010-01-01")));
         assertThat(data.getReferToJudgeTextFromOrderMade(), is("test"));
+        assertThat(data.getReferToJudgeDateFromClose(), is(Date.valueOf("2010-01-01")));
+        assertThat(data.getReferToJudgeTextFromClose(), is("test"));
+        assertThat(data.getReferToJudgeDateFromRespondToOrder(), is(Date.valueOf("2010-01-01")));
+        assertThat(data.getReferToJudgeTextFromRespondToOrder(), is("test"));
 
         assertThat(data.getUploadConsentOrderDocuments().size(), is(1));
         ConsentOrderData consOrder = data.getUploadConsentOrderDocuments().get(0);
@@ -224,6 +237,19 @@ public class CaseDataTest {
         assertThat(consOrder.getConsentOrder().getDocumentDateAdded(), is(Date.valueOf("2010-01-02")));
         assertThat(consOrder.getConsentOrder().getDocumentComment(), is("doc-comment"));
         assertThat(consOrder.getConsentOrder().getDocumentFileName(), is("file1"));
+
+        assertThat(data.getUploadOrder().size(), is(1));
+        ConsentOrderData uploadOrder = data.getUploadConsentOrderDocuments().get(0);
+        assertThat(uploadOrder.getId(), is("1"));
+        assertThat(uploadOrder.getConsentOrder().getDocumentType(), is("pdf"));
+        assertThat(uploadOrder.getConsentOrder().getDocumentLink().getDocumentUrl(), is("http://doc1"));
+        assertThat(uploadOrder.getConsentOrder().getDocumentLink().getDocumentFilename(), is("doc1"));
+        assertThat(uploadOrder.getConsentOrder().getDocumentLink().getDocumentBinaryUrl(), is("http://doc1.binary"));
+        assertThat(uploadOrder.getConsentOrder().getDocumentEmailContent(), is("email-content"));
+        assertThat(uploadOrder.getConsentOrder().getDocumentDateAdded(), is(Date.valueOf("2010-01-02")));
+        assertThat(uploadOrder.getConsentOrder().getDocumentComment(), is("doc-comment"));
+        assertThat(uploadOrder.getConsentOrder().getDocumentFileName(), is("file1"));
+
 
         assertThat(data.getUploadDocuments().size(), is(1));
         ConsentOrderData uploadDoc = data.getUploadDocuments().get(0);
@@ -249,6 +275,24 @@ public class CaseDataTest {
         assertThat(genOrder.getGeneralOrder().getGeneralOrderJudgeName(), is("judge1"));
         assertThat(genOrder.getGeneralOrder().getGeneralOrderDate(), is(Date.valueOf("2010-01-02")));
         assertThat(genOrder.getGeneralOrder().getGeneralOrderComments(), is("comment1"));
+
+        assertThat(data.getRespondToOrderDocuments().size(), is(1));
+        RespondToOrderData respOrder = data.getRespondToOrderDocuments().get(0);
+        assertThat(respOrder.getId(), is("1"));
+        assertThat(respOrder.getRespondToOrder().getDocumentType(), is("pdf"));
+        assertThat(respOrder.getRespondToOrder().getDocumentLink().getDocumentUrl(), is("http://doc1"));
+        assertThat(respOrder.getRespondToOrder().getDocumentLink().getDocumentFilename(), is("doc1"));
+        assertThat(respOrder.getRespondToOrder().getDocumentLink().getDocumentBinaryUrl(), is("http://doc1.binary"));
+        assertThat(respOrder.getRespondToOrder().getDocumentDateAdded(), is(Date.valueOf("2010-01-02")));
+        assertThat(respOrder.getRespondToOrder().getDocumentFileName(), is("file1"));
+
+        assertThat(data.getAmendedConsentOrderCollection().size(), is(1));
+        AmendedConsentOrderData amendOrder = data.getAmendedConsentOrderCollection().get(0);
+        assertThat(amendOrder.getId(), is("1"));
+        assertThat(amendOrder.getAmendedConsentOrder().getAmendedConsentOrder().getDocumentUrl(), is("http://doc1"));
+        assertThat(amendOrder.getAmendedConsentOrder().getAmendedConsentOrder().getDocumentFilename(), is("doc1"));
+        assertThat(amendOrder.getAmendedConsentOrder().getAmendedConsentOrder().getDocumentBinaryUrl(), is("http://doc1.binary"));
+        assertThat(amendOrder.getAmendedConsentOrder().getAmendedConsentOrderDate(), is(Date.valueOf("2010-01-02")));
     }
 
 }
