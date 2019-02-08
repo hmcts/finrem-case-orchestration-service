@@ -1,14 +1,18 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
+@JsonInclude(NON_NULL)
 public class CaseData {
     // SOLICITOR DETAILS
     @JsonProperty("solicitorName")
