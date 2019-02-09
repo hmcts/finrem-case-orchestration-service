@@ -2,15 +2,17 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.fee;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-
-import java.math.BigDecimal;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Fee {
-    @JsonProperty(value = "code")
-    private String code;
-    @JsonProperty(value = "fee_amount")
-    private BigDecimal feeAmount;
+public class FeeItem {
+    @JsonProperty("value")
+    private FeeValue value;
 }

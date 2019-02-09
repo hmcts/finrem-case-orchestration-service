@@ -2,17 +2,27 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class ApplicationConfiguration {
 
+    @Autowired
+    private HttpConfiguration httpConfiguration;
+
     @Bean
     public RestTemplate restTemplate() {
-        return new RestTemplate();
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(httpClient()));
+        return restTemplate;
     }
 
     @Bean
@@ -21,4 +31,19 @@ public class ApplicationConfiguration {
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         return objectMapper;
     }
+
+    private CloseableHttpClient httpClient() {
+        RequestConfig config = RequestConfig.custom()
+                .setConnectTimeout(httpConfiguration.getTimeout())
+                .setConnectionRequestTimeout(httpConfiguration.getRequestTimeout())
+                .setSocketTimeout(httpConfiguration.getReadTimeout()) // read time out
+                .build();
+
+        return HttpClientBuilder
+                .create()
+                .useSystemProperties()
+                .setDefaultRequestConfig(config)
+                .build();
+    }
+
 }

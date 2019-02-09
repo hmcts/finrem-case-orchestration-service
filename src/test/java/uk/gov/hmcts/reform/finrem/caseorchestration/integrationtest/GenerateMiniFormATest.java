@@ -110,8 +110,7 @@ public class GenerateMiniFormATest {
         CaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getCaseData().setMiniFormA(caseDocument());
 
-        return objectMapper.writeValueAsString(new CCDCallbackResponse(caseDetails.getCaseData(),
-                new ArrayList<>(), new ArrayList<>()));
+        return objectMapper.writeValueAsString(CCDCallbackResponse.builder().data(caseDetails.getCaseData()).build());
     }
 
     private CaseDocument caseDocument() {

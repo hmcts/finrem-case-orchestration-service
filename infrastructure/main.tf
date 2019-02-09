@@ -40,6 +40,7 @@ module "finrem-cos" {
     REFORM_ENVIRONMENT                                    = "${var.env}"
     IDAM_API_URL                                          = "${var.idam_api_url}"
     FEES_API_URL                                          = "${var.fees_api_url}"
+    PAYMENT_API_URL                                       = "${var.payment_api_url}"
     PRD_API_URL                                           = "${var.prd_api_url}"
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL                  = "${local.idam_s2s_url}"
     AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE             = "${var.auth_provider_service_client_microservice}"
