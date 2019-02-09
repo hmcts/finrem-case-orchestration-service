@@ -13,7 +13,12 @@ class GlobalExceptionHandler {
     @ExceptionHandler(FeignException.class)
     ResponseEntity<Object> handleFeignException(FeignException exception) {
         log.warn(exception.getMessage(), exception);
+        return ResponseEntity.status(exception.status()).body(exception.getMessage());
+    }
 
+    @ExceptionHandler(InvalidCaseDataException.class)
+    ResponseEntity<Object> handleInvalidCaseDataException(InvalidCaseDataException exception) {
+        log.warn(exception.getMessage(), exception);
         return ResponseEntity.status(exception.status()).body(exception.getMessage());
     }
 }

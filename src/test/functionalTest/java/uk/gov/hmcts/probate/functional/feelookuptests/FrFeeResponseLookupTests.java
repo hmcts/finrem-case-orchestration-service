@@ -9,7 +9,7 @@ import uk.gov.hmcts.probate.functional.IntegrationTestBase;
 import static org.hamcrest.Matchers.containsString;
 
 @RunWith(SerenityRunner.class)
-public class FrFeeLookupTests extends IntegrationTestBase {
+public class FrFeeResponseLookupTests extends IntegrationTestBase {
 
     private static final String FEE_LOOKUP_URL = "/case-orchestration/fee-lookup";
 

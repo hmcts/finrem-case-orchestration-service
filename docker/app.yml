@@ -225,6 +225,8 @@ services:
       TESTING_SUPPORT_ENABLED: "true"
       MICROSERVICEKEYS_EM_GW: "${IDAM_KEY_DM_STORE}"
       MICROSERVICEKEYS_FINREM_DOCUMENT_GENERATOR: "AAAAAAAAAAAAAAAA"
+      MICROSERVICEKEYS_FINREM_NOTIFICATION_SERVICE: "AAAAAAAAAAAAAAAA"
+      MICROSERVICEKEYS_FINREM_PAYMENT_SERVICE: "AAAAAAAAAAAAAAAA"
       MICROSERVICEKEYS_FINREM_CCD_DATA_MIGRATOR: "AAAAAAAAAAAAAAAA"
       MICROSERVICEKEYS_DIVORCE: "AAAAAAAAAAAAAAAA"
 
@@ -278,12 +280,7 @@ services:
       - ccd-shared-database
       - idam-api
       - service-auth-provider-api
-
-
     ports:
-
-
-
       - 4506:8080
     #   debug port exposed
     #   - 5006:5005
@@ -348,6 +345,73 @@ services:
       - service-auth-provider-api
       - dm-store
       - idam-api
+
+  payments-api:
+    image: hmcts.azurecr.io/hmcts/payment-api:latest
+    container_name: payments-api
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://payments-database:5432/payment
+      - SPRING_DATASOURCE_USERNAME=payment
+      - SPRING_DATASOURCE_PASSWORD=payment
+      - AUTH_PROVIDER_SERVICE_CLIENT_BASEURL=http://service-auth-provider-api:8080/
+      - FEES_REGISTER_URL=http://fees-register-api-aat.service.core-compute-aat.internal
+      - PAYMENTS_REPORT_FILE_LOCATION=.
+      - PBA_CMC_PAYMENTS_EMAIL_FROM=no-reply@reform.hmcts.net
+      - CARD_PAYMENTS_REPORT_SCHEDULER_ENABLED=true
+      - PBA_DIVORCE_PAYMENTS_EMAIL_SUBJECT=AAT Env - PBA Reconciliation Report for Divorce
+      - GOV_PAY_AUTH_KEY_PROBATE_FRONTEND=238mpukgl3uonfrqpt7ndqvr82ok75i3t8v66156q470k474iai66ukhdf
+      - PBA_CMC_PAYMENTS_REPORT_SCHEDULER_ENABLED=true
+      - GOV_PAY_OPERATIONAL_SERVICES=ccd_gw
+      - CARD_PAYMENTS_EMAIL_TO=Oluwakemi.Benson@hmcts.net,Leonie.Watson@Justice.gov.uk,kevin.harper@hmcts.net,Krishna.Nuthalapati@HMCTS.NET
+      - PAYMENT_AUDIT_FILE=%HOME%\\LogFiles\\payment-audit.log
+      - PBA_CMC_PAYMENTS_EMAIL_TO=Oluwakemi.Benson@hmcts.net,Leonie.Watson@Justice.gov.uk,kevin.harper@hmcts.net,Krishna.Nuthalapati@HMCTS.NET
+      - SPRING_MAIL_PORT=25
+      - SPRING_MAIL_HOST=mta.reform.hmcts.net
+      - GOV_PAY_URL=https://publicapi.payments.service.gov.uk/v1/payments
+      - PBA_DIVORCE_PAYMENTS_EMAIL_FROM=no-reply@reform.hmcts.net
+      - PBA_DIVORCE_PAYMENTS_EMAIL_MESSAGE=Hi <br/><br/>Please find attached today''s Payment by Account reconciliation report. <br/><br/>Regards <br/><br/>Payments team<br/><br/>
+      - PAYMENT_SERVER_URL=http://localhost:8383
+      - GOV_PAY_AUTH_KEY_REFERENCE=DummyKey
+      - PBA_CMC_PAYMENTS_EMAIL_MESSAGE=Hi <br/><br/>Please find attached today''s Payment by Account reconciliation report. <br/><br/>Regards <br/><br/>Payments team<br/><br/>
+      - REFORM_SERVICE_NAME=payment-api
+      - AUTH_IDAM_CLIENT_BASEURL=http://idam-api:8080
+      - GOV_PAY_AUTH_KEY_CMC=DummyKey
+      - PBA_CMC_PAYMENTS_EMAIL_SUBJECT=AAT Env - PBA Reconciliation Report for CMC
+      - CARD_PAYMENTS_EMAIL_FROM=no-reply@reform.hmcts.net
+      - CARD_PAYMENTS_EMAIL_MESSAGE=Hi <br/><br/>Please find attached today''s reconciliation report. <br/><br/>Regards <br/><br/>Payments team<br/><br/>
+      - GOV_PAY_AUTH_KEY_DIVORCE_FRONTEND=DummyKey
+      - FEATURE_PAYMENTS_SEARCH=true
+      - PBA_DIVORCE_PAYMENTS_REPORT_SCHEDULER_ENABLED=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_TRUST=*
+      - WEBSITE_LOCAL_CACHE_OPTION=Always
+      - PBA_DIVORCE_PAYMENTS_EMAIL_TO=Oluwakemi.Benson@hmcts.net,Leonie.Watson@Justice.gov.uk,kevin.harper@hmcts.net,Krishna.Nuthalapati@HMCTS.NET
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
+      - APPINSIGHTS_INSTRUMENTATIONKEY=57b197f7-87bb-4dbf-b812-8572521c620a
+      - CARD_PAYMENTS_EMAIL_SUBJECT=AAT Env - Card Payments Reconciliation Report
+      - TRUSTED_S2S_SERVICE_NAMES=cmc,probate_frontend,divorce_frontend,ccd_gw,bar_api,api_gw,finrem_payment_service
+      - ASB_CONNECTION_STRING=dummy
+      - http_proxy
+      - https_proxy
+      - no_proxy
+    ports:
+      - 8383:8080
+    links:
+      - payments-database
+      - service-auth-provider-api
+      - idam-api
+    depends_on:
+      - payments-database
+      - service-auth-provider-api
+      - idam-api
+
+
+  payments-database:
+    image: docker.artifactory.reform.hmcts.net/common-components/payments-database
+    container_name: payments-database
+    ports:
+      - 5430:5432
+
+
 
 volumes:
   ccd-docker-ccd-shared-database-data:

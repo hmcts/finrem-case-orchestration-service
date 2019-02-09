@@ -1,20 +1,29 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.error;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.springframework.http.ResponseEntity;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.STATUS_CODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.invalidCaseDataError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.INTERNAL_SERVER_ERROR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BAD_REQUEST;
 
 public class GlobalExceptionHandlerTest {
-
     GlobalExceptionHandler exceptionHandler = new GlobalExceptionHandler();
 
     @Test
     public void handleFeignException() {
         ResponseEntity<Object> actual = exceptionHandler.handleFeignException(feignError());
-        assertThat(actual.getStatusCodeValue(), Matchers.is(STATUS_CODE));
+        assertThat(actual.getStatusCodeValue(), is(INTERNAL_SERVER_ERROR));
+        assertThat(actual.getBody(), is("status 500 reading test"));
+    }
+
+    @Test
+    public void handleInvalidCaseDataException() {
+        ResponseEntity<Object> actual = exceptionHandler.handleInvalidCaseDataException(invalidCaseDataError());
+        assertThat(actual.getStatusCodeValue(), is(BAD_REQUEST));
+        assertThat(actual.getBody(), is("Bad request"));
     }
 }
