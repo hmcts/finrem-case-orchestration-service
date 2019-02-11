@@ -1,5 +1,5 @@
 variable "reform_service_name" {
-  default = "frcos"
+  default = "cos"
 }
 
 variable "reform_team" {
@@ -48,6 +48,10 @@ variable "idam_api_url" {
 
 variable "fees_api_url" {
   default = "http://fees-register-api-aat.service.core-compute-aat.internal"
+}
+
+variable "payment_api_url" {
+  default = "https://payment-api-aat.service.core-compute-aat.internal"
 }
 
 variable "prd_api_url" {

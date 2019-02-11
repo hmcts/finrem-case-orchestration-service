@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.FeeServiceConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.Fee;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
 import java.net.URI;
 
@@ -19,11 +19,10 @@ public class FeeService {
     private final FeeServiceConfiguration serviceConfig;
     private final RestTemplate restTemplate;
 
-
-    public Fee getApplicationFee() {
+    public FeeResponse getApplicationFee() {
         URI uri = buildUri();
-        log.info("Inside getApplicationFee, Fee API uri : {} ", uri);
-        ResponseEntity<Fee> responseEntity = restTemplate.getForEntity(uri, Fee.class);
+        log.info("Inside getApplicationFee, FeeResponse API uri : {} ", uri);
+        ResponseEntity<FeeResponse> responseEntity = restTemplate.getForEntity(uri, FeeResponse.class);
         return responseEntity.getBody();
     }
 

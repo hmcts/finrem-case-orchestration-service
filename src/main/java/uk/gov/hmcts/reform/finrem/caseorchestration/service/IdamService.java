@@ -23,7 +23,7 @@ public class IdamService {
     private final RestTemplate restTemplate;
 
     public String getUserEmailId(String authToken) {
-        HttpEntity<String> request = buildAuthRequest(authToken);
+        HttpEntity request = buildAuthRequest(authToken);
         URI uri = buildUri();
         log.info("Inside getUserEmailId, IDAM API uri : {}, request : {} ", uri, request);
         ResponseEntity<Map> responseEntity = restTemplate.exchange(uri, HttpMethod.GET, request, Map.class);
@@ -31,9 +31,10 @@ public class IdamService {
         return result.get("email").toString();
     }
 
-    private HttpEntity<String> buildAuthRequest(String authToken) {
+    private HttpEntity buildAuthRequest(String authToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", authToken);
+        headers.add("Content-Type", "application/json");
         return new HttpEntity<>(headers);
     }
 

@@ -1,17 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -19,23 +12,10 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = CaseOrchestrationApplication.class)
-@TestPropertySource("/application.properties")
-public class IdamServiceTest {
+public class IdamServiceTest extends BaseServiceTest {
 
     @Autowired
     private IdamService idamService;
-
-    private MockRestServiceServer mockServer;
-
-    @Autowired
-    private RestTemplate restTemplate;
-
-    @Before
-    public void setUp() {
-        mockServer = MockRestServiceServer.createServer(restTemplate);
-    }
 
     @Test
     public void retrieveUserEmailId() {

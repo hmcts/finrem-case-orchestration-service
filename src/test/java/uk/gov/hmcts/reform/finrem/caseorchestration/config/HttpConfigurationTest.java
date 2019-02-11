@@ -14,22 +14,15 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @TestPropertySource(locations = "/application.properties")
-public class FeeServiceConfigurationTest {
+public class HttpConfigurationTest {
 
     @Autowired
-    private FeeServiceConfiguration config;
-
+    private HttpConfiguration httpConfiguration;
 
     @Test
-    public void shouldCreateFeeServiceConfigFromAppProperties() {
-        assertThat(config.getUrl(), is("http://test"));
-        assertThat(config.getApi(), is("/api"));
-        assertThat(config.getChannel(), is("default"));
-        assertThat(config.getEvent(), is("general-application"));
-        assertThat(config.getJurisdiction1(), is("family"));
-        assertThat(config.getJurisdiction2(), is("family-court"));
-        assertThat(config.getKeyword(), is("without-notice"));
-        assertThat(config.getService(), is("other"));
+    public void shouldCreateHttpConfigFromAppProperties() {
+        assertThat(httpConfiguration.getReadTimeout(), is(60000));
+        assertThat(httpConfiguration.getRequestTimeout(), is(60000));
+        assertThat(httpConfiguration.getTimeout(), is(60000));
     }
-
 }
