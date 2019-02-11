@@ -88,16 +88,6 @@ public class FeeLookUpTest {
                 "/api.*")));
     }
 
-    @Ignore
-    @Test
-    public void feeLookupWithError() throws Exception {
-        stubWithError();
-        webClient.perform(MockMvcRequestBuilders.post(FEE_LOOKUP_URL)
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
     private String expectedBody() {
         return "{\"data\":{"
                 + "\"amountToPay\":\"5000\","
@@ -120,12 +110,5 @@ public class FeeLookUpTest {
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(BODY)));
-    }
-
-    private void stubWithError() {
-        stubFor(get("/api?service=other&jurisdiction1=family"
-                + "&jurisdiction2=family-court&channel=default&event=general-application&keyword=without-notice")
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.BAD_REQUEST.value())));
     }
 }
