@@ -32,7 +32,7 @@ public class FeeResponseServiceTest extends BaseServiceTest {
     }
 
     private static String toUri() {
-        return new StringBuilder("http://test/api")
+        return new StringBuilder("http://localhost:8086/api")
                 .append("?service=other")
                 .append("&jurisdiction1=family")
                 .append("&jurisdiction2=family-court")

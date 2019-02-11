@@ -36,7 +36,7 @@ public class FeeServiceTest  extends BaseServiceTest {
     }
 
     private String toUri() {
-        return "http://test/api?service=other&jurisdiction1=family&jurisdiction2=family-court&channel=default"
+        return "http://localhost:8086/api?service=other&jurisdiction1=family&jurisdiction2=family-court&channel=default"
                 + "&event=general-application&keyword=without-notice";
     }
 
