@@ -55,6 +55,15 @@ repositories {
 
 
 sourceSets {
+    testSmoke {
+        java {
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+            srcDir file('src/smokeTest/java')
+        }
+        resources.srcDir file('src/smokeTest/resources')
+    }
+    
     test {
         java.srcDir 'src/test/java'
         resources.srcDir 'src/test/resources'
@@ -75,7 +84,7 @@ def versions = [
         springfoxSwagger        : '2.9.2',
         commonsIo               : '2.5',
         feignHttpClient         : '9.5.1',
-        wiremockVersion         : '2.8.0',
+        wiremockVersion         : '2.18.0',
         reformsJavaLogging      : '4.0.1',
         serviceTokenGenerator   : '1.0.4'
 ]
@@ -109,6 +118,10 @@ dependencies {
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: '1.5.2'
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '1.5.2'
     testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '1.0.26'
+
+    testSmokeCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
+    testSmokeCompile sourceSets.main.runtimeClasspath
+    testSmokeCompile sourceSets.test.runtimeClasspath
 }
 def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
@@ -207,9 +220,9 @@ bootJar {
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
-    useJUnit {
-        includeCategories 'uk.gov.hmcts.reform.finrem.caseorchestration.smoketest.SmokeTest'
-    }
+    testClassesDirs = sourceSets.testSmoke.output.classesDirs
+    classpath = sourceSets.testSmoke.runtimeClasspath
+    finalizedBy aggregate
 }
 
 task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {

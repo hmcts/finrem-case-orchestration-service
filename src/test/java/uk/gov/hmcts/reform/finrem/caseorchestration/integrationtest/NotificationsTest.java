@@ -156,10 +156,8 @@ public class NotificationsTest {
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
-        System.out.print(caseDetails);
         String response = objectMapper.writeValueAsString(new CCDCallbackResponse(caseDetails.getCaseData(),
                 null, null));
-        System.out.print(response);
         return response;
     }
 
