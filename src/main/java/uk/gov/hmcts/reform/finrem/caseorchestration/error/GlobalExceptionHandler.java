@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 @Slf4j
-class GlobalExceptionHandler {
+public class GlobalExceptionHandler {
 
-    static final String SERVER_ERROR_MSG = "Some server side exception occurred. Please check logs for details";
+    public static final String SERVER_ERROR_MSG = "Some server side exception occurred. Please check logs for details";
 
     @ExceptionHandler(FeignException.class)
     ResponseEntity<Object> handleFeignException(FeignException exception) {
