@@ -92,5 +92,5 @@ variable "common_tags" {
 }
 
 variable "swagger_enabled" {
-  default = false
+  default = true
 }
