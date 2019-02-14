@@ -13,19 +13,6 @@ properties([
   pipelineTriggers([[$class: 'GitHubPushTrigger']])
 ])
 
-List<LinkedHashMap<String, Object>> secrets = [
-        secret("auth-provider-service-client-key", "AUTH_PROVIDER_SERVICE_CLIENT_KEY")
-]
-
-static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
-  [ $class: 'AzureKeyVaultSecret',
-    secretType: 'Secret',
-    name: secretName,
-    version: '',
-    envVariable: envVar
-  ]
-}
-
 withParameterizedPipeline(params.TYPE, params.PRODUCT_NAME, params.APP, params.ENVIRONMENT, params.SUBSCRIPTION) {
 //  loadVaultSecrets(secrets)
   before('buildinfra:prod') {

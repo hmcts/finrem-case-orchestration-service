@@ -42,40 +42,16 @@ variable "appinsights_instrumentation_key" {
   default = ""
 }
 
-variable "idam_api_url" {
-  default = "http://betaDevBccidamAppLB.reform.hmcts.net"
+variable "finrem_ns_url" {
+  default = "http://finrem-ns-aat.service.core-compute-aat.internal"
 }
 
-variable "fees_api_url" {
-  default = "http://fees-register-api-aat.service.core-compute-aat.internal"
+variable "document_generator_baseurl" {
+  default = "http://finrem-dgcs-aat.service.core-compute-aat.internal"
 }
 
 variable "payment_api_url" {
-  default = "https://payment-api-aat.service.core-compute-aat.internal"
-}
-
-variable "prd_api_url" {
-  default = "http://rpa-rd-professional-aat.service.core-compute-aat.internal"
-}
-
-variable "idam_s2s_url_prefix" {
-  default = "rpe-service-auth-provider"
-}
-
-variable "finrem_ns_url_prefix" {
-  default = "finrem-ns"
-}
-
-variable "auth_provider_service_client_microservice" {
-    default = "finrem-case-orchestration"
-}
-
-variable "auth_provider_service_client_tokentimetoliveinseconds" {
-  default = "900"
-}
-
-variable "finrem_case_orchestration_service_api_health_endpoint" {
-  default = "/health"
+  default = "http://finrem-ps-aat.service.core-compute-aat.internal"
 }
 
 variable "subscription" {}

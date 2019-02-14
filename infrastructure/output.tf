@@ -2,24 +2,16 @@ output "env" {
   value = "${var.env}"
 }
 
-output "idam_api_url" {
-  value = "${var.idam_api_url}"
+output "finrem_ns_url" {
+  value = "${var.finrem_ns_url}"
 }
 
-output "fees_api_url" {
-  value = "${var.fees_api_url}"
+output "document_generator_baseurl" {
+  value = "${var.document_generator_baseurl}"
 }
 
 output "payment_api_url" {
   value = "${var.payment_api_url}"
-}
-
-output "prd_api_url" {
-  value = "${var.prd_api_url}"
-}
-
-output "idam_s2s_url" {
-  value = "${local.idam_s2s_url}"
 }
 
 output "test_environment" {

@@ -8,14 +8,13 @@ services:
     ports:
       - 9000:9000
     environment:
-      IDAM_API_URL: http://idam-api:8080
-      FEES_API_URL: http://fees-register-api-aat.service.core-compute-aat.internal
-      PRD_API_URL: http://rpa-rd-professional-aat.service.core-compute-aat.internal
       FINREM_NOTIFICATION_SERVICE_BASE_URL: http://finrem-notification-service:8086
       DOCUMENT_GENERATOR_SERVICE_API_BASEURL: http://finrem-document-generator-client:4009
+      PAYMENT_SERVICE_API_BASEURL: http://finrem-payment-service:9001
     depends_on:
       - ccd-case-management-web
 #      - finrem-notification-service
+      - finrem-payment-service
       - finrem-document-generator-client
 #    links:
 #      - finrem-notification-service
@@ -319,6 +318,12 @@ services:
       UK_GOV_NOTIFY_API_KEY: "${UK_GOV_NOTIFY_API_KEY}"
     ports:
      - 8086:8086
+
+  finrem-payment-service:
+    image: hmcts/finrem-payment-service:latest
+    container_name: finrem-payment-service
+    ports:
+     - 9001:9001
 
   finrem-document-generator-client:
     image: hmcts/finrem-document-generator-client:latest

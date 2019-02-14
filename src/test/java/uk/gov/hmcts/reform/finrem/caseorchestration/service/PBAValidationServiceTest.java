@@ -28,9 +28,6 @@ public class PBAValidationServiceTest extends BaseServiceTest {
     @Autowired
     private PBAValidationService pbaValidationService;
 
-    @MockBean
-    private IdamService idamService;
-
     private JsonNode requestContent;
 
     @Before
@@ -44,8 +41,6 @@ public class PBAValidationServiceTest extends BaseServiceTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
-
-        when(idamService.getUserEmailId(AUTH_TOKEN)).thenReturn(EMAIL);
     }
 
     @Test
