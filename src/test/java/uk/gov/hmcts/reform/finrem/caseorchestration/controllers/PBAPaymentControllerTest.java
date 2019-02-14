@@ -30,8 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.AbstractBaseController.APPLICATION_SUBMITTED_STATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.AbstractBaseController.AWAITING_HWF_DECISION_STATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.APPLICATION_SUBMITTED_STATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.AWAITING_HWF_DECISION_STATE;
 
 @WebMvcTest(value = {PBAPaymentController.class, FeeLookupController.class})
 public class PBAPaymentControllerTest extends BaseControllerTest {

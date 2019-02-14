@@ -6,8 +6,10 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
+import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
@@ -29,9 +31,14 @@ public class NotificationServiceTest extends BaseServiceTest {
     private NotificationService notificationService;
     private CCDRequest ccdRequest;
 
+    @Autowired
+    protected RestTemplate restTemplate;
+
+    protected MockRestServiceServer mockServer;
+
     @Before
     public void setUp() {
-        super.setUp();
+        mockServer = MockRestServiceServer.createServer(restTemplate);
         ccdRequest = getCcdRequest();
     }
 
@@ -139,7 +146,6 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
-
     }
 
     @Test
@@ -160,6 +166,5 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
-
     }
 }

@@ -21,7 +21,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 @SuppressWarnings("unchecked")
-public class PBAPaymentConfirmationController extends AbstractBaseController {
+public class PBAPaymentConfirmationController implements BaseController {
     private final PBAPaymentConfirmationService pbaPaymentConfirmationService;
 
     @SuppressWarnings("unchecked")
