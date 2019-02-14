@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentConfirmationService;
 
 import javax.ws.rs.core.MediaType;
@@ -56,7 +57,7 @@ public class PBAPaymentConfirmationControllerTest extends BaseControllerTest {
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(is("Missing case data from CCD request.")));
+                .andExpect(content().string(is(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
 
 

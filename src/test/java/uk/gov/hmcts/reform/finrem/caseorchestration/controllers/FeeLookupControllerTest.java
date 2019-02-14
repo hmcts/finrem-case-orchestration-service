@@ -5,13 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.is;
@@ -21,6 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.fee;
 
 @WebMvcTest(FeeLookupController.class)
 public class FeeLookupControllerTest extends BaseControllerTest {
@@ -32,15 +32,6 @@ public class FeeLookupControllerTest extends BaseControllerTest {
     private FeeService feeService;
 
     private JsonNode requestContent;
-
-    private static FeeResponse fee() {
-        FeeResponse feeResponse = new FeeResponse();
-        feeResponse.setCode("FEE0640");
-        feeResponse.setDescription("finrem");
-        feeResponse.setFeeAmount(BigDecimal.valueOf(10d));
-        feeResponse.setVersion("v1");
-        return feeResponse;
-    }
 
     private void doFeeLookupSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -56,7 +47,6 @@ public class FeeLookupControllerTest extends BaseControllerTest {
                 .getResource("/fixtures/empty-casedata.json").toURI()));
     }
 
-
     @Test
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
         doEmtpyCaseDataSetUp();
@@ -65,7 +55,7 @@ public class FeeLookupControllerTest extends BaseControllerTest {
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(is("Missing case data from CCD request.")));
+                .andExpect(content().string(is(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
 
     @Test
@@ -84,5 +74,4 @@ public class FeeLookupControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
-
 }

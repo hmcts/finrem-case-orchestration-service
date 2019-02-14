@@ -48,6 +48,7 @@ module "finrem-cos" {
     AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS = "${var.auth_provider_service_client_tokentimetoliveinseconds}"
     FINREM_NOTIFICATION_SERVICE_BASE_URL                  = "${local.finrem_ns_url}"
     DOCUMENT_GENERATOR_SERVICE_API_BASEURL                = "${local.document_generator_baseurl}"
+    SWAGGER_ENABLED                                       = "${var.swagger_enabled}"
   }
 }
 
