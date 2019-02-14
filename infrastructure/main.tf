@@ -36,6 +36,7 @@ module "finrem-cos" {
     FINREM_NOTIFICATION_SERVICE_BASE_URL                  = "${var.finrem_ns_url}"
     DOCUMENT_GENERATOR_SERVICE_API_BASEURL                = "${var.document_generator_baseurl}"
     PAYMENT_SERVICE_API_BASEURL                           = "${var.payment_api_url}"
+    SWAGGER_ENABLED                                       = "${var.swagger_enabled}"
   }
 }
 

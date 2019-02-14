@@ -7,9 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 public interface BaseController {
-    String AWAITING_HWF_DECISION_STATE = "awaitingHWFDecision";
-    String APPLICATION_SUBMITTED_STATE = "applicationSubmitted";
-
     default void validateCaseData(CCDRequest ccdRequest) {
         if (ccdRequest == null || ccdRequest.getCaseDetails() == null
                 || ccdRequest.getCaseDetails().getCaseData() == null

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
@@ -13,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.is;
@@ -30,8 +28,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.APPLICATION_SUBMITTED_STATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.AWAITING_HWF_DECISION_STATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PBAPaymentController.APPLICATION_SUBMITTED_STATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PBAPaymentController.AWAITING_HWF_DECISION_STATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.fee;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler.SERVER_ERROR_MSG;
 
 @WebMvcTest(value = {PBAPaymentController.class, FeeLookupController.class})
 public class PBAPaymentControllerTest extends BaseControllerTest {
@@ -47,15 +47,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
     private JsonNode requestContent;
-
-    private static FeeResponse fee() {
-        FeeResponse feeResponse = new FeeResponse();
-        feeResponse.setCode("FEE0640");
-        feeResponse.setDescription("finrem");
-        feeResponse.setFeeAmount(BigDecimal.valueOf(10d));
-        feeResponse.setVersion("v1");
-        return feeResponse;
-    }
 
     private static PaymentResponse paymentResponse(boolean success) {
         PaymentResponse paymentResponse = PaymentResponse.builder()
@@ -80,7 +71,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(is("Missing case data from CCD request.")));
+                .andExpect(content().string(is(SERVER_ERROR_MSG)));
     }
 
     private void doPaymentPBASetUp(boolean success) throws Exception {

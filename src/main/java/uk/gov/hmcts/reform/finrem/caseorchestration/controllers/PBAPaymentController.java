@@ -27,6 +27,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Slf4j
 @SuppressWarnings("unchecked")
 public class PBAPaymentController implements BaseController {
+    public static final String AWAITING_HWF_DECISION_STATE = "awaitingHWFDecision";
+    public static final String APPLICATION_SUBMITTED_STATE = "applicationSubmitted";
+
     private final FeeService feeService;
     private final PBAPaymentService pbaPaymentService;
 

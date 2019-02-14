@@ -66,3 +66,7 @@ variable "ilbIp" {}
 variable "common_tags" {
   type = "map"
 }
+
+variable "swagger_enabled" {
+  default = true
+}
