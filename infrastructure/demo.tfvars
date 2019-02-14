@@ -1,5 +1,4 @@
 vault_section = "preprod"
-idam_api_url = "https://preprod-idamapi.reform.hmcts.net:3511"
-fees_api_url = "http://fees-register-api-demo.service.core-compute-demo.internal"
-payment_api_url = "http://payment-api-demo.service.core-compute-demo.internal"
-prd_api_url = "http://rpa-rd-professional-demo.service.core-compute-demo.internal"
+finrem_ns_url = "http://finrem-ns-demo.service.core-compute-demo.internal"
+document_generator_baseurl = "http://finrem-dgcs-demo.service.core-compute-demo.internal"
+payment_api_url = "http://finrem-ps-demo.service.core-compute-demo.internal"

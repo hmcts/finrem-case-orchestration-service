@@ -6,11 +6,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Component
-public class IdamServiceHealthCheck extends AbstractServiceHealthCheck {
+public class PaymentServiceHealthCheck extends AbstractServiceHealthCheck {
 
     @Autowired
-    public IdamServiceHealthCheck(
-        @Value("${idam.health.url}") String uri,
+    public PaymentServiceHealthCheck(
+        @Value("${payment.api.health.url}") String uri,
         RestTemplate restTemplate) {
         super(uri, restTemplate);
     }

@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.health;
 
-public class FeeServiceHealthCheckTest extends AbstractServiceHealthCheckTest {
+public class PaymentServiceHealthCheckTest extends AbstractServiceHealthCheckTest {
 
     private static final String URI = "http://localhost:4006/health";
 
@@ -11,6 +11,6 @@ public class FeeServiceHealthCheckTest extends AbstractServiceHealthCheckTest {
 
     @Override
     protected AbstractServiceHealthCheck healthCheckInstance() {
-        return new FeeServiceHealthCheck(URI, restTemplate);
+        return new PaymentServiceHealthCheck(URI, restTemplate);
     }
 }

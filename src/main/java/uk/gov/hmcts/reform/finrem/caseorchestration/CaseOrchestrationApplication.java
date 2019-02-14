@@ -7,9 +7,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 import uk.gov.hmcts.reform.authorisation.healthcheck.ServiceAuthHealthIndicator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.PaymentClient;
 
 @SpringBootApplication(exclude = {ServiceAuthHealthIndicator.class})
-@EnableFeignClients(basePackageClasses = {DocumentGeneratorClient.class})
+@EnableFeignClients(basePackageClasses = {DocumentGeneratorClient.class, PaymentClient.class})
 public class CaseOrchestrationApplication {
 
     public static void main(String[] args) {

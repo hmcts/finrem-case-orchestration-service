@@ -28,7 +28,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 @SuppressWarnings("unchecked")
-public class FeeLookupController extends AbstractBaseController {
+public class FeeLookupController implements BaseController {
 
     private final FeeService feeService;
 

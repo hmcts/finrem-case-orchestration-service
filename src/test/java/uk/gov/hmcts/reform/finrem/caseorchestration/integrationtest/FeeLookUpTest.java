@@ -62,7 +62,7 @@ public class FeeLookUpTest {
     private MockMvc webClient;
 
     @ClassRule
-    public static WireMockClassRule feeLookUpService = new WireMockClassRule(8086);
+    public static WireMockClassRule feeLookUpService = new WireMockClassRule(9001);
 
     private CCDRequest request;
 
@@ -85,7 +85,7 @@ public class FeeLookUpTest {
                 .andExpect(content()
                         .json(expectedBody()));
         verify(getRequestedFor(urlMatching(
-                "/api.*")));
+                "/payments/fee-lookup")));
     }
 
     private String expectedBody() {
@@ -104,8 +104,7 @@ public class FeeLookUpTest {
     }
 
     private void stubFeeLookUp() {
-        stubFor(get("/api?service=other&jurisdiction1=family"
-                + "&jurisdiction2=family-court&channel=default&event=general-application&keyword=without-notice")
+        stubFor(get("/payments/fee-lookup")
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)

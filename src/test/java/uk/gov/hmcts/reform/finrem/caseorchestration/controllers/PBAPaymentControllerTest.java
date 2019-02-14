@@ -28,9 +28,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PBAPaymentController.APPLICATION_SUBMITTED_STATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PBAPaymentController.AWAITING_HWF_DECISION_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.fee;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.AbstractBaseController.APPLICATION_SUBMITTED_STATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.AbstractBaseController.AWAITING_HWF_DECISION_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler.SERVER_ERROR_MSG;
 
 @WebMvcTest(value = {PBAPaymentController.class, FeeLookupController.class})

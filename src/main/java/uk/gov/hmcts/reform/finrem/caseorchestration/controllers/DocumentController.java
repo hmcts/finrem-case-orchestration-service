@@ -23,7 +23,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class DocumentController extends AbstractBaseController {
+public class DocumentController implements BaseController {
 
     @Autowired
     private DocumentService service;
@@ -42,9 +42,7 @@ public class DocumentController extends AbstractBaseController {
 
         log.info("Received request for generateMiniFormA. Auth token: {}, Case request : {}", authorisationToken,
                 request);
-
         validateCaseData(request);
-
         CaseData caseData = request.getCaseDetails().getCaseData();
         CaseDocument document = service.generateMiniFormA(authorisationToken, request.getCaseDetails());
         caseData.setMiniFormA(document);

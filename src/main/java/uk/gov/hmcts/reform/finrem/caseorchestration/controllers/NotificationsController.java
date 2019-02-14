@@ -19,7 +19,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @Slf4j
-public class NotificationsController {
+public class NotificationsController implements BaseController {
 
     private static final String LOG_MESSAGE = "received notification request for case reference :    ";
 
@@ -35,6 +35,7 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
+        validateCaseData(ccdRequest);
         if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
             notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, userToken);
         }
@@ -51,6 +52,7 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
+        validateCaseData(ccdRequest);
         if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
             notificationService.sendAssignToJudgeConfirmationEmail(ccdRequest, userToken);
         }
@@ -67,6 +69,7 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
+        validateCaseData(ccdRequest);
         if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
             notificationService.sendConsentOrderMadeConfirmationEmail(ccdRequest, userToken);
         }
@@ -83,6 +86,7 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
+        validateCaseData(ccdRequest);
         if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
             notificationService.sendConsentOrderNotApprovedEmail(ccdRequest, userToken);
         }
@@ -99,6 +103,7 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
+        validateCaseData(ccdRequest);
         if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
             notificationService.sendConsentOrderAvailableEmail(ccdRequest, userToken);
         }
