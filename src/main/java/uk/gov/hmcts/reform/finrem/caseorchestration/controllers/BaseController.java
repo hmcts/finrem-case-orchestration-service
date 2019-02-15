@@ -9,8 +9,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 public interface BaseController {
     default void validateCaseData(CCDRequest ccdRequest) {
         if (ccdRequest == null || ccdRequest.getCaseDetails() == null
-                || ccdRequest.getCaseDetails().getCaseData() == null
-                || ccdRequest.getCaseDetails().getCaseData().getDivorceCaseNumber() == null) {
+                || ccdRequest.getCaseDetails().getCaseData() == null) {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing case data from CCD request.");
         }
     }
