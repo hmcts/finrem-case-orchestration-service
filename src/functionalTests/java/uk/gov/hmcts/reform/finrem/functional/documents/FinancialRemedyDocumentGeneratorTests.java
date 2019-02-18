@@ -73,6 +73,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     private void validatePostSuccess(String jsonFileName) {
+        IntegrationTestBase.setDocumentGeneratorServiceUrlAsBaseUri();
         SerenityRest.given()
             .relaxedHTTPSValidation()
             .headers(utils.getHeaders())
@@ -84,7 +85,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
 
     private Response generateDocument(String jsonFileName) {
-
+        IntegrationTestBase.setDocumentGeneratorServiceUrlAsBaseUri();
         Response jsonResponse = SerenityRest.given()
             .relaxedHTTPSValidation()
             .headers(utils.getHeaders())
@@ -94,6 +95,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     private void validatePostSuccessForaccessingGeneratedDocument(String url) {
+
         SerenityRest.given()
             .relaxedHTTPSValidation()
             .headers(utils.getHeadersWithUserId())

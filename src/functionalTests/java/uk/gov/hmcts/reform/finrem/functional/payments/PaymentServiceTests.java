@@ -7,6 +7,7 @@ import net.serenitybdd.rest.SerenityRest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
+import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTest;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import static org.junit.Assert.assertTrue;
@@ -17,7 +18,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private static String FEE_LOOKUP = "/payments/fee-lookup";
     private static String PBA_VALIDATE = "/payments/pba-validate/";
     private static String PBA_PAYMENT = "/payments/pba-payment";
-
 
 
     @Value("${payment_api_url }")
@@ -37,6 +37,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Test
     public void verifyGetFeeLoopUpTest() {
 
+
         validatePostSuccess(FEE_LOOKUP);
 
     }
@@ -48,12 +49,14 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     @Test
     public void verifyPBAPaymentTest() {
+
         validatePostSuccessForPBAPayment(PBA_PAYMENT);
 
     }
 
 
     private void validatePostSuccess(String url) {
+        IntegrationTestBase.setPaymentServiceUrlUrlAsBaseUri();
         System.out.println("Fee LookUp : " + pbaValidationUrl + url);
 
         SerenityRest.given()
@@ -67,6 +70,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     public void validatePostSuccessForPBAValidation(String url) {
 
+        IntegrationTestBase.setPaymentServiceUrlUrlAsBaseUri();
         System.out.println("PBA Validation : " + pbaValidationUrl + url);
         System.out.println("Testing vaul access " + pdfAccessKey);
         SerenityRest.given()
@@ -81,8 +85,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     public void validatePostSuccessForPBAPayment(String url) {
 
+        IntegrationTestBase.setPaymentServiceUrlUrlAsBaseUri();
         System.out.println("PBA Payment : " + pbaValidationUrl + url);
-
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeader())

@@ -5,6 +5,7 @@ import net.serenitybdd.rest.SerenityRest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
+import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTest;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 @RunWith(SerenityRunner.class)
@@ -58,6 +59,7 @@ public class NotificationTests extends IntegrationTestBase {
 
     private void validatePostSuccessForNotification(String url, String jsonFileName) {
 
+        IntegrationTestBase.setNotificationServiceUrlAsBaseUri();
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getNewHeaders())

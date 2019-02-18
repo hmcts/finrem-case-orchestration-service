@@ -20,13 +20,17 @@ public abstract class IntegrationTestBase {
     @Autowired
     protected FunctionalTestUtils utils;
 
-    private String documentGeneratorServiceUrl;
-
 
     @Autowired
     protected SolCCDServiceAuthTokenGenerator serviceAuthTokenGenerator;
 
     public static String serviceAuthUrl;
+
+    public static String documentGeneratorServiceUrl;
+
+    public static String notificationServiceUrl;
+
+    public static String paymentServiceUrl;
 
 
     public IntegrationTestBase() {
@@ -38,8 +42,37 @@ public abstract class IntegrationTestBase {
     public void documentGeneratorServiceUrl(@Value("${document.generator.uri}")
                                                     String documentGeneratorServiceUrl) {
         this.documentGeneratorServiceUrl = documentGeneratorServiceUrl;
+
+    }
+
+    public static void setDocumentGeneratorServiceUrlAsBaseUri() {
         RestAssured.baseURI = documentGeneratorServiceUrl;
     }
+
+
+    @Autowired
+    public void notificationServiceUrl(@Value("${notification.uri}")
+                                                    String notificationServiceUrl) {
+        this.notificationServiceUrl = notificationServiceUrl;
+
+    }
+
+    public static void setNotificationServiceUrlAsBaseUri() {
+        RestAssured.baseURI = notificationServiceUrl;
+    }
+
+
+    @Autowired
+    public void paymentServiceUrl(@Value("${payment_api_url}")
+                                               String paymentServiceUrl) {
+        this.paymentServiceUrl = paymentServiceUrl;
+
+    }
+
+    public static void setPaymentServiceUrlUrlAsBaseUri() {
+        RestAssured.baseURI = notificationServiceUrl;
+    }
+
 
     @Autowired
     public void serviceAuthUrl(@Value("${idam.s2s-auth.url}")String serviceAuthUrl) {
