@@ -76,6 +76,11 @@ public class FunctionalTestUtils {
 
     }
 
+    public Headers getNewHeaders() {
+        return Headers.headers(
+                new Header("Content-Type", ContentType.JSON.toString()));
+    }
+
     public String downloadPdfAndParseToString(String documentUrl) {
         Response document = SerenityRest.given()
             .relaxedHTTPSValidation()

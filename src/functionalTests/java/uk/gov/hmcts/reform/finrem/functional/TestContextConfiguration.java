@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.functional;
 
-import com.netflix.ribbon.proxy.annotation.ClientProperties;
+
 import feign.Feign;
 import feign.jackson.JacksonEncoder;
 import lombok.extern.slf4j.Slf4j;
