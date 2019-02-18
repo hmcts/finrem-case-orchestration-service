@@ -41,6 +41,15 @@ public class CaseOrchestrationSmokeTests {
     @Value("${fees.keyword}")
     private String keyword;
 
+    @Value("${http.timeout}")
+    private int connectionTimeOut;
+
+    @Value("${http.requestTimeout}")
+    private int socketTimeOut;
+
+    @Value("${http.readTimeout}")
+    private int connectionManagerTimeOut;
+
     private RestAssuredConfig config;
 
     @Before
@@ -48,13 +57,13 @@ public class CaseOrchestrationSmokeTests {
         RestAssured.useRelaxedHTTPSValidation();
         config = RestAssured.config()
                 .httpClient(HttpClientConfig.httpClientConfig()
-                        .setParam("http.connection.timeout", 60000)
-                        .setParam("http.socket.timeout", 60000)
-                        .setParam("http.connection-manager.timeout", 60000));
+                        .setParam("http.connection.timeout", connectionTimeOut)
+                        .setParam("http.socket.timeout", socketTimeOut)
+                        .setParam("http.connection-manager.timeout", connectionManagerTimeOut));
     }
 
     @Test
-    public void shouldGetOkStatusFromHealthEndpoint() {
+    public void shouldFeeLookUp() {
         given().config(config)
                 .when()
                 .queryParam("service", service)
