@@ -4,11 +4,14 @@ buildscript {
     }
     repositories {
         mavenCentral()
+        maven { url "http://repo1.maven.org/maven2/" }
+        maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath group: 'org.sonarsource.scanner.gradle', name: 'sonarqube-gradle-plugin', version: '2.6.2'
         classpath("net.serenity-bdd:serenity-gradle-plugin:1.5.2")
+
     }
 }
 
@@ -16,6 +19,7 @@ plugins {
     id 'application'
     id 'checkstyle'
     id 'io.spring.dependency-management' version '1.0.6.RELEASE'
+    id 'com.github.ben-manes.versions' version '0.17.0'
     id 'jacoco'
     id 'net.ltgt.apt' version '0.10'
     id 'io.franzbecker.gradle-lombok' version '1.14'
@@ -36,6 +40,7 @@ apply plugin: 'net.serenity-bdd.aggregator'
 apply plugin: 'jacoco'
 apply plugin: 'org.owasp.dependencycheck'
 apply plugin: 'info.solidsoft.pitest'
+apply plugin: 'net.serenity-bdd.aggregator'
 
 
 group = 'uk.gov.hmcts.reform.finrem'
@@ -69,14 +74,24 @@ sourceSets {
         resources.srcDir 'src/test/resources'
     }
 
-    testFunctional {
+    functional {
         java {
-            compileClasspath += main.output
-            runtimeClasspath += main.output
-            srcDir file('src/test/functionalTest/java')
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDirs = ['src/functionalTests/java']
+
+
         }
-        resources.srcDir file('src/test/functionalTest/resources')
+        resources {
+            srcDirs = ['src/functionalTests/resources']
+        }
+
     }
+}
+
+configurations {
+    functionalCompile.extendsFrom testCompile
+    functionalRuntime.extendsFrom testRuntime
 }
 
 def versions = [
@@ -86,7 +101,26 @@ def versions = [
         feignHttpClient         : '9.5.1',
         wiremockVersion         : '2.18.0',
         reformsJavaLogging      : '4.0.1',
-        serviceTokenGenerator   : '1.0.4'
+        serviceTokenGenerator   : '1.0.4',
+        commonsLang3            : '3.7',
+        jsonAssert              : '1.2.3',
+        junit                   : '4.12',
+        lombok                  : '1.16.16',
+        nimbus                  : '5.1',
+        pdfbox                  : '2.0.8',
+        mockito                 : '2.8.9',
+        powerMock               : '1.7.3',
+        puppyCrawl              : '7.6',
+        restAssured             : '3.0.3',
+        serenity                : '2.0.11',
+        serenityCucumber        : '1.1.3',
+        springBoot              : '2.0.3.RELEASE',
+        springOpenFeign         : '2.0.0.RELEASE',
+        springHateoas           : '0.24.0.RELEASE',
+        unirest                 : '1.4.9',
+        pitest                  : '1.3.2',
+        gradlePitest            : '1.3.0',
+        sonarPitest             : '0.5'
 ]
 
 dependencies {
@@ -113,15 +147,28 @@ dependencies {
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremockVersion
-
-    testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-core', version: '1.5.2'
-    testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: '1.5.2'
-    testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '1.5.2'
-    testFunctionalCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '1.0.26'
-
+    
     testSmokeCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
     testSmokeCompile sourceSets.main.runtimeClasspath
     testSmokeCompile sourceSets.test.runtimeClasspath
+
+    functionalCompile group: 'junit', name: 'junit', version: versions.junit
+    functionalCompile group: 'net.serenity-bdd', name: 'serenity-core', version: '2.0.11'
+    functionalCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: '2.0.11'
+    functionalCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '2.0.11'
+    functionalCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '2.0.11'
+    functionalCompile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
+    functionalCompile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '1.0.4'
+    functionalCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
+    functionalCompile group: 'junit', name: 'junit', version: versions.junit
+    functionalCompile group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber
+    functionalCompile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
+    functionalCompile group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+    functionalCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+    functionalCompile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    functionalCompile group: 'org.pdfbox', name: 'com.springsource.org.pdfbox', version: '0.7.3'
+    functionalCompile group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
+
 }
 def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
@@ -225,9 +272,9 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
     finalizedBy aggregate
 }
 
-task functional(type: Test, description: 'Runs the functional tests.', group: 'Verification') {
-    // description = "Runs functional Tests"
-    testClassesDirs = sourceSets.testFunctional.output.classesDirs
-    classpath = sourceSets.testFunctional.runtimeClasspath
+task functional(type: Test) {
+    description = "Runs functional Tests"
+    setTestClassesDirs(sourceSets.functional.output.classesDirs)
+    setClasspath(sourceSets.functional.runtimeClasspath)
     finalizedBy aggregate
 }

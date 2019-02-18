@@ -20,7 +20,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
 
 
-    @Value("${pba.validation.url}")
+    @Value("${payment_api_url }")
     private String pbaValidationUrl;
 
     @Value("${idam.s2s-auth.microservice}")
@@ -34,10 +34,10 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private String pdfAccessKey;
 
 
-    //@Test
+    @Test
     public void verifyGetFeeLoopUpTest() {
 
-        //validatePostSuccess(FEE_LOOKUP);
+        validatePostSuccess(FEE_LOOKUP);
 
     }
 
@@ -53,15 +53,15 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
 
-    //private void validatePostSuccess(String url) {
-        //System.out.println("Fee LookUp : " + prdApiUrl + url);
+    private void validatePostSuccess(String url) {
+        System.out.println("Fee LookUp : " + pbaValidationUrl + url);
 
-        //SerenityRest.given()
-                //.relaxedHTTPSValidation()
-                //.when().get(prdApiUrl + url)
-                //.then()
-                //.assertThat().statusCode(200);
-    //}
+        SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .when().get(pbaValidationUrl + url)
+                .then()
+                .assertThat().statusCode(200);
+    }
 
 
 

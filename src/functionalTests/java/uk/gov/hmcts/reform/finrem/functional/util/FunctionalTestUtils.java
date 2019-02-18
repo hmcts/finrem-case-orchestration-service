@@ -69,6 +69,13 @@ public class FunctionalTestUtils {
             new Header("Content-Type", ContentType.JSON.toString()));
     }
 
+    public Headers getHeader() {
+        return Headers.headers(
+                new Header("Authorization", "Bearer "
+                        + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)));
+
+    }
+
     public String downloadPdfAndParseToString(String documentUrl) {
         Response document = SerenityRest.given()
             .relaxedHTTPSValidation()
