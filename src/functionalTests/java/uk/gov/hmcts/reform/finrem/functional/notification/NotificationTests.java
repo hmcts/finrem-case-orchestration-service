@@ -59,7 +59,6 @@ public class NotificationTests extends IntegrationTestBase {
 
     private void validatePostSuccessForNotification(String url, String jsonFileName) {
 
-        IntegrationTestBase.setNotificationServiceUrlAsBaseUri();
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getNewHeaders())

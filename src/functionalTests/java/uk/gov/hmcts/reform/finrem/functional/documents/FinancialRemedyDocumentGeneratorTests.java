@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import static org.junit.Assert.assertTrue;
 
-
 @RunWith(SerenityRunner.class)
 
 public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
@@ -27,6 +26,9 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Value("${idam.oauth2.client.secret}")
     private String authClientSecret;
+
+    @Value("${document.generator.uri}")
+    private String generatorUrl;
 
 
     @Test
@@ -85,12 +87,12 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
 
     private Response generateDocument(String jsonFileName) {
-        IntegrationTestBase.setDocumentGeneratorServiceUrlAsBaseUri();
+
         Response jsonResponse = SerenityRest.given()
             .relaxedHTTPSValidation()
             .headers(utils.getHeaders())
             .body(utils.getJsonFromFile(jsonFileName))
-            .when().post().andReturn();
+            .when().post(generatorUrl).andReturn();
         return jsonResponse;
     }
 

@@ -34,7 +34,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private String pdfAccessKey;
 
 
-    @Test
+    //@Test
     public void verifyGetFeeLoopUpTest() {
 
 
@@ -42,12 +42,12 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     }
 
-    @Test
+    //@Test
     public void verifyPBAValidationTest() {
         validatePostSuccessForPBAValidation(PBA_VALIDATE);
     }
 
-    @Test
+    //@Test
     public void verifyPBAPaymentTest() {
 
         validatePostSuccessForPBAPayment(PBA_PAYMENT);

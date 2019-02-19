@@ -61,7 +61,6 @@ public abstract class IntegrationTestBase {
         RestAssured.baseURI = notificationServiceUrl;
     }
 
-
     @Autowired
     public void paymentServiceUrl(@Value("${payment_api_url}")
                                                String paymentServiceUrl) {
