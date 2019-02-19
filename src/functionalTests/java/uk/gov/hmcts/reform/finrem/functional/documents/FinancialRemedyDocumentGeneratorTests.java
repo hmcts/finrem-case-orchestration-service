@@ -40,6 +40,9 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyDocumentGenerationPostResponseContent() {
         Response response = generateDocument("documentGeneratePayload.json");
+
+        System.out.println(response.jsonPath().prettyPrint());
+
         JsonPath jsonPathEvaluator = response.jsonPath();
         assertTrue(jsonPathEvaluator.get("fileName").toString().equalsIgnoreCase("MiniFormA.pdf"));
         assertTrue(jsonPathEvaluator.get("mimeType").toString().equalsIgnoreCase("application/pdf"));
