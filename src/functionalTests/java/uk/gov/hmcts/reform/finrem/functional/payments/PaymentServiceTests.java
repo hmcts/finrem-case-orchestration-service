@@ -67,7 +67,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
 
-
     public void validatePostSuccessForPBAValidation(String url) {
 
         IntegrationTestBase.setPaymentServiceUrlUrlAsBaseUri();
