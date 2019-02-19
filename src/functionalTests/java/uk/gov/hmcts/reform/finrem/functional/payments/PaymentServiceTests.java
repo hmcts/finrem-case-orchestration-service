@@ -20,7 +20,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private static String PBA_PAYMENT = "/payments/pba-payment";
 
 
-    @Value("${payment_api_url }")
+    @Value("${payment_api_url}")
     private String pbaValidationUrl;
 
     @Value("${idam.s2s-auth.microservice}")
@@ -89,7 +89,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
         System.out.println("PBA Payment : " + pbaValidationUrl + url);
         SerenityRest.given()
                 .relaxedHTTPSValidation()
-                .headers(utils.getHeader())
+                .headers(utils.getHeaders())
                 .body(utils.getJsonFromFile("paymentRequestPayload.json"))
                 .when().post(pbaValidationUrl + url)
                 .then()

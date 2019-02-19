@@ -17,12 +17,9 @@ public abstract class IntegrationTestBase {
 
     @Rule
     public SpringIntegrationMethodRule springIntegration;
+
     @Autowired
     protected FunctionalTestUtils utils;
-
-
-    @Autowired
-    protected SolCCDServiceAuthTokenGenerator serviceAuthTokenGenerator;
 
     public static String serviceAuthUrl;
 
