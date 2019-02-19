@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
