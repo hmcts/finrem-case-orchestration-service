@@ -34,9 +34,6 @@ public class TestContextConfiguration {
             .encoder(new JacksonEncoder())
             .contract(new SpringMvcContract())
             .target(ServiceAuthorisationApi.class, s2sUrl);
-        log.info("S2S URL: {}", s2sUrl);
-        log.info("service.name: {}", microservice);
-        log.info(": {idam.oauth2.client.secret}", secret);
         return new ServiceAuthTokenGenerator(secret, microservice, serviceAuthorisationApi);
     }
 }

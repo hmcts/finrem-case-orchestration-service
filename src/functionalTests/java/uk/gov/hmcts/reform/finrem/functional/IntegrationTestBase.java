@@ -36,7 +36,7 @@ public abstract class IntegrationTestBase {
     }
 
     @Autowired
-    public void documentGeneratorServiceUrl(@Value("${document.generator.uri}")
+    public void documentGeneratorServiceUrl(@Value("${cos.document.miniform.api}")
                                                     String documentGeneratorServiceUrl) {
         this.documentGeneratorServiceUrl = documentGeneratorServiceUrl;
 
