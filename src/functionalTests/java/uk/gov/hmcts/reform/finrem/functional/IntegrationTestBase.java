@@ -40,35 +40,8 @@ public abstract class IntegrationTestBase {
     public void caseOrchestrationUrl(@Value("${case.orchestration.api}")
                                                     String caseOrchestrationUrl) {
         this.caseOrchestrationUrl = caseOrchestrationUrl;
+        RestAssured.baseURI = caseOrchestrationUrl;
     }
-
-    public static void setDocumentGeneratorServiceUrlAsBaseUri() {
-        RestAssured.baseURI = documentGeneratorServiceUrl;
-    }
-
-
-    @Autowired
-    public void notificationServiceUrl(@Value("${notification.uri}")
-                                                    String notificationServiceUrl) {
-        this.notificationServiceUrl = notificationServiceUrl;
-
-    }
-
-    public static void setNotificationServiceUrlAsBaseUri() {
-        RestAssured.baseURI = notificationServiceUrl;
-    }
-
-    @Autowired
-    public void paymentServiceUrl(@Value("${payment_api_url}")
-                                               String paymentServiceUrl) {
-        this.paymentServiceUrl = paymentServiceUrl;
-
-    }
-
-    public static void setPaymentServiceUrlUrlAsBaseUri() {
-        RestAssured.baseURI = notificationServiceUrl;
-    }
-
 
     @Autowired
     public void serviceAuthUrl(@Value("${idam.s2s-auth.url}")String serviceAuthUrl) {

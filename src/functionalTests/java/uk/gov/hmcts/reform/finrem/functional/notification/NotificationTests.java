@@ -27,41 +27,40 @@ public class NotificationTests extends IntegrationTestBase {
     private String hwfSuccessfulApiUri;
 
 
-    @Test
+    //@Test
     public void verifyNotifyAssignToJudgeTestIsOkay() {
 
         validatePostSuccessForNotification(notifyAssignToJudge, "assignedToJudge.json");
 
     }
 
-    @Test
+    //@Test
     public void verifyNotifyConsentOrderAvailableTestIsOkay() {
 
         validatePostSuccessForNotification(consentOrderAvailable, "consentOrderAvailable.json");
 
     }
 
-    @Test
+    //@Test
     public void verifyNotifyConsentOrderMadeTestIsOkay() {
 
         validatePostSuccessForNotification(consentOrderMade, "consentOrderMade.json");
 
     }
 
-    @Test
+    //@Test
     public void verifyNotifyConsentOrderNotApprovedTestIsOkay() {
 
         validatePostSuccessForNotification(consentOrderNotApproved, "consentOrderNotApproved.json");
 
     }
 
-    @Test
+    //@Test
     public void verifyNotifyHwfSuccessfulTestIsOkay() {
 
         validatePostSuccessForNotification(hwfSuccessfulApiUri, "hwfSuccessfulEmail.json");
 
     }
-
 
     private void validatePostSuccessForNotification(String url, String jsonFileName) {
 

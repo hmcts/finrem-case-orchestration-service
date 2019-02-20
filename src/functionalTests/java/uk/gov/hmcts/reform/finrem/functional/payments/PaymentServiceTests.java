@@ -35,7 +35,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private HashMap<String, String> pbaAccounts = new HashMap<>();
 
 
-    //@Test
+    @Test
     public void verifyPBAAccountStatus() {
         pbaAccounts.put(pbaAccountActive, "Active");
         pbaAccounts.put(pbaAccountInActive, "Inactive");
@@ -45,31 +45,31 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
 
-    //@Test
+    @Test
     public void verifyGetFeeLoopUpTest() {
 
         validatePostSuccess(feeLookup);
     }
 
-    //@Test
+    @Test
     public void verifyPBAValidationTest() {
         validatePostSuccessForPBAValidation(pbaValidate);
     }
 
-    //@Test
+    @Test
     public void verifyPBAPaymentSuccessTest() {
         validatePostSuccessForPBAPayment(pbaPayment);
 
     }
 
-    //@Test
+    @Test
     public void verifyPBAPaymentFailureTest() {
         validateFailurePBAPayment(pbaPayment);
 
     }
 
     private void validatePostSuccess(String url) {
-        IntegrationTestBase.setPaymentServiceUrlUrlAsBaseUri();
+
         System.out.println("Fee LookUp : " + url);
 
         SerenityRest.given()
@@ -82,7 +82,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     public void validatePostSuccessForPBAValidation(String url) {
 
-        IntegrationTestBase.setPaymentServiceUrlUrlAsBaseUri();
         System.out.println("PBA Validation : " + url);
 
         SerenityRest.given()
