@@ -40,7 +40,7 @@ public abstract class IntegrationTestBase {
     public void caseOrchestrationUrl(@Value("${case.orchestration.api}")
                                                     String caseOrchestrationUrl) {
         this.caseOrchestrationUrl = caseOrchestrationUrl;
-        RestAssured.baseURI = caseOrchestrationUrl;
+        //RestAssured.baseURI = caseOrchestrationUrl;
     }
 
     @Autowired

@@ -32,7 +32,11 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Value("${pba.account.inactive}")
     private String pbaAccountInActive;
 
+    @Value("${payment.pba.confirmation}")
+    private String pbaConfirmation;
+
     private HashMap<String, String> pbaAccounts = new HashMap<>();
+
 
 
     @Test
@@ -68,6 +72,19 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     }
 
+    @Test
+    public void verifyPBAConfirmationForHWF() {
+        validatePBAConfirmationForHWF();
+
+    }
+
+    @Test
+    public void verifyPBAConfirmationForPBAPayment()
+    {
+
+        validatePBAConfirmationForPBAPayment();
+    }
+
     private void validatePostSuccess(String url) {
 
         System.out.println("Fee LookUp : " + url);
@@ -93,6 +110,36 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .assertThat().statusCode(200);
     }
 
+    private void validatePBAConfirmationForHWF() {
+
+       Response response = getPBAPaymentResponse(pbaConfirmation,"hwfPayment.json");
+
+        int statusCode = response.getStatusCode();
+
+        JsonPath jsonPathEvaluator = response.jsonPath();
+
+        assertEquals(statusCode, 200);
+
+        assertTrue(jsonPathEvaluator.get("confirmation_body").toString().contains("Process the application for help with fees"));
+
+
+    }
+
+    private void validatePBAConfirmationForPBAPayment() {
+
+        Response response = getPBAPaymentResponse(pbaConfirmation,"pba-Payment.json");
+
+        int statusCode = response.getStatusCode();
+
+        JsonPath jsonPathEvaluator = response.jsonPath();
+
+        assertEquals(statusCode, 200);
+
+        assertTrue(jsonPathEvaluator.get("confirmation_body").toString().contains("Process the application for help with fees"));
+
+
+
+    }
 
     private void validateFailurePBAPayment(String url) {
 
@@ -112,7 +159,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePostSuccessForPBAPayment(String url) {
         System.out.println("PBA Payment : " + url);
-        Response response = getPBAPaymentResponse("SuccessPaymentRequestPayload.json",  url);
+       Response response = getPBAPaymentResponse("SuccessPaymentRequestPayload.json",  url);
         int statusCode = response.getStatusCode();
         JsonPath jsonPathEvaluator = response.jsonPath();
 
@@ -131,7 +178,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .body(utils.getJsonFromFile(payload))
                 .when().post(url)
                 .andReturn();
-
     }
 
     private void validatePBAAccountNumber(String url, HashMap<String, String> pbaAccount) {
