@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
-import uk.gov.hmcts.reform.finrem.functional.SolCCDServiceAuthTokenGenerator;
+import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 
@@ -31,7 +31,7 @@ public class FunctionalTestUtils {
     @Value("${idam.api.url}")
     public String baseServiceOauth2Url = "";
     @Autowired
-    protected SolCCDServiceAuthTokenGenerator serviceAuthTokenGenerator;
+    private ServiceAuthTokenGenerator tokenGenerator;
     @Value("${user.id.url}")
     private String userId;
     @Value("${idam.username}")
@@ -57,16 +57,16 @@ public class FunctionalTestUtils {
     public Headers getHeadersWithUserId() {
 
         return Headers.headers(
-            new Header("ServiceAuthorization", serviceAuthTokenGenerator.generateServiceToken()),
-            new Header("user-roles", "caseworker-divorce"),
-            new Header("user-id", userId));
+                new Header("ServiceAuthorization", tokenGenerator.generate()),
+                new Header("user-roles", "caseworker-divorce"),
+                new Header("user-id", userId));
     }
 
     public Headers getHeaders() {
         return Headers.headers(
-            new Header("Authorization", "Bearer "
-                + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
-            new Header("Content-Type", ContentType.JSON.toString()));
+                new Header("Authorization", "Bearer "
+                        + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
+                new Header("Content-Type", ContentType.JSON.toString()));
     }
 
     public Headers getHeader() {
@@ -83,9 +83,9 @@ public class FunctionalTestUtils {
 
     public String downloadPdfAndParseToString(String documentUrl) {
         Response document = SerenityRest.given()
-            .relaxedHTTPSValidation()
-            .headers(getHeadersWithUserId())
-            .when().get(documentUrl).andReturn();
+                .relaxedHTTPSValidation()
+                .headers(getHeadersWithUserId())
+                .when().get(documentUrl).andReturn();
 
         return parsePDFToString(document.getBody().asInputStream());
     }

@@ -33,7 +33,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Value("${document.management.store.baseUrl}")
     private String dmStoreBaseUrl;
 
-    @Test
+    //@Test
     public void verifyDocumentGenerationShouldReturnOkResponseCode() {
         validatePostSuccess("documentGeneratePayload.json");
     }
