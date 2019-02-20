@@ -79,8 +79,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyPBAConfirmationForPBAPayment()
-    {
+    public void verifyPBAConfirmationForPBAPayment() {
 
         validatePBAConfirmationForPBAPayment();
     }
@@ -112,7 +111,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePBAConfirmationForHWF() {
 
-       Response response = getPBAPaymentResponse(pbaConfirmation,"hwfPayment.json");
+        Response response = getPBAPaymentResponse(pbaConfirmation,"hwfPayment.json");
 
         int statusCode = response.getStatusCode();
 
@@ -120,7 +119,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         assertEquals(statusCode, 200);
 
-        assertTrue(jsonPathEvaluator.get("confirmation_body").toString().contains("Process the application for help with fees"));
+        assertTrue(jsonPathEvaluator.get("confirmation_body")
+                .toString().contains("Process the application for help with fees"));
 
 
     }
@@ -135,7 +135,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         assertEquals(statusCode, 200);
 
-        assertTrue(jsonPathEvaluator.get("confirmation_body").toString().contains("Process the application for help with fees"));
+        assertTrue(jsonPathEvaluator.get("confirmation_body")
+                .toString().contains("Process the application for help with fees"));
 
 
 
@@ -159,7 +160,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePostSuccessForPBAPayment(String url) {
         System.out.println("PBA Payment : " + url);
-       Response response = getPBAPaymentResponse("SuccessPaymentRequestPayload.json",  url);
+        Response response = getPBAPaymentResponse("SuccessPaymentRequestPayload.json",  url);
         int statusCode = response.getStatusCode();
         JsonPath jsonPathEvaluator = response.jsonPath();
 
