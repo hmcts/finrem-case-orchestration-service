@@ -79,7 +79,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     private void validatePostSuccess(String jsonFileName) {
-        IntegrationTestBase.setDocumentGeneratorServiceUrlAsBaseUri();
+        ;
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())

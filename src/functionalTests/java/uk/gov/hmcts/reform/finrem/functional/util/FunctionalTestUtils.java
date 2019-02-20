@@ -78,7 +78,7 @@ public class FunctionalTestUtils {
 
     public Headers getNewHeaders() {
         return Headers.headers(
-                new Header("Content-Type", ContentType.JSON.toString()));
+                new Header("Content-Type", "application/json"));
     }
 
     public String downloadPdfAndParseToString(String documentUrl) {

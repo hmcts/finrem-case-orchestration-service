@@ -2,10 +2,9 @@ package uk.gov.hmcts.reform.finrem.functional.notification;
 
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
-import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
-import uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest.IntegrationTest;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 @RunWith(SerenityRunner.class)
@@ -27,38 +26,38 @@ public class NotificationTests extends IntegrationTestBase {
     private String hwfSuccessfulApiUri;
 
 
-    //@Test
+    @Test
     public void verifyNotifyAssignToJudgeTestIsOkay() {
 
-        validatePostSuccessForNotification(notifyAssignToJudge, "assignedToJudge.json");
+        validatePostSuccessForNotification(notifyAssignToJudge, "json/ccd-request-with-solicitor-assignToJudge.json");
 
     }
 
-    //@Test
+    @Test
     public void verifyNotifyConsentOrderAvailableTestIsOkay() {
 
-        validatePostSuccessForNotification(consentOrderAvailable, "consentOrderAvailable.json");
+        validatePostSuccessForNotification(consentOrderAvailable, ".json");
 
     }
 
-    //@Test
+    @Test
     public void verifyNotifyConsentOrderMadeTestIsOkay() {
 
-        validatePostSuccessForNotification(consentOrderMade, "consentOrderMade.json");
+        validatePostSuccessForNotification(consentOrderMade, "ccd-request-with-solicitor-consentOrderMade.json");
 
     }
 
-    //@Test
+    @Test
     public void verifyNotifyConsentOrderNotApprovedTestIsOkay() {
 
-        validatePostSuccessForNotification(consentOrderNotApproved, "consentOrderNotApproved.json");
+        validatePostSuccessForNotification(consentOrderNotApproved, "");
 
     }
 
-    //@Test
+    @Test
     public void verifyNotifyHwfSuccessfulTestIsOkay() {
 
-        validatePostSuccessForNotification(hwfSuccessfulApiUri, "hwfSuccessfulEmail.json");
+        validatePostSuccessForNotification(hwfSuccessfulApiUri, "ccd-request-with-solicitor-hwfSuccessfulEmail.json");
 
     }
 
