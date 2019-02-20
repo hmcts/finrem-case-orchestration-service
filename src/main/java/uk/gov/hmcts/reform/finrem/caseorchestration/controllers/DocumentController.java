@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentService;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_ISSUED;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -46,6 +47,7 @@ public class DocumentController implements BaseController {
         CaseData caseData = request.getCaseDetails().getCaseData();
         CaseDocument document = service.generateMiniFormA(authorisationToken, request.getCaseDetails());
         caseData.setMiniFormA(document);
+        caseData.setState(APPLICATION_ISSUED.toString());
 
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
