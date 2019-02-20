@@ -18,4 +18,12 @@ withParameterizedPipeline(params.TYPE, params.PRODUCT_NAME, params.APP, params.E
   before('buildinfra:prod') {
     error('Halting pipeline before PROD.')
   }
+  after('functionalTest:aat') {
+          publishHTML target: [
+          reportDir            : "target/site/serenity/",
+          reportFiles          : "index.html",
+          reportName           : "AAT Functional Tests",
+          alwaysLinkToLastBuild: true
+  ]
+}
 }

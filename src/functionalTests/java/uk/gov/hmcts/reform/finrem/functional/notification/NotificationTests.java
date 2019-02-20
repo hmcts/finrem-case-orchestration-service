@@ -11,48 +11,54 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 @RunWith(SerenityRunner.class)
 public class NotificationTests extends IntegrationTestBase {
 
-    private static final String NOTIFY_ASSIGN_TO_JUDGE = "/notify/assign-to-judge";
-    private static final String CONSENT_ORDER_AVAILABLE = "/notify/consent-order-available";
-    private static final String CONSENT_ORDER_MADE = "/notify/consent-order-made";
-    private static final String CONSENT_ORDER_NOT_APPROVED = "/notify/consent-order-not-approved";
-    private static final String HWF_SUCCESSFUL_API_URI = "/notify/hwf-successful";
+    @Value("${cos.notification.judge-assign.api}")
+    private String notifyAssignToJudge ;
 
-    @Value("${notification.uri}")
-    private String notificationUrl;
+    @Value("${cos.notification.consent-order-available.api}")
+    private String consentOrderAvailable ;
+
+    @Value("${cos.notification.consent-order-approved.api}")
+    private String consentOrderMade;
+
+    @Value("${cos.notification.consent-order-unapproved.api}")
+    private String consentOrderNotApproved;
+
+    @Value("${cos.notification.hwf-success.api}")
+    private String hwfSuccessfulApiUri;
 
 
     @Test
     public void verifyNotifyAssignToJudgeTestIsOkay() {
 
-        validatePostSuccessForNotification(NOTIFY_ASSIGN_TO_JUDGE, "assignedToJudge.json");
+        validatePostSuccessForNotification(notifyAssignToJudge, "assignedToJudge.json");
 
     }
 
     @Test
     public void verifyNotifyConsentOrderAvailableTestIsOkay() {
 
-        validatePostSuccessForNotification(CONSENT_ORDER_AVAILABLE, "consentOrderAvailable.json");
+        validatePostSuccessForNotification(consentOrderAvailable, "consentOrderAvailable.json");
 
     }
 
     @Test
     public void verifyNotifyConsentOrderMadeTestIsOkay() {
 
-        validatePostSuccessForNotification(CONSENT_ORDER_MADE, "consentOrderMade.json");
+        validatePostSuccessForNotification(consentOrderMade, "consentOrderMade.json");
 
     }
 
     @Test
     public void verifyNotifyConsentOrderNotApprovedTestIsOkay() {
 
-        validatePostSuccessForNotification(CONSENT_ORDER_NOT_APPROVED, "consentOrderNotApproved.json");
+        validatePostSuccessForNotification(consentOrderNotApproved, "consentOrderNotApproved.json");
 
     }
 
     @Test
     public void verifyNotifyHwfSuccessfulTestIsOkay() {
 
-        validatePostSuccessForNotification(HWF_SUCCESSFUL_API_URI, "hwfSuccessfulEmail.json");
+        validatePostSuccessForNotification(hwfSuccessfulApiUri, "hwfSuccessfulEmail.json");
 
     }
 
@@ -63,10 +69,8 @@ public class NotificationTests extends IntegrationTestBase {
                 .relaxedHTTPSValidation()
                 .headers(utils.getNewHeaders())
                 .body(utils.getJsonFromFile(jsonFileName))
-                .when().post(notificationUrl + url)
+                .when().post(url)
                 .then().assertThat().statusCode(204);
-
     }
-
 
 }

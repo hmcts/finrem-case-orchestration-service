@@ -37,6 +37,11 @@ module "finrem-cos" {
     DOCUMENT_GENERATOR_SERVICE_API_BASEURL                = "${var.document_generator_baseurl}"
     PAYMENT_SERVICE_API_BASEURL                           = "${var.payment_api_url}"
     SWAGGER_ENABLED                                       = "${var.swagger_enabled}"
+    USERNAME-AAT-SOLICITOR                                = "${data.azurerm_key_vault_secret.username-aat-solicitor.value}"
+    PASSWORD-AAT-SOLICITOR                                = "${data.azurerm_key_vault_secret.password-aat-solicitor.value}"
+    OAUTH2_CLIENT_FINREM                                  = "${data.azurerm_key_vault_secret.idam-secret.value}"
+    AUTH_PROVIDER_SERVICE_CLIENT_KEY                      = "${data.azurerm_key_vault_secret.finrem-doc-s2s-auth-secret.value}"
+
   }
 }
 
@@ -47,5 +52,26 @@ data "azurerm_key_vault" "finrem_key_vault" {
 
 data "azurerm_key_vault_secret" "finrem-case-orchestration-service-s2s-key" {
   name      = "finrem-case-orchestration-service-s2s-key"
+  vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
+}
+
+
+data "azurerm_key_vault_secret" "username-aat-solicitor" {
+  name      = "username-aat-solicitor"
+  vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
+}
+
+data "azurerm_key_vault_secret" "password-aat-solicitor" {
+  name      = "password-aat-solicitor"
+  vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
+}
+
+data "azurerm_key_vault_secret" "finrem-doc-s2s-auth-secret" {
+  name      = "finrem-doc-s2s-auth-secret"
+  vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
+}
+
+data "azurerm_key_vault_secret" "idam-secret" {
+  name      = "idam-secret"
   vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
 }

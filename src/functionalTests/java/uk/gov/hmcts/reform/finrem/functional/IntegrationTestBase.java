@@ -21,6 +21,8 @@ public abstract class IntegrationTestBase {
     @Autowired
     protected FunctionalTestUtils utils;
 
+    public static String caseOrchestrationUrl;
+
     public static String serviceAuthUrl;
 
     public static String documentGeneratorServiceUrl;
@@ -32,14 +34,12 @@ public abstract class IntegrationTestBase {
 
     public IntegrationTestBase() {
         this.springIntegration = new SpringIntegrationMethodRule();
-
     }
 
     @Autowired
-    public void documentGeneratorServiceUrl(@Value("${document.generator.uri}")
-                                                    String documentGeneratorServiceUrl) {
-        this.documentGeneratorServiceUrl = documentGeneratorServiceUrl;
-
+    public void caseOrchestrationUrl(@Value("${case.orchestration.api}")
+                                                    String caseOrchestrationUrl) {
+        this.caseOrchestrationUrl = caseOrchestrationUrl;
     }
 
     public static void setDocumentGeneratorServiceUrlAsBaseUri() {
