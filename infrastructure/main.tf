@@ -41,6 +41,8 @@ module "finrem-cos" {
     PASSWORD-AAT-SOLICITOR                                = "${data.azurerm_key_vault_secret.password-aat-solicitor.value}"
     OAUTH2_CLIENT_FINREM                                  = "${data.azurerm_key_vault_secret.idam-secret.value}"
     AUTH_PROVIDER_SERVICE_CLIENT_KEY                      = "${data.azurerm_key_vault_secret.finrem-doc-s2s-auth-secret.value}"
+    AAT_USERNAME                                          = "${data.azurerm_key_vault_secret.AAT-USERNAME.value}"
+    AAT_PASSWORD                                          = "${data.azurerm_key_vault_secret.AAT-PASSWOD.value}"
 
   }
 }
@@ -73,5 +75,15 @@ data "azurerm_key_vault_secret" "finrem-doc-s2s-auth-secret" {
 
 data "azurerm_key_vault_secret" "idam-secret" {
   name      = "idam-secret"
+  vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
+}
+
+data "azurerm_key_vault_secret" "AAT-USERNAME" {
+  name      = "AAT-USERNAME"
+  vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
+}
+
+data "azurerm_key_vault_secret" "AAT-PASSWORD" {
+  name      = "AAT-PASSWORD"
   vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
 }
