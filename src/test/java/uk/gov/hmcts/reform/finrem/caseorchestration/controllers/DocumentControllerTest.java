@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_ISSUED;
 
 @WebMvcTest(DocumentController.class)
 public class DocumentControllerTest extends BaseControllerTest {
@@ -75,6 +76,7 @@ public class DocumentControllerTest extends BaseControllerTest {
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state", is(APPLICATION_ISSUED.toString())))
                 .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
                 .andExpect(jsonPath("$.data.miniFormA.document_filename", is(DOC_NAME)))
                 .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BIN_DOC_URL)))

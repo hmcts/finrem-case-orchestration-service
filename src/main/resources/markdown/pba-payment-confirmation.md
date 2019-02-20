@@ -2,17 +2,15 @@
 Your application has now been submitted to the Court.
 
 # What happens next
-Payment will be taken from your PBA account in due course (unless Help with Fees has been requested) and you will be directed to the case file. Here you can view the ‘history’ tab to monitor the progress of your application.
+You will now be directed to the case file where you can monitor the progress of your application via the ‘history’ tab. Next:
+* Your application will be issued by Court staff and referred to a Judge
+* The Judge will consider your application and make an order
+You will receive an email notification at each stage of the process.
 
 # How will I receive my order? 
-You will receive a notification via email at the following stages: 
-* When a Help with Fees application has been dealt with (if applicable)
-* When the application has been issued
-* When the application has been referred to a Judge
-* When the application has been reviewed by a Judge
-* When the the Court Order is available for download
+Unless you have opted for postal service, you will receive a notification via email inviting you to log in and download a copy of the order. Orders can be accessed from the ‘orders’ tab in the case file.  
 
-Orders can be accessed from the ‘orders’ tab in the case file. 
+If you need to submit a response to the order, you can upload your response onto the case file.
 
 # If you need help 
 You can contact the court if you need help. 

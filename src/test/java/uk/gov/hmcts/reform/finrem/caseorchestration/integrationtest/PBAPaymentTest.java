@@ -40,8 +40,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PBAPaymentController.APPLICATION_SUBMITTED_STATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PBAPaymentController.AWAITING_HWF_DECISION_STATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_SUBMITTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -101,7 +101,7 @@ public class PBAPaymentTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.data.state", is(APPLICATION_SUBMITTED_STATE)))
+                .andExpect(jsonPath("$.data.state", is(APPLICATION_SUBMITTED.toString())))
                 .andExpect(jsonPath("$.data.PBAPaymentReference", is("REF0001")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0600")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("5000")))
@@ -127,7 +127,7 @@ public class PBAPaymentTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.data.state", is(AWAITING_HWF_DECISION_STATE)))
+                .andExpect(jsonPath("$.data.state", is(AWAITING_HWF_DECISION.toString())))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0600")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("5000")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription",

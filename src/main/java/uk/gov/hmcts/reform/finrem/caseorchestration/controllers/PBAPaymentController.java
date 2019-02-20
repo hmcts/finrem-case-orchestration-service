@@ -20,6 +20,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 import java.io.IOException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_SUBMITTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,9 +29,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Slf4j
 @SuppressWarnings("unchecked")
 public class PBAPaymentController implements BaseController {
-    public static final String AWAITING_HWF_DECISION_STATE = "awaitingHWFDecision";
-    public static final String APPLICATION_SUBMITTED_STATE = "applicationSubmitted";
-
     private final FeeService feeService;
     private final PBAPaymentService pbaPaymentService;
 
@@ -50,11 +49,11 @@ public class PBAPaymentController implements BaseController {
             if (!paymentResponse.isPaymentSuccess()) {
                 return paymentFailure(caseData, paymentResponse);
             }
-            caseData.setState(APPLICATION_SUBMITTED_STATE);
+            caseData.setState(APPLICATION_SUBMITTED.toString());
             caseData.setPbaPaymentReference(paymentResponse.getReference());
             log.info("Payment succeeded.");
         } else {
-            caseData.setState(AWAITING_HWF_DECISION_STATE);
+            caseData.setState(AWAITING_HWF_DECISION.toString());
         }
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
 

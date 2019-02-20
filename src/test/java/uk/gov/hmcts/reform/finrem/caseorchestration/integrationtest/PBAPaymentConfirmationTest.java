@@ -18,7 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 
 import java.io.InputStream;
 
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class PBAPaymentConfirmationTest {
 
-    private static final String PBA_CONFIRMATION_URL = "/case-orchestration/pba-confirmation";
+    private static final String PBA_CONFIRMATION_URL = "/case-orchestration/payment-confirmation";
     private static final String AUTH_TOKEN = "Bearer eeeeeyyyy.reeee";
 
     @Autowired
@@ -53,7 +53,32 @@ public class PBAPaymentConfirmationTest {
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.confirmation_body", startsWith("# Application Complete")));
+                .andExpect(jsonPath("$.confirmation_body",
+                        containsString("You will now be directed to the case file where you can monitor "
+                                + "the progress of your application via the ‘history’ tab. Next:")))
+                .andExpect(jsonPath("$.confirmation_body",
+                        containsString("* Your application will be issued by Court staff and referred "
+                                + "to a Judge")))
+                .andExpect(jsonPath("$.confirmation_body",
+                        containsString("* The Judge will consider your application and make an order")));
+    }
+
+
+    @Test
+    public void shouldDoHwfConfirmation() throws Exception {
+        setRequest("/fixtures/hwf.json");
+        webClient.perform(MockMvcRequestBuilders.post(PBA_CONFIRMATION_URL)
+                .header("Authorization", AUTH_TOKEN)
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.confirmation_body",
+                        containsString("The application will be received by Court staff who will:")))
+                .andExpect(jsonPath("$.confirmation_body",
+                        containsString("* Check the application")))
+                .andExpect(jsonPath("$.confirmation_body",
+                        containsString("* Process the application for help with fees")));
     }
 
     @Test
