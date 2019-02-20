@@ -88,7 +88,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())
                 .body(utils.getJsonFromFile(jsonFileName))
-                .when().post()
+                .when().post(generatorUrl)
                 .then()
                 .assertThat().statusCode(200);
     }
