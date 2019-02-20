@@ -50,7 +50,8 @@ public class NotificationTests extends IntegrationTestBase {
     @Test
     public void verifyNotifyConsentOrderNotApprovedTestIsOkay() {
 
-        validatePostSuccessForNotification(consentOrderNotApproved, "");
+        validatePostSuccessForNotification(consentOrderNotApproved,
+                "ccd-request-with-solicitor-consentOrderNotApproved");
 
     }
 

@@ -122,7 +122,7 @@
       },
       "divorceDecreeAbsoluteDate": "2010-01-01",
       "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "No",
+      "solicitorAgreeToReceiveEmails": "Yes",
       "orderDirection": "test",
       "orderDirectionOpt1": {
         "document_url": "http://file1",
@@ -145,14 +145,7 @@
       "referToJudgeTextFromAwaitingResponse": "test",
       "referToJudgeDateFromOrderMade": "2010-01-01",
       "referToJudgeTextFromOrderMade": "test",
-      "referToJudgeDateFromConsOrdApproved": "2010-01-01",
-      "referToJudgeTextFromConsOrdApproved": "test",
-      "referToJudgeDateFromConsOrdMade": "2010-01-01",
-      "referToJudgeTextFromConsOrdMade": "test",
-      "referToJudgeDateFromClose": "2010-01-01",
-      "referToJudgeTextFromClose": "test",
-      "referToJudgeDateFromRespondToOrder": "2010-01-01",
-      "referToJudgeTextFromRespondToOrder": "test",
+
       "orderRefusalCollection": [
         {
           "id": "1",
@@ -181,40 +174,8 @@
           }
         }
       ],
-      "uploadConsentOrderDocuments": [
-        {
-          "id": "1",
-          "value": {
-            "DocumentType": "pdf",
-            "DocumentLink": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "DocumentEmailContent": "email-content",
-            "DocumentDateAdded": "2010-01-02",
-            "DocumentComment": "doc-comment",
-            "DocumentFileName": "file1"
-          }
-        }
-      ],
-      "uploadOrder": [
-        {
-          "id": "1",
-          "value": {
-            "DocumentType": "pdf",
-            "DocumentLink": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "DocumentEmailContent": "email-content",
-            "DocumentDateAdded": "2010-01-02",
-            "DocumentComment": "doc-comment",
-            "DocumentFileName": "file1"
-          }
-        }
-      ],
+
+
       "uploadDocuments": [
         {
           "id": "1",
@@ -248,35 +209,9 @@
             "generalOrder_comments": "comment1"
           }
         }
-      ],
-      "respondToOrderDocuments": [
-        {
-          "id": "1",
-          "value": {
-            "DocumentType": "pdf",
-            "DocumentLink": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "DocumentDateAdded": "2010-01-02",
-            "DocumentFileName": "file1"
-          }
-        }
-      ],
-      "amendedConsentOrderCollection": [
-        {
-          "id": "1",
-          "value": {
-            "amendedConsentOrder": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "amendedConsentOrderDate": "2010-01-02"
-          }
-        }
       ]
+
+        }
+
     }
   }
-}
