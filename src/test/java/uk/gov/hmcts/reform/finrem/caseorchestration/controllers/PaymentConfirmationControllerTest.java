@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentConfirmationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
@@ -23,14 +23,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@WebMvcTest(PBAPaymentConfirmationController.class)
-public class PBAPaymentConfirmationControllerTest extends BaseControllerTest {
+@WebMvcTest(PaymentConfirmationController.class)
+public class PaymentConfirmationControllerTest extends BaseControllerTest {
 
-    private static final String PBA_CONFIRMATION_URL = "/case-orchestration/pba-confirmation";
+    private static final String PBA_CONFIRMATION_URL = "/case-orchestration/payment-confirmation";
     private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
     @MockBean
-    private PBAPaymentConfirmationService pbaPaymentConfirmationService;
+    private PaymentConfirmationService paymentConfirmationService;
 
     private JsonNode requestContent;
 
@@ -41,12 +41,13 @@ public class PBAPaymentConfirmationControllerTest extends BaseControllerTest {
                 .getResource("/fixtures/empty-casedata.json").toURI()));
     }
 
-    private void doConfirmationSetup() throws Exception {
+    private void doConfirmationSetup(boolean isHwf) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/pba-validate.json").toURI()));
 
-        when(pbaPaymentConfirmationService.paymentConfirmationMarkdown()).thenReturn("confirmation_markup");
+        String markDownResponse = isHwf ? "hwf_confirmation_markup" : "pba_confirmation_markup";
+        when(paymentConfirmationService.pbaPaymentConfirmationMarkdown()).thenReturn(markDownResponse);
     }
 
     @Test
@@ -62,17 +63,31 @@ public class PBAPaymentConfirmationControllerTest extends BaseControllerTest {
 
 
     @Test
-    public void shouldReturnConfirmationMarkdown() throws Exception {
-        doConfirmationSetup();
+    public void shouldReturnHWFConfirmationMarkdown() throws Exception {
+        doConfirmationSetup(true);
         mvc.perform(post(PBA_CONFIRMATION_URL)
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.confirmation_header", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.confirmation_body", is("confirmation_markup")));
-        verify(pbaPaymentConfirmationService, times(1)).paymentConfirmationMarkdown();
+                .andExpect(jsonPath("$.confirmation_body", is("hwf_confirmation_markup")));
+        verify(paymentConfirmationService, times(1)).pbaPaymentConfirmationMarkdown();
     }
+
+    @Test
+    public void shouldReturnPBAConfirmationMarkdown() throws Exception {
+        doConfirmationSetup(false);
+        mvc.perform(post(PBA_CONFIRMATION_URL)
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.confirmation_header", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.confirmation_body", is("pba_confirmation_markup")));
+        verify(paymentConfirmationService, times(1)).pbaPaymentConfirmationMarkdown();
+    }
+
 
 
 }

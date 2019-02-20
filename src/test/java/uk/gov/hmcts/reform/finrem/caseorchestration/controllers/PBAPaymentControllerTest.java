@@ -28,10 +28,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PBAPaymentController.APPLICATION_SUBMITTED_STATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PBAPaymentController.AWAITING_HWF_DECISION_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.fee;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler.SERVER_ERROR_MSG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_SUBMITTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 
 @WebMvcTest(value = {PBAPaymentController.class, FeeLookupController.class})
 public class PBAPaymentControllerTest extends BaseControllerTest {
@@ -96,7 +96,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.state", is(AWAITING_HWF_DECISION_STATE)))
+                .andExpect(jsonPath("$.data.state", is(AWAITING_HWF_DECISION.toString())))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("1000")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
@@ -129,7 +129,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.state", is(APPLICATION_SUBMITTED_STATE)))
+                .andExpect(jsonPath("$.data.state", is(APPLICATION_SUBMITTED.toString())))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("1000")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
