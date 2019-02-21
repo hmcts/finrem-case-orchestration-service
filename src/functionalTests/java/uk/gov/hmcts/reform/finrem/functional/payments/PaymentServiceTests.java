@@ -45,17 +45,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private HashMap<String, String> pbaAccounts = new HashMap<>();
 
 
-
-    @Test
-    public void verifyPBAAccountStatus() {
-        pbaAccounts.put(pbaAccountActive, "Active");
-        pbaAccounts.put(pbaAccountInActive, "Inactive");
-
-        validatePBAAccountNumber(pbaValidate, pbaAccounts);
-
-    }
-
-
     @Test
     public void verifyGetFeeLoopUpTest() {
 
@@ -67,7 +56,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
         validatePostSuccessForPBAValidation(pbaValidate);
     }
 
-    //@Test
+    @Test
     public void verifyPBAPaymentSuccessTest() {
         validatePostSuccessForPBAPayment(pbaPayment);
 
@@ -140,7 +129,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .headers(utils.getHeader())
                 .contentType("application/json")
                 .body(utils.getJsonFromFile("pba-validate.json"))
-                .when().get(pbaValidate + pbaAccountActive)
+                .when().get(pbaValidate)
                 .then()
                 .assertThat().statusCode(200);
     }
@@ -193,7 +182,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
         List<String> errors = jsonPathEvaluator.get("errors");
         assertEquals(statusCode, 200);
 
-        assertTrue(errors.contains("Account information could not be found"));
+        assertTrue(errors.get(0).contains("Access Denied"));
 
     }
 
@@ -260,64 +249,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .when().post(url)
                 .andReturn();
     }
-
-    private void validatePBAAccountNumber(String url, HashMap<String, String> pbaAccount) {
-
-        System.out.println("PBA Validation : " + url);
-
-        System.out.println("===================================================="
-                +
-                "                                                               "
-                +
-                "==============================================================="
-                +
-                "                                                               "
-                +
-                "================================================================");
-
-
-        System.out.println("username :" + idamUserName
-                + "     password :" + idamUserPassword);
-
-
-        System.out.println("===================================================="
-                +
-                "                                                               "
-                +
-                "==============================================================="
-                +
-                "                                                               "
-                +
-                "================================================================");
-
-        pbaAccount.forEach((account, status) -> {
-
-            Response response = SerenityRest.given()
-                    .relaxedHTTPSValidation()
-                    .headers(utils.getHeader())
-                    .when().post(url + account).andReturn();
-
-            JsonPath jsonPathEvaluator = response.jsonPath();
-
-            System.out.println("get pbaNumber status ====================: "
-                    + jsonPathEvaluator.get("pbaNumberValid"));
-
-            if (status.equalsIgnoreCase("Active")) {
-
-                assertTrue(jsonPathEvaluator.get("pbaNumberValid").toString()
-                        .equalsIgnoreCase("true"));
-
-            } else if (status.equalsIgnoreCase("Inactive")) {
-
-                assertTrue(jsonPathEvaluator.get("pbaNumberValid").toString()
-                        .equalsIgnoreCase("false"));
-            }
-
-        });
-    }
-
-
-
 
 
 }
