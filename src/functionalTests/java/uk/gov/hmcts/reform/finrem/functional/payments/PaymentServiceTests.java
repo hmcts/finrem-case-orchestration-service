@@ -32,7 +32,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Value("${cos.pba.account.inactive}")
     private String pbaAccountInActive;
 
-    @Value("${cos.payment.pba.confirmation}")
+    @Value("${cos.payment.pba.confirmation.api}")
     private String pbaConfirmation;
 
     @Value("${idam.username}")
@@ -156,7 +156,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         assertTrue(jsonPathEvaluator.get("confirmation_body")
                 .toString().contains("Process the application for help with fees"));
-
 
     }
 
