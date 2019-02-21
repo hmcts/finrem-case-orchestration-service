@@ -26,10 +26,10 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Value("${cos.payment.pba.api}")
     private String pbaPayment;
 
-    @Value("${pba.account.active}")
+    @Value("${cos.pba.account.active}")
     private String pbaAccountActive;
 
-    @Value("${pba.account.inactive}")
+    @Value("${cos.pba.account.inactive}")
     private String pbaAccountInActive;
 
     @Value("${payment.pba.confirmation}")
@@ -58,7 +58,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Test
     public void verifyGetFeeLoopUpTest() {
 
-        validatePostSuccess(feeLookup);
+        validatePostSuccess(feeLookup , "fee-lookup.json");
     }
 
     @Test
@@ -90,7 +90,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
         validatePBAConfirmationForPBAPayment();
     }
 
-    private void validatePostSuccess(String url) {
+    private void validatePostSuccess(String url, String jsonFileName) {
 
         System.out.println("Fee LookUp : " + url);
 
@@ -99,7 +99,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         SerenityRest.given()
                 .relaxedHTTPSValidation()
-                .when().get( url)
+                .body(utils.getJsonFromFile(jsonFileName))
+                .when().post( url)
                 .then()
                 .assertThat().statusCode(200);
     }
@@ -160,7 +161,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePBAConfirmationForPBAPayment() {
 
-        Response response = getPBAPaymentResponse(pbaConfirmation,"pba-Payment.json");
+        Response response = getPBAPaymentResponse(pbaConfirmation,"pba-payment.json");
 
         int statusCode = response.getStatusCode();
 
