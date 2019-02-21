@@ -53,13 +53,14 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     @Test
     public void verifyPBAValidationTest() {
+
         validatePostSuccessForPBAValidation(pbaValidate);
     }
 
     @Test
     public void verifyPBAPaymentSuccessTest() {
-        validatePostSuccessForPBAPayment(pbaPayment);
 
+        validatePostSuccessForPBAPayment(pbaPayment);
     }
 
     @Test
@@ -129,7 +130,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .headers(utils.getHeader())
                 .contentType("application/json")
                 .body(utils.getJsonFromFile("pba-validate.json"))
-                .when().get(pbaValidate)
+                .when().post(pbaValidate)
                 .then()
                 .assertThat().statusCode(200);
     }
@@ -189,27 +190,15 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private void validatePostSuccessForPBAPayment(String url) {
         System.out.println("PBA Payment : " + url);
 
-        Response response = getPBAPaymentResponse(url,"SuccessPaymentRequestPayload.json"  );
+        Response response = getPBAPaymentResponse(url, "SuccessPaymentRequestPayload.json");
         int statusCode = response.getStatusCode();
         JsonPath jsonPathEvaluator = response.jsonPath();
 
         assertEquals(statusCode, 200);
-
-        assertTrue(jsonPathEvaluator.get("state").toString()
+        assertTrue(jsonPathEvaluator.get("data.state").toString()
                 .equalsIgnoreCase("applicationSubmitted"));
-        assertPaymentResponse(url,"SuccessPaymentRequestPayload.json"  );
     }
 
-    private void assertPaymentResponse(String url, String payload) {
-
-        SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(utils.getHeader())
-                .contentType("application/json")
-                .body(utils.getJsonFromFile(payload))
-                .when().post(url).then().assertThat().statusCode(200);
-
-    }
 
     private Response getPBAPaymentResponse(String url, String payload) {
 
