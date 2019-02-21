@@ -56,6 +56,9 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         JsonPath jsonPathEvaluator = response.jsonPath();
 
         String url = jsonPathEvaluator.get("data.miniFormA.document_url");
+
+        System.out.println("AccessingGeneratedDocument url :" + url);
+
         validatePostSuccessForaccessingGeneratedDocument(fileRetrieveUrl(url));
 
         Response response1 = accessGeneratedDocument(fileRetrieveUrl(url));
@@ -73,6 +76,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
         String documentUrl = jsonPathEvaluator.get("data.miniFormA.document_binary_url");
 
+        System.out.println("AccessingGeneratedDocument binaryUrl :" + documentUrl);
+
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
         assertTrue(documentContent.contains(SOLICITOR_FIRM));
         assertTrue(documentContent.contains(SOLICITOR_NAME));
@@ -83,7 +88,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     private void validatePostSuccess(String jsonFileName) {
-        ;
+        System.out.println("GenerateDocUrl :" + generatorUrl);
+
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())
@@ -95,6 +101,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
 
     private Response generateDocument(String jsonFileName) {
+        System.out.println("GenerateDocUrl :" + generatorUrl);
 
         Response jsonResponse = SerenityRest.given()
                 .relaxedHTTPSValidation()
@@ -105,7 +112,9 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     private void validatePostSuccessForaccessingGeneratedDocument(String url) {
+        System.out.println("AccessingGeneratedDocument :" + url);
 
+        System.out.println("AccessingGeneratedDocument :" + url);
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeadersWithUserId())
