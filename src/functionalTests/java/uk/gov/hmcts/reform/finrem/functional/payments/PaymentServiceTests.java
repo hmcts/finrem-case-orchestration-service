@@ -35,6 +35,12 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Value("${payment.pba.confirmation}")
     private String pbaConfirmation;
 
+    @Value("${idam.username}")
+    private String idamUserName;
+
+    @Value("${idam.userpassword}")
+    private String idamUserPassword;
+
     private HashMap<String, String> pbaAccounts = new HashMap<>();
 
 
@@ -88,6 +94,9 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         System.out.println("Fee LookUp : " + url);
 
+        System.out.println("username :" + idamUserName
+                + "     password :" + idamUserPassword);
+
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .when().get( url)
@@ -99,6 +108,30 @@ public class PaymentServiceTests extends IntegrationTestBase {
     public void validatePostSuccessForPBAValidation(String url) {
 
         System.out.println("PBA Validation : " + url);
+        System.out.println("===================================================="
+                +
+                "                                                               "
+                +
+                "==============================================================="
+                +
+                "                                                               "
+                +
+                "================================================================");
+
+
+        System.out.println("username :" + idamUserName
+                + "     password :" + idamUserPassword);
+
+        System.out.println("===================================================="
+                +
+                "                                                               "
+                +
+                "==============================================================="
+                +
+                "                                                               "
+                +
+                "================================================================");
+
 
         SerenityRest.given()
                 .relaxedHTTPSValidation()
@@ -172,6 +205,32 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private Response getPBAPaymentResponse(String payload, String url) {
 
+        System.out.println("PBA Validation : " + url);
+        System.out.println("===================================================="
+                +
+                "                                                               "
+                +
+                "==============================================================="
+                +
+                "                                                               "
+                +
+                "================================================================");
+
+
+        System.out.println("username :" + idamUserName
+                + "     password :" + idamUserPassword);
+
+        System.out.println("===================================================="
+                +
+                "                                                               "
+                +
+                "==============================================================="
+                +
+                "                                                               "
+                +
+                "================================================================");
+
+
         return SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeader())
@@ -182,6 +241,33 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     private void validatePBAAccountNumber(String url, HashMap<String, String> pbaAccount) {
+
+        System.out.println("PBA Validation : " + url);
+
+        System.out.println("===================================================="
+                +
+                "                                                               "
+                +
+                "==============================================================="
+                +
+                "                                                               "
+                +
+                "================================================================");
+
+
+        System.out.println("username :" + idamUserName
+                + "     password :" + idamUserPassword);
+
+
+        System.out.println("===================================================="
+                +
+                "                                                               "
+                +
+                "==============================================================="
+                +
+                "                                                               "
+                +
+                "================================================================");
 
         pbaAccount.forEach((account, status) -> {
 
