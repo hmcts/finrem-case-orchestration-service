@@ -47,6 +47,10 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Value("${idam.userpassword}")
     private String idamUserPassword;
 
+    @Value("${idam.api.secret}")
+    private String idamSecret;
+
+
     private HashMap<String, String> pbaAccounts = new HashMap<>();
 
 
@@ -199,8 +203,13 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         Response response = getPBAPaymentResponse(url, "SuccessPaymentRequestPayload.json");
 
+
+
         String token = idamUtils.generateUserTokenWithNoRoles(idamUserName,idamUserPassword);
+
         System.out.println("Validate Post Payment data:" + response.jsonPath().prettyPrint());
+
+        System.out.println("idam secret  :" + idamSecret );
 
         System.out.println("Authorization token :" + token );
 
