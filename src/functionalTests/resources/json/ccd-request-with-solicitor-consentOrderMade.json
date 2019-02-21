@@ -250,9 +250,9 @@
         "PostCode": "string",
         "PostTown": "string"
       },
-      "solicitorAgreeToReceiveEmails": "string",
+      "solicitorAgreeToReceiveEmails": "yes",
       "solicitorDXnumber": "string",
-      "solicitorEmail": "string",
+      "solicitorEmail": "Padmaja.Ramisetti@hmcts.net",
       "solicitorFirm": "string",
       "solicitorName": "string",
       "solicitorPhone": "string",
