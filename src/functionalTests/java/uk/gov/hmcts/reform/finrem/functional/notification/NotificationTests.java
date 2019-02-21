@@ -26,6 +26,7 @@ public class NotificationTests extends IntegrationTestBase {
     private String hwfSuccessfulApiUri;
 
 
+    //Resource URL null
     @Test
     public void verifyNotifyAssignToJudgeTestIsOkay() {
 
@@ -33,6 +34,7 @@ public class NotificationTests extends IntegrationTestBase {
 
     }
 
+    //400
     @Test
     public void verifyNotifyConsentOrderAvailableTestIsOkay() {
 
@@ -41,6 +43,7 @@ public class NotificationTests extends IntegrationTestBase {
 
     }
 
+    //400
     @Test
     public void verifyNotifyConsentOrderMadeTestIsOkay() {
 
@@ -48,6 +51,7 @@ public class NotificationTests extends IntegrationTestBase {
 
     }
 
+    //ResourceURL Null
     @Test
     public void verifyNotifyConsentOrderNotApprovedTestIsOkay() {
 
@@ -56,6 +60,8 @@ public class NotificationTests extends IntegrationTestBase {
 
     }
 
+
+    //400
     @Test
     public void verifyNotifyHwfSuccessfulTestIsOkay() {
 
@@ -64,6 +70,22 @@ public class NotificationTests extends IntegrationTestBase {
     }
 
     private void validatePostSuccessForNotification(String url, String jsonFileName) {
+        System.out.println("Test URL is right and Request Data : " + url);
+        System.out.println("====================================================" +
+                "                                                               " +
+                "===============================================================" +
+                "                                                               " +
+                "================================================================");
+
+        System.out.println(utils.getJsonFromFile(jsonFileName));
+
+        System.out.println("====================================================" +
+                "                                                               " +
+                "===============================================================" +
+                "                                                               " +
+                "================================================================");
+
+
 
         SerenityRest.given()
                 .relaxedHTTPSValidation()
