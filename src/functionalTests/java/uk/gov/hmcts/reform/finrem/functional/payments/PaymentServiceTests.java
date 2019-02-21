@@ -198,7 +198,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private void validatePostSuccessForPBAPayment(String url) {
         System.out.println("PBA Payment : " + url);
 
-        assertPaymentResponse(url,"FailurePaymentRequestPayload.json"  );
+        assertPaymentResponse(url,"SuccessPaymentRequestPayload.json"  );
 
         //Response response = getPBAPaymentResponse(url,"SuccessPaymentRequestPayload.json"  );
         //int statusCode = response.getStatusCode();
@@ -210,8 +210,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
         //        .equalsIgnoreCase("Success"));
     }
 
-    private void assertPaymentResponse(String url, String payload)
-    {
+    private void assertPaymentResponse(String url, String payload) {
 
         SerenityRest.given()
                 .relaxedHTTPSValidation()
