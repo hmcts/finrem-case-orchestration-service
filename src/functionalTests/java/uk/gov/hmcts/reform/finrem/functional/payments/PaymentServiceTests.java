@@ -178,7 +178,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private void validateFailurePBAPayment(String url) {
 
         System.out.println("PBA Payment : " + url);
-        Response response = getPBAPaymentResponse("FailurePaymentRequestPayload.json",  url);
+        Response response = getPBAPaymentResponse(url,"FailurePaymentRequestPayload.json"  );
         int statusCode = response.getStatusCode();
         JsonPath jsonPathEvaluator = response.jsonPath();
 
@@ -193,7 +193,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePostSuccessForPBAPayment(String url) {
         System.out.println("PBA Payment : " + url);
-        Response response = getPBAPaymentResponse("SuccessPaymentRequestPayload.json",  url);
+        Response response = getPBAPaymentResponse(url,"SuccessPaymentRequestPayload.json"  );
         int statusCode = response.getStatusCode();
         JsonPath jsonPathEvaluator = response.jsonPath();
 
@@ -203,7 +203,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .equalsIgnoreCase("Success"));
     }
 
-    private Response getPBAPaymentResponse(String payload, String url) {
+    private Response getPBAPaymentResponse(String url, String payload) {
 
         System.out.println("PBA Validation : " + url);
         System.out.println("===================================================="
