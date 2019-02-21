@@ -138,6 +138,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeader())
                 .param("pbaNumber", "PBA222")
+                .contentType("application/json")
                 .when().post(url)
                 .then()
                 .assertThat().statusCode(200);
@@ -166,7 +167,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         JsonPath jsonPathEvaluator = response.jsonPath();
 
-        System.out.println(response.getBody().toString());
+        System.out.println("confirmation_body ===========" + jsonPathEvaluator.get("confirmation_body").toString());
 
         assertEquals(statusCode, 200);
 
@@ -179,33 +180,32 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         System.out.println("PBA Payment : " + url);
 
+        Response response = getPBAPaymentResponse(url,"FailurePaymentRequestPayload.json"  );
+        int statusCode = response.getStatusCode();
+        JsonPath jsonPathEvaluator = response.jsonPath();
+
+        assertEquals(statusCode, 200);
+
+        assertTrue(jsonPathEvaluator.get("paymentError").toString()
+                .equalsIgnoreCase("Account information could not be found"));
+
+        assertTrue(jsonPathEvaluator.get("error").toString()
+                .equalsIgnoreCase("404"));
         assertPaymentResponse(url,"FailurePaymentRequestPayload.json"  );
-        //Response response = getPBAPaymentResponse(url,"FailurePaymentRequestPayload.json"  );
-        //int statusCode = response.getStatusCode();
-        //JsonPath jsonPathEvaluator = response.jsonPath();
-
-        //assertEquals(statusCode, 200);
-
-        //assertTrue(jsonPathEvaluator.get("paymentError").toString()
-        //        .equalsIgnoreCase("Account information could not be found"));
-
-        //assertTrue(jsonPathEvaluator.get("error").toString()
-        //        .equalsIgnoreCase("404"));
     }
 
     private void validatePostSuccessForPBAPayment(String url) {
         System.out.println("PBA Payment : " + url);
 
+        Response response = getPBAPaymentResponse(url,"SuccessPaymentRequestPayload.json"  );
+        int statusCode = response.getStatusCode();
+        JsonPath jsonPathEvaluator = response.jsonPath();
+
+        assertEquals(statusCode, 200);
+
+        assertTrue(jsonPathEvaluator.get("status").toString()
+                .equalsIgnoreCase("Success"));
         assertPaymentResponse(url,"SuccessPaymentRequestPayload.json"  );
-
-        //Response response = getPBAPaymentResponse(url,"SuccessPaymentRequestPayload.json"  );
-        //int statusCode = response.getStatusCode();
-        //JsonPath jsonPathEvaluator = response.jsonPath();
-
-        //assertEquals(statusCode, 200);
-
-        //assertTrue(jsonPathEvaluator.get("status").toString()
-        //        .equalsIgnoreCase("Success"));
     }
 
     private void assertPaymentResponse(String url, String payload) {
@@ -293,6 +293,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
                     .relaxedHTTPSValidation()
                     .headers(utils.getHeader())
                     .when().post(url + account).andReturn();
+
+            System.out.println(response.getBody().toString());
 
             JsonPath jsonPathEvaluator = response.jsonPath();
 
