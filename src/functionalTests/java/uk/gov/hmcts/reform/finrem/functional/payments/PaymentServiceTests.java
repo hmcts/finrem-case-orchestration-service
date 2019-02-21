@@ -137,9 +137,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeader())
-                .param("pbaNumber", "PBA222")
-                .contentType("application/json")
-                .when().post(url)
+                .when().get(pbaValidate + pbaAccountActive)
                 .then()
                 .assertThat().statusCode(200);
     }
@@ -172,7 +170,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
         assertEquals(statusCode, 200);
 
         assertTrue(jsonPathEvaluator.get("confirmation_body")
-                .toString().contains("Process the application for help with fees"));
+                .toString().contains("Your application will be issued by Court staff and referred to a Judge"));
 
     }
 
@@ -183,6 +181,11 @@ public class PaymentServiceTests extends IntegrationTestBase {
         Response response = getPBAPaymentResponse(url,"FailurePaymentRequestPayload.json"  );
         int statusCode = response.getStatusCode();
         JsonPath jsonPathEvaluator = response.jsonPath();
+
+        System.out.println("Payment Failure Information : "
+                + jsonPathEvaluator.get("paymentError")
+                + "                                     "
+                + jsonPathEvaluator.get("error"));
 
         assertEquals(statusCode, 200);
 
@@ -294,7 +297,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
                     .headers(utils.getHeader())
                     .when().post(url + account).andReturn();
 
-            System.out.println(response.getBody().toString());
 
             JsonPath jsonPathEvaluator = response.jsonPath();
 
