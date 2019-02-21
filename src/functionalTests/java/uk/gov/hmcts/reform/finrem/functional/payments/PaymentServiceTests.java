@@ -209,7 +209,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         System.out.println("Validate Post Payment data:" + response.jsonPath().prettyPrint());
 
-        System.out.println("idam secret  :" + idamSecret );
+        System.out.println("Print idam secret  :" + idamSecret );
 
         System.out.println("Authorization token :" + token );
 
