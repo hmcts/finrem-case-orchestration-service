@@ -6,8 +6,10 @@ import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
+import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +19,9 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(SerenityRunner.class)
 public class PaymentServiceTests extends IntegrationTestBase {
+
+    @Autowired
+    private IdamUtils idamUtils;
 
     @Value("${cos.payment.fee.lookup.api}")
     private String feeLookup;
@@ -192,18 +197,19 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private void validatePostSuccessForPBAPayment(String url) {
         System.out.println("PBA Payment : " + url);
 
-
         Response response = getPBAPaymentResponse(url, "SuccessPaymentRequestPayload.json");
+
+        String token = idamUtils.generateUserTokenWithNoRoles(idamUserName,idamUserPassword);
         System.out.println("Validate Post Payment data:" + response.jsonPath().prettyPrint());
 
+        System.out.println("Authorization token :" + token );
 
         SerenityRest.given()
                 .relaxedHTTPSValidation()
-                .headers(utils.getHeader())
+                .headers("Authorization","Bearer " + token)
                 .contentType("application/json")
                 .body(utils.getJsonFromFile("SuccessPaymentRequestPayload.json"))
                 .when().post(url).then().assertThat().statusCode(200);
-
 
         //int statusCode = response.getStatusCode();
 
