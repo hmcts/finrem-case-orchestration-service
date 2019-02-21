@@ -45,7 +45,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
 
 
-    //@Test
+    @Test
     public void verifyPBAAccountStatus() {
         pbaAccounts.put(pbaAccountActive, "Active");
         pbaAccounts.put(pbaAccountInActive, "Inactive");
@@ -55,13 +55,13 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
 
-    //@Test
+    @Test
     public void verifyGetFeeLoopUpTest() {
 
         validatePostSuccess(feeLookup);
     }
 
-    //@Test
+    @Test
     public void verifyPBAValidationTest() {
         validatePostSuccessForPBAValidation(pbaValidate);
     }
@@ -72,19 +72,19 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     }
 
-    //@Test
+    @Test
     public void verifyPBAPaymentFailureTest() {
         validateFailurePBAPayment(pbaPayment);
 
     }
 
-    //@Test
+    @Test
     public void verifyPBAConfirmationForHWF() {
         validatePBAConfirmationForHWF();
 
     }
 
-    //@Test
+    @Test
     public void verifyPBAConfirmationForPBAPayment() {
 
         validatePBAConfirmationForPBAPayment();
