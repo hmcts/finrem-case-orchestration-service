@@ -14,7 +14,7 @@
               "document_filename": "string",
               "document_url": "string"
             },
-            "amendedConsentOrderDate": "2019-02-20T21:12:03.736Z"
+            "amendedConsentOrderDate": "2019-02-21T09:59:44.626Z"
           }
         }
       ],
@@ -27,7 +27,7 @@
       "assignedToJudge": "string",
       "assignedToJudgeReason": "string",
       "authorisation2b": "string",
-      "authorisation3": "2019-02-20T21:12:03.736Z",
+      "authorisation3": "2019-02-21T09:59:44.626Z",
       "authorisationFirm": "string",
       "authorisationName": "string",
       "consentOrder": {
@@ -57,8 +57,8 @@
         "document_url": "string"
       },
       "divorceCaseNumber": "string",
-      "divorceDecreeAbsoluteDate": "2019-02-20T21:12:03.736Z",
-      "divorceDecreeNisiDate": "2019-02-20T21:12:03.736Z",
+      "divorceDecreeAbsoluteDate": "2019-02-21T09:59:44.626Z",
+      "divorceDecreeNisiDate": "2019-02-21T09:59:44.626Z",
       "divorceStageReached": "string",
       "divorceUploadEvidence1": {
         "document_binary_url": "string",
@@ -70,13 +70,13 @@
         "document_filename": "string",
         "document_url": "string"
       },
-      "dueDate": "2019-02-20T21:12:03.736Z",
+      "dueDate": "2019-02-21T09:59:44.626Z",
       "generalOrderCollection": [
         {
           "id": "string",
           "value": {
             "generalOrder_comments": "string",
-            "generalOrder_dateOfOrder": "2019-02-20T21:12:03.736Z",
+            "generalOrder_dateOfOrder": "2019-02-21T09:59:44.626Z",
             "generalOrder_documentUpload": {
               "document_binary_url": "string",
               "document_filename": "string",
@@ -89,7 +89,7 @@
         }
       ],
       "helpWithFeesQuestion": "string",
-      "issueDate": "2019-02-20T21:12:03.736Z",
+      "issueDate": "2019-02-21T09:59:44.626Z",
       "miniFormA": {
         "document_binary_url": "string",
         "document_filename": "string",
@@ -108,7 +108,7 @@
       "orderDirection": "string",
       "orderDirectionAbsolute": "string",
       "orderDirectionAddComments": "string",
-      "orderDirectionDate": "2019-02-20T21:12:03.736Z",
+      "orderDirectionDate": "2019-02-21T09:59:44.626Z",
       "orderDirectionJudge": "string",
       "orderDirectionJudgeName": "string",
       "orderDirectionOpt1": {
@@ -127,7 +127,7 @@
               "string"
             ],
             "orderRefusalAddComments": "string",
-            "orderRefusalDate": "2019-02-20T21:12:03.736Z",
+            "orderRefusalDate": "2019-02-21T09:59:44.626Z",
             "orderRefusalDocs": {
               "document_binary_url": "string",
               "document_filename": "string",
@@ -201,13 +201,13 @@
       "rSolicitorName": "string",
       "rSolicitorPhone": "string",
       "rSolicitorReference": "string",
-      "referToJudgeDate": "2019-02-20T21:12:03.736Z",
-      "referToJudgeDateFromAwaitingResponse": "2019-02-20T21:12:03.736Z",
-      "referToJudgeDateFromClose": "2019-02-20T21:12:03.736Z",
-      "referToJudgeDateFromConsOrdApproved": "2019-02-20T21:12:03.736Z",
-      "referToJudgeDateFromConsOrdMade": "2019-02-20T21:12:03.736Z",
-      "referToJudgeDateFromOrderMade": "2019-02-20T21:12:03.736Z",
-      "referToJudgeDateFromRespondToOrder": "2019-02-20T21:12:03.736Z",
+      "referToJudgeDate": "2019-02-21T09:59:44.626Z",
+      "referToJudgeDateFromAwaitingResponse": "2019-02-21T09:59:44.626Z",
+      "referToJudgeDateFromClose": "2019-02-21T09:59:44.626Z",
+      "referToJudgeDateFromConsOrdApproved": "2019-02-21T09:59:44.626Z",
+      "referToJudgeDateFromConsOrdMade": "2019-02-21T09:59:44.626Z",
+      "referToJudgeDateFromOrderMade": "2019-02-21T09:59:44.626Z",
+      "referToJudgeDateFromRespondToOrder": "2019-02-21T09:59:44.626Z",
       "referToJudgeText": "string",
       "referToJudgeTextFromAwaitingResponse": "string",
       "referToJudgeTextFromClose": "string",
@@ -219,7 +219,7 @@
         {
           "id": "string",
           "value": {
-            "DocumentDateAdded": "2019-02-20T21:12:03.736Z",
+            "DocumentDateAdded": "2019-02-21T09:59:44.626Z",
             "DocumentFileName": "string",
             "DocumentLink": {
               "document_binary_url": "string",
@@ -263,7 +263,7 @@
           "id": "string",
           "value": {
             "DocumentComment": "string",
-            "DocumentDateAdded": "2019-02-20T21:12:03.736Z",
+            "DocumentDateAdded": "2019-02-21T09:59:44.626Z",
             "DocumentEmailContent": "string",
             "DocumentFileName": "string",
             "DocumentLink": {
@@ -280,7 +280,7 @@
           "id": "string",
           "value": {
             "DocumentComment": "string",
-            "DocumentDateAdded": "2019-02-20T21:12:03.736Z",
+            "DocumentDateAdded": "2019-02-21T09:59:44.626Z",
             "DocumentEmailContent": "string",
             "DocumentFileName": "string",
             "DocumentLink": {
@@ -297,7 +297,7 @@
           "id": "string",
           "value": {
             "DocumentComment": "string",
-            "DocumentDateAdded": "2019-02-20T21:12:03.736Z",
+            "DocumentDateAdded": "2019-02-21T09:59:44.626Z",
             "DocumentEmailContent": "string",
             "DocumentFileName": "string",
             "DocumentLink": {
