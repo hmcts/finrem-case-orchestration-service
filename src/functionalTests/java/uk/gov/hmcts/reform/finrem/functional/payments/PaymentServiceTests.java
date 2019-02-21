@@ -231,6 +231,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 "================================================================");
 
 
+        System.out.println("Resource URL payload file  : " + payload);
+
         return SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeader())
