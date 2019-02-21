@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import java.util.HashMap;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -137,6 +138,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeader())
+                .contentType("application/json")
+                .body(utils.getJsonFromFile("pba-validate.json"))
                 .when().get(pbaValidate + pbaAccountActive)
                 .then()
                 .assertThat().statusCode(200);
@@ -178,23 +181,20 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         System.out.println("PBA Payment : " + url);
 
+
         Response response = getPBAPaymentResponse(url,"FailurePaymentRequestPayload.json"  );
         int statusCode = response.getStatusCode();
         JsonPath jsonPathEvaluator = response.jsonPath();
 
         System.out.println("Payment Failure Information : "
-                + jsonPathEvaluator.get("paymentError")
                 + "                                     "
-                + jsonPathEvaluator.get("error"));
+                + jsonPathEvaluator.get("errors"));
 
+        List<String> errors = jsonPathEvaluator.get("errors");
         assertEquals(statusCode, 200);
 
-        assertTrue(jsonPathEvaluator.get("paymentError").toString()
-                .equalsIgnoreCase("Account information could not be found"));
+        assertTrue(errors.contains("Account information could not be found"));
 
-        assertTrue(jsonPathEvaluator.get("error").toString()
-                .equalsIgnoreCase("404"));
-        assertPaymentResponse(url,"FailurePaymentRequestPayload.json"  );
     }
 
     private void validatePostSuccessForPBAPayment(String url) {
@@ -206,8 +206,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         assertEquals(statusCode, 200);
 
-        assertTrue(jsonPathEvaluator.get("status").toString()
-                .equalsIgnoreCase("Success"));
+        assertTrue(jsonPathEvaluator.get("state").toString()
+                .equalsIgnoreCase("applicationSubmitted"));
         assertPaymentResponse(url,"SuccessPaymentRequestPayload.json"  );
     }
 
@@ -297,8 +297,10 @@ public class PaymentServiceTests extends IntegrationTestBase {
                     .headers(utils.getHeader())
                     .when().post(url + account).andReturn();
 
-
             JsonPath jsonPathEvaluator = response.jsonPath();
+
+            System.out.println("get pbaNumber status ====================: "
+                    + jsonPathEvaluator.get("pbaNumberValid"));
 
             if (status.equalsIgnoreCase("Active")) {
 
