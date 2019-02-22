@@ -19,5 +19,3 @@ data:
   DOCUMENT_GENERATOR_SERVICE_API_BASEURL : "http://finrem-dgcs-aat.service.core-compute-aat.internal"
   FINREM_NOTIFICATION_SERVICE_BASE_URL : "http://finrem-ns-aat.service.core-compute-aat.internal"
   PAYMENT_SERVICE_API_BASEURL : "http://finrem-ps-aat.service.core-compute-aat.internal"
-  AUTH_PROVIDER_SERVICE_CLIENT_KEY : ${AUTH_PROVIDER_SERVICE_CLIENT_KEY}
-
