@@ -61,19 +61,19 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private HashMap<String, String> pbaAccounts = new HashMap<>();
 
 
-    @Test
+    //@Test
     public void verifyGetFeeLoopUpTest() {
 
         validatePostSuccess(feeLookup , "fee-lookup.json");
     }
 
-    @Test
+    //@Test
     public void verifyPBAValidationTest() {
 
         validatePostSuccessForPBAValidation(pbaValidate);
     }
 
-    @Test
+    //@Test
     public void verifyPBAPaymentSuccessTest() {
 
         validatePostSuccessForPBAPayment(pbaPayment);
@@ -85,13 +85,13 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     }
 
-    @Test
+    //@Test
     public void verifyPBAConfirmationForHWF() {
         validatePBAConfirmationForHWF();
 
     }
 
-    @Test
+    //@Test
     public void verifyPBAConfirmationForPBAPayment() {
 
         validatePBAConfirmationForPBAPayment();
