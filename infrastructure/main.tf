@@ -37,12 +37,10 @@ module "finrem-cos" {
     DOCUMENT_GENERATOR_SERVICE_API_BASEURL                = "${var.document_generator_baseurl}"
     PAYMENT_SERVICE_API_BASEURL                           = "${var.payment_api_url}"
     SWAGGER_ENABLED                                       = "${var.swagger_enabled}"
-    USERNAME-AAT-SOLICITOR                                = "${data.azurerm_key_vault_secret.username-aat-solicitor.value}"
-    PASSWORD-AAT-SOLICITOR                                = "${data.azurerm_key_vault_secret.password-aat-solicitor.value}"
     OAUTH2_CLIENT_FINREM                                  = "${data.azurerm_key_vault_secret.idam-secret.value}"
     AUTH_PROVIDER_SERVICE_CLIENT_KEY                      = "${data.azurerm_key_vault_secret.finrem-doc-s2s-auth-secret.value}"
-    AAT_USERNAME                                          = "${data.azurerm_key_vault_secret.AAT-USERNAME.value}"
-    AAT_PASSWORD                                          = "${data.azurerm_key_vault_secret.AAT-PASSWORD.value}"
+    USERNAME-SOLICITOR                                    = "${data.azurerm_key_vault_secret.username-solicitor.value}"
+    PASSWORD-SOLICITOR                                    = "${data.azurerm_key_vault_secret.password-solicitor.value}"
 
   }
 }
@@ -58,13 +56,13 @@ data "azurerm_key_vault_secret" "finrem-case-orchestration-service-s2s-key" {
 }
 
 
-data "azurerm_key_vault_secret" "username-aat-solicitor" {
-  name      = "username-aat-solicitor"
+data "azurerm_key_vault_secret" "username-solicitor" {
+  name      = "username-solicitor"
   vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
 }
 
-data "azurerm_key_vault_secret" "password-aat-solicitor" {
-  name      = "password-aat-solicitor"
+data "azurerm_key_vault_secret" "password-solicitor" {
+  name      = "password-solicitor"
   vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
 }
 
@@ -78,12 +76,3 @@ data "azurerm_key_vault_secret" "idam-secret" {
   vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
 }
 
-data "azurerm_key_vault_secret" "AAT-USERNAME" {
-  name      = "AAT-USERNAME"
-  vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
-}
-
-data "azurerm_key_vault_secret" "AAT-PASSWORD" {
-  name      = "AAT-PASSWORD"
-  vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
-}

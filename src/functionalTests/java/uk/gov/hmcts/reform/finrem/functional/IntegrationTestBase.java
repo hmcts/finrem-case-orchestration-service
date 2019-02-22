@@ -15,42 +15,33 @@ import uk.gov.hmcts.reform.finrem.functional.util.FunctionalTestUtils;
 public abstract class IntegrationTestBase {
 
 
-    @Rule
-    public SpringIntegrationMethodRule springIntegration;
-
-    @Autowired
-    protected FunctionalTestUtils utils;
-
     public static String caseOrchestrationUrl;
-
     public static String serviceAuthUrl;
 
-    public static String documentGeneratorServiceUrl;
-
-    public static String notificationServiceUrl;
-
-    public static String paymentServiceUrl;
+    @Rule
+    public SpringIntegrationMethodRule springIntegration;
+    @Autowired
+    protected FunctionalTestUtils utils;
 
 
     public IntegrationTestBase() {
         this.springIntegration = new SpringIntegrationMethodRule();
     }
 
-    @Autowired
-    public void caseOrchestrationUrl(@Value("${case.orchestration.api}")
-                                                    String caseOrchestrationUrl) {
-        this.caseOrchestrationUrl = caseOrchestrationUrl;
-        //RestAssured.baseURI = caseOrchestrationUrl;
-    }
-
-    @Autowired
-    public void serviceAuthUrl(@Value("${idam.s2s-auth.url}")String serviceAuthUrl) {
-        this.serviceAuthUrl = serviceAuthUrl;
-
-    }
-
     public static void setServiceAuthUrlAsBaseUri() {
         RestAssured.baseURI = serviceAuthUrl;
+    }
+
+    @Autowired
+    public void caseOrchestrationUrl(@Value("${case.orchestration.api}")
+                                             String caseOrchestrationUrl) {
+        this.caseOrchestrationUrl = caseOrchestrationUrl;
+        RestAssured.baseURI = caseOrchestrationUrl;
+    }
+
+    @Autowired
+    public void serviceAuthUrl(@Value("${idam.s2s-auth.url}") String serviceAuthUrl) {
+        this.serviceAuthUrl = serviceAuthUrl;
     }
 
 }

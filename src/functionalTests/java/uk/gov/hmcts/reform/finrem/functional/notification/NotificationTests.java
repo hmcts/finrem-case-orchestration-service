@@ -2,8 +2,8 @@ package uk.gov.hmcts.reform.finrem.functional.notification;
 
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
-import org.junit.runner.RunWith;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
@@ -11,10 +11,10 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 public class NotificationTests extends IntegrationTestBase {
 
     @Value("${cos.notification.judge-assign.api}")
-    private String notifyAssignToJudge ;
+    private String notifyAssignToJudge;
 
     @Value("${cos.notification.consent-order-available.api}")
-    private String consentOrderAvailable ;
+    private String consentOrderAvailable;
 
     @Value("${cos.notification.consent-order-approved.api}")
     private String consentOrderMade;
@@ -67,30 +67,6 @@ public class NotificationTests extends IntegrationTestBase {
     }
 
     private void validatePostSuccessForNotification(String url, String jsonFileName) {
-        System.out.println("Test URL is right and Request Data : " + url);
-        System.out.println("===================================================="
-                +
-                "                                                               "
-                +
-                "==============================================================="
-                +
-                "                                                               "
-                +
-                "================================================================");
-
-        System.out.println(utils.getJsonFromFile(jsonFileName));
-
-        System.out.println("===================================================="
-                +
-                "                                                               "
-                +
-                "==============================================================="
-                +
-                "                                                               "
-                +
-                "================================================================");
-
-
 
         SerenityRest.given()
                 .relaxedHTTPSValidation()

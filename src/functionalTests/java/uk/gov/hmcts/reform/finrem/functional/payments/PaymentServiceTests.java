@@ -2,16 +2,12 @@ package uk.gov.hmcts.reform.finrem.functional.payments;
 
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import io.restassured.builder.RequestSpecBuilder;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
-import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,11 +17,6 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(SerenityRunner.class)
 public class PaymentServiceTests extends IntegrationTestBase {
-
-    @Autowired
-    private IdamUtils idamUtils;
-    @Autowired
-    private ServiceAuthTokenGenerator tokenGenerator;
 
     @Value("${user.id.url}")
     private String userId;
@@ -61,19 +52,19 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private HashMap<String, String> pbaAccounts = new HashMap<>();
 
 
-    //@Test
+    @Test
     public void verifyGetFeeLoopUpTest() {
 
-        validatePostSuccess(feeLookup , "fee-lookup.json");
+        validatePostSuccess(feeLookup, "fee-lookup.json");
     }
 
-    //@Test
+    @Test
     public void verifyPBAValidationTest() {
 
         validatePostSuccessForPBAValidation(pbaValidate);
     }
 
-    //@Test
+    @Test
     public void verifyPBAPaymentSuccessTest() {
 
         validatePostSuccessForPBAPayment(pbaPayment);
@@ -85,13 +76,13 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     }
 
-    //@Test
+    @Test
     public void verifyPBAConfirmationForHWF() {
         validatePBAConfirmationForHWF();
 
     }
 
-    //@Test
+    @Test
     public void verifyPBAConfirmationForPBAPayment() {
 
         validatePBAConfirmationForPBAPayment();
@@ -99,48 +90,18 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePostSuccess(String url, String jsonFileName) {
 
-        System.out.println("Fee LookUp : " + url);
-
-        System.out.println("username :" + idamUserName
-                + "     password :" + idamUserPassword);
-
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeader())
                 .contentType("application/json")
                 .body(utils.getJsonFromFile(jsonFileName))
-                .when().post( url)
+                .when().post(url)
                 .then()
                 .assertThat().statusCode(200);
     }
 
 
     public void validatePostSuccessForPBAValidation(String url) {
-
-        System.out.println("PBA Validation : " + url);
-        System.out.println("===================================================="
-                +
-                "                                                               "
-                +
-                "==============================================================="
-                +
-                "                                                               "
-                +
-                "================================================================");
-
-
-        System.out.println("username :" + idamUserName
-                + "     password :" + idamUserPassword);
-
-        System.out.println("===================================================="
-                +
-                "                                                               "
-                +
-                "==============================================================="
-                +
-                "                                                               "
-                +
-                "================================================================");
 
         SerenityRest.given()
                 .relaxedHTTPSValidation()
@@ -154,7 +115,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePBAConfirmationForHWF() {
 
-        Response response = getPBAPaymentResponse(pbaConfirmation,"hwfPayment.json");
+        Response response = getPBAPaymentResponse(pbaConfirmation, "hwfPayment.json");
 
         int statusCode = response.getStatusCode();
 
@@ -169,13 +130,11 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePBAConfirmationForPBAPayment() {
 
-        Response response = getPBAPaymentResponse(pbaConfirmation,"pba-payment.json");
+        Response response = getPBAPaymentResponse(pbaConfirmation, "pba-payment.json");
 
         int statusCode = response.getStatusCode();
 
         JsonPath jsonPathEvaluator = response.jsonPath();
-
-        System.out.println("confirmation_body ===========" + jsonPathEvaluator.get("confirmation_body").toString());
 
         assertEquals(statusCode, 200);
 
@@ -186,32 +145,11 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validateFailurePBAPayment(String url) {
 
-        System.out.println("PBA Payment : " + url);
-        System.out.println("username :" + idamUserName
-                + "     password :" + idamUserPassword);
-
-
-        SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .header("ServiceAuthorization", tokenGenerator.generate() )
-                .header( "user-roles", "caseworker-divorce")
-                .header("user-id", userId)
-                //.headers(utils.getHeadersWithUserId())
-                .contentType("application/json")
-                .body(utils.getJsonFromFile("FailurePaymentRequestPayload.json"))
-                .when().post(url).then().assertThat().statusCode(200);
-
-
-        Response response = getPBAPaymentResponse(url,"FailurePaymentRequestPayload.json"  );
+        Response response = getPBAPaymentResponse(url, "FailurePaymentRequestPayload.json");
 
         int statusCode = response.getStatusCode();
 
         JsonPath jsonPathEvaluator = response.jsonPath();
-
-
-        System.out.println("Payment Failure Information : "
-                + "                                     "
-                + jsonPathEvaluator.get("errors"));
 
         List<String> errors = jsonPathEvaluator.get("errors");
         assertEquals(statusCode, 200);
@@ -221,64 +159,20 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     private void validatePostSuccessForPBAPayment(String url) {
-        System.out.println("PBA Payment : " + url);
-
         Response response = getPBAPaymentResponse(url, "SuccessPaymentRequestPayload.json");
-
-
-
-        String token = idamUtils.generateUserTokenWithNoRoles(idamUserName,idamUserPassword);
-
-        System.out.println("Validate Post Payment data:" + response.jsonPath().prettyPrint());
-
-        System.out.println("Print idam secret  :" + idamSecret );
-
-        System.out.println("Authorization token :" + token );
-
 
         int statusCode = response.getStatusCode();
 
         JsonPath jsonPathEvaluator = response.jsonPath().setRoot("data");
 
-        System.out.println("Validate Post Payment data:" + response.jsonPath().get("data"));
-
-        System.out.println("Validate Post Payment state:" + jsonPathEvaluator.get("state"));
-
         assertEquals(statusCode, 200);
+
         assertTrue(jsonPathEvaluator.get("state").toString()
                 .equalsIgnoreCase("applicationSubmitted"));
     }
 
 
     private Response getPBAPaymentResponse(String url, String payload) {
-
-        System.out.println("PBA Validation : " + url);
-        System.out.println("===================================================="
-                +
-                "                                                               "
-                +
-                "==============================================================="
-                +
-                "                                                               "
-                +
-                "================================================================");
-
-
-        System.out.println("username :" + idamUserName
-                + "     password :" + idamUserPassword);
-
-        System.out.println("===================================================="
-                +
-                "                                                               "
-                +
-                "==============================================================="
-                +
-                "                                                               "
-                +
-                "================================================================");
-
-
-        System.out.println("Resource URL payload file  : " + payload);
 
         return SerenityRest.given()
                 .relaxedHTTPSValidation()
