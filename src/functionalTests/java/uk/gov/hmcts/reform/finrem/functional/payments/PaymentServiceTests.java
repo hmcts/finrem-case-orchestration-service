@@ -168,6 +168,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         System.out.println("AuthToken Testing " + utils.getAuthoToken());
 
+        System.out.println("IDAM Secret : " + idamSecret);
+
         JsonPath jsonPathEvaluator = response.jsonPath().setRoot("data");
 
         System.out.println("response of PBAPayment : " + response.getBody().prettyPrint());
