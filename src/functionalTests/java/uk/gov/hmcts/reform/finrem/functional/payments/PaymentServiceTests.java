@@ -2,12 +2,14 @@ package uk.gov.hmcts.reform.finrem.functional.payments;
 
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import io.restassured.builder.RequestSpecBuilder;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 
@@ -22,6 +24,11 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     @Autowired
     private IdamUtils idamUtils;
+    @Autowired
+    private ServiceAuthTokenGenerator tokenGenerator;
+
+    @Value("${user.id.url}")
+    private String userId;
 
     @Value("${cos.payment.fee.lookup.api}")
     private String feeLookup;
@@ -54,31 +61,31 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private HashMap<String, String> pbaAccounts = new HashMap<>();
 
 
-    //@Test
+    @Test
     public void verifyGetFeeLoopUpTest() {
 
         validatePostSuccess(feeLookup , "fee-lookup.json");
     }
 
-    //@Test
+    @Test
     public void verifyPBAValidationTest() {
 
         validatePostSuccessForPBAValidation(pbaValidate);
     }
 
-    //@Test
+    @Test
     public void verifyPBAPaymentSuccessTest() {
 
         validatePostSuccessForPBAPayment(pbaPayment);
     }
 
-    //@Test
+    @Test
     public void verifyPBAPaymentFailureTest() {
         validateFailurePBAPayment(pbaPayment);
 
     }
 
-    //@Test
+    @Test
     public void verifyPBAConfirmationForHWF() {
         validatePBAConfirmationForHWF();
 
@@ -99,6 +106,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         SerenityRest.given()
                 .relaxedHTTPSValidation()
+                .headers(utils.getHeader())
                 .contentType("application/json")
                 .body(utils.getJsonFromFile(jsonFileName))
                 .when().post( url)
@@ -179,22 +187,36 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private void validateFailurePBAPayment(String url) {
 
         System.out.println("PBA Payment : " + url);
-
-        Response response = getPBAPaymentResponse(url,"FailurePaymentRequestPayload.json"  );
-
-        int statusCode = response.getStatusCode();
-
-        JsonPath jsonPathEvaluator = response.jsonPath();
+        System.out.println("username :" + idamUserName
+                + "     password :" + idamUserPassword);
 
 
-        System.out.println("Payment Failure Information : "
-                + "                                     "
-                + jsonPathEvaluator.get("errors"));
+        SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .header("ServiceAuthorization", tokenGenerator.generate() )
+                .header( "user-roles", "caseworker-divorce")
+                .header("user-id", userId)
+                //.headers(utils.getHeadersWithUserId())
+                .contentType("application/json")
+                .body(utils.getJsonFromFile("FailurePaymentRequestPayload.json"))
+                .when().post(url).then().assertThat().statusCode(200);
 
-        List<String> errors = jsonPathEvaluator.get("errors");
-        assertEquals(statusCode, 200);
 
-        assertTrue(errors.get(0).contains("Access Denied"));
+//        Response response = getPBAPaymentResponse(url,"FailurePaymentRequestPayload.json"  );
+//
+//        int statusCode = response.getStatusCode();
+//
+//        JsonPath jsonPathEvaluator = response.jsonPath();
+//
+//
+//        System.out.println("Payment Failure Information : "
+//                + "                                     "
+//                + jsonPathEvaluator.get("errors"));
+//
+//        List<String> errors = jsonPathEvaluator.get("errors");
+//        assertEquals(statusCode, 200);
+//
+//        assertTrue(errors.get(0).contains("Access Denied"));
 
     }
 
@@ -220,17 +242,17 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .body(utils.getJsonFromFile("SuccessPaymentRequestPayload.json"))
                 .when().post(url).then().assertThat().statusCode(200);
 
-        //int statusCode = response.getStatusCode();
+        int statusCode = response.getStatusCode();
 
-        //JsonPath jsonPathEvaluator = response.jsonPath().setRoot("data");
+        JsonPath jsonPathEvaluator = response.jsonPath().setRoot("data");
 
-        //System.out.println("Validate Post Payment data:" + response.jsonPath().get("data"));
+        System.out.println("Validate Post Payment data:" + response.jsonPath().get("data"));
 
-        //System.out.println("Validate Post Payment state:" + jsonPathEvaluator.get("state"));
+        System.out.println("Validate Post Payment state:" + jsonPathEvaluator.get("state"));
 
-        //assertEquals(statusCode, 200);
-        //assertTrue(jsonPathEvaluator.get("data.state").toString()
-        //        .equalsIgnoreCase("applicationSubmitted"));
+        assertEquals(statusCode, 200);
+        assertTrue(jsonPathEvaluator.get("data.state").toString()
+                .equalsIgnoreCase("applicationSubmitted"));
     }
 
 

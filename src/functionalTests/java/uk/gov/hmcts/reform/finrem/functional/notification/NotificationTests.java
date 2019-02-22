@@ -26,7 +26,7 @@ public class NotificationTests extends IntegrationTestBase {
     private String hwfSuccessfulApiUri;
 
 
-    //@Test
+    @Test
     public void verifyNotifyAssignToJudgeTestIsOkay() {
 
         validatePostSuccessForNotification(notifyAssignToJudge, "ccd-request-with-solicitor-assignedToJudge.json");

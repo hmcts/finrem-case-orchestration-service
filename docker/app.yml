@@ -322,8 +322,16 @@ services:
   finrem-payment-service:
     image: hmcts/finrem-payment-service:latest
     container_name: finrem-payment-service
+    environment:
+      IDAM_API_URL: http://idam-api:8080
+      PAYMENT_API_URL: http://payments-api:8080
+      FEES_API_URL: http://payments-api:8080
+      PRD_API_URL: http://payments-api:8080
     ports:
      - 9001:9001
+    depends_on:
+      - idam-api
+      - payments-api
 
   finrem-document-generator-client:
     image: hmcts/finrem-document-generator-client:latest

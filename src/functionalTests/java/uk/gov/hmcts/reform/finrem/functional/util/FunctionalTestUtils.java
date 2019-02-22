@@ -56,8 +56,10 @@ public class FunctionalTestUtils {
 
     public Headers getHeadersWithUserId() {
 
+        System.out.println("AuthToken :" + tokenGenerator.generate());
+        System.out.println("user id " + userId);
         return Headers.headers(
-                new Header("ServiceAuthorization", tokenGenerator.generate()),
+                new Header("ServiceAuthorization", "Bearer " + tokenGenerator.generate()),
                 new Header("user-roles", "caseworker-divorce"),
                 new Header("user-id", userId));
     }
@@ -70,6 +72,8 @@ public class FunctionalTestUtils {
     }
 
     public Headers getHeader() {
+
+
         return Headers.headers(
                 new Header("Authorization", "Bearer "
                         + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)));
