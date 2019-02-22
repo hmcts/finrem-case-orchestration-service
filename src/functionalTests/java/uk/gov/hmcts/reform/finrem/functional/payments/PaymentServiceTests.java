@@ -164,9 +164,9 @@ public class PaymentServiceTests extends IntegrationTestBase {
         int statusCode = response.getStatusCode();
 
 
-         System.out.println("status :" + statusCode);
+        System.out.println("status :" + statusCode);
 
-         System.out.println("AuthToken Testing " + utils.getAuthoToken());
+        System.out.println("AuthToken Testing " + utils.getAuthoToken());
 
         JsonPath jsonPathEvaluator = response.jsonPath().setRoot("data");
 

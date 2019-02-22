@@ -71,8 +71,7 @@ public class FunctionalTestUtils {
                 new Header("Content-Type", ContentType.JSON.toString()));
     }
 
-    public String getAuthoToken()
-    {
+    public String getAuthoToken() {
         return idamUtils.generateUserTokenWithNoRoles(idamUserName,idamUserPassword);
     }
 
