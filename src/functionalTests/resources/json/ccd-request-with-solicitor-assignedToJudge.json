@@ -1,4 +1,6 @@
 {
+  "token": "test_token",
+  "event_id": "event1",
   "case_details": {
     "case_data": {
       "HWFNumber": "HWF123",
@@ -118,7 +120,7 @@
       },
       "orderDirectionOpt2": "test",
       "orderForChildrenQuestion1": "test",
-      "orderRefusalCollection": [
+      "orderRefusalCollection": [{
         "id": "1",
         "value": {
           "orderRefusal": [
@@ -143,7 +145,7 @@
           "whenShouldHearingTakePlace": "today",
           "whereShouldHearingTakePlace": "EZ801"
         }
-      ],
+      }],
       "orderSummary": {
         "Fees": [
           {
@@ -311,7 +313,5 @@
     "id": "12345678",
     "jurisdiction": "divorce",
     "state": "created"
-  },
-  "event_id": "event1",
-  "token": "testToken"
+  }
 }

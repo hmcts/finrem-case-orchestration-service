@@ -202,21 +202,21 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .when().post(url).then().assertThat().statusCode(200);
 
 
-//        Response response = getPBAPaymentResponse(url,"FailurePaymentRequestPayload.json"  );
-//
-//        int statusCode = response.getStatusCode();
-//
-//        JsonPath jsonPathEvaluator = response.jsonPath();
-//
-//
-//        System.out.println("Payment Failure Information : "
-//                + "                                     "
-//                + jsonPathEvaluator.get("errors"));
-//
-//        List<String> errors = jsonPathEvaluator.get("errors");
-//        assertEquals(statusCode, 200);
-//
-//        assertTrue(errors.get(0).contains("Access Denied"));
+        Response response = getPBAPaymentResponse(url,"FailurePaymentRequestPayload.json"  );
+
+        int statusCode = response.getStatusCode();
+
+        JsonPath jsonPathEvaluator = response.jsonPath();
+
+
+        System.out.println("Payment Failure Information : "
+                + "                                     "
+                + jsonPathEvaluator.get("errors"));
+
+        List<String> errors = jsonPathEvaluator.get("errors");
+        assertEquals(statusCode, 200);
+
+        assertTrue(errors.get(0).contains("Access Denied"));
 
     }
 
@@ -235,12 +235,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         System.out.println("Authorization token :" + token );
 
-        SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers("Authorization","Bearer " + token)
-                .contentType("application/json")
-                .body(utils.getJsonFromFile("SuccessPaymentRequestPayload.json"))
-                .when().post(url).then().assertThat().statusCode(200);
 
         int statusCode = response.getStatusCode();
 
@@ -251,7 +245,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
         System.out.println("Validate Post Payment state:" + jsonPathEvaluator.get("state"));
 
         assertEquals(statusCode, 200);
-        assertTrue(jsonPathEvaluator.get("data.state").toString()
+        assertTrue(jsonPathEvaluator.get("state").toString()
                 .equalsIgnoreCase("applicationSubmitted"));
     }
 

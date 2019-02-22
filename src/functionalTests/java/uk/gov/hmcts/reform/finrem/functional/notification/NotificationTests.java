@@ -34,7 +34,7 @@ public class NotificationTests extends IntegrationTestBase {
     }
 
 
-    //@Test
+    @Test
     public void verifyNotifyConsentOrderAvailableTestIsOkay() {
 
         validatePostSuccessForNotification(consentOrderAvailable,
@@ -43,7 +43,7 @@ public class NotificationTests extends IntegrationTestBase {
     }
 
 
-    //@Test
+    @Test
     public void verifyNotifyConsentOrderMadeTestIsOkay() {
 
         validatePostSuccessForNotification(consentOrderMade, "ccd-request-with-solicitor-consentOrderMade.json");
@@ -51,7 +51,7 @@ public class NotificationTests extends IntegrationTestBase {
     }
 
 
-    //@Test
+    @Test
     public void verifyNotifyConsentOrderNotApprovedTestIsOkay() {
 
         validatePostSuccessForNotification(consentOrderNotApproved,
@@ -59,7 +59,7 @@ public class NotificationTests extends IntegrationTestBase {
 
     }
 
-    //@Test
+    @Test
     public void verifyNotifyHwfSuccessfulTestIsOkay() {
 
         validatePostSuccessForNotification(hwfSuccessfulApiUri, "ccd-request-with-solicitor-hwfSuccessfulEmail.json");
@@ -94,10 +94,10 @@ public class NotificationTests extends IntegrationTestBase {
 
         SerenityRest.given()
                 .relaxedHTTPSValidation()
-                .headers(utils.getNewHeaders())
+                .headers(utils.getHeaders())
                 .body(utils.getJsonFromFile(jsonFileName))
                 .when().post(url)
-                .then().assertThat().statusCode(204);
+                .then().assertThat().statusCode(200);
     }
 
 }

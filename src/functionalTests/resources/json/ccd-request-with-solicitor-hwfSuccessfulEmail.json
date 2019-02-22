@@ -1,319 +1,317 @@
 {
+  "token": "test_token",
+  "event_id": "event1",
   "case_details": {
     "case_data": {
-      "HWFNumber": "string",
-      "PBANumber": "string",
-      "PBAPaymentReference": "string",
-      "PBAreference": "string",
+      "HWFNumber": "HWF123",
+      "PBANumber": "PBA222",
+      "PBAPaymentReference": "PBAPaymentRef123",
+      "PBAreference": "PBARef123",
       "amendedConsentOrderCollection": [
         {
-          "id": "string",
+          "id": "1",
           "value": {
             "amendedConsentOrder": {
-              "document_binary_url": "string",
-              "document_filename": "string",
-              "document_url": "string"
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
             },
-            "amendedConsentOrderDate": "2019-02-21T09:59:44.626Z"
+            "amendedConsentOrderDate": "2020-01-02"
           }
         }
       ],
-      "amountToPay": "string",
-      "appRespondentFMName": "string",
-      "appRespondentLName": "string",
-      "appRespondentRep": "string",
-      "applicantFMName": "string",
-      "applicantLName": "string",
-      "assignedToJudge": "string",
-      "assignedToJudgeReason": "string",
-      "authorisation2b": "string",
-      "authorisation3": "2019-02-21T09:59:44.626Z",
-      "authorisationFirm": "string",
-      "authorisationName": "string",
+      "amountToPay": "1000",
+      "appRespondentFMName": "John",
+      "appRespondentLName": "Smith",
+      "appRespondentRep": "No",
+      "applicantFMName": "Thomas",
+      "applicantLName": "Berdict",
+      "assignedToJudge": "Judge Judy",
+      "assignedToJudgeReason": "Testing",
+      "authorisation2b": "test",
+      "authorisation3": "2020-01-01",
+      "authorisationFirm": "test",
+      "authorisationName": "test",
       "consentOrder": {
-        "document_binary_url": "string",
+        "document_binary_url": "http://file1.binary",
         "document_filename": "string",
         "document_url": "string"
       },
       "consentOrderText": {
-        "document_binary_url": "string",
-        "document_filename": "string",
-        "document_url": "string"
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
       },
       "d81Applicant": {
-        "document_binary_url": "string",
-        "document_filename": "string",
-        "document_url": "string"
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
       },
       "d81Joint": {
-        "document_binary_url": "string",
-        "document_filename": "string",
-        "document_url": "string"
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
       },
-      "d81Question": "string",
+      "d81Question": "No",
       "d81Respondent": {
-        "document_binary_url": "string",
-        "document_filename": "string",
-        "document_url": "string"
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
       },
-      "divorceCaseNumber": "string",
-      "divorceDecreeAbsoluteDate": "2019-02-21T09:59:44.626Z",
-      "divorceDecreeNisiDate": "2019-02-21T09:59:44.626Z",
-      "divorceStageReached": "string",
+      "divorceCaseNumber": "DD12D12345",
+      "divorceDecreeAbsoluteDate": "2020-02-21",
+      "divorceDecreeNisiDate": "2019-02-21",
+      "divorceStageReached": "Decree Nisi",
       "divorceUploadEvidence1": {
-        "document_binary_url": "string",
-        "document_filename": "string",
-        "document_url": "string"
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
       },
       "divorceUploadEvidence2": {
-        "document_binary_url": "string",
-        "document_filename": "string",
-        "document_url": "string"
+        "document_url": "http://file2",
+        "document_filename": "file2",
+        "document_binary_url": "http://file2.binary"
       },
-      "dueDate": "2019-02-21T09:59:44.626Z",
+      "dueDate": "2019-03-21T09:53:03.013Z",
       "generalOrderCollection": [
         {
-          "id": "string",
+          "id": "1",
           "value": {
-            "generalOrder_comments": "string",
-            "generalOrder_dateOfOrder": "2019-02-21T09:59:44.626Z",
+            "generalOrder_order": "order1",
             "generalOrder_documentUpload": {
-              "document_binary_url": "string",
-              "document_filename": "string",
-              "document_url": "string"
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
             },
-            "generalOrder_judgeList": "string",
-            "generalOrder_judgeName": "string",
-            "generalOrder_order": "string"
+            "generalOrder_judgeList": "district judge",
+            "generalOrder_judgeName": "judge1",
+            "generalOrder_dateOfOrder": "2010-01-02",
+            "generalOrder_comments": "comment1"
           }
         }
       ],
-      "helpWithFeesQuestion": "string",
-      "issueDate": "2019-02-21T09:59:44.626Z",
+      "helpWithFeesQuestion": "NO",
+      "issueDate": "2019-02-21",
       "miniFormA": {
-        "document_binary_url": "string",
-        "document_filename": "string",
-        "document_url": "string"
-      },
+        "document_url": "http://doc1",
+        "document_filename": "doc1",
+        "document_binary_url": "http://doc1.binary"     },
       "natureOfApplication2": [
-        "string"
+        "item1",
+        "item2"
       ],
-      "natureOfApplication3a": "string",
-      "natureOfApplication3b": "string",
-      "natureOfApplication5": "string",
+      "natureOfApplication3a": "test",
+      "natureOfApplication3b": "test",
+      "natureOfApplication5": "test",
       "natureOfApplication6": [
-        "string"
+        "test"
       ],
-      "natureOfApplication7": "string",
-      "orderDirection": "string",
-      "orderDirectionAbsolute": "string",
-      "orderDirectionAddComments": "string",
-      "orderDirectionDate": "2019-02-21T09:59:44.626Z",
-      "orderDirectionJudge": "string",
-      "orderDirectionJudgeName": "string",
+      "natureOfApplication7": "test",
+      "orderDirection": "test",
+      "orderDirectionAbsolute": "test",
+      "orderDirectionAddComments": "test",
+      "orderDirectionDate": "2019-02-21",
+      "orderDirectionJudge": "test",
+      "orderDirectionJudgeName": "test",
       "orderDirectionOpt1": {
-        "document_binary_url": "string",
-        "document_filename": "string",
-        "document_url": "string"
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
       },
-      "orderDirectionOpt2": "string",
-      "orderForChildrenQuestion1": "string",
-      "orderRefusalCollection": [
-        {
-          "id": "string",
-          "value": {
-            "estimateLengthOfHearing": "string",
-            "orderRefusal": [
-              "string"
-            ],
-            "orderRefusalAddComments": "string",
-            "orderRefusalDate": "2019-02-21T09:59:44.626Z",
-            "orderRefusalDocs": {
-              "document_binary_url": "string",
-              "document_filename": "string",
-              "document_url": "string"
-            },
-            "orderRefusalJudge": "string",
-            "orderRefusalJudgeName": "string",
-            "orderRefusalNotEnough": [
-              "string"
-            ],
-            "orderRefusalNotEnoughOther": "string",
-            "orderRefusalOther": "string",
-            "otherHearingDetails": "string",
-            "whenShouldHearingTakePlace": "string",
-            "whereShouldHearingTakePlace": "string"
-          }
+      "orderDirectionOpt2": "test",
+      "orderForChildrenQuestion1": "test",
+      "orderRefusalCollection": [{
+        "id": "1",
+        "value": {
+          "orderRefusal": [
+            "Other"
+          ],
+          "orderRefusalDate": "2003-02-01",
+          "orderRefusalDocs": {
+            "document_url": "http://doc1",
+            "document_filename": "doc1",
+            "document_binary_url": "http://doc1.binary"
+          },
+          "orderRefusalJudge": "District Judge",
+          "orderRefusalOther": "test1",
+          "otherHearingDetails": "test2",
+          "orderRefusalJudgeName": "test3",
+          "orderRefusalNotEnough": [
+            "reason1"
+          ],
+          "estimateLengthOfHearing": "10",
+          "orderRefusalAddComments": "comment1",
+          "orderRefusalNotEnoughOther": "test",
+          "whenShouldHearingTakePlace": "today",
+          "whereShouldHearingTakePlace": "EZ801"
         }
-      ],
+      }],
       "orderSummary": {
         "Fees": [
           {
             "value": {
-              "FeeAmount": "string",
-              "FeeCode": "string",
-              "FeeDescription": "string",
-              "FeeVersion": "string"
+              "FeeAmount": "1000",
+              "FeeCode": "code",
+              "FeeDescription": "desc",
+              "FeeVersion": "ver1"
             }
           }
         ],
-        "PaymentReference": "string",
-        "PaymentTotal": "string"
+        "PaymentReference": "pay123",
+        "PaymentTotal": "1000"
       },
       "otherCollection": [
         {
-          "id": "string",
+          "id": "1",
           "value": {
-            "typeOfDocument": "string",
+            "typeOfDocument": "pdf",
             "uploadedDocument": {
-              "document_binary_url": "string",
-              "document_filename": "string",
-              "document_url": "string"
+              "document_url": "http://file1",
+              "document_filename": "file1",
+              "document_binary_url": "http://file1.binary"
             }
           }
         }
       ],
       "pensionCollection": [
         {
-          "id": "string",
+          "id": "1",
           "value": {
-            "typeOfDocument": "string",
+            "typeOfDocument": "pdf",
             "uploadedDocument": {
-              "document_binary_url": "string",
-              "document_filename": "string",
-              "document_url": "string"
+              "document_url": "http://file1",
+              "document_filename": "file1",
+              "document_binary_url": "http://file1.binary"
             }
           }
         }
       ],
       "rSolicitorAddress": {
-        "AddressLine1": "string",
-        "AddressLine2": "string",
-        "AddressLine3": "string",
-        "Country": "string",
-        "County": "string",
-        "PostCode": "string",
-        "PostTown": "string"
+        "AddressLine1": "Line1",
+        "AddressLine2": "Line2",
+        "AddressLine3": "Lne3",
+        "Country": "UK",
+        "County": "Surrey",
+        "PostCode": "CR5 2JX",
+        "PostTown": "Purley"
       },
-      "rSolicitorDXnumber": "string",
-      "rSolicitorEmail": "string",
-      "rSolicitorFirm": "string",
-      "rSolicitorName": "string",
-      "rSolicitorPhone": "string",
-      "rSolicitorReference": "string",
-      "referToJudgeDate": "2019-02-21T09:59:44.626Z",
-      "referToJudgeDateFromAwaitingResponse": "2019-02-21T09:59:44.626Z",
-      "referToJudgeDateFromClose": "2019-02-21T09:59:44.626Z",
-      "referToJudgeDateFromConsOrdApproved": "2019-02-21T09:59:44.626Z",
-      "referToJudgeDateFromConsOrdMade": "2019-02-21T09:59:44.626Z",
-      "referToJudgeDateFromOrderMade": "2019-02-21T09:59:44.626Z",
-      "referToJudgeDateFromRespondToOrder": "2019-02-21T09:59:44.626Z",
-      "referToJudgeText": "string",
-      "referToJudgeTextFromAwaitingResponse": "string",
-      "referToJudgeTextFromClose": "string",
-      "referToJudgeTextFromConsOrdApproved": "string",
-      "referToJudgeTextFromConsOrdMade": "string",
-      "referToJudgeTextFromOrderMade": "string",
-      "referToJudgeTextFromRespondToOrder": "string",
+      "rSolicitorDXnumber": "DX123",
+      "rSolicitorEmail": "rsolemail@email",
+      "rSolicitorFirm": "rsolfirm",
+      "rSolicitorName": "rsolname",
+      "rSolicitorPhone": "1234567812",
+      "rSolicitorReference": "rsolRef",
+      "referToJudgeDate": "2019-02-21",
+      "referToJudgeDateFromAwaitingResponse": "2019-02-21",
+      "referToJudgeDateFromClose": "2019-02-21",
+      "referToJudgeDateFromConsOrdApproved": "2019-02-21",
+      "referToJudgeDateFromConsOrdMade": "2019-02-21",
+      "referToJudgeDateFromOrderMade": "2019-02-21",
+      "referToJudgeDateFromRespondToOrder": "2019-02-21",
+      "referToJudgeText": "judgeText",
+      "referToJudgeTextFromAwaitingResponse": "test",
+      "referToJudgeTextFromClose": "test",
+      "referToJudgeTextFromConsOrdApproved": "test",
+      "referToJudgeTextFromConsOrdMade": "test",
+      "referToJudgeTextFromOrderMade": "test",
+      "referToJudgeTextFromRespondToOrder": "test",
       "respondToOrderDocuments": [
         {
-          "id": "string",
+          "id": "1",
           "value": {
-            "DocumentDateAdded": "2019-02-21T09:59:44.626Z",
-            "DocumentFileName": "string",
+            "DocumentType": "pdf",
             "DocumentLink": {
-              "document_binary_url": "string",
-              "document_filename": "string",
-              "document_url": "string"
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
             },
-            "DocumentType": "string"
+            "DocumentDateAdded": "2010-01-02",
+            "DocumentFileName": "file1"
           }
         }
       ],
       "respondentAddress": {
-        "AddressLine1": "string",
-        "AddressLine2": "string",
-        "AddressLine3": "string",
-        "Country": "string",
-        "County": "string",
-        "PostCode": "string",
-        "PostTown": "string"
+        "AddressLine1": "line2",
+        "AddressLine2": "line1",
+        "AddressLine3": "lin3",
+        "Country": "UK",
+        "County": "Surrey",
+        "PostCode": "CR52JL",
+        "PostTown": "Coulsdon"
       },
-      "respondentEmail": "string",
-      "respondentPhone": "string",
+      "respondentEmail": "email1@email",
+      "respondentPhone": "9876543211",
       "solicitorAddress": {
-        "AddressLine1": "string",
-        "AddressLine2": "string",
-        "AddressLine3": "string",
-        "Country": "string",
-        "County": "string",
-        "PostCode": "string",
-        "PostTown": "string"
+        "County": "essex",
+        "Country": "UK",
+        "PostCode": "b1 1ab",
+        "PostTown": "london",
+        "AddressLine1": "line1",
+        "AddressLine2": "line2",
+        "AddressLine3": "line3"
       },
       "solicitorAgreeToReceiveEmails": "yes",
       "solicitorDXnumber": "string",
       "solicitorEmail": "Padmaja.Ramisetti@hmcts.net",
-      "solicitorFirm": "string",
-      "solicitorName": "string",
-      "solicitorPhone": "string",
-      "solicitorReference": "string",
+      "solicitorFirm": "FirmA",
+      "solicitorName": "SolName1",
+      "solicitorPhone": "1234567891",
+      "solicitorReference": "LL01",
       "state": "string",
       "uploadConsentOrderDocuments": [
         {
-          "id": "string",
+          "id": "1",
           "value": {
-            "DocumentComment": "string",
-            "DocumentDateAdded": "2019-02-21T09:59:44.626Z",
-            "DocumentEmailContent": "string",
-            "DocumentFileName": "string",
+            "DocumentType": "pdf",
             "DocumentLink": {
-              "document_binary_url": "string",
-              "document_filename": "string",
-              "document_url": "string"
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
             },
-            "DocumentType": "string"
+            "DocumentEmailContent": "email-content",
+            "DocumentDateAdded": "2010-01-02",
+            "DocumentComment": "doc-comment",
+            "DocumentFileName": "file1"
           }
         }
       ],
       "uploadDocuments": [
         {
-          "id": "string",
+          "id": "1",
           "value": {
-            "DocumentComment": "string",
-            "DocumentDateAdded": "2019-02-21T09:59:44.626Z",
-            "DocumentEmailContent": "string",
-            "DocumentFileName": "string",
+            "DocumentType": "pdf",
             "DocumentLink": {
-              "document_binary_url": "string",
-              "document_filename": "string",
-              "document_url": "string"
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
             },
-            "DocumentType": "string"
+            "DocumentEmailContent": "email-content",
+            "DocumentDateAdded": "2010-01-02",
+            "DocumentComment": "doc-comment",
+            "DocumentFileName": "file1"
           }
         }
       ],
       "uploadOrder": [
         {
-          "id": "string",
+          "id": "1",
           "value": {
-            "DocumentComment": "string",
-            "DocumentDateAdded": "2019-02-21T09:59:44.626Z",
-            "DocumentEmailContent": "string",
-            "DocumentFileName": "string",
+            "DocumentType": "pdf",
             "DocumentLink": {
-              "document_binary_url": "string",
-              "document_filename": "string",
-              "document_url": "string"
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
             },
-            "DocumentType": "string"
+            "DocumentEmailContent": "email-content",
+            "DocumentDateAdded": "2010-01-02",
+            "DocumentComment": "doc-comment",
+            "DocumentFileName": "file1"
           }
         }
       ]
     },
-    "id": "string",
-    "jurisdiction": "string",
-    "state": "string"
-  },
-  "event_id": "string",
-  "token": "string"
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "created"
+  }
 }

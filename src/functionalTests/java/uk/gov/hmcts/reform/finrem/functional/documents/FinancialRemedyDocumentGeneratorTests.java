@@ -55,6 +55,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         Response response = generateDocument("documentGeneratePayload.json");
         JsonPath jsonPathEvaluator = response.jsonPath();
 
+        System.out.println("Validate Post Payment data:" + response.jsonPath().prettyPrint());
         String url = jsonPathEvaluator.get("data.miniFormA.document_url");
 
         System.out.println("AccessingGeneratedDocument url :" + url);
