@@ -8,8 +8,9 @@ def app = "cos"
 
 List<LinkedHashMap<String, Object>> secrets = [
         secret("pdf-service-access-key", "PDF_SERVICE_ACCESS_KEY"),
+        secret("finrem-payment-service-s2s-key", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
         secret("idam-secret" ,"OAUTH2_CLIENT_FINREM"),
-        secret("finrem-doc-s2s-auth-secret", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
+        //secret("finrem-doc-s2s-auth-secret", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
         secret("aat-username","AAT_USERNAME"),
         secret("aat-password","AAT_PASSWORD"),
         //secret(gov-uk-notification-test-key,"NOTIFICATION_KEY")
