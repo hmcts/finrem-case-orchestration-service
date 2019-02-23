@@ -23,5 +23,5 @@ import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 @PropertySource(value = {"classpath:application-${env}.properties"})
 public class TestContextConfiguration {
 
-    }
+}
 
