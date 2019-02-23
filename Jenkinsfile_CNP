@@ -26,6 +26,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 withPipeline(type, product, app) {
+    loadVaultSecrets(secrets)
     enableDockerBuild()
     enableDeployToAKS()
     setVaultName(product)
@@ -51,7 +52,6 @@ withPipeline(type, product, app) {
         ]
     }
 
-//    loadVaultSecrets(secrets)
     enableSlackNotifications('#finrem-dev')
 
     before('buildinfra:prod') {

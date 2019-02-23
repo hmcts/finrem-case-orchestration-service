@@ -48,7 +48,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Value("${idam.api.secret}")
     private String idamSecret;
 
-
     private HashMap<String, String> pbaAccounts = new HashMap<>();
 
 
