@@ -25,3 +25,7 @@ output "vaultUri" {
 output "auth_idam_client_secret" {
   value = "${data.azurerm_key_vault_secret.idam-secret.value}"
 }
+
+output "environment_name" {
+  value = "${local.local_env}"
+}
