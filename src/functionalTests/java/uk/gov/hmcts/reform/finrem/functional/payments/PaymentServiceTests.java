@@ -48,6 +48,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Value("${idam.api.secret}")
     private String idamSecret;
 
+    @Value("${env}")
+    private String environment;
 
     private HashMap<String, String> pbaAccounts = new HashMap<>();
 
@@ -169,6 +171,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
         System.out.println("AuthToken Testing " + utils.getAuthoToken());
 
         System.out.println("IDAM Secret : " + idamSecret);
+
+        System.out.println("ENIVRONMENT-----> : " + environment);
 
         JsonPath jsonPathEvaluator = response.jsonPath().setRoot("data");
 
