@@ -24,9 +24,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Value("${idam.s2s-auth.microservice}")
     private String microservice;
 
-    @Value("${idam.oauth2.client.secret}")
-    private String authClientSecret;
-
     @Value("${cos.document.miniform.api}")
     private String generatorUrl;
 
