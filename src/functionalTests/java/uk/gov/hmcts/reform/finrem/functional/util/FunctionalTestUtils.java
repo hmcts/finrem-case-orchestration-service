@@ -67,12 +67,12 @@ public class FunctionalTestUtils {
 
     public Headers getHeadersWithUserId(String service) {
 
-        if(service.equalsIgnoreCase("docGen"))
+        if (service.equalsIgnoreCase("docGen")) {
 
-        { token = docServiceToken.generate();}
-        else if (service.equalsIgnoreCase("payment"))
-        {
-           token= paymentServiceToken.generate();
+            token = docServiceToken.generate();
+        } else if (service.equalsIgnoreCase("payment")) {
+
+            token = paymentServiceToken.generate();
         }
         System.out.println("AuthToken :" +  tokenGenerator.generate());
         System.out.println("user id " + userId);
