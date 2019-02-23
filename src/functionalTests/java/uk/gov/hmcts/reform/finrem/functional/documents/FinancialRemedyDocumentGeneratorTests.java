@@ -115,7 +115,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         System.out.println("AccessingGeneratedDocument :" + url);
         SerenityRest.given()
                 .relaxedHTTPSValidation()
-                .headers(utils.getHeadersWithUserId("docGen"))
+                .headers(utils.getHeadersWithUserId())
                 .when().get(url)
                 .then().assertThat().statusCode(200);
 
@@ -124,7 +124,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private Response accessGeneratedDocument(String url) {
         Response jsonResponse = SerenityRest.given()
                 .relaxedHTTPSValidation()
-                .headers(utils.getHeadersWithUserId("docGen"))
+                .headers(utils.getHeadersWithUserId())
                 .when().get(url)
                 .andReturn();
         return jsonResponse;

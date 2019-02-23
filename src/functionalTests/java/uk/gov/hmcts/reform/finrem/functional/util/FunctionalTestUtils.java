@@ -45,15 +45,6 @@ public class FunctionalTestUtils {
     private IdamUtils idamUtils;
     private String token;
 
-    @Autowired
-    @Qualifier("document-s2s")
-    private ServiceAuthTokenGenerator docServiceToken;
-
-
-    @Autowired
-    @Qualifier("payment-s2s")
-    private ServiceAuthTokenGenerator paymentServiceToken;
-
 
     public String getJsonFromFile(String fileName) {
         try {
@@ -65,19 +56,13 @@ public class FunctionalTestUtils {
         }
     }
 
-    public Headers getHeadersWithUserId(String service) {
+    public Headers getHeadersWithUserId() {
 
-        if (service.equalsIgnoreCase("docGen")) {
 
-            token = docServiceToken.generate();
-        } else if (service.equalsIgnoreCase("payment")) {
-
-            token = paymentServiceToken.generate();
-        }
         System.out.println("AuthToken :" +  tokenGenerator.generate());
         System.out.println("user id " + userId);
         return Headers.headers(
-                new Header("ServiceAuthorization", "Bearer " + token),
+                new Header("ServiceAuthorization", "Bearer " + tokenGenerator.generate()),
                 new Header("user-roles", "caseworker-divorce"),
                 new Header("user-id", userId));
     }
@@ -110,7 +95,7 @@ public class FunctionalTestUtils {
     public String downloadPdfAndParseToString(String documentUrl) {
         Response document = SerenityRest.given()
                 .relaxedHTTPSValidation()
-                .headers(getHeadersWithUserId("docGen"))
+                .headers(getHeadersWithUserId())
                 .when().get(documentUrl).andReturn();
 
         return parsePDFToString(document.getBody().asInputStream());
