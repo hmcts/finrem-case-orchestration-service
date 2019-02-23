@@ -11,6 +11,7 @@ import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.util.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
@@ -42,6 +43,16 @@ public class FunctionalTestUtils {
     private String microservice;
     @Autowired
     private IdamUtils idamUtils;
+    private String token;
+
+    @Autowired
+    @Qualifier("document-s2s")
+    private ServiceAuthTokenGenerator docServiceToken;
+
+
+    @Autowired
+    @Qualifier("payment-s2s")
+    private ServiceAuthTokenGenerator paymentServiceToken;
 
 
     public String getJsonFromFile(String fileName) {
@@ -54,12 +65,19 @@ public class FunctionalTestUtils {
         }
     }
 
-    public Headers getHeadersWithUserId() {
+    public Headers getHeadersWithUserId(String service) {
 
-        System.out.println("AuthToken :" + tokenGenerator.generate());
+        if(service.equalsIgnoreCase("docGen"))
+
+        { token = docServiceToken.generate();}
+        else if (service.equalsIgnoreCase("payment"))
+        {
+           token= paymentServiceToken.generate();
+        }
+        System.out.println("AuthToken :" +  tokenGenerator.generate());
         System.out.println("user id " + userId);
         return Headers.headers(
-                new Header("ServiceAuthorization", "Bearer " + tokenGenerator.generate()),
+                new Header("ServiceAuthorization", "Bearer " + token),
                 new Header("user-roles", "caseworker-divorce"),
                 new Header("user-id", userId));
     }
@@ -92,7 +110,7 @@ public class FunctionalTestUtils {
     public String downloadPdfAndParseToString(String documentUrl) {
         Response document = SerenityRest.given()
                 .relaxedHTTPSValidation()
-                .headers(getHeadersWithUserId())
+                .headers(getHeadersWithUserId("docGen"))
                 .when().get(documentUrl).andReturn();
 
         return parsePDFToString(document.getBody().asInputStream());

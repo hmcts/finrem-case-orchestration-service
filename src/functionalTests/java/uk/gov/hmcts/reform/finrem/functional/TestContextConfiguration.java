@@ -23,12 +23,12 @@ import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 @PropertySource(value = {"classpath:application-${env}.properties"})
 public class TestContextConfiguration {
 
-    @Bean
-    public ServiceAuthTokenGenerator serviceAuthTokenGenerator(@Value("${idam.s2s-auth.url}")
+    @Bean("document-s2s")
+    public ServiceAuthTokenGenerator serviceAuthTokenGenerator_DocumentGenerator(@Value("${idam.s2s-auth.url}")
                                                                    String s2sUrl,
                                                                @Value("${idam.auth.secret}")
                                                                    String secret,
-                                                               @Value("${idam.s2s-auth.microservice}")
+                                                               @Value("${idam.s2s-auth.microservice_docGen}")
                                                                        String microservice) {
         final ServiceAuthorisationApi serviceAuthorisationApi = Feign.builder()
             .encoder(new JacksonEncoder())
@@ -36,4 +36,20 @@ public class TestContextConfiguration {
             .target(ServiceAuthorisationApi.class, s2sUrl);
         return new ServiceAuthTokenGenerator(secret, microservice, serviceAuthorisationApi);
     }
+
+    @Bean("payment-s2s")
+    public ServiceAuthTokenGenerator serviceAuthTokenGenerator_paymentValidation(@Value("${idam.s2s-auth.url}")
+                                                                       String s2sUrl,
+                                                               @Value("${idam.auth.secret}")
+                                                                       String secret,
+                                                               @Value("${idam.s2s-auth.microservice_payValidation}")
+                                                                       String microservice) {
+        final ServiceAuthorisationApi serviceAuthorisationApi = Feign.builder()
+                .encoder(new JacksonEncoder())
+                .contract(new SpringMvcContract())
+                .target(ServiceAuthorisationApi.class, s2sUrl);
+        return new ServiceAuthTokenGenerator(secret, microservice, serviceAuthorisationApi);
+    }
+
+
 }
