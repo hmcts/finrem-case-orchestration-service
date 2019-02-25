@@ -234,4 +234,6 @@ public class CaseData {
     private List<RespondToOrderData> respondToOrderDocuments;
     @JsonProperty("amendedConsentOrderCollection")
     private List<AmendedConsentOrderData> amendedConsentOrderCollection;
+    @JsonProperty("caseNotesCollection")
+    private List<CaseNotesData> caseNotesCollection;
 }
