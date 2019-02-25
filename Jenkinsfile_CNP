@@ -6,7 +6,25 @@ def type = "java"
 def product = "finrem"
 def app = "cos"
 
+List<LinkedHashMap<String, Object>> secrets = [
+        secret("pdf-service-access-key", "PDF_SERVICE_ACCESS_KEY"),
+        secret("finrem-doc-s2s-auth-secret", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
+        secret("idam-secret" ,"OAUTH2_CLIENT_FINREM"),
+        secret("username-solicitor","USERNAME-SOLICITOR"),
+        secret("password-solicitor","PASSWORD-SOLICITOR")
+]
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+    [ $class: 'AzureKeyVaultSecret',
+      secretType: 'Secret',
+      name: secretName,
+      version: '',
+      envVariable: envVar
+    ]
+}
+
 withPipeline(type, product, app) {
+    loadVaultSecrets(secrets)
     enableDockerBuild()
     enableDeployToAKS()
     setVaultName(product)
@@ -32,7 +50,6 @@ withPipeline(type, product, app) {
         ]
     }
 
-//    loadVaultSecrets(secrets)
     enableSlackNotifications('#finrem-dev')
 
     before('buildinfra:prod') {

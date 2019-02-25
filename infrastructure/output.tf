@@ -21,3 +21,11 @@ output "test_environment" {
 output "vaultUri" {
   value = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
 }
+
+output "auth_idam_client_secret" {
+  value = "${data.azurerm_key_vault_secret.idam-secret.value}"
+}
+
+output "environment_name" {
+  value = "${local.local_env}"
+}
