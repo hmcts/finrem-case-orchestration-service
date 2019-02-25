@@ -51,7 +51,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private HashMap<String, String> pbaAccounts = new HashMap<>();
 
 
-    //@Test
+    @Test
     public void verifyGetFeeLoopUpTest() {
 
         validatePostSuccess(feeLookup, "fee-lookup.json");
