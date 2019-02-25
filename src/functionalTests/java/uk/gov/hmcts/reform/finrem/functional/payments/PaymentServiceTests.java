@@ -152,7 +152,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         List<String> errors = jsonPathEvaluator.get("errors");
 
-        assertTrue(errors.get(0).contains("Access Denied"));
+        assertTrue(errors.get(0).contains("Account information could not be found"));
 
     }
 
