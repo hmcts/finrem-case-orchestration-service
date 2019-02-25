@@ -68,7 +68,7 @@ sourceSets {
         }
         resources.srcDir file('src/smokeTest/resources')
     }
-    
+
     test {
         java.srcDir 'src/test/java'
         resources.srcDir 'src/test/resources'
@@ -211,7 +211,7 @@ tasks.withType(Checkstyle).each { checkstyleTask ->
 }
 
 pmd {
-    toolVersion = "6.11.0"
+    toolVersion = "6.5.0"
     ignoreFailures = true
     sourceSets = [sourceSets.main, sourceSets.test]
     reportsDir = file("$project.buildDir/reports/pmd")
