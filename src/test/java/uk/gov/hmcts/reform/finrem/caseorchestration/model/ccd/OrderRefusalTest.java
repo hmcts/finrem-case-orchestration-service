@@ -30,14 +30,8 @@ public class OrderRefusalTest {
         assertThat(order.getOrderRefusalDocs().getDocumentBinaryUrl(), is("http://doc1.binary"));
         assertThat(order.getOrderRefusalJudge(), is("District Judge"));
         assertThat(order.getOrderRefusalOther(), is("test1"));
-        assertThat(order.getOtherHearingDetails(), is("test2"));
         assertThat(order.getOrderRefusalJudgeName(), is("test3"));
-        assertThat(order.getOrderRefusalNotEnough(), hasItems("reason1"));
-        assertThat(order.getEstimateLengthOfHearing(), is("10"));
         assertThat(order.getOrderRefusalAddComments(), is("comment1"));
-        assertThat(order.getWhenShouldHearingTakePlace(), is("today"));
-        assertThat(order.getWhereShouldHearingTakePlace(), is("EZ801"));
-
     }
 
 }
