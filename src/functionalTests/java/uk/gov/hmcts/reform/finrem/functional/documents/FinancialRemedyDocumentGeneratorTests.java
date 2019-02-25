@@ -53,10 +53,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         Response response = generateDocument("documentGeneratePayload.json");
         JsonPath jsonPathEvaluator = response.jsonPath();
 
-        System.out.println("Validate Post Payment data:" + response.jsonPath().prettyPrint());
         String url = jsonPathEvaluator.get("data.miniFormA.document_url");
-
-        System.out.println("AccessingGeneratedDocument url :" + url);
 
         validatePostSuccessForaccessingGeneratedDocument(fileRetrieveUrl(url));
 
@@ -76,7 +73,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
         String documentUrl = jsonPathEvaluator.get("data.miniFormA.document_binary_url");
 
-        System.out.println("AccessingGeneratedDocument binaryUrl :" + documentUrl);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
         assertTrue(documentContent.contains(SOLICITOR_FIRM));
@@ -88,7 +84,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     private void validatePostSuccess(String jsonFileName) {
-        System.out.println("GenerateDocUrl :" + generatorUrl);
 
         SerenityRest.given()
                 .relaxedHTTPSValidation()
@@ -101,7 +96,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
 
     private Response generateDocument(String jsonFileName) {
-        System.out.println("GenerateDocUrl :" + generatorUrl);
 
         Response jsonResponse = SerenityRest.given()
                 .relaxedHTTPSValidation()
@@ -112,9 +106,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     private void validatePostSuccessForaccessingGeneratedDocument(String url) {
-        System.out.println("AccessingGeneratedDocument :" + url);
 
-        System.out.println("AccessingGeneratedDocument :" + url);
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeadersWithUserId())

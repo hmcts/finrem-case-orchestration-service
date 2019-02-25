@@ -69,19 +69,19 @@ public class PaymentServiceTests extends IntegrationTestBase {
         validatePostSuccessForPBAPayment(pbaPayment);
     }
 
-    //@Test
+    @Test
     public void verifyPBAPaymentFailureTest() {
         validateFailurePBAPayment(pbaPayment);
 
     }
 
-    //@Test
+    @Test
     public void verifyPBAConfirmationForHWF() {
         validatePBAConfirmationForHWF();
 
     }
 
-    //@Test
+    @Test
     public void verifyPBAConfirmationForPBAPayment() {
 
         validatePBAConfirmationForPBAPayment();
