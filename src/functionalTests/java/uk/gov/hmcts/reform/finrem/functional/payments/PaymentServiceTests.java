@@ -146,12 +146,11 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         Response response = getPBAPaymentResponse(url, "FailurePaymentRequestPayload.json");
 
-        int statusCode = response.getStatusCode();
+        System.out.println("ValidateFailurePBAPayment" + response.getBody().prettyPrint());
 
         JsonPath jsonPathEvaluator = response.jsonPath();
 
         List<String> errors = jsonPathEvaluator.get("errors");
-        assertEquals(statusCode, 200);
 
         assertTrue(errors.get(0).contains("Access Denied"));
 
@@ -162,16 +161,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         int statusCode = response.getStatusCode();
 
-
-        System.out.println("status :" + statusCode);
-
-        System.out.println("AuthToken Testing " + utils.getAuthoToken());
-
-        System.out.println("IDAM Secret : " + idamSecret);
-
         JsonPath jsonPathEvaluator = response.jsonPath().setRoot("data");
-
-        System.out.println("response of PBAPayment : " + response.getBody().prettyPrint());
 
         assertEquals(statusCode, 200);
 
@@ -190,6 +180,5 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .when().post(url)
                 .andReturn();
     }
-
 
 }
