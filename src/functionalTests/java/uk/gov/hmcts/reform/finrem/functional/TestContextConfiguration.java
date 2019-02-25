@@ -38,5 +38,4 @@ public class TestContextConfiguration {
         return new ServiceAuthTokenGenerator(secret, microservice, serviceAuthorisationApi);
     }
 
-
 }

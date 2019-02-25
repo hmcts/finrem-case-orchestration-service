@@ -31,8 +31,10 @@ public class FunctionalTestUtils {
 
     @Value("${idam.api.url}")
     public String baseServiceOauth2Url = "";
+
     @Autowired
     private ServiceAuthTokenGenerator tokenGenerator;
+
     @Value("${user.id.url}")
     private String userId;
     @Value("${idam.username}")
@@ -58,11 +60,8 @@ public class FunctionalTestUtils {
 
     public Headers getHeadersWithUserId() {
 
-
-        System.out.println("AuthToken :" +  tokenGenerator.generate());
-        System.out.println("user id " + userId);
         return Headers.headers(
-                new Header("ServiceAuthorization", "Bearer " + tokenGenerator.generate()),
+                new Header("ServiceAuthorization",   tokenGenerator.generate()),
                 new Header("user-roles", "caseworker-divorce"),
                 new Header("user-id", userId));
     }

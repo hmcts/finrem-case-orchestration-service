@@ -47,6 +47,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     }
 
+
     @Test
     public void verifyGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
         Response response = generateDocument("documentGeneratePayload.json");
@@ -70,6 +71,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void downloadDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
         Response response = generateDocument("documentGeneratePayload.json");
+
         JsonPath jsonPathEvaluator = response.jsonPath();
 
         String documentUrl = jsonPathEvaluator.get("data.miniFormA.document_binary_url");

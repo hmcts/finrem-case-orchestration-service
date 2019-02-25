@@ -14,8 +14,7 @@ properties([
 ])
 
 List<LinkedHashMap<String, Object>> secrets = [
-        //secret("finrem-doc-s2s-auth-secret", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
-        secret("finrem-payment-service-s2s-key", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
+        secret("finrem-doc-s2s-auth-secret", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
         secret("aat-username","AAT_USERNAME"),
         secret("aat-password","AAT_PASSWORD"),
         secret("idam-secret" ,"OAUTH2_CLIENT_FINREM")
