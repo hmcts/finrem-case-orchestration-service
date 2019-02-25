@@ -10,8 +10,8 @@ List<LinkedHashMap<String, Object>> secrets = [
         secret("pdf-service-access-key", "PDF_SERVICE_ACCESS_KEY"),
         secret("finrem-doc-s2s-auth-secret", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
         secret("idam-secret" ,"OAUTH2_CLIENT_FINREM"),
-        secret("aat-username","AAT_USERNAME"),
-        secret("aat-password","AAT_PASSWORD"),
+        secret("username-solicitor","USERNAME-SOLICITOR"),
+        secret("password-solicitor","PASSWORD-SOLICITOR")
 ]
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {

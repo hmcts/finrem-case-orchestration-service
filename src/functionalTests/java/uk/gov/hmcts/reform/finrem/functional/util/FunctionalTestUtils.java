@@ -29,9 +29,6 @@ import java.nio.file.Files;
 @Component
 public class FunctionalTestUtils {
 
-    @Value("${idam.api.url}")
-    public String baseServiceOauth2Url = "";
-
     @Autowired
     private ServiceAuthTokenGenerator tokenGenerator;
 
