@@ -255,7 +255,7 @@
       },
       "solicitorAgreeToReceiveEmails": "yes",
       "solicitorDXnumber": "string",
-      "solicitorEmail": "email@hmcts.netti@hmcts.net",
+      "solicitorEmail": "email@hmcts.net",
       "solicitorFirm": "FirmA",
       "solicitorName": "SolName1",
       "solicitorPhone": "1234567891",
