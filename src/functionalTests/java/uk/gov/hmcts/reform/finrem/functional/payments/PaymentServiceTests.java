@@ -48,6 +48,10 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Value("${idam.api.secret}")
     private String idamSecret;
 
+    @Value("${pba.account.liberata.check.enabled}")
+    private boolean pbaAccountLiberataCheckEnabled;
+
+
     private HashMap<String, String> pbaAccounts = new HashMap<>();
 
 
@@ -146,13 +150,18 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         Response response = getPBAPaymentResponse(url, "FailurePaymentRequestPayload.json");
 
-        System.out.println("ValidateFailurePBAPayment" + response.getBody().prettyPrint());
+        int statusCode = response.getStatusCode();
+
+        System.out.println("ValidateFailurePBAPayment" + "status Code : "
+                + statusCode + response.getBody().prettyPrint());
 
         JsonPath jsonPathEvaluator = response.jsonPath();
+        assertEquals(statusCode, 200);
 
-        List<String> errors = jsonPathEvaluator.get("errors");
-
-        assertTrue(errors.get(0).contains("Account information could not be found"));
+        if (pbaAccountLiberataCheckEnabled) {
+            List<String> errors = jsonPathEvaluator.get("errors");
+            assertTrue(errors.get(0).contains("Account information could not be found"));
+        }
 
     }
 
