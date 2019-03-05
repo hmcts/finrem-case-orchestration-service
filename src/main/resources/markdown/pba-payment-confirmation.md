@@ -5,6 +5,7 @@ Your application has now been submitted to the Court.
 You will now be directed to the case file where you can monitor the progress of your application via the ‘history’ tab. Next:
 * Your application will be issued by Court staff and referred to a Judge
 * The Judge will consider your application and make an order
+
 You will receive an email notification at each stage of the process.
 
 # How will I receive my order? 
