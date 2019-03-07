@@ -11,7 +11,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class AmendedConsentOrderDataTest  extends  AmendedConsentOrderTest {
-    AmendedConsentOrderData orderData;
+    private AmendedConsentOrderData orderData;
 
     @Before
     public void setUp() throws Exception {

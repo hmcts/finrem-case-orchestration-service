@@ -57,10 +57,10 @@ public class CaseData {
     private Date  divorceDecreeAbsoluteDate;
 
     // APPLICANT’S DETAILS
-    @JsonProperty("applicantLName")
-    private String applicantLName;
     @JsonProperty("applicantFMName")
     private String applicantFMName;
+    @JsonProperty("applicantLName")
+    private String applicantLName;
 
     // RESPONDENT DETAILS
     @JsonProperty("appRespondentFMName")
@@ -234,4 +234,6 @@ public class CaseData {
     private List<RespondToOrderData> respondToOrderDocuments;
     @JsonProperty("amendedConsentOrderCollection")
     private List<AmendedConsentOrderData> amendedConsentOrderCollection;
+    @JsonProperty("caseNotesCollection")
+    private List<CaseNotesData> caseNotesCollection;
 }

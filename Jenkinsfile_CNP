@@ -7,7 +7,6 @@ def product = "finrem"
 def app = "cos"
 
 List<LinkedHashMap<String, Object>> secrets = [
-        secret("pdf-service-access-key", "PDF_SERVICE_ACCESS_KEY"),
         secret("finrem-doc-s2s-auth-secret", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
         secret("idam-secret" ,"OAUTH2_CLIENT_FINREM"),
         secret("username-solicitor","USERNAME-SOLICITOR"),
@@ -52,7 +51,4 @@ withPipeline(type, product, app) {
 
     enableSlackNotifications('#finrem-dev')
 
-    before('buildinfra:prod') {
-        error('Halting pipeline before PROD.')
-    }
 }

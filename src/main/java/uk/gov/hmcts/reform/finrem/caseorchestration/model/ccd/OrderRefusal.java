@@ -14,10 +14,6 @@ public class OrderRefusal {
     private List<String> orderRefusal;
     @JsonProperty("orderRefusalOther")
     private String orderRefusalOther;
-    @JsonProperty("orderRefusalNotEnough")
-    private List<String> orderRefusalNotEnough;
-    @JsonProperty("orderRefusalNotEnoughOther")
-    private String orderRefusalNotEnoughOther;
     @JsonProperty("orderRefusalDocs")
     private CaseDocument orderRefusalDocs;
     @JsonProperty("orderRefusalJudge")
@@ -26,14 +22,6 @@ public class OrderRefusal {
     private String orderRefusalJudgeName;
     @JsonProperty("orderRefusalDate")
     private Date orderRefusalDate;
-    @JsonProperty("estimateLengthOfHearing")
-    private String estimateLengthOfHearing;
-    @JsonProperty("whenShouldHearingTakePlace")
-    private String whenShouldHearingTakePlace;
-    @JsonProperty("whereShouldHearingTakePlace")
-    private String whereShouldHearingTakePlace;
-    @JsonProperty("otherHearingDetails")
-    private String otherHearingDetails;
     @JsonProperty("orderRefusalAddComments")
     private String orderRefusalAddComments;
 }

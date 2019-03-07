@@ -11,7 +11,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class GeneralOrderDataTest extends GeneralOrderTest {
-    GeneralOrderData orderData;
+    private GeneralOrderData orderData;
 
     @Before
     public void setUp() throws Exception {

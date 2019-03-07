@@ -197,13 +197,8 @@ public class CaseDataTest {
         assertThat(order.getOrderRefusal().getOrderRefusalDocs().getDocumentBinaryUrl(), is("http://doc1.binary"));
         assertThat(order.getOrderRefusal().getOrderRefusalJudge(), is("District Judge"));
         assertThat(order.getOrderRefusal().getOrderRefusalOther(), is("test1"));
-        assertThat(order.getOrderRefusal().getOtherHearingDetails(), is("test2"));
         assertThat(order.getOrderRefusal().getOrderRefusalJudgeName(), is("test3"));
-        assertThat(order.getOrderRefusal().getOrderRefusalNotEnough(), hasItems("reason1"));
-        assertThat(order.getOrderRefusal().getEstimateLengthOfHearing(), is("10"));
         assertThat(order.getOrderRefusal().getOrderRefusalAddComments(), is("comment1"));
-        assertThat(order.getOrderRefusal().getWhenShouldHearingTakePlace(), is("today"));
-        assertThat(order.getOrderRefusal().getWhereShouldHearingTakePlace(), is("EZ801"));
 
         assertThat(data.getDueDate(), is(Date.valueOf("2010-01-01")));
         assertThat(data.getIssueDate(), is(Date.valueOf("2010-01-01")));

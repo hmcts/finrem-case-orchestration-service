@@ -59,7 +59,7 @@ public class PBAPaymentService {
         return PaymentRequest.builder()
                 .accountNumber(caseData.getPbaNumber())
                 .caseReference(caseData.getDivorceCaseNumber())
-                .customerReference(caseData.getSolicitorReference())
+                .customerReference(caseData.getPbaReference())
                 .ccdCaseNumber(ccdCaseId)
                 .description(description)
                 .organisationName(caseData.getSolicitorFirm())

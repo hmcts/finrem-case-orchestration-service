@@ -50,12 +50,6 @@ data "azurerm_key_vault" "finrem_key_vault" {
   resource_group_name = "${local.vaultName}"
 }
 
-data "azurerm_key_vault_secret" "finrem-case-orchestration-service-s2s-key" {
-  name      = "finrem-case-orchestration-service-s2s-key"
-  vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
-}
-
-
 data "azurerm_key_vault_secret" "username-solicitor" {
   name      = "username-solicitor"
   vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
