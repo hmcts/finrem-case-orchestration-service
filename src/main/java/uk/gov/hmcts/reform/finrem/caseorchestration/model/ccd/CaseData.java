@@ -1,15 +1,29 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.OrderSummary;
 
 import java.util.Date;
 import java.util.List;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Data
+@JsonInclude(NON_NULL)
 public class CaseData {
+    @JsonProperty("state")
+    private String state;
+
     // SOLICITOR DETAILS
     @JsonProperty("solicitorName")
     private String solicitorName;
@@ -43,10 +57,10 @@ public class CaseData {
     private Date  divorceDecreeAbsoluteDate;
 
     // APPLICANT’S DETAILS
-    @JsonProperty("applicantLName")
-    private String applicantLName;
     @JsonProperty("applicantFMName")
     private String applicantFMName;
+    @JsonProperty("applicantLName")
+    private String applicantLName;
 
     // RESPONDENT DETAILS
     @JsonProperty("appRespondentFMName")
@@ -139,12 +153,16 @@ public class CaseData {
     private String helpWithFeesQuestion;
     @JsonProperty("HWFNumber")
     private String hwfNumber;
+    @JsonProperty("orderSummary")
+    private OrderSummary orderSummary;
     @JsonProperty("amountToPay")
     private String amountToPay;
     @JsonProperty("PBANumber")
     private String pbaNumber;
     @JsonProperty("PBAreference")
     private String pbaReference;
+    @JsonProperty("PBAPaymentReference")
+    private String pbaPaymentReference;
 
     // ORDER DETAILS
     @JsonProperty("orderDirection")
@@ -216,4 +234,6 @@ public class CaseData {
     private List<RespondToOrderData> respondToOrderDocuments;
     @JsonProperty("amendedConsentOrderCollection")
     private List<AmendedConsentOrderData> amendedConsentOrderCollection;
+    @JsonProperty("caseNotesCollection")
+    private List<CaseNotesData> caseNotesCollection;
 }

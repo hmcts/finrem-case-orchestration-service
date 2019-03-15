@@ -4,16 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentService;
 
@@ -22,8 +14,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -32,31 +25,30 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_ISSUED;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(DocumentController.class)
-@ContextConfiguration(classes = CaseOrchestrationApplication.class)
-public class DocumentControllerTest {
+public class DocumentControllerTest extends BaseControllerTest {
 
     private static final String GEN_DOC_URL = "/case-orchestration/documents/generate-mini-form-a";
 
-    @Autowired
-    private WebApplicationContext applicationContext;
+    private JsonNode requestContent;
 
     @MockBean
     private DocumentService documentService;
 
-    private MockMvc mvc;
-    private JsonNode requestContent;
-
     @Before
-    public void setUp() throws Exception {
-        mvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
-        doRequestSetUp();
+    public void setUp()  {
+        super.setUp();
+        try {
+            doRequestSetUp();
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
@@ -74,11 +66,12 @@ public class DocumentControllerTest {
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.state", is(APPLICATION_ISSUED.toString())))
                 .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
                 .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
                 .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BINARY_URL)))
-                .andExpect(jsonPath("$.errors", hasSize(0)))
-                .andExpect(jsonPath("$.warnings", hasSize(0)));
+                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
 
     @Test

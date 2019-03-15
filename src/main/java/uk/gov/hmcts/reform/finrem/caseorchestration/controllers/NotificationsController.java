@@ -19,7 +19,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @Slf4j
-public class NotificationsController {
+public class NotificationsController implements BaseController {
 
     private static final String LOG_MESSAGE = "received notification request for case reference :    ";
 
@@ -35,7 +35,10 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
-        notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, userToken);
+        validateCaseData(ccdRequest);
+        if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
+            notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, userToken);
+        }
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
@@ -49,7 +52,10 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
-        notificationService.sendAssignToJudgeConfirmationEmail(ccdRequest, userToken);
+        validateCaseData(ccdRequest);
+        if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
+            notificationService.sendAssignToJudgeConfirmationEmail(ccdRequest, userToken);
+        }
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
@@ -63,7 +69,10 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
-        notificationService.sendConsentOrderMadeConfirmationEmail(ccdRequest, userToken);
+        validateCaseData(ccdRequest);
+        if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
+            notificationService.sendConsentOrderMadeConfirmationEmail(ccdRequest, userToken);
+        }
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
@@ -77,7 +86,10 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
-        notificationService.sendConsentOrderNotApprovedEmail(ccdRequest, userToken);
+        validateCaseData(ccdRequest);
+        if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
+            notificationService.sendConsentOrderNotApprovedEmail(ccdRequest, userToken);
+        }
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
@@ -91,8 +103,15 @@ public class NotificationsController {
             @RequestBody CCDRequest ccdRequest,
             @RequestHeader(value = "Authorization") String userToken) {
         log.info(LOG_MESSAGE, ccdRequest.getCaseDetails().getCaseId());
-        notificationService.sendConsentOrderAvailableEmail(ccdRequest, userToken);
+        validateCaseData(ccdRequest);
+        if (isSolicitorAgreedToReceiveEmails(ccdRequest)) {
+            notificationService.sendConsentOrderAvailableEmail(ccdRequest, userToken);
+        }
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
+    }
+
+    private boolean isSolicitorAgreedToReceiveEmails(CCDRequest ccdRequest) {
+        return "Yes".equalsIgnoreCase(ccdRequest.getCaseDetails().getCaseData().getSolicitorAgreeToReceiveEmails());
     }
 }

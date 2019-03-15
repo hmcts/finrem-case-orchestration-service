@@ -1,88 +1,49 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
+import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
+import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 
-import java.io.File;
-
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class PBAValidationServiceTest {
-
-    private static final String EMAIL = "test@test.com";
-    private static final String AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
+public class PBAValidationServiceTest extends BaseServiceTest {
 
     @Autowired
     private PBAValidationService pbaValidationService;
 
-    @MockBean
-    private IdamService idamService;
+    @ClassRule
+    public static WireMockClassRule paymentService = new WireMockClassRule(9001);
 
-    @Autowired
-    private RestTemplate restTemplate;
-
-    private MockRestServiceServer mockServer;
-    private JsonNode requestContent;
-
-    @Before
-    public void setUp() throws Exception {
-        mockServer = MockRestServiceServer.createServer(restTemplate);
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/payment-by-account.json").toURI()));
-
-        when(idamService.getUserEmailId(AUTH_TOKEN)).thenReturn(EMAIL);
-    }
+    private static final String PBA_VALIDATE_API = "/payments/pba-validate/";
 
     @Test
     public void validPbaPositive() {
-        mockServer.expect(requestTo(toUri()))
-                .andExpect(method(HttpMethod.GET))
-                .andRespond(withSuccess(requestContent.toString(), MediaType.APPLICATION_JSON));
-
+        setUpPbaValidateService("NUM1", "{\"pbaNumberValid\": true}");
         assertThat(pbaValidationService.isValidPBA(AUTH_TOKEN, "NUM1"), is(true));
     }
 
     @Test
     public void validPbaNegative() {
-        mockServer.expect(requestTo(toUri()))
-                .andExpect(method(HttpMethod.GET))
-                .andRespond(withSuccess(requestContent.toString(), MediaType.APPLICATION_JSON));
-
+        setUpPbaValidateService("NUM3", "{\"pbaNumberValid\": false}");
         assertThat(pbaValidationService.isValidPBA(AUTH_TOKEN, "NUM3"), is(false));
     }
 
-    @Test
-    public void validPbaNoPbaResult() {
-        mockServer.expect(requestTo(toUri()))
-                .andExpect(method(HttpMethod.GET))
-                .andRespond(withSuccess("{\"payment_accounts\": []}", MediaType.APPLICATION_JSON));
+    private void setUpPbaValidateService(String pbaNumber, String response) {
+        paymentService.stubFor(get(urlPathEqualTo(PBA_VALIDATE_API + pbaNumber))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                        .withBody(response)));
 
-        assertThat(pbaValidationService.isValidPBA(AUTH_TOKEN, "NUM1"), is(false));
-    }
-
-    private static String toUri() {
-        return new StringBuilder("http://test/case-orchestration/organisations/pba/")
-                .append(EMAIL)
-                .toString();
     }
 }

@@ -14,7 +14,10 @@ properties([
 ])
 
 List<LinkedHashMap<String, Object>> secrets = [
-        secret("auth-provider-service-client-key", "AUTH_PROVIDER_SERVICE_CLIENT_KEY")
+        secret("finrem-doc-s2s-auth-secret", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
+        secret("username-solicitor","USERNAME-SOLICITOR"),
+        secret("password-solicitor","PASSWORD-SOLICITOR"),
+        secret("idam-secret" ,"OAUTH2_CLIENT_FINREM")
 ]
 
 static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
@@ -27,8 +30,16 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 withParameterizedPipeline(params.TYPE, params.PRODUCT_NAME, params.APP, params.ENVIRONMENT, params.SUBSCRIPTION) {
-//  loadVaultSecrets(secrets)
+  loadVaultSecrets(secrets)
   before('buildinfra:prod') {
     error('Halting pipeline before PROD.')
   }
+  after('functionalTest:aat') {
+          publishHTML target: [
+          reportDir            : "target/site/serenity/",
+          reportFiles          : "index.html",
+          reportName           : "AAT Functional Tests",
+          alwaysLinkToLastBuild: true
+  ]
+}
 }

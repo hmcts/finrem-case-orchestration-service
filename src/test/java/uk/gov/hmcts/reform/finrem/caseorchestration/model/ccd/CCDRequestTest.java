@@ -10,7 +10,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class CCDRequestTest extends CaseDetailsTest {
-    protected CCDRequest ccdRequest;
+    private CCDRequest ccdRequest;
 
     @Before
     public void setUp() throws Exception {

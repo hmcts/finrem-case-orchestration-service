@@ -1,64 +1,46 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.Before;
+import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
+import org.junit.ClassRule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.Fee;
+import org.springframework.http.HttpStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
 import java.math.BigDecimal;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = CaseOrchestrationApplication.class)
-@TestPropertySource(locations = "/application.properties")
-public class FeeServiceTest {
+public class FeeServiceTest extends BaseServiceTest {
 
     @Autowired
     private FeeService feeService;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    @ClassRule
+    public static WireMockClassRule paymentService = new WireMockClassRule(9001);
 
-    private MockRestServiceServer mockServer;
-
-    @Before
-    public void setUp() {
-        mockServer = MockRestServiceServer.createServer(restTemplate);
-    }
+    private static final String FEE_LOOKUP_API = "/payments/fee-lookup";
 
     @Test
     public void retrieveApplicationFee() {
-        mockServer.expect(requestTo(toUri()))
-                .andExpect(method(HttpMethod.GET))
-                .andRespond(withSuccess("{\"code\": \"TEST\", \"fee_amount\": \"10\"}", MediaType.APPLICATION_JSON));
+        paymentService.stubFor(get(urlPathEqualTo(FEE_LOOKUP_API))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                        .withBody("{\"code\": \"TEST\", \"fee_amount\": \"10\", "
+                                + "\"description\": \"desc\", \"version\": \"1.0\"}")));
 
-        Fee fee = feeService.getApplicationFee();
-        assertThat(fee.getCode(), is("TEST"));
-        assertThat(fee.getFeeAmount(), is(BigDecimal.TEN));
-    }
-
-    private static String toUri() {
-        return new StringBuilder("http://test/api")
-                .append("?service=other")
-                .append("&jurisdiction1=family")
-                .append("&jurisdiction2=family-court")
-                .append("&channel=default")
-                .append("&event=general-application")
-                .append("&keyword=without-notice")
-                .toString();
+        FeeResponse feeResponse = feeService.getApplicationFee();
+        assertThat(feeResponse.getCode(), is("TEST"));
+        assertThat(feeResponse.getFeeAmount(), is(BigDecimal.TEN));
+        assertThat(feeResponse.getDescription(), is("desc"));
+        assertThat(feeResponse.getVersion(), is("1.0"));
     }
 }

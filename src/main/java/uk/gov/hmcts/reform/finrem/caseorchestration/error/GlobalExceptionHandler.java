@@ -8,12 +8,19 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 @Slf4j
-class GlobalExceptionHandler {
+public class GlobalExceptionHandler {
+
+    public static final String SERVER_ERROR_MSG = "Some server side exception occurred. Please check logs for details";
 
     @ExceptionHandler(FeignException.class)
     ResponseEntity<Object> handleFeignException(FeignException exception) {
-        log.warn(exception.getMessage(), exception);
+        log.error(exception.getMessage(), exception);
+        return ResponseEntity.status(exception.status()).body(SERVER_ERROR_MSG);
+    }
 
-        return ResponseEntity.status(exception.status()).body(exception.getMessage());
+    @ExceptionHandler(InvalidCaseDataException.class)
+    ResponseEntity<Object> handleInvalidCaseDataException(InvalidCaseDataException exception) {
+        log.error(exception.getMessage(), exception);
+        return ResponseEntity.status(exception.status()).body(SERVER_ERROR_MSG);
     }
 }

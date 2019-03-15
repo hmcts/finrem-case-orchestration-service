@@ -8,24 +8,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentService;
 
-import java.util.ArrayList;
-
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_ISSUED;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class DocumentController {
+public class DocumentController implements BaseController {
 
     @Autowired
     private DocumentService service;
@@ -38,16 +37,19 @@ public class DocumentController {
                     + "attached to the case",
                     response = CCDCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 500, message = "Internal Server Error")
-        })
+            @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<CCDCallbackResponse> generateMiniFormA(
             @RequestHeader(value = "Authorization") String authorisationToken,
             @RequestBody @ApiParam("CaseData") CCDRequest request) {
-        CaseDocument document = service.generateMiniFormA(authorisationToken, request.getCaseDetails());
 
+        log.info("Received request for generateMiniFormA. Auth token: {}, Case request : {}", authorisationToken,
+                request);
+        validateCaseData(request);
         CaseData caseData = request.getCaseDetails().getCaseData();
+        CaseDocument document = service.generateMiniFormA(authorisationToken, request.getCaseDetails());
         caseData.setMiniFormA(document);
+        caseData.setState(APPLICATION_ISSUED.toString());
 
-        return ResponseEntity.ok(new CCDCallbackResponse(caseData, new ArrayList<>(), new ArrayList<>()));
+        return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
 }

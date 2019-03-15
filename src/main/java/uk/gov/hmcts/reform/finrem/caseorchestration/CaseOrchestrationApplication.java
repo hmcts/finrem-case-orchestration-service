@@ -5,9 +5,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
+import uk.gov.hmcts.reform.authorisation.healthcheck.ServiceAuthHealthIndicator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.PaymentClient;
 
-@SpringBootApplication
-@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.finrem.caseorchestration"})
+@SpringBootApplication(exclude = {ServiceAuthHealthIndicator.class})
+@EnableFeignClients(basePackageClasses = {DocumentGeneratorClient.class, PaymentClient.class})
 public class CaseOrchestrationApplication {
 
     public static void main(String[] args) {
@@ -24,5 +27,4 @@ public class CaseOrchestrationApplication {
         loggingFilter.setMaxPayloadLength(10240);
         return loggingFilter;
     }
-
 }
