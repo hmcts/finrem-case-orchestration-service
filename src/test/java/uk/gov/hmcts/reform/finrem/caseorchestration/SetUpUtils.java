@@ -22,11 +22,11 @@ public class SetUpUtils {
     public static final String FILE_NAME = "app_docs.pdf";
     public static final String REJECTED_ORDER_TYPE = "General Order";
 
-    public static  final int STATUS_CODE = HttpStatus.INTERNAL_SERVER_ERROR.value();
+    public static  final int INTERNAL_SERVER_ERROR = HttpStatus.INTERNAL_SERVER_ERROR.value();
     public static  final int BAD_REQUEST = HttpStatus.BAD_REQUEST.value();
 
     public static FeignException feignError() {
-        Response response = Response.builder().status(STATUS_CODE).headers(ImmutableMap.of()).build();
+        Response response = Response.builder().status(INTERNAL_SERVER_ERROR).headers(ImmutableMap.of()).build();
         return FeignException.errorStatus("test", response);
     }
 

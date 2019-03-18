@@ -2,14 +2,12 @@ package uk.gov.hmcts.reform.finrem.functional.idam;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
 import java.util.Base64;
 
-@Slf4j
 @Component
 public class IdamUtils implements IdamUserClient {
 

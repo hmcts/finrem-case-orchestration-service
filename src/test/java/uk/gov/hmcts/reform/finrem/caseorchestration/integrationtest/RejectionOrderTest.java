@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.e2etest;
+package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import org.junit.Test;
 import org.springframework.http.MediaType;
