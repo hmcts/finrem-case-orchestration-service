@@ -4,6 +4,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,18 +62,21 @@ public class PaymentServiceTests extends IntegrationTestBase {
         validatePostSuccess(feeLookup, "fee-lookup.json");
     }
 
+    @Ignore
     @Test
     public void verifyPBAValidationTest() {
 
         validatePostSuccessForPBAValidation(pbaValidate);
     }
 
+    @Ignore
     @Test
     public void verifyPBAPaymentSuccessTest() {
 
         validatePostSuccessForPBAPayment(pbaPayment);
     }
 
+    @Ignore
     @Test
     public void verifyPBAPaymentFailureTest() {
         validateFailurePBAPayment(pbaPayment);
@@ -85,6 +89,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     }
 
+    @Ignore
     @Test
     public void verifyPBAConfirmationForPBAPayment() {
 
