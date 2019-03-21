@@ -134,6 +134,7 @@ dependencies {
     compile group: 'commons-io', name: 'commons-io', version: versions.commonsIo
     compile(group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger)
     compile (group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger)
+    compile group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: '4.6.0'
     compile (group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.0.1.RELEASE')
             {
                 exclude group: 'io.reactivex', module: 'io.reactivex'
@@ -197,6 +198,8 @@ dependencyCheck {
 
 checkstyle.toolVersion = '7.2'
 checkstyle.configFile = new File(rootDir, "checkstyle.xml")
+
+
 
 // make build fail on Checkstyle issues (https://github.com/gradle/gradle/issues/881)
 tasks.withType(Checkstyle).each { checkstyleTask ->

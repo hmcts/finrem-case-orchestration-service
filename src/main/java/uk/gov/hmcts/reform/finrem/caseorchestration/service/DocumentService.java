@@ -45,4 +45,19 @@ public class DocumentService {
         caseDocument.setDocumentUrl(miniFormA.getUrl());
         return caseDocument;
     }
+
+    public CaseDocument generateMiniFormA(String authorisationToken,
+                                          uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails) {
+        Document miniFormA =
+                documentGeneratorClient.generatePDF(
+                        DocumentRequest.builder()
+                                .template(miniFormATemplate)
+                                .values(Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails))
+                                .build(),
+                        authorisationToken);
+
+        return caseDocument(miniFormA);
+    }
+
+
 }

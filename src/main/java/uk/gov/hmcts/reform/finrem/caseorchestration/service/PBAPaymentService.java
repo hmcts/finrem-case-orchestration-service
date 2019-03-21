@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.OrderSummary;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.FeeRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
+
+import java.util.Map;
 
 
 @Service
@@ -63,6 +67,55 @@ public class PBAPaymentService {
                 .ccdCaseNumber(ccdCaseId)
                 .description(description)
                 .organisationName(caseData.getSolicitorFirm())
+                .siteId(siteId)
+                .amount(fee.getCalculatedAmount())
+                .feesList(ImmutableList.of(fee))
+                .build();
+    }
+
+    /**
+     * Version 2 starts
+     */
+
+    public PaymentResponse makePaymentV2(String authToken, String ccdCaseId, Map<String, Object> mapOfCaseData) {
+        log.info("Inside makePayment, authToken : {}, ccdCaseId : {}, caseData : {}", authToken, ccdCaseId, mapOfCaseData);
+        PaymentRequest paymentRequest = buildPaymenRequestv2(ccdCaseId, mapOfCaseData);
+        log.info("paymentRequest: {}", paymentRequest);
+        PaymentResponse paymentResponse = paymentClient.pbaPayment(authToken, paymentRequest);
+        log.info("paymentResponse : {} ", paymentResponse);
+        return paymentResponse;
+    }
+
+    private PaymentRequest buildPaymenRequestv2(String ccdCaseId, Map<String, Object> mapOfCaseData) {
+        FeeRequest feeRequest = buildFeeRequestv2(mapOfCaseData);
+        log.info("Fee request : {} ", feeRequest);
+        return buildPaymentRequestv2(ccdCaseId, mapOfCaseData, feeRequest);
+    }
+
+    private FeeRequest buildFeeRequestv2(Map<String, Object> mapOfCaseData) {
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode dataJsonNode = mapper.valueToTree(mapOfCaseData);
+        JsonNode feeValueAsJson = dataJsonNode.path("orderSummary").path("Fees").get(0).path("value");
+
+        return FeeRequest.builder()
+                .calculatedAmount(feeValueAsJson.path("FeeAmount").asLong())
+                .code(feeValueAsJson.path("FeeCode").asText())
+                .version(feeValueAsJson.path("FeeVersion").asText())
+                .build();
+    }
+
+    private PaymentRequest buildPaymentRequestv2(String ccdCaseId, Map<String, Object> mapOfCaseData, FeeRequest fee) {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode dataJsonNode = mapper.valueToTree(mapOfCaseData);
+
+        return PaymentRequest.builder()
+                .accountNumber(dataJsonNode.path("pbaNumber").asText())
+                .caseReference(dataJsonNode.path("divorceCaseNumber").asText())
+                .customerReference(dataJsonNode.path("pbaReference").asText())
+                .ccdCaseNumber(ccdCaseId)
+                .description(description)
+                .organisationName(dataJsonNode.path("solicitorFirm").asText())
                 .siteId(siteId)
                 .amount(fee.getCalculatedAmount())
                 .feesList(ImmutableList.of(fee))
