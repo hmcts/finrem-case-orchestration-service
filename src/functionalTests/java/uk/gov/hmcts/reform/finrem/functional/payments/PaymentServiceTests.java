@@ -152,8 +152,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         int statusCode = response.getStatusCode();
 
-        System.out.println("ValidateFailurePBAPayment" + "status Code : "
-                + statusCode + response.getBody().prettyPrint());
 
         JsonPath jsonPathEvaluator = response.jsonPath();
         assertEquals(statusCode, 200);
