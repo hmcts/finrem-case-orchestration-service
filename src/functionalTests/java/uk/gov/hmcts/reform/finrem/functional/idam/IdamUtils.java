@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.functional.idam;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 
@@ -38,6 +39,7 @@ public class IdamUtils implements IdamUserClient {
         }
 
         response = RestAssured.given()
+            .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .relaxedHTTPSValidation()
             .post(idamTokenUrl(response.getBody().path("code")));
 
