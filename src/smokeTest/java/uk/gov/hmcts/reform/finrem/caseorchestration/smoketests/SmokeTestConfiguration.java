@@ -5,5 +5,6 @@ import org.springframework.context.annotation.PropertySource;
 
 @ComponentScan("uk.gov.hmcts.reform.finrem.caseorchestration.smoketests")
 @PropertySource("application.properties")
+@PropertySource("classpath::application-${env}.properties")
 public class SmokeTestConfiguration {
 }
