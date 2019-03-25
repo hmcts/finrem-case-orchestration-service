@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
 
 import java.util.Objects;
-import java.util.concurrent.CancellationException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -29,17 +28,18 @@ public class CaseMaintenanceController implements BaseController {
         log.info("Received request for updateCase ");
         validateCaseData(ccdRequest);
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
+        updateDivorceDetails(caseData);
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
 
     private void updateDivorceDetails(CaseData caseData) {
-        if(caseData.getDivorceStageReached().equals("Decree Nisi")) {
-            if(Objects.nonNull(caseData.getDivorceUploadEvidence2())) {
+        if (caseData.getDivorceStageReached().equals("Decree Nisi")) {
+            if (Objects.nonNull(caseData.getDivorceUploadEvidence2())) {
                 caseData.setDivorceUploadEvidence2(null);
                 caseData.setDivorceDecreeAbsoluteDate(null);
             }
-        } else  {
-            if(Objects.nonNull(caseData.getDivorceUploadEvidence1())) {
+        } else {
+            if (Objects.nonNull(caseData.getDivorceUploadEvidence1())) {
                 caseData.setDivorceUploadEvidence1(null);
                 caseData.setDivorceDecreeNisiDate(null);
             }
