@@ -36,6 +36,7 @@ module "finrem-cos" {
     FINREM_NOTIFICATION_SERVICE_BASE_URL                  = "${var.finrem_ns_url}"
     DOCUMENT_GENERATOR_SERVICE_API_BASEURL                = "${var.document_generator_baseurl}"
     PAYMENT_SERVICE_API_BASEURL                           = "${var.payment_api_url}"
+    FEES_API_URL                                          = "${var.fees_api_url}"
     SWAGGER_ENABLED                                       = "${var.swagger_enabled}"
     OAUTH2_CLIENT_FINREM                                  = "${data.azurerm_key_vault_secret.idam-secret.value}"
     AUTH_PROVIDER_SERVICE_CLIENT_KEY                      = "${data.azurerm_key_vault_secret.finrem-doc-s2s-auth-secret.value}"
