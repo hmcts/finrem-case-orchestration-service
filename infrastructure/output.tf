@@ -29,3 +29,7 @@ output "auth_idam_client_secret" {
 output "environment_name" {
   value = "${local.local_env}"
 }
+
+output "fees_api_url" {
+  value = "${var.fees_api_url}"
+}
