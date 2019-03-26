@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.FeeRequest
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 
+import java.math.BigDecimal;
+
 
 @Service
 @RequiredArgsConstructor
@@ -57,8 +59,9 @@ public class PBAPaymentService {
         OrderSummary orderSummary = caseData.getOrderSummary();
         FeeItem feeItem = orderSummary.getFees().get(0);
         FeeValue feeValue = feeItem.getValue();
+        BigDecimal feeAmount = new BigDecimal(feeValue.getFeeAmount()).divide(BigDecimal.valueOf(100));
         return FeeRequest.builder()
-                .calculatedAmount(Long.valueOf(feeValue.getFeeAmount()) / 100)
+                .calculatedAmount(feeAmount)
                 .code(feeValue.getFeeCode())
                 .version(feeValue.getFeeVersion())
                 .build();
