@@ -83,7 +83,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
     @Test
     public void shouldDeletePropertyDetails() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/updatecase/amend-property-adjustment-details.json").toURI()));
+                .getResource("/fixtures/updatecase/remove-property-adjustment-details.json").toURI()));
         mvc.perform(post("/case-orchestration/update-case")
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
@@ -92,6 +92,20 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .andDo(print())
                 .andExpect(jsonPath("$.data.natureOfApplication3a").doesNotExist())
                 .andExpect(jsonPath("$.data.natureOfApplication3b").doesNotExist());
+    }
+
+    @Test
+    public void shouldNotRemovePropertyDetails() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/updatecase/amend-property-adjustment-details.json").toURI()));
+        mvc.perform(post("/case-orchestration/update-case")
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.natureOfApplication3a").exists())
+                .andExpect(jsonPath("$.data.natureOfApplication3b").exists());
     }
 
     @Test

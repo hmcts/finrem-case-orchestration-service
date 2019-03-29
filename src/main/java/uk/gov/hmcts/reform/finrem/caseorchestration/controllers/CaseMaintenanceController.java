@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDCallbackRespons
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
 
+import java.util.List;
+
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -40,74 +42,85 @@ public class CaseMaintenanceController implements BaseController {
         updateDivorceDetails(caseData);
         updatePeriodicPaymentData(caseData);
         updatePropertyDetails(caseData);
-        updateRespondantSolicitorAddress(caseData);
-        updateJointD81(caseData);
+        updateRespondentSolicitorAddress(caseData);
+        updateD81Details(caseData);
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
 
     private void updateDivorceDetails(CaseData caseData) {
         if (caseData.getDivorceStageReached().equals("Decree Nisi")) {
-            if (nonNull(caseData.getDivorceUploadEvidence2())) {
-                caseData.setDivorceUploadEvidence2(null);
-                caseData.setDivorceDecreeAbsoluteDate(null);
-            }
+            // remove Decree Absolute details
+            caseData.setDivorceUploadEvidence2(null);
+            caseData.setDivorceDecreeAbsoluteDate(null);
         } else {
-            if (nonNull(caseData.getDivorceUploadEvidence1())) {
-                caseData.setDivorceUploadEvidence1(null);
-                caseData.setDivorceDecreeNisiDate(null);
-            }
+            // remove Decree Nisi details
+            caseData.setDivorceUploadEvidence1(null);
+            caseData.setDivorceDecreeNisiDate(null);
         }
-
     }
 
     private void updatePeriodicPaymentData(CaseData caseData) {
-        if (nonNull(caseData.getNatureOfApplication2())
-                && !caseData.getNatureOfApplication2().contains("Periodical Payment Order")) {
-            caseData.setNatureOfApplication5(null);
-            caseData.setNatureOfApplication6(null);
-            caseData.setNatureOfApplication7(null);
-            caseData.setOrderForChildrenQuestion1(null);
-        }
-        if (nonNull(caseData.getNatureOfApplication2())
-                && caseData.getNatureOfApplication2().contains("Periodical Payment Order")) {
-            if (nonNull(caseData.getNatureOfApplication5())
-                    && "Yes".equalsIgnoreCase(caseData.getNatureOfApplication5())) {
+        if (hasNotSelected(caseData.getNatureOfApplication2(), "Periodical Payment Order")) {
+            removePeriodicPaymentData(caseData);
+        } else {
+            // if written agreement for order for children
+            if (equalsTo(caseData.getNatureOfApplication5(), "Yes")) {
                 caseData.setNatureOfApplication6(null);
                 caseData.setNatureOfApplication7(null);
             }
         }
-
     }
 
     private void updatePropertyDetails(CaseData caseData) {
-        if (nonNull(caseData.getNatureOfApplication2())
-                && !caseData.getNatureOfApplication2().contains("Property Adjustment  Order")) {
-            caseData.setNatureOfApplication3a(null);
-            caseData.setNatureOfApplication3b(null);
+        if (hasNotSelected(caseData.getNatureOfApplication2(), "Property Adjustment  Order")) {
+            removePropertyAdjustmentDetails(caseData);
         }
     }
 
-    private void updateRespondantSolicitorAddress(CaseData caseData) {
-        if (nonNull(caseData.getAppRespondentRep()) && "No".equalsIgnoreCase(caseData.getAppRespondentRep())) {
-            caseData.setRespondentSolicitorName(null);
-            caseData.setRespondentSolicitorFirm(null);
-            caseData.setRespondentSolicitorReference(null);
-            caseData.setRespondentSolicitorAddress(null);
-            caseData.setRespondentSolicitorPhone(null);
-            caseData.setRespondentSolicitorEmail(null);
-            caseData.setRespondentSolicitorDxNumber(null);
-        }
-    }
-
-    private void updateJointD81(CaseData caseData) {
-        if (nonNull(caseData.getD81Question()) && "No".equalsIgnoreCase(caseData.getD81Question())) {
-            caseData.setD81Joint(null);
-        }
-
-        if (nonNull(caseData.getD81Question()) && "Yes".equalsIgnoreCase(caseData.getD81Question())) {
+    private void updateD81Details(CaseData caseData) {
+        if (equalsTo(caseData.getD81Question(), "Yes")) {
             caseData.setD81Applicant(null);
             caseData.setD81Respondent(null);
+        } else {
+            caseData.setD81Joint(null);
         }
+    }
+
+    private void updateRespondentSolicitorAddress(CaseData caseData) {
+        if (equalsTo(caseData.getAppRespondentRep(), "No")) {
+            removeRespondentSolicitorAddress(caseData);
+        }
+    }
+
+    private void removePeriodicPaymentData(CaseData caseData) {
+        caseData.setNatureOfApplication5(null);
+        caseData.setNatureOfApplication6(null);
+        caseData.setNatureOfApplication7(null);
+        caseData.setOrderForChildrenQuestion1(null);
+    }
+
+    private void removeRespondentSolicitorAddress(CaseData caseData) {
+        caseData.setRespondentSolicitorName(null);
+        caseData.setRespondentSolicitorFirm(null);
+        caseData.setRespondentSolicitorReference(null);
+        caseData.setRespondentSolicitorAddress(null);
+        caseData.setRespondentSolicitorPhone(null);
+        caseData.setRespondentSolicitorEmail(null);
+        caseData.setRespondentSolicitorDxNumber(null);
+    }
+
+    private void removePropertyAdjustmentDetails(CaseData caseData) {
+        caseData.setNatureOfApplication3a(null);
+        caseData.setNatureOfApplication3b(null);
+    }
+
+    private boolean equalsTo(String fieldData, String value) {
+        return nonNull(fieldData) && value.equalsIgnoreCase(fieldData);
+    }
+
+    private boolean hasNotSelected(List<String> natureOfApplication2, String option) {
+        return nonNull(natureOfApplication2)
+                && !natureOfApplication2.contains(option);
     }
 
 }
