@@ -1,10 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import feign.FeignException;
 import feign.Response;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
@@ -41,6 +43,10 @@ public class SetUpUtils {
         feeResponse.setFeeAmount(BigDecimal.valueOf(10d));
         feeResponse.setVersion("v1");
         return feeResponse;
+    }
+
+    public static CaseData caseDataWithUploadOrder(String uploadOrderId) {
+        return CaseData.builder().uploadOrder(ImmutableList.of(consentOrderData(uploadOrderId))).build();
     }
 
     public static ConsentOrderData consentOrderData(String id) {

@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
@@ -61,7 +62,8 @@ public class DocumentServiceTest {
 
     @Test
     public void generateConsentOrderNotApproved() {
-        ConsentOrderData consentOrderData = service.generateConsentOrderNotApproved(AUTH_TOKEN, new CaseDetails());
+        CaseData caseData = service.generateConsentOrderNotApproved(AUTH_TOKEN, new CaseDetails());
+        ConsentOrderData consentOrderData = caseData.getUploadOrder().get(0);
         assertThat(consentOrderData.getId(), is(notNullValue()));
         assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(REJECTED_ORDER_TYPE));
         assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));

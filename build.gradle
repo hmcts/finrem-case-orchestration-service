@@ -143,6 +143,7 @@ dependencies {
 
     compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
     compile group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.feignHttpClient
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremockVersion

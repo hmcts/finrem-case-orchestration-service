@@ -15,12 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentService;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -46,14 +43,8 @@ public class RejectedOrderDocumentController {
             @RequestHeader(value = "Authorization") String authorisationToken,
             @RequestBody @ApiParam("CaseData") CCDRequest request) {
 
-        ConsentOrderData consentOrderData =
+        CaseData caseData =
                 service.generateConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
-
-        CaseData caseData = request.getCaseDetails().getCaseData();
-        List<ConsentOrderData> data = Optional.ofNullable(caseData.getUploadOrder()).orElse(new ArrayList<>());
-        caseData.setUploadOrder(data);
-
-        caseData.getUploadOrder().add(consentOrderData);
 
         return ResponseEntity.ok(new CCDCallbackResponse(caseData, new ArrayList<>(), new ArrayList<>()));
     }

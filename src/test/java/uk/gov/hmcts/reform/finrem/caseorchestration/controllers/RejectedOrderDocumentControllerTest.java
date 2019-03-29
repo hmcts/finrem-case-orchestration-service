@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.REJECTED_ORDER_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDataWithUploadOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.consentOrderData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
 
@@ -71,7 +72,7 @@ public class RejectedOrderDocumentControllerTest {
     @Test
     public void generateConsentOrderNotApprovedSuccess() throws Exception {
         when(documentService.generateConsentOrderNotApproved(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-                .thenReturn(consentOrderData(UUID.randomUUID().toString()));
+                .thenReturn(caseDataWithUploadOrder(UUID.randomUUID().toString()));
 
         mvc.perform(post(API_URL)
                 .content(requestContent.toString())
