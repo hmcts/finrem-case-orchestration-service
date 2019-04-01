@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FeeRequest {
     @JsonProperty(value = "calculated_amount")
-    private long calculatedAmount;
+    private BigDecimal calculatedAmount;
 
     @JsonProperty(value = "code")
     private String code;
