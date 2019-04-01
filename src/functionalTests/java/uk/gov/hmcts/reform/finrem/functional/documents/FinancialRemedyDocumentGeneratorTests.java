@@ -39,8 +39,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyDocumentGenerationPostResponseContent() {
         Response response = generateDocument("documentGeneratePayload.json");
         JsonPath jsonPathEvaluator = response.jsonPath();
-        assertTrue(jsonPathEvaluator.get("data.miniFormA.document_filename").toString()
-                .equalsIgnoreCase("OnlineFormA.pdf"));
+        System.out.println("Response Body" + response.getBody().prettyPrint());
 
         assertTrue(jsonPathEvaluator.get("data.state.").toString()
                 .equalsIgnoreCase("applicationIssued"));
@@ -52,6 +51,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
         Response response = generateDocument("documentGeneratePayload.json");
         JsonPath jsonPathEvaluator = response.jsonPath();
+        System.out.println("Response Body" + response.getBody().prettyPrint());
 
         String url = jsonPathEvaluator.get("data.miniFormA.document_url");
 
@@ -59,7 +59,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
         Response response1 = accessGeneratedDocument(fileRetrieveUrl(url));
         JsonPath jsonPathEvaluator1 = response1.jsonPath();
-        assertTrue(jsonPathEvaluator1.get("originalDocumentName").toString().equalsIgnoreCase("OnlineFormA.pdf"));
         assertTrue(jsonPathEvaluator1.get("mimeType").toString().equalsIgnoreCase("application/pdf"));
         assertTrue(jsonPathEvaluator1.get("classification").toString().equalsIgnoreCase("RESTRICTED"));
     }

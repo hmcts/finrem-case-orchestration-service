@@ -15,4 +15,5 @@ echo $binFolder
 ./${binFolder}/ccd-add-role.sh caseworker-divorce-financialremedy-solicitor PUBLIC
 ./${binFolder}/ccd-add-role.sh caseworker-divorce-financialremedy-courtadmin PUBLIC
 ./${binFolder}/ccd-add-role.sh caseworker-divorce-financialremedy-judiciary PUBLIC
+./${binFolder}/ccd-add-role.sh caseworker-divorce-systemupdate PUBLIC
 
