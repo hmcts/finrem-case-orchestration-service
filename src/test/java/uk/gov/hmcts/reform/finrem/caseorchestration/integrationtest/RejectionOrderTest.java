@@ -3,8 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator;
 
+import java.io.IOException;
 import java.util.Collections;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -28,7 +31,7 @@ public class RejectionOrderTest extends AbstractDocumentTest {
         return DocumentRequest.builder()
                 .template(documentConfiguration.getRejectedOrderTemplate())
                 .fileName(documentConfiguration.getRejectedOrderFileName())
-                .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+                .values(Collections.singletonMap("caseDetails", copyOf(request.getCaseDetails())))
                 .build();
     }
 
@@ -58,5 +61,15 @@ public class RejectionOrderTest extends AbstractDocumentTest {
                                 is(BINARY_URL)))
                 .andExpect(jsonPath("$.errors", hasSize(0)))
                 .andExpect(jsonPath("$.warnings", hasSize(0)));
+    }
+
+    private CaseDetails copyOf(CaseDetails caseDetails) {
+        try {
+            CaseDetails deepCopy = objectMapper
+                    .readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
+            return OrderRefusalTranslator.translateOrderRefusalCollection(deepCopy);
+        } catch (IOException e) {
+            throw new IllegalStateException();
+        }
     }
 }

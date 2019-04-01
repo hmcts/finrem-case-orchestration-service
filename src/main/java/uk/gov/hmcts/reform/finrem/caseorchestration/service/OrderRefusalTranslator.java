@@ -13,21 +13,21 @@ import java.util.function.UnaryOperator;
 
 import static java.util.stream.Collectors.toList;
 
-final class ConsentOrderFunctions {
+public final class OrderRefusalTranslator {
     private static Map<String, String> REFUSAL_KEYS =
             ImmutableMap.of("Transferred to Applicant’s home Court", "Transferred to Applicant home Court - A",
                     "Transferred to Applicant's home Court", "Transferred to Applicant home Court - B"
             );
 
     static UnaryOperator<Pair<CaseDetails, String>> translateOrderRefusalCollection =
-            ConsentOrderFunctions::applyOrderRefusalCollectionTranslation;
+            OrderRefusalTranslator::applyOrderRefusalCollectionTranslation;
 
     static Pair<CaseDetails, String> applyOrderRefusalCollectionTranslation(
             Pair<CaseDetails, String> pair) {
         return ImmutablePair.of(translateOrderRefusalCollection(pair.getLeft()), pair.getRight());
     }
 
-    static CaseDetails translateOrderRefusalCollection(CaseDetails caseDetails) {
+    public static CaseDetails translateOrderRefusalCollection(CaseDetails caseDetails) {
         CaseData caseData = caseDetails.getCaseData();
         List<OrderRefusalData> orderRefusalCollection = caseData.getOrderRefusalCollection();
 

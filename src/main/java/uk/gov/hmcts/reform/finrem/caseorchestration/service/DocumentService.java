@@ -23,7 +23,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.translateOrderRefusalCollection;
 
 @Service
 public class DocumentService {
@@ -33,9 +34,6 @@ public class DocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentGeneratorClient documentGeneratorClient;
     private final ObjectMapper objectMapper;
-
-    private UnaryOperator<Pair<CaseDetails, String>> translateOrderRefusalCollection =
-            ConsentOrderFunctions::applyOrderRefusalCollectionTranslation;
 
     private Function<Pair<CaseDetails, String>, CaseDocument>
             generateDocument = this::applyGenerateConsentOrderNotApproved;
@@ -57,13 +55,12 @@ public class DocumentService {
                 documentConfiguration.getMiniFormFileName());
     }
 
-    public CaseData generateConsentOrderNotApproved(String authorisationToken, CaseDetails caseDetails) {
-        ConsentOrderData consentOrderData = translateOrderRefusalCollection
+    public CaseData generateConsentOrderNotApproved(String authorisationToken, final CaseDetails caseDetails) {
+        return translateOrderRefusalCollection
                 .andThen(generateDocument)
                 .andThen(createConsentOrderData)
+                .andThen(consentOrderData -> populateConsentOrderData(consentOrderData, caseDetails))
                 .apply(ImmutablePair.of(copyOf(caseDetails), authorisationToken));
-
-        return populateConsentOrderData(consentOrderData, caseDetails);
     }
 
     private CaseData populateConsentOrderData(ConsentOrderData consentOrderData, CaseDetails caseDetails) {
@@ -119,7 +116,7 @@ public class DocumentService {
     private CaseDetails copyOf(CaseDetails caseDetails) {
         try {
             return objectMapper
-                    .readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
+                .readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
         } catch (IOException e) {
             throw new IllegalStateException();
         }
