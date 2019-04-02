@@ -171,4 +171,30 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.rSolicitorEmail").doesNotExist())
                 .andExpect(jsonPath("$.data.rSolicitorPhone").doesNotExist());
     }
+
+    @Test
+    public void shouldDeletePensionDocumentsWhenPensionRelatedOptionsAreRemoved() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/updatecase/remove-pension-documents.json").toURI()));
+        mvc.perform(post("/case-orchestration/update-case")
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.pensionCollection").doesNotExist());
+    }
+
+    @Test
+    public void shouldNotDeletePensionDocumentsWhenPensionRelatedOptionsExists() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/updatecase/do-not-remove-pension-documents.json").toURI()));
+        mvc.perform(post("/case-orchestration/update-case")
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.pensionCollection").exists());
+    }
 }

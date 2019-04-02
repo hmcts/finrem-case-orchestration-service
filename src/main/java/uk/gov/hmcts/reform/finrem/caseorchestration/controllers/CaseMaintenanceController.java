@@ -44,6 +44,7 @@ public class CaseMaintenanceController implements BaseController {
         updatePropertyDetails(caseData);
         updateRespondentSolicitorAddress(caseData);
         updateD81Details(caseData);
+        updatePensionDocuments(caseData);
         return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
     }
 
@@ -121,6 +122,25 @@ public class CaseMaintenanceController implements BaseController {
     private boolean hasNotSelected(List<String> natureOfApplication2, String option) {
         return nonNull(natureOfApplication2)
                 && !natureOfApplication2.contains(option);
+    }
+
+    private void updatePensionDocuments(CaseData caseData) {
+        List<String> natureOfApplication2 = caseData.getNatureOfApplication2();
+        if (isPensionOptionsRemoved(natureOfApplication2)) {
+            removePensionDocuments(caseData);
+        }
+
+    }
+
+    private boolean isPensionOptionsRemoved(List<String> natureOfApplication2) {
+        return hasNotSelected(natureOfApplication2, "Pension Sharing Order")
+                && hasNotSelected(natureOfApplication2, "Pension Attachment Order")
+                && hasNotSelected(natureOfApplication2, "Pension Compensation Sharing Order")
+                && hasNotSelected(natureOfApplication2, "Pension Compensation Attachment Order");
+    }
+
+    private void removePensionDocuments(CaseData caseData) {
+        caseData.setPensionCollection(null);
     }
 
 }
