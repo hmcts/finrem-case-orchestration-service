@@ -192,11 +192,6 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
         assertThat(paymentResponse.getStatusHistories(), nullValue());
     }
 
-
-    private String toUri() {
-        return "http://test/credit-account-payments";
-    }
-
     private void setUpPbaPayment(String response) {
         paymentService.stubFor(post(urlPathEqualTo(PBA_PAYMENT_API))
                 .willReturn(aResponse()

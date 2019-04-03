@@ -1,15 +1,15 @@
 package uk.gov.hmcts.reform.finrem.functional.idam;
 
 import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 
 import java.util.Base64;
 
-@Slf4j
 @Component
 public class IdamUtils implements IdamUserClient {
 
@@ -23,11 +23,14 @@ public class IdamUtils implements IdamUserClient {
     @Value("${idam.api.secret}")
     private String idamSecret;
 
+    @Value("${idam.api.url.local}")
+    private String idamApiLocalUrl;
 
     public String generateUserTokenWithNoRoles(String username, String password) {
         String userLoginDetails = String.join(":", username, password);
         final String authHeader = "Basic " + new String(Base64.getEncoder().encode((userLoginDetails).getBytes()));
 
+        System.out.println("idamCodeUrl() -----> " + idamCodeUrl());
 
         Response response = RestAssured.given()
             .header("Authorization", authHeader)
@@ -39,12 +42,17 @@ public class IdamUtils implements IdamUserClient {
                 + " body: " + response.getBody().prettyPrint());
         }
 
+        String code = response.getBody().path("code");
+        System.out.println("code -----> " + code);
+
         response = RestAssured.given()
+            .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .relaxedHTTPSValidation()
-            .post(idamTokenUrl(response.getBody().path("code")));
+            .post(idamTokenUrl(code));
 
         String token = response.getBody().path("access_token");
 
+        System.out.println("token -----> " + token);
 
         return token;
     }
@@ -67,5 +75,15 @@ public class IdamUtils implements IdamUserClient {
             + "&grant_type=authorization_code";
 
         return myUrl;
+    }
+
+    public String getClientAuthToken() {
+        Response response = RestAssured.given()
+                .relaxedHTTPSValidation()
+                .post(idamApiLocalUrl + "?role=caseworker-divorce&id=1");
+        System.out.println(response.getBody().asString());
+
+        return response.getBody().asString();
+
     }
 }

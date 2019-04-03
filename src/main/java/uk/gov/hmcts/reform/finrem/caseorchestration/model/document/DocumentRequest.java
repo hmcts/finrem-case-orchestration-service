@@ -17,6 +17,9 @@ public class DocumentRequest {
     @JsonProperty(value = "template", required = true)
     @NotBlank
     private final String template;
+    @ApiModelProperty(value = "Name of the file", required = false)
+    @JsonProperty(value = "fileName", required = true)
+    private final String fileName;
     @JsonProperty(value = "values", required = true)
     @ApiModelProperty(value = "Placeholder key / value pairs", required = true)
     private final Map<String, Object> values;

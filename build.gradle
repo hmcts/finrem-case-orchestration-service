@@ -105,7 +105,6 @@ def versions = [
         commonsLang3            : '3.7',
         jsonAssert              : '1.2.3',
         junit                   : '4.12',
-        lombok                  : '1.16.16',
         nimbus                  : '5.1',
         pdfbox                  : '2.0.8',
         mockito                 : '2.8.9',
@@ -144,10 +143,11 @@ dependencies {
 
     compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
     compile group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.feignHttpClient
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremockVersion
-    
+
     testSmokeCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
     testSmokeCompile sourceSets.main.runtimeClasspath
     testSmokeCompile sourceSets.test.runtimeClasspath
@@ -163,7 +163,6 @@ dependencies {
     functionalCompile group: 'junit', name: 'junit', version: versions.junit
     functionalCompile group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber
     functionalCompile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
-    functionalCompile group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     functionalCompile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     functionalCompile group: 'org.pdfbox', name: 'com.springsource.org.pdfbox', version: '0.7.3'

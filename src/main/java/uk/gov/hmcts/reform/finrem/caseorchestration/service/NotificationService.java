@@ -28,18 +28,8 @@ public class NotificationService {
     private final RestTemplate restTemplate;
 
     public void sendHWFSuccessfulConfirmationEmail(CCDRequest ccdRequest, String authToken) {
-        NotificationRequest notificationRequest = buildNotificationRequest(ccdRequest);
-        HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
-        log.info(NOTIFICATION_SERVICE_URL, uri.toString());
-        try {
-            restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
-        } catch (Exception ex) {
-            log.error(MESSAGE,
-                    notificationRequest.getCaseReferenceNumber(), MSG_SOLICITOR_EMAIL,
-                    notificationRequest.getNotificationEmail(),
-                    EXCEPTION, ex.getMessage());
-        }
+        sendNotificationEmail(ccdRequest, authToken, uri);
     }
 
     public void sendAssignToJudgeConfirmationEmail(CCDRequest ccdRequest, String authToken) {
