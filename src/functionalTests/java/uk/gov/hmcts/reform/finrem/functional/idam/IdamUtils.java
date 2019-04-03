@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.functional.idam;
 
 import io.restassured.RestAssured;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -22,6 +23,8 @@ public class IdamUtils implements IdamUserClient {
     @Value("${idam.api.secret}")
     private String idamSecret;
 
+    @Value("${idam.api.url.local}")
+    private String idamApiLocalUrl;
 
     public String generateUserTokenWithNoRoles(String username, String password) {
         String userLoginDetails = String.join(":", username, password);
@@ -72,5 +75,15 @@ public class IdamUtils implements IdamUserClient {
             + "&grant_type=authorization_code";
 
         return myUrl;
+    }
+
+    public String getClientAuthToken()
+    {
+        Response response = RestAssured.given()
+                .relaxedHTTPSValidation()
+                .post(idamApiLocalUrl+"?role=caseworker-divorce&id=1");
+       System.out.println(response.getBody().asString());
+      return response.getBody().asString();
+
     }
 }
