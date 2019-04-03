@@ -77,13 +77,13 @@ public class IdamUtils implements IdamUserClient {
         return myUrl;
     }
 
-    public String getClientAuthToken()
-    {
+    public String getClientAuthToken() {
         Response response = RestAssured.given()
                 .relaxedHTTPSValidation()
-                .post(idamApiLocalUrl+"?role=caseworker-divorce&id=1");
-       System.out.println(response.getBody().asString());
-      return response.getBody().asString();
+                .post(idamApiLocalUrl + "?role=caseworker-divorce&id=1");
+        System.out.println(response.getBody().asString());
+
+        return response.getBody().asString();
 
     }
 }

@@ -61,7 +61,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         JsonPath jsonPathEvaluator = response.jsonPath();
         System.out.println("Response Body" + response.getBody().prettyPrint());
 
-        assertTrue(jsonPathEvaluator.get("data.UploadOrder[0].value.DocumentType").toString()
+        assertTrue(jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentType").toString()
                 .equalsIgnoreCase("generalOrder"));
     }
 
@@ -71,7 +71,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         JsonPath jsonPathEvaluator = response.jsonPath();
         System.out.println("Response Body" + response.getBody().prettyPrint());
 
-        String url = jsonPathEvaluator.get("uploadOrder[0].value.DocumentLink.document_url");
+        String url = jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentLink.document_url");
 
         validatePostSuccessForaccessingGeneratedDocument(fileRetrieveUrl(url));
 
@@ -114,6 +114,22 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         assertTrue(documentContent.contains(SOLICITOR_REF));
 
     }
+
+    @Test
+    public void downloadRejectOrderDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
+        Response response = generateDocument("document-rejected-order.json",documentRejectedOrderUrl);
+
+        JsonPath jsonPathEvaluator = response.jsonPath();
+
+        String documentUrl = jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentLink.document_binary_url");
+
+        String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
+        assertTrue(documentContent.contains("The order is not yet approved because"));
+
+    }
+
+
+
 
     private void validatePostSuccess(String jsonFileName,String url) {
 

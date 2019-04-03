@@ -65,8 +65,9 @@ public class FunctionalTestUtils {
 
     public Headers getHeaders() {
         return Headers.headers(
+
                 //new Header("Authorization", "Bearer "
-                       // + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
+                // + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
                 new Header("Authorization", "Bearer " + idamUtils.getClientAuthToken()),
                 new Header("Content-Type", ContentType.JSON.toString()));
     }
