@@ -32,6 +32,7 @@ public class DocumentService {
 
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
     public static final String ORDER_MADE_STATE = "orderMade";
+    public static final String DOCUMENT_COMMENT = "System Generated";
 
     private final DocumentConfiguration documentConfiguration;
     private final DocumentGeneratorClient documentGeneratorClient;
@@ -106,6 +107,7 @@ public class DocumentService {
         consentOrder.setDocumentType(documentConfiguration.getRejectedOrderDocType());
         consentOrder.setDocumentDateAdded(new Date());
         consentOrder.setDocumentLink(caseDocument);
+        consentOrder.setDocumentComment(DOCUMENT_COMMENT);
 
         ConsentOrderData consentOrderData = new ConsentOrderData();
         consentOrderData.setId(UUID.randomUUID().toString());

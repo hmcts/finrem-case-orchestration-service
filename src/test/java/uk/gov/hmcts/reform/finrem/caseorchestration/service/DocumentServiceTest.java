@@ -72,6 +72,7 @@ public class DocumentServiceTest {
         assertThat(consentOrderData.getId(), is(notNullValue()));
         assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(REJECTED_ORDER_TYPE));
         assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));
+        assertThat(consentOrderData.getConsentOrder().getDocumentComment(), is(equalTo("System Generated")));
 
         doCaseDocumentAssert(consentOrderData.getConsentOrder().getDocumentLink());
     }
