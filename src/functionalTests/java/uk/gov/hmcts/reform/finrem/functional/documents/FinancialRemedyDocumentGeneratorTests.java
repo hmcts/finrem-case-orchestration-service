@@ -30,9 +30,17 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Value("${document.management.store.baseUrl}")
     private String dmStoreBaseUrl;
 
+    @Value("${document.rejected.order}")
+    private String documentRejectedOrderUrl;
+
     @Test
     public void verifyDocumentGenerationShouldReturnOkResponseCode() {
-        validatePostSuccess("documentGeneratePayload.json");
+        validatePostSuccess("documentGeneratePayload.json",generatorUrl);
+    }
+
+    @Test
+    public void verifyRejectedOrderDocumentGenerationShouldReturnOkResponseCode() {
+        validatePostSuccess("document-rejected-order.json",documentRejectedOrderUrl);
     }
 
     @Test
@@ -45,7 +53,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 .equalsIgnoreCase("applicationIssued"));
 
     }
-
 
     @Test
     public void verifyGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
@@ -82,13 +89,13 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     }
 
-    private void validatePostSuccess(String jsonFileName) {
+    private void validatePostSuccess(String jsonFileName,String url) {
 
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())
                 .body(utils.getJsonFromFile(jsonFileName))
-                .when().post(generatorUrl)
+                .when().post(url)
                 .then()
                 .assertThat().statusCode(200);
     }

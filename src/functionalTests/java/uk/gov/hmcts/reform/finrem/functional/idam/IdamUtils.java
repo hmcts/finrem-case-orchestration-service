@@ -27,6 +27,7 @@ public class IdamUtils implements IdamUserClient {
         String userLoginDetails = String.join(":", username, password);
         final String authHeader = "Basic " + new String(Base64.getEncoder().encode((userLoginDetails).getBytes()));
 
+        System.out.println("idamCodeUrl() -----> " + idamCodeUrl());
 
         Response response = RestAssured.given()
             .header("Authorization", authHeader)
@@ -38,13 +39,17 @@ public class IdamUtils implements IdamUserClient {
                 + " body: " + response.getBody().prettyPrint());
         }
 
+        String code = response.getBody().path("code");
+        System.out.println("code -----> " + code);
+
         response = RestAssured.given()
             .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .relaxedHTTPSValidation()
-            .post(idamTokenUrl(response.getBody().path("code")));
+            .post(idamTokenUrl(code));
 
         String token = response.getBody().path("access_token");
 
+        System.out.println("token -----> " + token);
 
         return token;
     }

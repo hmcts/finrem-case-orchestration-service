@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.translateOrderRefusalCollection;
 
@@ -30,6 +31,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalT
 public class DocumentService {
 
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
+    public static final String ORDER_MADE_STATE = "orderMade";
 
     private final DocumentConfiguration documentConfiguration;
     private final DocumentGeneratorClient documentGeneratorClient;
@@ -39,6 +41,7 @@ public class DocumentService {
             generateDocument = this::applyGenerateConsentOrderNotApproved;
 
     private Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
+    private UnaryOperator<CaseData> updateCaseStateToOrderMade = this::updateState;
 
     @Autowired
     public DocumentService(DocumentGeneratorClient documentGeneratorClient,
@@ -60,7 +63,13 @@ public class DocumentService {
                 .andThen(generateDocument)
                 .andThen(createConsentOrderData)
                 .andThen(consentOrderData -> populateConsentOrderData(consentOrderData, caseDetails))
+                .andThen(updateCaseStateToOrderMade)
                 .apply(ImmutablePair.of(copyOf(caseDetails), authorisationToken));
+    }
+
+    private CaseData updateState(CaseData caseData) {
+        caseData.setState(ORDER_MADE_STATE);
+        return caseData;
     }
 
     private CaseData populateConsentOrderData(ConsentOrderData consentOrderData, CaseDetails caseDetails) {
