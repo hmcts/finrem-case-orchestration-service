@@ -43,7 +43,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         validatePostSuccess("document-rejected-order.json",documentRejectedOrderUrl);
     }
 
-
     @Test
     public void verifyDocumentGenerationPostResponseContent() {
         Response response = generateDocument("documentGeneratePayload.json",generatorUrl);
@@ -60,7 +59,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         JsonPath jsonPathEvaluator = response.jsonPath();
         System.out.println("Response Body" + response.getBody().prettyPrint());
 
-        assertTrue(jsonPathEvaluator.get("data.UploadOrder.DocumentType").toString()
+        assertTrue(jsonPathEvaluator.get("data.UploadOrder[0].value.DocumentType").toString()
                 .equalsIgnoreCase("generalOrder"));
     }
 
@@ -70,7 +69,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         JsonPath jsonPathEvaluator = response.jsonPath();
         System.out.println("Response Body" + response.getBody().prettyPrint());
 
-        String url = jsonPathEvaluator.get("uploadOrder.DocumentLink.document_url");
+        String url = jsonPathEvaluator.get("uploadOrder[0].DocumentLink.document_url");
 
         validatePostSuccessForaccessingGeneratedDocument(fileRetrieveUrl(url));
 
