@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -9,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalData;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import static java.util.stream.Collectors.toList;
@@ -19,26 +21,43 @@ public final class OrderRefusalTranslator {
                     "Transferred to Applicant's home Court", "Transferred to Applicant home Court - B"
             );
 
+    private static Function<CaseDetails, Pair<CaseDetails, List<OrderRefusalData>>> pickLatestOrderRefusal =
+            OrderRefusalTranslator::applyPickLatest;
+
+    private static Function<Pair<CaseDetails, List<OrderRefusalData>>, CaseDetails> translate =
+            OrderRefusalTranslator::applyTranslate;
+
     static UnaryOperator<Pair<CaseDetails, String>> translateOrderRefusalCollection =
             OrderRefusalTranslator::applyOrderRefusalCollectionTranslation;
 
-    static Pair<CaseDetails, String> applyOrderRefusalCollectionTranslation(
-            Pair<CaseDetails, String> pair) {
+    private static Pair<CaseDetails, String> applyOrderRefusalCollectionTranslation(Pair<CaseDetails, String> pair) {
         return ImmutablePair.of(translateOrderRefusalCollection(pair.getLeft()), pair.getRight());
     }
 
-    public static CaseDetails translateOrderRefusalCollection(CaseDetails caseDetails) {
-        CaseData caseData = caseDetails.getCaseData();
-        List<OrderRefusalData> orderRefusalCollection = caseData.getOrderRefusalCollection();
+    private static Pair<CaseDetails, List<OrderRefusalData>> applyPickLatest(CaseDetails caseDetails) {
+        List<OrderRefusalData> orderRefusalCollection = caseDetails.getCaseData().getOrderRefusalCollection();
+        List<OrderRefusalData> result = ImmutableList.of(orderRefusalCollection.get(orderRefusalCollection.size() - 1));
 
-        orderRefusalCollection.forEach(orderRefusalData -> {
+        return ImmutablePair.of(caseDetails, result);
+    }
+
+    private static CaseDetails applyTranslate(Pair<CaseDetails, List<OrderRefusalData>> pair) {
+        CaseDetails caseDetails = pair.getLeft();
+        CaseData caseData = caseDetails.getCaseData();
+        caseData.setOrderRefusalCollection(pair.getRight());
+
+        caseData.getOrderRefusalCollection().forEach(orderRefusalData -> {
             List<String> orderRefusal = orderRefusalData.getOrderRefusal().getOrderRefusal();
             orderRefusalData.getOrderRefusal().setOrderRefusal(
                     orderRefusal.stream()
-                            .map(s -> REFUSAL_KEYS.containsKey(s)  ? REFUSAL_KEYS.get(s) : s)
+                            .map(s -> REFUSAL_KEYS.getOrDefault(s, s))
                             .collect(toList()));
         });
 
         return caseDetails;
+    }
+
+    public static CaseDetails translateOrderRefusalCollection(CaseDetails caseDetails) {
+        return pickLatestOrderRefusal.andThen(translate).apply(caseDetails);
     }
 }
