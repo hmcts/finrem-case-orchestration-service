@@ -4,16 +4,19 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.util.ObjectUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalData;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import static java.util.stream.Collectors.toList;
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 public final class OrderRefusalTranslator {
     private static Map<String, String> REFUSAL_KEYS =
@@ -36,9 +39,16 @@ public final class OrderRefusalTranslator {
 
     private static Pair<CaseDetails, List<OrderRefusalData>> applyPickLatest(CaseDetails caseDetails) {
         List<OrderRefusalData> orderRefusalCollection = caseDetails.getCaseData().getOrderRefusalCollection();
-        List<OrderRefusalData> result = ImmutableList.of(orderRefusalCollection.get(orderRefusalCollection.size() - 1));
+        return ImmutablePair.of(caseDetails, refusalOrderList(orderRefusalCollection));
+    }
 
-        return ImmutablePair.of(caseDetails, result);
+    private static List<OrderRefusalData> refusalOrderList(List<OrderRefusalData> orderRefusalCollection) {
+        return isEmpty(orderRefusalCollection) ? ImmutableList.of() : constructOrderRefusalList(orderRefusalCollection);
+    }
+
+    private static ImmutableList<OrderRefusalData> constructOrderRefusalList(
+            List<OrderRefusalData> orderRefusalCollection) {
+        return ImmutableList.of(orderRefusalCollection.get(orderRefusalCollection.size() - 1));
     }
 
     private static CaseDetails applyTranslate(Pair<CaseDetails, List<OrderRefusalData>> pair) {
