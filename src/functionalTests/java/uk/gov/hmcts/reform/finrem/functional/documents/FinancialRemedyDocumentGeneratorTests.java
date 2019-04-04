@@ -113,6 +113,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERALORDER_JSON,documentRejectedOrderUrl,
                 "binary","generalOrder");
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
+        System.out.println("=======the document content========");
+        System.out.println(documentContent);
         assertTrue(documentContent.contains("The order is not yet approved because"));
 
     }
