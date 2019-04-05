@@ -20,7 +20,8 @@ public class OrderRefusalTranslatorTest {
 
     @Before
     public void setUpCaseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/model/case-details.json")) {
+        try (InputStream resourceAsStream =
+                     getClass().getResourceAsStream("/fixtures/model/case-details-multiple-orders.json")) {
             caseDetails = mapper.readValue(resourceAsStream, CaseDetails.class);
         }
     }

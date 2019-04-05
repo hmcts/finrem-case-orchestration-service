@@ -113,8 +113,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERALORDER_JSON,documentRejectedOrderUrl,
                 "binary","generalOrder");
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
-        assertTrue(documentContent.contains("The order is not yet approved because"));
-
+        assertTrue(documentContent.contains("Approved by:  District Judge test3"));
     }
 
 
@@ -147,18 +146,18 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         switch (documentType) {
             case "miniForma":
                 jsonPathEvaluator = generateDocument(jsonFile, url);
-                if (urlType == "document") {
+                if (urlType.equals("document")) {
                     url1 = jsonPathEvaluator.get("data.miniFormA.document_url");
-                } else if (urlType == "binary") {
+                } else if (urlType.equals("binary")) {
                     url1 = jsonPathEvaluator.get("data.miniFormA.document_binary_url");
                 }
                 break;
             case "generalOrder":
                 jsonPathEvaluator = generateDocument(jsonFile, url);
-                if (urlType == "document") {
+                if (urlType.equals("document")) {
 
                     url1 = jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentLink.document_url");
-                } else if (urlType == "binary")  {
+                } else if (urlType.equals("binary"))  {
                     url1 = jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentLink.document_binary_url");
                 }
                 break;
