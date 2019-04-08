@@ -119,7 +119,8 @@ def versions = [
         unirest                 : '1.4.9',
         pitest                  : '1.3.2',
         gradlePitest            : '1.3.0',
-        sonarPitest             : '0.5'
+        sonarPitest             : '0.5',
+        ccdClient               : '4.3.1'
 ]
 
 dependencies {
@@ -144,6 +145,7 @@ dependencies {
     compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
     compile group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.feignHttpClient
     compile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
+    compile group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremockVersion

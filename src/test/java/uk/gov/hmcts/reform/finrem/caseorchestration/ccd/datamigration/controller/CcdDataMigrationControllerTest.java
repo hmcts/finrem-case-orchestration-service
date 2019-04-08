@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controlle
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,15 +11,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod.CCDMigrationCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod.CCDMigrationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod.CaseDetails;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,19 +39,27 @@ public class CcdDataMigrationControllerTest {
     private WebApplicationContext applicationContext;
 
     private MockMvc mvc;
-    private CCDMigrationRequest request;
+    private CallbackRequest ccdMigrationRequest;
 
-    @Before
-    public void setUp() throws IOException {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/ccd-migrate-request.json")) {
-            request = objectMapper.readValue(resourceAsStream, CCDMigrationRequest.class);
+    private CallbackRequest ccdMigrationRequest() throws IOException {
+        String migrateRequestJson = "/fixtures/ccd-migrate-request.json";
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(migrateRequestJson)) {
+            ccdMigrationRequest =  objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+        }
+        return ccdMigrationRequest;
+    }
+
+    private CallbackRequest ccdAlreadyMigratedRequest() throws IOException {
+        String alreadyMigratedRequestJson = "/fixtures/ccd-already-migrated-request.json";
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(alreadyMigratedRequestJson)) {
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
 
     private String expectedCaseData() throws JsonProcessingException {
-        CaseDetails caseDetails = request.getCaseDetails();
-        return objectMapper.writeValueAsString(CCDMigrationCallbackResponse.builder()
-                .data(caseDetails.getCaseData()).build());
+        CaseDetails caseDetails = ccdMigrationRequest.getCaseDetails();
+        return objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDetails.getData()).build());
     }
 
     private void doMigrateSetup() {
@@ -63,11 +71,27 @@ public class CcdDataMigrationControllerTest {
         doMigrateSetup();
 
         mvc.perform(post(MIGRATE_URL)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(ccdMigrationRequest()))
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedCaseData()))
+                .andExpect(jsonPath("$.data.amountToPay", is("5000")))
+                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+    }
+
+    @Test
+    public void shouldNotDoMigration() throws Exception {
+        doMigrateSetup();
+
+        mvc.perform(post(MIGRATE_URL)
+                .content(objectMapper.writeValueAsString(ccdAlreadyMigratedRequest()))
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{}"))
+                .andExpect(jsonPath("$.data", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
