@@ -3,18 +3,21 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.google.common.collect.ImmutableList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.ObjectUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestBody;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 
+import java.util.Map;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,29 +26,31 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @SuppressWarnings("unchecked")
 public class PBAValidateController implements BaseController {
 
+
     private final PBAValidationService pbaValidationService;
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-validate", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    public ResponseEntity<CCDCallbackResponse> pbaValidate(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaValidate(
             @RequestHeader(value = "Authorization", required = false) String authToken,
-            @RequestBody CCDRequest ccdRequest) {
-        log.info("Received request for PBA validate. Auth token: {}, Case request : {}", authToken, ccdRequest);
+            @RequestBody CallbackRequest callbackRequest) {
+        log.info("Received request for PBA validate. Auth token: {}, Case request : {}", authToken, callbackRequest);
 
-        validateCaseData(ccdRequest);
+        validateCaseData(callbackRequest);
 
-        CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
+        Map<String,Object> caseData = callbackRequest.getCaseDetails().getData();
         if (isPBAPayment(caseData)) {
-            log.info("Validate PBA Number :  {}", caseData.getPbaNumber());
-            if (!pbaValidationService.isValidPBA(authToken, caseData.getPbaNumber())) {
+            String pbaNumber = ObjectUtils.toString(caseData.get(PBA_NUMBER));
+            log.info("Validate PBA Number :  {}",pbaNumber );
+            if (!pbaValidationService.isValidPBA(authToken, pbaNumber)) {
                 log.info("PBA number is invalid.");
-                return ResponseEntity.ok(CCDCallbackResponse.builder()
+                return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
                         .errors(ImmutableList.of("PBA Account Number is not valid, please enter a valid one."))
                         .build());
             }
             log.info("PBA number is valid.");
         }
-        return ResponseEntity.ok(CCDCallbackResponse.builder().build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().build());
     }
 
 }

@@ -6,11 +6,9 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 
 import java.io.File;
@@ -23,16 +21,13 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 public class PBAPaymentServiceTest extends BaseServiceTest {
 
     @Autowired
     private PBAPaymentService pbaPaymentService;
 
-    protected CCDRequest ccdRequest;
+    protected CallbackRequest callbackRequest;
 
     @ClassRule
     public static WireMockClassRule paymentService = new WireMockClassRule(9001);
@@ -42,8 +37,8 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
     @Before
     public void setupCaseData() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        ccdRequest = mapper.readValue(new File(getClass()
-                .getResource("/fixtures/pba-payment.json").toURI()), CCDRequest.class);
+        callbackRequest = mapper.readValue(new File(getClass()
+                .getResource("/fixtures/pba-payment.json").toURI()), CallbackRequest.class);
     }
 
     @Test
@@ -64,7 +59,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + "}");
 
         PaymentResponse paymentResponse = pbaPaymentService.makePayment("token", "123",
-                ccdRequest.getCaseDetails().getCaseData());
+                callbackRequest.getCaseDetails().getData());
 
         assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
         assertThat(paymentResponse.getStatus(), is("Success"));
@@ -93,7 +88,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + "}");
 
         PaymentResponse paymentResponse = pbaPaymentService.makePayment("token", "123",
-                ccdRequest.getCaseDetails().getCaseData());
+                callbackRequest.getCaseDetails().getData());
 
         assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
         assertThat(paymentResponse.getStatus(), is("Failed"));
@@ -126,7 +121,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + "}");
 
         PaymentResponse paymentResponse = pbaPaymentService.makePayment("token", "123",
-                ccdRequest.getCaseDetails().getCaseData());
+                callbackRequest.getCaseDetails().getData());
 
         assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
         assertThat(paymentResponse.getStatus(), is("Failed"));
@@ -158,7 +153,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + "}");
 
         PaymentResponse paymentResponse = pbaPaymentService.makePayment("token", "123",
-                ccdRequest.getCaseDetails().getCaseData());
+                callbackRequest.getCaseDetails().getData());
 
         assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
         assertThat(paymentResponse.getStatus(), is("Failed"));
@@ -183,7 +178,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + "}");
 
         PaymentResponse paymentResponse = pbaPaymentService.makePayment("token", "123",
-                ccdRequest.getCaseDetails().getCaseData());
+                callbackRequest.getCaseDetails().getData());
 
         assertThat(paymentResponse.getReference(), nullValue());
         assertThat(paymentResponse.getStatus(), is("403"));

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import org.junit.Before;
@@ -20,10 +21,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
@@ -43,6 +44,8 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DOCUMENT_CASE_DETAILS_JSON_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -72,12 +75,12 @@ public class GenerateMiniFormATest {
     @ClassRule
     public static WireMockClassRule documentGeneratorService = new WireMockClassRule(4009);
 
-    private CCDRequest request;
+    private CallbackRequest request;
 
     @Before
     public void setUp() throws IOException {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/fee-lookup.json")) {
-            request = objectMapper.readValue(resourceAsStream, CCDRequest.class);
+            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
 
@@ -108,9 +111,11 @@ public class GenerateMiniFormATest {
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
-        caseDetails.getCaseData().setMiniFormA(caseDocument());
-
-        return objectMapper.writeValueAsString(CCDCallbackResponse.builder().data(caseDetails.getCaseData()).build());
+        caseDetails.getData().put(MINI_FORM_A,caseDocument());
+        return objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(caseDetails.getData())
+            .build());
     }
 
     private CaseDocument caseDocument() {
@@ -124,7 +129,7 @@ public class GenerateMiniFormATest {
     private DocumentRequest documentRequest() {
         return DocumentRequest.builder()
                 .template(miniFormATemplate)
-                .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+                .values(Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, request.getCaseDetails()))
                 .build();
     }
 

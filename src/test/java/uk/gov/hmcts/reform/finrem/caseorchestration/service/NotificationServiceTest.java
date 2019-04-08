@@ -10,10 +10,12 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertThat;
 
@@ -29,7 +31,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Autowired
     private NotificationService notificationService;
-    private CCDRequest ccdRequest;
+    private CallbackRequest callbackRequest;
 
     @Autowired
     protected RestTemplate restTemplate;
@@ -39,7 +41,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Before
     public void setUp() {
         mockServer = MockRestServiceServer.createServer(restTemplate);
-        ccdRequest = getCcdRequest();
+        callbackRequest = getCallbackRequest();
     }
 
     @Test
@@ -47,20 +49,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_HWF_SUCCESSFUL))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, AUTH_TOKEN);
-    }
-
-    private CCDRequest getCcdRequest() {
-        CaseData caseData = new CaseData();
-        caseData.setSolicitorEmail("test@test.com");
-        caseData.setSolicitorName("Padmaja");
-        caseData.setSolicitorReference("56789");
-        CCDRequest ccdRequest = new CCDRequest();
-        CaseDetails caseDetails = new CaseDetails();
-        caseDetails.setCaseData(caseData);
-        caseDetails.setCaseId("12345");
-        ccdRequest.setCaseDetails(caseDetails);
-        return ccdRequest;
+        notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest, AUTH_TOKEN);
     }
 
     @Test
@@ -69,7 +58,7 @@ public class NotificationServiceTest extends BaseServiceTest {
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendHWFSuccessfulConfirmationEmail(ccdRequest, AUTH_TOKEN);
+            notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest, AUTH_TOKEN);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
@@ -81,7 +70,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_ASSIGNED_TO_JUDGE))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendAssignToJudgeConfirmationEmail(ccdRequest, AUTH_TOKEN);
+        notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest, AUTH_TOKEN);
     }
 
     @Test
@@ -89,18 +78,10 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_ASSIGNED_TO_JUDGE))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        CaseData caseData = new CaseData();
-        caseData.setSolicitorEmail("test@test.com");
-        caseData.setSolicitorName("Padmaja");
-        caseData.setSolicitorReference("56789");
-        CaseDetails caseDetails = new CaseDetails();
-        caseDetails.setCaseData(caseData);
-        caseDetails.setCaseId("12345");
-        CCDRequest ccdRequest = new CCDRequest();
-        ccdRequest.setCaseDetails(caseDetails);
+
 
         try {
-            notificationService.sendAssignToJudgeConfirmationEmail(ccdRequest, AUTH_TOKEN);
+            notificationService.sendAssignToJudgeConfirmationEmail(getCallbackRequest(), AUTH_TOKEN);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
@@ -112,7 +93,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_MADE))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendConsentOrderMadeConfirmationEmail(ccdRequest, AUTH_TOKEN);
+        notificationService.sendConsentOrderMadeConfirmationEmail(callbackRequest, AUTH_TOKEN);
     }
 
     @Test
@@ -121,7 +102,7 @@ public class NotificationServiceTest extends BaseServiceTest {
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendConsentOrderMadeConfirmationEmail(ccdRequest, AUTH_TOKEN);
+            notificationService.sendConsentOrderMadeConfirmationEmail(callbackRequest, AUTH_TOKEN);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
@@ -133,7 +114,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_NOT_APPROVED))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendConsentOrderNotApprovedEmail(ccdRequest, AUTH_TOKEN);
+        notificationService.sendConsentOrderNotApprovedEmail(callbackRequest, AUTH_TOKEN);
     }
 
     @Test
@@ -142,7 +123,7 @@ public class NotificationServiceTest extends BaseServiceTest {
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendConsentOrderNotApprovedEmail(ccdRequest, AUTH_TOKEN);
+            notificationService.sendConsentOrderNotApprovedEmail(callbackRequest, AUTH_TOKEN);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
@@ -153,7 +134,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_AVAILABLE))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendConsentOrderAvailableEmail(ccdRequest, AUTH_TOKEN);
+        notificationService.sendConsentOrderAvailableEmail(callbackRequest, AUTH_TOKEN);
     }
 
     @Test
@@ -162,9 +143,22 @@ public class NotificationServiceTest extends BaseServiceTest {
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendConsentOrderAvailableEmail(ccdRequest, AUTH_TOKEN);
+            notificationService.sendConsentOrderAvailableEmail(callbackRequest, AUTH_TOKEN);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
+    }
+
+    private CallbackRequest getCallbackRequest() {
+        Map<String,Object> caseData = new HashMap<>();
+        caseData.put("solicitorEmail","test@test.com");
+        caseData.put("solicitorName","solicitorName");
+        caseData.put("solicitorReference","56789");
+        return CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                .id(12345L)
+                .data(caseData)
+                .build())
+            .build();
     }
 }

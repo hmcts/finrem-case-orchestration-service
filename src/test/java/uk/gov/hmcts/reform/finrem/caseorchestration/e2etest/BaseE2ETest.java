@@ -8,8 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,12 +26,12 @@ abstract class BaseE2ETest extends BaseTest {
     @Autowired
     protected MockMvc webClient;
 
-    protected CCDRequest request;
+    protected CallbackRequest request;
 
     @Before
     public void setUp() throws IOException {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/fee-lookup.json")) {
-            request = objectMapper.readValue(resourceAsStream, CCDRequest.class);
+            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
 }

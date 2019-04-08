@@ -3,18 +3,18 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
 import java.util.Collections;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DOCUMENT_CASE_DETAILS_JSON_KEY;
+
 @Service
 public class DocumentService {
-
-    private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
 
     @Value("${document.miniFormA.template}")
     private String miniFormATemplate;

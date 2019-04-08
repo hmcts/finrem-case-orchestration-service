@@ -11,9 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod.CCDMigrationCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod.CCDMigrationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod.CaseData;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+
+import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -27,12 +28,13 @@ public class CcdDataMigrationController {
     @PostMapping(value = "/migrate", consumes = APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
-                    + "attached to the case", response = CCDMigrationCallbackResponse.class)})
-    public ResponseEntity<CCDMigrationCallbackResponse> migrate(
+                    + "attached to the case", response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> migrate(
             @RequestHeader(value = "Authorization") String authorisationToken,
-            @RequestBody @ApiParam("CaseData") CCDMigrationRequest ccdRequest) {
-        log.info("ccdMigrationRequest >>> authorisationToken {}, ccdRequest {}", authorisationToken, ccdRequest);
-        CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
-        return ResponseEntity.ok(CCDMigrationCallbackResponse.builder().data(caseData).build());
+            @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
+        log.info("ccdMigrationRequest >>> authorisationToken {}, callbackRequest {}",
+            authorisationToken, callbackRequest);
+        Map<String,Object> caseData = callbackRequest.getCaseDetails().getData();
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }

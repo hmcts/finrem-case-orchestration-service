@@ -12,10 +12,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod.CCDMigrationCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod.CCDMigrationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.model.prod.CaseDetails;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -39,19 +39,19 @@ public class CcdDataMigrationControllerTest {
     private WebApplicationContext applicationContext;
 
     private MockMvc mvc;
-    private CCDMigrationRequest request;
+    private CallbackRequest request;
 
     @Before
     public void setUp() throws IOException {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/ccd-migrate-request.json")) {
-            request = objectMapper.readValue(resourceAsStream, CCDMigrationRequest.class);
+            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
-        return objectMapper.writeValueAsString(CCDMigrationCallbackResponse.builder()
-                .data(caseDetails.getCaseData()).build());
+        return objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDetails.getData()).build());
     }
 
     private void doMigrateSetup() {

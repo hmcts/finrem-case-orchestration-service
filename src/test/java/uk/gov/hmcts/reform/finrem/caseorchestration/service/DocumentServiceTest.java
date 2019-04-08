@@ -6,8 +6,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
@@ -40,7 +40,7 @@ public class DocumentServiceTest {
 
         when(documentGeneratorClient.generatePDF(isA(DocumentRequest.class), eq(AUTH_TOKEN))).thenReturn(document);
 
-        CaseDocument result = service.generateMiniFormA(AUTH_TOKEN, new CaseDetails());
+        CaseDocument result = service.generateMiniFormA(AUTH_TOKEN, null);
         assertThat(result.getDocumentFilename(), Matchers.is(FILE_NAME));
         assertThat(result.getDocumentUrl(), Matchers.is(URL));
         assertThat(result.getDocumentBinaryUrl(), Matchers.is(BINARY_URL));
