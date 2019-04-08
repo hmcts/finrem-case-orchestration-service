@@ -1,4 +1,5 @@
 {
+  "orderRefusalAfterText": "afterText",
   "orderRefusal": [
     "Other"
   ],

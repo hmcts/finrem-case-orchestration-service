@@ -23,6 +23,7 @@ public class OrderRefusalTest {
 
     @Test
     public void shouldCreateOrderRefusalFromJson() {
+        assertThat(order.getOrderRefusalAfterText(), is("afterText"));
         assertThat(order.getOrderRefusal(), hasItems("Other"));
         assertThat(order.getOrderRefusalDate(), is(Date.valueOf("2003-02-01")));
         assertThat(order.getOrderRefusalDocs().getDocumentUrl(), is("http://doc1"));

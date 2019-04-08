@@ -1,6 +1,7 @@
 {
   "id": "1",
   "value": {
+    "orderRefusalAfterText": "afterText",
     "orderRefusal": [
       "Other"
     ],

@@ -10,6 +10,8 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class OrderRefusal {
+    @JsonProperty("orderRefusalAfterText")
+    private String orderRefusalAfterText;
     @JsonProperty("orderRefusal")
     private List<String> orderRefusal;
     @JsonProperty("orderRefusalOther")
