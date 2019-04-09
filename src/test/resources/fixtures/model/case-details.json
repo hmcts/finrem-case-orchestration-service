@@ -156,6 +156,10 @@
             "id": "1",
             "value": {
                "orderRefusal": [
+                  "Insufficient information provided – A",
+                  "Insufficient information provided – B",
+                  "Transferred to Applicant’s home Court",
+                  "Transferred to Applicant's home Court",
                   "Other"
                ],
                "orderRefusalDate": "2003-02-01",

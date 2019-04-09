@@ -178,7 +178,7 @@ services:
       IDAM_SECRET: idam_test_secret
       IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_CCD_GATEWAY: "${OAUTH2_CLIENT_CCD_GATEWAY}"
       IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_CCD_ADMIN: "${OAUTH2_CLIENT_CCD_ADMIN}"
-      IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_FINREM: "${OAUTH2_CLIENT_FINREM}"
+      IDAM_API_OAUTH2_CLIENT_CLIENT_SECRETS_FINREM: AAAAAAAAAAAAAAAA
       IDAM_CCD_WHITELIST: http://localhost:3451/oauth2redirect
       IDAM_CCD_ADMIN_WHITELIST: https://localhost:3100/oauth2redirect
       IDAM_FINREM_WHITELIST: https://localhost:9000/oauth2/callback
@@ -325,7 +325,7 @@ services:
     environment:
       IDAM_API_URL: http://idam-api:8080
       PAYMENT_API_URL: http://payments-api:8080
-      FEES_API_URL: http://payments-api:8080
+      FEES_API_URL: http://fees-register-api-aat.service.core-compute-aat.internal
       PRD_API_URL: http://payments-api:8080
     ports:
      - 9001:9001

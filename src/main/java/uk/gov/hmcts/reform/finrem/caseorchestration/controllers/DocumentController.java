@@ -33,8 +33,8 @@ public class DocumentController implements BaseController {
     @Autowired
     private DocumentService service;
 
-    @PostMapping(path = "/generate-mini-form-a",
-            consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/documents/generate-mini-form-a", consumes = APPLICATION_JSON_VALUE,
+            produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Mini Form A generation. Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "

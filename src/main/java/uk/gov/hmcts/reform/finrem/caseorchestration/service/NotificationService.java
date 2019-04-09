@@ -29,9 +29,6 @@ public class NotificationService {
     private static final String MESSAGE = "Failed to send notification email for case id : ";
     private static final String MSG_SOLICITOR_EMAIL = " for solicitor email";
     private static final String EXCEPTION = "exception :";
-
-
-
     private final NotificationServiceConfiguration notificationServiceConfiguration;
     private final RestTemplate restTemplate;
 
@@ -39,15 +36,7 @@ public class NotificationService {
         NotificationRequest notificationRequest = buildNotificationRequest(callbackRequest);
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
-        log.info(NOTIFICATION_SERVICE_URL, uri.toString());
-        try {
-            restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
-        } catch (Exception ex) {
-            log.error(MESSAGE,
-                    notificationRequest.getCaseReferenceNumber(), MSG_SOLICITOR_EMAIL,
-                    notificationRequest.getNotificationEmail(),
-                    EXCEPTION, ex.getMessage());
-        }
+        sendNotificationEmail(ccdRequest, authToken, uri);
     }
 
     public void sendAssignToJudgeConfirmationEmail(CallbackRequest callbackRequest, String authToken) {

@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.FeeRequest
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
@@ -41,7 +42,7 @@ public class PBAPaymentService {
 
     public PaymentResponse makePayment(String authToken, String ccdCaseId, Map<String, Object> mapOfCaseData) {
         log.info("Inside makePayment, authToken : {}, ccdCaseId : {}, caseData : {}", authToken, ccdCaseId,
-            mapOfCaseData);
+                mapOfCaseData);
         PaymentRequest paymentRequest = buildPaymenRequest(ccdCaseId, mapOfCaseData);
         log.info("paymentRequest: {}", paymentRequest);
         PaymentResponse paymentResponse = paymentClient.pbaPayment(authToken, paymentRequest);
@@ -60,12 +61,14 @@ public class PBAPaymentService {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode dataJsonNode = mapper.valueToTree(mapOfCaseData);
         JsonNode feeValueAsJson = dataJsonNode.path(ORDER_SUMMARY).path(FEES).get(0).path(VALUE);
+        BigDecimal feeAmount = new BigDecimal(feeValueAsJson.path(FEE_AMOUNT).asDouble()).divide(BigDecimal.valueOf(100));
 
-        return FeeRequest.builder()
-            .calculatedAmount(feeValueAsJson.path(FEE_AMOUNT).asLong())
-            .code(feeValueAsJson.path(FEE_CODE).asText())
-            .version(feeValueAsJson.path(FEE_VERSION).asText())
-            .build();
+        return FeeRequest
+                .builder()
+                .calculatedAmount(feeAmount)
+                .code(feeValueAsJson.path(FEE_CODE).asText())
+                .version(feeValueAsJson.path(FEE_VERSION).asText())
+                .build();
     }
 
     private PaymentRequest buildPaymentRequest(String ccdCaseId, Map<String, Object> mapOfCaseData, FeeRequest fee) {
@@ -73,16 +76,15 @@ public class PBAPaymentService {
         JsonNode dataJsonNode = mapper.valueToTree(mapOfCaseData);
 
         return PaymentRequest.builder()
-            .accountNumber(dataJsonNode.path(PBA_NUMBER).asText())
-            .caseReference(dataJsonNode.path(DIVORCE_CASE_NUMBER).asText())
-            .customerReference(dataJsonNode.path(PBA_REFERENCE).asText())
-            .ccdCaseNumber(ccdCaseId)
-            .description(description)
-            .organisationName(dataJsonNode.path(SOLICITOR_FIRM).asText())
-            .siteId(siteId)
-            .amount(fee.getCalculatedAmount())
-            .feesList(ImmutableList.of(fee))
-            .build();
+                .accountNumber(dataJsonNode.path(PBA_NUMBER).asText())
+                .caseReference(dataJsonNode.path(DIVORCE_CASE_NUMBER).asText())
+                .customerReference(dataJsonNode.path(PBA_REFERENCE).asText())
+                .ccdCaseNumber(ccdCaseId)
+                .description(description)
+                .organisationName(dataJsonNode.path(SOLICITOR_FIRM).asText())
+                .siteId(siteId)
+                .amount(fee.getCalculatedAmount())
+                .feesList(ImmutableList.of(fee))
+                .build();
     }
-
 }

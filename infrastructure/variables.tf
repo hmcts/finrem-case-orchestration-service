@@ -54,6 +54,10 @@ variable "payment_api_url" {
   default = "http://finrem-ps-aat.service.core-compute-aat.internal"
 }
 
+variable "fees_api_url" {
+  default = "http://fees-register-api-aat.service.core-compute-aat.internal"
+}
+
 variable "subscription" {}
 
 variable "location" {

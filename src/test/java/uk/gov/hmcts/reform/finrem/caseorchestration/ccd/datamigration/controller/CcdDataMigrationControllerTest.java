@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controlle
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +20,7 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,17 +39,25 @@ public class CcdDataMigrationControllerTest {
     private WebApplicationContext applicationContext;
 
     private MockMvc mvc;
-    private CallbackRequest request;
+    private CallbackRequest ccdMigrationRequest;
 
-    @Before
-    public void setUp() throws IOException {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/ccd-migrate-request.json")) {
-            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+    private CallbackRequest ccdMigrationRequest() throws IOException {
+        String migrateRequestJson = "/fixtures/ccd-migrate-request.json";
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(migrateRequestJson)) {
+            ccdMigrationRequest =  objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+        }
+        return ccdMigrationRequest;
+    }
+
+    private CallbackRequest ccdAlreadyMigratedRequest() throws IOException {
+        String alreadyMigratedRequestJson = "/fixtures/ccd-already-migrated-request.json";
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(alreadyMigratedRequestJson)) {
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
 
     private String expectedCaseData() throws JsonProcessingException {
-        CaseDetails caseDetails = request.getCaseDetails();
+        CaseDetails caseDetails = ccdMigrationRequest.getCaseDetails();
         return objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDetails.getData()).build());
     }
@@ -63,11 +71,27 @@ public class CcdDataMigrationControllerTest {
         doMigrateSetup();
 
         mvc.perform(post(MIGRATE_URL)
-                .content(objectMapper.writeValueAsString(request))
+                .content(objectMapper.writeValueAsString(ccdMigrationRequest()))
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedCaseData()))
+                .andExpect(jsonPath("$.data.amountToPay", is("5000")))
+                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+    }
+
+    @Test
+    public void shouldNotDoMigration() throws Exception {
+        doMigrateSetup();
+
+        mvc.perform(post(MIGRATE_URL)
+                .content(objectMapper.writeValueAsString(ccdAlreadyMigratedRequest()))
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json("{}"))
+                .andExpect(jsonPath("$.data", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }

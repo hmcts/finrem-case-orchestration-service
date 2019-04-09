@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentService;
@@ -24,17 +25,18 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_ISSUED;
 
 @WebMvcTest(DocumentController.class)
 public class DocumentControllerTest extends BaseControllerTest {
 
-    private static final String AUTH_TOKEN = "Bearer eyJhbGJbpjciOiJIUzI1NiJ9";
-    private static final String GEN_DOC_URL = "/case-orchestration/generate-mini-form-a";
-    private static final String DOC_URL = "http://test/file";
-    private static final String BIN_DOC_URL = DOC_URL + "/binary";
-    private static final String DOC_NAME = "doc_name";
+    private static final String GEN_DOC_URL = "/case-orchestration/documents/generate-mini-form-a";
 
     private JsonNode requestContent;
 
@@ -50,16 +52,6 @@ public class DocumentControllerTest extends BaseControllerTest {
             fail(e.getMessage());
         }
     }
-
-    private static CaseDocument caseDocument() {
-        CaseDocument caseDocument = new CaseDocument();
-        caseDocument.setDocumentUrl(DOC_URL);
-        caseDocument.setDocumentFilename(DOC_NAME);
-        caseDocument.setDocumentBinaryUrl(BIN_DOC_URL);
-
-        return caseDocument;
-    }
-
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -78,8 +70,8 @@ public class DocumentControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.state", is(APPLICATION_ISSUED.toString())))
                 .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
-                .andExpect(jsonPath("$.data.miniFormA.document_filename", is(DOC_NAME)))
-                .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BIN_DOC_URL)))
+                .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
+                .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BINARY_URL)))
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }

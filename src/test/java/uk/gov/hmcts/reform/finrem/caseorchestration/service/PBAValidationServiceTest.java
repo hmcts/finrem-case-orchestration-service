@@ -14,10 +14,9 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 
 public class PBAValidationServiceTest extends BaseServiceTest {
-
-    private static final String AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
     @Autowired
     private PBAValidationService pbaValidationService;

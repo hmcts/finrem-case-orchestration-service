@@ -25,7 +25,6 @@ public class DocumentTest {
         assertThat(doc.getMimeType(), is(MIME_TYPE));
     }
 
-
     @Test
     public void equality() {
         Document doc = document();
