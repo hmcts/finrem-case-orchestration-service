@@ -24,7 +24,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class FormGDocumentController {
+public class CourSheetDocumentController {
 
     @Autowired
     private DocumentService service;
