@@ -10,7 +10,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SerenityRunner.class)
 public class MigrationTests extends IntegrationTestBase {
@@ -48,8 +49,7 @@ public class MigrationTests extends IntegrationTestBase {
 
     }
 
-    private void verifyDontMigrateAssertions(JsonPath jsonPath)
-    {
+    private void verifyDontMigrateAssertions(JsonPath jsonPath) {
         assertNull("Should be null",jsonPath.get("data"));
         assertNull("Should be null",jsonPath.get("data_classification"));
         assertNull("Should be null",jsonPath.get("security_classification"));
