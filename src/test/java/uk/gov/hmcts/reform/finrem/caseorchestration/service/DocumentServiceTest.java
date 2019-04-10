@@ -81,8 +81,7 @@ public class DocumentServiceTest {
 
     private ConsentOrderData consentOrderData(Map<String, Object> caseData) {
         List<ConsentOrderData> list =
-                mapper.convertValue(caseData, new TypeReference<List<ConsentOrderData>>() {
-                });
+                mapper.convertValue(caseData.get("uploadOrder"), new TypeReference<List<ConsentOrderData>>() {});
 
         return list
                 .stream()

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.google.common.collect.ImmutableList;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -47,6 +48,12 @@ public class RejectedOrderDocumentController {
         Map<String, Object> caseData =
                 service.generateConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(
+                AboutToStartOrSubmitCallbackResponse.builder()
+                        .data(caseData)
+                        .errors(ImmutableList.of())
+                        .warnings(ImmutableList.of())
+                        .build()
+        );
     }
 }

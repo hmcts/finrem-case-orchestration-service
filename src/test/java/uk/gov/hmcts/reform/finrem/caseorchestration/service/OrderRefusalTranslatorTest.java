@@ -44,7 +44,8 @@ public class OrderRefusalTranslatorTest {
 
     private OrderRefusalData orderRefusalDataList(CaseDetails result) {
         List<OrderRefusalData> list =
-                mapper.convertValue(result.getData(), new TypeReference<List<OrderRefusalData>>() {});
+                mapper.convertValue(result.getData().get("orderRefusalCollection"),
+                        new TypeReference<List<OrderRefusalData>>() {});
 
         return list.get(0);
     }
