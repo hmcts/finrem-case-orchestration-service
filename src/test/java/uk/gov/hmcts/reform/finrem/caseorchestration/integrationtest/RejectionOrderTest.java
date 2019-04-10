@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator;
 

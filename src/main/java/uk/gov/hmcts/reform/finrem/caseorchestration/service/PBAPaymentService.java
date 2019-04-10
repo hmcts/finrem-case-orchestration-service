@@ -61,7 +61,8 @@ public class PBAPaymentService {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode dataJsonNode = mapper.valueToTree(mapOfCaseData);
         JsonNode feeValueAsJson = dataJsonNode.path(ORDER_SUMMARY).path(FEES).get(0).path(VALUE);
-        BigDecimal feeAmount = new BigDecimal(feeValueAsJson.path(FEE_AMOUNT).asDouble()).divide(BigDecimal.valueOf(100));
+        BigDecimal feeAmount =
+                new BigDecimal(feeValueAsJson.path(FEE_AMOUNT).asDouble()).divide(BigDecimal.valueOf(100));
 
         return FeeRequest
                 .builder()

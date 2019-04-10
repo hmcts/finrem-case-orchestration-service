@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -9,12 +10,15 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,8 +32,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalT
 public class DocumentService {
 
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
-    public static final String ORDER_MADE_STATE = "orderMade";
-    public static final String DOCUMENT_COMMENT = "System Generated";
+    private static final String ORDER_MADE_STATE = "orderMade";
+    private static final String DOCUMENT_COMMENT = "System Generated";
 
     private final DocumentConfiguration documentConfiguration;
     private final DocumentGeneratorClient documentGeneratorClient;
@@ -38,7 +42,7 @@ public class DocumentService {
     private Function<Pair<CaseDetails, String>, CaseDocument>
             generateDocument = this::applyGenerateConsentOrderNotApproved;
 
-    private Function<CaseDocument, Map<String, Object>> createConsentOrderData = this::applyCreateConsentOrderData;
+    private Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
     private UnaryOperator<Map<String, Object>> updateCaseStateToOrderMade = this::updateState;
 
     @Autowired
@@ -56,7 +60,8 @@ public class DocumentService {
                 documentConfiguration.getMiniFormFileName());
     }
 
-    public Map<String, Object> generateConsentOrderNotApproved(String authorisationToken, final CaseDetails caseDetails) {
+    public Map<String, Object> generateConsentOrderNotApproved(
+            String authorisationToken, final CaseDetails caseDetails) {
         return translateOrderRefusalCollection
                 .andThen(generateDocument)
                 .andThen(createConsentOrderData)
@@ -70,12 +75,15 @@ public class DocumentService {
         return caseData;
     }
 
-    private Map<String, Object> populateConsentOrderData(Map<String, Object> consentOrderData, CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getCaseData();
-        List<ConsentOrderData> data = Optional.ofNullable(caseData.getUploadOrder()).orElse(new ArrayList<>());
-        caseData.setUploadOrder(data);
+    private Map<String, Object> populateConsentOrderData(ConsentOrderData consentOrderData, CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
 
-        caseData.getUploadOrder().add(consentOrderData);
+        List<ConsentOrderData> uploadOrder = Optional.ofNullable(caseData.get("uploadOrder"))
+                .map(this::convertToUploadOrderList)
+                .orElse(new ArrayList<>());
+        uploadOrder.add(consentOrderData);
+
+        caseData.put("uploadOrder", uploadOrder);
         return caseData;
     }
 
@@ -99,16 +107,17 @@ public class DocumentService {
                 documentConfiguration.getRejectedOrderFileName());
     }
 
-    private Map<String, Object> applyCreateConsentOrderData(CaseDocument caseDocument) {
-        Map<String, Object> consentOrder = new HashMap<>();
-        consentOrder.put("documentType", documentConfiguration.getRejectedOrderDocType());
-        consentOrder.put("documentDateAdded", new Date());
-        consentOrder.put("documentLink", caseDocument);
-        consentOrder.put("documentComment", DOCUMENT_COMMENT);
+    private ConsentOrderData applyCreateConsentOrderData(CaseDocument caseDocument) {
+        ConsentOrder consentOrder = new ConsentOrder();
+        consentOrder.setDocumentType(documentConfiguration.getRejectedOrderDocType());
+        consentOrder.setDocumentDateAdded(new Date());
+        consentOrder.setDocumentLink(caseDocument);
+        consentOrder.setDocumentComment(DOCUMENT_COMMENT);
 
-        Map<String, Object> consentOrderData = new HashMap<>();
-        consentOrderData.put("id", UUID.randomUUID().toString());
-        consentOrderData.put("consentOrder", consentOrder);
+        ConsentOrderData consentOrderData = new ConsentOrderData();
+        consentOrderData.setId(UUID.randomUUID().toString());
+        consentOrderData.setConsentOrder(consentOrder);
+
         return consentOrderData;
     }
 
@@ -127,5 +136,9 @@ public class DocumentService {
         } catch (IOException e) {
             throw new IllegalStateException();
         }
+    }
+
+    private List<ConsentOrderData> convertToUploadOrderList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<List<ConsentOrderData>>() {});
     }
 }

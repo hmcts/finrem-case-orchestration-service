@@ -1,19 +1,21 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
 import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -58,17 +60,17 @@ public class DocumentServiceTest {
 
     @Test
     public void generateMiniFormA() {
-        doCaseDocumentAssert(service.generateMiniFormA(AUTH_TOKEN, new CaseDetails()));
+        doCaseDocumentAssert(service.generateMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
     }
 
     @Test
     public void generateConsentOrderNotApproved() throws Exception {
         CaseDetails caseDetails = caseDetails();
 
-        CaseData caseData = service.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        Map<String, Object> caseData = service.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
         ConsentOrderData consentOrderData = consentOrderData(caseData);
 
-        assertThat(caseData.getState(), is(equalTo("orderMade")));
+        assertThat(caseData.get("state"), is(equalTo("orderMade")));
         assertThat(consentOrderData.getId(), is(notNullValue()));
         assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(REJECTED_ORDER_TYPE));
         assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));
@@ -77,8 +79,12 @@ public class DocumentServiceTest {
         doCaseDocumentAssert(consentOrderData.getConsentOrder().getDocumentLink());
     }
 
-    private ConsentOrderData consentOrderData(CaseData caseData) {
-        return caseData.getUploadOrder()
+    private ConsentOrderData consentOrderData(Map<String, Object> caseData) {
+        List<ConsentOrderData> list =
+                mapper.convertValue(caseData, new TypeReference<List<ConsentOrderData>>() {
+                });
+
+        return list
                 .stream()
                 .filter(cd -> cd.getConsentOrder().getDocumentType().equals(REJECTED_ORDER_TYPE))
                 .findFirst().orElseThrow(() -> new IllegalStateException(REJECTED_ORDER_TYPE + " missing"));

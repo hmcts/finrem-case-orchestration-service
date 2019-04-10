@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
 import java.io.IOException;
@@ -62,12 +62,12 @@ public abstract class AbstractDocumentTest {
     @ClassRule
     public static WireMockClassRule documentGeneratorService = new WireMockClassRule(4009);
 
-    protected CCDRequest request;
+    protected CallbackRequest request;
 
     @Before
     public void setUp() throws IOException {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/fee-lookup.json")) {
-            request = objectMapper.readValue(resourceAsStream, CCDRequest.class);
+            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
 

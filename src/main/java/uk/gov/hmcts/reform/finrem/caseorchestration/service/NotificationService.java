@@ -36,7 +36,7 @@ public class NotificationService {
         NotificationRequest notificationRequest = buildNotificationRequest(callbackRequest);
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
-        sendNotificationEmail(ccdRequest, authToken, uri);
+        sendNotificationEmail(callbackRequest, authToken, uri);
     }
 
     public void sendAssignToJudgeConfirmationEmail(CallbackRequest callbackRequest, String authToken) {

@@ -14,7 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentService;
 
 import javax.ws.rs.core.MediaType;
@@ -38,7 +38,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.REJECTED_ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDataWithUploadOrder;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.consentOrderData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
 
 @RunWith(SpringRunner.class)

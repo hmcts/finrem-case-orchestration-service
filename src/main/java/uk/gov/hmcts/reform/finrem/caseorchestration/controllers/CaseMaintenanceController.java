@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,11 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -43,13 +38,13 @@ public class CaseMaintenanceController implements BaseController {
 
         log.info("Received request for updateCase ");
         validateCaseData(ccdRequest);
-        Map<String, Object> caseData = ccdRequest.getCaseDetails().getCaseData();
+        Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
         updateDivorceDetails(caseData);
         updatePeriodicPaymentData(caseData);
         updatePropertyDetails(caseData);
         updateRespondentSolicitorAddress(caseData);
         updateD81Details(caseData);
-        return ResponseEntity.ok(CCDCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     private void updateDivorceDetails(Map<String, Object> caseData) {
@@ -71,30 +66,32 @@ public class CaseMaintenanceController implements BaseController {
             removePeriodicPaymentData(caseData);
         } else {
             // if written agreement for order for children
-            if (equalsTo(caseData.getNatureOfApplication5(), "Yes")) {
-                caseData.setNatureOfApplication6(null);
-                caseData.setNatureOfApplication7(null);
+            if (equalsTo((String) caseData.get("natureOfApplication5"), "Yes")) {
+                caseData.put("natureOfApplication6", null);
+                caseData.put("natureOfApplication7", null);
             }
         }
     }
 
-    private void updatePropertyDetails(CaseData caseData) {
-        if (hasNotSelected(caseData.getNatureOfApplication2(), "Property Adjustment  Order")) {
+    private void updatePropertyDetails(Map<String, Object> caseData) {
+        List natureOfApplication2 = (List) caseData.get("natureOfApplication2");
+
+        if (hasNotSelected(natureOfApplication2, "Property Adjustment  Order")) {
             removePropertyAdjustmentDetails(caseData);
         }
     }
 
-    private void updateD81Details(CaseData caseData) {
-        if (equalsTo(caseData.getD81Question(), "Yes")) {
-            caseData.setD81Applicant(null);
-            caseData.setD81Respondent(null);
+    private void updateD81Details(Map<String, Object> caseData) {
+        if (equalsTo((String) caseData.get("d81Question"), "Yes")) {
+            caseData.put("d81Applicant", null);
+            caseData.put("d81Respondent", null);
         } else {
-            caseData.setD81Joint(null);
+            caseData.put("d81Joint", null);
         }
     }
 
-    private void updateRespondentSolicitorAddress(CaseData caseData) {
-        if (equalsTo(caseData.getAppRespondentRep(), "No")) {
+    private void updateRespondentSolicitorAddress(Map<String, Object> caseData) {
+        if (equalsTo((String) caseData.get("appRespondentRep"), "No")) {
             removeRespondentSolicitorAddress(caseData);
         }
     }

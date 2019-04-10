@@ -1,9 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalData;
 
 import java.io.InputStream;
@@ -29,7 +30,8 @@ public class OrderRefusalTranslatorTest {
     @Test
     public void modifyOrderRefusalCollection() {
         CaseDetails result = translateOrderRefusalCollection(caseDetails);
-        OrderRefusalData orderRefusalData = result.getCaseData().getOrderRefusalCollection().get(0);
+
+        OrderRefusalData orderRefusalData = orderRefusalDataList(result);
         List<String> orderRefusal = orderRefusalData.getOrderRefusal().getOrderRefusal();
 
         assertThat(orderRefusal, hasItems(
@@ -38,5 +40,12 @@ public class OrderRefusalTranslatorTest {
                 "Transferred to Applicant home Court - A",
                 "Transferred to Applicant home Court - B",
                 "Other"));
+    }
+
+    private OrderRefusalData orderRefusalDataList(CaseDetails result) {
+        List<OrderRefusalData> list =
+                mapper.convertValue(result.getData(), new TypeReference<List<OrderRefusalData>>() {});
+
+        return list.get(0);
     }
 }
