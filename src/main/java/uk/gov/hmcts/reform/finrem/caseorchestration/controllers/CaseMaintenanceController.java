@@ -104,13 +104,13 @@ public class CaseMaintenanceController implements BaseController {
     }
 
     private void removeRespondentSolicitorAddress(Map<String, Object> caseData) {
-        caseData.put("respondentSolicitorName", null);
-        caseData.put("respondentSolicitorFirm", null);
-        caseData.put("respondentSolicitorReference", null);
-        caseData.put("respondentSolicitorAddress", null);
-        caseData.put("respondentSolicitorPhone", null);
-        caseData.put("respondentSolicitorEmail", null);
-        caseData.put("respondentSolicitorDxNumber", null);
+        caseData.put("rSolicitorName", null);
+        caseData.put("rSolicitorFirm", null);
+        caseData.put("rSolicitorReference", null);
+        caseData.put("rSolicitorAddress", null);
+        caseData.put("rSolicitorPhone", null);
+        caseData.put("rSolicitorEmail", null);
+        caseData.put("rSolicitorDXNumber", null);
     }
 
     private void removePropertyAdjustmentDetails(Map<String, Object> caseData) {
