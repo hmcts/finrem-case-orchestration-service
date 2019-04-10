@@ -15,4 +15,6 @@ public class DocumentConfiguration {
     private String coversheetTemplate;
     private String coversheetFileName;
     private String rejectedOrderDocType;
+    private String formGTemplate;
+    private String formGFileName;
 }

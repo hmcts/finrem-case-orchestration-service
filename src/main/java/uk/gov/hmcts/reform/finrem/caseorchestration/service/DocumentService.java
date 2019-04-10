@@ -39,9 +39,7 @@ public class DocumentService {
     private final DocumentGeneratorClient documentGeneratorClient;
     private final ObjectMapper objectMapper;
 
-    private Function<Pair<CaseDetails, String>, CaseDocument>
-            generateDocument = this::applyGenerateConsentOrderNotApproved;
-
+    private Function<Pair<CaseDetails, String>, CaseDocument> generateDocument = this::applyGenerateRefusalOrder;
     private Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
     private UnaryOperator<Map<String, Object>> updateCaseStateToOrderMade = this::updateState;
 
@@ -101,7 +99,7 @@ public class DocumentService {
         return caseDocument(miniFormA);
     }
 
-    private CaseDocument applyGenerateConsentOrderNotApproved(Pair<CaseDetails, String> data) {
+    private CaseDocument applyGenerateRefusalOrder(Pair<CaseDetails, String> data) {
         return generateDocument(data.getRight(), data.getLeft(),
                 documentConfiguration.getRejectedOrderTemplate(),
                 documentConfiguration.getRejectedOrderFileName());
@@ -140,5 +138,9 @@ public class DocumentService {
 
     private List<ConsentOrderData> convertToUploadOrderList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<List<ConsentOrderData>>() {});
+    }
+
+    public Map<String, Object> generateCourtCoverSheet(String authorisationToken, CaseDetails caseDetails) {
+        throw new UnsupportedOperationException();
     }
 }

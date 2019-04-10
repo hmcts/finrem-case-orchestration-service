@@ -151,6 +151,23 @@
             "whereShouldHearingTakePlace": "EZ801"
           }
         }
+      ],
+      "uploadOrder": [
+        {
+          "id": "1",
+          "value": {
+            "DocumentType": "pdf",
+            "DocumentLink": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
+            },
+            "DocumentEmailContent": "email-content",
+            "DocumentDateAdded": "2010-01-02",
+            "DocumentComment": "doc-comment",
+            "DocumentFileName": "file1"
+          }
+        }
       ]
     }
   }
