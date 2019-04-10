@@ -167,7 +167,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.rSolicitorName").doesNotExist())
                 .andExpect(jsonPath("$.data.rSolicitorReference").doesNotExist())
                 .andExpect(jsonPath("$.data.rSolicitorAddress").doesNotExist())
-                .andExpect(jsonPath("$.data.rSolicitorDXnumber").doesNotExist())
+                .andExpect(jsonPath("$.data.rSolicitorDXNumber").doesNotExist())
                 .andExpect(jsonPath("$.data.rSolicitorEmail").doesNotExist())
                 .andExpect(jsonPath("$.data.rSolicitorPhone").doesNotExist());
     }
