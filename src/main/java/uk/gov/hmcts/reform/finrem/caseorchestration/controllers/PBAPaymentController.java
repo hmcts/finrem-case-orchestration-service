@@ -23,9 +23,9 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_ISSUED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.GATE_KEEPING_AND_ALLOCATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMOUNT_TO_PAY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_SUMMARY;
@@ -85,7 +85,7 @@ public class PBAPaymentController implements BaseController {
                 return paymentFailure(mapOfCaseData, paymentResponse);
             }
             mapOfCaseData.put(ISSUE_DATE, ZonedDateTime.now().toLocalDate());
-            mapOfCaseData.put(STATE, APPLICATION_ISSUED.toString());
+            mapOfCaseData.put(STATE, GATE_KEEPING_AND_ALLOCATION.toString());
             mapOfCaseData.put(PBA_PAYMENT_REFERENCE, paymentResponse.getReference());
             log.info("Payment succeeded.");
         } else {
