@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
@@ -39,7 +39,7 @@ public class DocumentControllerTest extends BaseControllerTest {
     private JsonNode requestContent;
 
     @MockBean
-    private DocumentService documentService;
+    private OnlineFormDocumentService documentService;
 
     @Before
     public void setUp()  {

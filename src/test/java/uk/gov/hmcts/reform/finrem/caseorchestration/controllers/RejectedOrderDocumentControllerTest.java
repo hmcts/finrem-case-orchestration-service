@@ -15,7 +15,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
@@ -51,7 +51,7 @@ public class RejectedOrderDocumentControllerTest {
     private WebApplicationContext applicationContext;
 
     @MockBean
-    private DocumentService documentService;
+    private RefusalOrderDocumentService documentService;
 
     private MockMvc mvc;
     private JsonNode requestContent;
