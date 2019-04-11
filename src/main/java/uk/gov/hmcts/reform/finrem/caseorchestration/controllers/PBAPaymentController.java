@@ -44,14 +44,18 @@ public class PBAPaymentController implements BaseController {
         CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
         feeLookup(authToken, ccdRequest, caseData);
         if (isPBAPayment(caseData)) {
-            String ccdCaseId = ccdRequest.getCaseDetails().getCaseId();
-            PaymentResponse paymentResponse = pbaPaymentService.makePayment(authToken, ccdCaseId, caseData);
-            if (!paymentResponse.isPaymentSuccess()) {
-                return paymentFailure(caseData, paymentResponse);
+            if (isPBAPaymentReferenceDoesNotExists(caseData)) {
+                String ccdCaseId = ccdRequest.getCaseDetails().getCaseId();
+                PaymentResponse paymentResponse = pbaPaymentService.makePayment(authToken, ccdCaseId, caseData);
+                if (!paymentResponse.isPaymentSuccess()) {
+                    return paymentFailure(caseData, paymentResponse);
+                }
+                caseData.setState(APPLICATION_SUBMITTED.toString());
+                caseData.setPbaPaymentReference(paymentResponse.getReference());
+                log.info("Payment succeeded.");
+            } else {
+                log.info("PBA Payment Reference already exists.");
             }
-            caseData.setState(APPLICATION_SUBMITTED.toString());
-            caseData.setPbaPaymentReference(paymentResponse.getReference());
-            log.info("Payment succeeded.");
         } else {
             caseData.setState(AWAITING_HWF_DECISION.toString());
         }
