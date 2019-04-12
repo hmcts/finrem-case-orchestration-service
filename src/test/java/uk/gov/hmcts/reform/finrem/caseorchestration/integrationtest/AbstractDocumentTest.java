@@ -66,9 +66,13 @@ public abstract class AbstractDocumentTest {
 
     @Before
     public void setUp() throws IOException {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/fee-lookup.json")) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(getTestFixture())) {
             request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
+    }
+
+    protected String getTestFixture() {
+        return "/fixtures/fee-lookup.json";
     }
 
     protected abstract DocumentRequest documentRequest();

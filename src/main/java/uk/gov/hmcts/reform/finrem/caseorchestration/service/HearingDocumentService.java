@@ -39,7 +39,7 @@ public class HearingDocumentService extends AbstractDocumentService {
         return Optional.of(pair)
                 .filter(this::isFastTrackApplication)
                 .map(this::generateFastTrackFormC)
-                .orElse(generateFormCAndG(pair));
+                .orElseGet(() -> generateFormCAndG(pair));
     }
 
     private Map<String, Object> generateFormCAndG(Pair<CaseDetails, String> pair) {
