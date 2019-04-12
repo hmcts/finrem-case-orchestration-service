@@ -51,18 +51,18 @@ public class HearingDocumentServiceTest {
     @Test(expected = IllegalArgumentException.class)
     public void fastTrackDecisionNotSupplied() {
         CaseDetails caseDetails = CaseDetails.builder().data(ImmutableMap.of()).build();
-        service.generateCourtCoverSheet(AUTH_TOKEN, caseDetails);
+        service.generateHearingDocuments(AUTH_TOKEN, caseDetails);
     }
 
     @Test
     public void generateFastTrackFormC() {
-        Map<String, Object> result = service.generateCourtCoverSheet(AUTH_TOKEN, makeItFastTrackDecisionCase());
+        Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
         doCaseDocumentAssert((CaseDocument) result.get("formC"));
     }
 
     @Test
     public void generateNonFastTrackFormCAndFormG() {
-        Map<String, Object> result = service.generateCourtCoverSheet(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
+        Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
         doCaseDocumentAssert((CaseDocument) result.get("formC"));
         doCaseDocumentAssert((CaseDocument) result.get("formG"));
     }
@@ -70,7 +70,7 @@ public class HearingDocumentServiceTest {
     @Test(expected = UnsuccessfulDocumentGenerateException.class)
     public void unsuccessfulGenerateHearingDocuments() {
         when(generatorClient.generatePDF(isA(DocumentRequest.class), eq(AUTH_TOKEN))).thenThrow(new RuntimeException());
-        service.generateCourtCoverSheet(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
+        service.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
     }
 
     private CaseDetails makeItNonFastTrackDecisionCase() {

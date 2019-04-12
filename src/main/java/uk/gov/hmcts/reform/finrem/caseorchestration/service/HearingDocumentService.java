@@ -28,7 +28,7 @@ public class HearingDocumentService extends AbstractDocumentService {
         super(documentGeneratorClient, config, objectMapper);
     }
 
-    public Map<String, Object> generateCourtCoverSheet(String authorisationToken, CaseDetails caseDetails) {
+    public Map<String, Object> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         return Optional.of(Pair.of(copyOf(caseDetails), authorisationToken))
                 .filter(pair -> pair.getLeft().getData().get("fastTrackDecision") != null)
                 .map(this::courtCoverSheetDocuments)

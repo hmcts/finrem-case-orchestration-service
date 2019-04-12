@@ -20,6 +20,8 @@ import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.PREPARE_FOR_HEARING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -42,10 +44,11 @@ public class HearingDocumentController {
             @RequestHeader(value = "Authorization") String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        Map<String, Object> documents = service.generateCourtCoverSheet(authorisationToken, callback.getCaseDetails());
+        Map<String, Object> documents = service.generateHearingDocuments(authorisationToken, callback.getCaseDetails());
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         caseData.putAll(documents);
+        caseData.put(STATE, PREPARE_FOR_HEARING.toString());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
