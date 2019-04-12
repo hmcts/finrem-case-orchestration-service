@@ -7,12 +7,9 @@ import org.mockito.Mockito;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -20,8 +17,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
 
-public class DocumentServiceTest {
+public class OnlineFormDocumentServiceTest {
 
     private DocumentGeneratorClient generatorClient;
     private DocumentConfiguration config;
@@ -49,11 +47,5 @@ public class DocumentServiceTest {
     @Test
     public void generateMiniFormA() {
         doCaseDocumentAssert(service.generateMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
-    }
-
-    private static void doCaseDocumentAssert(CaseDocument result) {
-        assertThat(result.getDocumentFilename(), is(FILE_NAME));
-        assertThat(result.getDocumentUrl(), is(DOC_URL));
-        assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
     }
 }

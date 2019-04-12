@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CourtCoverSheetDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
@@ -24,12 +24,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class CourtCoverSheetDocumentController {
+public class HearingDocumentController {
 
     @Autowired
-    private CourtCoverSheetDocumentService service;
+    private HearingDocumentService service;
 
-    @PostMapping(path = "/documents/court-coversheet", consumes = APPLICATION_JSON_VALUE,
+    @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Form G generation. Serves as a callback from CCD")
     @ApiResponses(value = {

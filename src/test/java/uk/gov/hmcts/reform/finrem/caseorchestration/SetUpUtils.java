@@ -6,6 +6,7 @@ import feign.FeignException;
 import feign.Response;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.UnsuccessfulDocumentGenerateException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
@@ -16,6 +17,9 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 public class SetUpUtils {
 
@@ -35,6 +39,10 @@ public class SetUpUtils {
 
     public static InvalidCaseDataException invalidCaseDataError() {
         return new InvalidCaseDataException(BAD_REQUEST, "Bad request");
+    }
+
+    public static UnsuccessfulDocumentGenerateException documentGenerateException() {
+        return new UnsuccessfulDocumentGenerateException("test error", new Exception());
     }
 
     public static FeeResponse fee() {
@@ -83,5 +91,11 @@ public class SetUpUtils {
         caseDocument.setDocumentBinaryUrl(BINARY_URL);
 
         return caseDocument;
+    }
+
+    public static void doCaseDocumentAssert(CaseDocument result) {
+        assertThat(result.getDocumentFilename(), is(FILE_NAME));
+        assertThat(result.getDocumentUrl(), is(DOC_URL));
+        assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
     }
 }
