@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
@@ -31,7 +31,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class DocumentController implements BaseController {
 
     @Autowired
-    private DocumentService service;
+    private OnlineFormDocumentService service;
 
     @PostMapping(path = "/documents/generate-mini-form-a", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)

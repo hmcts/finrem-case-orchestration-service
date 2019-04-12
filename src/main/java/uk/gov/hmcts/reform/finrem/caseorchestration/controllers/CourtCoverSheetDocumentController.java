@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CourtCoverSheetDocumentService;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
@@ -24,10 +24,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class CourSheetDocumentController {
+public class CourtCoverSheetDocumentController {
 
     @Autowired
-    private DocumentService service;
+    private CourtCoverSheetDocumentService service;
 
     @PostMapping(path = "/documents/court-coversheet", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
@@ -38,11 +38,15 @@ public class CourSheetDocumentController {
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateMiniFormA(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateCourtCoverSheet(
             @RequestHeader(value = "Authorization") String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        Map<String, Object> caseData = service.generateCourtCoverSheet(authorisationToken, callback.getCaseDetails());
+        Map<String, Object> documents = service.generateCourtCoverSheet(authorisationToken, callback.getCaseDetails());
+
+        Map<String, Object> caseData = callback.getCaseDetails().getData();
+        caseData.putAll(documents);
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }

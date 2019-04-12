@@ -15,6 +15,9 @@ public class DocumentConfiguration {
     private String coversheetTemplate;
     private String coversheetFileName;
     private String rejectedOrderDocType;
+    private String formCFastTrackTemplate;
+    private String formCNonFastTrackTemplate;
+    private String formCFileName;
     private String formGTemplate;
     private String formGFileName;
 }

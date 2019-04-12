@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -28,7 +28,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class RejectedOrderDocumentController {
 
     @Autowired
-    private DocumentService service;
+    private RefusalOrderDocumentService service;
 
     @PostMapping(path = "/documents/consent-order-not-approved", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
