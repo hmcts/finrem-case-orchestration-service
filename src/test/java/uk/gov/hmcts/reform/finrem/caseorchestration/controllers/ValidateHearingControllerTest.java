@@ -80,4 +80,17 @@ public class ValidateHearingControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.warnings[0]",
                         Matchers.is("Date of the Fast Track hearing must be between 6 and 10 weeks.")));
     }
+
+    @Test
+    public void shouldSuccessfullyValidate() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/contested/validate-hearing-successfully.json").toURI()));
+        mvc.perform(post("/case-orchestration/validate-hearing")
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.warnings").doesNotExist());
+    }
 }
