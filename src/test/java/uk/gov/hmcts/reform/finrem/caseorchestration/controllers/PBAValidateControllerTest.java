@@ -37,16 +37,6 @@ public class PBAValidateControllerTest extends BaseControllerTest {
     @MockBean
     private PBAValidationService pbaValidationService;
 
-    private JsonNode requestContent;
-
-
-    private void doEmtpyCaseDataSetUp() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/empty-casedata.json").toURI()));
-    }
-
-
     @Test
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
         doEmtpyCaseDataSetUp();

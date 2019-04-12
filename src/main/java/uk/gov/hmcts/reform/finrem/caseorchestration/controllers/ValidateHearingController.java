@@ -30,7 +30,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @SuppressWarnings("unchecked")
 public class ValidateHearingController implements BaseController {
 
-
     private final PBAValidationService pbaValidationService;
 
     public static boolean isDateInBetweenIncludingEndPoints(final LocalDate min, final LocalDate max,

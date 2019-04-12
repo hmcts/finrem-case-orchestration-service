@@ -32,15 +32,6 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
     @MockBean
     private PaymentConfirmationService paymentConfirmationService;
 
-    private JsonNode requestContent;
-
-
-    private void doEmtpyCaseDataSetUp() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/empty-casedata.json").toURI()));
-    }
-
     private void doConfirmationSetup(boolean isHwf) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
