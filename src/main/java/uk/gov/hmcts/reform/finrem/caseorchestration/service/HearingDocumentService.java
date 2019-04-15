@@ -43,7 +43,7 @@ public class HearingDocumentService extends AbstractDocumentService {
     }
 
     private Map<String, Object> generateFormCAndG(Pair<CaseDetails, String> pair) {
-        CompletableFuture<CaseDocument> formCFastTrack =
+        CompletableFuture<CaseDocument> formCNonFastTrack =
                 supplyAsync(() -> generateDocument(pair.getRight(), pair.getLeft(),
                         config.getFormCNonFastTrackTemplate(), config.getFormCFileName()));
 
@@ -51,7 +51,7 @@ public class HearingDocumentService extends AbstractDocumentService {
                 config.getFormGTemplate(), config.getFormGFileName()));
 
         try {
-            return formCFastTrack
+            return formCNonFastTrack
                     .thenCombine(formG, this::createDocumentMap)
                     .get();
         } catch (InterruptedException | ExecutionException e) {
