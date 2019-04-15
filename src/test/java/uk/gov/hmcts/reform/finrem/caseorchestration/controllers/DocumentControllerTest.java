@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import javax.ws.rs.core.MediaType;
@@ -34,12 +36,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus
 @WebMvcTest(DocumentController.class)
 public class DocumentControllerTest extends BaseControllerTest {
 
-    private static final String GEN_DOC_URL = "/case-orchestration/documents/generate-mini-form-a";
-
     private JsonNode requestContent;
 
     @MockBean
-    private OnlineFormDocumentService documentService;
+    protected OnlineFormDocumentService documentService;
 
     @Before
     public void setUp()  {
@@ -51,17 +51,29 @@ public class DocumentControllerTest extends BaseControllerTest {
         }
     }
 
+    protected String endpoint() {
+        return "/case-orchestration/documents/generate-mini-form-a";
+    }
+
+    protected OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
+        return when(documentService.generateMiniFormA(eq(AUTH_TOKEN), isA(CaseDetails.class)));
+    }
+
     private void doRequestSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/fee-lookup.json").toURI()));
+                .getResource(jsonFixture()).toURI()));
+    }
+
+    String jsonFixture() {
+        return "/fixtures/fee-lookup.json";
     }
 
     @Test
     public void generateMiniFormA() throws Exception {
-        when(documentService.generateMiniFormA(eq(AUTH_TOKEN), isA(CaseDetails.class))).thenReturn(caseDocument());
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
 
-        mvc.perform(post(GEN_DOC_URL)
+        mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -76,7 +88,7 @@ public class DocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateMiniFormAHttpError400() throws Exception {
-        mvc.perform(post(GEN_DOC_URL)
+        mvc.perform(post(endpoint())
                 .content("kwuilebge")
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -85,9 +97,9 @@ public class DocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateMiniFormAHttpError500() throws Exception {
-        when(documentService.generateMiniFormA(eq(AUTH_TOKEN), isA(CaseDetails.class))).thenThrow(feignError());
+        whenServiceGeneratesDocument().thenThrow(feignError());
 
-        mvc.perform(post(GEN_DOC_URL)
+        mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))

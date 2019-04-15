@@ -20,4 +20,6 @@ public class DocumentConfiguration {
     private String formCFileName;
     private String formGTemplate;
     private String formGFileName;
+    private String contestedMiniFormTemplate;
+    private String contestedMiniFormFileName;
 }

@@ -23,5 +23,11 @@ public class OnlineFormDocumentService extends AbstractDocumentService {
                 config.getMiniFormTemplate(),
                 config.getMiniFormFileName());
     }
+
+    public CaseDocument generateContestedMiniFormA(String authorisationToken, CaseDetails caseDetails) {
+        return generateDocument(authorisationToken, caseDetails,
+                config.getContestedMiniFormTemplate(),
+                config.getContestedMiniFormFileName());
+    }
 }
 

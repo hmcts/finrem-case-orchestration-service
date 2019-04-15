@@ -32,7 +32,7 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
     public void generateMiniFormA() throws Exception {
         generateDocumentServiceSuccessStub();
 
-        webClient.perform(MockMvcRequestBuilders.post(API_URL)
+        webClient.perform(MockMvcRequestBuilders.post(apiUrl())
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
