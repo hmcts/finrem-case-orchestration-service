@@ -11,15 +11,36 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.UnsuccessfulDocumentGenerateException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.UnaryOperator;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Service
 public class HearingDocumentService extends AbstractDocumentService {
+
+    private UnaryOperator<CaseDetails> addFastTrackFields = caseDetails -> {
+        Map<String, Object> data = caseDetails.getData();
+        data.put("formCCreatedDate", new Date());
+        data.put("eventDatePlus21Days", asDate(LocalDate.now().plusDays(21)));
+
+        return caseDetails;
+    };
+
+    private UnaryOperator<CaseDetails> addNonFastTrackFields = caseDetails -> {
+        Map<String, Object> data = caseDetails.getData();
+        data.put("formCCreatedDate", new Date());
+        data.put("hearingDateLess35Days", asDate(LocalDate.now().minusDays(35)));
+        data.put("hearingDateLess14Days", asDate(LocalDate.now().minusDays(14)));
+
+        return caseDetails;
+    };
 
     @Autowired
     public HearingDocumentService(DocumentGeneratorClient documentGeneratorClient,
@@ -44,7 +65,7 @@ public class HearingDocumentService extends AbstractDocumentService {
 
     private Map<String, Object> generateFormCAndG(Pair<CaseDetails, String> pair) {
         CompletableFuture<CaseDocument> formCNonFastTrack =
-                supplyAsync(() -> generateDocument(pair.getRight(), pair.getLeft(),
+                supplyAsync(() -> generateDocument(pair.getRight(), addNonFastTrackFields.apply(pair.getLeft()),
                         config.getFormCNonFastTrackTemplate(), config.getFormCFileName()));
 
         CompletableFuture<CaseDocument> formG = supplyAsync(() -> generateDocument(pair.getRight(), pair.getLeft(),
@@ -65,7 +86,7 @@ public class HearingDocumentService extends AbstractDocumentService {
 
     private Map<String, Object> generateFastTrackFormC(Pair<CaseDetails, String> pair) {
         return ImmutableMap.of("formC",
-                generateDocument(pair.getRight(), pair.getLeft(),
+                generateDocument(pair.getRight(), addFastTrackFields.apply(pair.getLeft()),
                         config.getFormCFastTrackTemplate(), config.getFormCFileName()));
     }
 
@@ -74,5 +95,9 @@ public class HearingDocumentService extends AbstractDocumentService {
         String fastTrackDecision = (String) caseData.get("fastTrackDecision");
 
         return fastTrackDecision.toLowerCase().equals("yes");
+    }
+
+    private static Date asDate(LocalDate localDate) {
+        return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
     }
 }
