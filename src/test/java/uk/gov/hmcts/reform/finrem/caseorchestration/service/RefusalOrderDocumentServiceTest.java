@@ -8,7 +8,6 @@ import org.mockito.Mockito;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
@@ -29,6 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.REJECTED_ORDER_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
 
 public class RefusalOrderDocumentServiceTest {
 
@@ -80,12 +80,6 @@ public class RefusalOrderDocumentServiceTest {
                 .stream()
                 .filter(cd -> cd.getConsentOrder().getDocumentType().equals(REJECTED_ORDER_TYPE))
                 .findFirst().orElseThrow(() -> new IllegalStateException(REJECTED_ORDER_TYPE + " missing"));
-    }
-
-    private static void doCaseDocumentAssert(CaseDocument result) {
-        assertThat(result.getDocumentFilename(), is(FILE_NAME));
-        assertThat(result.getDocumentUrl(), is(DOC_URL));
-        assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
     }
 
     private CaseDetails caseDetails() throws Exception {

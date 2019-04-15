@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.UnsuccessfulDocumentGenerateException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.util.Map;
@@ -18,16 +19,16 @@ import java.util.concurrent.ExecutionException;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 
 @Service
-public class CourtCoverSheetDocumentService extends AbstractDocumentService {
+public class HearingDocumentService extends AbstractDocumentService {
 
     @Autowired
-    public CourtCoverSheetDocumentService(DocumentGeneratorClient documentGeneratorClient,
-                           DocumentConfiguration config,
-                           ObjectMapper objectMapper) {
+    public HearingDocumentService(DocumentGeneratorClient documentGeneratorClient,
+                                  DocumentConfiguration config,
+                                  ObjectMapper objectMapper) {
         super(documentGeneratorClient, config, objectMapper);
     }
 
-    public Map<String, Object> generateCourtCoverSheet(String authorisationToken, CaseDetails caseDetails) {
+    public Map<String, Object> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         return Optional.of(Pair.of(copyOf(caseDetails), authorisationToken))
                 .filter(pair -> pair.getLeft().getData().get("fastTrackDecision") != null)
                 .map(this::courtCoverSheetDocuments)
@@ -38,7 +39,7 @@ public class CourtCoverSheetDocumentService extends AbstractDocumentService {
         return Optional.of(pair)
                 .filter(this::isFastTrackApplication)
                 .map(this::generateFastTrackFormC)
-                .orElse(generateFormCAndG(pair));
+                .orElseGet(() -> generateFormCAndG(pair));
     }
 
     private Map<String, Object> generateFormCAndG(Pair<CaseDetails, String> pair) {
@@ -54,7 +55,7 @@ public class CourtCoverSheetDocumentService extends AbstractDocumentService {
                     .thenCombine(formG, this::createDocumentMap)
                     .get();
         } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
+            throw new UnsuccessfulDocumentGenerateException("error while generating hearing documents", e);
         }
     }
 
