@@ -31,8 +31,6 @@ public class FeeLookupControllerTest extends BaseControllerTest {
     @MockBean
     private FeeService feeService;
 
-    private JsonNode requestContent;
-
     private void doFeeLookupSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
@@ -41,11 +39,6 @@ public class FeeLookupControllerTest extends BaseControllerTest {
         when(feeService.getApplicationFee()).thenReturn(fee());
     }
 
-    private void doEmtpyCaseDataSetUp() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/empty-casedata.json").toURI()));
-    }
 
     @Test
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {

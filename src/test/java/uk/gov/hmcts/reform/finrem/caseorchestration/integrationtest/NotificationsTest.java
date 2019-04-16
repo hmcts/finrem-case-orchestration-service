@@ -20,10 +20,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,13 +74,13 @@ public class NotificationsTest {
     @ClassRule
     public static WireMockClassRule notificationService = new WireMockClassRule(8086);
 
-    private CCDRequest request;
+    private CallbackRequest request;
 
     @Before
     public void setUp() throws IOException {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(
                 "/fixtures/ccd-request-with-solicitor-email-consent.json")) {
-            request = objectMapper.readValue(resourceAsStream, CCDRequest.class);
+            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
 
@@ -156,8 +156,9 @@ public class NotificationsTest {
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
-        String response = objectMapper.writeValueAsString(new CCDCallbackResponse(caseDetails.getCaseData(),
-                null, null));
+        String response =
+            objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(caseDetails.getData()).build());
         return response;
     }
 

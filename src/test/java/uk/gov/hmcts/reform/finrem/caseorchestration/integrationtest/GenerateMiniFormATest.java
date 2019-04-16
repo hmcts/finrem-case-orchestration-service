@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
@@ -32,7 +32,7 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
     public void generateMiniFormA() throws Exception {
         generateDocumentServiceSuccessStub();
 
-        webClient.perform(MockMvcRequestBuilders.post(API_URL)
+        webClient.perform(MockMvcRequestBuilders.post(apiUrl())
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -43,9 +43,10 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
-        caseDetails.getCaseData().setMiniFormA(caseDocument());
+        caseDetails.getData().put("miniFormA", caseDocument());
 
-        return objectMapper.writeValueAsString(CCDCallbackResponse.builder().data(caseDetails.getCaseData()).build());
+        return objectMapper.writeValueAsString(
+                AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
     private CaseDocument caseDocument() {

@@ -12,7 +12,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import javax.ws.rs.core.MediaType;
@@ -64,7 +64,7 @@ public class NotificationsControllerTest {
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendHWFSuccessfulConfirmationEmail(any(CCDRequest.class), any());
+                .sendHWFSuccessfulConfirmationEmail(any(CallbackRequest.class), any());
 
     }
 
@@ -91,7 +91,7 @@ public class NotificationsControllerTest {
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendAssignToJudgeConfirmationEmail(any(CCDRequest.class), any());
+                .sendAssignToJudgeConfirmationEmail(any(CallbackRequest.class), any());
 
     }
 
@@ -118,7 +118,7 @@ public class NotificationsControllerTest {
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendConsentOrderMadeConfirmationEmail(any(CCDRequest.class), any());
+                .sendConsentOrderMadeConfirmationEmail(any(CallbackRequest.class), any());
 
     }
 
@@ -144,7 +144,7 @@ public class NotificationsControllerTest {
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendConsentOrderNotApprovedEmail(any(CCDRequest.class), any());
+                .sendConsentOrderNotApprovedEmail(any(CallbackRequest.class), any());
 
     }
 
@@ -171,7 +171,7 @@ public class NotificationsControllerTest {
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendConsentOrderAvailableEmail(any(CCDRequest.class), any());
+                .sendConsentOrderAvailableEmail(any(CallbackRequest.class), any());
 
     }
 

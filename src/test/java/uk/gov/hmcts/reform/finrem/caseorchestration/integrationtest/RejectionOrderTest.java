@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator;
 
@@ -50,14 +50,14 @@ public class RejectionOrderTest extends AbstractDocumentTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.uploadOrder[0].id", is(notNullValue())))
-                .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentType", is(REJECTED_ORDER_TYPE)))
-                .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentDateAdded", is(notNullValue())))
-                .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_url", is(DOC_URL)))
+                .andExpect(jsonPath("$.data.uploadOrder[1].id", is(notNullValue())))
+                .andExpect(jsonPath("$.data.uploadOrder[1].value.DocumentType", is(REJECTED_ORDER_TYPE)))
+                .andExpect(jsonPath("$.data.uploadOrder[1].value.DocumentDateAdded", is(notNullValue())))
+                .andExpect(jsonPath("$.data.uploadOrder[1].value.DocumentLink.document_url", is(DOC_URL)))
                 .andExpect(
-                        jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_filename", is(FILE_NAME)))
+                        jsonPath("$.data.uploadOrder[1].value.DocumentLink.document_filename", is(FILE_NAME)))
                 .andExpect(
-                        jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_binary_url",
+                        jsonPath("$.data.uploadOrder[1].value.DocumentLink.document_binary_url",
                                 is(BINARY_URL)))
                 .andExpect(jsonPath("$.errors", hasSize(0)))
                 .andExpect(jsonPath("$.warnings", hasSize(0)));

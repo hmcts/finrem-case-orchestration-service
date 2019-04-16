@@ -6,7 +6,7 @@ import feign.FeignException;
 import feign.Response;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.UnsuccessfulDocumentGenerateException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
@@ -15,6 +15,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 public class SetUpUtils {
 
@@ -36,6 +41,10 @@ public class SetUpUtils {
         return new InvalidCaseDataException(BAD_REQUEST, "Bad request");
     }
 
+    public static UnsuccessfulDocumentGenerateException documentGenerateException() {
+        return new UnsuccessfulDocumentGenerateException("test error", new Exception());
+    }
+
     public static FeeResponse fee() {
         FeeResponse feeResponse = new FeeResponse();
         feeResponse.setCode("FEE0640");
@@ -45,8 +54,10 @@ public class SetUpUtils {
         return feeResponse;
     }
 
-    public static CaseData caseDataWithUploadOrder(String uploadOrderId) {
-        return CaseData.builder().uploadOrder(ImmutableList.of(consentOrderData(uploadOrderId))).build();
+    public static Map<String, Object> caseDataWithUploadOrder(String uploadOrderId) {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("uploadOrder", ImmutableList.of(consentOrderData(uploadOrderId)));
+        return caseData;
     }
 
     public static ConsentOrderData consentOrderData(String id) {
@@ -80,5 +91,11 @@ public class SetUpUtils {
         caseDocument.setDocumentBinaryUrl(BINARY_URL);
 
         return caseDocument;
+    }
+
+    public static void doCaseDocumentAssert(CaseDocument result) {
+        assertThat(result.getDocumentFilename(), is(FILE_NAME));
+        assertThat(result.getDocumentUrl(), is(DOC_URL));
+        assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
     }
 }
