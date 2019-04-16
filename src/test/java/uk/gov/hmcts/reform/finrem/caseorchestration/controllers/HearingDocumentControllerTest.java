@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.documentGenerateException;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.PREPARE_FOR_HEARING;
 
 @WebMvcTest(HearingDocumentController.class)
@@ -81,7 +81,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void generateMiniFormAHttpError500() throws Exception {
         when(service.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-                .thenThrow(documentGenerateException());
+                .thenThrow(feignError());
 
         mvc.perform(post(GEN_DOC_URL)
                 .content(requestContent.toString())

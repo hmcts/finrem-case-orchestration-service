@@ -8,12 +8,12 @@ import org.mockito.Mockito;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.UnsuccessfulDocumentGenerateException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
 import java.util.Map;
+import java.util.concurrent.CompletionException;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -67,7 +67,7 @@ public class HearingDocumentServiceTest {
         doCaseDocumentAssert((CaseDocument) result.get("formG"));
     }
 
-    @Test(expected = UnsuccessfulDocumentGenerateException.class)
+    @Test(expected = CompletionException.class)
     public void unsuccessfulGenerateHearingDocuments() {
         when(generatorClient.generatePDF(isA(DocumentRequest.class), eq(AUTH_TOKEN))).thenThrow(new RuntimeException());
         service.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());

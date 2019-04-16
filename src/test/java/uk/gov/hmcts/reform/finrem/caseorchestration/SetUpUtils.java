@@ -6,7 +6,6 @@ import feign.FeignException;
 import feign.Response;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.UnsuccessfulDocumentGenerateException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
@@ -39,10 +38,6 @@ public class SetUpUtils {
 
     public static InvalidCaseDataException invalidCaseDataError() {
         return new InvalidCaseDataException(BAD_REQUEST, "Bad request");
-    }
-
-    public static UnsuccessfulDocumentGenerateException documentGenerateException() {
-        return new UnsuccessfulDocumentGenerateException("test error", new Exception());
     }
 
     public static FeeResponse fee() {
