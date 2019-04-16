@@ -83,7 +83,7 @@
     <suppress>
         <notes>We are using SecureRandom without a custom seed so not affected. This will however be
             fixed with spring boot 2.1.4 upgrade which is using spring-security.* of 5.1.5 or higher</notes>
-        <gav regex="true">^org\.springframework:spring-security.+:.*$</gav>
+        <gav regex="true">.*</gav>
         <cve>CVE-2019-3795</cve>
     </suppress>
 </suppressions>
