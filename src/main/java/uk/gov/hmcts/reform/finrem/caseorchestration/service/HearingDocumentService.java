@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.UnsuccessfulDocumentGenerateException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.time.LocalDate;
@@ -17,7 +16,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.function.UnaryOperator;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
@@ -71,13 +69,8 @@ public class HearingDocumentService extends AbstractDocumentService {
         CompletableFuture<CaseDocument> formG = supplyAsync(() -> generateDocument(pair.getRight(), pair.getLeft(),
                 config.getFormGTemplate(), config.getFormGFileName()));
 
-        try {
-            return formCNonFastTrack
-                    .thenCombine(formG, this::createDocumentMap)
-                    .get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new UnsuccessfulDocumentGenerateException("error while generating hearing documents", e);
-        }
+        return formCNonFastTrack
+                .thenCombine(formG, this::createDocumentMap).join();
     }
 
     private Map<String, Object> createDocumentMap(CaseDocument formC, CaseDocument formG) {

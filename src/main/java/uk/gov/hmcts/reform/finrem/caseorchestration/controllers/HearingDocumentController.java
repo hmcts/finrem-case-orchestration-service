@@ -33,7 +33,7 @@ public class HearingDocumentController {
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles Form G generation. Serves as a callback from CCD")
+    @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
                     + "attached to the case",
