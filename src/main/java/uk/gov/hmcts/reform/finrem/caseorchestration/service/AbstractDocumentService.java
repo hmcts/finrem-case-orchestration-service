@@ -73,6 +73,7 @@ public abstract class AbstractDocumentService {
         return caseDocument;
     }
 
+
     protected Document toDocument(CaseDocument caseDocument) {
         Document document = new Document();
         document.setBinaryUrl(caseDocument.getDocumentBinaryUrl());

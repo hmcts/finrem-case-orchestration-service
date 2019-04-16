@@ -24,7 +24,6 @@ plugins {
     id 'net.ltgt.apt' version '0.10'
 }
 
-
 apply plugin: 'au.com.dius.pact'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'jacoco'
@@ -35,14 +34,11 @@ apply plugin: 'org.sonarqube'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'net.serenity-bdd.aggregator'
 
-
-
 group = 'uk.gov.hmcts.reform.finrem'
 version = '0.0.1'
 mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
 
 repositories {
     mavenLocal()
@@ -77,7 +73,7 @@ sourceSets {
         resources {
             srcDirs = ['src/functionalTests/resources']
         }
-
+        
     }
 
     contract {
@@ -246,13 +242,25 @@ tasks.withType(Checkstyle).each { checkstyleTask ->
     }
 }
 
+pmd {
+    toolVersion = "6.5.0"
+    ignoreFailures = true
+    sourceSets = [sourceSets.main, sourceSets.test]
+    reportsDir = file("$project.buildDir/reports/pmd")
+    ruleSetFiles = files("ruleset.xml")
+}
+
 jacocoTestReport {
     executionData(test)
 
     reports {
-        xml.enabled = true
-        csv.enabled = false
-        xml.destination file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+        xml {
+            enabled true
+        }
+
+        html {
+            enabled true
+        }
     }
 }
 
@@ -263,25 +271,6 @@ jacocoTestCoverageVerification {
                 minimum = 0.8
             }
         }
-    }
-}
-
-project.tasks['sonarqube'].dependsOn jacocoTestReport
-
-def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/error/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication']
-
-sonarqube {
-    properties {
-        property "sonar.projectKey", "finrem-case-orchestration"
-        property "sonar.exclusions", sonarExclusions.join(', ')
-        property "sonar.dynamicAnalysis", "reuseReports"
-        property "sonar.java.coveragePlugin", "jacoco"
-        property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
-        property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
     }
 }
 
@@ -298,6 +287,7 @@ pitest {
 }
 
 compileJava.dependsOn(processResources)
+check.dependsOn dependencyCheckAnalyze
 build.dependsOn jacocoTestReport
 
 bootJar {
@@ -306,15 +296,6 @@ bootJar {
                 'Implementation-Version': project.version
     }
     archiveName 'finrem-case-orchestration.jar'
-}
-
-pact {
-    publish {
-        pactDirectory = 'target/pacts'
-        pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?:'http://localhost:80'
-        tags = [System.getenv("PACT_BRANCH_NAME") ?:'Dev']
-        version = versions.pact_version
-    }
 }
 
 task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verification') {
@@ -327,12 +308,5 @@ task functional(type: Test) {
     description = "Runs functional Tests"
     setTestClassesDirs(sourceSets.functional.output.classesDirs)
     setClasspath(sourceSets.functional.runtimeClasspath)
-    finalizedBy aggregate
-}
-
-task contractTest(type: Test) {
-    description = "Runs Contract Tests"
-    setTestClassesDirs(sourceSets.contract.output.classesDirs)
-    setClasspath(sourceSets.contract.runtimeClasspath)
     finalizedBy aggregate
 }
