@@ -80,12 +80,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateMiniFormAHttpError500() throws Exception {
-        when(service.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-<<<<<<< HEAD
-                .thenThrow(documentGenerateException());
-=======
-                .thenThrow(feignError());
->>>>>>> contested-cos
+        when(service.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class))).thenThrow(feignError());
 
         mvc.perform(post(GEN_DOC_URL)
                 .content(requestContent.toString())

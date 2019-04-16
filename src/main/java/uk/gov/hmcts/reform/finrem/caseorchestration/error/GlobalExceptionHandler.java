@@ -24,10 +24,4 @@ public class GlobalExceptionHandler {
         log.error(exception.getMessage(), exception);
         return ResponseEntity.status(exception.status()).body(SERVER_ERROR_MSG);
     }
-
-    @ExceptionHandler(UnsuccessfulDocumentGenerateException.class)
-    ResponseEntity<Object> handleDocumentGenerationException(UnsuccessfulDocumentGenerateException exception) {
-        log.error(exception.getMessage(), exception);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(SERVER_ERROR_MSG);
-    }
 }
