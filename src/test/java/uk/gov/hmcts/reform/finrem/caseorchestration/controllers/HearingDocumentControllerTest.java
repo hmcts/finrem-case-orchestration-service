@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
@@ -37,6 +39,9 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @MockBean
     private HearingDocumentService service;
 
+    @MockBean
+    private ValidateHearingService validateHearingService;
+
     @Before
     public void setUp()  {
         super.setUp();
@@ -45,6 +50,9 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         } catch (Exception e) {
             fail(e.getMessage());
         }
+
+        when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {

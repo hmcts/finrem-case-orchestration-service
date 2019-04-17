@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -15,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_6_AND_10_WEEKS;
 
 public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
 
@@ -57,6 +59,9 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
         caseDetails.getData().put("formC", caseDocument());
 
         return objectMapper.writeValueAsString(
-                AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+                AboutToStartOrSubmitCallbackResponse.builder()
+                        .data(caseDetails.getData())
+                        .warnings(ImmutableList.of(DATE_BETWEEN_6_AND_10_WEEKS))
+                        .build());
     }
 }

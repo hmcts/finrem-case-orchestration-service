@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -30,11 +29,6 @@ public class ValidateHearingController implements BaseController {
 
     @Autowired
     private ValidateHearingService validateHearingService;
-
-    public static boolean isDateInBetweenIncludingEndPoints(final LocalDate min, final LocalDate max,
-                                                            final LocalDate date) {
-        return !(date.isBefore(min) || date.isAfter(max));
-    }
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/validate-hearing", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

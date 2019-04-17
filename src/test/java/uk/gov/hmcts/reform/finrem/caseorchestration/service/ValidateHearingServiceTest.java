@@ -18,6 +18,8 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_14_WEEKS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_6_AND_10_WEEKS;
 
 public class ValidateHearingServiceTest {
 
@@ -68,7 +70,7 @@ public class ValidateHearingServiceTest {
                         pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)));
 
         List<String> errors = doTestWarnings(pairs);
-        assertThat(errors, hasItem("Date of the Fast Track hearing must be between 6 and 10 weeks."));
+        assertThat(errors, hasItem(DATE_BETWEEN_6_AND_10_WEEKS));
     }
 
     @Test
@@ -88,7 +90,7 @@ public class ValidateHearingServiceTest {
                         pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)));
 
         List<String> errors = doTestWarnings(pairs);
-        assertThat(errors, hasItem("Date of the hearing must be between 12 and 14 weeks."));
+        assertThat(errors, hasItem(DATE_BETWEEN_12_AND_14_WEEKS));
     }
 
     @Test

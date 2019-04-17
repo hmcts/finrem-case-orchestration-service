@@ -17,6 +17,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Service
 public class ValidateHearingService {
 
+    public static final String DATE_BETWEEN_6_AND_10_WEEKS =
+            "Date of the Fast Track hearing must be between 6 and 10 weeks.";
+    public static final String DATE_BETWEEN_12_AND_14_WEEKS = "Date of the hearing must be between 12 and 14 weeks.";
+    public static final String MUST_FIELD_ERROR = "Issue Date , fast track decision or hearingDate is empty";
+
     public List<String> validateHearingErrors(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         String issueDate = ObjectUtils.toString(caseData.get(ISSUE_DATE));
@@ -25,7 +30,7 @@ public class ValidateHearingService {
 
         if (StringUtils.isBlank(issueDate) || StringUtils.isBlank(fastTrackDecision)
                 || StringUtils.isBlank(hearingDate)) {
-            return  ImmutableList.of("Issue Date , fast track decision or hearingDate is empty");
+            return  ImmutableList.of(MUST_FIELD_ERROR);
         }
 
         return ImmutableList.of();
@@ -43,11 +48,11 @@ public class ValidateHearingService {
         if (fastTrackDecision.equalsIgnoreCase("yes")) {
             if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(6), issueLocalDate.plusWeeks(10),
                     hearingLocalDate)) {
-                return ImmutableList.of("Date of the Fast Track hearing must be between 6 and 10 weeks.");
+                return ImmutableList.of(DATE_BETWEEN_6_AND_10_WEEKS);
             }
         } else if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(12), issueLocalDate.plusWeeks(14),
                 hearingLocalDate)) {
-            return ImmutableList.of("Date of the hearing must be between 12 and 14 weeks.");
+            return ImmutableList.of(DATE_BETWEEN_12_AND_14_WEEKS);
         }
 
         return ImmutableList.of();
