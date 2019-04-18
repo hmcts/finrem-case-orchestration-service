@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.UnaryOperator;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 
 @Service
 public class HearingDocumentService extends AbstractDocumentService {
@@ -33,9 +35,13 @@ public class HearingDocumentService extends AbstractDocumentService {
 
     private UnaryOperator<CaseDetails> addNonFastTrackFields = caseDetails -> {
         Map<String, Object> data = caseDetails.getData();
+
+        String hearingDate = ObjectUtils.toString(data.get(HEARING_DATE));
+        LocalDate hearingLocalDate = LocalDate.parse(hearingDate);
+
         data.put("formCCreatedDate", new Date());
-        data.put("hearingDateLess35Days", asDate(LocalDate.now().minusDays(35)));
-        data.put("hearingDateLess14Days", asDate(LocalDate.now().minusDays(14)));
+        data.put("hearingDateLess35Days", asDate(hearingLocalDate.minusDays(35)));
+        data.put("hearingDateLess14Days", asDate(hearingLocalDate.minusDays(14)));
 
         return caseDetails;
     };
