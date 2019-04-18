@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -28,7 +27,7 @@ public class HearingDocumentService extends AbstractDocumentService {
     private UnaryOperator<CaseDetails> addFastTrackFields = caseDetails -> {
         Map<String, Object> data = caseDetails.getData();
         data.put("formCCreatedDate", new Date());
-        data.put("eventDatePlus21Days", asDate(LocalDate.now().plusDays(21)));
+        data.put("eventDatePlus21Days", LocalDate.now().plusDays(21));
 
         return caseDetails;
     };
@@ -40,8 +39,8 @@ public class HearingDocumentService extends AbstractDocumentService {
         LocalDate hearingLocalDate = LocalDate.parse(hearingDate);
 
         data.put("formCCreatedDate", new Date());
-        data.put("hearingDateLess35Days", asDate(hearingLocalDate.minusDays(35)));
-        data.put("hearingDateLess14Days", asDate(hearingLocalDate.minusDays(14)));
+        data.put("hearingDateLess35Days", hearingLocalDate.minusDays(35));
+        data.put("hearingDateLess14Days", hearingLocalDate.minusDays(14));
 
         return caseDetails;
     };
@@ -94,9 +93,5 @@ public class HearingDocumentService extends AbstractDocumentService {
         String fastTrackDecision = (String) caseData.get("fastTrackDecision");
 
         return fastTrackDecision.toLowerCase().equals("yes");
-    }
-
-    private static Date asDate(LocalDate localDate) {
-        return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
     }
 }
