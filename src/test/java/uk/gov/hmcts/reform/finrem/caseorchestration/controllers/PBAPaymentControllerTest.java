@@ -64,11 +64,19 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .andExpect(content().string(is(SERVER_ERROR_MSG)));
     }
 
-    private void doPaymentPBASetUp(boolean success) throws Exception {
+    private void doPBASetUp(boolean success) throws Exception {
         requestContent = objectMapper.readTree(new File(getClass().getResource("/fixtures/pba-payment.json").toURI()));
 
         when(feeService.getApplicationFee()).thenReturn(fee());
         when(pbaPaymentService.makePayment(anyString(), anyString(), any())).thenReturn(paymentResponse(success));
+    }
+
+    private void doPBAPaymentReferenceAlreadyExistsSetup() throws Exception {
+        String pbaPaymentAlreadyExists = "/fixtures/pba-payment-already-exists.json";
+        requestContent = objectMapper.readTree(new File(getClass().getResource(pbaPaymentAlreadyExists).toURI()));
+
+        when(feeService.getApplicationFee()).thenReturn(fee());
+        when(pbaPaymentService.makePayment(anyString(), anyString(), any())).thenReturn(paymentResponse(true));
     }
 
     private void doHWFSetUp() throws Exception {
@@ -99,7 +107,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnErrorWhenPbaPaymentFails() throws Exception {
-        doPaymentPBASetUp(false);
+        doPBASetUp(false);
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
@@ -113,7 +121,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldDoPbaPayment() throws Exception {
-        doPaymentPBASetUp(true);
+        doPBASetUp(true);
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
@@ -128,5 +136,19 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), anyString(), any());
+    }
+
+
+    @Test
+    public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists() throws Exception {
+        doPBAPaymentReferenceAlreadyExistsSetup();
+        mvc.perform(post(PBA_PAYMENT_URL)
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+        verify(pbaPaymentService, times(0)).makePayment(anyString(), anyString(), any());
     }
 }

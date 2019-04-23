@@ -5,9 +5,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 
 import java.util.Map;
+import java.util.Objects;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HELP_WITH_FEES_QUESTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_PAYMENT_REFERENCE;
 
 public interface BaseController {
 
@@ -20,5 +23,9 @@ public interface BaseController {
 
     default boolean isPBAPayment(Map<String, Object> caseData) {
         return ObjectUtils.toString(caseData.get(HELP_WITH_FEES_QUESTION)).equalsIgnoreCase("no");
+    }
+
+    default boolean isPBAPaymentReferenceDoesNotExists(Map<String, Object> caseData) {
+        return isEmpty((String) caseData.get(PBA_PAYMENT_REFERENCE));
     }
 }
