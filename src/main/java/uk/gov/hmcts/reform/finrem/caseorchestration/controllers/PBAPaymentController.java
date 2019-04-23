@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdUpdateService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 
@@ -23,6 +24,8 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedEvent.ALLOCATE_TO_JUDGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedEvent.ISSUE_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.GATE_KEEPING_AND_ALLOCATION;
@@ -42,6 +45,7 @@ public class PBAPaymentController implements BaseController {
 
     private final FeeService feeService;
     private final PBAPaymentService pbaPaymentService;
+    private final CcdUpdateService ccdUpdateService;
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -49,7 +53,7 @@ public class PBAPaymentController implements BaseController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) throws IOException {
         log.info("Received request for PBA payment for consented . Auth token: {}, Case request : {}", authToken,
-            callbackRequest);
+                callbackRequest);
 
         final Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
         feeLookup(authToken, callbackRequest, mapOfCaseData);
@@ -71,10 +75,10 @@ public class PBAPaymentController implements BaseController {
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/contested/pba-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPaymentContested(
-        @RequestHeader(value = "Authorization", required = false) String authToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) throws IOException {
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) throws IOException {
         log.info("Received request for PBA payment for contested. Auth token: {}, Case request : {}", authToken,
-            callbackRequest);
+                callbackRequest);
 
         final Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
         feeLookup(authToken, callbackRequest, mapOfCaseData);
@@ -87,6 +91,10 @@ public class PBAPaymentController implements BaseController {
             mapOfCaseData.put(ISSUE_DATE, ZonedDateTime.now().toLocalDate());
             mapOfCaseData.put(STATE, GATE_KEEPING_AND_ALLOCATION.toString());
             mapOfCaseData.put(PBA_PAYMENT_REFERENCE, paymentResponse.getReference());
+            ccdUpdateService.createEvent(authToken, callbackRequest.getCaseDetails(), ISSUE_APPLICATION.getId(),
+                    ISSUE_APPLICATION.getEventSummary(), ISSUE_APPLICATION.getEventDescription());
+            ccdUpdateService.createEvent(authToken, callbackRequest.getCaseDetails(), ALLOCATE_TO_JUDGE.getId(),
+                    ALLOCATE_TO_JUDGE.getEventSummary(), ALLOCATE_TO_JUDGE.getEventDescription());
             log.info("Payment succeeded.");
         } else {
             mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());

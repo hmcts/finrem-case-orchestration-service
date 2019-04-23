@@ -11,6 +11,9 @@ services:
       FINREM_NOTIFICATION_SERVICE_BASE_URL: http://finrem-notification-service:8086
       DOCUMENT_GENERATOR_SERVICE_API_BASEURL: http://finrem-document-generator-client:4009
       PAYMENT_SERVICE_API_BASEURL: http://finrem-payment-service:9001
+      IDAM_BASE_URL: http://idam-api:8080
+      AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://service-auth-provider-api:8080
+      CCD_CORE_CASE_DATA_API_URL: http://ccd-data-store-api:4452
     depends_on:
       - ccd-case-management-web
 #      - finrem-notification-service
@@ -85,7 +88,7 @@ services:
       USER_PROFILE_DB_USERNAME: "${DB_USERNAME}"
       USER_PROFILE_DB_PASSWORD: "${DB_PASSWORD}"
       USER_PROFILE_DB_USE_SSL: "${DB_USE_SSL}"
-      USER_PROFILE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_definition,ccd_admin,finrem_ccd_data_migrator
+      USER_PROFILE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_definition,ccd_admin,finrem_ccd_data_migrator,finrem_case_orchestration
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       REFORM_SERVICE_NAME: ccd-user-profile-api
       REFORM_TEAM: ccd
@@ -108,7 +111,7 @@ services:
       DEFINITION_STORE_DB_PASSWORD: "${DB_PASSWORD}"
       DEFINITION_STORE_DB_USE_SSL: "${DB_USE_SSL}"
       DEFINITION_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DEFINITION_STORE}"
-      DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin,finrem_ccd_data_migrator
+      DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin,finrem_ccd_data_migrator,finrem_case_orchestration
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
       IDAM_USER_URL: http://idam-api:8080
       IDAM_S2S_URL: http://service-auth-provider-api:8080
@@ -137,7 +140,7 @@ services:
       DATA_STORE_DB_USE_SSL: "${DB_USE_SSL}"
       DATA_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DATA_STORE}"
       DATA_STORE_TOKEN_SECRET: iuasbcuasdcbasdgcasdgcuysachjsacyasdgjcgasdj
-      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,finrem_ccd_data_migrator
+      DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,finrem_ccd_data_migrator,finrem_case_orchestration
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
       IDAM_USER_URL: http://idam-api:8080
@@ -228,6 +231,7 @@ services:
       MICROSERVICEKEYS_FINREM_PAYMENT_SERVICE: "AAAAAAAAAAAAAAAA"
       MICROSERVICEKEYS_FINREM_CCD_DATA_MIGRATOR: "AAAAAAAAAAAAAAAA"
       MICROSERVICEKEYS_DIVORCE: "AAAAAAAAAAAAAAAA"
+      MICROSERVICEKEYS_FINREM_CASE_ORCHESTRATION: "AAAAAAAAAAAAAAAA"
 
   dm-store:
     image: "hmcts/dm-store:${DM_STORE_TAG:-latest}"

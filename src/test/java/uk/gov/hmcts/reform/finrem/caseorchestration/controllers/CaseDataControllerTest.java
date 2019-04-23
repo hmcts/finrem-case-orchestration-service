@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdUpdateService;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
@@ -21,6 +23,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
     private ObjectMapper objectMapper = new ObjectMapper();
+
+    @MockBean
+    private CcdUpdateService ccdUpdateService;
 
     @Test
     public void shouldApplicationSubmittedToGateKeepingState() throws Exception {

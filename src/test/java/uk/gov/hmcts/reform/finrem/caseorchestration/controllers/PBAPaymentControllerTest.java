@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdUpdateService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 
@@ -41,6 +42,9 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
 
     @MockBean
     private PBAPaymentService pbaPaymentService;
+
+    @MockBean
+    private CcdUpdateService ccdUpdateService;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
