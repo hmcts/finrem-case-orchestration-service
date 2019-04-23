@@ -110,7 +110,7 @@ public class CaseMaintenanceController implements BaseController {
         caseData.put("rSolicitorAddress", null);
         caseData.put("rSolicitorPhone", null);
         caseData.put("rSolicitorEmail", null);
-        caseData.put("rSolicitorDXNumber", null);
+        caseData.put("rSolicitorDXnumber", null);
     }
 
     private void removePropertyAdjustmentDetails(Map<String, Object> caseData) {
