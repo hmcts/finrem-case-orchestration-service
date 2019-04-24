@@ -2,18 +2,23 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.ObjectUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 
 import java.net.URI;
+import java.util.Map;
 
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 @Service
 @Slf4j
@@ -27,33 +32,35 @@ public class NotificationService {
     private final NotificationServiceConfiguration notificationServiceConfiguration;
     private final RestTemplate restTemplate;
 
-    public void sendHWFSuccessfulConfirmationEmail(CCDRequest ccdRequest, String authToken) {
+    public void sendHWFSuccessfulConfirmationEmail(CallbackRequest callbackRequest , String authToken) {
+        NotificationRequest notificationRequest = buildNotificationRequest(callbackRequest);
+        HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
-        sendNotificationEmail(ccdRequest, authToken, uri);
+        sendNotificationEmail(callbackRequest, authToken, uri);
     }
 
-    public void sendAssignToJudgeConfirmationEmail(CCDRequest ccdRequest, String authToken) {
+    public void sendAssignToJudgeConfirmationEmail(CallbackRequest callbackRequest, String authToken) {
         URI uri = buildUri(notificationServiceConfiguration.getAssignToJudge());
-        sendNotificationEmail(ccdRequest, authToken, uri);
+        sendNotificationEmail(callbackRequest, authToken, uri);
     }
 
-    public void sendConsentOrderMadeConfirmationEmail(CCDRequest ccdRequest, String authToken) {
+    public void sendConsentOrderMadeConfirmationEmail(CallbackRequest callbackRequest, String authToken) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderMade());
-        sendNotificationEmail(ccdRequest, authToken, uri);
+        sendNotificationEmail(callbackRequest, authToken, uri);
     }
 
-    public void sendConsentOrderNotApprovedEmail(CCDRequest ccdRequest, String authToken) {
+    public void sendConsentOrderNotApprovedEmail(CallbackRequest callbackRequest, String authToken) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderNotApproved());
-        sendNotificationEmail(ccdRequest, authToken, uri);
+        sendNotificationEmail(callbackRequest, authToken, uri);
     }
 
-    public void sendConsentOrderAvailableEmail(CCDRequest ccdRequest, String authToken) {
+    public void sendConsentOrderAvailableEmail(CallbackRequest callbackRequest, String authToken) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailable());
-        sendNotificationEmail(ccdRequest, authToken, uri);
+        sendNotificationEmail(callbackRequest, authToken, uri);
     }
 
-    private void sendNotificationEmail(CCDRequest ccdRequest, String authToken, URI uri) {
-        NotificationRequest notificationRequest = buildNotificationRequest(ccdRequest);
+    private void sendNotificationEmail(CallbackRequest callbackRequest, String authToken, URI uri) {
+        NotificationRequest notificationRequest = buildNotificationRequest(callbackRequest);
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));
         log.info(NOTIFICATION_SERVICE_URL, uri.toString());
         try {
@@ -66,13 +73,13 @@ public class NotificationService {
         }
     }
 
-    private NotificationRequest buildNotificationRequest(CCDRequest ccdRequest) {
+    private NotificationRequest buildNotificationRequest(CallbackRequest callbackRequest) {
         NotificationRequest notificationRequest = new NotificationRequest();
-        notificationRequest.setCaseReferenceNumber(ccdRequest.getCaseDetails().getCaseId());
-        notificationRequest.setSolicitorReferenceNumber(
-                ccdRequest.getCaseDetails().getCaseData().getSolicitorReference());
-        notificationRequest.setName(ccdRequest.getCaseDetails().getCaseData().getSolicitorName());
-        notificationRequest.setNotificationEmail(ccdRequest.getCaseDetails().getCaseData().getSolicitorEmail());
+        notificationRequest.setCaseReferenceNumber(ObjectUtils.toString(callbackRequest.getCaseDetails().getId()));
+        Map<String,Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
+        notificationRequest.setSolicitorReferenceNumber(ObjectUtils.toString(mapOfCaseData.get(SOLICITOR_REFERENCE)));
+        notificationRequest.setName(ObjectUtils.toString(mapOfCaseData.get(SOLICITOR_NAME)));
+        notificationRequest.setNotificationEmail(ObjectUtils.toString(mapOfCaseData.get(SOLICITOR_EMAIL)));
         return notificationRequest;
     }
 

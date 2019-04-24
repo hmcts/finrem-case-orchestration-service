@@ -1,26 +1,37 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.PaymentClient;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeItem;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeValue;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.OrderSummary;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.FeeRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 
 import java.math.BigDecimal;
+import java.util.Map;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FEES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FEE_AMOUNT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FEE_CODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FEE_VERSION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_SUMMARY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class PBAPaymentService {
+
     private final PaymentClient paymentClient;
 
     @Value("${payment.api.siteId}")
@@ -29,41 +40,52 @@ public class PBAPaymentService {
     @Value("${payment.api.description}")
     private String description;
 
-
-    public PaymentResponse makePayment(String authToken, String ccdCaseId, CaseData caseData) {
-        log.info("Inside makePayment, authToken : {}, ccdCaseId : {}, caseData : {}", authToken, ccdCaseId, caseData);
-        PaymentRequest paymentRequest = buildPaymentRequest(ccdCaseId, caseData);
+    public PaymentResponse makePayment(String authToken, String ccdCaseId, Map<String, Object> mapOfCaseData) {
+        log.info("Inside makePayment, authToken : {}, ccdCaseId : {}, caseData : {}", authToken, ccdCaseId,
+                mapOfCaseData);
+        PaymentRequest paymentRequest = buildPaymenRequest(ccdCaseId, mapOfCaseData);
         log.info("paymentRequest: {}", paymentRequest);
         PaymentResponse paymentResponse = paymentClient.pbaPayment(authToken, paymentRequest);
         log.info("paymentResponse : {} ", paymentResponse);
         return paymentResponse;
     }
 
-    private PaymentRequest buildPaymentRequest(String ccdCaseId, CaseData caseData) {
-        FeeRequest fee = buildFeeRequest(caseData);
-        log.info("Fee request : {} ", fee);
-        return PaymentRequest.builder()
-                .accountNumber(caseData.getPbaNumber())
-                .caseReference(caseData.getDivorceCaseNumber())
-                .customerReference(caseData.getPbaReference())
-                .ccdCaseNumber(ccdCaseId)
-                .description(description)
-                .organisationName(caseData.getSolicitorFirm())
-                .siteId(siteId)
-                .amount(fee.getCalculatedAmount())
-                .feesList(ImmutableList.of(fee))
+    private PaymentRequest buildPaymenRequest(String ccdCaseId, Map<String, Object> mapOfCaseData) {
+        FeeRequest feeRequest = buildFeeRequest(mapOfCaseData);
+        log.info("Fee request : {} ", feeRequest);
+        return buildPaymentRequest(ccdCaseId, mapOfCaseData, feeRequest);
+    }
+
+    private FeeRequest buildFeeRequest(Map<String, Object> mapOfCaseData) {
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode dataJsonNode = mapper.valueToTree(mapOfCaseData);
+        JsonNode feeValueAsJson = dataJsonNode.path(ORDER_SUMMARY).path(FEES).get(0).path(VALUE);
+        BigDecimal feeAmount =
+                BigDecimal.valueOf(feeValueAsJson.path(FEE_AMOUNT).asDouble()).divide(BigDecimal.valueOf(100));
+
+        return FeeRequest
+                .builder()
+                .calculatedAmount(feeAmount)
+                .code(feeValueAsJson.path(FEE_CODE).asText())
+                .version(feeValueAsJson.path(FEE_VERSION).asText())
                 .build();
     }
 
-    private FeeRequest buildFeeRequest(CaseData caseData) {
-        OrderSummary orderSummary = caseData.getOrderSummary();
-        FeeItem feeItem = orderSummary.getFees().get(0);
-        FeeValue feeValue = feeItem.getValue();
-        BigDecimal feeAmount = new BigDecimal(feeValue.getFeeAmount()).divide(BigDecimal.valueOf(100));
-        return FeeRequest.builder()
-                .calculatedAmount(feeAmount)
-                .code(feeValue.getFeeCode())
-                .version(feeValue.getFeeVersion())
+    private PaymentRequest buildPaymentRequest(String ccdCaseId, Map<String, Object> mapOfCaseData, FeeRequest fee) {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode dataJsonNode = mapper.valueToTree(mapOfCaseData);
+
+        return PaymentRequest.builder()
+                .accountNumber(dataJsonNode.path(PBA_NUMBER).asText())
+                .caseReference(dataJsonNode.path(DIVORCE_CASE_NUMBER).asText())
+                .customerReference(dataJsonNode.path(PBA_REFERENCE).asText())
+                .ccdCaseNumber(ccdCaseId)
+                .description(description)
+                .organisationName(dataJsonNode.path(SOLICITOR_FIRM).asText())
+                .siteId(siteId)
+                .amount(fee.getCalculatedAmount())
+                .feesList(ImmutableList.of(fee))
                 .build();
     }
 }

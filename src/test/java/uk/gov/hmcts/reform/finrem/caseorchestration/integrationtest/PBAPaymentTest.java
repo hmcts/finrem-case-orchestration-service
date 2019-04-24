@@ -18,8 +18,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -84,7 +84,7 @@ public class PBAPaymentTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private CCDRequest request;
+    private CallbackRequest request;
 
     @ClassRule
     public static WireMockClassRule feeLookUpService = new WireMockClassRule(9001);
@@ -188,7 +188,7 @@ public class PBAPaymentTest {
     private void setUpPbaPayment(String name) throws IOException {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(
                 name)) {
-            request = objectMapper.readValue(resourceAsStream, CCDRequest.class);
+            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
 }

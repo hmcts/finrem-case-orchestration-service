@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -11,8 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
@@ -46,7 +43,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     private PBAPaymentService pbaPaymentService;
 
     private ObjectMapper objectMapper = new ObjectMapper();
-    private JsonNode requestContent;
 
     private static PaymentResponse paymentResponse(boolean success) {
         PaymentResponse paymentResponse = PaymentResponse.builder()
@@ -56,12 +52,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .build();
         return paymentResponse;
     }
-
-    private void doEmtpyCaseDataSetUp() throws IOException, URISyntaxException {
-        requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/empty-casedata.json").toURI()));
-    }
-
 
     @Test
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {

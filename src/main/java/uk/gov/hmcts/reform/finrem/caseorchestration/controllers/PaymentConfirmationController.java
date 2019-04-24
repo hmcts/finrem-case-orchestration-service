@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestBody;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDAfterSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseData;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
 
 import java.io.IOException;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -27,20 +27,21 @@ public class PaymentConfirmationController implements BaseController {
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    public ResponseEntity<CCDAfterSubmitCallbackResponse> pbaConfirmation(
+    public ResponseEntity<SubmittedCallbackResponse> pbaConfirmation(
             @RequestHeader(value = "Authorization", required = false) String authToken,
-            @RequestBody CCDRequest ccdRequest) throws IOException {
-        log.info("Received request for PBA confirmation. Auth token: {}, Case request : {}", authToken, ccdRequest);
+            @RequestBody CallbackRequest callbackRequest) throws IOException {
+        log.info("Received request for PBA confirmation. Auth token: {}, Case request : {}", authToken,
+            callbackRequest);
 
-        validateCaseData(ccdRequest);
+        validateCaseData(callbackRequest);
 
-        CaseData caseData = ccdRequest.getCaseDetails().getCaseData();
+        Map<String,Object> caseData = callbackRequest.getCaseDetails().getData();
 
         String confirmationBody = (isPBAPayment(caseData) ? paymentConfirmationService.pbaPaymentConfirmationMarkdown()
                 : paymentConfirmationService.hwfPaymentConfirmationMarkdown());
         log.info("confirmationBody : {}", confirmationBody);
 
-        CCDAfterSubmitCallbackResponse callbackResponse = CCDAfterSubmitCallbackResponse.builder()
+        SubmittedCallbackResponse callbackResponse = SubmittedCallbackResponse.builder()
                 .confirmationBody(confirmationBody)
                 .build();
 
