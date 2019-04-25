@@ -24,8 +24,6 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedEvent.ALLOCATE_TO_JUDGE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedEvent.ISSUE_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.GATE_KEEPING_AND_ALLOCATION;
@@ -91,10 +89,6 @@ public class PBAPaymentController implements BaseController {
             mapOfCaseData.put(ISSUE_DATE, ZonedDateTime.now().toLocalDate());
             mapOfCaseData.put(STATE, GATE_KEEPING_AND_ALLOCATION.toString());
             mapOfCaseData.put(PBA_PAYMENT_REFERENCE, paymentResponse.getReference());
-            ccdUpdateService.createEvent(authToken, callbackRequest.getCaseDetails(), ISSUE_APPLICATION.getId(),
-                    ISSUE_APPLICATION.getEventSummary(), ISSUE_APPLICATION.getEventDescription());
-            ccdUpdateService.createEvent(authToken, callbackRequest.getCaseDetails(), ALLOCATE_TO_JUDGE.getId(),
-                    ALLOCATE_TO_JUDGE.getEventSummary(), ALLOCATE_TO_JUDGE.getEventDescription());
             log.info("Payment succeeded.");
         } else {
             mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
