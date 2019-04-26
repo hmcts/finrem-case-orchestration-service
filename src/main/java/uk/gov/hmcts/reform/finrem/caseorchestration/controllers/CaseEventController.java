@@ -30,7 +30,7 @@ public class CaseEventController implements BaseController {
     @Autowired
     private CcdUpdateService ccdUpdateService;
 
-    @PostMapping(path = "/create-history-for-event", consumes = APPLICATION_JSON, produces =
+    @PostMapping(path = "/create-history-event", consumes = APPLICATION_JSON, produces =
             APPLICATION_JSON)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> createHistoryForEvent(
             @RequestHeader(value = "Authorization", required = false) String authToken,

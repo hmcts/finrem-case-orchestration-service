@@ -4,13 +4,14 @@ import com.nimbusds.jwt.JWTParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import java.text.ParseException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+
+import java.text.ParseException;
 
 
 @Service
@@ -27,26 +28,15 @@ public class CcdUpdateService {
         String caseId = caseDetails.getId().toString();
         String caseType = caseDetails.getCaseTypeId();
         String jurisdictionId = caseDetails.getJurisdiction();
-        StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
-                authorisation,
-                authTokenGenerator.generate(),
-                getUserId(authorisation),
-                jurisdictionId,
-                caseType,
-                caseId,
-                eventId);
 
-        CaseDataContent caseDataContent = CaseDataContent.builder()
-                .eventToken(startEventResponse.getToken())
-                .event(
-                        Event.builder()
-                                .id(startEventResponse.getEventId())
-                                .summary(eventSummary)
-                                .description(eventDescription)
-                                .build()
-                ).data(caseDetails.getData())
-                .build();
+        StartEventResponse startEventResponse = startEvent(authorisation, eventId, caseId, caseType, jurisdictionId);
+        CaseDataContent caseDataContent = buildCaseDataContent(caseDetails, eventSummary,
+                eventDescription, startEventResponse);
+        return submitEvent(authorisation, caseId, caseType, jurisdictionId, caseDataContent);
+    }
 
+    private CaseDetails submitEvent(String authorisation, String caseId, String caseType, String jurisdictionId,
+                                    CaseDataContent caseDataContent) {
         return coreCaseDataApi.submitEventForCaseWorker(
                 authorisation,
                 authTokenGenerator.generate(),
@@ -56,6 +46,35 @@ public class CcdUpdateService {
                 caseId,
                 true,
                 caseDataContent);
+    }
+
+    private StartEventResponse startEvent(String authorisation, String eventId, String caseId, String caseType,
+                                          String jurisdictionId) {
+        return coreCaseDataApi.startEventForCaseWorker(
+                authorisation,
+                authTokenGenerator.generate(),
+                getUserId(authorisation),
+                jurisdictionId,
+                caseType,
+                caseId,
+                eventId);
+    }
+
+    private CaseDataContent buildCaseDataContent(CaseDetails caseDetails, String eventSummary, String eventDescription,
+                                                 StartEventResponse startEventResponse) {
+        return CaseDataContent.builder()
+                .eventToken(startEventResponse.getToken())
+                .event(buildEvent(eventSummary, eventDescription, startEventResponse))
+                .data(caseDetails.getData())
+                .build();
+    }
+
+    private Event buildEvent(String eventSummary, String eventDescription, StartEventResponse startEventResponse) {
+        return Event.builder()
+                .id(startEventResponse.getEventId())
+                .summary(eventSummary)
+                .description(eventDescription)
+                .build();
     }
 
     private String getUserId(String jwt) {

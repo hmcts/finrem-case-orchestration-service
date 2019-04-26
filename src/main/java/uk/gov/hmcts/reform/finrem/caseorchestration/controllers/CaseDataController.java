@@ -11,13 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdUpdateService;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.GATE_KEEPING_AND_ALLOCATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,7 +26,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @SuppressWarnings("unchecked")
 public class CaseDataController implements BaseController {
-    private final CcdUpdateService ccdUpdateService;
 
     @PostMapping(path = "/application-submitted-to-gate-keeping", consumes = APPLICATION_JSON, produces =
             APPLICATION_JSON)
@@ -37,6 +37,7 @@ public class CaseDataController implements BaseController {
         log.info("Current case state {}, Case request : {}", caseDetails.getState(), callbackRequest);
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(ISSUE_DATE, ZonedDateTime.now().toLocalDate());
+        caseData.put(STATE, GATE_KEEPING_AND_ALLOCATION.toString());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
