@@ -1,0 +1,18 @@
+java:
+  applicationPort: '9000'
+  livenessPath: '/health'
+  environment:
+      APPLICATION_INSIGHTS_IKEY: '97f6a0e1-6be6-44b0-97bf-d03852b7791f'
+      SLOT: 'PRODUCTION'
+      REFORM_SERVICE_NAME: 'cos'
+      REFORM_TEAM: 'finrem'
+      APPINSIGHTS_INSTRUMENTATIONKEY : '97f6a0e1-6be6-44b0-97bf-d03852b7791f'
+  image: 'https://hmcts.azurecr.io/hmcts/finrem-case-orchestration-service:latest'
+  keyVaults:
+    finrem:
+      resourceGroup: finrem
+      secrets:
+        - finrem-doc-s2s-auth-secret
+        - idam-secret
+        - username-solicitor
+        - password-solicitor
