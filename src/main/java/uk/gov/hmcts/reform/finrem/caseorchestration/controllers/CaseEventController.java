@@ -13,13 +13,11 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdUpdateService;
 
 import javax.validation.constraints.NotNull;
-import java.time.ZonedDateTime;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedEvent.ALLOCATE_TO_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedEvent.ISSUE_APPLICATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
 
 @RestController
 @RequestMapping("/case-orchestration")
