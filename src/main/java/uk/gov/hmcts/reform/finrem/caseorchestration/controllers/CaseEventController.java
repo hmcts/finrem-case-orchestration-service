@@ -32,7 +32,6 @@ public class CaseEventController implements BaseController {
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
         validateCaseData(callback);
-        Map<String, Object> caseData = callback.getCaseDetails().getData();
         ccdUpdateService.createEvent(authToken, callback.getCaseDetails(), ISSUE_APPLICATION.getId(),
                 ISSUE_APPLICATION.getEventSummary(), ISSUE_APPLICATION.getEventDescription());
         ccdUpdateService.createEvent(authToken, callback.getCaseDetails(), ALLOCATE_TO_JUDGE.getId(),
