@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
@@ -16,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
@@ -69,6 +71,10 @@ public class DocumentControllerTest extends BaseControllerTest {
         return "/fixtures/fee-lookup.json";
     }
 
+    Matcher<String> expectedState() {
+        return equalTo(APPLICATION_ISSUED.toString());
+    }
+
     @Test
     public void generateMiniFormA() throws Exception {
         whenServiceGeneratesDocument().thenReturn(caseDocument());
@@ -78,7 +84,7 @@ public class DocumentControllerTest extends BaseControllerTest {
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.state", is(APPLICATION_ISSUED.toString())))
+                .andExpect(jsonPath("$.data.state", is(expectedState())))
                 .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
                 .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
                 .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BINARY_URL)))

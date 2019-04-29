@@ -3,25 +3,23 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.when;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 
 public class OnlineFormDocumentServiceTest {
 
-    private DocumentGeneratorClient generatorClient;
     private DocumentConfiguration config;
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -32,20 +30,59 @@ public class OnlineFormDocumentServiceTest {
         config = new DocumentConfiguration();
         config.setMiniFormTemplate("template");
         config.setMiniFormFileName("file_name");
-
-        Document document = new Document();
-        document.setBinaryUrl(BINARY_URL);
-        document.setFileName(FILE_NAME);
-        document.setUrl(DOC_URL);
-
-        generatorClient = Mockito.mock(DocumentGeneratorClient.class);
-        when(generatorClient.generatePDF(isA(DocumentRequest.class), eq(AUTH_TOKEN))).thenReturn(document);
-
-        service = new OnlineFormDocumentService(generatorClient, config, mapper);
     }
 
     @Test
     public void generateMiniFormA() {
+        service = new OnlineFormDocumentService(new DocumentClientStub(new CountDownLatch(1)), config, mapper);
         doCaseDocumentAssert(service.generateMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
+    }
+
+    @Test
+    public void generateContestedMiniFormA() {
+        service = new OnlineFormDocumentService(new DocumentClientStub(new CountDownLatch(1)), config, mapper);
+        doCaseDocumentAssert(service.generateContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
+    }
+
+    @Test
+    public void generateContestedDraftMiniFormA() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(2);
+        service = new OnlineFormDocumentService(new DocumentClientStub(latch), config, mapper);
+
+        CaseDocument result =
+                service.generateDraftContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().data(caseData()).build());
+        latch.await();
+
+        doCaseDocumentAssert(result);
+    }
+
+    private Map<String, Object> caseData() {
+        Map<String, Object> documentMap = new HashMap<>();
+        documentMap.put("document_url", "http://test.url");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("miniFormA", documentMap);
+
+        return data;
+    }
+
+    private static class DocumentClientStub implements DocumentClient {
+
+        private final CountDownLatch latch;
+
+        DocumentClientStub(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public Document generatePDF(DocumentRequest generateDocumentRequest, String authorizationToken) {
+            latch.countDown();
+            return document();
+        }
+
+        @Override
+        public void deleteDocument(String fileUrl, String authorizationToken) {
+            latch.countDown();
+        }
     }
 }
