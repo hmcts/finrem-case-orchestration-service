@@ -32,6 +32,10 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
     public void generateMiniFormA() throws Exception {
         generateDocumentServiceSuccessStub();
 
+        generateDocument();
+    }
+
+    void generateDocument() throws Exception {
         webClient.perform(MockMvcRequestBuilders.post(apiUrl())
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION, AUTH_TOKEN)
@@ -41,7 +45,7 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
                 .andExpect(content().json(expectedCaseData()));
     }
 
-    private String expectedCaseData() throws JsonProcessingException {
+    String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getData().put("miniFormA", caseDocument());
 
