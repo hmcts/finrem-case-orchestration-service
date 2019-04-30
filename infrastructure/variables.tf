@@ -58,6 +58,22 @@ variable "fees_api_url" {
   default = "http://fees-register-api-aat.service.core-compute-aat.internal"
 }
 
+variable "ccd_core_case_data_api_url" {
+  default = "http://ccd-data-store-api-aat.service.core-compute-aat.internal"
+}
+
+variable "idam_s2s_url_prefix" {
+  default = "rpe-service-auth-provider"
+}
+
+variable "auth_provider_service_client_microservice" {
+  default = "finrem_case_orchestration"
+}
+
+variable "auth_provider_service_client_tokentimetoliveinseconds" {
+  default = "900"
+}
+
 variable "subscription" {}
 
 variable "location" {

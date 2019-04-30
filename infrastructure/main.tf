@@ -10,6 +10,7 @@ locals {
   nonPreviewVaultName = "${var.reform_team}-${var.env}"
   vaultName = "${var.env == "preview" ? local.previewVaultName : local.nonPreviewVaultName}"
   vaultUri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
+  idam_s2s_url   = "http://${var.idam_s2s_url_prefix}-${local.local_env}.service.core-compute-${local.local_env}.internal"
 
   asp_name = "${var.env == "prod" ? "finrem-cos-prod" : "${var.raw_product}-${var.env}"}"
   asp_rg = "${var.env == "prod" ? "finrem-cos-prod" : "${var.raw_product}-${var.env}"}"
@@ -42,6 +43,10 @@ module "finrem-cos" {
     AUTH_PROVIDER_SERVICE_CLIENT_KEY                      = "${data.azurerm_key_vault_secret.finrem-doc-s2s-auth-secret.value}"
     USERNAME-SOLICITOR                                    = "${data.azurerm_key_vault_secret.username-solicitor.value}"
     PASSWORD-SOLICITOR                                    = "${data.azurerm_key_vault_secret.password-solicitor.value}"
+    CCD_CORE_CASE_DATA_API_URL                            = "${var.ccd_core_case_data_api_url}"
+    AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE             = "${var.auth_provider_service_client_microservice}"
+    FINREM_CASE_ORCHESTRATION_S2S_KEY                      = "${data.azurerm_key_vault_secret.finrem-case-orchestration-service-s2s-key.value}"
+    AUTH_PROVIDER_SERVICE_CLIENT_TOKENTIMETOLIVEINSECONDS = "${var.auth_provider_service_client_tokentimetoliveinseconds}"
 
   }
 }
@@ -70,4 +75,11 @@ data "azurerm_key_vault_secret" "idam-secret" {
   name      = "idam-secret"
   vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
 }
+
+data "azurerm_key_vault_secret" "finrem-case-orchestration-service-s2s-key" {
+  name      = "finrem-case-orchestration-service-s2s-key"
+  vault_uri = "${data.azurerm_key_vault.finrem_key_vault.vault_uri}"
+}
+
+
 
