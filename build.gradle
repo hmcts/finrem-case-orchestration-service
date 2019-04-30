@@ -11,7 +11,6 @@ buildscript {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath group: 'org.sonarsource.scanner.gradle', name: 'sonarqube-gradle-plugin', version: '2.6.2'
         classpath("net.serenity-bdd:serenity-gradle-plugin:1.5.2")
-
     }
 }
 
@@ -56,6 +55,17 @@ repositories {
     maven { url "https://dl.bintray.com/hmcts/hmcts-maven" }
     maven { url "http://repo.maven.apache.org/maven2" }
     maven { url 'https://repo.spring.io/libs-milestone' }
+}
+
+dependencyManagement {
+    dependencies {
+        // CVE-2019-0232, CVE-2019-0199 - command line injections on windows
+        dependencySet(group: 'org.apache.tomcat.embed', version: '9.0.19') {
+            entry 'tomcat-embed-core'
+            entry 'tomcat-embed-el'
+            entry 'tomcat-embed-websocket'
+        }
+    }
 }
 
 
