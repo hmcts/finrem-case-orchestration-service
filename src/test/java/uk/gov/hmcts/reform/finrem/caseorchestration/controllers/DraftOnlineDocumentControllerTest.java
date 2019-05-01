@@ -4,12 +4,14 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.web.servlet.ResultMatcher;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 
 @WebMvcTest(DraftOnlineDocumentController.class)
@@ -31,7 +33,7 @@ public class DraftOnlineDocumentControllerTest extends DocumentControllerTest {
     }
 
     @Override
-    Matcher<String> expectedState() {
-        return Matchers.isEmptyOrNullString();
+    ResultMatcher stateCheck() {
+        return jsonPath("$.data.state").doesNotExist();
     }
 }

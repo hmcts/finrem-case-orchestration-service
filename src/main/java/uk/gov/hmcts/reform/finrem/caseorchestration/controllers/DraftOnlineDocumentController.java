@@ -48,8 +48,6 @@ public class DraftOnlineDocumentController {
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, callback.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
-        //TODO what should be the state??
-        caseData.put(STATE, "");
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
