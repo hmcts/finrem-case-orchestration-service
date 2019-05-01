@@ -23,9 +23,9 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 withPipeline(type, product, app) {
-    loadVaultSecrets(secrets)
+    enableDockerBuild()
     installCharts()
-    enableDeployToAKS()
+    loadVaultSecrets(secrets)
     setVaultName(product)
 
     after('functionalTest:aat') {

@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    propertiesvolume:
+      enabled: true
+      prefixed: true
+      paths: /mnt/secrets/finrem
+      aliases:
+        finrem.finrem-doc-s2s-auth-secret: AUTH_PROVIDER_SERVICE_CLIENT_KEY
+        finrem.idam-secret: OAUTH2_CLIENT_FINREM
+        finrem.username-solicitor: USERNAME-SOLICITOR
+        finrem.password-solicitor: PASSWORD-SOLICITOR
