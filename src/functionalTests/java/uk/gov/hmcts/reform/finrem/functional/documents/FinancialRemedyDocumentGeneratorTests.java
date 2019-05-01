@@ -22,12 +22,10 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private static String SOLICITOR_REF = "JAW052018";
     private static String MINIFORMA_JSON = "documentGeneratePayload.json";
     private static String GENERALORDER_JSON = "document-rejected-order.json";
-    private static String SOLICITOR_FIRM_CONTESTED = "Michael Jones & Partners Contested";
-    private static String SOLICITOR_NAME_CONTESTED = "Solictor Contested";
-    private static String APPLICANT_NAME_CONTESTED = "Applicant Contested";
-    private static String DIVORCE_CASENO_CONTESTED = "DD12D12345";
-    private static String SOLICITOR_REF_CONTESTED = "LL01";
-    private static String HEARING_JSON = "contested/validate-hearing-with-hearingdate.json";
+    private static String APPLICANT_NAME_HEARING = "Applicant Contested";
+    private static String DIVORCE_CASENO_HEARING = "DD12D12345";
+    private static String SOLICITOR_REF_HEARING = "LL01";
+    private static String HEARING_JSON = "validate-hearing-with-hearingdate.json";
 
     private String url1;
     private JsonPath jsonPathEvaluator;
@@ -204,11 +202,9 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(HEARING_JSON,generatorHearingUrl,"binary","hearing");
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
-        assertTrue(documentContent.contains(SOLICITOR_FIRM_CONTESTED));
-        assertTrue(documentContent.contains(SOLICITOR_NAME_CONTESTED));
-        assertTrue(documentContent.contains(APPLICANT_NAME_CONTESTED));
-        assertTrue(documentContent.contains(DIVORCE_CASENO_CONTESTED));
-        assertTrue(documentContent.contains(SOLICITOR_REF_CONTESTED));
+        assertTrue(documentContent.contains(APPLICANT_NAME_HEARING));
+        assertTrue(documentContent.contains(DIVORCE_CASENO_HEARING));
+        assertTrue(documentContent.contains(SOLICITOR_REF_HEARING));
 
     }
 
