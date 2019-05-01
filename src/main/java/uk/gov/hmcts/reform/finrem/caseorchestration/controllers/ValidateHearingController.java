@@ -25,8 +25,6 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @SuppressWarnings("unchecked")
 public class ValidateHearingController implements BaseController {
 
-    private final PBAValidationService pbaValidationService;
-
     @Autowired
     private ValidateHearingService validateHearingService;
 

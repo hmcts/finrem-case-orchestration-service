@@ -23,36 +23,23 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    public void shouldApplicationSubmittedToGateKeepingState() throws Exception {
+    public void shouldAppendIssueDate() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/application-submitted-to-gateKeepingState.json").toURI()));
-        mvc.perform(post("/case-orchestration/application-submitted-to-gate-keeping")
+        mvc.perform(post("/case-orchestration/append-issued-date")
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.data.state", Matchers.is("gateKeepingAndAllocation")))
                 .andExpect(jsonPath("$.data.issueDate").exists());
     }
 
-    @Test
-    public void shouldNotChangeToGateKeepingState() throws Exception {
-        requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/contested/do-not-change-to-gateKeepingState.json").toURI()));
-        mvc.perform(post("/case-orchestration/application-submitted-to-gate-keeping")
-                .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.state").doesNotExist());
-    }
 
     @Test
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
         doEmtpyCaseDataSetUp();
-        mvc.perform(post("/case-orchestration/application-submitted-to-gate-keeping")
+        mvc.perform(post("/case-orchestration/append-issued-date")
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))

@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @SuppressWarnings("unchecked")
 public class CaseDataController implements BaseController {
 
-    @PostMapping(path = "/application-submitted-to-gate-keeping", consumes = APPLICATION_JSON, produces =
+    @PostMapping(path = "/append-issued-date", consumes = APPLICATION_JSON, produces =
             APPLICATION_JSON)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> applicationSubmittedToGateKeepingState(
             @RequestBody CallbackRequest callbackRequest) {
@@ -36,7 +36,6 @@ public class CaseDataController implements BaseController {
         log.info("Current case state {}, Case request : {}", caseDetails.getState(), callbackRequest);
         Map<String, Object> caseData = caseDetails.getData();
         if (caseDetails.getState().equalsIgnoreCase(APPLICATION_SUBMITTED.toString())) {
-            caseData.put(STATE, GATE_KEEPING_AND_ALLOCATION.toString());
             caseData.put(ISSUE_DATE, ZonedDateTime.now().toLocalDate());
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
