@@ -121,7 +121,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyContestedGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_JSON,generateContestedUrl,"document","miniForma");
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_JSON,generateContestedUrl,
+                "document","miniForma");
 
         validatePostSuccessForaccessingGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -133,7 +134,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void downloadContestedDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_JSON,generateContestedUrl,"binary","miniForma");
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_JSON,generateContestedUrl,
+                "binary","miniForma");
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
         assertTrue(documentContent.contains(SOLICITOR_FIRM));
