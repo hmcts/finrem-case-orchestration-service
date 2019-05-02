@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -15,13 +15,13 @@ public abstract class AbstractDocumentService {
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
 
     protected final DocumentConfiguration config;
-    private final DocumentGeneratorClient documentGeneratorClient;
+    private final DocumentClient documentClient;
     protected final ObjectMapper objectMapper;
 
-    public AbstractDocumentService(DocumentGeneratorClient documentGeneratorClient,
+    public AbstractDocumentService(DocumentClient documentClient,
                            DocumentConfiguration config,
                            ObjectMapper objectMapper) {
-        this.documentGeneratorClient = documentGeneratorClient;
+        this.documentClient = documentClient;
         this.config = config;
         this.objectMapper = objectMapper;
     }
@@ -29,7 +29,7 @@ public abstract class AbstractDocumentService {
     CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
                                           String template, String fileName) {
         Document miniFormA =
-                documentGeneratorClient.generatePDF(
+                documentClient.generatePDF(
                         DocumentRequest.builder()
                                 .template(template)
                                 .fileName(fileName)
@@ -38,6 +38,11 @@ public abstract class AbstractDocumentService {
                         authorisationToken);
 
         return caseDocument(miniFormA);
+    }
+
+
+    void deleteDocument(String documentUrl, String authorisationToken) {
+        documentClient.deleteDocument(documentUrl, authorisationToken);
     }
 
     private CaseDocument caseDocument(Document miniFormA) {

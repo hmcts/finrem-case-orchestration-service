@@ -2,19 +2,15 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
-import java.time.LocalDate;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
 
@@ -22,8 +18,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
@@ -33,7 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class HearingDocumentServiceTest {
 
-    private DocumentGeneratorClient generatorClient;
+    private DocumentClient generatorClient;
     private DocumentConfiguration config;
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -51,7 +45,7 @@ public class HearingDocumentServiceTest {
         config.setFormGFileName("Form-G.pdf");
         config.setMiniFormFileName("file_name");
 
-        generatorClient = new TestDocumentGeneratorClient();
+        generatorClient = new TestDocumentClient();
         service = new HearingDocumentService(generatorClient, config, mapper);
     }
 
@@ -65,7 +59,7 @@ public class HearingDocumentServiceTest {
     public void generateFastTrackFormC() {
         Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
         doCaseDocumentAssert((CaseDocument) result.get("formC"));
-        ((TestDocumentGeneratorClient)generatorClient).verifyAdditionalFastTrackFields();
+        ((TestDocumentClient)generatorClient).verifyAdditionalFastTrackFields();
     }
 
     @Test
@@ -73,12 +67,12 @@ public class HearingDocumentServiceTest {
         Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
         doCaseDocumentAssert((CaseDocument) result.get("formC"));
         doCaseDocumentAssert((CaseDocument) result.get("formG"));
-        ((TestDocumentGeneratorClient)generatorClient).verifyAdditionalNonFastTrackFields();
+        ((TestDocumentClient)generatorClient).verifyAdditionalNonFastTrackFields();
     }
 
     @Test(expected = CompletionException.class)
     public void unsuccessfulGenerateHearingDocuments() {
-        ((TestDocumentGeneratorClient) generatorClient).throwException();
+        ((TestDocumentClient) generatorClient).throwException();
         service.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
     }
 
@@ -104,7 +98,7 @@ public class HearingDocumentServiceTest {
         return document;
     }
 
-    private class TestDocumentGeneratorClient implements DocumentGeneratorClient {
+    private class TestDocumentClient implements DocumentClient {
 
         private Map<String, Object> value;
         private boolean throwException;
@@ -117,6 +111,11 @@ public class HearingDocumentServiceTest {
 
             this.value = request.getValues();
             return document();
+        }
+
+        @Override
+        public void deleteDocument(String fileUrl, String authorizationToken) {
+            throw new UnsupportedOperationException();
         }
 
         void throwException() {

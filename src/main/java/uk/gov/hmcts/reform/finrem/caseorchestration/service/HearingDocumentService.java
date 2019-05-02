@@ -7,7 +7,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
@@ -46,10 +46,10 @@ public class HearingDocumentService extends AbstractDocumentService {
     };
 
     @Autowired
-    public HearingDocumentService(DocumentGeneratorClient documentGeneratorClient,
+    public HearingDocumentService(DocumentClient documentClient,
                                   DocumentConfiguration config,
                                   ObjectMapper objectMapper) {
-        super(documentGeneratorClient, config, objectMapper);
+        super(documentClient, config, objectMapper);
     }
 
     public Map<String, Object> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
