@@ -11,7 +11,6 @@ public class CCDConfigConstant {
     public static final String SOLICITOR_EMAIL = "solicitorEmail";
     public static final String SOLICITOR_FIRM = "solicitorFirm";
     //Document related
-    public static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
     public static final String MINI_FORM_A = "miniFormA";
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
