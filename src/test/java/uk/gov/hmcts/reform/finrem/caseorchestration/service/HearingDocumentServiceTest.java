@@ -23,6 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 
 public class HearingDocumentServiceTest {
@@ -86,7 +87,8 @@ public class HearingDocumentServiceTest {
 
     private CaseDetails caseDetails(String isFastTrackDecision) {
         Map<String, Object> caseData =
-                ImmutableMap.of("fastTrackDecision", isFastTrackDecision, HEARING_DATE, DATE_OF_HEARING);
+                ImmutableMap.of("fastTrackDecision", isFastTrackDecision, HEARING_DATE, DATE_OF_HEARING,
+                        CASE_ALLOCATED_TO, "fastTrack");
         return CaseDetails.builder().data(caseData).build();
     }
 
