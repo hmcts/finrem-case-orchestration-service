@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -47,10 +48,108 @@ public class CaseMaintenanceController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
+    @PostMapping(path = "/update-contested-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Handles update Contested Case details and cleans up the data fields"
+            + " based on the options choosen")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
+                    + "attached to the case",
+                    response = AboutToStartOrSubmitCallbackResponse.class),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateContestedCase(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestBody CallbackRequest ccdRequest) {
+
+        log.info("Received request for contested - updateCase ");
+        validateCaseData(ccdRequest);
+        Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
+        updateDivorceDetails(caseData);
+        updateContestedRespondentDetails(caseData);
+        updateContestedPeriodicPaymentOrder(caseData);
+        updateContestedPropertyAdjustmentOrder(caseData);
+        updateContestedFastTrackProcedureDetail(caseData);
+        updateContestedComplexityDetails(caseData);
+        isApplicantsHomeCourt(caseData);
+        updateContestedMiamDetails(caseData);
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    private void updateContestedFastTrackProcedureDetail(Map<String, Object> caseData) {
+        if (equalsTo((String) caseData.get("fastTrackDecision"), "No")) {
+            caseData.put("fastTrackDecisionReason", null);
+        }
+    }
+
+
+    private void updateContestedComplexityDetails(Map<String, Object> caseData) {
+        if (equalsTo((String) caseData.get("addToComplexityListOfCourts"), "No")) {
+            caseData.put("estimatedAssetsChecklist", null);
+            caseData.put("netValueOfHome", null);
+            caseData.put("potentialAllegationChecklist", null);
+            caseData.put("otherReasonForComplexity", null);
+            caseData.put("otherReasonForComplexityText", null);
+        } else {
+            if (equalsTo((String) caseData.get("otherReasonForComplexity"), "No")) {
+                caseData.put("otherReasonForComplexityText", null);
+            }
+        }
+    }
+
+    private void isApplicantsHomeCourt(Map<String, Object> caseData) {
+        if (equalsTo((String) caseData.get("isApplicantsHomeCourt"), "No")) {
+            caseData.put("reasonForLocalCourt", null);
+        }
+    }
+
+    private void updateContestedMiamDetails(Map<String, Object> caseData) {
+        if (equalsTo((String) caseData.get("applicantAttendedMIAM"), "Yes")) {
+            caseData.put("claimingExemptionMIAM", null);
+            caseData.put("familyMediatorMIAM", null);
+            caseData.put("MIAMExemptionsChecklist", null);
+            caseData.put("MIAMDomesticViolenceChecklist", null);
+            caseData.put("MIAMUrgencyReasonChecklist", null);
+            caseData.put("MIAMPreviousAttendanceChecklist", null);
+            caseData.put("MIAMOtherGroundsChecklist", null);
+        }
+    }
+
+    private void updateContestedPeriodicPaymentOrder(Map<String, Object> caseData) {
+        ArrayList natureOfApplicationList = (ArrayList) caseData.get("natureOfApplicationChecklist");
+        if (hasNotSelected(natureOfApplicationList, "periodicalPaymentOrder")) {
+            caseData.put("paymentForChildrenDecision", null);
+            caseData.put("benefitForChildrenDecision", null);
+            caseData.put("benefitPaymentChecklist", null);
+        } else {
+            if (equalsTo((String) caseData.get("paymentForChildrenDecision"), "No")) {
+                caseData.put("benefitForChildrenDecision", null);
+                caseData.put("benefitPaymentChecklist", null);
+            } else {
+                if (equalsTo((String) caseData.get("benefitForChildrenDecision"), "Yes")) {
+                    caseData.put("benefitPaymentChecklist", null);
+                }
+            }
+        }
+    }
+
+    private void updateContestedPropertyAdjustmentOrder(Map<String, Object> caseData) {
+        ArrayList natureOfApplicationList = (ArrayList) caseData.get("natureOfApplicationChecklist");
+        if (hasNotSelected(natureOfApplicationList, "propertyAdjustmentOrder")) {
+            caseData.put("propertyAddress", null);
+            caseData.put("mortgageDetail", null);
+            caseData.put("propertyAdjutmentOrderDetail", null);
+        } else {
+            if (equalsTo((String) caseData.get("additionalPropertyOrderDecision"), "No")) {
+                caseData.put("propertyAdjutmentOrderDetail", null);
+            }
+        }
+    }
+
+
     private void updateDivorceDetails(Map<String, Object> caseData) {
         if (caseData.get("divorceStageReached").equals("Decree Nisi")) {
             // remove Decree Absolute details
-            caseData.put("divorceUploadEvidence2",null);
+            caseData.put("divorceUploadEvidence2", null);
             caseData.put("divorceDecreeAbsoluteDate", null);
         } else {
             // remove Decree Nisi details
@@ -117,6 +216,21 @@ public class CaseMaintenanceController implements BaseController {
         caseData.put("natureOfApplication3a", null);
         caseData.put("natureOfApplication3b", null);
     }
+
+    private void updateContestedRespondentDetails(Map<String, Object> caseData) {
+        if (equalsTo((String) caseData.get("respondentRepresented"), "No")) {
+            removeRespondentSolicitorAddress(caseData);
+        } else {
+            removeContestedRespondentAddress(caseData);
+        }
+    }
+
+    private void removeContestedRespondentAddress(Map<String, Object> caseData) {
+        caseData.put("respondentAddress", null);
+        caseData.put("respondentPhone", null);
+        caseData.put("respondentEmail", null);
+    }
+
 
     private boolean equalsTo(String fieldData, String value) {
         return nonNull(fieldData) && value.equalsIgnoreCase(fieldData);

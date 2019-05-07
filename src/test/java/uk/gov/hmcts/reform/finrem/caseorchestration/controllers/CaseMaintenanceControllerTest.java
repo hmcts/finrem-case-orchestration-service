@@ -171,4 +171,33 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.rSolicitorEmail").doesNotExist())
                 .andExpect(jsonPath("$.data.rSolicitorPhone").doesNotExist());
     }
+
+
+    @Test
+    public void shouldDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/contested/amend-divorce-details-decree-nisi.json").toURI()));
+        mvc.perform(post("/case-orchestration/update-contested-case")
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.divorceUploadEvidence2").doesNotExist())
+                .andExpect(jsonPath("$.data.divorceDecreeAbsoluteDate").doesNotExist());
+    }
+
+    @Test
+    public void shouldDeleteDecreeAbsoluteWhenSolicitorChooseToDecreeNisiForContested() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/contested/amend-divorce-details-decree-absolute.json").toURI()));
+        mvc.perform(post("/case-orchestration/update-contested-case")
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.divorceUploadEvidence1").doesNotExist())
+                .andExpect(jsonPath("$.data.divorceDecreeNisiDate").doesNotExist());
+    }
 }
