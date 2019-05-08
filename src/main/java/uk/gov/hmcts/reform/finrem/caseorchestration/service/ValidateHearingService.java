@@ -13,7 +13,7 @@ import java.util.Map;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingFunctions.isFastTrackApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
 
 @Service
 public class ValidateHearingService {

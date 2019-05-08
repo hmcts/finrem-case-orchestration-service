@@ -122,7 +122,8 @@
         "document_binary_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
       },
       "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "No"
+      "solicitorAgreeToReceiveEmails": "No",
+      "caseAllocatedTo": "standardTrack"
     }
   }
 }

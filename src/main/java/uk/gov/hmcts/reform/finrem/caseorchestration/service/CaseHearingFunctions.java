@@ -13,7 +13,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 
-final class HearingFunctions {
+final class CaseHearingFunctions {
 
     static UnaryOperator<CaseDetails> addFastTrackFields = caseDetails -> {
         Map<String, Object> data = caseDetails.getData();

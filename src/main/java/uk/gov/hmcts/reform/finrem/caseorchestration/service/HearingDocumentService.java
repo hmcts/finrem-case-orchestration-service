@@ -15,9 +15,9 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingFunctions.addFastTrackFields;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingFunctions.addNonFastTrackFields;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingFunctions.isFastTrackApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addFastTrackFields;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
 
 @Service
 public class HearingDocumentService extends AbstractDocumentService {
