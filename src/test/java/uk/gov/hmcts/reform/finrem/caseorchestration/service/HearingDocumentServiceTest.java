@@ -64,6 +64,14 @@ public class HearingDocumentServiceTest {
     }
 
     @Test
+    public void generateJudiciaryBasedFastTrackFormC() {
+        Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN,
+                makeItJudiciaryFastTrackDecisionCase());
+        doCaseDocumentAssert((CaseDocument) result.get("formC"));
+        ((TestDocumentClient)generatorClient).verifyAdditionalFastTrackFields();
+    }
+
+    @Test
     public void generateNonFastTrackFormCAndFormG() {
         Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
         doCaseDocumentAssert((CaseDocument) result.get("formC"));
@@ -85,10 +93,16 @@ public class HearingDocumentServiceTest {
         return caseDetails("Yes");
     }
 
+    private CaseDetails makeItJudiciaryFastTrackDecisionCase() {
+        Map<String, Object> caseData =
+                ImmutableMap.of("fastTrackDecision", "No",
+                        CASE_ALLOCATED_TO, "fastTrack", HEARING_DATE, DATE_OF_HEARING);
+        return CaseDetails.builder().data(caseData).build();
+    }
+
     private CaseDetails caseDetails(String isFastTrackDecision) {
         Map<String, Object> caseData =
-                ImmutableMap.of("fastTrackDecision", isFastTrackDecision, HEARING_DATE, DATE_OF_HEARING,
-                        CASE_ALLOCATED_TO, "fastTrack");
+                ImmutableMap.of("fastTrackDecision", isFastTrackDecision, HEARING_DATE, DATE_OF_HEARING);
         return CaseDetails.builder().data(caseData).build();
     }
 

@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -38,8 +39,10 @@ final class CaseHearingFunctions {
 
     static Function<Map<String, Object>, Boolean> isFastTrackApplication = caseData -> {
         String fastTrackDecision = ObjectUtils.toString(caseData.get(FAST_TRACK_DECISION));
-        String caseAllocatedTo = ObjectUtils.toString(caseData.get(CASE_ALLOCATED_TO));
-        return fastTrackDecision.equalsIgnoreCase("yes")
-                && caseAllocatedTo.equalsIgnoreCase("fastTrack");
+        String caseAllocatedTo = (String) caseData.get(CASE_ALLOCATED_TO);
+
+        return Optional.ofNullable(caseAllocatedTo)
+                .map(s -> s.equalsIgnoreCase("fastTrack"))
+                .orElseGet(() -> fastTrackDecision.equalsIgnoreCase("yes"));
     };
 }
