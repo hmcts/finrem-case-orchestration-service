@@ -96,7 +96,7 @@ public class HearingDocumentServiceTest {
     private CaseDetails makeItJudiciaryFastTrackDecisionCase() {
         Map<String, Object> caseData =
                 ImmutableMap.of("fastTrackDecision", "No",
-                        CASE_ALLOCATED_TO, "fastTrack", HEARING_DATE, DATE_OF_HEARING);
+                        CASE_ALLOCATED_TO, "Yes", HEARING_DATE, DATE_OF_HEARING);
         return CaseDetails.builder().data(caseData).build();
     }
 

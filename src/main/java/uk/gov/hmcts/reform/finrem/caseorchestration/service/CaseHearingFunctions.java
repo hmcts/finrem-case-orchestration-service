@@ -42,7 +42,7 @@ final class CaseHearingFunctions {
         String caseAllocatedTo = (String) caseData.get(CASE_ALLOCATED_TO);
 
         return Optional.ofNullable(caseAllocatedTo)
-                .map(s -> s.equalsIgnoreCase("fastTrack"))
+                .map(s -> s.equalsIgnoreCase("yes"))
                 .orElseGet(() -> fastTrackDecision.equalsIgnoreCase("yes"));
     };
 }
