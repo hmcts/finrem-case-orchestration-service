@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,39 +10,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
-import java.time.LocalDate;
-import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.UnaryOperator;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addFastTrackFields;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
 
 @Service
 public class HearingDocumentService extends AbstractDocumentService {
-
-    private UnaryOperator<CaseDetails> addFastTrackFields = caseDetails -> {
-        Map<String, Object> data = caseDetails.getData();
-        data.put("formCCreatedDate", new Date());
-        data.put("eventDatePlus21Days", LocalDate.now().plusDays(21));
-
-        return caseDetails;
-    };
-
-    private UnaryOperator<CaseDetails> addNonFastTrackFields = caseDetails -> {
-        Map<String, Object> data = caseDetails.getData();
-
-        String hearingDate = ObjectUtils.toString(data.get(HEARING_DATE));
-        LocalDate hearingLocalDate = LocalDate.parse(hearingDate);
-
-        data.put("formCCreatedDate", new Date());
-        data.put("hearingDateLess35Days", hearingLocalDate.minusDays(35));
-        data.put("hearingDateLess14Days", hearingLocalDate.minusDays(14));
-
-        return caseDetails;
-    };
 
     @Autowired
     public HearingDocumentService(DocumentClient documentClient,
@@ -89,9 +66,6 @@ public class HearingDocumentService extends AbstractDocumentService {
     }
 
     private boolean isFastTrackApplication(Pair<CaseDetails, String> pair) {
-        Map<String, Object> caseData = pair.getLeft().getData();
-        String fastTrackDecision = (String) caseData.get("fastTrackDecision");
-
-        return fastTrackDecision.toLowerCase().equals("yes");
+        return isFastTrackApplication.apply(pair.getLeft().getData());
     }
 }
