@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,15 +19,11 @@ import java.util.Map;
 
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 public class CaseMaintenanceController implements BaseController {
-
-    @Autowired
-    private OnlineFormDocumentService service;
 
     @PostMapping(path = "/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Handles update Case details and cleans up the data fields based on the options choosen")
@@ -79,8 +72,6 @@ public class CaseMaintenanceController implements BaseController {
         updateContestedComplexityDetails(caseData);
         isApplicantsHomeCourt(caseData);
         updateContestedMiamDetails(caseData);
-        CaseDocument document = service.generateDraftContestedMiniFormA(authToken, ccdRequest.getCaseDetails());
-        caseData.put(MINI_FORM_A, document);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -92,7 +83,7 @@ public class CaseMaintenanceController implements BaseController {
 
     private void updateContestedComplexityDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("addToComplexityListOfCourts"), "falseNo")) {
-            cleanupContestedComplexityDetails(caseData);
+            removeContestedComplexityDetails(caseData);
         } else {
             updateComplexityDetails(caseData);
         }
@@ -104,7 +95,7 @@ public class CaseMaintenanceController implements BaseController {
         }
     }
 
-    private void cleanupContestedComplexityDetails(Map<String, Object> caseData) {
+    private void removeContestedComplexityDetails(Map<String, Object> caseData) {
         caseData.put("estimatedAssetsChecklist", null);
         caseData.put("netValueOfHome", null);
         caseData.put("potentialAllegationChecklist", null);
@@ -114,62 +105,76 @@ public class CaseMaintenanceController implements BaseController {
     }
 
     private void isApplicantsHomeCourt(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("isApplicantsHomeCourt"), "Yes")) {
+        if (equalsTo((String) caseData.get("isApplicantsHomeCourt"), "No")) {
             caseData.put("reasonForLocalCourt", null);
         }
     }
 
     private void updateContestedMiamDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("applicantAttendedMIAM"), "Yes")) {
-            caseData.put("claimingExemptionMIAM", null);
-            caseData.put("familyMediatorMIAM", null);
-            caseData.put("MIAMExemptionsChecklist", null);
-            caseData.put("MIAMDomesticViolenceChecklist", null);
-            caseData.put("MIAMUrgencyReasonChecklist", null);
-            caseData.put("MIAMPreviousAttendanceChecklist", null);
-            caseData.put("MIAMOtherGroundsChecklist", null);
+            removeAllMiamExceptionDetails(caseData);
         } else {
-            if (equalsTo((String) caseData.get("claimingExemptionMIAM"), "No")) {
-                caseData.put("familyMediatorMIAM", null);
-                caseData.put("MIAMExemptionsChecklist", null);
-                caseData.put("MIAMDomesticViolenceChecklist", null);
-                caseData.put("MIAMUrgencyReasonChecklist", null);
-                caseData.put("MIAMPreviousAttendanceChecklist", null);
-                caseData.put("MIAMOtherGroundsChecklist", null);
-            } else {
-                if (equalsTo((String) caseData.get("familyMediatorMIAM"), "Yes")) {
-                    caseData.put("MIAMExemptionsChecklist", null);
-                    caseData.put("MIAMDomesticViolenceChecklist", null);
-                    caseData.put("MIAMUrgencyReasonChecklist", null);
-                    caseData.put("MIAMPreviousAttendanceChecklist", null);
-                    caseData.put("MIAMOtherGroundsChecklist", null);
-                } else {
-                    ArrayList miamExemptionsChecklist = (ArrayList) caseData.get("MIAMExemptionsChecklist");
-                    if (hasNotSelected(miamExemptionsChecklist, "other")) {
-                        caseData.put("MIAMOtherGroundsChecklist", null);
-                    }
-
-                    if (hasNotSelected(miamExemptionsChecklist, "domesticViolence")) {
-                        caseData.put("MIAMDomesticViolenceChecklist", null);
-                    }
-
-                    if (hasNotSelected(miamExemptionsChecklist, "urgency")) {
-                        caseData.put("MIAMUrgencyReasonChecklist", null);
-                    }
-
-                    if (hasNotSelected(miamExemptionsChecklist, "previousMIAMattendance")) {
-                        caseData.put("MIAMPreviousAttendanceChecklist", null);
-                    }
-                }
-            }
-
+            updateWhenClaimingExemptionMiam(caseData);
         }
+    }
+
+    private void updateWhenClaimingExemptionMiam(Map<String, Object> caseData) {
+        if (equalsTo((String) caseData.get("claimingExemptionMIAM"), "No")) {
+            caseData.put("familyMediatorMIAM", null);
+            removeMiamExceptionDetails(caseData);
+        } else {
+            updateClaimingExemptionMiamDetails(caseData);
+        }
+    }
+
+    private void removeAllMiamExceptionDetails(Map<String, Object> caseData) {
+        caseData.put("claimingExemptionMIAM", null);
+        caseData.put("familyMediatorMIAM", null);
+        removeMiamExceptionDetails(caseData);
+    }
+
+    private void updateClaimingExemptionMiamDetails(Map<String, Object> caseData) {
+        if (equalsTo((String) caseData.get("familyMediatorMIAM"), "Yes")) {
+            removeMiamExceptionDetails(caseData);
+        } else {
+            updateMiamExceptionDetails(caseData);
+        }
+    }
+
+    private void updateMiamExceptionDetails(Map<String, Object> caseData) {
+        ArrayList miamExemptionsChecklist = (ArrayList) caseData.get("MIAMExemptionsChecklist");
+        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
+                "other", "MIAMOtherGroundsChecklist");
+
+        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
+                "domesticViolence", "MIAMDomesticViolenceChecklist");
+
+        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
+                "urgency", "MIAMUrgencyReasonChecklist");
+
+        removeExemptionCheckLists(caseData, miamExemptionsChecklist,
+                "previousMIAMattendance", "MIAMPreviousAttendanceChecklist");
+    }
+
+    private void removeExemptionCheckLists(Map<String, Object> caseData, ArrayList miamExemptionsChecklist,
+                                           String other, String miamOtherGroundsChecklist) {
+        if (hasNotSelected(miamExemptionsChecklist, other)) {
+            caseData.put(miamOtherGroundsChecklist, null);
+        }
+    }
+
+    private void removeMiamExceptionDetails(Map<String, Object> caseData) {
+        caseData.put("MIAMExemptionsChecklist", null);
+        caseData.put("MIAMDomesticViolenceChecklist", null);
+        caseData.put("MIAMUrgencyReasonChecklist", null);
+        caseData.put("MIAMPreviousAttendanceChecklist", null);
+        caseData.put("MIAMOtherGroundsChecklist", null);
     }
 
     private void updateContestedPeriodicPaymentOrder(Map<String, Object> caseData) {
         ArrayList natureOfApplicationList = (ArrayList) caseData.get("natureOfApplicationChecklist");
         if (hasNotSelected(natureOfApplicationList, "periodicalPaymentOrder")) {
-            cleanupContestedPeriodicalPaymentOrderDetails(caseData);
+            removeContestedPeriodicalPaymentOrderDetails(caseData);
         } else {
             updateContestedPeriodicPaymentDetails(caseData);
         }
@@ -177,7 +182,7 @@ public class CaseMaintenanceController implements BaseController {
 
     private void updateContestedPeriodicPaymentDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("paymentForChildrenDecision"), "No")) {
-            cleanupBenefitsDetails(caseData);
+            removeBenefitsDetails(caseData);
         } else {
             if (equalsTo((String) caseData.get("benefitForChildrenDecision"), "Yes")) {
                 caseData.put("benefitPaymentChecklist", null);
@@ -185,20 +190,20 @@ public class CaseMaintenanceController implements BaseController {
         }
     }
 
-    private void cleanupBenefitsDetails(Map<String, Object> caseData) {
+    private void removeBenefitsDetails(Map<String, Object> caseData) {
         caseData.put("benefitForChildrenDecision", null);
         caseData.put("benefitPaymentChecklist", null);
     }
 
-    private void cleanupContestedPeriodicalPaymentOrderDetails(Map<String, Object> caseData) {
+    private void removeContestedPeriodicalPaymentOrderDetails(Map<String, Object> caseData) {
         caseData.put("paymentForChildrenDecision", null);
-        cleanupBenefitsDetails(caseData);
+        removeBenefitsDetails(caseData);
     }
 
     private void updateContestedPropertyAdjustmentOrder(Map<String, Object> caseData) {
         ArrayList natureOfApplicationList = (ArrayList) caseData.get("natureOfApplicationChecklist");
         if (hasNotSelected(natureOfApplicationList, "propertyAdjustmentOrder")) {
-            cleanupPropertyAdjustmentOrder(caseData);
+            removePropertyAdjustmentOrder(caseData);
         } else {
             updatePropertyAdjustmentOrderDetails(caseData);
         }
@@ -210,7 +215,7 @@ public class CaseMaintenanceController implements BaseController {
         }
     }
 
-    private void cleanupPropertyAdjustmentOrder(Map<String, Object> caseData) {
+    private void removePropertyAdjustmentOrder(Map<String, Object> caseData) {
         caseData.put("propertyAddress", null);
         caseData.put("mortgageDetail", null);
         caseData.put("propertyAdjutmentOrderDetail", null);
