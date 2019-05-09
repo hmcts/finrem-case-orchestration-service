@@ -28,4 +28,6 @@ public class CCDConfigConstant {
     public static final String ISSUE_DATE = "issueDate";
     public static final String FAST_TRACK_DECISION = "fastTrackDecision";
     public static final String HEARING_DATE = "hearingDate";
+    public static final String MIAM_ATTENDANCE = "applicantAttendedMIAM";
+    public static final String MIAM_EXEMPTION = "claimingExemptionMIAM";
 }

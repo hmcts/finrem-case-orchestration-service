@@ -33,4 +33,10 @@ abstract class BaseControllerTest extends BaseTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/empty-casedata.json").toURI()));
     }
+
+    void doValidCaseDataSetUp() throws IOException, URISyntaxException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/pba-validate.json").toURI()));
+    }
 }

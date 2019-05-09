@@ -15,23 +15,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.MiamCheckService;
 
 import javax.validation.constraints.NotNull;
-import java.util.Map;
+import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class MiamCheckController {
+public class MiamCheckController implements BaseController {
 
     @Autowired
-    private OnlineFormDocumentService service;
+    private MiamCheckService service;
 
     @PostMapping(path = "/miam-attend-exempt-check", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
@@ -45,10 +42,15 @@ public class MiamCheckController {
             @RequestHeader(value = "Authorization") String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        Map<String, Object> caseData = callback.getCaseDetails().getData();
-        CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, callback.getCaseDetails());
-        caseData.put(MINI_FORM_A, document);
+        log.info("Received request for validating MIAM exemption. Auth token: {}, Case request : {}",
+                authorisationToken, callback);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        validateCaseData(callback);
+        return ResponseEntity.ok(response(callback));
+    }
+
+    private AboutToStartOrSubmitCallbackResponse response(CallbackRequest callback) {
+        List<String> errors = service.miamExemptAttendCheck(callback.getCaseDetails());
+        return AboutToStartOrSubmitCallbackResponse.builder().errors(errors).build();
     }
 }
