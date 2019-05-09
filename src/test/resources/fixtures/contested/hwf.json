@@ -5,7 +5,7 @@
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_data": {
-      "helpWithFeesQuestion": "No",
+      "helpWithFeesQuestion": "Yes",
       "applicantLName":"Guy",
       "dateOfMarriage":"1111-01-01",
       "mortgageDetail":"test",

@@ -15,17 +15,32 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentConfirmationService {
-    public static final String PBA_PAYMENT_CONFIRMATION_MARKDOWN = "/markdown/pba-payment-confirmation.md";
-    public static final String HWF_PAYMENT_CONFIRMATION_MARKDOWN = "/markdown/hwf-payment-confirmation.md";
+    public static final String CONSENTED_PBA_PAYMENT_CONFIRMATION = "/markdown/consented-pba-payment-confirmation.md";
+    public static final String CONSENTED_HWF_PAYMENT_CONFIRMATION = "/markdown/consented-hwf-payment-confirmation.md";
 
-    public String pbaPaymentConfirmationMarkdown() throws IOException {
-        try (InputStream inputStream = getClass().getResourceAsStream(PBA_PAYMENT_CONFIRMATION_MARKDOWN)) {
+    public static final String CONTESTED_PBA_PAYMENT_CONFIRMATION = "/markdown/contested-pba-payment-confirmation.md";
+    public static final String CONTESTED_HWF_PAYMENT_CONFIRMATION = "/markdown/contested-hwf-payment-confirmation.md";
+
+    public String consentedPbaPaymentConfirmation() throws IOException {
+        try (InputStream inputStream = getClass().getResourceAsStream(CONSENTED_PBA_PAYMENT_CONFIRMATION)) {
             return IOUtils.toString(inputStream, UTF_8);
         }
     }
 
-    public String hwfPaymentConfirmationMarkdown() throws IOException {
-        try (InputStream inputStream = getClass().getResourceAsStream(HWF_PAYMENT_CONFIRMATION_MARKDOWN)) {
+    public String consentedHwfPaymentConfirmation() throws IOException {
+        try (InputStream inputStream = getClass().getResourceAsStream(CONSENTED_HWF_PAYMENT_CONFIRMATION)) {
+            return IOUtils.toString(inputStream, UTF_8);
+        }
+    }
+
+    public String contestedPbaPaymentConfirmation() throws IOException {
+        try (InputStream inputStream = getClass().getResourceAsStream(CONTESTED_PBA_PAYMENT_CONFIRMATION)) {
+            return IOUtils.toString(inputStream, UTF_8);
+        }
+    }
+
+    public String contestedHwfPaymentConfirmation() throws IOException {
+        try (InputStream inputStream = getClass().getResourceAsStream(CONTESTED_HWF_PAYMENT_CONFIRMATION)) {
             return IOUtils.toString(inputStream, UTF_8);
         }
     }

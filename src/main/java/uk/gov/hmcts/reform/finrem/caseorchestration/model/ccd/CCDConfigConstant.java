@@ -10,6 +10,8 @@ public class CCDConfigConstant {
     public static final String SOLICITOR_NAME = "solicitorName";
     public static final String SOLICITOR_EMAIL = "solicitorEmail";
     public static final String SOLICITOR_FIRM = "solicitorFirm";
+    //Application Type related
+    public static final String D81_QUESTION = "d81Question";
     //Document related
     public static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
     public static final String MINI_FORM_A = "miniFormA";
