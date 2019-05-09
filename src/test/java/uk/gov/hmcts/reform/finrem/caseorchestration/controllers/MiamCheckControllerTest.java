@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN
 public class MiamCheckControllerTest extends BaseControllerTest {
 
     private static final String API_URL = "/case-orchestration/miam-attend-exempt-check";
-    public static final String ERROR_MSG = "You cannot make this application unless the applicant has "
+    private static final String ERROR_MSG = "You cannot make this application unless the applicant has "
             + "either attended, or is exempt from attending a MIAM";
 
     @MockBean

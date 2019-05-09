@@ -124,7 +124,7 @@
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "No",
       "applicantAttendedMIAM": "No",
-      "claimingExemptionMIAM": "No"
+      "claimingExemptionMIAM": "Yes"
     }
   }
 }
