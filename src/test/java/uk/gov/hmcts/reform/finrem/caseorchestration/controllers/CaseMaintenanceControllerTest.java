@@ -4,14 +4,25 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
 
 @WebMvcTest(CaseMaintenanceController.class)
 public class CaseMaintenanceControllerTest extends BaseControllerTest {
@@ -21,6 +32,9 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private JsonNode requestContent;
+
+    @MockBean
+    private OnlineFormDocumentService service;
 
     @Test
     public void shouldDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsolute() throws Exception {
@@ -175,6 +189,9 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested() throws Exception {
+        when(service.generateDraftContestedMiniFormA(eq(BEARER_TOKEN), isA(CaseDetails.class)))
+                .thenReturn(caseDocument());
+
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/amend-divorce-details-decree-nisi.json").toURI()));
         mvc.perform(post("/case-orchestration/update-contested-case")
@@ -184,11 +201,17 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.divorceUploadEvidence2").doesNotExist())
-                .andExpect(jsonPath("$.data.divorceDecreeAbsoluteDate").doesNotExist());
+                .andExpect(jsonPath("$.data.divorceDecreeAbsoluteDate").doesNotExist())
+                .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
+                .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
+                .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BINARY_URL)));
     }
 
     @Test
     public void shouldDeleteDecreeAbsoluteWhenSolicitorChooseToDecreeNisiForContested() throws Exception {
+        when(service.generateDraftContestedMiniFormA(eq(BEARER_TOKEN), isA(CaseDetails.class)))
+                .thenReturn(caseDocument());
+
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/amend-divorce-details-decree-absolute.json").toURI()));
         mvc.perform(post("/case-orchestration/update-contested-case")
@@ -198,6 +221,9 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.divorceUploadEvidence1").doesNotExist())
-                .andExpect(jsonPath("$.data.divorceDecreeNisiDate").doesNotExist());
+                .andExpect(jsonPath("$.data.divorceDecreeNisiDate").doesNotExist())
+                .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
+                .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
+                .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BINARY_URL)));
     }
 }
