@@ -23,6 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 
 public class HearingDocumentServiceTest {
@@ -63,6 +64,14 @@ public class HearingDocumentServiceTest {
     }
 
     @Test
+    public void generateJudiciaryBasedFastTrackFormC() {
+        Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN,
+                makeItJudiciaryFastTrackDecisionCase());
+        doCaseDocumentAssert((CaseDocument) result.get("formC"));
+        ((TestDocumentClient)generatorClient).verifyAdditionalFastTrackFields();
+    }
+
+    @Test
     public void generateNonFastTrackFormCAndFormG() {
         Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
         doCaseDocumentAssert((CaseDocument) result.get("formC"));
@@ -82,6 +91,13 @@ public class HearingDocumentServiceTest {
 
     private CaseDetails makeItFastTrackDecisionCase() {
         return caseDetails("Yes");
+    }
+
+    private CaseDetails makeItJudiciaryFastTrackDecisionCase() {
+        Map<String, Object> caseData =
+                ImmutableMap.of("fastTrackDecision", "No",
+                        CASE_ALLOCATED_TO, "Yes", HEARING_DATE, DATE_OF_HEARING);
+        return CaseDetails.builder().data(caseData).build();
     }
 
     private CaseDetails caseDetails(String isFastTrackDecision) {

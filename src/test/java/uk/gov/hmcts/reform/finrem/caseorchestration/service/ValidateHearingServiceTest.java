@@ -15,6 +15,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
@@ -64,7 +65,18 @@ public class ValidateHearingServiceTest {
     }
 
     @Test
-    public void fastTrackHearingDatesWarning() {
+    public void fastTrackHearingDatesWarningWithJudiciaryOutcome() {
+        List<ImmutablePair<String, Object>> pairs =
+                asList(pairOf(ISSUE_DATE, LocalDate.now()),
+                        pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)),
+                        pairOf(CASE_ALLOCATED_TO, "Yes"));
+
+        List<String> errors = doTestWarnings(pairs);
+        assertThat(errors, hasItem(DATE_BETWEEN_6_AND_10_WEEKS));
+    }
+
+    @Test
+    public void fastTrackHearingDatesWarningWithoutJudiciaryOutcome() {
         List<ImmutablePair<String, Object>> pairs =
                 asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION,"Yes"),
                         pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)));
