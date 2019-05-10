@@ -113,7 +113,9 @@ public class CaseMaintenanceController implements BaseController {
     private void updateContestedMiamDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("applicantAttendedMIAM"), "Yes")) {
             removeAllMiamExceptionDetails(caseData);
+            removeMiamCertificationDetailsForApplicantAttendedMiam(caseData);
         } else {
+            removeMiamCertificationDetails(caseData);
             updateWhenClaimingExemptionMiam(caseData);
         }
     }
@@ -127,6 +129,19 @@ public class CaseMaintenanceController implements BaseController {
         }
     }
 
+    private void removeMiamCertificationDetailsForApplicantAttendedMiam(Map<String, Object> caseData) {
+        caseData.put("soleTraderName1", null);
+        caseData.put("familyMediatorServiceName1", null);
+        caseData.put("mediatorRegistrationNumber1", null);
+    }
+
+    private void removeMiamCertificationDetails(Map<String, Object> caseData) {
+        removeMiamCertificationDetailsForApplicantAttendedMiam(caseData);
+        caseData.put("soleTraderName", null);
+        caseData.put("familyMediatorServiceName", null);
+        caseData.put("mediatorRegistrationNumber", null);
+    }
+
     private void removeAllMiamExceptionDetails(Map<String, Object> caseData) {
         caseData.put("claimingExemptionMIAM", null);
         caseData.put("familyMediatorMIAM", null);
@@ -137,6 +152,7 @@ public class CaseMaintenanceController implements BaseController {
         if (equalsTo((String) caseData.get("familyMediatorMIAM"), "Yes")) {
             removeMiamExceptionDetails(caseData);
         } else {
+            removeMiamCertificationDetails(caseData);
             updateMiamExceptionDetails(caseData);
         }
     }

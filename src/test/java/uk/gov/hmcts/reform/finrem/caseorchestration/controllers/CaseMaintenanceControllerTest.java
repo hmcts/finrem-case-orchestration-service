@@ -545,4 +545,42 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").exists())
                 .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").exists());
     }
+
+    @Test
+    public void shouldRemoveMiamCertificationDetailsWhenApplicantIsNotAttendedMiamForContested() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/contested/"
+                        + "remove-miam-certification-details.json").toURI()));
+        mvc.perform(post("/case-orchestration/update-contested-case")
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.soleTraderName").doesNotExist())
+                .andExpect(jsonPath("$.data.soleTraderName1").doesNotExist())
+                .andExpect(jsonPath("$.data.familyMediatorServiceName1").doesNotExist())
+                .andExpect(jsonPath("$.data.familyMediatorServiceName").doesNotExist())
+                .andExpect(jsonPath("$.data.mediatorRegistrationNumber").doesNotExist())
+                .andExpect(jsonPath("$.data.mediatorRegistrationNumber1").doesNotExist());
+    }
+
+    @Test
+    public void shouldCleanupMiamCertificationWhenApplicantAttendedMiamForContested() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/contested/"
+                        + "cleanup-miam-certification-details-when-applicant-attended-miam.json").toURI()));
+        mvc.perform(post("/case-orchestration/update-contested-case")
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.soleTraderName").exists())
+                .andExpect(jsonPath("$.data.soleTraderName1").doesNotExist())
+                .andExpect(jsonPath("$.data.familyMediatorServiceName1").doesNotExist())
+                .andExpect(jsonPath("$.data.familyMediatorServiceName").exists())
+                .andExpect(jsonPath("$.data.mediatorRegistrationNumber").exists())
+                .andExpect(jsonPath("$.data.mediatorRegistrationNumber1").doesNotExist());
+    }
 }
