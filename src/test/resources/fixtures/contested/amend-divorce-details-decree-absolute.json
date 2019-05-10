@@ -1,0 +1,87 @@
+{
+  "token": "test_token",
+  "event_id": "event1",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "created",
+    "case_data": {
+      "cfcCourtList": "FR_s_CFCList_2",
+      "applicantLName": "Ramisetti0012",
+      "dateOfMarriage": "2012-01-11",
+      "rSolicitorFirm": "Test Respondant Solicitor firm001",
+      "rSolicitorName": "Test Respondant Solicitor001",
+      "applicantFMName": "Padmaja0012",
+      "dateOfSepration": "2014-01-11",
+      "rSolicitorEmail": "prashanth.mamidi1@gmail.com",
+      "rSolicitorPhone": "07581239551",
+      "respondentEmail": "prashanth.mamidi@gmail.com",
+      "respondentLName": "lastname0012",
+      "respondentPhone": "7411201631",
+      "respondentFMName": "respondant0012",
+      "divorceCaseNumber": "EZ17D80124",
+      "fastTrackDecision": "No",
+      "rSolicitorAddress": {
+        "County": "Please select",
+        "Country": "Essex",
+        "PostCode": "IG1 1NL",
+        "PostTown": "ILFORD",
+        "AddressLine1": "FLAT 188 CITY VIEW,  CENTREWAY APARTMENTS, AXON PLACE",
+        "AddressLine2": "AXON PLACE",
+        "AddressLine3": ""
+      },
+      "respondentAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "IG2 6SA",
+        "PostTown": "Ilford",
+        "AddressLine1": "102 Ashurst Drive",
+        "AddressLine2": "GantsHill",
+        "AddressLine3": ""
+      },
+      "allocatedCourtList": "cfc",
+      "petitionIssuedDate": "2015-01-11",
+      "rSolicitorDXnumber": "aaaa001",
+      "solicitorReference": "KKKK0012",
+      "divorceStageReached": "Decree Absolute",
+      "rSolicitorReference": "Resp Reference001",
+      "uploadScanned4BForm": {
+        "document_url": "http://dm-store:8080/documents/2755c645-6550-4b11-96fc-10be491a9797",
+        "document_filename": "Amended Consent order01.doc",
+        "document_binary_url": "http://dm-store:8080/documents/2755c645-6550-4b11-96fc-10be491a9797/binary"
+      },
+      "promptForAnyDocument": "No",
+      "applicantAttendedMIAM": "Yes",
+      "divorceDecreeNisiDate": null,
+      "isApplicantsHomeCourt": "Yes",
+      "respondentRepresented": "Yes",
+      "applicantSolicitorFirm": "Padmaja firm0012",
+      "applicantSolicitorName": "Padmaja0012",
+      "divorceUploadEvidence2": {
+        "document_url": "http://dm-store:8080/documents/5b063b62-6ad2-4f9c-80ad-e4e69e5d98a8",
+        "document_filename": "Decree Absolute.doc",
+        "document_binary_url": "http://dm-store:8080/documents/5b063b62-6ad2-4f9c-80ad-e4e69e5d98a8/binary"
+      },
+      "divorceUploadEvidence1": null,
+      "applicantSolicitorEmail": "padmaja.ramisetti001@gmail.com",
+      "applicantSolicitorPhone": "07411201631",
+      "nameOfCourtDivorceCentre": "Divorce1",
+      "applicantSolicitorAddress": {
+        "County": "Essex",
+        "Country": "United Kingdom",
+        "PostCode": "IG1 1NL",
+        "PostTown": "ILFORD1",
+        "AddressLine1": "FLAT 1876 CITY VIEW,  CENTREWAY APARTMENTS, AXON PLACE",
+        "AddressLine2": "AXON PLACE1",
+        "AddressLine3": null
+      },
+      "divorceDecreeAbsoluteDate": null,
+      "applicantSolicitorDXnumber": "RDDD0012",
+      "addToComplexityListOfCourts": "falseNo",
+      "natureOfApplicationChecklist": [
+        "Lump Sum Order"
+      ],
+      "applicantSolicitorConsentForEmails": "No"
+    }
+  }
+}
