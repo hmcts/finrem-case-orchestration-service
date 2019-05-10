@@ -1,0 +1,166 @@
+{
+  "id" : "12345678",
+  "jurisdiction":"divorce",
+  "state":"created",
+  "case_data": {
+    "issueDate": "2019-05-01",
+    "hearingDate": "2019-07-10",
+    "hearingTime": "23",
+    "courtAddress": "leicester 1",
+    "timeEstimate": "10",
+    "applicantLName": "Martin",
+    "dateOfMarriage": "2000-01-01",
+    "judgeAllocated": "districtJudge",
+    "mortgageDetail": "Names for property address 1",
+    "netValueOfHome": "10000000",
+    "rSolicitorFirm": "Golden",
+    "rSolicitorName": "mark",
+    "applicantFMName": "James",
+    "caseAllocatedTo": "standardTrack",
+    "dateOfSepration": "2019-01-01",
+    "propertyAddress": "property address 1",
+    "rSolicitorEmail": "golden@gmail.com",
+    "rSolicitorPhone": "0202222222",
+    "respondentLName": "Marshal",
+    "respondentFMName": "Sarah",
+    "divorceCaseNumber": "DD12D12345",
+    "fastTrackDecision": "Yes",
+    "judgeTimeEstimate": "standardTime",
+    "rSolicitorAddress": {
+      "County": "london",
+      "Country": "uk",
+      "PostCode": "sw1x7jj",
+      "PostTown": "london",
+      "AddressLine1": "1",
+      "AddressLine2": "",
+      "AddressLine3": ""
+    },
+    "allocatedCourtList": "nottingham",
+    "familyMediatorMIAM": "No",
+    "petitionIssuedDate": "2019-04-03",
+    "rSolicitorDXnumber": "02033333333",
+    "solicitorReference": "LinkLaw0001",
+    "divorceStageReached": "Decree Absolute",
+    "nottinghamCourtList": "FR_s_NottinghamList_2",
+    "rSolicitorReference": "golden001",
+    "reasonForLocalCourt": "some reason",
+    "allocatedCourtListGA": "nottingham",
+    "allocatedCourtListSL": "nottingham",
+    "isHeardByDeputyJudge": "Yes",
+    "promptForAnyDocument": "Yes",
+    "applicantAttendedMIAM": "No",
+    "claimingExemptionMIAM": "Yes",
+    "isApplicantsHomeCourt": "No",
+    "nottinghamCourtListGA": "FR_s_NottinghamList_3",
+    "nottinghamCourtListSL": "FR_s_NottinghamList_3",
+    "respondentRepresented": "Yes",
+    "applicantSolicitorFirm": "LinkLaw",
+    "applicantSolicitorName": "Shah",
+    "applicationAllocatedTo": "standardList",
+    "MIAMExemptionsChecklist": [
+      "domesticViolence",
+      "urgency",
+      "previousMIAMattendance",
+      "other"
+    ],
+    "applicantSolicitorEmail": "linklaw@gmail.com",
+    "applicantSolicitorPhone": "02033445566",
+    "benefitPaymentChecklist": [
+      "Step child or step children",
+      "In addition to child support maintenance already paid under a Child Support Agency assessment",
+      "To meet expenses incurred by a child being in educated or training for work",
+      "The child or the person with care of the child or the absent parent of the child is not habitually resident in the United Kingdom"
+    ],
+    "fastTrackDecisionReason": [
+      "reason_1",
+      "reason_2"
+    ],
+    "isApplicantsHomeCourtGA": "Yes",
+    "estimatedAssetsChecklist": [
+      "estimatedAssetsChecklist_2"
+    ],
+    "nameOfCourtDivorceCentre": "Derby",
+    "otherReasonForComplexity": "Yes",
+    "uploadAdditionalDocument": [
+      {
+        "id": "4cf37119-460e-484b-9893-45127f262ec7",
+        "value": {
+          "additionalDocuments": {
+            "document_url": "http://dm-store:8080/documents/1a87424e-7212-4d0d-8a0a-2d28cac5b272",
+            "document_filename": "sample.pdf",
+            "document_binary_url": "http://dm-store:8080/documents/1a87424e-7212-4d0d-8a0a-2d28cac5b272/binary"
+          },
+          "additionalDocumentType": "scheduleOfAssets"
+        }
+      }
+    ],
+    "MIAMOtherGroundsChecklist": "FR_ms_MIAMOtherGroundsChecklist_Value_3",
+    "applicantSolicitorAddress": {
+      "County": "uk",
+      "Country": "uk",
+      "PostCode": "sw1x7hh",
+      "PostTown": "London",
+      "AddressLine1": "16",
+      "AddressLine2": "grosvenor place",
+      "AddressLine3": ""
+    },
+    "detailPotentialAllegation": "no issue",
+    "divorceDecreeAbsoluteDate": null,
+    "MIAMUrgencyReasonChecklist": [
+      "FR_ms_MIAMUrgencyReasonChecklist_Value_1",
+      "FR_ms_MIAMUrgencyReasonChecklist_Value_3",
+      "FR_ms_MIAMUrgencyReasonChecklist_Value_5"
+    ],
+    "applicantSolicitorDXnumber": "02044556677",
+    "benefitForChildrenDecision": "No",
+    "paymentForChildrenDecision": "Yes",
+    "addToComplexityListOfCourts": "trueYes",
+    "natureOfApplicationChecklist": [
+      "periodicalPaymentOrder",
+      "Lump Sum Order",
+      "Pension Sharing Order",
+      "Pension Attachment Order",
+      "Pension Compensation Sharing Order",
+      "Pension Compensation Attachment Order",
+      "propertyAdjustmentOrder"
+    ],
+    "otherReasonForComplexityText": "some reason",
+    "potentialAllegationChecklist": [
+      "potentialAllegationChecklist_1"
+    ],
+    "propertyAdjutmentOrderDetail": [
+      {
+        "id": "048655c8-fc79-406e-8bae-f0800137af91",
+        "value": {
+          "propertAddress": "property address 2",
+          "nameForProperty": "names for property address 2"
+        }
+      }
+    ],
+    "MIAMDomesticViolenceChecklist": [
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_2",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_3",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_4",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_5",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_6",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_7",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_8",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_13",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_15",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_23",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_22",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_20",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_19",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_18",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_11"
+    ],
+    "MIAMPreviousAttendanceChecklist": "FR_ms_MIAMPreviousAttendanceChecklist_Value_3",
+    "additionalPropertyOrderDecision": "Yes",
+    "applicantSolicitorConsentForEmails": "Yes",
+    "formCCreatedDate": "2019-05-07",
+    "eventDatePlus21Days": "2019-05-28",
+    "hearingDateLess35Days": "2019-06-05",
+    "hearingDateLess14Days": "2019-06-26"
+  }
+}
