@@ -27,7 +27,7 @@ public class PaymentConfirmationController implements BaseController {
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    public ResponseEntity<SubmittedCallbackResponse> pbaConfirmation(
+    public ResponseEntity<SubmittedCallbackResponse> paymentConfirmation(
             @RequestHeader(value = "Authorization", required = false) String authToken,
             @RequestBody CallbackRequest callbackRequest) throws IOException {
         log.info("Received request for PBA confirmation. Auth token: {}, Case request : {}", authToken,
@@ -37,8 +37,7 @@ public class PaymentConfirmationController implements BaseController {
 
         Map<String,Object> caseData = callbackRequest.getCaseDetails().getData();
 
-        String confirmationBody = (isPBAPayment(caseData) ? paymentConfirmationService.pbaPaymentConfirmationMarkdown()
-                : paymentConfirmationService.hwfPaymentConfirmationMarkdown());
+        String confirmationBody = confirmationBody(caseData);
         log.info("confirmationBody : {}", confirmationBody);
 
         SubmittedCallbackResponse callbackResponse = SubmittedCallbackResponse.builder()
@@ -46,6 +45,23 @@ public class PaymentConfirmationController implements BaseController {
                 .build();
 
         return ResponseEntity.ok(callbackResponse);
+    }
+
+    private String confirmationBody(Map<String, Object> caseData) throws IOException {
+        boolean isConsentedApplication = isConsentedApplication(caseData);
+        log.info("Application type isConsentedApplication : {}", isConsentedApplication);
+
+        String confirmationBody;
+        if (isConsentedApplication) {
+            log.info("Consented confirmation page to show");
+            confirmationBody = isPBAPayment(caseData) ?  paymentConfirmationService.consentedPbaPaymentConfirmation()
+                    : paymentConfirmationService.consentedHwfPaymentConfirmation();
+        } else {
+            log.info("Contested confirmation page to show");
+            confirmationBody = isPBAPayment(caseData) ?  paymentConfirmationService.contestedPbaPaymentConfirmation()
+                    : paymentConfirmationService.contestedHwfPaymentConfirmation();
+        }
+        return confirmationBody;
     }
 
 }

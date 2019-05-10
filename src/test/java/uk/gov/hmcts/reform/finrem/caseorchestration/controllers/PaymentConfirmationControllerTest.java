@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -10,8 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationS
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
@@ -32,13 +29,35 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
     @MockBean
     private PaymentConfirmationService paymentConfirmationService;
 
-    private void doConfirmationSetup(boolean isHwf) throws Exception {
+    private void doConfirmationSetup(boolean isConsented, boolean isHwf) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
-        requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/pba-validate.json").toURI()));
+        String inputFile;
+        if (isConsented) {
+            inputFile = isHwf ? "/fixtures/hwf.json" : "/fixtures/pba-validate.json";
+        } else {
+            inputFile = isHwf ? "/fixtures/contested/hwf.json" : "/fixtures/contested/pba-validate.json";
+        }
 
-        String markDownResponse = isHwf ? "hwf_confirmation_markup" : "pba_confirmation_markup";
-        when(paymentConfirmationService.pbaPaymentConfirmationMarkdown()).thenReturn(markDownResponse);
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource(inputFile).toURI()));
+
+        if (isConsented) {
+            if (isHwf) {
+                when(paymentConfirmationService.consentedHwfPaymentConfirmation())
+                        .thenReturn("consented_hwf_confirmation_markup");
+            } else {
+                when(paymentConfirmationService.consentedPbaPaymentConfirmation())
+                        .thenReturn("consented_pba_confirmation_markup");
+            }
+        } else {
+            if (isHwf) {
+                when(paymentConfirmationService.contestedHwfPaymentConfirmation())
+                        .thenReturn("contested_hwf_confirmation_markup");
+            } else {
+                when(paymentConfirmationService.contestedPbaPaymentConfirmation())
+                        .thenReturn("contested_pba_confirmation_markup");
+            }
+        }
     }
 
     @Test
@@ -54,29 +73,56 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
 
 
     @Test
-    public void shouldReturnHWFConfirmationMarkdown() throws Exception {
-        doConfirmationSetup(true);
+    public void shouldReturnConsentedHWFConfirmationMarkdown() throws Exception {
+        doConfirmationSetup(true, true);
         mvc.perform(post(PBA_CONFIRMATION_URL)
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.confirmation_header", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.confirmation_body", is("hwf_confirmation_markup")));
-        verify(paymentConfirmationService, times(1)).pbaPaymentConfirmationMarkdown();
+                .andExpect(jsonPath("$.confirmation_body", is("consented_hwf_confirmation_markup")));
+        verify(paymentConfirmationService, times(1)).consentedHwfPaymentConfirmation();
     }
 
     @Test
-    public void shouldReturnPBAConfirmationMarkdown() throws Exception {
-        doConfirmationSetup(false);
+    public void shouldReturnConsentedPBAConfirmationMarkdown() throws Exception {
+        doConfirmationSetup(true, false);
         mvc.perform(post(PBA_CONFIRMATION_URL)
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.confirmation_header", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.confirmation_body", is("pba_confirmation_markup")));
-        verify(paymentConfirmationService, times(1)).pbaPaymentConfirmationMarkdown();
+                .andExpect(jsonPath("$.confirmation_body", is("consented_pba_confirmation_markup")));
+        verify(paymentConfirmationService, times(1)).consentedPbaPaymentConfirmation();
+    }
+
+
+    @Test
+    public void shouldReturnContestedHWFConfirmationMarkdown() throws Exception {
+        doConfirmationSetup(false, true);
+        mvc.perform(post(PBA_CONFIRMATION_URL)
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.confirmation_header", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.confirmation_body", is("contested_hwf_confirmation_markup")));
+        verify(paymentConfirmationService, times(1)).contestedHwfPaymentConfirmation();
+    }
+
+    @Test
+    public void shouldReturnContestedPBAConfirmationMarkdown() throws Exception {
+        doConfirmationSetup(false, false);
+        mvc.perform(post(PBA_CONFIRMATION_URL)
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.confirmation_header", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.confirmation_body", is("contested_pba_confirmation_markup")));
+        verify(paymentConfirmationService, times(1)).contestedPbaPaymentConfirmation();
     }
 
 
