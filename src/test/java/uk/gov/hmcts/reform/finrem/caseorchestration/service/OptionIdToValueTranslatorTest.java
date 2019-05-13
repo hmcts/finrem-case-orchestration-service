@@ -9,12 +9,13 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FixedListOption;
 
 import java.io.File;
 import java.net.URISyntaxException;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -29,15 +30,35 @@ public class OptionIdToValueTranslatorTest {
 
     @Test
     public void translateOptions() throws Exception {
-        translator.translateFixedListOptions(caseDetails());
+        CaseDetails actual = caseDetailsWithOptions();
+        translator.translateOptionsValues.accept(actual);
+
+        assertThat(actual, is(equalTo(expectedCaseDetails())));
     }
 
-    private String jsonFixture() {
-        return "/fixtures/contested/contested-case-details.json";
+    @Test
+    public void nothingToTranslate() throws Exception {
+        CaseDetails actual = caseDetailsWithEmptyOptions();
+        translator.translateOptionsValues.accept(actual);
+
+        assertThat(actual, is(equalTo(caseDetailsWithEmptyOptions())));
     }
 
-    private CaseDetails caseDetails() throws Exception {
-        File file = new File(getClass().getResource(jsonFixture()).toURI());
+    private CaseDetails caseDetailsWithEmptyOptions() throws Exception {
+        File file = new File(getClass()
+                .getResource("/fixtures/contested/contested-case-details-empty-options.json").toURI());
+        return objectMapper.readValue(file, CaseDetails.class);
+    }
+
+    private CaseDetails expectedCaseDetails() throws Exception {
+        File file = new File(getClass()
+                .getResource("/fixtures/contested/expected-contested-case-details.json").toURI());
+        return objectMapper.readValue(file, CaseDetails.class);
+    }
+
+    private CaseDetails caseDetailsWithOptions() throws Exception {
+        File file = new File(getClass()
+                .getResource("/fixtures/contested/contested-case-details-options-list.json").toURI());
         return objectMapper.readValue(file, CaseDetails.class);
     }
 }

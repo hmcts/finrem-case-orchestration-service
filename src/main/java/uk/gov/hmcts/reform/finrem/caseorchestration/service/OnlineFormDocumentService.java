@@ -19,11 +19,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class OnlineFormDocumentService extends AbstractDocumentService {
 
+    private final OptionIdToValueTranslator optionIdToValueTranslator;
+
     @Autowired
     public OnlineFormDocumentService(DocumentClient documentClient,
                                      DocumentConfiguration config,
+                                     OptionIdToValueTranslator optionIdToValueTranslator,
                                      ObjectMapper objectMapper) {
         super(documentClient, config, objectMapper);
+        this.optionIdToValueTranslator = optionIdToValueTranslator;
     }
 
     public CaseDocument generateMiniFormA(String authorisationToken, CaseDetails caseDetails) {
@@ -39,12 +43,19 @@ public class OnlineFormDocumentService extends AbstractDocumentService {
     }
 
     public CaseDocument generateDraftContestedMiniFormA(String authorisationToken, CaseDetails caseDetails) {
-        CaseDocument caseDocument = generateDocument(authorisationToken, caseDetails,
+        CaseDocument caseDocument = generateDocument(authorisationToken, translateOptions(caseDetails),
                 config.getContestedDraftMiniFormTemplate(),
                 config.getContestedDraftMiniFormFileName());
 
         Optional.ofNullable(miniFormData(caseDetails)).ifPresent(data -> deleteOldMiniFormA(data, authorisationToken));
         return caseDocument;
+    }
+
+    private CaseDetails translateOptions(CaseDetails caseDetails) {
+        CaseDetails copy = copyOf(caseDetails);
+        optionIdToValueTranslator.translateOptionsValues.accept(copy);
+
+        return copy;
     }
 
     private Map<String, Object> miniFormData(CaseDetails caseDetails) {

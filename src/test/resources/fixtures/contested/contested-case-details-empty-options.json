@@ -57,20 +57,8 @@
     "applicantSolicitorFirm": "LinkLaw",
     "applicantSolicitorName": "Shah",
     "applicationAllocatedTo": "standardList",
-    "MIAMExemptionsChecklist": [
-      "domesticViolence",
-      "urgency",
-      "previousMIAMattendance",
-      "other"
-    ],
     "applicantSolicitorEmail": "linklaw@gmail.com",
     "applicantSolicitorPhone": "02033445566",
-    "benefitPaymentChecklist": [
-      "Step child or step children",
-      "In addition to child support maintenance already paid under a Child Support Agency assessment",
-      "To meet expenses incurred by a child being in educated or training for work",
-      "The child or the person with care of the child or the absent parent of the child is not habitually resident in the United Kingdom"
-    ],
     "fastTrackDecisionReason": [
       "reason_1",
       "reason_2"
@@ -94,7 +82,6 @@
         }
       }
     ],
-    "MIAMOtherGroundsChecklist": "FR_ms_MIAMOtherGroundsChecklist_Value_3",
     "applicantSolicitorAddress": {
       "County": "uk",
       "Country": "uk",
@@ -106,28 +93,11 @@
     },
     "detailPotentialAllegation": "no issue",
     "divorceDecreeAbsoluteDate": null,
-    "MIAMUrgencyReasonChecklist": [
-      "FR_ms_MIAMUrgencyReasonChecklist_Value_1",
-      "FR_ms_MIAMUrgencyReasonChecklist_Value_3",
-      "FR_ms_MIAMUrgencyReasonChecklist_Value_5"
-    ],
     "applicantSolicitorDXnumber": "02044556677",
     "benefitForChildrenDecision": "No",
     "paymentForChildrenDecision": "Yes",
     "addToComplexityListOfCourts": "trueYes",
-    "natureOfApplicationChecklist": [
-      "periodicalPaymentOrder",
-      "Lump Sum Order",
-      "Pension Sharing Order",
-      "Pension Attachment Order",
-      "Pension Compensation Sharing Order",
-      "Pension Compensation Attachment Order",
-      "propertyAdjustmentOrder"
-    ],
     "otherReasonForComplexityText": "some reason",
-    "potentialAllegationChecklist": [
-      "potentialAllegationChecklist_1"
-    ],
     "propertyAdjutmentOrderDetail": [
       {
         "id": "048655c8-fc79-406e-8bae-f0800137af91",
@@ -137,25 +107,6 @@
         }
       }
     ],
-    "MIAMDomesticViolenceChecklist": [
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_2",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_3",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_4",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_5",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_6",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_7",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_8",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_13",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_15",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_23",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_22",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_20",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_19",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_18",
-      "FR_ms_MIAMDomesticViolenceChecklist_Value_11"
-    ],
-    "MIAMPreviousAttendanceChecklist": "FR_ms_MIAMPreviousAttendanceChecklist_Value_3",
     "additionalPropertyOrderDecision": "Yes",
     "applicantSolicitorConsentForEmails": "Yes",
     "formCCreatedDate": "2019-05-07",

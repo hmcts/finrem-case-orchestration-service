@@ -25,29 +25,36 @@ public class OnlineFormDocumentServiceTest {
 
     private OnlineFormDocumentService service;
 
+    private OptionIdToValueTranslator translator;
+
     @Before
     public void setUp() {
         config = new DocumentConfiguration();
         config.setMiniFormTemplate("template");
         config.setMiniFormFileName("file_name");
+        translator = new OptionIdToValueTranslator("classpath:options-id-value-transform.json",
+                new ObjectMapper());
+        translator.initOptionValueMap();
     }
 
     @Test
     public void generateMiniFormA() {
-        service = new OnlineFormDocumentService(new DocumentClientStub(new CountDownLatch(1)), config, mapper);
+        service = new OnlineFormDocumentService(new DocumentClientStub(new CountDownLatch(1)),
+                config, translator, mapper);
         doCaseDocumentAssert(service.generateMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
     }
 
     @Test
     public void generateContestedMiniFormA() {
-        service = new OnlineFormDocumentService(new DocumentClientStub(new CountDownLatch(1)), config, mapper);
+        service = new OnlineFormDocumentService(new DocumentClientStub(new CountDownLatch(1)),
+                config, translator, mapper);
         doCaseDocumentAssert(service.generateContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
     }
 
     @Test
     public void generateContestedDraftMiniFormA() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(2);
-        service = new OnlineFormDocumentService(new DocumentClientStub(latch), config, mapper);
+        service = new OnlineFormDocumentService(new DocumentClientStub(latch), config, translator, mapper);
 
         CaseDocument result =
                 service.generateDraftContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().data(caseData()).build());
