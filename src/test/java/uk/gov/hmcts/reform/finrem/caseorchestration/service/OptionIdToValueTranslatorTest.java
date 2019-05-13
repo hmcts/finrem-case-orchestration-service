@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,10 +49,8 @@ public class OptionIdToValueTranslatorTest {
         new OptionIdToValueTranslator("random.json", new ObjectMapper()).initOptionValueMap();
     }
 
-    private CaseDetails caseDetailsWithEmptyOptions() throws Exception {
-        File file = new File(getClass()
-                .getResource("/fixtures/contested/contested-case-details-empty-options.json").toURI());
-        return objectMapper.readValue(file, CaseDetails.class);
+    private CaseDetails caseDetailsWithEmptyOptions()  {
+        return CaseDetails.builder().data(ImmutableMap.of()).build();
     }
 
     private CaseDetails expectedCaseDetails() throws Exception {

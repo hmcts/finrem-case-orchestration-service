@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -43,13 +44,14 @@ public class OptionIdToValueTranslator {
     }
 
     private void translateFixedListOptions(CaseDetails caseDetails) {
-        fixedListOption.optionsKeys().forEach(optionKey -> {
-            handleTranslation(caseDetails, optionKey);
-        });
+        Optional.ofNullable(caseDetails.getData()).ifPresent(caseData -> {
+            fixedListOption.optionsKeys().forEach(optionKey -> {
+                handleTranslation(caseData, optionKey);
+            });
+        } );
     }
 
-    private void handleTranslation(CaseDetails caseDetails, String optionKey) {
-        Map<String, Object> data = caseDetails.getData();
+    private void handleTranslation(Map<String, Object> data, String optionKey) {
         Object option = data.get(optionKey);
 
         if (option instanceof String) {

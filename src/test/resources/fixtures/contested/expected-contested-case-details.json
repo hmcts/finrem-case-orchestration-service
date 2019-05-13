@@ -3,109 +3,19 @@
   "jurisdiction":"divorce",
   "state":"created",
   "case_data": {
-    "issueDate": "2019-05-01",
-    "hearingDate": "2019-07-10",
-    "hearingTime": "23",
-    "courtAddress": "leicester 1",
-    "timeEstimate": "10",
-    "applicantLName": "Martin",
-    "dateOfMarriage": "2000-01-01",
-    "judgeAllocated": "districtJudge",
-    "mortgageDetail": "Names for property address 1",
-    "netValueOfHome": "10000000",
-    "rSolicitorFirm": "Golden",
-    "rSolicitorName": "mark",
-    "applicantFMName": "James",
-    "caseAllocatedTo": "standardTrack",
-    "dateOfSepration": "2019-01-01",
-    "propertyAddress": "property address 1",
-    "rSolicitorEmail": "golden@gmail.com",
-    "rSolicitorPhone": "0202222222",
-    "respondentLName": "Marshal",
-    "respondentFMName": "Sarah",
-    "divorceCaseNumber": "DD12D12345",
-    "fastTrackDecision": "Yes",
-    "judgeTimeEstimate": "standardTime",
-    "rSolicitorAddress": {
-      "County": "london",
-      "Country": "uk",
-      "PostCode": "sw1x7jj",
-      "PostTown": "london",
-      "AddressLine1": "1",
-      "AddressLine2": "",
-      "AddressLine3": ""
-    },
-    "allocatedCourtList": "nottingham",
-    "familyMediatorMIAM": "No",
-    "petitionIssuedDate": "2019-04-03",
-    "rSolicitorDXnumber": "02033333333",
-    "solicitorReference": "LinkLaw0001",
-    "divorceStageReached": "Decree Absolute",
-    "nottinghamCourtList": "FR_s_NottinghamList_2",
-    "rSolicitorReference": "golden001",
-    "reasonForLocalCourt": "some reason",
-    "allocatedCourtListGA": "nottingham",
-    "allocatedCourtListSL": "nottingham",
-    "isHeardByDeputyJudge": "Yes",
-    "promptForAnyDocument": "Yes",
-    "applicantAttendedMIAM": "No",
-    "claimingExemptionMIAM": "Yes",
-    "isApplicantsHomeCourt": "No",
-    "nottinghamCourtListGA": "FR_s_NottinghamList_3",
-    "nottinghamCourtListSL": "FR_s_NottinghamList_3",
-    "respondentRepresented": "Yes",
-    "applicantSolicitorFirm": "LinkLaw",
-    "applicantSolicitorName": "Shah",
-    "applicationAllocatedTo": "standardList",
     "MIAMExemptionsChecklist": [
       "Domestic violence",
       "Urgency",
       "Previous MIAM attendance or previous MIAM exemption",
       "Other"
     ],
-    "applicantSolicitorEmail": "linklaw@gmail.com",
-    "applicantSolicitorPhone": "02033445566",
     "benefitPaymentChecklist": [
       "For a stepchild or step children",
       "In addition to child support or maintenance already paid under a Child Support Agency assessment",
       "To meet expenses incurred by a child in relation to being educated or training for work",
       "When either the child or the person with care of the child or the absent parent of the child is not habitually resident in the United Kingdom"
     ],
-    "fastTrackDecisionReason": [
-      "reason_1",
-      "reason_2"
-    ],
-    "isApplicantsHomeCourtGA": "Yes",
-    "estimatedAssetsChecklist": [
-      "estimatedAssetsChecklist_2"
-    ],
-    "nameOfCourtDivorceCentre": "Derby",
-    "otherReasonForComplexity": "Yes",
-    "uploadAdditionalDocument": [
-      {
-        "id": "4cf37119-460e-484b-9893-45127f262ec7",
-        "value": {
-          "additionalDocuments": {
-            "document_url": "http://dm-store:8080/documents/1a87424e-7212-4d0d-8a0a-2d28cac5b272",
-            "document_filename": "sample.pdf",
-            "document_binary_url": "http://dm-store:8080/documents/1a87424e-7212-4d0d-8a0a-2d28cac5b272/binary"
-          },
-          "additionalDocumentType": "scheduleOfAssets"
-        }
-      }
-    ],
     "MIAMOtherGroundsChecklist": "The applicant is bankrupt evidenced by a bankruptcy order in respect of the prospective applicant.",
-    "applicantSolicitorAddress": {
-      "County": "uk",
-      "Country": "uk",
-      "PostCode": "sw1x7hh",
-      "PostTown": "London",
-      "AddressLine1": "16",
-      "AddressLine2": "grosvenor place",
-      "AddressLine3": ""
-    },
-    "detailPotentialAllegation": "no issue",
-    "divorceDecreeAbsoluteDate": null,
     "MIAMUrgencyReasonChecklist": [
       "There is risk to the life, liberty or physical safety of the prospective applicant or his or her family or his or her home",
       "Any delay caused by MIAM would cause significant risk of a miscarriage of justice",
@@ -113,10 +23,6 @@
       "Any delay caused by MIAM would cause irretrievable problems in dealing with the dispute (including the irretrievable loss of significant evidence)",
       "There is a significant risk that in the period necessary to schedule and attend a MIAM, proceedings relating to the dispute will be brought in another state in which a valid claim to jurisdiction may exist, such that a court in that ... cont"
     ],
-    "applicantSolicitorDXnumber": "02044556677",
-    "benefitForChildrenDecision": "No",
-    "paymentForChildrenDecision": "Yes",
-    "addToComplexityListOfCourts": "trueYes",
     "natureOfApplicationChecklist": [
       "Periodical Payment Order",
       "Lump Sum Order",
@@ -126,7 +32,6 @@
       "Pension Compensation Attachment Order",
       "Property Adjustment Order"
     ],
-    "otherReasonForComplexityText": "some reason",
     "potentialAllegationChecklist": [
       "Pre- or post-nuptial agreements",
       "Complex asset or income structures",
@@ -144,15 +49,7 @@
       "The case involves an insolvency issue",
       "Not applicable"
     ],
-    "propertyAdjutmentOrderDetail": [
-      {
-        "id": "048655c8-fc79-406e-8bae-f0800137af91",
-        "value": {
-          "propertAddress": "property address 2",
-          "nameForProperty": "names for property address 2"
-        }
-      }
-    ],
+
     "MIAMDomesticViolenceChecklist": [
       "Evidence that a prospective party has been arrested for a relevant domestic violence offence;",
       "Evidence of a relevant police caution for a domestic violence offence;",
@@ -178,8 +75,6 @@
       "Evidence which demonstrates that a prospective party has been, or is at risk of being, the victim of domestic violence by another prospective party in the form of abuse which relates to financial matters."
     ],
     "MIAMPreviousAttendanceChecklist": "In the 4 months prior to making the application, the person filed a relevant family application confirming that a MIAM exemption applied and that application related to the same or substantially the same dispute",
-    "additionalPropertyOrderDecision": "Yes",
-    "applicantSolicitorConsentForEmails": "Yes",
     "formCCreatedDate": "2019-05-07",
     "eventDatePlus21Days": "2019-05-28",
     "hearingDateLess35Days": "2019-06-05",
