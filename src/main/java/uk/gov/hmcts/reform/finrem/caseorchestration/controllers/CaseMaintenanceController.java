@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +22,7 @@ import java.util.Map;
 
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -32,6 +36,9 @@ public class CaseMaintenanceController implements BaseController {
     private static final String DIVORCE_UPLOAD_PETITION = "divorceUploadPetition";
     private static final String DIVORCE_UPLOAD_EVIDENCE_1 = "divorceUploadEvidence1";
     private static final String DIVORCE_DECREE_NISI_DATE = "divorceDecreeNisiDate";
+
+    @Autowired
+    private OnlineFormDocumentService onlineFormDocumentService;
 
     @PostMapping(path = "/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Handles update Case details and cleans up the data fields based on the options choosen")
@@ -81,6 +88,9 @@ public class CaseMaintenanceController implements BaseController {
         isApplicantsHomeCourt(caseData);
         updateContestedMiamDetails(caseData);
         cleanupAdditionalDocuments(caseData);
+        CaseDocument document = onlineFormDocumentService.generateDraftContestedMiniFormA(authToken,
+                ccdRequest.getCaseDetails());
+        caseData.put(MINI_FORM_A, document);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
