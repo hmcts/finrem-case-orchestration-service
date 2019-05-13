@@ -204,8 +204,9 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested() throws Exception {
-        when(onlineFormDocumentService.generateMiniFormA(eq(BEARER_TOKEN), isA(CaseDetails.class)))
+        when(onlineFormDocumentService.generateDraftContestedMiniFormA(eq(BEARER_TOKEN), isA(CaseDetails.class)))
                 .thenReturn(caseDocument());
+
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/amend-divorce-details-decree-nisi.json").toURI()));
         mvc.perform(post("/case-orchestration/update-contested-case")
