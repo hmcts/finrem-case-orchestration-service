@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 
 import java.io.File;
-import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -42,6 +41,11 @@ public class OptionIdToValueTranslatorTest {
         translator.translateOptionsValues.accept(actual);
 
         assertThat(actual, is(equalTo(caseDetailsWithEmptyOptions())));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void jsonFileNotFound() {
+        new OptionIdToValueTranslator("random.json", new ObjectMapper()).initOptionValueMap();
     }
 
     private CaseDetails caseDetailsWithEmptyOptions() throws Exception {
