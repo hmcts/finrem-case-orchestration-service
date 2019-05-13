@@ -282,7 +282,7 @@ public class CaseMaintenanceController implements BaseController {
             caseData.put(DIVORCE_UPLOAD_PETITION, null);
         } else {
             // remove Decree Nisi details
-            caseData.put(DIVORCE_PETITION_ISSUED_DATE, null);
+            caseData.put(DIVORCE_UPLOAD_EVIDENCE_1, null);
             caseData.put(DIVORCE_DECREE_NISI_DATE, null);
             // remove Decree Absolute date
             caseData.put(DIVORCE_UPLOAD_EVIDENCE_2, null);
