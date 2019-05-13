@@ -17,6 +17,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class CaseMaintenanceControllerTest extends BaseControllerTest {
 
     private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
+    private static final String DATA_DIVORCE_UPLOAD_EVIDENCE_1 = "$.data.divorceUploadEvidence1";
+    private static final String DATA_DIVORCE_DECREE_NISI_DATE = "$.data.divorceDecreeNisiDate";
+    private static final String DIVORCE_PETITION_ISSUED_DATE = "$.data.divorcePetitionIssuedDate";
+    private static final String DATA_DIVORCE_UPLOAD_PETITION = "$.data.divorceUploadPetition";
+    private static final String DATA_DIVORCE_UPLOAD_EVIDENCE_2 = "$.data.divorceUploadEvidence2";
+    private static final String DATA_DIVORCE_DECREE_ABSOLUTE_DATE = "$.data.divorceDecreeAbsoluteDate";
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -183,12 +189,12 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.data.divorceUploadEvidence2").doesNotExist())
-                .andExpect(jsonPath("$.data.divorceDecreeAbsoluteDate").doesNotExist())
-                .andExpect(jsonPath("$.data.divorcePetitionIssuedDate").doesNotExist())
-                .andExpect(jsonPath("$.data.divorceUploadPetition").doesNotExist())
-                .andExpect(jsonPath("$.data.divorceUploadEvidence1").exists())
-                .andExpect(jsonPath("$.data.divorceDecreeNisiDate").exists());
+                .andExpect(jsonPath(DATA_DIVORCE_UPLOAD_EVIDENCE_2).doesNotExist())
+                .andExpect(jsonPath(DATA_DIVORCE_DECREE_ABSOLUTE_DATE).doesNotExist())
+                .andExpect(jsonPath(DIVORCE_PETITION_ISSUED_DATE).doesNotExist())
+                .andExpect(jsonPath(DATA_DIVORCE_UPLOAD_PETITION).doesNotExist())
+                .andExpect(jsonPath(DATA_DIVORCE_UPLOAD_EVIDENCE_1).exists())
+                .andExpect(jsonPath(DATA_DIVORCE_DECREE_NISI_DATE).exists());
     }
 
     @Test
@@ -201,10 +207,10 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.data.divorcePetitionIssuedDate").doesNotExist())
-                .andExpect(jsonPath("$.data.divorceUploadPetition").doesNotExist())
-                .andExpect(jsonPath("$.data.divorceUploadEvidence1").doesNotExist())
-                .andExpect(jsonPath("$.data.divorceDecreeNisiDate").doesNotExist());
+                .andExpect(jsonPath(DIVORCE_PETITION_ISSUED_DATE).doesNotExist())
+                .andExpect(jsonPath(DATA_DIVORCE_UPLOAD_PETITION).doesNotExist())
+                .andExpect(jsonPath(DATA_DIVORCE_UPLOAD_EVIDENCE_1).doesNotExist())
+                .andExpect(jsonPath(DATA_DIVORCE_DECREE_NISI_DATE).doesNotExist());
     }
 
     @Test
@@ -217,12 +223,12 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.data.divorceUploadEvidence1").doesNotExist())
-                .andExpect(jsonPath("$.data.divorceDecreeNisiDate").doesNotExist())
-                .andExpect(jsonPath("$.data.divorcePetitionIssuedDate").exists())
-                .andExpect(jsonPath("$.data.divorceUploadPetition").exists())
-                .andExpect(jsonPath("$.data.divorceUploadEvidence2").doesNotExist())
-                .andExpect(jsonPath("$.data.divorceDecreeAbsoluteDate").doesNotExist());
+                .andExpect(jsonPath(DATA_DIVORCE_UPLOAD_EVIDENCE_1).doesNotExist())
+                .andExpect(jsonPath(DATA_DIVORCE_DECREE_NISI_DATE).doesNotExist())
+                .andExpect(jsonPath(DIVORCE_PETITION_ISSUED_DATE).exists())
+                .andExpect(jsonPath(DATA_DIVORCE_UPLOAD_PETITION).exists())
+                .andExpect(jsonPath(DATA_DIVORCE_UPLOAD_EVIDENCE_2).doesNotExist())
+                .andExpect(jsonPath(DATA_DIVORCE_DECREE_ABSOLUTE_DATE).doesNotExist());
     }
 
     @Test
