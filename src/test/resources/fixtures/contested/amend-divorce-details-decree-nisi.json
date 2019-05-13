@@ -75,7 +75,7 @@
         "AddressLine2": "AXON PLACE1",
         "AddressLine3": null
       },
-      "divorceDecreeAbsoluteDate": null,
+      "divorceDecreeAbsoluteDate": "2015-12-12",
       "applicantSolicitorDXnumber": "RDDD0012",
       "addToComplexityListOfCourts": "falseNo",
       "natureOfApplicationChecklist": [
