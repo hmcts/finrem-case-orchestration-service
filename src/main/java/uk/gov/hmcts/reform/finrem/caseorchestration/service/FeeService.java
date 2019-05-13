@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.PaymentClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
 
@@ -13,8 +14,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 public class FeeService {
     private final PaymentClient paymentClient;
 
-    public FeeResponse getApplicationFee() {
-        log.info("Inside getApplicationFee");
-        return paymentClient.feeLookup();
+    public FeeResponse getApplicationFee(ApplicationType applicationType) {
+        log.info("Inside getApplicationFee, applicationType = {}", applicationType);
+        return paymentClient.feeLookup(applicationType.toString());
     }
 }

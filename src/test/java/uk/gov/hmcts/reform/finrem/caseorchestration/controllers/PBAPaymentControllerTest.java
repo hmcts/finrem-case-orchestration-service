@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.fee;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler.SERVER_ERROR_MSG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 
@@ -67,7 +68,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     private void doPBASetUp(boolean success) throws Exception {
         requestContent = objectMapper.readTree(new File(getClass().getResource("/fixtures/pba-payment.json").toURI()));
 
-        when(feeService.getApplicationFee()).thenReturn(fee());
+        when(feeService.getApplicationFee(CONSENTED)).thenReturn(fee(CONSENTED));
         when(pbaPaymentService.makePayment(anyString(), anyString(), any())).thenReturn(paymentResponse(success));
     }
 
@@ -75,7 +76,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         String pbaPaymentAlreadyExists = "/fixtures/pba-payment-already-exists.json";
         requestContent = objectMapper.readTree(new File(getClass().getResource(pbaPaymentAlreadyExists).toURI()));
 
-        when(feeService.getApplicationFee()).thenReturn(fee());
+        when(feeService.getApplicationFee(CONSENTED)).thenReturn(fee(CONSENTED));
         when(pbaPaymentService.makePayment(anyString(), anyString(), any())).thenReturn(paymentResponse(true));
     }
 
@@ -83,7 +84,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/hwf.json").toURI()));
-        when(feeService.getApplicationFee()).thenReturn(fee());
+        when(feeService.getApplicationFee(CONSENTED)).thenReturn(fee(CONSENTED));
     }
 
     @Test
