@@ -77,7 +77,7 @@ public class CaseMaintenanceController implements BaseController {
     }
 
     private void cleanupAdditionalDocuments(Map<String, Object> caseData) {
-        if (equalsTo((String)caseData.get("promptForAnyDocument"), "No")) {
+        if (equalsTo((String) caseData.get("promptForAnyDocument"), "No")) {
             caseData.put("uploadAdditionalDocument", null);
         }
     }
@@ -258,14 +258,14 @@ public class CaseMaintenanceController implements BaseController {
     }
 
     private void updateDivorceDetailsForContestedCase(Map<String, Object> caseData) {
-        if (caseData.get("divorceStageReached").equals("Decree Nisi")) {
+        if (equalsTo((String) caseData.get("divorceStageReached"), "Decree Nisi")) {
             // remove Decree Absolute details
             caseData.put("divorceUploadEvidence2", null);
             caseData.put("divorceDecreeAbsoluteDate", null);
             // remove petition issue date data
             caseData.put("divorcePetitionIssuedDate", null);
             caseData.put("divorceUploadPetition", null);
-        } else if (caseData.get("divorceStageReached").equals("Decree Absolute")) {
+        } else if (equalsTo((String) caseData.get("divorceStageReached"), "Decree Absolute")) {
             // remove Decree Nisi details
             caseData.put("divorceUploadEvidence1", null);
             caseData.put("divorceDecreeNisiDate", null);
@@ -357,7 +357,7 @@ public class CaseMaintenanceController implements BaseController {
 
 
     private boolean equalsTo(String fieldData, String value) {
-        return nonNull(fieldData) && value.equalsIgnoreCase(fieldData);
+        return nonNull(fieldData) && value.equalsIgnoreCase(fieldData.trim());
     }
 
     private boolean hasNotSelected(List<String> list, String option) {
