@@ -64,7 +64,7 @@ public class CaseMaintenanceController implements BaseController {
         log.info("Received request for contested - updateCase ");
         validateCaseData(ccdRequest);
         Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
-        updateDivorceDetails(caseData);
+        updateDivorceDetailsForContestedCase(caseData);
         updateContestedRespondentDetails(caseData);
         updateContestedPeriodicPaymentOrder(caseData);
         updateContestedPropertyAdjustmentOrder(caseData);
@@ -72,7 +72,14 @@ public class CaseMaintenanceController implements BaseController {
         updateContestedComplexityDetails(caseData);
         isApplicantsHomeCourt(caseData);
         updateContestedMiamDetails(caseData);
+        cleanupAdditionalDocuments(caseData);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    private void cleanupAdditionalDocuments(Map<String, Object> caseData) {
+        if (equalsTo((String)caseData.get("promptForAnyDocument"), "No")) {
+            caseData.put("uploadAdditionalDocument", null);
+        }
     }
 
     private void updateContestedFastTrackProcedureDetail(Map<String, Object> caseData) {
@@ -247,6 +254,31 @@ public class CaseMaintenanceController implements BaseController {
             // remove Decree Nisi details
             caseData.put("divorceUploadEvidence1", null);
             caseData.put("divorceDecreeNisiDate", null);
+        }
+    }
+
+    private void updateDivorceDetailsForContestedCase(Map<String, Object> caseData) {
+        if (caseData.get("divorceStageReached").equals("Decree Nisi")) {
+            // remove Decree Absolute details
+            caseData.put("divorceUploadEvidence2", null);
+            caseData.put("divorceDecreeAbsoluteDate", null);
+            // remove petition issue date data
+            caseData.put("divorcePetitionIssuedDate", null);
+            caseData.put("divorceUploadPetition", null);
+        } else if (caseData.get("divorceStageReached").equals("Decree Absolute")) {
+            // remove Decree Nisi details
+            caseData.put("divorceUploadEvidence1", null);
+            caseData.put("divorceDecreeNisiDate", null);
+            // remove petition issue date data
+            caseData.put("divorcePetitionIssuedDate", null);
+            caseData.put("divorceUploadPetition", null);
+        } else {
+            // remove Decree Nisi details
+            caseData.put("divorceUploadEvidence1", null);
+            caseData.put("divorceDecreeNisiDate", null);
+            // remove Decree Absolute date
+            caseData.put("divorceUploadEvidence2", null);
+            caseData.put("divorceDecreeAbsoluteDate", null);
         }
     }
 

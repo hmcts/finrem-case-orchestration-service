@@ -52,7 +52,7 @@
       },
       "promptForAnyDocument": "No",
       "applicantAttendedMIAM": "Yes",
-      "divorceDecreeNisiDate": null,
+      "divorceDecreeNisiDate": "2015-12-12",
       "isApplicantsHomeCourt": "Yes",
       "respondentRepresented": "Yes",
       "applicantSolicitorFirm": "Padmaja firm0012",
@@ -62,7 +62,11 @@
         "document_filename": "Decree Absolute.doc",
         "document_binary_url": "http://dm-store:8080/documents/5b063b62-6ad2-4f9c-80ad-e4e69e5d98a8/binary"
       },
-      "divorceUploadEvidence1": null,
+      "divorceUploadEvidence1": {
+        "document_url": "http://dm-store:8080/documents/5b063b62-6ad2-4f9c-80ad-e4e69e5d98a8",
+        "document_filename": "Decree Nisi.doc",
+        "document_binary_url": "http://dm-store:8080/documents/5b063b62-6ad2-4f9c-80ad-e4e69e5d98a8/binary"
+      },
       "applicantSolicitorEmail": "padmaja.ramisetti001@gmail.com",
       "applicantSolicitorPhone": "07411201631",
       "nameOfCourtDivorceCentre": "Divorce1",
@@ -75,7 +79,7 @@
         "AddressLine2": "AXON PLACE1",
         "AddressLine3": null
       },
-      "divorceDecreeAbsoluteDate": null,
+      "divorceDecreeAbsoluteDate": "2015-12-12",
       "applicantSolicitorDXnumber": "RDDD0012",
       "addToComplexityListOfCourts": "falseNo",
       "natureOfApplicationChecklist": [

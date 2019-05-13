@@ -174,7 +174,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
 
 
     @Test
-    public void shouldDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested() throws Exception {
+    public void shouldDeleteNDecreeAbsoluteWhenSolicitorChooseToDecreeNisiForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/amend-divorce-details-decree-nisi.json").toURI()));
         mvc.perform(post("/case-orchestration/update-contested-case")
@@ -184,11 +184,15 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.divorceUploadEvidence2").doesNotExist())
-                .andExpect(jsonPath("$.data.divorceDecreeAbsoluteDate").doesNotExist());
+                .andExpect(jsonPath("$.data.divorceDecreeAbsoluteDate").doesNotExist())
+                .andExpect(jsonPath("$.data.divorcePetitionIssuedDate").doesNotExist())
+                .andExpect(jsonPath("$.data.divorceUploadPetition").doesNotExist())
+                .andExpect(jsonPath("$.data.divorceUploadEvidence1").exists())
+                .andExpect(jsonPath("$.data.divorceDecreeNisiDate").exists());
     }
 
     @Test
-    public void shouldDeleteDecreeAbsoluteWhenSolicitorChooseToDecreeNisiForContested() throws Exception {
+    public void shouldDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/amend-divorce-details-decree-absolute.json").toURI()));
         mvc.perform(post("/case-orchestration/update-contested-case")
@@ -197,8 +201,28 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
+                .andExpect(jsonPath("$.data.divorcePetitionIssuedDate").doesNotExist())
+                .andExpect(jsonPath("$.data.divorceUploadPetition").doesNotExist())
                 .andExpect(jsonPath("$.data.divorceUploadEvidence1").doesNotExist())
                 .andExpect(jsonPath("$.data.divorceDecreeNisiDate").doesNotExist());
+    }
+
+    @Test
+    public void shouldDeleteDecreeAbsoluteWhenSolicitorChooseToPetitionIssuedForContested() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/contested/amend-divorce-details-petition-issued.json").toURI()));
+        mvc.perform(post("/case-orchestration/update-contested-case")
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.divorceUploadEvidence1").doesNotExist())
+                .andExpect(jsonPath("$.data.divorceDecreeNisiDate").doesNotExist())
+                .andExpect(jsonPath("$.data.divorcePetitionIssuedDate").exists())
+                .andExpect(jsonPath("$.data.divorceUploadPetition").exists())
+                .andExpect(jsonPath("$.data.divorceUploadEvidence2").doesNotExist())
+                .andExpect(jsonPath("$.data.divorceDecreeAbsoluteDate").doesNotExist());
     }
 
     @Test
@@ -583,4 +607,36 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.mediatorRegistrationNumber").exists())
                 .andExpect(jsonPath("$.data.mediatorRegistrationNumber1").doesNotExist());
     }
+
+    @Test
+    public void shouldCleanupAdditionalDocumentsForContested() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/contested/"
+                        + "cleanup-addtional-documents.json").toURI()));
+        mvc.perform(post("/case-orchestration/update-contested-case")
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.promptForAnyDocument").exists())
+                .andExpect(jsonPath("$.data.uploadAdditionalDocument").doesNotExist());
+    }
+
+    @Test
+    public void shouldNotCleanupAdditionalDocumentsForContested() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/contested/"
+                        + "remove-property-adjustment-order-details.json").toURI()));
+        mvc.perform(post("/case-orchestration/update-contested-case")
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.promptForAnyDocument").exists())
+                .andExpect(jsonPath("$.data.uploadAdditionalDocument").exists());
+    }
+
+
 }
