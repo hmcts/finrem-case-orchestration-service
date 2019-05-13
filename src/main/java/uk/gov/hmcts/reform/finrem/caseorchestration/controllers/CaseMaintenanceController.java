@@ -25,6 +25,14 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Slf4j
 public class CaseMaintenanceController implements BaseController {
 
+    private static final String DIVORCE_STAGE_REACHED = "divorceStageReached";
+    private static final String DIVORCE_UPLOAD_EVIDENCE_2 = "divorceUploadEvidence2";
+    private static final String DIVORCE_DECREE_ABSOLUTE_DATE = "divorceDecreeAbsoluteDate";
+    private static final String DIVORCE_PETITION_ISSUED_DATE = "divorcePetitionIssuedDate";
+    private static final String DIVORCE_UPLOAD_PETITION = "divorceUploadPetition";
+    private static final String DIVORCE_UPLOAD_EVIDENCE_1 = "divorceUploadEvidence1";
+    private static final String DIVORCE_DECREE_NISI_DATE = "divorceDecreeNisiDate";
+
     @PostMapping(path = "/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Handles update Case details and cleans up the data fields based on the options choosen")
     @ApiResponses(value = {
@@ -246,39 +254,39 @@ public class CaseMaintenanceController implements BaseController {
 
 
     private void updateDivorceDetails(Map<String, Object> caseData) {
-        if (caseData.get("divorceStageReached").equals("Decree Nisi")) {
+        if (caseData.get(DIVORCE_STAGE_REACHED).equals("Decree Nisi")) {
             // remove Decree Absolute details
-            caseData.put("divorceUploadEvidence2", null);
-            caseData.put("divorceDecreeAbsoluteDate", null);
+            caseData.put(DIVORCE_UPLOAD_EVIDENCE_2, null);
+            caseData.put(DIVORCE_DECREE_ABSOLUTE_DATE, null);
         } else {
             // remove Decree Nisi details
-            caseData.put("divorceUploadEvidence1", null);
-            caseData.put("divorceDecreeNisiDate", null);
+            caseData.put(DIVORCE_UPLOAD_EVIDENCE_1, null);
+            caseData.put(DIVORCE_DECREE_NISI_DATE, null);
         }
     }
 
     private void updateDivorceDetailsForContestedCase(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("divorceStageReached"), "Decree Nisi")) {
+        if (equalsTo((String) caseData.get(DIVORCE_STAGE_REACHED), "Decree Nisi")) {
             // remove Decree Absolute details
-            caseData.put("divorceUploadEvidence2", null);
-            caseData.put("divorceDecreeAbsoluteDate", null);
+            caseData.put(DIVORCE_UPLOAD_EVIDENCE_2, null);
+            caseData.put(DIVORCE_DECREE_ABSOLUTE_DATE, null);
             // remove petition issue date data
-            caseData.put("divorcePetitionIssuedDate", null);
-            caseData.put("divorceUploadPetition", null);
-        } else if (equalsTo((String) caseData.get("divorceStageReached"), "Decree Absolute")) {
+            caseData.put(DIVORCE_PETITION_ISSUED_DATE, null);
+            caseData.put(DIVORCE_UPLOAD_PETITION, null);
+        } else if (equalsTo((String) caseData.get(DIVORCE_STAGE_REACHED), "Decree Absolute")) {
             // remove Decree Nisi details
-            caseData.put("divorceUploadEvidence1", null);
-            caseData.put("divorceDecreeNisiDate", null);
+            caseData.put(DIVORCE_UPLOAD_EVIDENCE_1, null);
+            caseData.put(DIVORCE_DECREE_NISI_DATE, null);
             // remove petition issue date data
-            caseData.put("divorcePetitionIssuedDate", null);
-            caseData.put("divorceUploadPetition", null);
+            caseData.put(DIVORCE_PETITION_ISSUED_DATE, null);
+            caseData.put(DIVORCE_UPLOAD_PETITION, null);
         } else {
             // remove Decree Nisi details
-            caseData.put("divorceUploadEvidence1", null);
-            caseData.put("divorceDecreeNisiDate", null);
+            caseData.put(DIVORCE_PETITION_ISSUED_DATE, null);
+            caseData.put(DIVORCE_DECREE_NISI_DATE, null);
             // remove Decree Absolute date
-            caseData.put("divorceUploadEvidence2", null);
-            caseData.put("divorceDecreeAbsoluteDate", null);
+            caseData.put(DIVORCE_UPLOAD_EVIDENCE_2, null);
+            caseData.put(DIVORCE_DECREE_ABSOLUTE_DATE, null);
         }
     }
 
