@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,7 +54,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus
 @Category(IntegrationTest.class)
 public class PBAPaymentTest {
     private static final String PBA_PAYMENT_URL = "/case-orchestration/pba-payment";
-    private static final String FEE_LOOKUP_URL = "/payments/fee-lookup";
+    private static final String FEE_LOOKUP_URL = "/payments/fee-lookup\\?application-type=consented";
     private static final String PBA_URL = "/payments/pba-payment";
     private static final String AUTH_TOKEN = "eeeeeeyyy.eeee";
     private static final String FEE_RESPONSE = "{\n"
@@ -174,7 +175,7 @@ public class PBAPaymentTest {
     }
 
     private void stubFeeLookUp() {
-        stubFor(get(FEE_LOOKUP_URL)
+        stubFor(get(urlMatching(FEE_LOOKUP_URL))
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(CONTENT_TYPE, javax.ws.rs.core.MediaType.APPLICATION_JSON)

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
@@ -24,7 +25,8 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_PAYMENT_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_REFERENCE;
 
 @RestController
@@ -43,9 +45,13 @@ public class FeeLookupController implements BaseController {
         log.info("Received request for FEE lookup. Auth token: {}, Case request : {}", authToken, callbackRequest);
 
         validateCaseData(callbackRequest);
-        FeeResponse feeResponse = feeService.getApplicationFee();
 
         Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
+
+        ApplicationType applicationType = isConsentedApplication(mapOfCaseData) ? CONSENTED : CONTESTED;
+
+        FeeResponse feeResponse = feeService.getApplicationFee(applicationType);
+
         FeeCaseData feeResponseData = FeeCaseData.builder().build();
         updateCaseWithFee(mapOfCaseData, feeResponseData, feeResponse);
         ObjectMapper objectMapper = new ObjectMapper();
