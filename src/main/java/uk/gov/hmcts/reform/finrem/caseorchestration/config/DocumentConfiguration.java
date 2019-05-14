@@ -22,6 +22,6 @@ public class DocumentConfiguration {
     private String formGFileName;
     private String contestedMiniFormTemplate;
     private String contestedMiniFormFileName;
-    public String  contestedDraftMiniFormTemplate;
-    public String  contestedDraftMiniFormFileName;
+    private String contestedDraftMiniFormTemplate;
+    private String contestedDraftMiniFormFileName;
 }
