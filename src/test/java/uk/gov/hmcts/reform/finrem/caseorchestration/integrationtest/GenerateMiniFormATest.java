@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
+import java.io.IOException;
 import java.util.Collections;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -68,5 +69,17 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
                 .fileName(documentConfiguration.getMiniFormFileName())
                 .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
                 .build();
+    }
+
+    protected CaseDetails copyWithOptionValueTranslation(CaseDetails caseDetails) {
+        try {
+            CaseDetails deepCopy = objectMapper
+                    .readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
+
+            optionIdToValueTranslator.translateFixedListOptions(deepCopy);
+            return deepCopy;
+        } catch (IOException e) {
+            throw new IllegalStateException();
+        }
     }
 }
