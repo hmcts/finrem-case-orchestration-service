@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FixedListOption;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -52,7 +53,7 @@ public class OptionIdToValueTranslator {
     }
 
 
-    public void translateFixedListOptions(CaseDetails caseDetails) {
+    private void translateFixedListOptions(CaseDetails caseDetails) {
         Optional.ofNullable(caseDetails.getData()).ifPresent(caseData -> {
             fixedListOption.optionsKeys().forEach(optionKey -> {
                 handleTranslation(caseData, optionKey);

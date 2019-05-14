@@ -37,7 +37,7 @@ public class OnlineFormDocumentService extends AbstractDocumentService {
     }
 
     public CaseDocument generateContestedMiniFormA(String authorisationToken, CaseDetails caseDetails) {
-        return generateDocument(authorisationToken, translateOptions(caseDetails),
+        return generateDocument(authorisationToken, caseDetails,
                 config.getContestedMiniFormTemplate(),
                 config.getContestedMiniFormFileName());
     }
@@ -59,7 +59,8 @@ public class OnlineFormDocumentService extends AbstractDocumentService {
     }
 
     private Map<String, Object> miniFormData(CaseDetails caseDetails) {
-        return (Map<String, Object>) caseDetails.getData().get(MINI_FORM_A);
+        Map<String, Object> caseData = caseDetails.getData();
+        return (Map<String, Object>) caseData.get(MINI_FORM_A);
     }
 
     private void deleteOldMiniFormA(Map<String, Object> documentData, String authorisationToken) {

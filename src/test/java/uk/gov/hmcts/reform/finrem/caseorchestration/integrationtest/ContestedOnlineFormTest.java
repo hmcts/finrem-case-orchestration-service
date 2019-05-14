@@ -13,7 +13,7 @@ public class ContestedOnlineFormTest extends GenerateMiniFormATest {
 
     @Override
     protected String getTestFixture() {
-        return "/fixtures/contested/generate-contested-form-A.json";
+        return "/fixtures/contested/validate-hearing-with-fastTrackDecision.json";
     }
 
     @Override
@@ -21,8 +21,7 @@ public class ContestedOnlineFormTest extends GenerateMiniFormATest {
         return DocumentRequest.builder()
                 .template(documentConfiguration.getContestedMiniFormTemplate())
                 .fileName(documentConfiguration.getContestedMiniFormFileName())
-                .values(Collections.singletonMap("caseDetails",
-                        copyWithOptionValueTranslation(request.getCaseDetails())))
+                .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
                 .build();
     }
 }

@@ -127,25 +127,7 @@
         "document_url": "http://doc1",
         "document_filename": "doc1",
         "document_binary_url": "http://doc1.binary"
-      },
-      "MIAMDomesticViolenceChecklist":[
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_2",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_3",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_4",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_5",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_6",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_7",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_8",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_13",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_15",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_23",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_22",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_20",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_19",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_18",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_11"
-      ]
+      }
     }
   }
 }
