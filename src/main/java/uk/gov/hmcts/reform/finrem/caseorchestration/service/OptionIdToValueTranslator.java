@@ -1,20 +1,24 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FixedListOption;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Component
 public class OptionIdToValueTranslator {
@@ -36,12 +40,18 @@ public class OptionIdToValueTranslator {
     @PostConstruct
     void initOptionValueMap() {
         try {
-            File file = ResourceUtils.getFile(optionsJsonFile);
-            fixedListOption = objectMapper.readValue(file, FixedListOption.class);
+            fixedListOption = objectMapper.readValue(optionsJson(), FixedListOption.class);
         } catch (Exception error) {
             throw new IllegalStateException(String.format("error reading %s", optionsJsonFile), error);
         }
     }
+
+    private String optionsJson() throws IOException {
+        try (InputStream inputStream = getClass().getResourceAsStream(optionsJsonFile)) {
+            return IOUtils.toString(inputStream, UTF_8);
+        }
+    }
+
 
     private void translateFixedListOptions(CaseDetails caseDetails) {
         Optional.ofNullable(caseDetails.getData()).ifPresent(caseData -> {

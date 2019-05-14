@@ -32,7 +32,7 @@ public class OnlineFormDocumentServiceTest {
         config = new DocumentConfiguration();
         config.setMiniFormTemplate("template");
         config.setMiniFormFileName("file_name");
-        translator = new OptionIdToValueTranslator("classpath:options-id-value-transform.json",
+        translator = new OptionIdToValueTranslator("/options/options-id-value-transform.json",
                 new ObjectMapper());
         translator.initOptionValueMap();
     }
