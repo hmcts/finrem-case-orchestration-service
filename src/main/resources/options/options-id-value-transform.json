@@ -1,0 +1,93 @@
+{
+
+  "MIAMExemptionsChecklist": {
+    "domesticViolence": "Domestic violence",
+    "urgency": "Urgency",
+    "previousMIAMattendance": "Previous MIAM attendance or previous MIAM exemption",
+    "other": "Other"
+  },
+  "MIAMDomesticViolenceChecklist": {
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_1": "Evidence that a prospective party has been arrested for a relevant domestic violence offence;",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_2": "Evidence of a relevant police caution for a domestic violence offence;",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_3": "Evidence of relevant criminal proceedings for a domestic violence offence which have not concluded;",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_4": "Evidence of a relevant conviction for a domestic violence offence;",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_5": "A court order binding a prospective party over in connection with a domestic violence offence;",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_6": "A domestic violence protection notice issued under section 24 of the Crime and Security Act 2010 against a prospective party;",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_7": "A relevant protective injunction;",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_8": "An undertaking given in England and Wales under section 46 or 63E of the Family Law Act 1996 (or given in Scotland or Northern Ireland in place of a protective injunction) by a prospective party, provided that a cross-undertaking relating; cont...",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_9": "A copy of a finding of fact, made in proceedings in the United Kingdom, that there has been domestic violence by a prospective party;",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_10": "An expert report produced as evidence in proceedings in the United Kingdom for the benefit of a court or tribunal confirming that a person with whom a prospective party is or was in a family relationship, was assessed as being, or cont....",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_11": "A letter or report from an appropriate health professional confirming that-\n(i) that professional, or another appropriate health professional, has examined a prospective party in person; and\n(ii) in the reasonable professional judgment cont…",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_12": "A letter or report from-\n(i) the appropriate health professional who made the referral described below; \n(ii) an appropriate health professional who has access to the medical records of the prospective party referred to below; or cont..",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_13": "A letter from any person who is a member of a multi-agency risk assessment conference (or other suitable local safeguarding forum) confirming that a prospective party, or a person with whom that prospective party is in",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_14": "A family relationship, is or has been at risk of harm from domestic violence by another prospective party;",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_15": "A letter from an independent domestic violence advisor confirming that they are providing support to a prospective party;",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_16": "A letter from an independent sexual violence advisor confirming that they are providing support to a prospective party relating to sexual violence by another prospective party;",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_17": "A letter from an officer employed by a local authority or housing association (or their equivalent in Scotland or Northern Ireland) for the purpose of supporting tenants containing- \n(i) a statement to the effect that,  cont …",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_18": "A letter which- \n(i) is from an organization providing domestic violence support services, or a registered charity, which letter confirms that it- \n(a) is situated in England and Wales, \n(b) has been operating for an uninterrupted cont....",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_19": "A letter or report from an organisation providing domestic violence support services in the United Kingdom confirming- \n(i) that a person with whom a prospective party is or was in a family relationship was refused admission to a refuge; cont",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_20": "A letter from a public authority confirming that a person with whom a prospective party is or was in a family relationship, was assessed as being, or at risk of being, a victim of domestic violence by that prospective party cont…",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_21": "A letter from the Secretary of State for the Home Department confirming that a prospective party has been granted leave to remain in the United Kingdom under paragraph 289B of the Rules made by the Home Secretary under section 3(2) cont..",
+    "FR_ms_MIAMDomesticViolenceChecklist_Value_22": "Evidence which demonstrates that a prospective party has been, or is at risk of being, the victim of domestic violence by another prospective party in the form of abuse which relates to financial matters."
+  },
+  "MIAMUrgencyReasonChecklist": {
+    "FR_ms_MIAMUrgencyReasonChecklist_Value_1": "There is risk to the life, liberty or physical safety of the prospective applicant or his or her family or his or her home",
+    "FR_ms_MIAMUrgencyReasonChecklist_Value_2": "Any delay caused by MIAM would cause significant risk of a miscarriage of justice",
+    "FR_ms_MIAMUrgencyReasonChecklist_Value_3": "Any delay caused by MIAM would cause unreasonable hardship to the prospective applicant",
+    "FR_ms_MIAMUrgencyReasonChecklist_Value_4": "Any delay caused by MIAM would cause irretrievable problems in dealing with the dispute (including the irretrievable loss of significant evidence)",
+    "FR_ms_MIAMUrgencyReasonChecklist_Value_5": "There is a significant risk that in the period necessary to schedule and attend a MIAM, proceedings relating to the dispute will be brought in another state in which a valid claim to jurisdiction may exist, such that a court in that ... cont"
+  },
+  "MIAMPreviousAttendanceChecklist": {
+    "FR_ms_MIAMPreviousAttendanceChecklist_Value_1": "In the 4 months prior to making the application, the person attended a MIAM or participated in another form of non-court dispute resolution relating to the same or substantially the same dispute",
+    "FR_ms_MIAMPreviousAttendanceChecklist_Value_2": "At the time of making the application, the person is participating in another form of non-court dispute resolution relating to the same or substantially the same dispute",
+    "FR_ms_MIAMPreviousAttendanceChecklist_Value_3": "In the 4 months prior to making the application, the person filed a relevant family application confirming that a MIAM exemption applied and that application related to the same or substantially the same dispute",
+    "FR_ms_MIAMPreviousAttendanceChecklist_Value_4": "The application would be made in existing proceedings which are continuing and the prospective applicant attended a MIAM before initiating those proceedings",
+    "FR_ms_MIAMPreviousAttendanceChecklist_Value_5": "The application would be made in existing proceedings which are continuing and a MIAM exemption applied to the application for those proceedings"
+  },
+  "MIAMOtherGroundsChecklist": {
+    "FR_ms_MIAMOtherGroundsChecklist_Value_1": "The applicant is bankrupt evidenced by an application by the prospective applicant for a bankruptcy order;",
+    "FR_ms_MIAMOtherGroundsChecklist_Value_2": "The applicant is bankrupt evidenced by a petition by a creditor of the prospective applicant for a bankruptcy order",
+    "FR_ms_MIAMOtherGroundsChecklist_Value_3": "The applicant is bankrupt evidenced by a bankruptcy order in respect of the prospective applicant.",
+    "FR_ms_MIAMOtherGroundsChecklist_Value_4": "The prospective applicant does not have sufficient contact details for any of the prospective respondents to enable a family mediator to contact any of the prospective respondents for the purpose of scheduling the MIAM.",
+    "FR_ms_MIAMOtherGroundsChecklist_Value_5": "The application would be made without notice (Paragraph 5.1 of Practice Direction 18A sets out the circumstances in which applications may be made without notice.)",
+    "FR_ms_MIAMOtherGroundsChecklist_Value_6": "(i) the prospective applicant is or all of the prospective respondents are subject to a disability or other inability that would prevent attendance at a MIAM unless appropriate facilities can be offered by an authorised mediator;  .....cont",
+    "FR_ms_MIAMOtherGroundsChecklist_Value_7": "The prospective applicant or all of the prospective respondents cannot attend a MIAM because he or she is, or they are, as the case may be (i) in prison or any other institution in which he or she is or they are required to be detained; ... cont",
+    "FR_ms_MIAMOtherGroundsChecklist_Value_8": "The prospective applicant or all of the prospective respondents are not habitually resident in England and Wales.",
+    "FR_ms_MIAMOtherGroundsChecklist_Value_9": "A child is one of the prospective parties by virtue of Rule 12.3(1).",
+    "FR_ms_MIAMOtherGroundsChecklist_Value_10": "(i) the prospective applicant has contacted as many authorised family mediators as have an office within fifteen miles of his or her home (or three of them if there are three or more), and all of them have stated that they are not available ...cont",
+    "FR_ms_MIAMOtherGroundsChecklist_Value_11": "There is no authorised family mediator with an office within fifteen miles of the prospective applicant’s home."
+  },
+  "natureOfApplicationChecklist": {
+    "periodicalPaymentOrder": "Periodical Payment Order",
+    "Lump Sum Order": "Lump Sum Order",
+    "Pension Sharing Order": "Pension Sharing Order",
+    "Pension Attachment Order": "Pension Attachment Order",
+    "Pension Compensation Sharing Order": "Pension Compensation Sharing Order",
+    "Pension Compensation Attachment Order": "Pension Compensation Attachment Order",
+    "propertyAdjustmentOrder": "Property Adjustment Order"
+  },
+  "benefitPaymentChecklist": {
+    "Step child or step children": "For a stepchild or step children",
+    "In addition to child support maintenance already paid under a Child Support Agency assessment": "In addition to child support or maintenance already paid under a Child Support Agency assessment",
+    "To meet expenses arising from a child’s disability": "To meet expenses arising from a child’s disability",
+    "To meet expenses incurred by a child being in educated or training for work": "To meet expenses incurred by a child in relation to being educated or training for work",
+    "The child or the person with care of the child or the absent parent of the child is not habitually resident in the United Kingdom": "When either the child or the person with care of the child or the absent parent of the child is not habitually resident in the United Kingdom"
+  },
+  "potentialAllegationChecklist": {
+    "potentialAllegationChecklist_1": "Pre- or post-nuptial agreements",
+    "potentialAllegationChecklist_2": "Complex asset or income structures",
+    "potentialAllegationChecklist_3": "Assets are / were held through the medium of trusts / settlements/ family/ unquoted corporate entities or otherwise held offshore or overseas",
+    "potentialAllegationChecklist_4": "The value of family assets, trust and/or corporate entities",
+    "potentialAllegationChecklist_5": "Non-disclosure of assets",
+    "potentialAllegationChecklist_6": "Expert accountancy evidence will be required",
+    "potentialAllegationChecklist_7": "There are substantial arguments concerning the illiquidity of assets",
+    "potentialAllegationChecklist_8": "There may be substantial arguments about which assets are “matrimonial assets” or “non-matrimonial assets”",
+    "potentialAllegationChecklist_9": "There may be substantial arguments about the parties’ respective contributions",
+    "potentialAllegationChecklist_10": "There are/may be disputed allegations of “obvious and gross” conduct",
+    "potentialAllegationChecklist_11": "The case involves an application under Schedule 1 Children Act 1989",
+    "potentialAllegationChecklist_12": "The application involves a complex or novel legal argument",
+    "potentialAllegationChecklist_13": "There is likely to be a need for the involvement of Intervenors",
+    "potentialAllegationChecklist_14": "The case involves an insolvency issue",
+    "notApplicable": "Not applicable"
+  }
+}

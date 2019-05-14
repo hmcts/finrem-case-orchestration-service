@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 
 import javax.ws.rs.core.MediaType;
@@ -21,6 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.fee;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONTESTED;
 
 @WebMvcTest(FeeLookupController.class)
 public class FeeLookupControllerTest extends BaseControllerTest {
@@ -31,12 +33,14 @@ public class FeeLookupControllerTest extends BaseControllerTest {
     @MockBean
     private FeeService feeService;
 
-    private void doFeeLookupSetUp() throws IOException, URISyntaxException {
+    private void doFeeLookupSetUp(ApplicationType applicationType) throws IOException, URISyntaxException {
+        String fileName = applicationType == CONSENTED
+                ? "/fixtures/fee-lookup.json" : "/fixtures/contested/fee-lookup.json";
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/fee-lookup.json").toURI()));
+                .getResource(fileName).toURI()));
 
-        when(feeService.getApplicationFee()).thenReturn(fee());
+        when(feeService.getApplicationFee(applicationType)).thenReturn(fee(applicationType));
     }
 
 
@@ -52,8 +56,8 @@ public class FeeLookupControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldDoFeeLookup() throws Exception {
-        doFeeLookupSetUp();
+    public void shouldDoConsentedFeeLookup() throws Exception {
+        doFeeLookupSetUp(CONSENTED);
         mvc.perform(post(FEE_LOOKUP_URL)
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
@@ -64,6 +68,24 @@ public class FeeLookupControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
                 .andExpect(jsonPath("$.data.amountToPay", is("1000")))
+                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+    }
+
+
+    @Test
+    public void shouldDoContestedFeeLookup() throws Exception {
+        doFeeLookupSetUp(CONTESTED);
+        mvc.perform(post(FEE_LOOKUP_URL)
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
+                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("25500")))
+                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
+                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
+                .andExpect(jsonPath("$.data.amountToPay", is("25500")))
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }

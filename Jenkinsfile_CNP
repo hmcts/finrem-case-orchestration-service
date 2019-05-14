@@ -23,9 +23,9 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 withPipeline(type, product, app) {
-    loadVaultSecrets(secrets)
     enableDockerBuild()
-    enableDeployToAKS()
+    installCharts()
+    loadVaultSecrets(secrets)
     setVaultName(product)
 
     after('functionalTest:aat') {
@@ -54,5 +54,5 @@ withPipeline(type, product, app) {
     before('buildinfra:prod') {
         error('Halting pipeline before PROD.')
     }
-    
+
 }

@@ -5,121 +5,108 @@
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_data": {
-      "PBANumber": "PBA123",
-      "d81Question": "No",
-      "PBAreference": "ABCD",
-      "consentOrder": {
-        "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
-      },
-      "d81Applicant": {
-        "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b/binary"
-      },
-      "d81Respondent": {
-        "document_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
-      },
-      "solicitorFirm": "Mr",
-      "solicitorName": "Solictor",
-      "applicantLName": "Guy",
-      "authorisation3": "2010-01-01",
-      "solicitorEmail": "test@admin.com",
-      "solicitorPhone": "9963472494",
-      "applicantFMName": "Poor",
-      "authorisation2b": "test",
-      "otherCollection": [
-        {
-          "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
-          "value": {
-            "typeOfDocument": "ScheduleOfAssets",
-            "uploadedDocument": {
-              "document_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee",
-              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-              "document_binary_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee/binary"
-            }
-          }
-        }
-      ],
-      "respondentEmail": null,
-      "respondentPhone": "9963472494",
-      "appRespondentRep": "No",
-      "consentOrderText": {
-        "document_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
-      },
-      "solicitorAddress": {
-        "County": "test",
-        "Country": "United Kingdom",
-        "PostCode": "b1 1ab",
-        "PostTown": "SRIKALAHASTI",
-        "AddressLine1": "House no: 6-354-2, Gandhi Street",
-        "AddressLine2": "Srikalahasti, Chittor District",
-        "AddressLine3": "test"
-      },
-      "authorisationFirm": "test",
-      "authorisationName": "test",
-      "divorceCaseNumber": "DD12D12345",
-      "pensionCollection": [
-        {
-          "id": "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",
-          "value": {
-            "typeOfDocument": "Form P2",
-            "uploadedDocument": {
-              "document_url": "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589",
-              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-              "document_binary_url": "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589/binary"
-            }
-          }
-        }
-      ],
-      "respondentAddress": {
-        "County": "Essex",
-        "Country": "United Kingdom",
-        "PostCode": "SE12 9SE",
-        "PostTown": "London",
-        "AddressLine1": "252 Marvels Lane",
-        "AddressLine2": "AddressGlobalUK",
-        "AddressLine3": "London"
-      },
-      "solicitorDXnumber": null,
-      "appRespondentLName": "Korivi",
-      "solicitorReference": "LL01",
-      "appRespondentFMName": "test",
-      "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
-      "natureOfApplication2": [
-        "Lump Sum Order",
-        "Periodical Payment Order",
-        "Pension Sharing Order",
-        "Pension Attachment Order",
-        "Pension Compensation Sharing Order",
-        "Pension Compensation Attachment Order",
-        "A settlement or a transfer of property",
-        "Property Adjustment  Order"
-      ],
-      "natureOfApplication5": "No",
-      "natureOfApplication6": [
-        "Step Child or Step Children",
-        "disability expenses",
-        "In addition to child support",
-        "training",
-        "When not habitually resident"
-      ],
-      "natureOfApplication7": "test",
-      "natureOfApplication3a": "test",
-      "natureOfApplication3b": "test",
-      "divorceUploadEvidence1": {
-        "document_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
+      "applicantLName":"Guy",
+      "dateOfMarriage":"1111-01-01",
+      "mortgageDetail":"test",
+      "netValueOfHome":"dfdf",
+      "applicantFMName":"Poor",
+      "dateOfSepration":"1111-01-01",
+      "propertyAddress":"test",
+      "respondentEmail":null,
+      "respondentLName":"test",
+      "respondentPhone":null,
+      "respondentFMName":"test",
+      "divorceCaseNumber":"DD12D12345",
+      "fastTrackDecision":"Yes",
+      "respondentAddress":{
+        "County":"",
+        "Country":"",
+        "PostCode":"",
+        "PostTown":"SRIKALAHASTI",
+        "AddressLine1":"House no: 6-354-2, Gandhi Street, Srikalahasti, Chittor District",
+        "AddressLine2":"Srikalahasti, Chittor District",
+        "AddressLine3":""
       },
-      "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "No"
+      "allocatedCourtList":"nottingham",
+      "familyMediatorMIAM":"Yes",
+      "petitionIssuedDate":"1111-01-01",
+      "solicitorReference":"LL01",
+      "divorceStageReached":"Decree Nisi",
+      "nottinghamCourtList":"FR_s_NottinghamList_2",
+      "reasonForLocalCourt":"dfff",
+      "uploadScanned4AForm":{
+        "document_url":"http://dm-store:8080/documents/728daa26-507e-4c53-8c5b-a86d14d7aa82",
+        "document_filename":"Test Document 1.doc",
+        "document_binary_url":"http://dm-store:8080/documents/728daa26-507e-4c53-8c5b-a86d14d7aa82/binary"
+      },
+      "promptForAnyDocument":"No",
+      "applicantAttendedMIAM":"No",
+      "claimingExemptionMIAM":"Yes",
+      "divorceDecreeNisiDate":"1111-01-01",
+      "isApplicantsHomeCourt":"No",
+      "respondentRepresented":"No",
+      "applicantSolicitorFirm":"test firm",
+      "applicantSolicitorName":"Test",
+      "divorceUploadEvidence1":{
+        "document_url":"http://dm-store:8080/documents/f406f22d-ed3b-4aba-beda-88e008b61301",
+        "document_filename":"Test Document 1.doc",
+        "document_binary_url":"http://dm-store:8080/documents/f406f22d-ed3b-4aba-beda-88e008b61301/binary"
+      },
+      "applicantSolicitorEmail":"test@admin.com",
+      "applicantSolicitorPhone":"9963472494",
+      "benefitPaymentChecklist":[
+        "Step child or step children",
+        "In addition to child support maintenance already paid under a Child Support Agency assessment",
+        "To meet expenses arising from a child’s disability",
+        "To meet expenses incurred by a child being in educated or training for work",
+        "The child or the person with care of the child or the absent parent of the child is not habitually resident in the United Kingdom"
+      ],
+      "fastTrackDecisionReason":[
+        "reason_1",
+        "reason_2",
+        "reason_3"
+      ],
+      "estimatedAssetsChecklist":[
+        "estimatedAssetsChecklist_1",
+        "estimatedAssetsChecklist_2",
+        "estimatedAssetsChecklist_3",
+        "estimatedAssetsChecklist_4"
+      ],
+      "nameOfCourtDivorceCentre":"test",
+      "otherReasonForComplexity":"Yes",
+      "applicantSolicitorAddress":{
+        "County":"",
+        "Country":"United Kingdom",
+        "PostCode":"SE12 9SE",
+        "PostTown":"London",
+        "AddressLine1":"250 Marvels Lane",
+        "AddressLine2":"Srikalahasti, Chittor District",
+        "AddressLine3":""
+      },
+      "detailPotentialAllegation":"sfsffsd",
+      "applicantSolicitorDXnumber":null,
+      "benefitForChildrenDecision":"No",
+      "paymentForChildrenDecision":"Yes",
+      "addToComplexityListOfCourts":"trueDontKnow",
+      "natureOfApplicationChecklist":[
+        "periodicalPaymentOrder",
+        "propertyAdjustmentOrder",
+        "Pension Compensation Attachment Order",
+        "Pension Compensation Sharing Order",
+        "Pension Attachment Order",
+        "Pension Sharing Order",
+        "Lump Sum Order"
+      ],
+      "otherReasonForComplexityText":"sdff",
+      "potentialAllegationChecklist":[
+        "potentialAllegationChecklist_1",
+        "potentialAllegationChecklist_2",
+        "potentialAllegationChecklist_3",
+        "notApplicable"
+      ],
+      "additionalPropertyOrderDecision":"No",
+      "applicantSolicitorConsentForEmails":"No"
     }
   }
 }
