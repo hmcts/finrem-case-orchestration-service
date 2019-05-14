@@ -123,11 +123,16 @@
       },
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "No",
-      "miniFormA": {
-        "document_url": "http://doc1",
-        "document_filename": "doc1",
-        "document_binary_url": "http://doc1.binary"
-      },
+      "caseAllocatedTo": "Yes",
+      "natureOfApplicationChecklist":[
+        "periodicalPaymentOrder",
+        "Lump Sum Order",
+        "Pension Sharing Order",
+        "Pension Attachment Order",
+        "Pension Compensation Sharing Order",
+        "Pension Compensation Attachment Order",
+        "propertyAdjustmentOrder"
+      ],
       "MIAMDomesticViolenceChecklist":[
         "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_2",

@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OptionIdToValueTranslator;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,6 +63,9 @@ public abstract class AbstractDocumentTest {
 
     @Autowired
     protected DocumentConfiguration documentConfiguration;
+
+    @Autowired
+    protected OptionIdToValueTranslator optionIdToValueTranslator;
 
     @ClassRule
     public static WireMockClassRule documentGeneratorService = new WireMockClassRule(4009);
