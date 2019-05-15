@@ -26,6 +26,9 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private static String DIVORCE_CASENO_HEARING = "DD12D12345";
     private static String SOLICITOR_REF_HEARING = "LL01";
     private static String HEARING_JSON = "validate-hearing-with-hearingdate.json";
+    private String contestedDir = "/json/contested/";
+    private String consentedDir = "/json/consented/";
+
 
     private String url1;
     private JsonPath jsonPathEvaluator;
@@ -52,13 +55,19 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void verifyDocumentGenerationShouldReturnOkResponseCode() {
-        validatePostSuccess(MINIFORMA_JSON,generatorUrl);
+        validatePostSuccess(MINIFORMA_JSON,generatorUrl,consentedDir);
     }
 
     @Test
     public void verifyRejectedOrderDocumentGenerationShouldReturnOkResponseCode() {
-        validatePostSuccess(GENERALORDER_JSON,documentRejectedOrderUrl);
+        validatePostSuccess(GENERALORDER_JSON,documentRejectedOrderUrl,consentedDir);
     }
+
+    @Test
+    public void verifyContestedDocumentGenerationShouldReturnOkResponseCode() {
+        validatePostSuccess(MINIFORMA_JSON,generateContestedUrl,consentedDir);
+    }
+
 
     @Test
     public void verifyDocumentGenerationPostResponseContent() {
@@ -129,13 +138,13 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
 
-    private void validatePostSuccess(String jsonFileName,String url) {
+    private void validatePostSuccess(String jsonFileName,String url, String journeyType) {
 
         System.out.println("url " + url);
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())
-                .body(utils.getJsonFromFile(jsonFileName))
+                .body(utils.getJsonFromFile(jsonFileName, journeyType ))
                 .when().post(url)
                 .then()
                 .assertThat().statusCode(200);
