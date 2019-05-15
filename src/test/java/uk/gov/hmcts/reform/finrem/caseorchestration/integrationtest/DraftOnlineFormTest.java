@@ -23,7 +23,8 @@ public class DraftOnlineFormTest extends GenerateMiniFormATest {
         return DocumentRequest.builder()
                 .template(documentConfiguration.getContestedDraftMiniFormTemplate())
                 .fileName(documentConfiguration.getContestedDraftMiniFormFileName())
-                .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+                .values(Collections.singletonMap("caseDetails",
+                        copyWithOptionValueTranslation(request.getCaseDetails())))
                 .build();
     }
 
