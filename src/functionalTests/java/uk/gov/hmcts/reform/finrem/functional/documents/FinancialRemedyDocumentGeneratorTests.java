@@ -72,7 +72,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyDocumentGenerationPostResponseContent() {
 
-        JsonPath jsonPathEvaluator = generateDocument(MINIFORMA_JSON,generatorUrl);
+        JsonPath jsonPathEvaluator = generateDocument(MINIFORMA_JSON,generatorUrl,consentedDir);
 
         assertTrue(jsonPathEvaluator.get("data.state.").toString()
                 .equalsIgnoreCase("applicationIssued"));
@@ -81,7 +81,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyRejectedOrderDocumentGenerationPostResponseContent() {
 
-        JsonPath jsonPathEvaluator = generateDocument(GENERALORDER_JSON,documentRejectedOrderUrl);
+        JsonPath jsonPathEvaluator = generateDocument(GENERALORDER_JSON,documentRejectedOrderUrl,consentedDir);
 
         assertTrue(jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentType").toString()
                 .equalsIgnoreCase("generalOrder"));
@@ -91,7 +91,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyRejectedOrderGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERALORDER_JSON,documentRejectedOrderUrl,
-                "document","generalOrder");
+                "document","generalOrder", consentedDir);
 
         validatePostSuccessForaccessingGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -104,7 +104,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_JSON,generatorUrl,"document","miniForma");
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_JSON,generatorUrl,"document","miniForma",consentedDir);
 
         validatePostSuccessForaccessingGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -117,7 +117,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void downloadDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_JSON,generatorUrl,"binary","miniForma");
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_JSON,generatorUrl,"binary","miniForma",consentedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
         assertTrue(documentContent.contains(SOLICITOR_FIRM));
@@ -132,7 +132,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadRejectOrderDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERALORDER_JSON,documentRejectedOrderUrl,
-                "binary","generalOrder");
+                "binary","generalOrder",consentedDir);
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
         assertTrue(documentContent.contains("Approved by:  District Judge test3"));
     }
@@ -151,22 +151,22 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
 
-    private JsonPath generateDocument(String jsonFileName, String url) {
+    private JsonPath generateDocument(String jsonFileName, String url, String journeyType) {
 
         Response jsonResponse = SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())
-                .body(utils.getJsonFromFile(jsonFileName))
+                .body(utils.getJsonFromFile(jsonFileName,journeyType))
                 .when().post(url).andReturn();
         return jsonResponse.jsonPath();
     }
 
 
-    private String getDocumentUrlOrDocumentBinaryUrl(String jsonFile,String url ,String urlType,String documentType) {
+    private String getDocumentUrlOrDocumentBinaryUrl(String jsonFile,String url ,String urlType,String documentType, String journeyType) {
 
         switch (documentType) {
             case "miniForma":
-                jsonPathEvaluator = generateDocument(jsonFile, url);
+                jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
                 if (urlType.equals("document")) {
                     url1 = jsonPathEvaluator.get("data.miniFormA.document_url");
                 } else if (urlType.equals("binary")) {
@@ -174,7 +174,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 }
                 break;
             case "generalOrder":
-                jsonPathEvaluator = generateDocument(jsonFile, url);
+                jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
                 if (urlType.equals("document")) {
 
                     url1 = jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentLink.document_url");
@@ -183,7 +183,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 }
                 break;
             default :
-                jsonPathEvaluator = generateDocument(jsonFile, url);
+                jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
                 break;
         }
 
