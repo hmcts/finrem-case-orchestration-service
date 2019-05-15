@@ -19,9 +19,9 @@ public class MigrationTests extends IntegrationTestBase {
     @Value("${migration.api}")
     private String migrationUrl;
 
-    private static String CCD_MIGRATE_JSON = "ccd-migrate-request.json";
-    private static String CCD_MIGRATE_DONT_JSON = "ccd-migrate-dont-request.json";
-    private static String CCD_MIGRATE_DONT_JSON_NOAMOUNT_NOHWF = "ccd-migrate-dont-request.json";
+    private static String CCD_MIGRATE_JSON = "ccd-migrate-request1.json";
+    private static String CCD_MIGRATE_DONT_JSON = "ccd-migrate-dont-request1.json";
+    private static String CCD_MIGRATE_DONT_JSON_NOAMOUNT_NOHWF = "ccd-migrate-dont-request1.json";
 
     @Test
     public void verifyMigrationIsDone() {

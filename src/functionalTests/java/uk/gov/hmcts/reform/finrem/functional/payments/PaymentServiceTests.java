@@ -58,7 +58,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Test
     public void verifyGetFeeLoopUpTest() {
 
-        validatePostSuccess(feeLookup, "fee-lookup.json");
+        validatePostSuccess(feeLookup, "fee-lookup1.json");
     }
 
     @Test
@@ -110,7 +110,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeader())
                 .contentType("application/json")
-                .body(utils.getJsonFromFile("pba-validate.json"))
+                .body(utils.getJsonFromFile("pba-validate1.json"))
                 .when().post(pbaValidate)
                 .then()
                 .assertThat().statusCode(200);
@@ -118,7 +118,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePBAConfirmationForHWF() {
 
-        Response response = getPBAPaymentResponse(pbaConfirmation, "hwfPayment.json");
+        Response response = getPBAPaymentResponse(pbaConfirmation, "hwfPayment1.json");
 
         int statusCode = response.getStatusCode();
 
@@ -133,7 +133,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePBAConfirmationForPBAPayment() {
 
-        Response response = getPBAPaymentResponse(pbaConfirmation, "pba-payment.json");
+        Response response = getPBAPaymentResponse(pbaConfirmation, "pba-payment1.json");
 
         int statusCode = response.getStatusCode();
 
@@ -148,7 +148,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validateFailurePBAPayment(String url) {
 
-        Response response = getPBAPaymentResponse(url, "FailurePaymentRequestPayload.json");
+        Response response = getPBAPaymentResponse(url, "FailurePaymentRequestPayload1.json");
 
         int statusCode = response.getStatusCode();
 
@@ -166,7 +166,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     private void validatePostSuccessForPBAPayment(String url) {
-        Response response = getPBAPaymentResponse(url, "SuccessPaymentRequestPayload.json");
+        Response response = getPBAPaymentResponse(url, "SuccessPaymentRequestPayload1.json");
 
         int statusCode = response.getStatusCode();
 

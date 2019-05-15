@@ -29,7 +29,7 @@ public class NotificationTests extends IntegrationTestBase {
     @Test
     public void verifyNotifyAssignToJudgeTestIsOkay() {
 
-        validatePostSuccessForNotification(notifyAssignToJudge, "ccd-request-with-solicitor-assignedToJudge.json");
+        validatePostSuccessForNotification(notifyAssignToJudge, "ccd-request-with-solicitor-assignedToJudge1.json");
 
     }
 
@@ -38,7 +38,7 @@ public class NotificationTests extends IntegrationTestBase {
     public void verifyNotifyConsentOrderAvailableTestIsOkay() {
 
         validatePostSuccessForNotification(consentOrderAvailable,
-                "ccd-request-with-solicitor-consentOrderAvailable.json");
+                "ccd-request-with-solicitor-consentOrderAvailable1.json");
 
     }
 
@@ -46,7 +46,7 @@ public class NotificationTests extends IntegrationTestBase {
     @Test
     public void verifyNotifyConsentOrderMadeTestIsOkay() {
 
-        validatePostSuccessForNotification(consentOrderMade, "ccd-request-with-solicitor-consentOrderMade.json");
+        validatePostSuccessForNotification(consentOrderMade, "ccd-request-with-solicitor-consentOrderMade1.json");
 
     }
 
@@ -55,14 +55,14 @@ public class NotificationTests extends IntegrationTestBase {
     public void verifyNotifyConsentOrderNotApprovedTestIsOkay() {
 
         validatePostSuccessForNotification(consentOrderNotApproved,
-                "ccd-request-with-solicitor-consentOrderNotApproved.json");
+                "ccd-request-with-solicitor-consentOrderNotApproved1.json");
 
     }
 
     @Test
     public void verifyNotifyHwfSuccessfulTestIsOkay() {
 
-        validatePostSuccessForNotification(hwfSuccessfulApiUri, "ccd-request-with-solicitor-hwfSuccessfulEmail.json");
+        validatePostSuccessForNotification(hwfSuccessfulApiUri, "ccd-request-with-solicitor-hwfSuccessfulEmail1.json");
 
     }
 

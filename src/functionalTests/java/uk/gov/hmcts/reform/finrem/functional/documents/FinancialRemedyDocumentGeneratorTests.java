@@ -20,8 +20,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private static String APPLICANT_NAME = "Williams";
     private static String DIVORCE_CASENO = "DD12D12345";
     private static String SOLICITOR_REF = "JAW052018";
-    private static String MINIFORMA_JSON = "documentGeneratePayload.json";
-    private static String GENERALORDER_JSON = "document-rejected-order.json";
+    private static String MINIFORMA_JSON = "documentGeneratePayload1.json";
+    private static String GENERALORDER_JSON = "document-rejected-order1.json";
     private String url1;
     private JsonPath jsonPathEvaluator;
     @Value("${idam.s2s-auth.microservice}")
