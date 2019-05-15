@@ -40,7 +40,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         }
     }
 
-
     @Test
     public void verifyamendDivorceDetailsD81Joint() {
         validatePostSuccess(amendCaseDetailsUrl,consentedDir,"amend-divorce-details-d81-joint.json");

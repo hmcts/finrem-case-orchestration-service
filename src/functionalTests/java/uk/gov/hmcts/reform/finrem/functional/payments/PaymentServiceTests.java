@@ -30,6 +30,9 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Value("${cos.payment.pba.api}")
     private String pbaPayment;
 
+    @Value("${cos.contested.payment.pba.api}")
+    private String pbaContestedPayment;
+
     @Value("${cos.pba.account.active}")
     private String pbaAccountActive;
 
@@ -53,43 +56,65 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
 
     private HashMap<String, String> pbaAccounts = new HashMap<>();
+    private String contestedDir = "/json/contested/";
+    private String consentedDir = "/json/consented/";
+
 
 
     @Test
     public void verifyGetFeeLoopUpTest() {
 
-        validatePostSuccess(feeLookup, "fee-lookup1.json");
+        validatePostSuccess(feeLookup, "fee-lookup.json");
     }
 
     @Test
     public void verifyPBAValidationTest() {
 
-        validatePostSuccessForPBAValidation(pbaValidate);
+        validatePostSuccessForPBAValidation(pbaValidate, "pba-validate.json" ,consentedDir );
     }
 
     @Test
-    public void verifyPBAPaymentSuccessTest() {
+    public void verifyPBAPaymentSuccessTestConsented() {
 
-        validatePostSuccessForPBAPayment(pbaPayment);
+        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload.json" , consentedDir);
+    }
+
+    @Test
+    public void verifyPBAPaymentSuccessTestContested() {
+
+        validatePostSuccessForPBAPayment(pbaContestedPayment, "SuccessPaymentRequestPayload.json" , contestedDir);
     }
 
     @Test
     public void verifyPBAPaymentFailureTest() {
-        validateFailurePBAPayment(pbaPayment);
+        validateFailurePBAPayment(pbaPayment, "FailurePaymentRequestPayload.json" , consentedDir);
 
     }
 
     @Test
-    public void verifyPBAConfirmationForHWF() {
-        validatePBAConfirmationForHWF();
+    public void verifyPBAConfirmationForHWFConsented() {
+        validatePBAConfirmationForHWF(pbaConfirmation, "hwfPayment.json", consentedDir);
 
     }
 
     @Test
-    public void verifyPBAConfirmationForPBAPayment() {
+    public void verifyPBAConfirmationForPBAPaymentConsented() {
 
-        validatePBAConfirmationForPBAPayment();
+        validatePBAConfirmationForPBAPayment(pbaConfirmation, "pba-payment.json", consentedDir);
     }
+
+    @Test
+    public void verifyPBAConfirmationForHWFContested() {
+        validatePBAConfirmationForHWF(pbaConfirmation, "hwfPayment.json", contestedDir);
+
+    }
+
+    @Test
+    public void verifyPBAConfirmationForPBAPaymentContested() {
+
+        validatePBAConfirmationForPBAPayment(pbaConfirmation, "pba-payment.json", contestedDir);
+    }
+
 
     private void validatePostSuccess(String url, String jsonFileName) {
 
@@ -104,21 +129,21 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
 
-    public void validatePostSuccessForPBAValidation(String url) {
+    public void validatePostSuccessForPBAValidation(String url, String fileName , String journeyType) {
 
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeader())
                 .contentType("application/json")
-                .body(utils.getJsonFromFile("pba-validate1.json"))
+                .body(utils.getJsonFromFile("pba-validate.json"))
                 .when().post(pbaValidate)
                 .then()
                 .assertThat().statusCode(200);
     }
 
-    private void validatePBAConfirmationForHWF() {
+    private void validatePBAConfirmationForHWF(String url, String fileName, String journeyType) {
 
-        Response response = getPBAPaymentResponse(pbaConfirmation, "hwfPayment1.json");
+        Response response = getPBAPaymentResponse(url, fileName , journeyType);
 
         int statusCode = response.getStatusCode();
 
@@ -131,9 +156,9 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     }
 
-    private void validatePBAConfirmationForPBAPayment() {
+    private void validatePBAConfirmationForPBAPayment(String url, String fileName, String journeyType) {
 
-        Response response = getPBAPaymentResponse(pbaConfirmation, "pba-payment1.json");
+        Response response = getPBAPaymentResponse(url, fileName, journeyType);
 
         int statusCode = response.getStatusCode();
 
@@ -146,9 +171,9 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     }
 
-    private void validateFailurePBAPayment(String url) {
+    private void validateFailurePBAPayment(String url, String fileName, String journeyType) {
 
-        Response response = getPBAPaymentResponse(url, "FailurePaymentRequestPayload1.json");
+        Response response = getPBAPaymentResponse(url, fileName , journeyType);
 
         int statusCode = response.getStatusCode();
 
@@ -165,8 +190,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     }
 
-    private void validatePostSuccessForPBAPayment(String url) {
-        Response response = getPBAPaymentResponse(url, "SuccessPaymentRequestPayload1.json");
+    private void validatePostSuccessForPBAPayment(String url, String fileName, String journeyType) {
+        Response response = getPBAPaymentResponse(url, fileName, journeyType);
 
         int statusCode = response.getStatusCode();
 
@@ -174,18 +199,25 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         assertEquals(statusCode, 200);
 
-        assertTrue(jsonPathEvaluator.get("state").toString()
-                .equalsIgnoreCase("applicationSubmitted"));
+        if ( journeyType == consentedDir) {
+            assertTrue(jsonPathEvaluator.get("state").toString()
+                    .equalsIgnoreCase("applicationSubmitted"));
+        }
+        else
+        {
+            assertTrue(jsonPathEvaluator.get("state").toString()
+                    .equalsIgnoreCase("gateKeepingAndAllocation"));
+        }
     }
 
 
-    private Response getPBAPaymentResponse(String url, String payload) {
+    private Response getPBAPaymentResponse(String url, String filename, String journeyType) {
 
         return SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeader())
                 .contentType("application/json")
-                .body(utils.getJsonFromFile(payload))
+                .body(utils.getJsonFromFile(filename))
                 .when().post(url)
                 .andReturn();
     }
