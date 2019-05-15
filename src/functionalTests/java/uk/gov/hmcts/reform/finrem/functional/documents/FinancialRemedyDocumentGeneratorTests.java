@@ -126,7 +126,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyContestedDraftDocumentGenerationPostResponseContent() {
 
-        JsonPath jsonPathEvaluator = generateDocument(MINIFORMA_CONTESTED_JSON, generateContestedDraftUrl, contestedDir);
+        JsonPath jsonPathEvaluator = generateDocument(MINIFORMA_CONTESTED_JSON,
+                generateContestedDraftUrl, contestedDir);
         System.out.println("response Content " + jsonPathEvaluator.prettyPrint());
         assertNull(jsonPathEvaluator.get("data.state."));
     }
@@ -167,7 +168,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_JSON, generatorUrl, "document", "miniForma", consentedDir);
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_JSON, generatorUrl,
+                "document", "miniForma", consentedDir);
 
         validatePostSuccessForaccessingGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -179,7 +181,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyGeneratedContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_CONTESTED_JSON, generateContestedUrl, "document", "miniForma", contestedDir);
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_CONTESTED_JSON, generateContestedUrl,
+                "document", "miniForma", contestedDir);
 
         validatePostSuccessForaccessingGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -192,7 +195,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyGeneratedFormCContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORMC_JSON, generateHearingUrl, "document", "hearing", contestedDir);
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORMC_JSON,
+                generateHearingUrl, "document", "hearing", contestedDir);
 
         validatePostSuccessForaccessingGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -205,7 +209,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyGeneratedFormGContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORMG_JSON, generateHearingUrl, "document", "hearing", contestedDir);
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORMG_JSON, generateHearingUrl,
+                "document", "hearing", contestedDir);
 
         validatePostSuccessForaccessingGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -218,7 +223,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void downloadDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_JSON, generatorUrl, "binary", "miniForma", consentedDir);
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_JSON, generatorUrl,
+                "binary", "miniForma", consentedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
         assertTrue(documentContent.contains(SOLICITOR_FIRM));
@@ -241,7 +247,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void downloadContestedDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_CONTESTED_JSON, generateContestedUrl, "binary", "miniForma", contestedDir);
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINIFORMA_CONTESTED_JSON, generateContestedUrl,
+                "binary", "miniForma", contestedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
         assertTrue(documentContent.contains(SOLICITOR_FIRM));
@@ -255,7 +262,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void downloadContestedFormCDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORMC_JSON, generateHearingUrl, "binary", "hearing", contestedDir);
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORMC_JSON, generateHearingUrl,
+                "binary", "hearing", contestedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
@@ -270,7 +278,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void downloadContestedFormGDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
-        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORMG_JSON, generateHearingUrl, "binary", "hearing", contestedDir);
+        String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORMG_JSON, generateHearingUrl,
+                "binary", "hearing", contestedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
@@ -307,7 +316,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
 
-    private String getDocumentUrlOrDocumentBinaryUrl(String jsonFile, String url, String urlType, String documentType, String journeyType) {
+    private String getDocumentUrlOrDocumentBinaryUrl(String jsonFile, String url,
+                                                     String urlType, String documentType, String journeyType) {
 
         switch (documentType) {
             case "miniForma":
