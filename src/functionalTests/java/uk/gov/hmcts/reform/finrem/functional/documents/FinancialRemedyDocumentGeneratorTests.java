@@ -22,6 +22,11 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private static String SOLICITOR_REF = "JAW052018";
     private static String MINIFORMA_JSON = "documentGeneratePayload1.json";
     private static String GENERALORDER_JSON = "document-rejected-order1.json";
+    private static String APPLICANT_NAME_HEARING = "Applicant Contested";
+    private static String DIVORCE_CASENO_HEARING = "DD12D12345";
+    private static String SOLICITOR_REF_HEARING = "LL01";
+    private static String HEARING_JSON = "validate-hearing-with-hearingdate.json";
+
     private String url1;
     private JsonPath jsonPathEvaluator;
     @Value("${idam.s2s-auth.microservice}")
