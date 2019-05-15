@@ -460,7 +460,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
     public void shouldRemoveMiamExceptionsWhenApplicantAttendedMiamForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/remove-exceptions-when-applicant-attended-miam.json").toURI()));
-        mvc.perform(post("/case-orchestration/update-contested-case")
+        mvc.perform(post("/case-orchestration/update-miam-details")
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -481,7 +481,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/"
                         + "update-miam-exceptions-when-applicant-not-claiming-exemption.json").toURI()));
-        mvc.perform(post("/case-orchestration/update-contested-case")
+        mvc.perform(post("/case-orchestration/update-miam-details")
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -502,7 +502,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/"
                         + "update-miam-exceptions-when-applicant-attended-family-mediator.json").toURI()));
-        mvc.perform(post("/case-orchestration/update-contested-case")
+        mvc.perform(post("/case-orchestration/update-miam-details")
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -521,7 +521,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/"
                         + "remove-domestic-violence-checklist.json").toURI()));
-        mvc.perform(post("/case-orchestration/update-contested-case")
+        mvc.perform(post("/case-orchestration/update-miam-details")
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -540,7 +540,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/"
                         + "remove-urgency-checklist.json").toURI()));
-        mvc.perform(post("/case-orchestration/update-contested-case")
+        mvc.perform(post("/case-orchestration/update-miam-details")
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -559,7 +559,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/"
                         + "remove-previousMiamAttendance-checklist.json").toURI()));
-        mvc.perform(post("/case-orchestration/update-contested-case")
+        mvc.perform(post("/case-orchestration/update-miam-details")
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -578,7 +578,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/"
                         + "remove-other-checklist.json").toURI()));
-        mvc.perform(post("/case-orchestration/update-contested-case")
+        mvc.perform(post("/case-orchestration/update-miam-details")
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -597,7 +597,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/"
                         + "do-not-remove-checklists.json").toURI()));
-        mvc.perform(post("/case-orchestration/update-contested-case")
+        mvc.perform(post("/case-orchestration/update-miam-details")
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -615,7 +615,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/"
                         + "remove-miam-certification-details.json").toURI()));
-        mvc.perform(post("/case-orchestration/update-contested-case")
+        mvc.perform(post("/case-orchestration/update-miam-details")
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -634,7 +634,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/"
                         + "cleanup-miam-certification-details-when-applicant-attended-miam.json").toURI()));
-        mvc.perform(post("/case-orchestration/update-contested-case")
+        mvc.perform(post("/case-orchestration/update-miam-details")
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))

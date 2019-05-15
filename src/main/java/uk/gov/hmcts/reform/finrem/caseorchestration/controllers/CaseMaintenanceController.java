@@ -94,6 +94,26 @@ public class CaseMaintenanceController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
+    @PostMapping(path = "/update-miam-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Handles update Contested Case MIAM details and cleans up the data fields"
+            + " based on the options choosen")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
+                    + "attached to the case",
+                    response = AboutToStartOrSubmitCallbackResponse.class),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateContestedCaseMiamDetails(
+            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestBody CallbackRequest ccdRequest) {
+
+        log.info("Received request for contested - updateContestedCaseMiamDetails ");
+        validateCaseData(ccdRequest);
+        Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
+        updateContestedMiamDetails(caseData);
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
     private void cleanupAdditionalDocuments(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("promptForAnyDocument"), "No")) {
             caseData.put("uploadAdditionalDocument", null);
