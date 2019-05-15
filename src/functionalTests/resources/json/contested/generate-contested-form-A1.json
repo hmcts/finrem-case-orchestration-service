@@ -23,13 +23,13 @@
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
         "document_binary_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
       },
-      "solicitorFirm": "Mr",
-      "solicitorName": "Solictor",
+      "solicitorFirm": "Michael Jones & Partners",
+      "solicitorName": "Jane Smith",
       "applicantLName": "Guy",
       "authorisation3": "2010-01-01",
       "solicitorEmail": "test@admin.com",
       "solicitorPhone": "9963472494",
-      "applicantFMName": "Poor",
+      "applicantFMName": "Williams",
       "authorisation2b": "test",
       "otherCollection": [
         {
@@ -91,7 +91,7 @@
       },
       "solicitorDXnumber": null,
       "appRespondentLName": "Korivi",
-      "solicitorReference": "LL01",
+      "solicitorReference": "JAW052018",
       "appRespondentFMName": "test",
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
