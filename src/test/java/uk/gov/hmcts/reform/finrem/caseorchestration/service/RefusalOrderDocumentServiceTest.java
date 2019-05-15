@@ -6,7 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocu
 
 public class RefusalOrderDocumentServiceTest {
 
-    private DocumentGeneratorClient generatorClient;
+    private DocumentClient generatorClient;
     private DocumentConfiguration config;
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -50,7 +50,7 @@ public class RefusalOrderDocumentServiceTest {
         document.setFileName(FILE_NAME);
         document.setUrl(DOC_URL);
 
-        generatorClient = Mockito.mock(DocumentGeneratorClient.class);
+        generatorClient = Mockito.mock(DocumentClient.class);
         when(generatorClient.generatePDF(isA(DocumentRequest.class), eq(AUTH_TOKEN))).thenReturn(document);
 
         service = new RefusalOrderDocumentService(generatorClient, config, mapper);

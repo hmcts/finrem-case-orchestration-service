@@ -6,45 +6,27 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentGeneratorClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.UnaryOperator;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addFastTrackFields;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
 
 @Service
 public class HearingDocumentService extends AbstractDocumentService {
 
-    private UnaryOperator<CaseDetails> addFastTrackFields = caseDetails -> {
-        Map<String, Object> data = caseDetails.getData();
-        data.put("formCCreatedDate", new Date());
-        data.put("eventDatePlus21Days", asDate(LocalDate.now().plusDays(21)));
-
-        return caseDetails;
-    };
-
-    private UnaryOperator<CaseDetails> addNonFastTrackFields = caseDetails -> {
-        Map<String, Object> data = caseDetails.getData();
-        data.put("formCCreatedDate", new Date());
-        data.put("hearingDateLess35Days", asDate(LocalDate.now().minusDays(35)));
-        data.put("hearingDateLess14Days", asDate(LocalDate.now().minusDays(14)));
-
-        return caseDetails;
-    };
-
     @Autowired
-    public HearingDocumentService(DocumentGeneratorClient documentGeneratorClient,
+    public HearingDocumentService(DocumentClient documentClient,
                                   DocumentConfiguration config,
                                   ObjectMapper objectMapper) {
-        super(documentGeneratorClient, config, objectMapper);
+        super(documentClient, config, objectMapper);
     }
 
     public Map<String, Object> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
@@ -84,13 +66,6 @@ public class HearingDocumentService extends AbstractDocumentService {
     }
 
     private boolean isFastTrackApplication(Pair<CaseDetails, String> pair) {
-        Map<String, Object> caseData = pair.getLeft().getData();
-        String fastTrackDecision = (String) caseData.get("fastTrackDecision");
-
-        return fastTrackDecision.toLowerCase().equals("yes");
-    }
-
-    private static Date asDate(LocalDate localDate) {
-        return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        return isFastTrackApplication.apply(pair.getLeft().getData());
     }
 }

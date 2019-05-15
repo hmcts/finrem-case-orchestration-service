@@ -23,14 +23,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OptionIdToValueTranslator;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -49,6 +52,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 public abstract class AbstractDocumentTest {
 
     private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generatePDF";
+    private static final String TEMP_URL = "http://doc1";
+    private static final String DELETE_DOCUMENT_CONTEXT_PATH = "/version/1/delete-pdf-document";
 
     @Autowired
     protected ObjectMapper objectMapper;
@@ -58,6 +63,9 @@ public abstract class AbstractDocumentTest {
 
     @Autowired
     protected DocumentConfiguration documentConfiguration;
+
+    @Autowired
+    protected OptionIdToValueTranslator optionIdToValueTranslator;
 
     @ClassRule
     public static WireMockClassRule documentGeneratorService = new WireMockClassRule(4009);
@@ -91,7 +99,7 @@ public abstract class AbstractDocumentTest {
                 .andExpect(status().isInternalServerError());
     }
 
-    protected void generateDocumentServiceSuccessStub() throws JsonProcessingException {
+    void generateDocumentServiceSuccessStub() throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
                 .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest()), true, true))
                 .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
@@ -100,6 +108,13 @@ public abstract class AbstractDocumentTest {
                         .withStatus(HttpStatus.OK.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
                         .withBody(objectMapper.writeValueAsString(document()))));
+    }
+
+    void deleteDocumentServiceStubWith(HttpStatus status) {
+        documentGeneratorService.stubFor(
+                delete(urlMatching(DELETE_DOCUMENT_CONTEXT_PATH.concat("\\?fileUrl=").concat(TEMP_URL)))
+                        .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+                        .willReturn(aResponse().withStatus(status.value())));
     }
 
     private void generateDocumentServiceErrorStub() throws JsonProcessingException {

@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.fee;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler.SERVER_ERROR_MSG;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 
@@ -64,18 +65,26 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .andExpect(content().string(is(SERVER_ERROR_MSG)));
     }
 
-    private void doPaymentPBASetUp(boolean success) throws Exception {
+    private void doPBASetUp(boolean success) throws Exception {
         requestContent = objectMapper.readTree(new File(getClass().getResource("/fixtures/pba-payment.json").toURI()));
 
-        when(feeService.getApplicationFee()).thenReturn(fee());
+        when(feeService.getApplicationFee(CONSENTED)).thenReturn(fee(CONSENTED));
         when(pbaPaymentService.makePayment(anyString(), anyString(), any())).thenReturn(paymentResponse(success));
+    }
+
+    private void doPBAPaymentReferenceAlreadyExistsSetup() throws Exception {
+        String pbaPaymentAlreadyExists = "/fixtures/pba-payment-already-exists.json";
+        requestContent = objectMapper.readTree(new File(getClass().getResource(pbaPaymentAlreadyExists).toURI()));
+
+        when(feeService.getApplicationFee(CONSENTED)).thenReturn(fee(CONSENTED));
+        when(pbaPaymentService.makePayment(anyString(), anyString(), any())).thenReturn(paymentResponse(true));
     }
 
     private void doHWFSetUp() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/hwf.json").toURI()));
-        when(feeService.getApplicationFee()).thenReturn(fee());
+        when(feeService.getApplicationFee(CONSENTED)).thenReturn(fee(CONSENTED));
     }
 
     @Test
@@ -99,7 +108,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnErrorWhenPbaPaymentFails() throws Exception {
-        doPaymentPBASetUp(false);
+        doPBASetUp(false);
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
@@ -113,7 +122,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldDoPbaPayment() throws Exception {
-        doPaymentPBASetUp(true);
+        doPBASetUp(true);
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
@@ -128,5 +137,19 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), anyString(), any());
+    }
+
+
+    @Test
+    public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists() throws Exception {
+        doPBAPaymentReferenceAlreadyExistsSetup();
+        mvc.perform(post(PBA_PAYMENT_URL)
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+        verify(pbaPaymentService, times(0)).makePayment(anyString(), anyString(), any());
     }
 }

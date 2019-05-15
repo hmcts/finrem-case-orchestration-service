@@ -10,6 +10,8 @@ public class CCDConfigConstant {
     public static final String SOLICITOR_NAME = "solicitorName";
     public static final String SOLICITOR_EMAIL = "solicitorEmail";
     public static final String SOLICITOR_FIRM = "solicitorFirm";
+    //Application Type related
+    public static final String D81_QUESTION = "d81Question";
     //Document related
     public static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
     public static final String MINI_FORM_A = "miniFormA";
@@ -28,4 +30,7 @@ public class CCDConfigConstant {
     public static final String ISSUE_DATE = "issueDate";
     public static final String FAST_TRACK_DECISION = "fastTrackDecision";
     public static final String HEARING_DATE = "hearingDate";
+    public static final String CASE_ALLOCATED_TO = "caseAllocatedTo";
+    public static final String MIAM_ATTENDANCE = "applicantAttendedMIAM";
+    public static final String MIAM_EXEMPTION = "claimingExemptionMIAM";
 }

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
+import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -43,6 +44,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_14_WEEKS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.MUST_FIELD_ERROR;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -82,6 +88,21 @@ public class HearingNonFastTrackDocumentTest {
     }
 
     @Test
+    public void missingIssueDate() throws Exception {
+        doMissingMustFieldTest(ISSUE_DATE);
+    }
+
+    @Test
+    public void missingHearingDate() throws Exception {
+        doMissingMustFieldTest(HEARING_DATE);
+    }
+
+    @Test
+    public void missingFastTrackDecision() throws Exception {
+        doMissingMustFieldTest(FAST_TRACK_DECISION);
+    }
+
+    @Test
     public void generateFormCAndFormGSuccess() throws Exception {
         generateDocumentServiceSuccessStub(formCDocumentRequest());
         generateDocumentServiceSuccessStub(formGDocumentRequest());
@@ -108,6 +129,19 @@ public class HearingNonFastTrackDocumentTest {
                 .andExpect(status().isInternalServerError());
     }
 
+    private void doMissingMustFieldTest(String missingFieldKey) throws Exception {
+        CaseDetails caseDetails = request.getCaseDetails();
+        caseDetails.getData().put(missingFieldKey, null);
+
+        webClient.perform(MockMvcRequestBuilders.post(API_URL)
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedErrorData(), true));
+    }
+
     private DocumentRequest formGDocumentRequest() {
         return documentRequest(config.getFormGTemplate(), config.getFormGFileName());
     }
@@ -116,6 +150,14 @@ public class HearingNonFastTrackDocumentTest {
         return documentRequest(config.getFormCNonFastTrackTemplate(), config.getFormCFileName());
     }
 
+    private String expectedErrorData() throws JsonProcessingException {
+        return objectMapper.writeValueAsString(
+                AboutToStartOrSubmitCallbackResponse.builder()
+                        .errors(ImmutableList.of(MUST_FIELD_ERROR))
+                        .build());
+    }
+
+
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getData().put("formC", caseDocument());
@@ -123,7 +165,10 @@ public class HearingNonFastTrackDocumentTest {
         caseDetails.getData().put("state", "prepareForHearing");
 
         return objectMapper.writeValueAsString(
-                AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+                AboutToStartOrSubmitCallbackResponse.builder()
+                        .data(caseDetails.getData())
+                        .warnings(ImmutableList.of(DATE_BETWEEN_12_AND_14_WEEKS))
+                        .build());
     }
 
     private DocumentRequest documentRequest(String template, String fileName) {

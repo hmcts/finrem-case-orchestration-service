@@ -6,6 +6,7 @@ import feign.FeignException;
 import feign.Response;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 
 public class SetUpUtils {
 
@@ -40,11 +42,11 @@ public class SetUpUtils {
         return new InvalidCaseDataException(BAD_REQUEST, "Bad request");
     }
 
-    public static FeeResponse fee() {
+    public static FeeResponse fee(ApplicationType applicationType) {
         FeeResponse feeResponse = new FeeResponse();
         feeResponse.setCode("FEE0640");
         feeResponse.setDescription("finrem");
-        feeResponse.setFeeAmount(BigDecimal.valueOf(10d));
+        feeResponse.setFeeAmount(applicationType == CONSENTED ? BigDecimal.valueOf(10) : BigDecimal.valueOf(255));
         feeResponse.setVersion("v1");
         return feeResponse;
     }
