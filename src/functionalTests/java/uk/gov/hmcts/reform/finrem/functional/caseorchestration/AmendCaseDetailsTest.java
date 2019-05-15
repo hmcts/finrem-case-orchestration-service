@@ -31,7 +31,8 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     @Test
     public void verifyamendDivorceDetailsD81Individual() {
         validatePostSuccess(amendCaseDetailsUrl,consentedDir,"amend-divorce-details-d81-individual1.json");
-        jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,"amend-divorce-details-d81-individual1.json");
+        jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
+                "amend-divorce-details-d81-individual1.json");
 
         System.out.println("result : " + jsonPathEvaluator.prettyPrint());
         if (jsonPathEvaluator.get("d81Joint") != null) {
@@ -54,8 +55,10 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyamendDivorceDetailsDecreeAbsolute() {
-        validatePostSuccess(amendCaseDetailsUrl,consentedDir,"amend-divorce-details-decree-absolute1.json");
-        jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,"amend-divorce-details-decree-absolute1.json");
+        validatePostSuccess(amendCaseDetailsUrl,consentedDir,
+                "amend-divorce-details-decree-absolute1.json");
+        jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
+                "amend-divorce-details-decree-absolute1.json");
 
         if (jsonPathEvaluator.get("divorceDecreeNisiDate") != null ) {
             Assert.fail("The divorceDecreeNisiDate is still showing in the result even after"
@@ -66,7 +69,8 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     @Test
     public void verifyamendDivorceDetailsDecreeNisi() {
         validatePostSuccess(amendCaseDetailsUrl,consentedDir,"amend-divorce-details-decree-nisi1.json");
-        jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,"amend-divorce-details-decree-nisi1.json");
+        jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
+                "amend-divorce-details-decree-nisi1.json");
 
         if (jsonPathEvaluator.get("divorceDecreeAbsoluteDate") != null ) {
             Assert.fail("The divorceDecreeAbsoluteDate is still showing in the result even after"
@@ -168,16 +172,14 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
 
     @Test
-    public void verifyDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested()
-    {
+    public void verifyDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "amend-divorce-details-decree-nisi1.json");
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,contestedDir,
                 "amend-divorce-details-decree-nisi1.json");
 
         if (jsonPathEvaluator.get("divorceUploadEvidence2") != null
-                || jsonPathEvaluator.get("divorceDecreeAbsoluteDate") != null )
-        {
+                || jsonPathEvaluator.get("divorceDecreeAbsoluteDate") != null ) {
 
             Assert.fail("The decree nissi file is still showing "
                     + "in the result.");
@@ -186,16 +188,14 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyDeleteDecreeAbsoluteWhenSolicitorChooseToDecreeNisiForContested()
-    {
+    public void verifyDeleteDecreeAbsoluteWhenSolicitorChooseToDecreeNisiForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "amend-divorce-details-decree-absolute1.json");
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,contestedDir,
                 "amend-divorce-details-decree-absolute1.json");
 
         if (jsonPathEvaluator.get("divorceUploadEvidence1") != null
-                || jsonPathEvaluator.get("divorceDecreeNisiDate") != null )
-        {
+                || jsonPathEvaluator.get("divorceDecreeNisiDate") != null ) {
 
             Assert.fail("The decree Absolute file is still showing "
                     + "in the result.");
@@ -204,8 +204,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyRemovePropertyAdjustmentOrderDetailsWhenSolicitorUncheckedForContested()
-    {
+    public void verifyRemovePropertyAdjustmentOrderDetailsWhenSolicitorUncheckedForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-property-adjustment-order-details1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -213,9 +212,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
         if (jsonPathEvaluator.get("propertyAddress") != null
                 || jsonPathEvaluator.get("mortgageDetail") != null
-                || jsonPathEvaluator.get("propertyAdjutmentOrderDetail") != null)
-
-        {
+                || jsonPathEvaluator.get("propertyAdjutmentOrderDetail") != null) {
 
             Assert.fail("The property details are still showing "
                     + "in the result.");
@@ -225,16 +222,13 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
 
     @Test
-    public void verifyRemoveAdditionalPropertyDetailsForContested()
-    {
+    public void verifyRemoveAdditionalPropertyDetailsForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-additional-property-details1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-additional-property-details1.json");
 
-        if ( jsonPathEvaluator.get("propertyAdjutmentOrderDetail") != null)
-
-        {
+        if ( jsonPathEvaluator.get("propertyAdjutmentOrderDetail") != null) {
 
             Assert.fail("The additional property details are still showing "
                     + "in the result.");
@@ -242,8 +236,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyRemovePeriodicPaymentOrderDetailsWhenSolicitorUncheckedForContested()
-    {
+    public void verifyRemovePeriodicPaymentOrderDetailsWhenSolicitorUncheckedForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-periodic-payment-order-details1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -251,9 +244,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
         if (jsonPathEvaluator.get("paymentForChildrenDecision") != null
                 || jsonPathEvaluator.get("benefitForChildrenDecision") != null
-                || jsonPathEvaluator.get("benefitPaymentChecklist") != null)
-
-        {
+                || jsonPathEvaluator.get("benefitPaymentChecklist") != null) {
 
             Assert.fail("The periodic payment details are still showing "
                     + "in the result.");
@@ -262,8 +253,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyUpdatePeriodicPaymentDetailsWhenPaymentForChildrenIsUncheckedForContested()
-    {
+    public void verifyUpdatePeriodicPaymentDetailsWhenPaymentForChildrenIsUncheckedForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "update-periodic-payment-details-for-no-payment-for-children1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -271,29 +261,24 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
         if (jsonPathEvaluator.get("benefitForChildrenDecision") != null
                 || jsonPathEvaluator.get("benefitPaymentChecklist") != null
-        )
+        ) {
 
-        {
-
-            Assert.fail("The periodic payment details are still showing even after " +
-                    "payment for children is unchecked for contested"
+            Assert.fail("The periodic payment details are still showing even after "
+                    + "payment for children is unchecked for contested"
                     + "in the result.");
         }
 
     }
 
     @Test
-    public void verifyUpdatePeriodicPaymentDetailsWhenBenefitsForChildrenForContested()
-    {
+    public void verifyUpdatePeriodicPaymentDetailsWhenBenefitsForChildrenForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "update-periodic-payment-details-with-benefits-for-children1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "update-periodic-payment-details-with-benefits-for-children1.json");
 
         if ( jsonPathEvaluator.get("benefitPaymentChecklist") != null
-        )
-
-        {
+        ) {
 
             Assert.fail("The benefitPaymentCheckList is still showing"
                     + "in the result.");
@@ -301,8 +286,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyRemoveSolicitorDetailsWhenRespondentIsNotRepresentedBySolicitorForContested()
-    {
+    public void verifyRemoveSolicitorDetailsWhenRespondentIsNotRepresentedBySolicitorForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-respondent-solicitor-details1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -316,9 +300,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 || jsonPathEvaluator.get("rSolicitorPhone") != null
                 || jsonPathEvaluator.get("rSolicitorDXnumber") != null
 
-        )
-
-        {
+        ) {
 
             Assert.fail("The respondent solicitor details are still showing "
                     + "in the result.");
@@ -327,8 +309,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyRemoveRespondentAddressWhenRespondentIsRepresentedBySolicitorForContested()
-    {
+    public void verifyRemoveRespondentAddressWhenRespondentIsRepresentedBySolicitorForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-respondent-address-details1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -337,9 +318,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         if ( jsonPathEvaluator.get("respondentAddress") != null
                 || jsonPathEvaluator.get("respondentPhone") != null
                 || jsonPathEvaluator.get("respondentEmail") != null
-        )
-
-        {
+        ) {
 
             Assert.fail("The respondent solicitor address details are still showing "
                     + "in the result.");
@@ -348,8 +327,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyUpdateFastTrackDetailsForContested()
-    {
+    public void verifyUpdateFastTrackDetailsForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-respondent-address-details1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -357,9 +335,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
         if ( jsonPathEvaluator.get("fastTrackDecisionReason") != null
 
-        )
-
-        {
+        ) {
 
             Assert.fail("The fastTrackDecisionReason  details are still showing "
                     + "in the result.");
@@ -367,8 +343,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyShouldNotUpdateFastTrackDetailsForContested()
-    {
+    public void verifyShouldNotUpdateFastTrackDetailsForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-respondent-solicitor-details1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -376,9 +351,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
         if ( jsonPathEvaluator.get("fastTrackDecisionReason") == null
 
-        )
-
-        {
+        ) {
 
             Assert.fail("The fastTrackDecisionReason  details are not showing "
                     + "in the result.");
@@ -386,8 +359,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyshouldRemoveComplexityDetailsForContested()
-    {
+    public void verifyshouldRemoveComplexityDetailsForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-complexity-details1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -400,9 +372,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 || jsonPathEvaluator.get("otherReasonForComplexityText") != null
                 || jsonPathEvaluator.get("detailPotentialAllegation") != null
 
-        )
-
-        {
+        ) {
 
             Assert.fail("The complexity details for contested are still showing "
                     + "in the result.");
@@ -411,8 +381,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyshouldRemoveAdditionalReasonForComplexityForContested()
-    {
+    public void verifyshouldRemoveAdditionalReasonForComplexityForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-other-reason-for-complexity1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -420,17 +389,14 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
         if ( jsonPathEvaluator.get("otherReasonForComplexityText") != null
 
-        )
-
-        {
+        ) {
             Assert.fail("The other complexity details are not showing "
                     + "in the result.");
         }
     }
 
     @Test
-    public void verifyshouldRemoveReasonForLocalCourtForContested()
-    {
+    public void verifyshouldRemoveReasonForLocalCourtForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "is-applicant-home-court1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -438,9 +404,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
         if ( jsonPathEvaluator.get("reasonForLocalCourt") != null
 
-        )
-
-        {
+        ) {
             Assert.fail("The reason for local court details are not showing "
                     + "in the result.");
         }
@@ -448,8 +412,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
 
     @Test
-    public void verifyshouldRemoveMiamExceptionsWhenApplicantAttendedMiamForContested()
-    {
+    public void verifyshouldRemoveMiamExceptionsWhenApplicantAttendedMiamForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-exceptions-when-applicant-attended-miam1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -463,9 +426,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") != null
                 || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") != null
 
-        )
-
-        {
+        ) {
 
             Assert.fail("The Miam exception details when applicant attended Miam for contested are still showing "
                     + "in the result.");
@@ -474,8 +435,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyshouldUpdateMiamExceptionsWhenApplicantNotClaimingExceptionsForContested()
-    {
+    public void verifyshouldUpdateMiamExceptionsWhenApplicantNotClaimingExceptionsForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "update-miam-exceptions-when-applicant-not-claiming-exemption1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -490,19 +450,18 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") != null
                 || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") != null
 
-        )
+        ) {
 
-        {
-
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated  "
+            Assert.fail("The Miam exception details when applicant attended"
+                    +
+                    " Miam for contested are not correctly updated  "
                     + "in the result.");
         }
     }
 
 
     @Test
-    public void verifyshouldUpdateMiamExceptionsWhenApplicantHasFamilyMediatorForContested()
-    {
+    public void verifyshouldUpdateMiamExceptionsWhenApplicantHasFamilyMediatorForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "update-miam-exceptions-when-applicant-attended-family-mediator1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -514,18 +473,17 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") != null
                 || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") != null
 
-        )
+        ) {
 
-        {
-
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated  "
+            Assert.fail("The Miam exception details when applicant attended "
+                    +
+                    "Miam for contested are not correctly updated  "
                     + "in the result.");
         }
     }
 
     @Test
-    public void verifyShouldRemoveDomesticViolenceCheckListForContested()
-    {
+    public void verifyShouldRemoveDomesticViolenceCheckListForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-domestic-violence-checklist1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -537,18 +495,17 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") == null
                 || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") == null
 
-        )
+        ) {
 
-        {
-
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated  "
+            Assert.fail("The Miam exception details when applicant attended "
+                    +
+                    "Miam for contested are not correctly updated  "
                     + "in the result.");
         }
     }
 
     @Test
-    public void verifyShouldRemoveUrgencyCheckListForContested()
-    {
+    public void verifyShouldRemoveUrgencyCheckListForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-urgency-checklist1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -560,18 +517,17 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") == null
                 || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") == null
 
-        )
+        ) {
 
-        {
-
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated  "
+            Assert.fail("The Miam exception details when applicant attended "
+                    +
+                    "Miam for contested are not correctly updated  "
                     + "in the result.");
         }
     }
 
     @Test
-    public void verifyShouldRemovePreviousMiamAttendanceCheckListForContested()
-    {
+    public void verifyShouldRemovePreviousMiamAttendanceCheckListForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-previousMiamAttendance-checklist1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -583,18 +539,17 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") != null
                 || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") == null
 
-        )
+        ) {
 
-        {
-
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated  "
+            Assert.fail("The Miam exception details when applicant attended "
+                    +
+                    "Miam for contested are not correctly updated  "
                     + "in the result.");
         }
     }
 
     @Test
-    public void verifyShouldRemoveOtherGroundsMiamCheckListForContested()
-    {
+    public void verifyShouldRemoveOtherGroundsMiamCheckListForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-other-checklist1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -606,19 +561,18 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") == null
                 || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") != null
 
-        )
+        ) {
 
-        {
-
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated  "
+            Assert.fail("The Miam exception details when applicant attended "
+                    +
+                    "Miam for contested are not correctly updated  "
                     + "in the result.");
         }
     }
 
 
     @Test
-    public void verifyShouldNotRemoveMiamCheckListForContested()
-    {
+    public void verifyShouldNotRemoveMiamCheckListForContested() {
         validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
                 "do-not-remove-checklists1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -630,11 +584,11 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") == null
                 || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") == null
 
-        )
+        ) {
 
-        {
-
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are removed  "
+            Assert.fail("The Miam exception details when applicant attended "
+                    +
+                    "Miam for contested are removed  "
                     + "in the result.");
         }
     }
@@ -658,7 +612,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 .headers(utils.getHeaders())
                 .body(utils.getJsonFromFile(jsonFileName, journeyType))
                 .when().post(url).andReturn();
-                    System.out.println("url  : " + url);
         return response.jsonPath().setRoot("data");
     }
 
