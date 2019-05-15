@@ -42,6 +42,13 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private String documentRejectedOrderUrl;
 
 
+    @Value("${cos.document.hearing.api}")
+    private String generatorHearingUrl;
+
+
+    @Value("${cos.document.contested.miniform.api}")
+    private String generateContestedUrl;
+
 
     @Test
     public void verifyDocumentGenerationShouldReturnOkResponseCode() {
