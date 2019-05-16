@@ -63,33 +63,21 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Test
     public void verifyGetFeeLoopUpTestConsented() {
 
-         ValidatePostSuccess(feeLookup, "fee-lookup.json",consentedDir);
-         Response response = getResponse(feeLookup, "fee-lookup.json",consentedDir);
-         JsonPath jsonPathEvaluator = response.jsonPath();
-
-        assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode").toString().equalsIgnoreCase("FEE0640"));
-        assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode").toString().equalsIgnoreCase("1000"));
-
+        validateFeeLookUpPayment(feeLookup, "fee-lookup.json",consentedDir);
     }
 
 
     @Test
     public void verifyGetFeeLoopUpTestContested() {
 
-        ValidatePostSuccess(feeLookup, "fee-lookup.json",contestedDir);
-        Response response = getResponse(feeLookup, "fee-lookup.json",contestedDir);
-        JsonPath jsonPathEvaluator = response.jsonPath();
-
-        assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode").toString().equalsIgnoreCase("FEE0640"));
-        assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode").toString().equalsIgnoreCase("25500"));
-
+        validateFeeLookUpPayment(feeLookup, "fee-lookup.json",contestedDir);
     }
 
 
     @Test
     public void verifyPBAValidationTest() {
 
-        ValidatePostSuccess(pbaValidate, "pba-validate.json" ,consentedDir );
+        validatePostSuccess(pbaValidate, "pba-validate.json" ,consentedDir );
     }
 
     @Test
@@ -190,7 +178,24 @@ public class PaymentServiceTests extends IntegrationTestBase {
         }
     }
 
-    private void ValidatePostSuccess(String url, String filename, String journeyType)
+    private void validateFeeLookUpPayment(String url, String fileName, String journeyType)
+    {
+        validatePostSuccess(url, fileName ,journeyType);
+        Response response = getResponse(url, fileName ,journeyType);
+        JsonPath jsonPathEvaluator = response.jsonPath();
+
+        assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode").toString().equalsIgnoreCase("FEE0640"));
+
+        if(journeyType == consentedDir) {
+            assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode").toString().equalsIgnoreCase("1000"));
+        } else
+        {
+            assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode").toString().equalsIgnoreCase("25500"));
+        }
+
+    }
+
+    private void validatePostSuccess(String url, String filename, String journeyType)
     {
         Response response = getResponse(url, filename, journeyType);
         int statusCode = response.getStatusCode();
