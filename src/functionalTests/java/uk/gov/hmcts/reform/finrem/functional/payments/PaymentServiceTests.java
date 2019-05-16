@@ -126,10 +126,9 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePBAConfirmation(String url, String fileName, String journeyType, String paymentType) {
 
+        validatePostSuccess(url, fileName ,journeyType);
         Response response = getResponse(url, fileName , journeyType);
-        int statusCode = response.getStatusCode();
         JsonPath jsonPathEvaluator = response.jsonPath();
-        assertEquals(statusCode, 200);
 
         if ( paymentType == "HWF") {
 
@@ -146,13 +145,9 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validateFailurePBAPayment(String url, String fileName, String journeyType) {
 
+        validatePostSuccess(url, fileName ,journeyType);
         Response response = getResponse(url, fileName , journeyType);
-        int statusCode = response.getStatusCode();
-        System.out.println("ValidateFailurePBAPayment" + "status Code : "
-                + statusCode + response.getBody().prettyPrint());
         JsonPath jsonPathEvaluator = response.jsonPath();
-        assertEquals(statusCode, 200);
-
 
         if (pbaAccountLiberataCheckEnabled) {
             List<String> errors = jsonPathEvaluator.get("errors");
@@ -163,11 +158,9 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePostSuccessForPBAPayment(String url, String fileName, String journeyType) {
 
+        validatePostSuccess(url, fileName ,journeyType);
         Response response = getResponse(url, fileName, journeyType);
-        int statusCode = response.getStatusCode();
         JsonPath jsonPathEvaluator = response.jsonPath().setRoot("data");
-
-        assertEquals(statusCode, 200);
 
         if ( journeyType == consentedDir) {
             assertTrue(jsonPathEvaluator.get("state").toString()
