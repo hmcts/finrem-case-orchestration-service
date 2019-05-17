@@ -252,6 +252,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 "binary", "miniForma", contestedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
+        System.out.println("Contested Document " +  documentContent.toString());
         assertTrue(documentContent.contains(SOLICITOR_FIRM));
         assertTrue(documentContent.contains(SOLICITOR_NAME));
         assertTrue(documentContent.contains(APPLICANT_NAME));

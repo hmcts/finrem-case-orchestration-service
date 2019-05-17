@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(SerenityRunner.class)
+//@RunWith(SerenityRunner.class)
 public class MigrationTests extends IntegrationTestBase {
 
     @Value("${migration.api}")
