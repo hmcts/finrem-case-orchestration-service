@@ -33,8 +33,6 @@ public class NotificationService {
     private final RestTemplate restTemplate;
 
     public void sendHWFSuccessfulConfirmationEmail(CallbackRequest callbackRequest , String authToken) {
-        NotificationRequest notificationRequest = buildNotificationRequest(callbackRequest);
-        HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
         sendNotificationEmail(callbackRequest, authToken, uri);
     }
