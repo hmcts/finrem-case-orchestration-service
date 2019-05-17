@@ -30,9 +30,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Value("${cos.payment.pba.api}")
     private String pbaPayment;
 
-    @Value("${cos.contested.payment.pba.api}")
-    private String pbaContestedPayment;
-
     @Value("${cos.pba.account.active}")
     private String pbaAccountActive;
 
@@ -82,7 +79,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Test
     public void verifyPBAPaymentSuccessTestContested() {
 
-        validatePostSuccessForPBAPayment(pbaContestedPayment, "SuccessPaymentRequestPayload.json" , contestedDir);
+        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload.json" , contestedDir);
     }
 
     @Test
