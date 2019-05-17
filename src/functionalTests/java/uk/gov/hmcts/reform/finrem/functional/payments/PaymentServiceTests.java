@@ -61,20 +61,20 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Test
     public void verifyGetFeeLoopUpTest() {
 
-        validatePostSuccess(feeLookup, "fee-lookup.json");
+        validatePostSuccess(feeLookup, "fee-lookup_consented.json");
     }
 
     @Test
     public void verifyGetFeeLoopUpTestConsented() {
 
-        validateFeeLookUpPayment(feeLookup, "fee-lookup.json",consentedDir);
+        validateFeeLookUpPayment(feeLookup, "fee-lookup_consented.json",consentedDir);
     }
 
 
     @Test
     public void verifyGetFeeLoopUpTestContested() {
 
-        validateFeeLookUpPayment(feeLookup, "fee-lookup.json",contestedDir);
+        validateFeeLookUpPayment(feeLookup, "fee-lookup_contested.json",contestedDir);
     }
 
 
