@@ -18,16 +18,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
-import java.time.ZonedDateTime;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ContestedStatus.GATE_KEEPING_AND_ALLOCATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMOUNT_TO_PAY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_SUMMARY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_PAYMENT_REFERENCE;
@@ -47,9 +43,9 @@ public class PBAPaymentController implements BaseController {
     @PostMapping(path = "/pba-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPayment(
             @RequestHeader(value = "Authorization", required = false) String authToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) throws IOException {
+            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
         log.info("Received request for PBA payment for consented . Auth token: {}, Case request : {}", authToken,
-            callbackRequest);
+                callbackRequest);
 
         validateCaseData(callbackRequest);
 
@@ -63,38 +59,6 @@ public class PBAPaymentController implements BaseController {
                     return paymentFailure(mapOfCaseData, paymentResponse);
                 }
                 mapOfCaseData.put(STATE, APPLICATION_SUBMITTED.toString());
-                mapOfCaseData.put(PBA_PAYMENT_REFERENCE, paymentResponse.getReference());
-                log.info("Payment succeeded.");
-            } else {
-                log.info("PBA Payment Reference already exists.");
-            }
-        } else {
-            mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
-        }
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
-    }
-
-    @SuppressWarnings("unchecked")
-    @PostMapping(path = "/contested/pba-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPaymentContested(
-        @RequestHeader(value = "Authorization", required = false) String authToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) throws IOException {
-        log.info("Received request for PBA payment for contested. Auth token: {}, Case request : {}", authToken,
-            callbackRequest);
-
-        validateCaseData(callbackRequest);
-
-        final Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
-        feeLookup(authToken, callbackRequest, mapOfCaseData);
-        if (isPBAPayment(mapOfCaseData)) {
-            if (isPBAPaymentReferenceDoesNotExists(mapOfCaseData)) {
-                String ccdCaseId = ObjectUtils.toString(callbackRequest.getCaseDetails().getId());
-                PaymentResponse paymentResponse = pbaPaymentService.makePayment(authToken, ccdCaseId, mapOfCaseData);
-                if (!paymentResponse.isPaymentSuccess()) {
-                    return paymentFailure(mapOfCaseData, paymentResponse);
-                }
-                mapOfCaseData.put(ISSUE_DATE, ZonedDateTime.now().toLocalDate());
-                mapOfCaseData.put(STATE, GATE_KEEPING_AND_ALLOCATION.toString());
                 mapOfCaseData.put(PBA_PAYMENT_REFERENCE, paymentResponse.getReference());
                 log.info("Payment succeeded.");
             } else {
