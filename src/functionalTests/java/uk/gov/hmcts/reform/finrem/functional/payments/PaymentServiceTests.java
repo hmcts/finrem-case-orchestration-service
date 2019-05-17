@@ -253,15 +253,19 @@ public class PaymentServiceTests extends IntegrationTestBase {
         System.out.println("validateFeeLookUpPayment" + "status Code : "
                 + response.getStatusCode() + response.getBody().prettyPrint());
 
-        assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
-                .toString().equalsIgnoreCase("FEE0640"));
 
         if (journeyType == consentedDir) {
             assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
                     .toString().equalsIgnoreCase("1000"));
+            assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
+                    .toString().equalsIgnoreCase("FEE0228"));
+
         } else {
             assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
                     .toString().equalsIgnoreCase("25500"));
+            assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
+                    .toString().equalsIgnoreCase("FEE0229"));
+
         }
 
     }
