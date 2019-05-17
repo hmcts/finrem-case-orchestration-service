@@ -222,7 +222,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .andDo(print())
                 .andExpect(jsonPath(DATA_DIVORCE_UPLOAD_EVIDENCE_2).doesNotExist())
                 .andExpect(jsonPath(DATA_DIVORCE_DECREE_ABSOLUTE_DATE).doesNotExist())
-                .andExpect(jsonPath(DIVORCE_PETITION_ISSUED_DATE).doesNotExist())
+                .andExpect(jsonPath(DIVORCE_PETITION_ISSUED_DATE).exists())
                 .andExpect(jsonPath(DATA_DIVORCE_UPLOAD_PETITION).doesNotExist())
                 .andExpect(jsonPath(DATA_DIVORCE_UPLOAD_EVIDENCE_1).exists())
                 .andExpect(jsonPath(DATA_DIVORCE_DECREE_NISI_DATE).exists())
@@ -241,7 +241,7 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath(DIVORCE_PETITION_ISSUED_DATE).doesNotExist())
+                .andExpect(jsonPath(DIVORCE_PETITION_ISSUED_DATE).exists())
                 .andExpect(jsonPath(DATA_DIVORCE_UPLOAD_PETITION).doesNotExist())
                 .andExpect(jsonPath(DATA_DIVORCE_UPLOAD_EVIDENCE_1).doesNotExist())
                 .andExpect(jsonPath(DATA_DIVORCE_DECREE_NISI_DATE).doesNotExist());
