@@ -202,9 +202,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
         if ( journeyType == consentedDir) {
             assertTrue(jsonPathEvaluator.get("state").toString()
                     .equalsIgnoreCase("applicationSubmitted"));
-        }
-        else
-        {
+        } else {
             assertTrue(jsonPathEvaluator.get("state").toString()
                     .equalsIgnoreCase("gateKeepingAndAllocation"));
         }
