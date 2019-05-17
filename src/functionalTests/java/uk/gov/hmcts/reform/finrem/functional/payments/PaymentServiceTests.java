@@ -250,7 +250,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
         Response response = getResponse(url, fileName ,journeyType);
         JsonPath jsonPathEvaluator = response.jsonPath();
 
-        System.out.println("validatePostSuccessForPBAPayment" + "status Code : "
+        System.out.println("validateFeeLookUpPayment" + "status Code : "
                 + response.getStatusCode() + response.getBody().prettyPrint());
 
         assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
@@ -265,7 +265,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
         }
 
     }
-
 
 
 
