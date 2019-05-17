@@ -51,7 +51,8 @@ public class NotificationTests extends IntegrationTestBase {
     @Test
     public void verifyNotifyConsentOrderMadeTestIsOkay() {
 
-        validatePostSuccessForNotification(consentOrderMade, "ccd-request-with-solicitor-consentOrderMade.json", consentedDir);
+        validatePostSuccessForNotification(consentOrderMade,
+                "ccd-request-with-solicitor-consentOrderMade.json", consentedDir);
 
     }
 
