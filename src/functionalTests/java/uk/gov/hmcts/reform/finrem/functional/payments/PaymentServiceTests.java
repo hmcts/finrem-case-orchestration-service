@@ -57,13 +57,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private String consentedDir = "/json/consented/";
 
 
-
-    @Test
-    public void verifyGetFeeLoopUpTest() {
-
-        validatePostSuccess(feeLookup, "fee-lookup_consented.json");
-    }
-
     @Test
     public void verifyGetFeeLoopUpTestConsented() {
 
