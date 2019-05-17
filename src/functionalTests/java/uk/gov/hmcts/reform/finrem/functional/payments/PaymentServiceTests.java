@@ -248,13 +248,13 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
 
         if (journeyType == consentedDir) {
-            assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
-                    .toString().equalsIgnoreCase("1000"));
+            assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeAmount")
+                    .toString().equalsIgnoreCase("5000"));
             assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
                     .toString().equalsIgnoreCase("FEE0228"));
 
         } else {
-            assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
+            assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeAmount")
                     .toString().equalsIgnoreCase("25500"));
             assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
                     .toString().equalsIgnoreCase("FEE0229"));
