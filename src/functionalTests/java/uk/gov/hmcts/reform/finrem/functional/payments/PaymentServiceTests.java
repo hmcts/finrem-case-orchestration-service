@@ -228,13 +228,9 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         assertEquals(statusCode, 200);
 
-        if ( journeyType == consentedDir) {
-            assertTrue(jsonPathEvaluator.get("state").toString()
+        assertTrue(jsonPathEvaluator.get("state").toString()
                     .equalsIgnoreCase("applicationSubmitted"));
-        } else {
-            assertTrue(jsonPathEvaluator.get("state").toString()
-                    .equalsIgnoreCase("gateKeepingAndAllocation"));
-        }
+
     }
 
 
@@ -253,6 +249,9 @@ public class PaymentServiceTests extends IntegrationTestBase {
         validatePostSuccess(url, fileName ,journeyType);
         Response response = getResponse(url, fileName ,journeyType);
         JsonPath jsonPathEvaluator = response.jsonPath();
+
+        System.out.println("validatePostSuccessForPBAPayment" + "status Code : "
+                + response.getStatusCode() + response.getBody().prettyPrint());
 
         assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
                 .toString().equalsIgnoreCase("FEE0640"));
