@@ -87,13 +87,13 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Test
     public void verifyPBAPaymentSuccessTestConsented() {
 
-        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_old.json" , consentedDir);
+        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload.json" , consentedDir);
     }
 
     @Test
     public void verifyPBAPaymentSuccessTestContested() {
 
-        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_old.json" , contestedDir);
+        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload.json" , contestedDir);
     }
 
     @Test
