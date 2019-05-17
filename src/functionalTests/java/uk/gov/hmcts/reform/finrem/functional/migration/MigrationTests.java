@@ -23,7 +23,7 @@ public class MigrationTests extends IntegrationTestBase {
     private static String CCD_MIGRATE_DONT_JSON = "ccd-migrate-dont-request1.json";
     private static String CCD_MIGRATE_DONT_JSON_NOAMOUNT_NOHWF = "ccd-migrate-dont-request1.json";
 
-    @Test
+    //@Test
     public void verifyMigrationIsDone() {
 
         JsonPath jsonPathEvaluator = validateDoMigration(CCD_MIGRATE_JSON,migrationUrl);
@@ -33,7 +33,7 @@ public class MigrationTests extends IntegrationTestBase {
 
     }
 
-    @Test
+    //@Test
     public void verifyMigrationIsNotRequired() {
 
         validatePostSuccess(CCD_MIGRATE_DONT_JSON,migrationUrl);
@@ -41,7 +41,7 @@ public class MigrationTests extends IntegrationTestBase {
 
     }
 
-    @Test
+    //@Test
     public void verifyMigrationIsNotRequiredWhenNoAmountToPayAndNoHWFInRequest() {
 
         validatePostSuccess(CCD_MIGRATE_DONT_JSON_NOAMOUNT_NOHWF,migrationUrl);

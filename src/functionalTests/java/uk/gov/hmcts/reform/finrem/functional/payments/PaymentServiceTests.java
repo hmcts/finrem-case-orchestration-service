@@ -65,6 +65,20 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     @Test
+    public void verifyGetFeeLoopUpTestConsented() {
+
+        validateFeeLookUpPayment(feeLookup, "fee-lookup.json",consentedDir);
+    }
+
+
+    @Test
+    public void verifyGetFeeLoopUpTestContested() {
+
+        validateFeeLookUpPayment(feeLookup, "fee-lookup.json",contestedDir);
+    }
+
+
+    @Test
     public void verifyPBAValidationTest() {
 
         validatePostSuccessForPBAValidation(pbaValidate, "pba-validate.json" ,consentedDir );
@@ -125,6 +139,12 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .assertThat().statusCode(200);
     }
 
+    private void validatePostSuccess(String url, String filename, String journeyType) {
+        Response response = getResponse(url, filename, journeyType);
+        int statusCode = response.getStatusCode();
+        assertEquals(statusCode, 200);
+
+    }
 
     public void validatePostSuccessForPBAValidation(String url, String fileName , String journeyType) {
 
@@ -144,6 +164,10 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         int statusCode = response.getStatusCode();
 
+        System.out.println("validatePBAConfirmationForHWF" + "status Code : "
+                + statusCode + response.getBody().prettyPrint());
+
+
         JsonPath jsonPathEvaluator = response.jsonPath();
 
         assertEquals(statusCode, 200);
@@ -158,6 +182,10 @@ public class PaymentServiceTests extends IntegrationTestBase {
         Response response = getPBAPaymentResponse(url, fileName, journeyType);
 
         int statusCode = response.getStatusCode();
+
+        System.out.println("validatePBAConfirmationForPBAPayment" + "status Code : "
+                + statusCode + response.getBody().prettyPrint());
+
 
         JsonPath jsonPathEvaluator = response.jsonPath();
 
@@ -194,6 +222,10 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         JsonPath jsonPathEvaluator = response.jsonPath().setRoot("data");
 
+        System.out.println("validatePostSuccessForPBAPayment" + "status Code : "
+                + statusCode + response.getBody().prettyPrint());
+
+
         assertEquals(statusCode, 200);
 
         if ( journeyType == consentedDir) {
@@ -213,6 +245,38 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .headers(utils.getHeader())
                 .contentType("application/json")
                 .body(utils.getJsonFromFile(filename))
+                .when().post(url)
+                .andReturn();
+    }
+
+    private void validateFeeLookUpPayment(String url, String fileName, String journeyType) {
+        validatePostSuccess(url, fileName ,journeyType);
+        Response response = getResponse(url, fileName ,journeyType);
+        JsonPath jsonPathEvaluator = response.jsonPath();
+
+        assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
+                .toString().equalsIgnoreCase("FEE0640"));
+
+        if (journeyType == consentedDir) {
+            assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
+                    .toString().equalsIgnoreCase("1000"));
+        } else {
+            assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
+                    .toString().equalsIgnoreCase("25500"));
+        }
+
+    }
+
+
+
+
+    private Response getResponse(String url, String filename, String journeyType) {
+
+        return SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(utils.getHeader())
+                .contentType("application/json")
+                .body(utils.getJsonFromFile(filename , journeyType))
                 .when().post(url)
                 .andReturn();
     }
