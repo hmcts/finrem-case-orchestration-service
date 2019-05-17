@@ -120,6 +120,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         JsonPath jsonPathEvaluator = generateDocument(MINIFORMA_CONTESTED_JSON,
                 generateContestedUrl, contestedDir);
 
+        System.out.println("response Content " + jsonPathEvaluator.prettyPrint());
+
         assertTrue(jsonPathEvaluator.get("data.state.").toString()
                 .equalsIgnoreCase("applicationIssued"));
     }
@@ -228,6 +230,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 "binary", "miniForma", consentedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
+        System.out.println("response content : " + documentContent.toString());
         assertTrue(documentContent.contains(SOLICITOR_FIRM));
         assertTrue(documentContent.contains(SOLICITOR_NAME));
         assertTrue(documentContent.contains(APPLICANT_NAME));
