@@ -120,8 +120,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         JsonPath jsonPathEvaluator = generateDocument(MINIFORMA_CONTESTED_JSON,
                 generateContestedUrl, contestedDir);
 
-        System.out.println("response Content " + jsonPathEvaluator.prettyPrint());
-
         assertTrue(jsonPathEvaluator.get("data.state.").toString()
                 .equalsIgnoreCase("applicationIssued"));
     }
@@ -131,7 +129,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
         JsonPath jsonPathEvaluator = generateDocument(MINIFORMA_CONTESTED_JSON,
                 generateContestedDraftUrl, contestedDir);
-        System.out.println("response Content " + jsonPathEvaluator.prettyPrint());
         assertNull(jsonPathEvaluator.get("data.state."));
     }
 
@@ -140,7 +137,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyContestedFormCDocumentGenerationPostResponseContent() {
 
         JsonPath jsonPathEvaluator = generateDocument(CONTESTED_FORMC_JSON, generateHearingUrl, contestedDir);
-        System.out.println("response content : " + jsonPathEvaluator.prettyPrint());
         assertTrue(jsonPathEvaluator.get("data.state.").toString()
                 .equalsIgnoreCase("prepareForHearing"));
     }
@@ -149,7 +145,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyContestedFormGDocumentGenerationPostResponseContent() {
 
         JsonPath jsonPathEvaluator = generateDocument(CONTESTED_FORMG_JSON, generateHearingUrl, contestedDir);
-        System.out.println("response content : " + jsonPathEvaluator.prettyPrint());
         assertTrue(jsonPathEvaluator.get("data.state.").toString()
                 .equalsIgnoreCase("prepareForHearing"));
     }
@@ -230,7 +225,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 "binary", "miniForma", consentedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
-        System.out.println("response content : " + documentContent.toString());
         assertTrue(documentContent.contains(SOLICITOR_FIRM));
         assertTrue(documentContent.contains(SOLICITOR_NAME));
         assertTrue(documentContent.contains(APPLICANT_NAME));
@@ -255,7 +249,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 "binary", "miniForma", contestedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
-        System.out.println("Contested Document " +  documentContent.toString());
         assertTrue(documentContent.contains(SOLICITOR_FIRM));
         assertTrue(documentContent.contains(SOLICITOR_NAME));
         assertTrue(documentContent.contains(APPLICANT_NAME));
@@ -272,7 +265,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
-        System.out.println("response content : " + documentContent.toString());
         assertTrue(documentContent.contains(APPLICANT_NAME_HEARING));
         assertTrue(documentContent.contains(DIVORCE_CASENO));
         assertTrue(documentContent.contains(SOLICITOR_REF_HEARING));
@@ -288,7 +280,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
-        System.out.println("response content : " + documentContent.toString());
         assertTrue(documentContent.contains(APPLICANT_NAME_HEARING));
         assertTrue(documentContent.contains(DIVORCE_CASENO));
         assertTrue(documentContent.contains(SOLICITOR_REF_HEARING));
@@ -299,7 +290,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     private void validatePostSuccess(String jsonFileName, String url, String journeyType) {
 
-        System.out.println("url " + url);
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())

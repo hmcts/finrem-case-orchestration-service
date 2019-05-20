@@ -157,10 +157,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         int statusCode = response.getStatusCode();
 
-        System.out.println("validatePBAConfirmationForHWF" + "status Code : "
-                + statusCode + response.getBody().prettyPrint());
-
-
         JsonPath jsonPathEvaluator = response.jsonPath();
 
         assertEquals(statusCode, 200);
@@ -175,9 +171,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
         Response response = getPBAPaymentResponse(url, fileName, journeyType);
 
         int statusCode = response.getStatusCode();
-
-        System.out.println("validatePBAConfirmationForPBAPayment" + "status Code : "
-                + statusCode + response.getBody().prettyPrint());
 
 
         JsonPath jsonPathEvaluator = response.jsonPath();
@@ -195,9 +188,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         int statusCode = response.getStatusCode();
 
-        System.out.println("ValidateFailurePBAPayment" + "status Code : "
-                + statusCode + response.getBody().prettyPrint());
-
         JsonPath jsonPathEvaluator = response.jsonPath();
         assertEquals(statusCode, 200);
 
@@ -214,10 +204,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
         int statusCode = response.getStatusCode();
 
         JsonPath jsonPathEvaluator = response.jsonPath().setRoot("data");
-
-        System.out.println("validatePostSuccessForPBAPayment" + "status Code : "
-                + statusCode + response.getBody().prettyPrint());
-
 
         assertEquals(statusCode, 200);
 
@@ -242,9 +228,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
         validatePostSuccess(url, fileName ,journeyType);
         Response response = getResponse(url, fileName ,journeyType);
         JsonPath jsonPathEvaluator = response.jsonPath();
-
-        System.out.println("validateFeeLookUpPayment" + "status Code : "
-                + response.getStatusCode() + response.getBody().prettyPrint());
 
 
         if (journeyType == consentedDir) {

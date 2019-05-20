@@ -34,7 +34,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "amend-divorce-details-d81-individual1.json");
 
-        System.out.println("result : " + jsonPathEvaluator.prettyPrint());
         if (jsonPathEvaluator.get("d81Joint") != null) {
             Assert.fail("The d81Joint is still showing in the result even after selecting individual.");
         }
