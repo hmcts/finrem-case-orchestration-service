@@ -314,8 +314,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         return jsonResponse.jsonPath();
     }
 
-    private int getStatusCode(String jsonFileName, String url, String journeyType)
-    {
+    private int getStatusCode(String jsonFileName, String url, String journeyType) {
         return SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())
