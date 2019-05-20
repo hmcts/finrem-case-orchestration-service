@@ -93,6 +93,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void verifyContestedFormGDocumentGenerationShouldReturnOkResponseCode() {
+        System.out.println("status code is :" + getStatusCode(CONTESTED_FORMG_JSON, generateHearingUrl, contestedDir));
         validatePostSuccess(CONTESTED_FORMG_JSON, generateHearingUrl, contestedDir);
     }
 
@@ -143,6 +144,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void verifyContestedFormGDocumentGenerationPostResponseContent() {
+
+        System.out.println("status code is :" + getStatusCode(CONTESTED_FORMG_JSON, generateHearingUrl, contestedDir));
 
         JsonPath jsonPathEvaluator = generateDocument(CONTESTED_FORMG_JSON, generateHearingUrl, contestedDir);
         System.out.println("FormG document generation : " + jsonPathEvaluator.prettyPrint());
@@ -270,7 +273,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         assertTrue(documentContent.contains(APPLICANT_NAME_HEARING));
         assertTrue(documentContent.contains(DIVORCE_CASENO));
         assertTrue(documentContent.contains(SOLICITOR_REF_HEARING));
-        assertTrue(documentContent.contains(DOCUMENT_FORMC));
 
     }
 
@@ -312,6 +314,14 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         return jsonResponse.jsonPath();
     }
 
+    private int getStatusCode(String jsonFileName, String url, String journeyType)
+    {
+        return SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(utils.getHeaders())
+                .body(utils.getJsonFromFile(jsonFileName, journeyType))
+                .when().post(url).getStatusCode();
+    }
 
     private String getDocumentUrlOrDocumentBinaryUrl(String jsonFile, String url, String urlType,
                                                      String documentType, String journeyType) {
@@ -327,8 +337,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 break;
             case "generalOrder":
                 jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
+                System.out.println("status code is :" + getStatusCode(jsonFile, url, journeyType));
                 if (urlType.equals("document")) {
-
                     url1 = jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentLink.document_url");
                 } else if (urlType.equals("binary")) {
                     url1 = jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentLink.document_binary_url");
@@ -336,6 +346,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 break;
             case "hearing":
                 jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
+                System.out.println("status code is :" + getStatusCode(jsonFile, url, journeyType));
                 System.out.println("generate Document reponse : " + jsonPathEvaluator.prettyPrint());
                 if (urlType.equals("document")) {
                     url1 = jsonPathEvaluator.get("data.formC.document_url");
@@ -360,6 +371,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         return url1;
 
     }
+
+
 
     private void validatePostSuccessForaccessingGeneratedDocument(String url) {
 
