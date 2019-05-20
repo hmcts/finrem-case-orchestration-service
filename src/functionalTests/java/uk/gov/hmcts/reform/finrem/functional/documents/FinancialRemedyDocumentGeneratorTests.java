@@ -30,7 +30,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private static String SOLICITOR_REF_HEARING = "LL01";
     private static String DOCUMENT_FORMC = "Form C";
     private static String DOCUMENT_FORMG = "Form G";
-    private static String CONTESTED_FORMG_JSON = "validate-hearing-with-hearingdate1.json";
+    private static String CONTESTED_FORMG_JSON = "validate-hearing-withoutfastTrackDecision1.json";
     private String contestedDir = "/json/contested/";
     private String consentedDir = "/json/consented/";
 
@@ -145,6 +145,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyContestedFormGDocumentGenerationPostResponseContent() {
 
         JsonPath jsonPathEvaluator = generateDocument(CONTESTED_FORMG_JSON, generateHearingUrl, contestedDir);
+        System.out.println("FormG document generation : " + jsonPathEvaluator.prettyPrint());
         assertTrue(jsonPathEvaluator.get("data.state.").toString()
                 .equalsIgnoreCase("prepareForHearing"));
     }
@@ -264,6 +265,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 "binary", "hearing", contestedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
+        System.out.println("Document Content : " + documentContent.toString());
 
         assertTrue(documentContent.contains(APPLICANT_NAME_HEARING));
         assertTrue(documentContent.contains(DIVORCE_CASENO));
@@ -334,6 +336,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 break;
             case "hearing":
                 jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
+                System.out.println("generate Document reponse : " + jsonPathEvaluator.prettyPrint());
                 if (urlType.equals("document")) {
                     url1 = jsonPathEvaluator.get("data.formC.document_url");
                 } else if (urlType.equals("binary")) {
@@ -342,6 +345,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 break;
             case "hearingG":
                 jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
+                System.out.println("generate Document reponse : " + jsonPathEvaluator.prettyPrint());
                 if (urlType.equals("document")) {
                     url1 = jsonPathEvaluator.get("data.formG.document_url");
                 } else if (urlType.equals("binary")) {
