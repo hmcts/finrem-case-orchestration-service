@@ -530,6 +530,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 "remove-previousMiamAttendance-checklist1.json");
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-previousMiamAttendance-checklist1.json");
+        System.out.println("response content : " + jsonPathEvaluator.prettyPrint());
 
         if (     jsonPathEvaluator.get("MIAMExemptionsChecklist") == null
                 || jsonPathEvaluator.get("MIAMDomesticViolenceChecklist") == null
