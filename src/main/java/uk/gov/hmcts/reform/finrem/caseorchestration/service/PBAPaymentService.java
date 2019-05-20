@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRes
 import java.math.BigDecimal;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FEES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FEE_AMOUNT;
@@ -37,23 +38,26 @@ public class PBAPaymentService {
     @Value("${payment.api.siteId}")
     private String siteId;
 
-    @Value("${payment.api.description}")
-    private String description;
+    @Value("${payment.api.consented-description}")
+    private String consentedDescription;
+
+    @Value("${payment.api.contested-description}")
+    private String contestedDescription;
 
     public PaymentResponse makePayment(String authToken, String ccdCaseId, Map<String, Object> mapOfCaseData) {
         log.info("Inside makePayment, authToken : {}, ccdCaseId : {}, caseData : {}", authToken, ccdCaseId,
                 mapOfCaseData);
-        PaymentRequest paymentRequest = buildPaymenRequest(ccdCaseId, mapOfCaseData);
+        PaymentRequest paymentRequest = buildPaymentRequest(ccdCaseId, mapOfCaseData);
         log.info("paymentRequest: {}", paymentRequest);
         PaymentResponse paymentResponse = paymentClient.pbaPayment(authToken, paymentRequest);
         log.info("paymentResponse : {} ", paymentResponse);
         return paymentResponse;
     }
 
-    private PaymentRequest buildPaymenRequest(String ccdCaseId, Map<String, Object> mapOfCaseData) {
+    private PaymentRequest buildPaymentRequest(String ccdCaseId, Map<String, Object> mapOfCaseData) {
         FeeRequest feeRequest = buildFeeRequest(mapOfCaseData);
         log.info("Fee request : {} ", feeRequest);
-        return buildPaymentRequest(ccdCaseId, mapOfCaseData, feeRequest);
+        return buildPaymentRequestWithFee(ccdCaseId, mapOfCaseData, feeRequest);
     }
 
     private FeeRequest buildFeeRequest(Map<String, Object> mapOfCaseData) {
@@ -72,10 +76,11 @@ public class PBAPaymentService {
                 .build();
     }
 
-    private PaymentRequest buildPaymentRequest(String ccdCaseId, Map<String, Object> mapOfCaseData, FeeRequest fee) {
+    private PaymentRequest buildPaymentRequestWithFee(String ccdCaseId, Map<String, Object> mapOfCaseData,
+                                                      FeeRequest fee) {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode dataJsonNode = mapper.valueToTree(mapOfCaseData);
-
+        String description = isConsentedApplication(mapOfCaseData) ? consentedDescription : contestedDescription;
         return PaymentRequest.builder()
                 .accountNumber(dataJsonNode.path(PBA_NUMBER).asText())
                 .caseReference(dataJsonNode.path(DIVORCE_CASE_NUMBER).asText())
