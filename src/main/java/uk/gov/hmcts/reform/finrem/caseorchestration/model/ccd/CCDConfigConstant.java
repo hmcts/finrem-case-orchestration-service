@@ -13,7 +13,6 @@ public class CCDConfigConstant {
     //Application Type related
     public static final String D81_QUESTION = "d81Question";
     //Document related
-    public static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
     public static final String MINI_FORM_A = "miniFormA";
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";

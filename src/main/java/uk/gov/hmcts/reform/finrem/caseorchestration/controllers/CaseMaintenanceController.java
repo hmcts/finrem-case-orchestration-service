@@ -32,7 +32,6 @@ public class CaseMaintenanceController implements BaseController {
     private static final String DIVORCE_STAGE_REACHED = "divorceStageReached";
     private static final String DIVORCE_UPLOAD_EVIDENCE_2 = "divorceUploadEvidence2";
     private static final String DIVORCE_DECREE_ABSOLUTE_DATE = "divorceDecreeAbsoluteDate";
-    private static final String DIVORCE_PETITION_ISSUED_DATE = "divorcePetitionIssuedDate";
     private static final String DIVORCE_UPLOAD_PETITION = "divorceUploadPetition";
     private static final String DIVORCE_UPLOAD_EVIDENCE_1 = "divorceUploadEvidence1";
     private static final String DIVORCE_DECREE_NISI_DATE = "divorceDecreeNisiDate";
@@ -280,15 +279,11 @@ public class CaseMaintenanceController implements BaseController {
             // remove Decree Absolute details
             caseData.put(DIVORCE_UPLOAD_EVIDENCE_2, null);
             caseData.put(DIVORCE_DECREE_ABSOLUTE_DATE, null);
-            // remove petition issue date data
-            caseData.put(DIVORCE_PETITION_ISSUED_DATE, null);
             caseData.put(DIVORCE_UPLOAD_PETITION, null);
         } else if (equalsTo((String) caseData.get(DIVORCE_STAGE_REACHED), "Decree Absolute")) {
             // remove Decree Nisi details
             caseData.put(DIVORCE_UPLOAD_EVIDENCE_1, null);
             caseData.put(DIVORCE_DECREE_NISI_DATE, null);
-            // remove petition issue date data
-            caseData.put(DIVORCE_PETITION_ISSUED_DATE, null);
             caseData.put(DIVORCE_UPLOAD_PETITION, null);
         } else {
             // remove Decree Nisi details
