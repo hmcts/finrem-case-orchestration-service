@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.smoketests;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.config.HttpClientConfig;
 import io.restassured.config.RestAssuredConfig;
@@ -10,6 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import static io.restassured.RestAssured.given;
 
@@ -17,8 +22,8 @@ import static io.restassured.RestAssured.given;
 @ContextConfiguration(classes = {SmokeTestConfiguration.class})
 public class CaseOrchestrationSmokeTests {
 
-    @Value("${payment.api.baseurl}")
-    private String paymentApiUrl;
+    @Value("${url}")
+    private String url;
 
     @Value("${fees.lookup.endpoint}")
     private String feeLookupEndPoint;
@@ -33,6 +38,8 @@ public class CaseOrchestrationSmokeTests {
     private int connectionManagerTimeOut;
 
     private RestAssuredConfig config;
+    private ObjectMapper objectMapper = new ObjectMapper();
+
 
     @Before
     public void setUp() {
@@ -42,15 +49,25 @@ public class CaseOrchestrationSmokeTests {
                         .setParam("http.connection.timeout", connectionTimeOut)
                         .setParam("http.socket.timeout", socketTimeOut)
                         .setParam("http.connection-manager.timeout", connectionManagerTimeOut));
+
+
     }
 
     @Test
-    public void shouldFeeLookUp() {
+    public void shouldFeeLookUp() throws IOException {
         given().config(config)
+                .body(objectMapper.writeValueAsString(getRequestFromFile("/case.json")))
+                .headers("Content-Type", "application/json")
                 .when()
-                .get(paymentApiUrl + feeLookupEndPoint)
+                .post(url + feeLookupEndPoint)
                 .prettyPeek()
                 .then()
                 .statusCode(HttpStatus.OK.value());
+    }
+
+    private  CallbackRequest getRequestFromFile(String fileName) throws IOException {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(fileName)) {
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+        }
     }
 }
