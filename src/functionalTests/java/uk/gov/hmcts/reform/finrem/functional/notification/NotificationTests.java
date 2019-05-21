@@ -25,11 +25,16 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.hwf-success.api}")
     private String hwfSuccessfulApiUri;
 
+    private String contestedDir = "/json/contested/";
+    private String consentedDir = "/json/consented/";
+
+
 
     @Test
     public void verifyNotifyAssignToJudgeTestIsOkay() {
 
-        validatePostSuccessForNotification(notifyAssignToJudge, "ccd-request-with-solicitor-assignedToJudge.json");
+        validatePostSuccessForNotification(notifyAssignToJudge,
+                "ccd-request-with-solicitor-assignedToJudge.json", consentedDir);
 
     }
 
@@ -38,7 +43,7 @@ public class NotificationTests extends IntegrationTestBase {
     public void verifyNotifyConsentOrderAvailableTestIsOkay() {
 
         validatePostSuccessForNotification(consentOrderAvailable,
-                "ccd-request-with-solicitor-consentOrderAvailable.json");
+                "ccd-request-with-solicitor-consentOrderAvailable.json", consentedDir);
 
     }
 
@@ -46,7 +51,8 @@ public class NotificationTests extends IntegrationTestBase {
     @Test
     public void verifyNotifyConsentOrderMadeTestIsOkay() {
 
-        validatePostSuccessForNotification(consentOrderMade, "ccd-request-with-solicitor-consentOrderMade.json");
+        validatePostSuccessForNotification(consentOrderMade,
+                "ccd-request-with-solicitor-consentOrderMade.json", consentedDir);
 
     }
 
@@ -55,18 +61,19 @@ public class NotificationTests extends IntegrationTestBase {
     public void verifyNotifyConsentOrderNotApprovedTestIsOkay() {
 
         validatePostSuccessForNotification(consentOrderNotApproved,
-                "ccd-request-with-solicitor-consentOrderNotApproved.json");
+                "ccd-request-with-solicitor-consentOrderNotApproved.json", consentedDir);
 
     }
 
     @Test
     public void verifyNotifyHwfSuccessfulTestIsOkay() {
 
-        validatePostSuccessForNotification(hwfSuccessfulApiUri, "ccd-request-with-solicitor-hwfSuccessfulEmail.json");
+        validatePostSuccessForNotification(hwfSuccessfulApiUri,
+                "ccd-request-with-solicitor-hwfSuccessfulEmail.json", consentedDir);
 
     }
 
-    private void validatePostSuccessForNotification(String url, String jsonFileName) {
+    private void validatePostSuccessForNotification(String url, String jsonFileName, String journeyType) {
 
         SerenityRest.given()
                 .relaxedHTTPSValidation()

@@ -1,0 +1,82 @@
+{
+  "id" : "12345678",
+  "jurisdiction":"divorce",
+  "state":"created",
+  "case_data": {
+    "MIAMExemptionsChecklist": [
+      "domesticViolence",
+      "urgency",
+      "previousMIAMattendance",
+      "other"
+    ],
+    "benefitPaymentChecklist": [
+      "Step child or step children",
+      "In addition to child support maintenance already paid under a Child Support Agency assessment",
+      "To meet expenses incurred by a child being in educated or training for work",
+      "The child or the person with care of the child or the absent parent of the child is not habitually resident in the United Kingdom"
+    ],
+    "MIAMOtherGroundsChecklist": "FR_ms_MIAMOtherGroundsChecklist_Value_3",
+    "MIAMUrgencyReasonChecklist": [
+      "FR_ms_MIAMUrgencyReasonChecklist_Value_1",
+      "FR_ms_MIAMUrgencyReasonChecklist_Value_2",
+      "FR_ms_MIAMUrgencyReasonChecklist_Value_3",
+      "FR_ms_MIAMUrgencyReasonChecklist_Value_4",
+      "FR_ms_MIAMUrgencyReasonChecklist_Value_5"
+    ],
+    "natureOfApplicationChecklist": [
+      "periodicalPaymentOrder",
+      "Lump Sum Order",
+      "Pension Sharing Order",
+      "Pension Attachment Order",
+      "Pension Compensation Sharing Order",
+      "Pension Compensation Attachment Order",
+      "propertyAdjustmentOrder"
+    ],
+    "potentialAllegationChecklist": [
+      "potentialAllegationChecklist_1",
+      "potentialAllegationChecklist_2",
+      "potentialAllegationChecklist_3",
+      "potentialAllegationChecklist_4",
+      "potentialAllegationChecklist_5",
+      "potentialAllegationChecklist_6",
+      "potentialAllegationChecklist_7",
+      "potentialAllegationChecklist_8",
+      "potentialAllegationChecklist_9",
+      "potentialAllegationChecklist_10",
+      "potentialAllegationChecklist_11",
+      "potentialAllegationChecklist_12",
+      "potentialAllegationChecklist_13",
+      "potentialAllegationChecklist_14",
+      "notApplicable"
+    ],
+    "MIAMDomesticViolenceChecklist": [
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_2",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_3",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_4",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_5",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_6",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_7",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_8",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_9",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_10",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_11",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_12",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_13",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_14",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_15",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_16",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_17",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_18",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_19",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_20",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_21",
+      "FR_ms_MIAMDomesticViolenceChecklist_Value_22"
+    ],
+    "MIAMPreviousAttendanceChecklist": "FR_ms_MIAMPreviousAttendanceChecklist_Value_3",
+    "formCCreatedDate": "2019-05-07",
+    "eventDatePlus21Days": "2019-05-28",
+    "hearingDateLess35Days": "2019-06-05",
+    "hearingDateLess14Days": "2019-06-26"
+  }
+}
