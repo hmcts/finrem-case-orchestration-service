@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.smoketests;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.config.HttpClientConfig;
 import io.restassured.config.RestAssuredConfig;
@@ -10,6 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import static io.restassured.RestAssured.given;
 
@@ -17,29 +22,11 @@ import static io.restassured.RestAssured.given;
 @ContextConfiguration(classes = {SmokeTestConfiguration.class})
 public class CaseOrchestrationSmokeTests {
 
-    @Value("${fees.url}")
-    private String feeUrl;
+    @Value("${url}")
+    private String url;
 
-    @Value("${fees.api}")
-    private String feesApi;
-
-    @Value("${fees.jurisdiction1}")
-    private String jurisdiction1;
-
-    @Value("${fees.jurisdiction2}")
-    private String jurisdiction2;
-
-    @Value("${fees.channel}")
-    private String channel;
-
-    @Value("${fees.service}")
-    private String service;
-
-    @Value("${fees.event}")
-    private String event;
-
-    @Value("${fees.keyword}")
-    private String keyword;
+    @Value("${fees.lookup.endpoint}")
+    private String feeLookupEndPoint;
 
     @Value("${http.timeout}")
     private int connectionTimeOut;
@@ -51,6 +38,8 @@ public class CaseOrchestrationSmokeTests {
     private int connectionManagerTimeOut;
 
     private RestAssuredConfig config;
+    private ObjectMapper objectMapper = new ObjectMapper();
+
 
     @Before
     public void setUp() {
@@ -60,21 +49,25 @@ public class CaseOrchestrationSmokeTests {
                         .setParam("http.connection.timeout", connectionTimeOut)
                         .setParam("http.socket.timeout", socketTimeOut)
                         .setParam("http.connection-manager.timeout", connectionManagerTimeOut));
+
+
     }
 
     @Test
-    public void shouldFeeLookUp() {
+    public void shouldFeeLookUp() throws IOException {
         given().config(config)
+                .body(objectMapper.writeValueAsString(getRequestFromFile("/case.json")))
+                .headers("Content-Type", "application/json")
                 .when()
-                .queryParam("service", service)
-                .queryParam("jurisdiction1", jurisdiction1)
-                .queryParam("jurisdiction2", jurisdiction2)
-                .queryParam("channel", channel)
-                .queryParam("event", event)
-                .queryParam("keyword", keyword)
-                .get(feeUrl + feesApi)
+                .post(url + feeLookupEndPoint)
                 .prettyPeek()
                 .then()
                 .statusCode(HttpStatus.OK.value());
+    }
+
+    private  CallbackRequest getRequestFromFile(String fileName) throws IOException {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(fileName)) {
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+        }
     }
 }
