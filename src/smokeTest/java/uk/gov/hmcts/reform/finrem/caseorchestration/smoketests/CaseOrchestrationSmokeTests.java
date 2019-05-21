@@ -17,29 +17,11 @@ import static io.restassured.RestAssured.given;
 @ContextConfiguration(classes = {SmokeTestConfiguration.class})
 public class CaseOrchestrationSmokeTests {
 
-    @Value("${fees.url}")
-    private String feeUrl;
+    @Value("${payment.api.baseurl}")
+    private String paymentApiUrl;
 
-    @Value("${fees.api}")
-    private String feesApi;
-
-    @Value("${fees.jurisdiction1}")
-    private String jurisdiction1;
-
-    @Value("${fees.jurisdiction2}")
-    private String jurisdiction2;
-
-    @Value("${fees.channel}")
-    private String channel;
-
-    @Value("${fees.service}")
-    private String service;
-
-    @Value("${fees.event}")
-    private String event;
-
-    @Value("${fees.keyword}")
-    private String keyword;
+    @Value("${fees.lookup.endpoint}")
+    private String feeLookupEndPoint;
 
     @Value("${http.timeout}")
     private int connectionTimeOut;
@@ -66,13 +48,7 @@ public class CaseOrchestrationSmokeTests {
     public void shouldFeeLookUp() {
         given().config(config)
                 .when()
-                .queryParam("service", service)
-                .queryParam("jurisdiction1", jurisdiction1)
-                .queryParam("jurisdiction2", jurisdiction2)
-                .queryParam("channel", channel)
-                .queryParam("event", event)
-                .queryParam("keyword", keyword)
-                .get(feeUrl + feesApi)
+                .get(paymentApiUrl + feeLookupEndPoint)
                 .prettyPeek()
                 .then()
                 .statusCode(HttpStatus.OK.value());
