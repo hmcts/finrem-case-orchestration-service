@@ -55,6 +55,16 @@ public class FunctionalTestUtils {
         }
     }
 
+    public String getJsonFromFile(String fileName , String directory) {
+        try {
+            File file = ResourceUtils.getFile(this.getClass().getResource(directory + fileName));
+            return new String(Files.readAllBytes(file.toPath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public Headers getHeadersWithUserId() {
 
         return Headers.headers(

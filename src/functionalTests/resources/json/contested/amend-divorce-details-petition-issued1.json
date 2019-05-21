@@ -1,0 +1,86 @@
+{
+  "token": "test_token",
+  "event_id": "event1",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "created",
+    "case_data": {
+      "applicantLName": "Ramisetti",
+      "dateOfMarriage": "2012-10-10",
+      "soleTraderName": "Sole trader name",
+      "applicantFMName": "Padmaja",
+      "dateOfSepration": "2013-10-10",
+      "respondentEmail": "padmajaqqq@gmail.com",
+      "respondentLName": "lastname001",
+      "respondentPhone": "7411201630",
+      "respondentFMName": "PRASH",
+      "divorceCaseNumber": "EZ17D80123",
+      "fastTrackDecision": "No",
+      "respondentAddress": {
+        "County": "Please select",
+        "Country": "",
+        "PostCode": "",
+        "PostTown": "ILFORD",
+        "AddressLine1": "FLAT 188 CITY VIEW,  CENTREWAY APARTMENTS, AXON PLACE, AXON PLACE",
+        "AddressLine2": "AXON PLACE",
+        "AddressLine3": ""
+      },
+      "allocatedCourtList": "nottingham",
+      "solicitorReference": "KKKK",
+      "divorceStageReached": "Petition Issued",
+      "nottinghamCourtList": "FR_s_NottinghamList_1",
+      "promptForAnyDocument": "Yes",
+      "applicantAttendedMIAM": "Yes",
+      "divorceDecreeNisiDate": "2015-12-12",
+      "divorceUploadEvidence1": {
+        "document_url": "http://dm-store:8080/documents/5b063b62-6ad2-4f9c-80ad-e4e69e5d98a8",
+        "document_filename": "Decree Absolute.doc",
+        "document_binary_url": "http://dm-store:8080/documents/5b063b62-6ad2-4f9c-80ad-e4e69e5d98a8/binary"
+      },
+      "divorceUploadPetition": {
+        "document_url": "http://dm-store:8080/documents/fa644f46-8d96-4ade-81ab-bfc59e0db3c8",
+        "document_filename": "Amended Consent order01.doc",
+        "document_binary_url": "http://dm-store:8080/documents/fa644f46-8d96-4ade-81ab-bfc59e0db3c8/binary"
+      },
+      "isApplicantsHomeCourt": "No",
+      "respondentRepresented": "No",
+      "applicantSolicitorFirm": "Padmaja firm",
+      "applicantSolicitorName": "Padmaja",
+      "applicantSolicitorEmail": "padmajaqqqq@gmail.com",
+      "applicantSolicitorPhone": "07411201631",
+      "nameOfCourtDivorceCentre": "Divorce",
+      "uploadAdditionalDocument": [
+        {
+          "id": "94f69b9a-13ea-47a5-8a08-1f6626169056",
+          "value": {
+            "additionalDocuments": {
+              "document_url": "http://dm-store:8080/documents/87cb0bf1-6618-4a7c-bcad-a2840a301129",
+              "document_filename": "Amended Consent order01.doc",
+              "document_binary_url": "http://dm-store:8080/documents/87cb0bf1-6618-4a7c-bcad-a2840a301129/binary"
+            },
+            "additionalDocumentType": "scheduleOfAssets"
+          }
+        }
+      ],
+      "applicantSolicitorAddress": {
+        "County": "Please select",
+        "Country": "",
+        "PostCode": "",
+        "PostTown": "ILFORD",
+        "AddressLine1": "FLAT 188 CITY VIEW,  CENTREWAY APARTMENTS, AXON PLACE",
+        "AddressLine2": "AXON PLACE",
+        "AddressLine3": ""
+      },
+      "divorcePetitionIssuedDate": "2019-12-12",
+      "familyMediatorServiceName": "Family mediation Service  Name",
+      "applicantSolicitorDXnumber": "RDDD",
+      "mediatorRegistrationNumber": "Miam URN",
+      "addToComplexityListOfCourts": "falseNo",
+      "natureOfApplicationChecklist": [
+        "Lump Sum Order"
+      ],
+      "applicantSolicitorConsentForEmails": "Yes"
+    }
+  }
+}

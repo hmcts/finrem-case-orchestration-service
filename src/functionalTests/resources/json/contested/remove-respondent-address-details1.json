@@ -1,0 +1,180 @@
+{
+  "token": "test_token",
+  "event_id": "event1",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "created",
+    "case_data": {
+      "cfcCourtList": "FR_s_CFCList_2",
+      "applicantLName": "Ramisetti0012",
+      "dateOfMarriage": "2012-01-11",
+      "mortgageDetail": "HSBC",
+      "netValueOfHome": "netValue",
+      "rSolicitorFirm": "Test Respondant Solicitor firm",
+      "rSolicitorName": "Test Respondant Solicitor",
+      "applicantFMName": "Padmaja0012",
+      "dateOfSepration": "2014-01-11",
+      "propertyAddress": "102",
+      "rSolicitorEmail": "padmaja.ramisetti@gmail.com",
+      "rSolicitorPhone": "07411201630",
+      "respondentEmail": "padmaja102.ramisetti@gmail.com",
+      "respondentLName": "lastname0012",
+      "respondentPhone": "7411201631",
+      "respondentFMName": "respondant0012",
+      "divorceCaseNumber": "EZ17D80124",
+      "fastTrackDecision": "No",
+      "rSolicitorAddress": {
+        "County": "Essex",
+        "Country": "",
+        "PostCode": "IG1 1NL",
+        "PostTown": "ILFORD",
+        "AddressLine1": "FLAT 188 CITY VIEW,  CENTREWAY APARTMENTS, AXON PLACE",
+        "AddressLine2": "AXON PLACE",
+        "AddressLine3": "ILFORD"
+      },
+      "respondentAddress": {
+        "County": "Essex",
+        "Country": "United Kingdom",
+        "PostCode": "IG2 6SA",
+        "PostTown": "Ilford",
+        "AddressLine1": "102 Ashurst Drive, GantsHill",
+        "AddressLine2": "GantsHill",
+        "AddressLine3": "Ilford"
+      },
+      "allocatedCourtList": "cfc",
+      "familyMediatorMIAM": "No",
+      "petitionIssuedDate": "2015-01-11",
+      "rSolicitorDXnumber": "aaaa",
+      "solicitorReference": "KKKK0012",
+      "divorceStageReached": "Decree Nisi",
+      "rSolicitorReference": "Resp Reference",
+      "reasonForLocalCourt": "reason for not local court",
+      "uploadScanned4AForm": {
+        "document_url": "http://dm-store:8080/documents/b0d86c4d-1f31-4d29-bff5-9ceff08d4b10",
+        "document_filename": "Decree Absolute.doc",
+        "document_binary_url": "http://dm-store:8080/documents/b0d86c4d-1f31-4d29-bff5-9ceff08d4b10/binary"
+      },
+      "uploadScanned4BForm": {
+        "document_url": "http://dm-store:8080/documents/623881d8-3d4a-475d-b374-01b69d56ea5a",
+        "document_filename": "Decree Absolute.doc",
+        "document_binary_url": "http://dm-store:8080/documents/623881d8-3d4a-475d-b374-01b69d56ea5a/binary"
+      },
+      "promptForAnyDocument": "Yes",
+      "applicantAttendedMIAM": "No",
+      "claimingExemptionMIAM": "Yes",
+      "divorceDecreeNisiDate": "2015-12-12",
+      "isApplicantsHomeCourt": "Yes",
+      "respondentRepresented": "Yes",
+      "applicantSolicitorFirm": "Padmaja firm0012",
+      "applicantSolicitorName": "Padmaja0012",
+      "divorceUploadEvidence1": {
+        "document_url": "http://dm-store:8080/documents/f7933198-a441-46c4-af3b-d0c050e322c5",
+        "document_filename": "Decree Nisi.doc",
+        "document_binary_url": "http://dm-store:8080/documents/f7933198-a441-46c4-af3b-d0c050e322c5/binary"
+      },
+      "divorceUploadEvidence2": null,
+      "MIAMExemptionsChecklist": [
+        "domesticViolence ",
+        "urgency",
+        "previousMIAMattendance ",
+        "other"
+      ],
+      "applicantSolicitorEmail": "padmaja.ramisetti001@gmail.com",
+      "applicantSolicitorPhone": "07411201631",
+      "benefitPaymentChecklist": [
+        "Step child or step children",
+        "In addition to child support maintenance already paid under a Child Support Agency assessment",
+        "To meet expenses arising from a child’s disability"
+      ],
+      "fastTrackDecisionReason": [
+        "reason_1",
+        "reason_2",
+        "reason_3"
+      ],
+      "estimatedAssetsChecklist": [
+        "estimatedAssetsChecklist_2",
+        "estimatedAssetsChecklist_3"
+      ],
+      "nameOfCourtDivorceCentre": "Divorce1",
+      "otherReasonForComplexity": "Yes",
+      "uploadAdditionalDocument": [
+        {
+          "id": "0f6b12a9-747f-4cda-9f28-12127100c36a",
+          "value": {
+            "additionalDocuments": {
+              "document_url": "http://dm-store:8080/documents/e2a6e3cb-b72c-40db-b2b6-41e932ae5df4",
+              "document_filename": "Decree Nisi.doc",
+              "document_binary_url": "http://dm-store:8080/documents/e2a6e3cb-b72c-40db-b2b6-41e932ae5df4/binary"
+            },
+            "additionalDocumentType": "scheduleOfAssets"
+          }
+        },
+        {
+          "id": "42cc56f0-e351-4c23-854e-424099dbcdb0",
+          "value": {
+            "additionalDocuments": {
+              "document_url": "http://dm-store:8080/documents/98932dea-0cff-4832-a177-d220c0cf06ff",
+              "document_filename": "Amended Consent order01.doc",
+              "document_binary_url": "http://dm-store:8080/documents/98932dea-0cff-4832-a177-d220c0cf06ff/binary"
+            },
+            "additionalDocumentType": "letter"
+          }
+        }
+      ],
+      "MIAMOtherGroundsChecklist": "FR_ms_MIAMOtherGroundsChecklist_Value_1",
+      "applicantSolicitorAddress": {
+        "County": "Essex",
+        "Country": "United Kingdom",
+        "PostCode": "IG1 1NL",
+        "PostTown": "ILFORD1",
+        "AddressLine1": "FLAT 1876 CITY VIEW,  CENTREWAY APARTMENTS, AXON PLACE",
+        "AddressLine2": "AXON PLACE1",
+        "AddressLine3": null
+      },
+      "detailPotentialAllegation": "allegation",
+      "divorceDecreeAbsoluteDate": null,
+      "MIAMUrgencyReasonChecklist": [
+        "FR_ms_MIAMUrgencyReasonChecklist_Value_1",
+        "FR_ms_MIAMUrgencyReasonChecklist_Value_2"
+      ],
+      "applicantSolicitorDXnumber": "RDDD00123",
+      "benefitForChildrenDecision": "No",
+      "paymentForChildrenDecision": "Yes",
+      "addToComplexityListOfCourts": "trueYes",
+      "natureOfApplicationChecklist": [
+        "Lump Sum Order",
+        "Pension Sharing Order",
+        "Pension Attachment Order",
+        "Pension Compensation Sharing Order",
+        "Pension Compensation Attachment Order",
+        "propertyAdjustmentOrder"
+      ],
+      "otherReasonForComplexityText": "reason For complexity",
+      "potentialAllegationChecklist": [
+        "potentialAllegationChecklist_2",
+        "potentialAllegationChecklist_1",
+        "potentialAllegationChecklist_4",
+        "potentialAllegationChecklist_14"
+      ],
+      "propertyAdjutmentOrderDetail": [
+        {
+          "id": "0cd0c3c3-84d7-4286-b4dd-93b8635c9dc7",
+          "value": {
+            "propertAddress": "103",
+            "nameForProperty": "HSBC"
+          }
+        }
+      ],
+      "MIAMDomesticViolenceChecklist": [
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_4",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_3",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_2"
+      ],
+      "MIAMPreviousAttendanceChecklist": "FR_ms_MIAMPreviousAttendanceChecklist_Value_1",
+      "additionalPropertyOrderDecision": "Yes",
+      "applicantSolicitorConsentForEmails": "Yes"
+    }
+  }
+}
