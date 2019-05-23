@@ -8,6 +8,7 @@ services:
     ports:
       - 9000:9000
     environment:
+      IDAM_API_URL: http://idam-api:8080
       FINREM_NOTIFICATION_SERVICE_BASE_URL: http://finrem-notification-service:8086
       DOCUMENT_GENERATOR_SERVICE_API_BASEURL: http://finrem-document-generator-client:4009
       PAYMENT_SERVICE_API_BASEURL: http://finrem-payment-service:9001

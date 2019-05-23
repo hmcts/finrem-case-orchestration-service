@@ -33,3 +33,7 @@ output "environment_name" {
 output "fees_api_url" {
   value = "${var.fees_api_url}"
 }
+
+output "idam_api_url" {
+  value = "${var.idam_api_url}"
+}
