@@ -47,7 +47,7 @@ public class CaseDataController implements BaseController {
         if (idamService.isUserRoleAdmin(authToken)) {
             log.info("Admin users.");
             caseData.put(IS_ADMIN, YES);
-        }else{
+        } else {
             log.info("other users.");
             caseData.put(IS_ADMIN, NO);
             caseData.put(APPLICANT_REPRESENTED, YES);

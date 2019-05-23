@@ -38,6 +38,7 @@ public class IdamServiceTest  {
     public void setUp() {
         mockServer = MockRestServiceServer.createServer(restTemplate);
     }
+
     @Test
     public void retrieveUserRoleIsAdmin() {
         mockServer.expect(requestTo(toUri()))

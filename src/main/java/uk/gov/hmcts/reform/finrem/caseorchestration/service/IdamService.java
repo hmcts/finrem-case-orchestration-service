@@ -29,18 +29,18 @@ public class IdamService {
     private final IdamServiceConfiguration serviceConfig;
     private final RestTemplate restTemplate;
 
-    private final static Function<IdamServiceConfiguration,URI> uriSupplier =
+    private static final  Function<IdamServiceConfiguration,URI> uriSupplier =
         (serviceConfig) -> fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi()).build().toUri();
 
-    private final static Function<String, HttpEntity> buildAuthRequest = authToken -> {
+    private static final  Function<String, HttpEntity> buildAuthRequest = authToken -> {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", authToken);
         headers.add("Content-Type", "application/json");
         return new HttpEntity<>(headers);
     };
 
-    private final static Function<ResponseEntity<Map>, Boolean>  isAdmin=
-        responseEntity->List.class.cast(responseEntity.getBody().get(ROLES)).stream()
+    private static final  Function<ResponseEntity<Map>, Boolean>  isAdmin =
+        responseEntity -> List.class.cast(responseEntity.getBody().get(ROLES)).stream()
         .anyMatch(role -> role.equals(FR_COURT_ADMIN));
 
     public boolean isUserRoleAdmin(String authToken) {
