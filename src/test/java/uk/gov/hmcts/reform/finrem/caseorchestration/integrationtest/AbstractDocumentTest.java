@@ -32,6 +32,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
@@ -54,6 +55,7 @@ public abstract class AbstractDocumentTest {
     private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generatePDF";
     private static final String TEMP_URL = "http://doc1";
     private static final String DELETE_DOCUMENT_CONTEXT_PATH = "/version/1/delete-pdf-document";
+    private static final String IDAM_SERVICE_CONTEXT_PATH = "/details";
 
     @Autowired
     protected ObjectMapper objectMapper;
@@ -69,6 +71,9 @@ public abstract class AbstractDocumentTest {
 
     @ClassRule
     public static WireMockClassRule documentGeneratorService = new WireMockClassRule(4009);
+
+    @ClassRule
+    public static WireMockClassRule idamService = new WireMockClassRule(4501);
 
     protected CallbackRequest request;
 
@@ -125,5 +130,15 @@ public abstract class AbstractDocumentTest {
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)));
+    }
+
+    void idamServiceStub() throws JsonProcessingException {
+        idamService.stubFor(get(urlPathEqualTo(IDAM_SERVICE_CONTEXT_PATH))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                .withBody("{\"roles\": [\"caseworker-divorce-financialremedy-courtadmin\"]}")));
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.ResultMatcher;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import javax.ws.rs.core.MediaType;
@@ -46,6 +47,9 @@ public class DocumentControllerTest extends BaseControllerTest {
 
     @MockBean
     protected OnlineFormDocumentService documentService;
+
+    @MockBean
+    protected IdamService idamService;
 
     @Before
     public void setUp()  {

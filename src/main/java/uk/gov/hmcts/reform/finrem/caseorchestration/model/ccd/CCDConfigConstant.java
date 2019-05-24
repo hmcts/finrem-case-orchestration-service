@@ -32,4 +32,11 @@ public class CCDConfigConstant {
     public static final String CASE_ALLOCATED_TO = "caseAllocatedTo";
     public static final String MIAM_ATTENDANCE = "applicantAttendedMIAM";
     public static final String MIAM_EXEMPTION = "claimingExemptionMIAM";
+    public static final String IS_ADMIN = "isAdmin";
+    public static final String APPLICANT_REPRESENTED = "applicantRepresented";
+    public static final String YES = "Yes";
+    public static final String NO = "No";
+    public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
+    public static final String ROLES = "roles";
+
 }
