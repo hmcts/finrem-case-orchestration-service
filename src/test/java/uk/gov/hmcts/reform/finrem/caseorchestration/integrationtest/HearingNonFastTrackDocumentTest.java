@@ -47,7 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_14_WEEKS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_16_WEEKS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.MUST_FIELD_ERROR;
 
 @RunWith(SpringRunner.class)
@@ -167,7 +167,7 @@ public class HearingNonFastTrackDocumentTest {
         return objectMapper.writeValueAsString(
                 AboutToStartOrSubmitCallbackResponse.builder()
                         .data(caseDetails.getData())
-                        .warnings(ImmutableList.of(DATE_BETWEEN_12_AND_14_WEEKS))
+                        .warnings(ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS))
                         .build());
     }
 
