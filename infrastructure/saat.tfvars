@@ -1,4 +1,5 @@
 vault_section = "test"
+idam_api_url = "http://betaDevBccidamAppLB.reform.hmcts.net"
 finrem_ns_url = "http://finrem-ns-saat.service.core-compute-saat.internal"
 document_generator_baseurl = "http://finrem-dgcs-saat.service.core-compute-saat.internal"
 payment_api_url = "http://finrem-ps-saat.service.core-compute-saat.internal"
