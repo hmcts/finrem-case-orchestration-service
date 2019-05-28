@@ -89,8 +89,7 @@ public class NotificationsTest {
         stubForNotification(NOTIFY_HWF_SUCCESSFUL_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(HWF_SUCCESSFUL_URL)
                 .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN))
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().json(expectedCaseData()));
@@ -103,8 +102,7 @@ public class NotificationsTest {
         stubForNotification(NOTIFY_CONSENT_ORDER_MADE_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_MADE_URL)
                 .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN))
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().json(expectedCaseData()));
@@ -117,8 +115,7 @@ public class NotificationsTest {
         stubForNotification(NOTIFY_CONSENT_ORDER_AVAILABLE_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_AVAILABLE_URL)
                 .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN))
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().json(expectedCaseData()));
@@ -131,8 +128,7 @@ public class NotificationsTest {
         stubForNotification(NOTIFY_CONSENT_ORDER_NOT_APPROVED_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_NOT_APPROVED_URL)
                 .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN))
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().json(expectedCaseData()));
@@ -145,8 +141,7 @@ public class NotificationsTest {
         stubForNotification(NOTIFY_ASSIGN_TO_JUDGE_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(ASSIGNED_TO_JUDGE_URL)
                 .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN))
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().json(expectedCaseData()));

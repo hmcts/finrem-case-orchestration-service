@@ -32,34 +32,34 @@ public class NotificationService {
     private final NotificationServiceConfiguration notificationServiceConfiguration;
     private final RestTemplate restTemplate;
 
-    public void sendHWFSuccessfulConfirmationEmail(CallbackRequest callbackRequest , String authToken) {
+    public void sendHWFSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
-        sendNotificationEmail(callbackRequest, authToken, uri);
+        sendNotificationEmail(callbackRequest, uri);
     }
 
-    public void sendAssignToJudgeConfirmationEmail(CallbackRequest callbackRequest, String authToken) {
+    public void sendAssignToJudgeConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getAssignToJudge());
-        sendNotificationEmail(callbackRequest, authToken, uri);
+        sendNotificationEmail(callbackRequest, uri);
     }
 
-    public void sendConsentOrderMadeConfirmationEmail(CallbackRequest callbackRequest, String authToken) {
+    public void sendConsentOrderMadeConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderMade());
-        sendNotificationEmail(callbackRequest, authToken, uri);
+        sendNotificationEmail(callbackRequest, uri);
     }
 
-    public void sendConsentOrderNotApprovedEmail(CallbackRequest callbackRequest, String authToken) {
+    public void sendConsentOrderNotApprovedEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderNotApproved());
-        sendNotificationEmail(callbackRequest, authToken, uri);
+        sendNotificationEmail(callbackRequest, uri);
     }
 
-    public void sendConsentOrderAvailableEmail(CallbackRequest callbackRequest, String authToken) {
+    public void sendConsentOrderAvailableEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailable());
-        sendNotificationEmail(callbackRequest, authToken, uri);
+        sendNotificationEmail(callbackRequest, uri);
     }
 
-    private void sendNotificationEmail(CallbackRequest callbackRequest, String authToken, URI uri) {
+    private void sendNotificationEmail(CallbackRequest callbackRequest, URI uri) {
         NotificationRequest notificationRequest = buildNotificationRequest(callbackRequest);
-        HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders(authToken));
+        HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders());
         log.info(NOTIFICATION_SERVICE_URL, uri.toString());
         try {
             restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
@@ -89,9 +89,8 @@ public class NotificationService {
                 .toUri();
     }
 
-    private HttpHeaders buildHeaders(String authToken) {
+    private HttpHeaders buildHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", authToken);
         headers.add("Content-Type", "application/json");
         return headers;
     }
