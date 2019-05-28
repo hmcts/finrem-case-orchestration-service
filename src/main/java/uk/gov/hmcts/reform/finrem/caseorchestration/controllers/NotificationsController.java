@@ -36,13 +36,12 @@ public class NotificationsController implements BaseController {
         @ApiResponse(code = 200, message = "HWFSuccessful e-mail sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendHwfSuccessfulConfirmationEmail(
-        @RequestBody CallbackRequest callbackRequest,
-        @RequestHeader(value = "Authorization") String userToken) {
+        @RequestBody CallbackRequest callbackRequest) {
         log.info(LOG_MESSAGE, callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (isSolicitorAgreedToReceiveEmails(caseData)) {
-            notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest, userToken);
+            notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -53,13 +52,12 @@ public class NotificationsController implements BaseController {
         @ApiResponse(code = 204, message = "Case assigned to Judge e-mail sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendAssignToJudgeConfirmationEmail(
-        @RequestBody CallbackRequest callbackRequest,
-        @RequestHeader(value = "Authorization") String userToken) {
+        @RequestBody CallbackRequest callbackRequest) {
         log.info(LOG_MESSAGE, callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (isSolicitorAgreedToReceiveEmails(caseData)) {
-            notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest, userToken);
+            notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -70,13 +68,12 @@ public class NotificationsController implements BaseController {
         @ApiResponse(code = 204, message = "Consent order made e-mail sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderMadeConfirmationEmail(
-        @RequestBody CallbackRequest callbackRequest,
-        @RequestHeader(value = "Authorization") String userToken) {
+        @RequestBody CallbackRequest callbackRequest) {
         log.info(LOG_MESSAGE, callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (isSolicitorAgreedToReceiveEmails(caseData)) {
-            notificationService.sendConsentOrderMadeConfirmationEmail(callbackRequest, userToken);
+            notificationService.sendConsentOrderMadeConfirmationEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -87,13 +84,12 @@ public class NotificationsController implements BaseController {
         @ApiResponse(code = 204, message = "Consent order not approved e-mail sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderNotApprovedEmail(
-        @RequestBody CallbackRequest callbackRequest,
-        @RequestHeader(value = "Authorization") String userToken) {
+        @RequestBody CallbackRequest callbackRequest) {
         log.info(LOG_MESSAGE, callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (isSolicitorAgreedToReceiveEmails(caseData)) {
-            notificationService.sendConsentOrderNotApprovedEmail(callbackRequest, userToken);
+            notificationService.sendConsentOrderNotApprovedEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -104,13 +100,12 @@ public class NotificationsController implements BaseController {
         @ApiResponse(code = 204, message = "Consent order available e-mail sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderAvailableEmail(
-        @RequestBody CallbackRequest callbackRequest,
-        @RequestHeader(value = "Authorization") String userToken) {
+        @RequestBody CallbackRequest callbackRequest) {
         log.info(LOG_MESSAGE, callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (isSolicitorAgreedToReceiveEmails(caseData)) {
-            notificationService.sendConsentOrderAvailableEmail(callbackRequest, userToken);
+            notificationService.sendConsentOrderAvailableEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
