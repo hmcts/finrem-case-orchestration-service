@@ -21,7 +21,7 @@ services:
 #      - finrem-notification-service
 
   ccd-case-management-web:
-    image: "hmcts/ccd-case-management-web:${CCD_CASE_MANAGEMENT_WEB_TAG:-latest}"
+    image: "hmcts.azurecr.io/hmcts/ccd-case-management-web:${CCD_CASE_MANAGEMENT_WEB_TAG:-latest}"
     container_name: ccd-case-management-web
     environment:
       IDAM_LOGIN_URL: https://localhost:3501/login
@@ -79,7 +79,7 @@ services:
       - idam-api
 
   ccd-user-profile-api:
-    image: "hmcts/ccd-user-profile-api:${CCD_USER_PROFILE_API_TAG:-latest}"
+    image: "hmcts.azurecr.io/hmcts/ccd-user-profile-api:${CCD_USER_PROFILE_API_TAG:-latest}"
     environment:
       USER_PROFILE_DB_HOST: ccd-shared-database
       USER_PROFILE_DB_PORT: 5432
@@ -101,7 +101,7 @@ services:
       - service-auth-provider-api
 
   ccd-definition-store-api:
-    image: "hmcts/ccd-definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
+    image: "hmcts.azurecr.io/hmcts/ccd-definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
     environment:
       DEFINITION_STORE_DB_HOST: ccd-shared-database
       DEFINITION_STORE_DB_PORT: 5432
@@ -129,7 +129,7 @@ services:
       - service-auth-provider-api
 
   ccd-data-store-api:
-    image: "hmcts/ccd-data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
+    image: "hmcts.azurecr.io/hmcts/ccd-data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
     environment:
       DATA_STORE_DB_HOST: ccd-shared-database
       DATA_STORE_DB_PORT: 5432
@@ -231,7 +231,7 @@ services:
       MICROSERVICEKEYS_DIVORCE: "AAAAAAAAAAAAAAAA"
 
   dm-store:
-    image: "hmcts/dm-store:${DM_STORE_TAG:-latest}"
+    image: "hmcts.azurecr.io/hmcts/dm-store:${DM_STORE_TAG:-latest}"
     command: --wait-for-database 30
     healthcheck:
       disable: true
