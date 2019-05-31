@@ -33,7 +33,6 @@ module "finrem-cos" {
     REFORM_SERVICE_NAME                                   = "${var.reform_service_name}"
     REFORM_TEAM                                           = "${var.reform_team}"
     REFORM_ENVIRONMENT                                    = "${var.env}"
-    TMP_DUMMY_VAR                                         = "remove me"
     IDAM_API_URL                                          = "${var.idam_api_url}"
     FINREM_NOTIFICATION_SERVICE_BASE_URL                  = "${var.finrem_ns_url}"
     DOCUMENT_GENERATOR_SERVICE_API_BASEURL                = "${var.document_generator_baseurl}"
