@@ -83,6 +83,10 @@ public class DocumentControllerTest extends BaseControllerTest {
         return jsonPath("$.data.state", is(APPLICATION_ISSUED.toString()));
     }
 
+    String documentName() {
+        return "miniFormA";
+    }
+
     @Test
     public void generateMiniFormA() throws Exception {
         whenServiceGeneratesDocument().thenReturn(caseDocument());
@@ -93,9 +97,9 @@ public class DocumentControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(stateCheck())
-                .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
-                .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
-                .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BINARY_URL)))
+                .andExpect(jsonPath("$.data."+documentName()+".document_url", is(DOC_URL)))
+                .andExpect(jsonPath("$.data."+documentName()+".document_filename", is(FILE_NAME)))
+                .andExpect(jsonPath("$.data."+documentName()+".document_binary_url", is(BINARY_URL)))
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
