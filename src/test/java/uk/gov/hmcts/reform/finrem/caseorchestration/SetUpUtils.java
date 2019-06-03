@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
@@ -17,10 +19,12 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 
 public class SetUpUtils {
 
@@ -57,7 +61,22 @@ public class SetUpUtils {
         return caseData;
     }
 
-    public static ConsentOrderData consentOrderData(String id) {
+    public static Map<String, Object> generalLetterDataMap() {
+        return ImmutableMap.of(GENERAL_LETTER, ImmutableList.of(generalLetterData()));
+    }
+
+    private static GeneralLetterData generalLetterData() {
+        GeneralLetter generalLetter = new GeneralLetter();
+        generalLetter.setGeneratedLetter(caseDocument());
+
+        GeneralLetterData generalLetterData = new GeneralLetterData();
+        generalLetterData.setId(UUID.randomUUID().toString());
+        generalLetterData.setGeneralLetter(generalLetter);
+
+        return generalLetterData;
+    }
+
+    private static ConsentOrderData consentOrderData(String id) {
         ConsentOrder consentOrder = new ConsentOrder();
         consentOrder.setDocumentType(REJECTED_ORDER_TYPE);
         consentOrder.setDocumentLink(caseDocument());

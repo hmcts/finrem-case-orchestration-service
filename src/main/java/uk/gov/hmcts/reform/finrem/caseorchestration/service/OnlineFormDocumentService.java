@@ -51,13 +51,6 @@ public class OnlineFormDocumentService extends AbstractDocumentService {
         return caseDocument;
     }
 
-    public CaseDocument createGeneralLetter(String authorisationToken, CaseDetails caseDetails) {
-        return generateDocument(authorisationToken, caseDetails,
-                config.getGeneralLetterTemplate(),
-                config.getGeneralLetterFileName());
-    }
-
-
     private CaseDetails translateOptions(CaseDetails caseDetails) {
         CaseDetails copy = copyOf(caseDetails);
         optionIdToValueTranslator.translateOptionsValues.accept(copy);

@@ -120,7 +120,19 @@
       },
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "Yes",
-      "generalLetterBody": "This test is the test which, always passes!"
+      "generalLetterBody": "This test is the test which, always passes!",
+      "generalLetter": [
+        {
+          "id": "1",
+          "value": {
+            "generatedLetter": {
+              "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
+              "document_filename": "app_docs.pdf",
+              "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
+            }
+          }
+        }
+      ]
     }
   }
 }

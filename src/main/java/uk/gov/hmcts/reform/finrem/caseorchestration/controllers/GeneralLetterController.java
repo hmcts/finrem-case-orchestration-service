@@ -14,14 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_TEXT;
 
 @RestController
@@ -30,7 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class GeneralLetterController implements BaseController {
 
     @Autowired
-    private OnlineFormDocumentService service;
+    private GeneralLetterService service;
 
     @PostMapping(path = "/documents/general-letter", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
@@ -45,9 +43,12 @@ public class GeneralLetterController implements BaseController {
             @RequestHeader(value = "Authorization") String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
+        validateCaseData(callback);
+        
+        Map<String, Object> generalLetters = service.createGeneralLetter(authorisationToken, callback.getCaseDetails());
+
         Map<String, Object> caseData = callback.getCaseDetails().getData();
-        CaseDocument document = service.createGeneralLetter(authorisationToken, callback.getCaseDetails());
-        caseData.put(GENERAL_LETTER, document);
+        caseData.putAll(generalLetters);
         caseData.put(GENERAL_LETTER_TEXT, null);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
