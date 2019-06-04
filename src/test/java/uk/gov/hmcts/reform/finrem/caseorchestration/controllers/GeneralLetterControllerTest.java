@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.ResultMatcher;
@@ -37,6 +38,9 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
         return "/case-orchestration/documents/general-letter";
     }
 
+    @Value("${generalLetterBody.default.Text}")
+    private String expectedDefaultText;
+    
     @Test
     public void generateGeneralLetterSuccess() throws Exception {
         doValidCaseDataSetUp();
@@ -88,6 +92,6 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
     }
 
     private ResultMatcher letterContentEmpty() {
-        return jsonPath("$.data.generalLetterBody", isEmptyOrNullString());
+        return jsonPath("$.data.generalLetterBody", is(expectedDefaultText));
     }
 }
