@@ -72,8 +72,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
 
-    //Being fixed now , ignoring to unblock pr merge for release
-    @Ignore
     @Test
     public void verifyPBAValidationTest() {
 
@@ -86,16 +84,13 @@ public class PaymentServiceTests extends IntegrationTestBase {
         validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload.json" , consentedDir);
     }
 
-    //Being fixed now , ignoring to unblock pr merge for release
-    //@Ignore
     @Test
     public void verifyPBAPaymentSuccessTestContested() {
 
         validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Contested.json" , contestedDir);
     }
 
-    //Being fixed now , ignoring to unblock pr merge for release
-    @Ignore
+
     @Test
     public void verifyPBAPaymentFailureTest() {
         validateFailurePBAPayment(pbaPayment, "FailurePaymentRequestPayload.json" , consentedDir);
@@ -117,13 +112,12 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Test
     public void verifyPBAConfirmationForHWFContested() {
         validatePBAConfirmationForHWF(pbaConfirmation, "hwfPayment.json", contestedDir);
-
     }
 
     @Test
     public void verifyPBAConfirmationForPBAPaymentContested() {
 
-        validatePBAConfirmationForPBAPayment(pbaConfirmation, "pba-payment.json", contestedDir);
+        validatePBAConfirmationForPBAPayment(pbaConfirmation, "SuccessPaymentRequestPayload_Contested.json", contestedDir);
     }
 
 
@@ -211,6 +205,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
         int statusCode = response.getStatusCode();
 
         JsonPath jsonPathEvaluator = response.jsonPath().setRoot("data");
+        System.out.println("response : " + response.prettyPrint());
+        System.out.println("statusCode : " + statusCode);
 
         assertEquals(statusCode, 200);
 
@@ -226,7 +222,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeader())
                 .contentType("application/json")
-                .body(utils.getJsonFromFile(filename))
+                .body(utils.getJsonFromFile(filename, journeyType))
                 .when().post(url)
                 .andReturn();
     }
