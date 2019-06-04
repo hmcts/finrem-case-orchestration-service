@@ -34,9 +34,9 @@ public class ValidateHearingDatesTest extends IntegrationTestBase {
 
     @Test
     public void verifyShouldThrowErrorWhenIssueDateAndHearingDateAreEmpty() {
-        validatePostSuccess(validateHearing, "pba-validate.json" , consentedDir);
+        validatePostSuccess(validateHearing, "pba-validate1.json" , consentedDir);
         assertEquals("Issue Date , fast track decision or hearingDate is empty",
-                getResponse(validateHearing, "pba-validate.json",consentedDir).jsonPath().get("errors[0]"));
+                getResponse(validateHearing, "pba-validate1.json",consentedDir).jsonPath().get("errors[0]"));
     }
 
     @Test

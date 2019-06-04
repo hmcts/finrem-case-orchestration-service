@@ -1,11 +1,11 @@
 {
-  "token": "token_test",
   "event_id": "some_event_id",
   "case_details": {
+    "id": "95959595",
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_data": {
-      "PBANumber": "PBA123456",
+      "PBANumber": "PBA222",
       "d81Question": "No",
       "PBAreference": "ABCD",
       "consentOrder": {
@@ -63,7 +63,7 @@
       },
       "authorisationFirm": "test",
       "authorisationName": "test",
-      "divorceCaseNumber": "DD12D12345",
+      "divorceCaseNumber": "ED12D67898",
       "pensionCollection": [
         {
           "id": "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",
@@ -119,7 +119,7 @@
         "document_binary_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
       },
       "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "Yes"
+      "solicitorAgreeToReceiveEmails": "No"
     }
   }
 }

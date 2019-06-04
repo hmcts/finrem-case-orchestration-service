@@ -3,7 +3,7 @@
   "summary": "",
   "description": "",
   "case_details": {
-    "id": "100030000",
+    "id": "17878710",
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_data": {
@@ -26,7 +26,7 @@
         "applicantSolicitorEmail": "emailSol99@email.com",
         "applicantSolicitorDXnumber": null,
         "applicantSolicitorConsentForEmails": "No",
-        "divorceCaseNumber": "ED12D12999",
+        "divorceCaseNumber": "ED12D15888",
         "dateOfMarriage": "1999-01-01",
         "dateOfSepration": "2019-02-01",
         "divorcePetitionIssuedDate": "2019-03-01",
@@ -73,17 +73,17 @@
       "authorisation2b": "SolPos99",
       "authorisation3": "2019-06-03",
       "helpWithFeesQuestion": "No",
-      "amountToPay": "1000",
-      "PBANumber": "PBA0078447",
+      "amountToPay": "10",
+      "PBANumber": "PBA0066906",
       "PBAreference": "MyReference98",
       "orderSummary": {
         "PaymentReference": "",
-        "PaymentTotal": "1000",
+        "PaymentTotal": "10",
         "Fees": [
           {
             "value": {
               "FeeCode": "FEE0229",
-              "FeeAmount": "1000",
+              "FeeAmount": "10",
               "FeeDescription": "Application for a financial order",
               "FeeVersion": "1"
             }

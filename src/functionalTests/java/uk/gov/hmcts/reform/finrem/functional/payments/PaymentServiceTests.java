@@ -56,6 +56,12 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private HashMap<String, String> pbaAccounts = new HashMap<>();
     private String contestedDir = "/json/contested/";
     private String consentedDir = "/json/consented/";
+    private JsonPath jsonPathEvaluator;
+    private String dataPath = "data";
+    private String feesPath= "data.orderSummary.Fees[0].value";
+    private String hwf = "HWF";
+    private String pba = "PBA";
+
 
 
     @Test
@@ -71,22 +77,22 @@ public class PaymentServiceTests extends IntegrationTestBase {
         validateFeeLookUpPayment(feeLookup, "fee-lookup_contested.json",contestedDir);
     }
 
-
     @Test
     public void verifyPBAValidationTest() {
 
-        validatePostSuccessForPBAValidation(pbaValidate, "pba-validate.json" ,consentedDir );
+        validatePostSuccess(pbaValidate, "pba-validate1.json" ,consentedDir );
     }
 
     @Test
-    public void verifyPBAPaymentSuccessTestConsented() {
+    public void verifyPBAPaymentSuccessTestConsented() throws InterruptedException{
 
-        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload.json" , consentedDir);
+        //Thread.sleep(120000);
+        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Consented.json" , consentedDir);
     }
 
     @Test
-    public void verifyPBAPaymentSuccessTestContested() {
-
+    public void verifyPBAPaymentSuccessTestContested() throws InterruptedException {
+        Thread.sleep(120000);
         validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Contested.json" , contestedDir);
     }
 
@@ -98,40 +104,35 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyPBAConfirmationForHWFConsented() {
-        validatePBAConfirmationForHWF(pbaConfirmation, "hwfPayment.json", consentedDir);
+    public void verifyPaymentConfirmationMessageForHWFConsented() throws InterruptedException {
+
+        validatePaymentConfirmationMessage(pbaConfirmation, "hwfPayment.json", consentedDir, hwf);
+        //validatePBAConfirmationForHWF(pbaConfirmation, "hwfPayment.json", consentedDir);
 
     }
 
     @Test
-    public void verifyPBAConfirmationForPBAPaymentConsented() {
+    public void verifyPaymentConfirmationMessageForPBAPaymentConsented() throws InterruptedException{
 
-        validatePBAConfirmationForPBAPayment(pbaConfirmation, "pba-payment.json", consentedDir);
+
+        validatePaymentConfirmationMessage(pbaConfirmation, "pba-payment.json", consentedDir, pba);
+        //validatePBAConfirmationForPBAPayment(pbaConfirmation, "pba-payment.json", consentedDir);
+    }
+
+
+    @Test
+    public void verifyPBAConfirmationMessageForHWFContested() {
+        validatePaymentConfirmationMessage(pbaConfirmation, "hwfPayment.json", contestedDir, hwf);
+        //validatePBAConfirmationForHWF(pbaConfirmation, "hwfPayment.json", contestedDir);
     }
 
     @Test
-    public void verifyPBAConfirmationForHWFContested() {
-        validatePBAConfirmationForHWF(pbaConfirmation, "hwfPayment.json", contestedDir);
+    public void verifyPBAConfirmationMessageForPBAPaymentContested() {
+
+        //validatePBAConfirmationForPBAPayment(pbaConfirmation, "SuccessPaymentRequestPayload_Contested.json", contestedDir);
+        validatePaymentConfirmationMessage(pbaConfirmation, "pba-payment_contested.json", contestedDir, pba);
     }
 
-    @Test
-    public void verifyPBAConfirmationForPBAPaymentContested() {
-
-        validatePBAConfirmationForPBAPayment(pbaConfirmation, "SuccessPaymentRequestPayload_Contested.json", contestedDir);
-    }
-
-
-    private void validatePostSuccess(String url, String jsonFileName) {
-
-        SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(utils.getHeader())
-                .contentType("application/json")
-                .body(utils.getJsonFromFile(jsonFileName))
-                .when().post(url)
-                .then()
-                .assertThat().statusCode(200);
-    }
 
     private void validatePostSuccess(String url, String filename, String journeyType) {
         Response response = getResponse(url, filename, journeyType);
@@ -140,79 +141,78 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     }
 
-    public void validatePostSuccessForPBAValidation(String url, String fileName , String journeyType) {
+    private void validatePaymentConfirmationMessage(String url, String fileName, String journeyType, String paymentType)
+    {
 
-        SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(utils.getHeader())
-                .contentType("application/json")
-                .body(utils.getJsonFromFile("pba-validate.json"))
-                .when().post(pbaValidate)
-                .then()
-                .assertThat().statusCode(200);
+        validatePostSuccess(url, fileName , journeyType);
+
+        if (paymentType== pba) {
+            if (journeyType == consentedDir) {
+                assertTrue(getResponseData(url, fileName, journeyType, "").get("confirmation_body")
+                        .toString().contains("Your application will be issued by Court staff and referred to a Judge"));
+            } else {
+                assertTrue(getResponseData(url, fileName, journeyType, "").get("confirmation_body")
+                        .toString().contains("The application will be sent to the Judge for gatekeeping"));
+
+            }
+        }
+        else if (paymentType == hwf){
+
+            if (journeyType == consentedDir) {
+                assertTrue(getResponseData(url, fileName, journeyType, "").get("confirmation_body")
+                        .toString().contains("Process the application for help with fees"));
+            } else {
+                assertTrue(getResponseData(url, fileName, journeyType, "").get("confirmation_body")
+                        .toString().contains("process the application for help with fees"));
+
+            }
+        }
     }
+
 
     private void validatePBAConfirmationForHWF(String url, String fileName, String journeyType) {
 
-        Response response = getPBAPaymentResponse(url, fileName , journeyType);
+        validatePostSuccess(url, fileName , journeyType);
 
-        int statusCode = response.getStatusCode();
-
-        JsonPath jsonPathEvaluator = response.jsonPath();
-
-        assertEquals(statusCode, 200);
-
-        assertTrue(jsonPathEvaluator.get("confirmation_body")
-                .toString().contains("Process the application for help with fees"));
+        assertTrue(getResponseData(url, fileName, journeyType,"").get("confirmation_body")
+                .toString().contains("process the application for help with fees"));
 
     }
 
     private void validatePBAConfirmationForPBAPayment(String url, String fileName, String journeyType) {
 
-        Response response = getPBAPaymentResponse(url, fileName, journeyType);
+        validatePostSuccess(url, fileName , journeyType);
 
-        int statusCode = response.getStatusCode();
+        if (journeyType == consentedDir) {
+            assertTrue(getResponseData(url, fileName, journeyType,"").get("confirmation_body")
+                    .toString().contains("Your application will be issued by Court staff and referred to a Judge"));
+        }
+        else{
+            assertTrue(getResponseData(url, fileName, journeyType,"").get("confirmation_body")
+                    .toString().contains("The application will be sent to the Judge for gatekeeping"));
 
-
-        JsonPath jsonPathEvaluator = response.jsonPath();
-
-        assertEquals(statusCode, 200);
-
-        assertTrue(jsonPathEvaluator.get("confirmation_body")
-                .toString().contains("Your application will be issued by Court staff and referred to a Judge"));
+        }
 
     }
 
     private void validateFailurePBAPayment(String url, String fileName, String journeyType) {
 
-        Response response = getPBAPaymentResponse(url, fileName , journeyType);
-
-        int statusCode = response.getStatusCode();
-
-        JsonPath jsonPathEvaluator = response.jsonPath();
-        assertEquals(statusCode, 200);
+        validatePostSuccess(url, fileName , journeyType);
 
         if (pbaAccountLiberataCheckEnabled) {
-            List<String> errors = jsonPathEvaluator.get("errors");
+
+            List<String> errors = getResponseData(url, fileName, journeyType,"").get("errors");
+
             assertTrue(errors.get(0).contains("Account information could not be found"));
         }
 
     }
 
     private void validatePostSuccessForPBAPayment(String url, String fileName, String journeyType) {
-        Response response = getPBAPaymentResponse(url, fileName, journeyType);
 
-        int statusCode = response.getStatusCode();
-
-        JsonPath jsonPathEvaluator = response.jsonPath().setRoot("data");
-        System.out.println("response : " + response.prettyPrint());
-        System.out.println("statusCode : " + statusCode);
-
-        assertEquals(statusCode, 200);
-
-        assertTrue(jsonPathEvaluator.get("state").toString()
+        validatePostSuccess(url, fileName , journeyType);
+        assertTrue(getResponseData(url, fileName, journeyType,dataPath).get("state").toString()
                     .equalsIgnoreCase("applicationSubmitted"));
-
     }
 
 
@@ -229,26 +229,23 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validateFeeLookUpPayment(String url, String fileName, String journeyType) {
         validatePostSuccess(url, fileName ,journeyType);
-        Response response = getResponse(url, fileName ,journeyType);
-        JsonPath jsonPathEvaluator = response.jsonPath();
-
 
         if (journeyType == consentedDir) {
-            assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeAmount")
+            assertTrue(getResponseData(url, fileName, journeyType,feesPath).get("FeeAmount")
                     .toString().equalsIgnoreCase("5000"));
-            assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
+
+            assertTrue(getResponseData(url, fileName, journeyType,feesPath).get("FeeCode")
                     .toString().equalsIgnoreCase("FEE0228"));
 
         } else {
-            assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeAmount")
+            assertTrue(getResponseData(url, fileName, journeyType,feesPath).get("FeeAmount")
                     .toString().equalsIgnoreCase("25500"));
-            assertTrue(jsonPathEvaluator.get("data.orderSummary.Fees[0].value.FeeCode")
-                    .toString().equalsIgnoreCase("FEE0229"));
 
+            assertTrue(getResponseData(url, fileName, journeyType,feesPath).get("FeeCode")
+                    .toString().equalsIgnoreCase("FEE0229"));
         }
 
     }
-
 
 
     private Response getResponse(String url, String filename, String journeyType) {
@@ -260,6 +257,19 @@ public class PaymentServiceTests extends IntegrationTestBase {
                 .body(utils.getJsonFromFile(filename , journeyType))
                 .when().post(url)
                 .andReturn();
+    }
+
+    private JsonPath getResponseData(String url, String filename, String journeyType, String dataPath) {
+        Response response= SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(utils.getHeader())
+                .contentType("application/json")
+                .body(utils.getJsonFromFile(filename , journeyType))
+                .when().post(url)
+                .andReturn();
+            System.out.println("res" + response.prettyPrint());
+             jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
+            return jsonPathEvaluator;
     }
 
 }

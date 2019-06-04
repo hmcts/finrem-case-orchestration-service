@@ -1,11 +1,11 @@
 {
+  "token": "token_test",
   "event_id": "some_event_id",
   "case_details": {
-    "id": "1902901",
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_data": {
-      "PBANumber": "PBA0066906",
+      "PBANumber": "PBA123456",
       "d81Question": "No",
       "PBAreference": "ABCD",
       "consentOrder": {
@@ -44,7 +44,7 @@
           }
         }
       ],
-      "respondentEmail": "respondent@email.com",
+      "respondentEmail": null,
       "respondentPhone": "9963472494",
       "appRespondentRep": "No",
       "consentOrderText": {
@@ -63,7 +63,7 @@
       },
       "authorisationFirm": "test",
       "authorisationName": "test",
-      "divorceCaseNumber": "DD12D12345",
+      "divorceCaseNumber": "ED12D78765",
       "pensionCollection": [
         {
           "id": "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",
@@ -86,7 +86,7 @@
         "AddressLine2": "AddressGlobalUK",
         "AddressLine3": "London"
       },
-      "solicitorDXnumber": "DX12345",
+      "solicitorDXnumber": null,
       "appRespondentLName": "Korivi",
       "solicitorReference": "LL01",
       "appRespondentFMName": "test",
@@ -119,22 +119,7 @@
         "document_binary_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
       },
       "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "No",
-      "amountToPay":"1000",
-      "orderSummary":{
-        "PaymentReference":"Ref1",
-        "PaymentTotal":"1000",
-        "Fees":[
-          {
-            "value":{
-              "FeeDescription":"desc",
-              "FeeVersion":"v1",
-              "FeeCode":"code1",
-              "FeeAmount":"1000"
-            }
-          }
-        ]
-      }
+      "solicitorAgreeToReceiveEmails": "Yes"
     }
   }
 }
