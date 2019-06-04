@@ -13,7 +13,6 @@ import javax.ws.rs.core.MediaType;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -40,7 +39,7 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
 
     @Value("${generalLetterBody.default.Text}")
     private String expectedDefaultText;
-    
+
     @Test
     public void generateGeneralLetterSuccess() throws Exception {
         doValidCaseDataSetUp();
