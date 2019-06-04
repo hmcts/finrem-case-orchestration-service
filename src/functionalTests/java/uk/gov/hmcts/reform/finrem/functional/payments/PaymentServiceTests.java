@@ -58,7 +58,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private String consentedDir = "/json/consented/";
     private JsonPath jsonPathEvaluator;
     private String dataPath = "data";
-    private String feesPath= "data.orderSummary.Fees[0].value";
+    private String feesPath = "data.orderSummary.Fees[0].value";
     private String hwf = "HWF";
     private String pba = "PBA";
 
@@ -92,7 +92,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyPBAPaymentSuccessTestConsented() throws InterruptedException{
+    public void verifyPBAPaymentSuccessTestConsented() throws InterruptedException {
 
         validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Consented.json" , consentedDir);
         Thread.sleep(120000);
@@ -116,7 +116,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyPaymentConfirmationMessageForPBAPaymentConsented() throws InterruptedException{
+    public void verifyPaymentConfirmationMessageForPBAPaymentConsented() throws InterruptedException {
 
 
         validatePaymentConfirmationMessage(pbaConfirmation, "pba-payment.json", consentedDir, pba);
@@ -127,13 +127,12 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Test
     public void verifyPBAConfirmationMessageForHWFContested() {
         validatePaymentConfirmationMessage(pbaConfirmation, "hwfPayment.json", contestedDir, hwf);
-        //validatePBAConfirmationForHWF(pbaConfirmation, "hwfPayment.json", contestedDir);
+
     }
 
     @Test
     public void verifyPBAConfirmationMessageForPBAPaymentContested() {
 
-        //validatePBAConfirmationForPBAPayment(pbaConfirmation, "SuccessPaymentRequestPayload_Contested.json", contestedDir);
         validatePaymentConfirmationMessage(pbaConfirmation, "pba-payment_contested.json", contestedDir, pba);
     }
 
@@ -145,12 +144,12 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     }
 
-    private void validatePaymentConfirmationMessage(String url, String fileName, String journeyType, String paymentType)
-    {
+    private void validatePaymentConfirmationMessage(String url, String fileName,
+                                                    String journeyType, String paymentType) {
 
         validatePostSuccess(url, fileName , journeyType);
 
-        if (paymentType== pba) {
+        if (paymentType == pba) {
             if (journeyType == consentedDir) {
                 assertTrue(getResponseData(url, fileName, journeyType, "").get("confirmation_body")
                         .toString().contains("Your application will be issued by Court staff and referred to a Judge"));
@@ -159,8 +158,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
                         .toString().contains("The application will be sent to the Judge for gatekeeping"));
 
             }
-        }
-        else if (paymentType == hwf){
+        } else if (paymentType == hwf) {
 
             if (journeyType == consentedDir) {
                 assertTrue(getResponseData(url, fileName, journeyType, "").get("confirmation_body")
@@ -190,8 +188,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
         if (journeyType == consentedDir) {
             assertTrue(getResponseData(url, fileName, journeyType,"").get("confirmation_body")
                     .toString().contains("Your application will be issued by Court staff and referred to a Judge"));
-        }
-        else{
+        } else {
             assertTrue(getResponseData(url, fileName, journeyType,"").get("confirmation_body")
                     .toString().contains("The application will be sent to the Judge for gatekeeping"));
 
@@ -264,16 +261,16 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     private JsonPath getResponseData(String url, String filename, String journeyType, String dataPath) {
-        Response response= SerenityRest.given()
+        Response response = SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeader())
                 .contentType("application/json")
                 .body(utils.getJsonFromFile(filename , journeyType))
                 .when().post(url)
                 .andReturn();
-            System.out.println("res" + response.prettyPrint());
-             jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
-            return jsonPathEvaluator;
+
+        jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
+        return jsonPathEvaluator;
     }
 
 }
