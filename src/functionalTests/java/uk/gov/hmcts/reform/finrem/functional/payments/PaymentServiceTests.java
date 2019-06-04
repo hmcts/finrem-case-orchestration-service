@@ -87,11 +87,11 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     //Being fixed now , ignoring to unblock pr merge for release
-    @Ignore
+    //@Ignore
     @Test
     public void verifyPBAPaymentSuccessTestContested() {
 
-        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload.json" , contestedDir);
+        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Contested.json" , contestedDir);
     }
 
     //Being fixed now , ignoring to unblock pr merge for release
