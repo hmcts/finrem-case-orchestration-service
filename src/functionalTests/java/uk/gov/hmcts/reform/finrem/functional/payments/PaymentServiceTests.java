@@ -63,6 +63,14 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private String pba = "PBA";
 
 
+    @Test
+    public void verifyPBAPaymentSuccessTestContested() throws InterruptedException {
+
+        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Contested.json" , contestedDir);
+        Thread.sleep(120000);
+        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Contested.json" , contestedDir);
+    }
+
 
     @Test
     public void verifyGetFeeLoopUpTestConsented() {
@@ -86,15 +94,11 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Test
     public void verifyPBAPaymentSuccessTestConsented() throws InterruptedException{
 
-        //Thread.sleep(120000);
+        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Consented.json" , consentedDir);
+        Thread.sleep(120000);
         validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Consented.json" , consentedDir);
     }
 
-    @Test
-    public void verifyPBAPaymentSuccessTestContested() throws InterruptedException {
-        Thread.sleep(120000);
-        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Contested.json" , contestedDir);
-    }
 
 
     @Test
