@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SerenityRunner.class)
-public class PaymentServiceTests_Consented extends IntegrationTestBase {
+public class PaymentServiceTests extends IntegrationTestBase {
 
     @Value("${user.id.url}")
     private String userId;
@@ -133,7 +133,7 @@ public class PaymentServiceTests_Consented extends IntegrationTestBase {
 
 
     @Test
-    public void verifyDuplicatePaymentReturnsErrorWithin2MinutesForContested() throws InterruptedException{
+    public void verifyDuplicatePaymentReturnsErrorWithin2MinutesForContested() throws InterruptedException {
 
         validateDuplicatePayment(pbaPayment, "SuccessPaymentRequestPayload_Contested_Duplicate.json" , contestedDir);
 
@@ -146,12 +146,12 @@ public class PaymentServiceTests_Consented extends IntegrationTestBase {
 
     }
 
-    private void validateDuplicatePayment(String url, String filename, String journeyType) throws InterruptedException{
+    private void validateDuplicatePayment(String url, String filename, String journeyType) throws InterruptedException {
 
         validatePostSuccess(url, filename, journeyType);
-       assertEquals("duplicate payment", getResponse(url, filename, journeyType).jsonPath().get("errors[0]"));
-       Thread.sleep(120000);
-       validatePostSuccess(url, filename, journeyType);
+        assertEquals("duplicate payment", getResponse(url, filename, journeyType).jsonPath().get("errors[0]"));
+        Thread.sleep(120000);
+        validatePostSuccess(url, filename, journeyType);
     }
 
     private void validatePaymentConfirmationMessage(String url, String fileName,
@@ -236,9 +236,8 @@ public class PaymentServiceTests_Consented extends IntegrationTestBase {
         return jsonPathEvaluator;
     }
 
-    public Response getResponse(String url, String filename, String journeyType)
-    {
-       return SerenityRest.given()
+    public Response getResponse(String url, String filename, String journeyType) {
+        return SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeader())
                 .contentType("application/json")
