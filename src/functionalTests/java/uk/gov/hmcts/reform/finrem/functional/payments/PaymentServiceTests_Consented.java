@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SerenityRunner.class)
-public class PaymentServiceTests extends IntegrationTestBase {
+public class PaymentServiceTests_Consented extends IntegrationTestBase {
 
     @Value("${user.id.url}")
     private String userId;
@@ -66,8 +66,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Test
     public void verifyPBAPaymentSuccessTestContested() throws InterruptedException {
 
-        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Contested.json" , contestedDir);
-        Thread.sleep(120000);
+//        validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Contested.json" , contestedDir);
+//        Thread.sleep(120000);
         validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Contested.json" , contestedDir);
     }
 
@@ -98,7 +98,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
         Thread.sleep(120000);
         validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Consented.json" , consentedDir);
     }
-
 
 
     @Test
@@ -261,14 +260,16 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     private JsonPath getResponseData(String url, String filename, String journeyType, String dataPath) {
+        System.out.println("url : " + url);
+        System.out.println("request :" + utils.getJsonFromFile(filename, journeyType).toString());
         Response response = SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeader())
                 .contentType("application/json")
-                .body(utils.getJsonFromFile(filename , journeyType))
+                .body(utils.getJsonFromFile(filename, journeyType))
                 .when().post(url)
                 .andReturn();
-
+        System.out.println("response " + response.prettyPrint());
         jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
         return jsonPathEvaluator;
     }
