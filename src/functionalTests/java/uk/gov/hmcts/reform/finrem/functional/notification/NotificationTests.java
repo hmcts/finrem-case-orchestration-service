@@ -28,8 +28,6 @@ public class NotificationTests extends IntegrationTestBase {
     private String contestedDir = "/json/contested/";
     private String consentedDir = "/json/consented/";
 
-
-
     @Test
     public void verifyNotifyAssignToJudgeTestIsOkay() {
 
@@ -78,7 +76,7 @@ public class NotificationTests extends IntegrationTestBase {
         SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())
-                .body(utils.getJsonFromFile(jsonFileName))
+                .body(utils.getJsonFromFile(jsonFileName,journeyType))
                 .when().post(url)
                 .then().assertThat().statusCode(200);
     }
