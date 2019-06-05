@@ -35,5 +35,4 @@ public class TestContextConfiguration {
                 .target(ServiceAuthorisationApi.class, s2sUrl);
         return new ServiceAuthTokenGenerator(secret, microservice, serviceAuthorisationApi);
     }
-
 }
