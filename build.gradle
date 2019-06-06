@@ -131,6 +131,17 @@ dependencyManagement {
             entry 'tomcat-embed-el'
             entry 'tomcat-embed-websocket'
         }
+
+        // solves CVE-2019-12086
+        // remove once spring manager incorporates this changes
+        dependencySet(
+                group: 'com.fasterxml.jackson.core',
+                version: '2.9.9'
+                //version: dependencyManagement.importedProperties['jackson.version'] solves CVE-2019-12086
+        ) {
+            entry 'jackson-core'
+            entry 'jackson-databind'
+        }
     }
 }
 
@@ -271,7 +282,6 @@ pitest {
 }
 
 compileJava.dependsOn(processResources)
-check.dependsOn dependencyCheckAnalyze
 build.dependsOn jacocoTestReport
 
 bootJar {

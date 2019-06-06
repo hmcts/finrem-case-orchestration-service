@@ -32,7 +32,7 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
     @Test
     public void generateMiniFormA() throws Exception {
         generateDocumentServiceSuccessStub();
-
+        idamServiceStub();
         generateDocument();
     }
 

@@ -27,7 +27,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
@@ -59,12 +58,11 @@ public class NotificationsControllerTest {
         buildCcdRequest();
         mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendHWFSuccessfulConfirmationEmail(any(CallbackRequest.class), any());
+                .sendHWFSuccessfulConfirmationEmail(any(CallbackRequest.class));
 
     }
 
@@ -73,7 +71,6 @@ public class NotificationsControllerTest {
         buildRequest();
         mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
@@ -86,12 +83,11 @@ public class NotificationsControllerTest {
         buildCcdRequest();
         mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendAssignToJudgeConfirmationEmail(any(CallbackRequest.class), any());
+                .sendAssignToJudgeConfirmationEmail(any(CallbackRequest.class));
 
     }
 
@@ -100,7 +96,6 @@ public class NotificationsControllerTest {
         buildRequest();
         mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
@@ -113,12 +108,11 @@ public class NotificationsControllerTest {
         buildCcdRequest();
         mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendConsentOrderMadeConfirmationEmail(any(CallbackRequest.class), any());
+                .sendConsentOrderMadeConfirmationEmail(any(CallbackRequest.class));
 
     }
 
@@ -127,7 +121,6 @@ public class NotificationsControllerTest {
         buildRequest();
         mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
@@ -139,12 +132,11 @@ public class NotificationsControllerTest {
         buildCcdRequest();
         mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendConsentOrderNotApprovedEmail(any(CallbackRequest.class), any());
+                .sendConsentOrderNotApprovedEmail(any(CallbackRequest.class));
 
     }
 
@@ -153,7 +145,6 @@ public class NotificationsControllerTest {
         buildRequest();
         mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
@@ -166,12 +157,11 @@ public class NotificationsControllerTest {
         buildCcdRequest();
         mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendConsentOrderAvailableEmail(any(CallbackRequest.class), any());
+                .sendConsentOrderAvailableEmail(any(CallbackRequest.class));
 
     }
 
@@ -180,7 +170,6 @@ public class NotificationsControllerTest {
         buildRequest();
         mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 

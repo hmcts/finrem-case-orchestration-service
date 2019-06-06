@@ -41,7 +41,7 @@ public class DraftOnlineFormTest extends GenerateMiniFormATest {
     private void doTestDeleteMiniFormA(HttpStatus miniFormAServiceStatus) throws Exception {
         generateDocumentServiceSuccessStub();
         deleteDocumentServiceStubWith(miniFormAServiceStatus);
-
+        idamServiceStub();
         generateDocument();
     }
 }

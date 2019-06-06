@@ -14,6 +14,8 @@ public class CCDConfigConstant {
     public static final String D81_QUESTION = "d81Question";
     //Document related
     public static final String MINI_FORM_A = "miniFormA";
+    public static final String GENERAL_LETTER = "generalLetter";
+    public static final String GENERAL_LETTER_TEXT = "generalLetterBody";
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
     public static final String FEES = "Fees";
@@ -32,4 +34,11 @@ public class CCDConfigConstant {
     public static final String CASE_ALLOCATED_TO = "caseAllocatedTo";
     public static final String MIAM_ATTENDANCE = "applicantAttendedMIAM";
     public static final String MIAM_EXEMPTION = "claimingExemptionMIAM";
+    public static final String IS_ADMIN = "isAdmin";
+    public static final String APPLICANT_REPRESENTED = "applicantRepresented";
+    public static final String YES = "Yes";
+    public static final String NO = "No";
+    public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
+    public static final String ROLES = "roles";
+
 }

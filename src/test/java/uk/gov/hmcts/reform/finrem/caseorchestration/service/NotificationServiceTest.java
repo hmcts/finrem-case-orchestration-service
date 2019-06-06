@@ -20,7 +20,6 @@ import java.util.Map;
 import static org.junit.Assert.assertThat;
 
 public class NotificationServiceTest extends BaseServiceTest {
-    private static final String AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
     private static final String END_POINT_HWF_SUCCESSFUL = "http://localhost:8086/notify/hwf-successful";
     private static final String END_POINT_ASSIGNED_TO_JUDGE = "http://localhost:8086/notify/assign-to-judge";
     private static final String END_POINT_CONSENT_ORDER_MADE = "http://localhost:8086/notify/consent-order-made";
@@ -49,7 +48,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_HWF_SUCCESSFUL))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest, AUTH_TOKEN);
+        notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest);
     }
 
     @Test
@@ -58,7 +57,7 @@ public class NotificationServiceTest extends BaseServiceTest {
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest, AUTH_TOKEN);
+            notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
@@ -70,7 +69,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_ASSIGNED_TO_JUDGE))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest, AUTH_TOKEN);
+        notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
     }
 
     @Test
@@ -81,7 +80,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
 
         try {
-            notificationService.sendAssignToJudgeConfirmationEmail(getCallbackRequest(), AUTH_TOKEN);
+            notificationService.sendAssignToJudgeConfirmationEmail(getCallbackRequest());
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
@@ -93,7 +92,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_MADE))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendConsentOrderMadeConfirmationEmail(callbackRequest, AUTH_TOKEN);
+        notificationService.sendConsentOrderMadeConfirmationEmail(callbackRequest);
     }
 
     @Test
@@ -102,7 +101,7 @@ public class NotificationServiceTest extends BaseServiceTest {
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendConsentOrderMadeConfirmationEmail(callbackRequest, AUTH_TOKEN);
+            notificationService.sendConsentOrderMadeConfirmationEmail(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
@@ -114,7 +113,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_NOT_APPROVED))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendConsentOrderNotApprovedEmail(callbackRequest, AUTH_TOKEN);
+        notificationService.sendConsentOrderNotApprovedEmail(callbackRequest);
     }
 
     @Test
@@ -123,7 +122,7 @@ public class NotificationServiceTest extends BaseServiceTest {
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendConsentOrderNotApprovedEmail(callbackRequest, AUTH_TOKEN);
+            notificationService.sendConsentOrderNotApprovedEmail(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
@@ -134,7 +133,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_AVAILABLE))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendConsentOrderAvailableEmail(callbackRequest, AUTH_TOKEN);
+        notificationService.sendConsentOrderAvailableEmail(callbackRequest);
     }
 
     @Test
@@ -143,7 +142,7 @@ public class NotificationServiceTest extends BaseServiceTest {
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendConsentOrderAvailableEmail(callbackRequest, AUTH_TOKEN);
+            notificationService.sendConsentOrderAvailableEmail(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
