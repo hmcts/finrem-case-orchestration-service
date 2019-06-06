@@ -38,12 +38,13 @@ public class NotificationsController implements BaseController {
         log.info(LOG_MESSAGE, callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        if (isSolicitorAgreedToReceiveEmails(caseData)) {
-            if (isConsentedApplication(caseData)) {
+        if (isConsentedApplication(caseData)) {
+            if (isSolicitorAgreedToReceiveEmails(caseData, "solicitorAgreeToReceiveEmails")) {
                 notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest);
-            } else {
-                notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
             }
+        } else if (isSolicitorAgreedToReceiveEmails(caseData,
+                "applicantSolicitorConsentForEmails")) {
+            notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -58,7 +59,7 @@ public class NotificationsController implements BaseController {
         log.info(LOG_MESSAGE, callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        if (isSolicitorAgreedToReceiveEmails(caseData)) {
+        if (isSolicitorAgreedToReceiveEmails(caseData, "solicitorAgreeToReceiveEmails")) {
             notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -74,7 +75,7 @@ public class NotificationsController implements BaseController {
         log.info(LOG_MESSAGE, callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        if (isSolicitorAgreedToReceiveEmails(caseData)) {
+        if (isSolicitorAgreedToReceiveEmails(caseData, "solicitorAgreeToReceiveEmails")) {
             notificationService.sendConsentOrderMadeConfirmationEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -90,7 +91,7 @@ public class NotificationsController implements BaseController {
         log.info(LOG_MESSAGE, callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        if (isSolicitorAgreedToReceiveEmails(caseData)) {
+        if (isSolicitorAgreedToReceiveEmails(caseData, "solicitorAgreeToReceiveEmails")) {
             notificationService.sendConsentOrderNotApprovedEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -106,14 +107,15 @@ public class NotificationsController implements BaseController {
         log.info(LOG_MESSAGE, callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        if (isSolicitorAgreedToReceiveEmails(caseData)) {
+        if (isSolicitorAgreedToReceiveEmails(caseData, "solicitorAgreeToReceiveEmails")) {
             notificationService.sendConsentOrderAvailableEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    private boolean isSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData) {
+    private boolean isSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData,
+                                                     String solicitorAgreeToReceiveEmails) {
         return "Yes".equalsIgnoreCase(ObjectUtils.toString(mapOfCaseData
-                .get("solicitorAgreeToReceiveEmails")));
+                .get(solicitorAgreeToReceiveEmails)));
     }
 }

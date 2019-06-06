@@ -54,7 +54,7 @@ public class NotificationsControllerTest {
 
     @Test
     public void sendHwfSuccessfulConfirmationEmail() throws Exception {
-        buildCcdRequest();
+        buildCcdRequest("/fixtures/ccd-request-with-solicitor-email-consent.json");
         mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -67,7 +67,7 @@ public class NotificationsControllerTest {
 
     @Test
     public void shouldNotSendHwfSuccessfulConfirmationEmail() throws Exception {
-        buildRequest();
+        buildCcdRequest("/fixtures/model/ccd-request.json");
         mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -79,7 +79,7 @@ public class NotificationsControllerTest {
 
     @Test
     public void sendAssignToJudgeConfirmationEmail() throws Exception {
-        buildCcdRequest();
+        buildCcdRequest("/fixtures/ccd-request-with-solicitor-email-consent.json");
         mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -92,7 +92,7 @@ public class NotificationsControllerTest {
 
     @Test
     public void shouldNotSendAssignToJudgeConfirmationEmail() throws Exception {
-        buildRequest();
+        buildCcdRequest("/fixtures/model/ccd-request.json");
         mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -104,7 +104,7 @@ public class NotificationsControllerTest {
 
     @Test
     public void sendConsentOrderMadeConfirmationEmail() throws Exception {
-        buildCcdRequest();
+        buildCcdRequest("/fixtures/ccd-request-with-solicitor-email-consent.json");
         mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -117,7 +117,7 @@ public class NotificationsControllerTest {
 
     @Test
     public void shouldNotSendConsentOrderMadeConfirmationEmail() throws Exception {
-        buildRequest();
+        buildCcdRequest("/fixtures/model/ccd-request.json");
         mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -128,7 +128,7 @@ public class NotificationsControllerTest {
 
     @Test
     public void sendConsentOrderNotApprovedEmail() throws Exception {
-        buildCcdRequest();
+        buildCcdRequest("/fixtures/ccd-request-with-solicitor-email-consent.json");
         mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -141,19 +141,18 @@ public class NotificationsControllerTest {
 
     @Test
     public void shouldNotSendConsentOrderNotApprovedEmail() throws Exception {
-        buildRequest();
+        buildCcdRequest("/fixtures/model/ccd-request.json");
         mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
-
     }
 
     @Test
     public void sendConsentOrderAvailableEmail() throws Exception {
-        buildCcdRequest();
+        buildCcdRequest("/fixtures/ccd-request-with-solicitor-email-consent.json");
         mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -166,25 +165,44 @@ public class NotificationsControllerTest {
 
     @Test
     public void shouldNotSendConsentOrderAvailableEmail() throws Exception {
-        buildRequest();
+        buildCcdRequest("/fixtures/model/ccd-request.json");
         mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
+    }
+
+    @Test
+    public void sendConsentedHwfSuccessfulConfirmationEmail() throws Exception {
+        buildCcdRequest("/fixtures/contested/hwf.json");
+        mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
+                .content(requestContent.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+                .sendContestedHwfSuccessfulConfirmationEmail(any(CallbackRequest.class));
 
     }
 
-    private void buildCcdRequest() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/ccd-request-with-solicitor-email-consent.json").toURI()));
+    @Test
+    public void shouldNotSendContestedHwfSuccessfulEmail() throws Exception {
+        buildCcdRequest("/fixtures/contested/contested-hwf-without-solicitor-consent.json");
+        mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
+                .content(requestContent.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verifyNoMoreInteractions(notificationService);
     }
 
-    private void buildRequest() throws IOException, URISyntaxException {
+
+
+    private void buildCcdRequest(String fileName) throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/model/ccd-request.json").toURI()));
+                .getResource(fileName).toURI()));
     }
 }
