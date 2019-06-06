@@ -9,11 +9,11 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.json.Json;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+
 
 @RunWith(SerenityRunner.class)
 
@@ -28,10 +28,11 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     private JsonPath jsonPathEvaluator;
     private String contestedDir = "/json/contested/";
     private String consentedDir = "/json/consented/";
+    private String dataPath = "data";
 
     @Test
     public void verifyamendDivorceDetailsD81Individual() {
-        validatePostSuccess(amendCaseDetailsUrl,consentedDir,"amend-divorce-details-d81-individual1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "amend-divorce-details-d81-individual1.json");
 
@@ -42,7 +43,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyamendDivorceDetailsD81Joint() {
-        validatePostSuccess(amendCaseDetailsUrl,consentedDir,"amend-divorce-details-d81-joint.json");
+
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,"amend-divorce-details-d81-joint.json");
 
         if (jsonPathEvaluator.get("d81Applicant") != null
@@ -54,8 +55,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyamendDivorceDetailsDecreeAbsolute() {
-        validatePostSuccess(amendCaseDetailsUrl,consentedDir,
-                "amend-divorce-details-decree-absolute1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "amend-divorce-details-decree-absolute1.json");
 
@@ -67,7 +67,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyamendDivorceDetailsDecreeNisi() {
-        validatePostSuccess(amendCaseDetailsUrl,consentedDir,"amend-divorce-details-decree-nisi1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "amend-divorce-details-decree-nisi1.json");
 
@@ -80,7 +80,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyamendPeriodicPaymentOrder() {
-        validatePostSuccess(amendCaseDetailsUrl,consentedDir,"amend-periodic-payment-order1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,"amend-periodic-payment-order1.json");
 
         if (jsonPathEvaluator.get("natureOfApplication6") != null
@@ -92,7 +92,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyamendPeriodicPaymentOrderwithoutagreement() {
-        validatePostSuccess(amendCaseDetailsUrl,consentedDir,"amend-periodic-payment-order-without-agreement1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "amend-periodic-payment-order-without-agreement1.json");
 
@@ -105,7 +105,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyamendPropertyAdjustmentDetails() {
-        validatePostSuccess(amendCaseDetailsUrl,consentedDir,"amend-property-adjustment-details1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "amend-property-adjustment-details1.json");
 
@@ -119,7 +119,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyamendRemovePeriodicPaymentOrder() {
-        validatePostSuccess(amendCaseDetailsUrl,consentedDir,"amend-remove-periodic-payment-order1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "amend-remove-periodic-payment-order1.json");
 
@@ -135,7 +135,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyamendRemovePropertyAdjustmentDetails() {
-        validatePostSuccess(amendCaseDetailsUrl,consentedDir,"remove-property-adjustment-details1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "remove-property-adjustment-details1.json");
 
@@ -151,8 +151,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyamendRemoveRespondantSolicitorDetails() {
-        validatePostSuccess(amendCaseDetailsUrl,consentedDir,
-                "remove-respondant-solicitor-details1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "remove-respondant-solicitor-details1.json");
 
@@ -172,8 +171,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "amend-divorce-details-decree-nisi1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,contestedDir,
                 "amend-divorce-details-decree-nisi1.json");
 
@@ -186,12 +184,10 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     }
 
-    //Being fixed now , ignoring to unblock pr merge for release
-    @Ignore
+
     @Test
     public void verifyDeleteDecreeAbsoluteWhenSolicitorChooseToDecreeNisiForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "amend-divorce-details-decree-absolute1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,contestedDir,
                 "amend-divorce-details-decree-absolute1.json");
 
@@ -206,8 +202,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyRemovePropertyAdjustmentOrderDetailsWhenSolicitorUncheckedForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "remove-property-adjustment-order-details1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-property-adjustment-order-details1.json");
 
@@ -221,12 +216,9 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
 
-    //Being fixed now , ignoring to unblock pr merge for release
-    @Ignore
     @Test
     public void verifyRemoveAdditionalPropertyDetailsForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "remove-additional-property-details1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-additional-property-details1.json");
 
@@ -239,8 +231,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyRemovePeriodicPaymentOrderDetailsWhenSolicitorUncheckedForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "remove-periodic-payment-order-details1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-periodic-payment-order-details1.json");
 
@@ -256,8 +247,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyUpdatePeriodicPaymentDetailsWhenPaymentForChildrenIsUncheckedForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "update-periodic-payment-details-for-no-payment-for-children1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "update-periodic-payment-details-for-no-payment-for-children1.json");
 
@@ -274,8 +264,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyUpdatePeriodicPaymentDetailsWhenBenefitsForChildrenForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "update-periodic-payment-details-with-benefits-for-children1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "update-periodic-payment-details-with-benefits-for-children1.json");
 
@@ -289,8 +278,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyRemoveSolicitorDetailsWhenRespondentIsNotRepresentedBySolicitorForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "remove-respondent-solicitor-details1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-respondent-solicitor-details1.json");
 
@@ -312,8 +300,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyRemoveRespondentAddressWhenRespondentIsRepresentedBySolicitorForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "remove-respondent-address-details1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-respondent-address-details1.json");
 
@@ -330,8 +317,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyUpdateFastTrackDetailsForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "remove-respondent-address-details1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-respondent-address-details1.json");
 
@@ -346,8 +332,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyShouldNotUpdateFastTrackDetailsForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "remove-respondent-solicitor-details1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-respondent-solicitor-details1.json");
 
@@ -362,8 +347,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyshouldRemoveComplexityDetailsForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "remove-complexity-details1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-complexity-details1.json");
 
@@ -384,8 +368,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyshouldRemoveAdditionalReasonForComplexityForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "remove-other-reason-for-complexity1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-other-reason-for-complexity1.json");
 
@@ -399,8 +382,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyshouldRemoveReasonForLocalCourtForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "is-applicant-home-court1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "is-applicant-home-court1.json");
 
@@ -415,8 +397,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyshouldRemoveMiamExceptionsWhenApplicantAttendedMiamForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "remove-exceptions-when-applicant-attended-miam1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-exceptions-when-applicant-attended-miam1.json");
 
@@ -438,8 +419,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyshouldUpdateMiamExceptionsWhenApplicantNotClaimingExceptionsForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "update-miam-exceptions-when-applicant-not-claiming-exemption1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "update-miam-exceptions-when-applicant-not-claiming-exemption1.json");
 
@@ -464,8 +444,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyshouldUpdateMiamExceptionsWhenApplicantHasFamilyMediatorForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "update-miam-exceptions-when-applicant-attended-family-mediator1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "update-miam-exceptions-when-applicant-attended-family-mediator1.json");
 
@@ -486,8 +465,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyShouldRemoveDomesticViolenceCheckListForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "remove-domestic-violence-checklist1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-domestic-violence-checklist1.json");
 
@@ -508,8 +486,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyShouldRemoveUrgencyCheckListForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "remove-urgency-checklist1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-urgency-checklist1.json");
 
@@ -530,8 +507,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyShouldRemovePreviousMiamAttendanceCheckListForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "remove-previousMiamAttendance-checklist1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-previousMiamAttendance-checklist1.json");
         System.out.println("response content : " + jsonPathEvaluator.prettyPrint());
@@ -553,8 +529,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyShouldRemoveOtherGroundsMiamCheckListForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "remove-other-checklist1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-other-checklist1.json");
 
@@ -576,8 +551,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyShouldNotRemoveMiamCheckListForContested() {
-        validatePostSuccess(amendContestedCaseDetailsUrl,contestedDir,
-                "do-not-remove-checklists1.json");
+
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "do-not-remove-checklists1.json");
 
@@ -596,18 +570,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         }
     }
 
-
-    private void validatePostSuccess(String url, String journeyType,String jsonFileName) {
-
-        SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(utils.getHeaders())
-                .body(utils.getJsonFromFile(jsonFileName, journeyType))
-                .when().post(url)
-                .then()
-                .assertThat().statusCode(200);
-    }
-
     private JsonPath amendCaseDetails(String url, String journeyType, String jsonFileName) {
 
         Response response = SerenityRest.given()
@@ -615,6 +577,9 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 .headers(utils.getHeaders())
                 .body(utils.getJsonFromFile(jsonFileName, journeyType))
                 .when().post(url).andReturn();
+
+        int statusCode = response.getStatusCode();
+        assertEquals(statusCode, 200);
         return response.jsonPath().setRoot("data");
     }
 

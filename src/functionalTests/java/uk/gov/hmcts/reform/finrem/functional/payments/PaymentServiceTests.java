@@ -86,7 +86,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Test
     public void verifyPBAValidationTest() {
 
-        validatePostSuccess(pbaValidate, "pba-validate1.json" ,consentedDir );
+        utils.validatePostSuccess(pbaValidate, "pba-validate1.json" ,consentedDir );
     }
 
     @Test
@@ -140,18 +140,12 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
 
-    private void validatePostSuccess(String url, String filename, String journeyType) {
-        int statusCode = getResponse(url, filename, journeyType).getStatusCode();
-        assertEquals(statusCode, 200);
-
-    }
-
     private void validateDuplicatePayment(String url, String filename, String journeyType) throws InterruptedException {
 
-        validatePostSuccess(url, filename, journeyType);
-        assertEquals("duplicate payment", getResponse(url, filename, journeyType).jsonPath().get("errors[0]"));
+        utils.validatePostSuccess(url, filename, journeyType);
+        assertEquals("duplicate payment", utils.getResponse(url, filename, journeyType).jsonPath().get("errors[0]"));
         Thread.sleep(120000);
-        validatePostSuccess(url, filename, journeyType);
+        utils.validatePostSuccess(url, filename, journeyType);
     }
 
     private void validatePaymentConfirmationMessage(String url, String fileName,
@@ -159,20 +153,20 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         if (paymentType == pba) {
             if (journeyType == consentedDir) {
-                assertTrue(getResponseData(url, fileName, journeyType, "").get("confirmation_body")
+                assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
                         .toString().contains("Your application will be issued by Court staff and referred to a Judge"));
             } else {
-                assertTrue(getResponseData(url, fileName, journeyType, "").get("confirmation_body")
+                assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
                         .toString().contains("The application will be sent to the Judge for gatekeeping"));
 
             }
         } else if (paymentType == hwf) {
 
             if (journeyType == consentedDir) {
-                assertTrue(getResponseData(url, fileName, journeyType, "").get("confirmation_body")
+                assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
                         .toString().contains("Process the application for help with fees"));
             } else {
-                assertTrue(getResponseData(url, fileName, journeyType, "").get("confirmation_body")
+                assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
                         .toString().contains("process the application for help with fees"));
 
             }
@@ -184,7 +178,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         if (pbaAccountLiberataCheckEnabled) {
 
-            List<String> errors = getResponseData(url, fileName, journeyType,"").get("errors");
+            List<String> errors = utils.getResponseData(url, fileName, journeyType,"").get("errors");
 
             assertTrue(errors.get(0).contains("Account information could not be found"));
         }
@@ -193,7 +187,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePostSuccessForPBAPayment(String url, String fileName, String journeyType) {
 
-        assertTrue(getResponseData(url, fileName, journeyType,dataPath).get("state").toString()
+        assertTrue(utils.getResponseData(url, fileName, journeyType,dataPath).get("state").toString()
                     .equalsIgnoreCase("applicationSubmitted"));
     }
 
@@ -201,17 +195,17 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
 
         if (journeyType == consentedDir) {
-            assertTrue(getResponseData(url, fileName, journeyType,feesPath).get("FeeAmount")
+            assertTrue(utils.getResponseData(url, fileName, journeyType,feesPath).get("FeeAmount")
                     .toString().equalsIgnoreCase("5000"));
 
-            assertTrue(getResponseData(url, fileName, journeyType,feesPath).get("FeeCode")
+            assertTrue(utils.getResponseData(url, fileName, journeyType,feesPath).get("FeeCode")
                     .toString().equalsIgnoreCase("FEE0228"));
 
         } else {
-            assertTrue(getResponseData(url, fileName, journeyType,feesPath).get("FeeAmount")
+            assertTrue(utils.getResponseData(url, fileName, journeyType,feesPath).get("FeeAmount")
                     .toString().equalsIgnoreCase("25500"));
 
-            assertTrue(getResponseData(url, fileName, journeyType,feesPath).get("FeeCode")
+            assertTrue(utils.getResponseData(url, fileName, journeyType,feesPath).get("FeeCode")
                     .toString().equalsIgnoreCase("FEE0229"));
         }
 
@@ -219,30 +213,5 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
 
 
-    private JsonPath getResponseData(String url, String filename, String journeyType, String dataPath) {
-        System.out.println("url : " + url);
-        System.out.println("request :" + utils.getJsonFromFile(filename, journeyType));
-        Response response = SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(utils.getHeader())
-                .contentType("application/json")
-                .body(utils.getJsonFromFile(filename, journeyType))
-                .when().post(url)
-                .andReturn();
-        System.out.println("response " + response.prettyPrint());
-        jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
-        int statusCode = response.getStatusCode();
-        assertEquals(statusCode, 200);
-        return jsonPathEvaluator;
-    }
-
-    public Response getResponse(String url, String filename, String journeyType) {
-        return SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(utils.getHeader())
-                .contentType("application/json")
-                .body(utils.getJsonFromFile(filename , journeyType))
-                .when().post(url).andReturn();
-    }
 
 }

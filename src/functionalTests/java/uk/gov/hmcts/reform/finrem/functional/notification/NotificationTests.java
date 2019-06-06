@@ -31,7 +31,7 @@ public class NotificationTests extends IntegrationTestBase {
     @Test
     public void verifyNotifyAssignToJudgeTestIsOkay() {
 
-        validatePostSuccessForNotification(notifyAssignToJudge,
+        utils.validatePostSuccess(notifyAssignToJudge,
                 "ccd-request-with-solicitor-assignedToJudge1.json", consentedDir);
 
     }
@@ -40,7 +40,7 @@ public class NotificationTests extends IntegrationTestBase {
     @Test
     public void verifyNotifyConsentOrderAvailableTestIsOkay() {
 
-        validatePostSuccessForNotification(consentOrderAvailable,
+        utils.validatePostSuccess(consentOrderAvailable,
                 "ccd-request-with-solicitor-consentOrderAvailable1.json", consentedDir);
 
     }
@@ -49,7 +49,7 @@ public class NotificationTests extends IntegrationTestBase {
     @Test
     public void verifyNotifyConsentOrderMadeTestIsOkay() {
 
-        validatePostSuccessForNotification(consentOrderMade,
+        utils.validatePostSuccess(consentOrderMade,
                 "ccd-request-with-solicitor-consentOrderMade1.json", consentedDir);
 
     }
@@ -58,7 +58,7 @@ public class NotificationTests extends IntegrationTestBase {
     @Test
     public void verifyNotifyConsentOrderNotApprovedTestIsOkay() {
 
-        validatePostSuccessForNotification(consentOrderNotApproved,
+        utils.validatePostSuccess(consentOrderNotApproved,
                 "ccd-request-with-solicitor-consentOrderNotApproved1.json", consentedDir);
 
     }
@@ -66,19 +66,8 @@ public class NotificationTests extends IntegrationTestBase {
     @Test
     public void verifyNotifyHwfSuccessfulTestIsOkay() {
 
-        validatePostSuccessForNotification(hwfSuccessfulApiUri,
+        utils.validatePostSuccess(hwfSuccessfulApiUri,
                 "ccd-request-with-solicitor-hwfSuccessfulEmail1.json", consentedDir);
 
     }
-
-    private void validatePostSuccessForNotification(String url, String jsonFileName, String journeyType) {
-
-        SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(utils.getHeaders())
-                .body(utils.getJsonFromFile(jsonFileName,journeyType))
-                .when().post(url)
-                .then().assertThat().statusCode(200);
-    }
-
 }
