@@ -1,10 +1,11 @@
 {
   "event_id": "some_event_id",
   "case_details": {
-    "id": "123",
+    "id": "17878767",
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_data": {
+      "helpWithFeesQuestion": "No",
       "PBANumber": "PBA0066906",
       "cfcCourtList": "FR_s_CFCList_2",
       "applicantLName": "Ramisetti0012",
@@ -176,18 +177,19 @@
       "additionalPropertyOrderDecision": "Yes",
       "applicantSolicitorConsentForEmails": "Yes",
       "orderSummary":{
-        "PaymentReference":"Ref1",
-        "PaymentTotal":"1000",
         "Fees":[
           {
+            "id":"3e79be12-2ac8-4e6a-86d7-e1c3f596399a",
             "value":{
-              "FeeDescription":"desc",
-              "FeeVersion":"v1",
-              "FeeCode":"code1",
-              "FeeAmount":"1000"
+              "FeeCode":"FEE0229",
+              "FeeAmount":"1000",
+              "FeeVersion":"1",
+              "FeeDescription":"Application for a financial order"
             }
           }
-        ]
+        ],
+        "PaymentTotal":"1000",
+        "PaymentReference":""
       }
     }
   }

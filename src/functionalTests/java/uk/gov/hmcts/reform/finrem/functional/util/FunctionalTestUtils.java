@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.functional.util;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.rest.SerenityRest;
 import org.pdfbox.cos.COSDocument;
@@ -24,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
+import static org.junit.Assert.assertEquals;
+
 
 @ContextConfiguration(classes = TestContextConfiguration.class)
 @Component
@@ -43,6 +46,7 @@ public class FunctionalTestUtils {
     @Autowired
     private IdamUtils idamUtils;
     private String token;
+    private JsonPath jsonPathEvaluator;
 
 
     public String getJsonFromFile(String fileName) {
@@ -147,5 +151,47 @@ public class FunctionalTestUtils {
 
         return parsedText;
     }
+
+
+    public void validatePostSuccess(String url, String filename, String journeyType) {
+        int statusCode = getResponse(url, filename, journeyType).getStatusCode();
+        assertEquals(statusCode, 200);
+
+    }
+
+    public JsonPath getResponseData(String url, String filename, String journeyType, String dataPath) {
+
+        Response response = SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(getHeader())
+                .contentType("application/json")
+                .body(getJsonFromFile(filename, journeyType))
+                .when().post(url)
+                .andReturn();
+
+
+        jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
+        int statusCode = response.getStatusCode();
+        assertEquals(statusCode, 200);
+        return jsonPathEvaluator;
+    }
+
+    public Response getResponse(String url, String filename, String journeyType) {
+        return SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(getHeader())
+                .contentType("application/json")
+                .body(getJsonFromFile(filename , journeyType))
+                .when().post(url).andReturn();
+    }
+
+    public int getStatusCode( String url, String jsonFileName,String journeyType) {
+        return SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(getHeaders())
+                .body(getJsonFromFile(jsonFileName, journeyType))
+                .when().post(url).getStatusCode();
+    }
+
 
 }
