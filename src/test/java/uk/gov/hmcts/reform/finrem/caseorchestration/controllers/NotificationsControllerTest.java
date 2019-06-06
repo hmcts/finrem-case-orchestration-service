@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import javax.ws.rs.core.MediaType;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
