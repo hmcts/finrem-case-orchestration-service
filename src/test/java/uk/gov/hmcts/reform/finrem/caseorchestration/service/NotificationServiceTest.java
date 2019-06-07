@@ -27,6 +27,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             + "consent-order-not-approved";
     private static final String END_POINT_CONSENT_ORDER_AVAILABLE = "http://localhost:8086/notify/"
             + "consent-order-available";
+    private static final String END_POINT_CONTESTED_HWF_SUCCESSFUL = "http://localhost:8086/notify/"
+            + "contested/hwf-successful";
 
     @Autowired
     private NotificationService notificationService;
@@ -148,16 +150,37 @@ public class NotificationServiceTest extends BaseServiceTest {
         }
     }
 
+
+    @Test
+    public void sendContestedHwfSuccessfulNotificationEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+    }
+
+    @Test
+    public void throwExceptionWhenContestedHwfSuccessfulNotificationEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+        try {
+            notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
+        }
+    }
+
     private CallbackRequest getCallbackRequest() {
-        Map<String,Object> caseData = new HashMap<>();
-        caseData.put("solicitorEmail","test@test.com");
-        caseData.put("solicitorName","solicitorName");
-        caseData.put("solicitorReference","56789");
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("solicitorEmail", "test@test.com");
+        caseData.put("solicitorName", "solicitorName");
+        caseData.put("solicitorReference", "56789");
         return CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                .id(12345L)
-                .data(caseData)
-                .build())
-            .build();
+                .caseDetails(CaseDetails.builder()
+                        .id(12345L)
+                        .data(caseData)
+                        .build())
+                .build();
     }
 }

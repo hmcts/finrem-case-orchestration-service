@@ -57,6 +57,11 @@ public class NotificationService {
         sendNotificationEmail(callbackRequest, uri);
     }
 
+    public void sendContestedHwfSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getConsentedHwfSuccessful());
+        sendNotificationEmail(callbackRequest, uri);
+    }
+
     private void sendNotificationEmail(CallbackRequest callbackRequest, URI uri) {
         NotificationRequest notificationRequest = buildNotificationRequest(callbackRequest);
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders());
