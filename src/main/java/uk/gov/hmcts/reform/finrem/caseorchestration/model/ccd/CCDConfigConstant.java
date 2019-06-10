@@ -9,6 +9,8 @@ public class CCDConfigConstant {
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
     public static final String SOLICITOR_NAME = "solicitorName";
     public static final String SOLICITOR_EMAIL = "solicitorEmail";
+    public static final String CONSENTED_SOLICITOR_EMAIL = "applicantSolicitorEmail";
+    public static final String CONSENTED_SOLICITOR_NAME = "applicantSolicitorName";
     public static final String SOLICITOR_FIRM = "solicitorFirm";
     //Application Type related
     public static final String D81_QUESTION = "d81Question";

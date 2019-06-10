@@ -15,7 +15,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.Notificat
 import java.net.URI;
 import java.util.Map;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.D81_QUESTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
@@ -63,7 +67,15 @@ public class NotificationService {
     }
 
     private void sendNotificationEmail(CallbackRequest callbackRequest, URI uri) {
-        NotificationRequest notificationRequest = buildNotificationRequest(callbackRequest);
+        NotificationRequest notificationRequest;
+        if (isConsentedApplication(callbackRequest.getCaseDetails().getData())) {
+            notificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
+                    SOLICITOR_NAME, SOLICITOR_EMAIL);
+        } else {
+            notificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
+                    CONSENTED_SOLICITOR_NAME, CONSENTED_SOLICITOR_EMAIL);
+        }
+
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders());
         log.info(NOTIFICATION_SERVICE_URL, uri.toString());
         try {
@@ -76,15 +88,19 @@ public class NotificationService {
         }
     }
 
-    private NotificationRequest buildNotificationRequest(CallbackRequest callbackRequest) {
+    private NotificationRequest buildNotificationRequest(CallbackRequest callbackRequest,
+                                                         String solicitorReference,
+                                                         String solicitorName,
+                                                         String solicitorEmail) {
         NotificationRequest notificationRequest = new NotificationRequest();
         notificationRequest.setCaseReferenceNumber(ObjectUtils.toString(callbackRequest.getCaseDetails().getId()));
-        Map<String,Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
-        notificationRequest.setSolicitorReferenceNumber(ObjectUtils.toString(mapOfCaseData.get(SOLICITOR_REFERENCE)));
-        notificationRequest.setName(ObjectUtils.toString(mapOfCaseData.get(SOLICITOR_NAME)));
-        notificationRequest.setNotificationEmail(ObjectUtils.toString(mapOfCaseData.get(SOLICITOR_EMAIL)));
+        Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
+        notificationRequest.setSolicitorReferenceNumber(ObjectUtils.toString(mapOfCaseData.get(solicitorReference)));
+        notificationRequest.setName(ObjectUtils.toString(mapOfCaseData.get(solicitorName)));
+        notificationRequest.setNotificationEmail(ObjectUtils.toString(mapOfCaseData.get(solicitorEmail)));
         return notificationRequest;
     }
+
 
     private URI buildUri(String endPoint) {
         return fromHttpUrl(notificationServiceConfiguration.getUrl()
@@ -99,4 +115,10 @@ public class NotificationService {
         headers.add("Content-Type", "application/json");
         return headers;
     }
+
+
+    private boolean isConsentedApplication(Map<String, Object> caseData) {
+        return isNotEmpty((String) caseData.get(D81_QUESTION));
+    }
+
 }
