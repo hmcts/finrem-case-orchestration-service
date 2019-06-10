@@ -18,6 +18,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_HWF_SUCCESSFUL = "http://localhost:8086/notify/hwf-successful";
@@ -153,6 +156,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void sendContestedHwfSuccessfulNotificationEmail() {
+        callbackRequest = getContestedCallbackRequest();
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
@@ -173,9 +177,23 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     private CallbackRequest getCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
+        caseData.put("d81Question", "No");
         caseData.put("solicitorEmail", "test@test.com");
         caseData.put("solicitorName", "solicitorName");
         caseData.put("solicitorReference", "56789");
+        return CallbackRequest.builder()
+                .caseDetails(CaseDetails.builder()
+                        .id(12345L)
+                        .data(caseData)
+                        .build())
+                .build();
+    }
+
+    private CallbackRequest getContestedCallbackRequest() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(CONSENTED_SOLICITOR_EMAIL, "test@test.com");
+        caseData.put(CONSENTED_SOLICITOR_NAME, "solicitorName");
+        caseData.put(SOLICITOR_REFERENCE, "56789");
         return CallbackRequest.builder()
                 .caseDetails(CaseDetails.builder()
                         .id(12345L)
