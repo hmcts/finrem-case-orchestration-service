@@ -50,14 +50,14 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.generalLetter[0].id", is(notNullValue())))
+                .andExpect(jsonPath("$.data.generalLetterCollection[0].id", is(notNullValue())))
                 .andExpect(
-                        jsonPath("$.data.generalLetter[0].value.generatedLetter.document_url", is(DOC_URL)))
+                        jsonPath("$.data.generalLetterCollection[0].value.generatedLetter.document_url", is(DOC_URL)))
                 .andExpect(
-                        jsonPath("$.data.generalLetter[0].value.generatedLetter.document_filename",
+                        jsonPath("$.data.generalLetterCollection[0].value.generatedLetter.document_filename",
                                 is(FILE_NAME)))
                 .andExpect(
-                        jsonPath("$.data.generalLetter[0].value.generatedLetter.document_binary_url",
+                        jsonPath("$.data.generalLetterCollection[0].value.generatedLetter.document_binary_url",
                                 is(BINARY_URL)))
                 .andExpect(letterContentEmpty());
 
