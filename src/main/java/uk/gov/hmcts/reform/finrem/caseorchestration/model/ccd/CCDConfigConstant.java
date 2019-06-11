@@ -16,7 +16,7 @@ public class CCDConfigConstant {
     public static final String D81_QUESTION = "d81Question";
     //Document related
     public static final String MINI_FORM_A = "miniFormA";
-    public static final String GENERAL_LETTER = "generalLetter";
+    public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_TEXT = "generalLetterBody";
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";

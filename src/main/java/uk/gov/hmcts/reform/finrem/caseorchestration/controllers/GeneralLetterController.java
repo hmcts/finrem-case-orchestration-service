@@ -56,7 +56,6 @@ public class GeneralLetterController implements BaseController {
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         caseData.putAll(generalLetters);
-        caseData.put(GENERAL_LETTER_TEXT, generalLetterBodyDefaultText);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

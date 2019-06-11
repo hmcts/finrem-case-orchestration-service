@@ -231,7 +231,7 @@ services:
       MICROSERVICEKEYS_DIVORCE: "AAAAAAAAAAAAAAAA"
 
   dm-store:
-    image: "hmcts.azurecr.io/hmcts/dm-store:${DM_STORE_TAG:-latest}"
+    image: "hmcts/dm-store:${DM_STORE_TAG:-latest}"
     command: --wait-for-database 30
     healthcheck:
       disable: true

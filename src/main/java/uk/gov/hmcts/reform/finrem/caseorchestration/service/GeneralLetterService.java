@@ -60,7 +60,7 @@ public class GeneralLetterService extends AbstractDocumentService {
                                                           CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        List<GeneralLetterData> generalLetterDataList = Optional.ofNullable(caseData.get("generalLetter"))
+        List<GeneralLetterData> generalLetterDataList = Optional.ofNullable(caseData.get("generalLetterCollection"))
                 .map(this::convertToUploadOrderList)
                 .orElse(new ArrayList<>());
 

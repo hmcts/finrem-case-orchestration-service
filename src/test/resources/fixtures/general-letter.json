@@ -82,7 +82,7 @@
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "Yes",
       "generalLetterBody": "This test is the test which, always passes!",
-      "generalLetter": [
+      "generalLetterCollection": [
         {
           "id": "1",
           "value": {

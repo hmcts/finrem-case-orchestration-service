@@ -1,12 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.google.common.collect.ImmutableList;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +15,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 
 import javax.validation.constraints.NotNull;
-
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,17 +24,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class GeneralLetterValidateController implements BaseController {
+public class GeneralLetterStart implements BaseController {
 
-    @Value("${generalLetterBody.default.Text}")
-    private String generalLetterBodyDefaultText;
 
-    @Value("${generalLetterBody.error.message}")
-    private String errorMessage;
-
-    @PostMapping(path = "/general-letter-validate", consumes = APPLICATION_JSON_VALUE,
+    @PostMapping(path = "/general-letter-start", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Validates general letter text. Serves as a callback from CCD")
+    @ApiOperation(value = "Clears previous entered field values. Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
                     + "attached to the case",
@@ -48,30 +40,18 @@ public class GeneralLetterValidateController implements BaseController {
             @RequestHeader(value = "Authorization") String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        log.info("Received request for general letter validate. Auth token: {}, Case request : {}",
+        log.info("Received request to clear general letter fields. Auth token: {}, Case request : {}",
                 authorisationToken, callback);
 
         validateCaseData(callback);
-        Map<String,Object> caseData = callback.getCaseDetails().getData();
 
-        return Optional.of((String)caseData.get(GENERAL_LETTER_TEXT))
-                .filter(this::checkTextPredicate)
-                .map(this::sendError)
-                .orElseGet(this::sendDefault);
-    }
+        Map<String, Object> caseData = callback.getCaseDetails().getData();
+        caseData.put("generalLetterAddressTo", null);
+        caseData.put("generalLetterRecipient", null);
+        caseData.put("generalLetterRecipientAddress", null);
+        caseData.put("generalLetterCreatedBy", null);
+        caseData.put(GENERAL_LETTER_TEXT, null);
 
-    private boolean checkTextPredicate(String text) {
-        return text.equals(generalLetterBodyDefaultText);
-    }
-
-    private ResponseEntity sendError(String text) {
-        log.info("general letter text {} is invalid.", text);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(ImmutableList.of(errorMessage))
-                .build());
-    }
-
-    private ResponseEntity sendDefault() {
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }
