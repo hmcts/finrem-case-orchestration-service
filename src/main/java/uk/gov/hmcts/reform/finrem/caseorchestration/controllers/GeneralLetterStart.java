@@ -49,9 +49,13 @@ public class GeneralLetterStart implements BaseController {
         caseData.put("generalLetterAddressTo", null);
         caseData.put("generalLetterRecipient", null);
         caseData.put("generalLetterRecipientAddress", null);
-        caseData.put("generalLetterCreatedBy", null);
+        caseData.put("generalLetterCreatedBy", createdByName(authorisationToken));
         caseData.put(GENERAL_LETTER_TEXT, null);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    private String createdByName(String authorisationToken) {
+        return null;
     }
 }
