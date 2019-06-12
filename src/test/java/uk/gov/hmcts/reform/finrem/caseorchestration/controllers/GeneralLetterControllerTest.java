@@ -37,9 +37,6 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
         return "/case-orchestration/documents/general-letter";
     }
 
-    @Value("${generalLetterBody.default.Text}")
-    private String expectedDefaultText;
-
     @Test
     public void generateGeneralLetterSuccess() throws Exception {
         doValidCaseDataSetUp();
