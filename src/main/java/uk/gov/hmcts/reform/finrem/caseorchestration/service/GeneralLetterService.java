@@ -62,6 +62,7 @@ public class GeneralLetterService extends AbstractDocumentService {
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         data.put("generalLetterCreatedDate", new Date());
+        data.put("ccdCaseNumber", caseDetails.getId());
 
         return caseDetails;
     }

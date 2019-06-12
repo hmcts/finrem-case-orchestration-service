@@ -87,6 +87,7 @@ public class GeneralLetterServiceTest {
         void verifyAdditionalFields() {
             Map<String, Object> data = data();
             assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
+            assertThat(data.get("ccdCaseNumber"), is(1234567890L));
         }
 
         private Map<String, Object> data() {
