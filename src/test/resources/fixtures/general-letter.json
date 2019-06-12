@@ -81,7 +81,11 @@
       "helpWithFeesQuestion": "No",
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "Yes",
-      "generalLetterBody": "This test is the test which, always passes!",
+      "generalLetterAddressTo": "applicantSolicitor",
+      "generalLetterRecipient": "",
+      "generalLetterRecipientAddress": "",
+      "generalLetterCreatedBy": "",
+      "generalLetterBody": "Test content for the letter body",
       "generalLetterCollection": [
         {
           "id": "1",
