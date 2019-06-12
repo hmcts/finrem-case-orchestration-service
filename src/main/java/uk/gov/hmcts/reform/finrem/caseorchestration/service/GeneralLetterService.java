@@ -13,11 +13,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 
@@ -26,6 +28,7 @@ public class GeneralLetterService extends AbstractDocumentService {
 
     private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
     private Function<CaseDocument, GeneralLetterData> createGeneralLetterData = this::applyGeneralLetterData;
+    private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
 
     @Autowired
     public GeneralLetterService(DocumentClient documentClient,
@@ -37,11 +40,11 @@ public class GeneralLetterService extends AbstractDocumentService {
         return generateDocument
                 .andThen(createGeneralLetterData)
                 .andThen(data -> populateGeneralLetterData(data, caseDetails))
-                .apply(caseDetails, authorisationToken);
+                .apply(copyOf(caseDetails), authorisationToken);
     }
 
     private CaseDocument applyGenerateDocument(CaseDetails caseDetails, String authorisationToken) {
-        return generateDocument(authorisationToken, caseDetails,
+        return generateDocument(authorisationToken, addExtraFields.apply(caseDetails),
                 config.getGeneralLetterTemplate(),
                 config.getGeneralLetterFileName());
     }
@@ -54,6 +57,13 @@ public class GeneralLetterService extends AbstractDocumentService {
         generalLetterData.setGeneralLetter(generalLetter);
 
         return generalLetterData;
+    }
+
+    private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
+        Map<String, Object> data = caseDetails.getData();
+        data.put("generalLetterCreatedDate", new Date());
+
+        return caseDetails;
     }
 
     private Map<String, Object> populateGeneralLetterData(GeneralLetterData generalLetterData,

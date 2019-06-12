@@ -3,13 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
 import java.io.InputStream;
@@ -18,10 +18,8 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
@@ -43,9 +41,7 @@ public class GeneralLetterServiceTest {
         config.setGeneralLetterTemplate("test_template");
         config.setGeneralLetterFileName("test_file");
 
-        generatorClient = Mockito.mock(DocumentClient.class);
-        when(generatorClient.generatePDF(isA(DocumentRequest.class), eq(AUTH_TOKEN))).thenReturn(document());
-
+        generatorClient = new TestDocumentClient();
         service = new GeneralLetterService(generatorClient, config, mapper);
     }
 
@@ -58,6 +54,7 @@ public class GeneralLetterServiceTest {
 
         doCaseDocumentAssert(result.get(0).getGeneralLetter().getGeneratedLetter());
         doCaseDocumentAssert(result.get(1).getGeneralLetter().getGeneratedLetter());
+        ((TestDocumentClient)generatorClient).verifyAdditionalFields();
     }
 
     private CaseDetails caseDetails() throws Exception {
@@ -70,5 +67,31 @@ public class GeneralLetterServiceTest {
         assertThat(result.getDocumentFilename(), is(FILE_NAME));
         assertThat(result.getDocumentUrl(), is(DOC_URL));
         assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
+    }
+
+    private class TestDocumentClient implements DocumentClient {
+
+        private Map<String, Object> value;
+
+        @Override
+        public Document generatePDF(DocumentRequest request, String authorizationToken) {
+            this.value = request.getValues();
+            return document();
+        }
+
+        @Override
+        public void deleteDocument(String fileUrl, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
+        void verifyAdditionalFields() {
+            Map<String, Object> data = data();
+            assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
+        }
+
+        private Map<String, Object> data() {
+            CaseDetails caseDetails = (CaseDetails) value.get("caseDetails");
+            return caseDetails.getData();
+        }
     }
 }

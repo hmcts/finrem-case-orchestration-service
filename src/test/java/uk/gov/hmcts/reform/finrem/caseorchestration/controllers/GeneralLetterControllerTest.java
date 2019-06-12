@@ -58,8 +58,7 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
                                 is(FILE_NAME)))
                 .andExpect(
                         jsonPath("$.data.generalLetterCollection[0].value.generatedLetter.document_binary_url",
-                                is(BINARY_URL)))
-                .andExpect(letterContentEmpty());
+                                is(BINARY_URL)));
 
     }
 
@@ -90,7 +89,4 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
         return when(documentService.createGeneralLetter(eq(AUTH_TOKEN), isA(CaseDetails.class)));
     }
 
-    private ResultMatcher letterContentEmpty() {
-        return jsonPath("$.data.generalLetterBody", is(expectedDefaultText));
-    }
 }
