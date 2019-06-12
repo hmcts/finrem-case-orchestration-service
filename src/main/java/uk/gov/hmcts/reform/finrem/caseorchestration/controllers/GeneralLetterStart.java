@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-
 import javax.validation.constraints.NotNull;
+import java.text.ParseException;
 import java.util.Map;
-import java.util.Optional;
+import com.nimbusds.jwt.JWTParser;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_TEXT;
@@ -25,7 +25,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 public class GeneralLetterStart implements BaseController {
-
 
     @PostMapping(path = "/general-letter-start", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
@@ -55,7 +54,13 @@ public class GeneralLetterStart implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    private String createdByName(String authorisationToken) {
-        return null;
+    private String createdByName(String jwt) {
+        try {
+            jwt = jwt.replaceAll("Bearer ", "");
+            return JWTParser.parse(jwt).getJWTClaimsSet().getClaims().get("forename") + " " +
+                    JWTParser.parse(jwt).getJWTClaimsSet().getClaims().get("surname");
+        } catch (ParseException e) {
+            throw new IllegalStateException("JWT is not valid");
+        }
     }
 }
