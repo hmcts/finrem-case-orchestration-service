@@ -326,7 +326,7 @@ services:
       IDAM_API_URL: http://idam-api:8080
       PAYMENT_API_URL: http://payments-api:8080
       FEES_API_URL: http://fees-register-api-aat.service.core-compute-aat.internal
-      PRD_API_URL: http://payments-api:8080
+      PRD_API_URL: http://rd-professional-api:8090
     ports:
      - 9001:9001
     depends_on:
