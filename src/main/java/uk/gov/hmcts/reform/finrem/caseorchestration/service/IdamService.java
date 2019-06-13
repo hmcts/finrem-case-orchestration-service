@@ -53,7 +53,7 @@ public class IdamService {
             buildAuthRequest.apply(authToken), Map.class));
     }
 
-    public String getIDAMFullName(String authorisationToken) {
+    public String getIdamFullName(String authorisationToken) {
         return userFullName.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
                 buildAuthRequest.apply(authorisationToken), Map.class));
     }

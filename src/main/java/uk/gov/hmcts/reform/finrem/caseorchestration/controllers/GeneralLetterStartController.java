@@ -15,9 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import javax.validation.constraints.NotNull;
-import java.text.ParseException;
 import java.util.Map;
-import com.nimbusds.jwt.JWTParser;
+
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -53,7 +52,7 @@ public class GeneralLetterStartController implements BaseController {
         caseData.put("generalLetterAddressTo", null);
         caseData.put("generalLetterRecipient", null);
         caseData.put("generalLetterRecipientAddress", null);
-        caseData.put("generalLetterCreatedBy", service.getIDAMFullName(authorisationToken));
+        caseData.put("generalLetterCreatedBy", service.getIdamFullName(authorisationToken));
         caseData.put(GENERAL_LETTER_TEXT, null);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());

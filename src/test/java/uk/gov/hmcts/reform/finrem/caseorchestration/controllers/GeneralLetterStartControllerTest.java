@@ -13,7 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -35,7 +36,7 @@ public class GeneralLetterStartControllerTest extends BaseControllerTest {
     @Test
     public void initialiseGeneralLetterPropertiesSuccess() throws Exception {
         generalLetterStartControllerSetUp();
-        when(idamService.getIDAMFullName(bearerToken)).thenReturn("Integration Test");
+        when(idamService.getIdamFullName(bearerToken)).thenReturn("Integration Test");
 
         mvc.perform(post("/case-orchestration/general-letter-start")
                 .content(requestContent.toString())
@@ -63,7 +64,8 @@ public class GeneralLetterStartControllerTest extends BaseControllerTest {
     @Test
     public void initialiseGeneralLetterPropertiesInternalServerError() throws Exception {
         generalLetterStartControllerSetUp();
-        when(idamService.getIDAMFullName(bearerToken)).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+        when(idamService.getIdamFullName(bearerToken))
+                .thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
         mvc.perform(post("/case-orchestration/general-letter-start")
                 .content(requestContent.toString())
