@@ -426,7 +426,7 @@ services:
 
   rd-professional-api:
     build:
-      context: ../prd
+      context: .
       args:
         - http_proxy
         - https_proxy
