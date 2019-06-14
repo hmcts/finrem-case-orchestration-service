@@ -1,4 +1,4 @@
-serviceToken="$(./pba-service-token.sh)"
+serviceToken="$(./idam-service-token.sh rd-professional-api)"
 
 echo ${serviceToken}
 
