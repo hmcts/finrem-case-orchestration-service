@@ -99,6 +99,17 @@ To import the Financial Remedy CCD definition file, run the following command:
     ./bin/ccd-import-definition.sh <<Finrem_Definition_File_Path>>
 ```
 
+### Load pba reference data using new endpoints of PRD
+
+To load reference data ( organisation, user and pba account: PBA0222), run the following command.
+
+Go to **bin** folder,
+
+```bash
+    ./load-pba-reference-data.sh
+```
+
+
 ## Developing
 
 ### Unit tests

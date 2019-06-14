@@ -1,4 +1,4 @@
-serviceToken="$(./idam-service-token.sh rd-professional-api)"
+serviceToken="$(./idam-service-token.sh rd_professional_api)"
 
 echo ${serviceToken}
 

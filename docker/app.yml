@@ -425,12 +425,6 @@ services:
       - 5430:5432
 
   rd-professional-api:
-    build:
-      context: .
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
     image: hmcts.azurecr.io/hmcts/rd-professional-api:latest
     container_name: rd-professional-api
     environment:
