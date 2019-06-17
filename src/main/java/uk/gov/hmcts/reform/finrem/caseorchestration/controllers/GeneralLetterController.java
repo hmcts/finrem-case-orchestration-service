@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +20,6 @@ import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_TEXT;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -30,9 +28,6 @@ public class GeneralLetterController implements BaseController {
 
     @Autowired
     private GeneralLetterService service;
-
-    @Value("${generalLetterBody.default.Text}")
-    private String generalLetterBodyDefaultText;
 
     @PostMapping(path = "/documents/general-letter", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
@@ -56,7 +51,6 @@ public class GeneralLetterController implements BaseController {
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         caseData.putAll(generalLetters);
-        caseData.put(GENERAL_LETTER_TEXT, generalLetterBodyDefaultText);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

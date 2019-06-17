@@ -43,9 +43,19 @@ public class IdamService {
         responseEntity -> List.class.cast(responseEntity.getBody().get(ROLES)).stream()
         .anyMatch(role -> role.equals(FR_COURT_ADMIN));
 
+    private static final  Function<ResponseEntity<Map>, String>  userFullName = responseEntity -> {
+        Map body = responseEntity.getBody();
+        return (String)body.get("forename") + " " + body.get("surname");
+    };
+
     public boolean isUserRoleAdmin(String authToken) {
         return isAdmin.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
             buildAuthRequest.apply(authToken), Map.class));
+    }
+
+    public String getIdamFullName(String authorisationToken) {
+        return userFullName.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
+                buildAuthRequest.apply(authorisationToken), Map.class));
     }
 
 }
