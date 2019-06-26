@@ -33,6 +33,7 @@ public class NotificationService {
     private static final String MESSAGE = "Failed to send notification email for case id : ";
     private static final String MSG_SOLICITOR_EMAIL = " for solicitor email";
     private static final String EXCEPTION = "exception :";
+    private static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
     private final NotificationServiceConfiguration notificationServiceConfiguration;
     private final RestTemplate restTemplate;
 
@@ -98,6 +99,7 @@ public class NotificationService {
         notificationRequest.setSolicitorReferenceNumber(ObjectUtils.toString(mapOfCaseData.get(solicitorReference)));
         notificationRequest.setName(ObjectUtils.toString(mapOfCaseData.get(solicitorName)));
         notificationRequest.setNotificationEmail(ObjectUtils.toString(mapOfCaseData.get(solicitorEmail)));
+        notificationRequest.setSelectedCourt(ObjectUtils.toString(mapOfCaseData.get(ALLOCATED_COURT_LIST)));
         return notificationRequest;
     }
 
