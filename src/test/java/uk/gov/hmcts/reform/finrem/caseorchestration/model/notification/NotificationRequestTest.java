@@ -11,11 +11,12 @@ public class NotificationRequestTest {
     @Test
     public void shouldReturnNotificationRequestData() {
         underTest = new NotificationRequest("12345", "67890",
-                "Padmaja", "test@test.com");
+                "Padmaja", "test@test.com", "nottingham");
         assertEquals("12345", underTest.getCaseReferenceNumber());
         assertEquals("67890", underTest.getSolicitorReferenceNumber());
         assertEquals("Padmaja", underTest.getName());
         assertEquals("test@test.com", underTest.getNotificationEmail());
+        assertEquals("nottingham", underTest.getSelectedCourt());
     }
 
     @Test
@@ -34,9 +35,11 @@ public class NotificationRequestTest {
         underTest.setNotificationEmail("test1@test1.com");
         underTest.setSolicitorReferenceNumber("67891");
         underTest.setCaseReferenceNumber("54321");
+        underTest.setSelectedCourt("nottingham");
         assertEquals("54321", underTest.getCaseReferenceNumber());
         assertEquals("67891", underTest.getSolicitorReferenceNumber());
         assertEquals("Prashanth", underTest.getName());
         assertEquals("test1@test1.com", underTest.getNotificationEmail());
+        assertEquals("nottingham", underTest.getSelectedCourt());
     }
 }

@@ -327,6 +327,7 @@ services:
       PAYMENT_API_URL: http://payments-api:8080
       FEES_API_URL: http://fees-register-api-aat.service.core-compute-aat.internal
       PRD_API_URL: http://rd-professional-api:8090
+      AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://service-auth-provider-api:8080
     ports:
      - 9001:9001
     depends_on:

@@ -42,5 +42,6 @@ public class CCDConfigConstant {
     public static final String NO = "No";
     public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
     public static final String ROLES = "roles";
+    public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
 
 }

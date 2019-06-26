@@ -19,4 +19,6 @@ public class NotificationRequest {
     private String name;
     @JsonProperty("notificationEmail")
     private String notificationEmail;
+    @JsonProperty("selectedCourt")
+    private String selectedCourt;
 }
