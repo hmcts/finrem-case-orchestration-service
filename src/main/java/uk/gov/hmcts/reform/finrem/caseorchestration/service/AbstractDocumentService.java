@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -43,6 +44,10 @@ public abstract class AbstractDocumentService {
 
     void deleteDocument(String documentUrl, String authorisationToken) {
         documentClient.deleteDocument(documentUrl, authorisationToken);
+    }
+
+    void generateApprovedConsentOrder(CallbackRequest callbackRequest, String authorisationToken) {
+        documentClient.generateApprovedConsentOrder(callbackRequest, authorisationToken);
     }
 
     private CaseDocument caseDocument(Document miniFormA) {

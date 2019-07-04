@@ -2,11 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
@@ -27,5 +24,13 @@ public interface DocumentClient {
     @DeleteMapping(path = "/version/1/delete-pdf-document")
     void deleteDocument(
             @RequestParam("fileUrl") String fileUrl,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+
+    @PostMapping(
+            path = "/version/1/generateApprovedConsentOrder",
+            headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
+    )
+    void generateApprovedConsentOrder(
+            @RequestBody CallbackRequest callback,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 }
