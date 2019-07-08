@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -699,15 +698,6 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .andDo(print())
                 .andExpect(jsonPath("$.data.latestConsentOrder").exists());
     }
-
-    private CaseDocument getCaseDocument() {
-        CaseDocument caseDocument = new CaseDocument();
-        caseDocument.setDocumentUrl("http://doc1");
-        caseDocument.setDocumentBinaryUrl("http://doc1/binary");
-        caseDocument.setDocumentFilename("doc1");
-        return caseDocument;
-    }
-
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
