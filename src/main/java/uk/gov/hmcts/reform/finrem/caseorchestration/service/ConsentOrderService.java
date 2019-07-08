@@ -20,19 +20,26 @@ import static java.util.Optional.ofNullable;
 @Slf4j
 public class ConsentOrderService {
 
+    private static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
+    private static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
+    private static final String CONSENT_ORDER_COLLECTION = "amendedConsentOrderCollection";
+    private static final String CONSENT_ORDER_MSG = "amendedConsentOrderCollection doesn't have documents in case_data";
+    private static final String RESPOND_TO_ORDER_DOCUMENTS = "respondToOrderDocuments";
+    private static final String DOCUMENT_DOESN_T_EXISTS = "AmendedConsentOrder type document doesn't exists.";
+    private static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
     private ObjectMapper objectMapper;
 
     private static boolean isAmendedConsentOrderType(RespondToOrderData respondToOrderData) {
-        return "AmendedConsentOrder".equalsIgnoreCase(respondToOrderData.getRespondToOrder().getDocumentType());
+        return AMENDED_CONSENT_ORDER.equalsIgnoreCase(respondToOrderData.getRespondToOrder().getDocumentType());
     }
 
     public CaseDocument getLatestConsentOrderData(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
         try {
-            if ("FR_respondToOrder".equalsIgnoreCase(callbackRequest.getEventId())) {
+            if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(callbackRequest.getEventId())) {
                 return getLatestRespondToOrderDocuments(caseData);
-            } else if ("FR_amendedConsentOrder".equalsIgnoreCase(callbackRequest.getEventId())) {
+            } else if (FR_AMENDED_CONSENT_ORDER.equalsIgnoreCase(callbackRequest.getEventId())) {
                 return getLatestAmendedConsentOrder(caseData);
             } else {
                 return convertToCaseDocument(caseData.get("consentOrder"));
@@ -44,13 +51,12 @@ public class ConsentOrderService {
     }
 
     private CaseDocument getLatestAmendedConsentOrder(Map<String, Object> caseData) {
-        return ofNullable(caseData.get("amendedConsentOrderCollection"))
+        return ofNullable(caseData.get(CONSENT_ORDER_COLLECTION))
                 .map(this::convertToAmendedConsentOrderDataList)
-                .get()
+                .orElseThrow(() -> new NoSuchFieldExistsException(CONSENT_ORDER_MSG))
                 .stream()
                 .reduce((first, second) -> second)
-                .orElseThrow(() -> new NoSuchFieldExistsException(
-                        "amendedConsentOrderCollection doesn't have documents in case_data"))
+                .orElseThrow(() -> new NoSuchFieldExistsException(CONSENT_ORDER_MSG))
                 .getConsentOrder()
                 .getAmendedConsentOrder();
     }
@@ -74,13 +80,13 @@ public class ConsentOrderService {
     }
 
     private CaseDocument getLatestRespondToOrderDocuments(Map<String, Object> caseData) {
-        return ofNullable(caseData.get("respondToOrderDocuments"))
+        return ofNullable(caseData.get(RESPOND_TO_ORDER_DOCUMENTS))
                 .map(this::convertToRespondToOrderDataList)
-                .get()
+                .orElseThrow(() -> new NoSuchFieldExistsException(DOCUMENT_DOESN_T_EXISTS))
                 .stream()
                 .filter(ConsentOrderService::isAmendedConsentOrderType)
                 .reduce((first, second) -> second)
-                .orElseThrow(() -> new NoSuchFieldExistsException("AmendedConsentOrder type document doesn't exists."))
+                .orElseThrow(() -> new NoSuchFieldExistsException(DOCUMENT_DOESN_T_EXISTS))
                 .getRespondToOrder()
                 .getDocumentLink();
 
