@@ -8,7 +8,9 @@ public enum ConsentedStatus {
 
     APPLICATION_ISSUED("applicationIssued"),
 
-    PREPARE_FOR_HEARING("prepareForHearing");
+    PREPARE_FOR_HEARING("prepareForHearing"),
+
+    CASE_ADDED("caseAdded");
 
     private final String id;
 

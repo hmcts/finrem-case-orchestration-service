@@ -7,6 +7,7 @@ import feign.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
@@ -45,6 +46,10 @@ public class SetUpUtils {
 
     public static InvalidCaseDataException invalidCaseDataError() {
         return new InvalidCaseDataException(BAD_REQUEST, "Bad request");
+    }
+
+    public static NoSuchFieldExistsException noSuchFieldExistsCaseDataError() {
+        return new NoSuchFieldExistsException("Field Does not exists");
     }
 
     public static HttpServerErrorException httpServerError() {
