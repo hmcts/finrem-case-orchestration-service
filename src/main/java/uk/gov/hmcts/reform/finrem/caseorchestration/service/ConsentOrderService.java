@@ -44,7 +44,7 @@ public class ConsentOrderService {
     }
 
     private CaseDocument getLatestAmendedConsentOrder(Map<String, Object> caseData) {
-       return ofNullable(caseData.get("amendedConsentOrderCollection"))
+        return ofNullable(caseData.get("amendedConsentOrderCollection"))
                 .map(this::convertToAmendedConsentOrderDataList)
                 .get()
                 .stream()
