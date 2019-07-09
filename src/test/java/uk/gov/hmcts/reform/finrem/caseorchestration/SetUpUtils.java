@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import feign.FeignException;
 import feign.Response;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -44,6 +45,10 @@ public class SetUpUtils {
 
     public static InvalidCaseDataException invalidCaseDataError() {
         return new InvalidCaseDataException(BAD_REQUEST, "Bad request");
+    }
+
+    public static HttpServerErrorException httpServerError() {
+        return new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     public static FeeResponse fee(ApplicationType applicationType) {

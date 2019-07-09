@@ -2,6 +2,7 @@
   "token": "token_test",
   "event_id": "some_event_id",
   "case_details": {
+    "id": 1234567890,
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_data": {
@@ -81,8 +82,12 @@
       "helpWithFeesQuestion": "No",
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "Yes",
-      "generalLetterBody": "This test is the test which, always passes!",
-      "generalLetter": [
+      "generalLetterAddressTo": "applicantSolicitor",
+      "generalLetterRecipient": "",
+      "generalLetterRecipientAddress": "",
+      "generalLetterCreatedBy": "",
+      "generalLetterBody": "Test content for the letter body",
+      "generalLetterCollection": [
         {
           "id": "1",
           "value": {

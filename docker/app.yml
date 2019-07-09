@@ -12,13 +12,11 @@ services:
       FINREM_NOTIFICATION_SERVICE_BASE_URL: http://finrem-notification-service:8086
       DOCUMENT_GENERATOR_SERVICE_API_BASEURL: http://finrem-document-generator-client:4009
       PAYMENT_SERVICE_API_BASEURL: http://finrem-payment-service:9001
+      PRD_API_URL: http://rd-professional-api:8090
     depends_on:
       - ccd-case-management-web
-#      - finrem-notification-service
       - finrem-payment-service
       - finrem-document-generator-client
-#    links:
-#      - finrem-notification-service
 
   ccd-case-management-web:
     image: "hmcts.azurecr.io/hmcts/ccd-case-management-web:${CCD_CASE_MANAGEMENT_WEB_TAG:-latest}"
@@ -229,9 +227,10 @@ services:
       MICROSERVICEKEYS_FINREM_PAYMENT_SERVICE: "AAAAAAAAAAAAAAAA"
       MICROSERVICEKEYS_FINREM_CCD_DATA_MIGRATOR: "AAAAAAAAAAAAAAAA"
       MICROSERVICEKEYS_DIVORCE: "AAAAAAAAAAAAAAAA"
+      MICROSERVICEKEYS_RD_PROFESSIONAL_API: "AAAAAAAAAAAAAAAA"
 
   dm-store:
-    image: "hmcts.azurecr.io/hmcts/dm-store:${DM_STORE_TAG:-latest}"
+    image: "hmcts/dm-store:${DM_STORE_TAG:-latest}"
     command: --wait-for-database 30
     healthcheck:
       disable: true
@@ -327,7 +326,8 @@ services:
       IDAM_API_URL: http://idam-api:8080
       PAYMENT_API_URL: http://payments-api:8080
       FEES_API_URL: http://fees-register-api-aat.service.core-compute-aat.internal
-      PRD_API_URL: http://payments-api:8080
+      PRD_API_URL: http://rd-professional-api:8090
+      AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://service-auth-provider-api:8080
     ports:
      - 9001:9001
     depends_on:
@@ -425,9 +425,50 @@ services:
     ports:
       - 5430:5432
 
+  rd-professional-api:
+    image: hmcts.azurecr.io/hmcts/rd-professional-api:latest
+    container_name: rd-professional-api
+    environment:
+      - JAVA_OPTS= ${JAVA_OPTS}
+      - POSTGRES_USERNAME=dbrefdata
+      - POSTGRES_PASSWORD=dbrefdata
+      - POSTGRES_HOST=rd-professional-db
+      - POSTGRES_PORT=5432
+      # these environment variables are used by java-logging library
+      - JSON_CONSOLE_PRETTY_PRINT
+      - ROOT_APPENDER
+      - ROOT_LOGGING_LEVEL
+      - REFORM_SERVICE_TYPE
+      - REFORM_SERVICE_NAME
+      - REFORM_TEAM
+      - REFORM_ENVIRONMENT
+      - LOGBACK_DATE_FORMAT
+      - LOGBACK_REQUIRE_THREAD
+      - LOGBACK_REQUIRE_ALERT_LEVEL=false
+      - LOGBACK_REQUIRE_ERROR_CODE=false
+      - S2S_URL=http://service-auth-provider-api:8080
+      - S2S_SECRET=AAAAAAAAAAAAAAAA
+    ports:
+      - 8000:8000
+      - ${SERVER_PORT:-8090}:${SERVER_PORT:-8090}
+    depends_on:
+      - rd-professional-db
+      - service-auth-provider-api
 
+  rd-professional-db:
+    build:
+      context: ../prd
+    image: hmcts.azurecr.io/hmcts/rd-professional-db:latest
+    container_name: rd-professional-db
+    volumes:
+      - rd-professional-db-volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-dbrefdata}"
+    ports:
+      - 5428:5432
 
 volumes:
   ccd-docker-ccd-shared-database-data:
   ccd-docker-azure-blob-data:
+  rd-professional-db-volume:
 

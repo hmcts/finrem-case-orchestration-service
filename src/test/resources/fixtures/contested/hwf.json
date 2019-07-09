@@ -106,7 +106,7 @@
         "notApplicable"
       ],
       "additionalPropertyOrderDecision":"No",
-      "applicantSolicitorConsentForEmails":"No"
+      "applicantSolicitorConsentForEmails":"Yes"
     }
   }
 }

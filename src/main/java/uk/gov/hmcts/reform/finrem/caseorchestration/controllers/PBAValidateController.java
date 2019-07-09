@@ -30,7 +30,6 @@ public class PBAValidateController implements BaseController {
     @Value("${ccd.threadDelay}")
     private boolean ccdThreadDelay;
 
-
     private final PBAValidationService pbaValidationService;
 
     @SuppressWarnings("unchecked")
@@ -49,7 +48,6 @@ public class PBAValidateController implements BaseController {
                 log.info("caught Exception.... " + e);
             }
         }
-
 
         validateCaseData(callbackRequest);
 

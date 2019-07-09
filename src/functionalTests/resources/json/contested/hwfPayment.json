@@ -1,11 +1,11 @@
 {
   "event_id": "some_event_id",
   "case_details": {
-    "id": "123",
+    "id": "93939393",
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_data": {
-      "helpWithFeesQuestion": "No",
+      "helpWithFeesQuestion": "Yes",
       "applicantLName":"Guy",
       "dateOfMarriage":"1111-01-01",
       "mortgageDetail":"test",
@@ -17,7 +17,7 @@
       "respondentLName":"test",
       "respondentPhone":null,
       "respondentFMName":"test",
-      "divorceCaseNumber":"DD12D12345",
+      "divorceCaseNumber":"ED12D66666",
       "fastTrackDecision":"Yes",
       "respondentAddress":{
         "County":"",

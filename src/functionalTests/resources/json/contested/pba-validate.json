@@ -1,11 +1,10 @@
 {
   "event_id": "some_event_id",
   "case_details": {
-    "id": "123",
+    "id": "989898",
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_data": {
-      "PBAreference": "ABCD",
       "helpWithFeesQuestion": "No",
       "applicantLName":"Guy",
       "dateOfMarriage":"1111-01-01",
@@ -18,7 +17,7 @@
       "respondentLName":"test",
       "respondentPhone":null,
       "respondentFMName":"test",
-      "divorceCaseNumber":"ED12D87878",
+      "divorceCaseNumber":"DD12D12345",
       "fastTrackDecision":"Yes",
       "respondentAddress":{
         "County":"",

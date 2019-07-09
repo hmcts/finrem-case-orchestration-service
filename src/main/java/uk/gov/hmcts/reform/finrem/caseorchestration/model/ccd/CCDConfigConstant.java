@@ -9,12 +9,14 @@ public class CCDConfigConstant {
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
     public static final String SOLICITOR_NAME = "solicitorName";
     public static final String SOLICITOR_EMAIL = "solicitorEmail";
+    public static final String CONSENTED_SOLICITOR_EMAIL = "applicantSolicitorEmail";
+    public static final String CONSENTED_SOLICITOR_NAME = "applicantSolicitorName";
     public static final String SOLICITOR_FIRM = "solicitorFirm";
     //Application Type related
     public static final String D81_QUESTION = "d81Question";
     //Document related
     public static final String MINI_FORM_A = "miniFormA";
-    public static final String GENERAL_LETTER = "generalLetter";
+    public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_TEXT = "generalLetterBody";
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
@@ -40,5 +42,6 @@ public class CCDConfigConstant {
     public static final String NO = "No";
     public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
     public static final String ROLES = "roles";
+    public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
 
 }

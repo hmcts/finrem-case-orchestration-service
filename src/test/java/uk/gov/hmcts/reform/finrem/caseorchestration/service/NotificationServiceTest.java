@@ -18,6 +18,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALLOCATED_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_HWF_SUCCESSFUL = "http://localhost:8086/notify/hwf-successful";
@@ -27,6 +31,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             + "consent-order-not-approved";
     private static final String END_POINT_CONSENT_ORDER_AVAILABLE = "http://localhost:8086/notify/"
             + "consent-order-available";
+    private static final String END_POINT_CONTESTED_HWF_SUCCESSFUL = "http://localhost:8086/notify/"
+            + "contested/hwf-successful";
 
     @Autowired
     private NotificationService notificationService;
@@ -148,16 +154,53 @@ public class NotificationServiceTest extends BaseServiceTest {
         }
     }
 
+
+    @Test
+    public void sendContestedHwfSuccessfulNotificationEmail() {
+        callbackRequest = getContestedCallbackRequest();
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+    }
+
+    @Test
+    public void throwExceptionWhenContestedHwfSuccessfulNotificationEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+        try {
+            notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
+        }
+    }
+
     private CallbackRequest getCallbackRequest() {
-        Map<String,Object> caseData = new HashMap<>();
-        caseData.put("solicitorEmail","test@test.com");
-        caseData.put("solicitorName","solicitorName");
-        caseData.put("solicitorReference","56789");
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("d81Question", "No");
+        caseData.put("solicitorEmail", "test@test.com");
+        caseData.put("solicitorName", "solicitorName");
+        caseData.put("solicitorReference", "56789");
         return CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                .id(12345L)
-                .data(caseData)
-                .build())
-            .build();
+                .caseDetails(CaseDetails.builder()
+                        .id(12345L)
+                        .data(caseData)
+                        .build())
+                .build();
+    }
+
+    private CallbackRequest getContestedCallbackRequest() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(CONSENTED_SOLICITOR_EMAIL, "test@test.com");
+        caseData.put(CONSENTED_SOLICITOR_NAME, "solicitorName");
+        caseData.put(SOLICITOR_REFERENCE, "56789");
+        caseData.put(ALLOCATED_COURT_LIST, "notingham");
+        return CallbackRequest.builder()
+                .caseDetails(CaseDetails.builder()
+                        .id(12345L)
+                        .data(caseData)
+                        .build())
+                .build();
     }
 }

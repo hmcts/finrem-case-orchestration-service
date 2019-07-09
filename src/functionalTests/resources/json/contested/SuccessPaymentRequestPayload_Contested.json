@@ -1,0 +1,95 @@
+{
+  "event_id": "FR_applicationPaymentSubmission",
+  "summary": "",
+  "description": "",
+  "case_details": {
+    "id": "100050018",
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_data": {
+     "ignore_warning": false,
+      "event_data": {
+        "applicantRepresented": "Yes",
+        "applicantSolicitorName": "SolName99",
+        "applicantSolicitorFirm": "SolFirm99",
+        "solicitorReference": "SolRef99",
+        "applicantSolicitorAddress": {
+          "AddressLine1": "67 Pears Road",
+          "AddressLine2": "",
+          "AddressLine3": "",
+          "PostTown": "Hounslow",
+          "County": "",
+          "PostCode": "TW3 1SS",
+          "Country": "United Kingdom"
+        },
+        "applicantSolicitorPhone": "89897876765",
+        "applicantSolicitorEmail": "emailSol99@email.com",
+        "applicantSolicitorDXnumber": null,
+        "applicantSolicitorConsentForEmails": "No",
+        "divorceCaseNumber": "ED12D12999",
+        "dateOfMarriage": "1999-01-01",
+        "dateOfSepration": "2019-02-01",
+        "divorcePetitionIssuedDate": "2019-03-01",
+        "nameOfCourtDivorceCentre": "Court Name",
+        "divorceStageReached": "Decree Absolute",
+        "divorceDecreeAbsoluteDate": "2019-03-01",
+        "divorceUploadEvidence2": {
+          "document_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/ad49bf72-7d1e-489e-8a64-eba293eacdfb",
+          "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/ad49bf72-7d1e-489e-8a64-eba293eacdfb/binary",
+          "document_filename": "pdf-sample_AdditionalUpload.pdf"
+        },
+        "applicantFMName": "F23 M23",
+        "applicantLName": "L23",
+        "respondentFMName": "RF99 RM99",
+        "respondentLName": "RL99",
+        "respondentRepresented": "No",
+        "respondentAddress": {
+          "AddressLine1": "67 Pears Road",
+          "AddressLine2": "",
+          "AddressLine3": "",
+          "PostTown": "Hounslow",
+          "County": "Greater London",
+          "PostCode": "TW3 1SS",
+          "Country": "United Kingdom"
+        },
+        "respondentPhone": null,
+        "respondentEmail": null,
+        "natureOfApplicationChecklist": [
+          "Maintenance pending suite"
+        ],
+        "fastTrackDecision": "No",
+        "addToComplexityListOfCourts": "falseNo",
+        "allocatedCourtList": "cfc",
+        "cfcCourtList": "FR_s_CFCList_16",
+        "isApplicantsHomeCourt": "No",
+        "applicantAttendedMIAM": "Yes",
+        "mediatorRegistrationNumber": "URN888",
+        "familyMediatorServiceName": "FMS",
+        "soleTraderName": "Sol Trader Name",
+        "promptForAnyDocument": "No"
+      },
+      "authorisationName": "SolName99",
+      "solicitorFirm": "SolFirm99",
+      "authorisation2b": "SolPos99",
+      "authorisation3": "2019-06-03",
+      "helpWithFeesQuestion": "No",
+      "amountToPay": "1000",
+      "PBANumber": "PBA0078447",
+      "PBAreference": "MyReference98",
+      "orderSummary": {
+        "PaymentReference": "",
+        "PaymentTotal": "1000",
+        "Fees": [
+          {
+            "value": {
+              "FeeCode": "FEE0229",
+              "FeeAmount": "1000",
+              "FeeDescription": "Application for a financial order",
+              "FeeVersion": "1"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
