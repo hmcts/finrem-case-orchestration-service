@@ -157,10 +157,8 @@ public class FunctionalTestUtils {
 
         Response res = getResponse(url, filename, journeyType);
         int statusCode = res.getStatusCode();
-        String errMsg = res.getBody().toString();
+        String errMsg = res.getBody().prettyPrint();
         System.out.println("Response Body : " + errMsg);
-
-
         assertEquals(errMsg,200,statusCode );
 
     }
