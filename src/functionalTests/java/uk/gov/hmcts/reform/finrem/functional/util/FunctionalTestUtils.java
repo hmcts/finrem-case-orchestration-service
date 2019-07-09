@@ -154,8 +154,14 @@ public class FunctionalTestUtils {
 
 
     public void validatePostSuccess(String url, String filename, String journeyType) {
-        int statusCode = getResponse(url, filename, journeyType).getStatusCode();
-        assertEquals(statusCode, 200);
+
+        Response res = getResponse(url, filename, journeyType);
+        int statusCode = res.getStatusCode();
+        String errMsg = res.getBody().toString();
+        System.out.println("Response Body : " + errMsg);
+
+
+        assertEquals(errMsg,200,statusCode );
 
     }
 
