@@ -173,7 +173,7 @@ public class FunctionalTestUtils {
                 .when().post(url)
                 .andReturn();
 
-
+        System.out.println("Response body : " + response.getBody().prettyPrint());
         jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
         int statusCode = response.getStatusCode();
         assertEquals(statusCode, 200);

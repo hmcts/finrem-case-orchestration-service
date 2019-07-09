@@ -61,6 +61,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private String feesPath = "data.orderSummary.Fees[0].value";
     private String hwf = "HWF";
     private String pba = "PBA";
+    private Response response;
 
 
     @Test
@@ -144,7 +145,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
         utils.validatePostSuccess(url, filename, journeyType);
         assertEquals("duplicate payment", utils.getResponse(url, filename, journeyType).jsonPath().get("errors[0]"));
-        Thread.sleep(120000);
+        Thread.sleep(180000);
         utils.validatePostSuccess(url, filename, journeyType);
     }
 
@@ -187,7 +188,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePostSuccessForPBAPayment(String url, String fileName, String journeyType)
             throws InterruptedException {
-        Thread.sleep(120000);
+        Thread.sleep(180000);
         assertTrue(utils.getResponseData(url, fileName, journeyType,dataPath).get("state").toString()
                     .equalsIgnoreCase("applicationSubmitted"));
     }
