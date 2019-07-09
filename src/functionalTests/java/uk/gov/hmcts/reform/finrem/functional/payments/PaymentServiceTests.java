@@ -84,8 +84,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyPBAValidationTest() {
-
+    public void verifyPBAValidationTest() throws InterruptedException {
+        Thread.sleep(120000);
         utils.validatePostSuccess(pbaValidate, "pba-validate1.json" ,consentedDir );
     }
 
