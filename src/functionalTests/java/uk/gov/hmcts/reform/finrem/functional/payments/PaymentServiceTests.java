@@ -121,13 +121,13 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
 
     @Test
-    public void verifyPBAConfirmationMessageForHWFContested() {
+    public void verifyPBAConfirmationMessageForHWFContested() throws InterruptedException {
         validatePaymentConfirmationMessage(pbaConfirmation, "hwfPayment.json", contestedDir, hwf);
 
     }
 
     @Test
-    public void verifyPBAConfirmationMessageForPBAPaymentContested() {
+    public void verifyPBAConfirmationMessageForPBAPaymentContested() throws InterruptedException {
 
         validatePaymentConfirmationMessage(pbaConfirmation, "pba-payment_contested.json", contestedDir, pba);
     }
@@ -150,7 +150,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     private void validatePaymentConfirmationMessage(String url, String fileName,
-                                                    String journeyType, String paymentType) throws InterruptedException {
+                                                    String journeyType, String paymentType)
+            throws InterruptedException {
         Thread.sleep(120000);
         if (paymentType == pba) {
             if (journeyType == consentedDir) {
