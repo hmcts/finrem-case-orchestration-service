@@ -132,7 +132,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
 
-    @Ignore
     @Test
     public void verifyDuplicatePaymentReturnsErrorWithin2MinutesForContested() throws InterruptedException {
 
