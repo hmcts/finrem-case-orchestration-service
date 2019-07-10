@@ -150,8 +150,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     private void validatePaymentConfirmationMessage(String url, String fileName,
-                                                    String journeyType, String paymentType) {
-
+                                                    String journeyType, String paymentType) throws InterruptedException {
+        Thread.sleep(120000);
         if (paymentType == pba) {
             if (journeyType == consentedDir) {
                 assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
@@ -189,7 +189,10 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private void validatePostSuccessForPBAPayment(String url, String fileName, String journeyType)
             throws InterruptedException {
         Thread.sleep(180000);
-        assertTrue(utils.getResponseData(url, fileName, journeyType,dataPath).get("state").toString()
+        response = utils.getResponse(url, fileName, journeyType);
+        jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
+        String errMsg = response.getBody().prettyPrint();
+        assertTrue(errMsg,jsonPathEvaluator.get("state").toString()
                     .equalsIgnoreCase("applicationSubmitted"));
     }
 
