@@ -25,7 +25,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -142,11 +142,11 @@ public class HearingNonFastTrackDocumentTest {
                 .andExpect(content().json(expectedErrorData(), true));
     }
 
-    private DocumentRequest formGDocumentRequest() {
+    private DocumentGenerationRequest formGDocumentRequest() {
         return documentRequest(config.getFormGTemplate(), config.getFormGFileName());
     }
 
-    private DocumentRequest formCDocumentRequest() {
+    private DocumentGenerationRequest formCDocumentRequest() {
         return documentRequest(config.getFormCNonFastTrackTemplate(), config.getFormCFileName());
     }
 
@@ -171,15 +171,15 @@ public class HearingNonFastTrackDocumentTest {
                         .build());
     }
 
-    private DocumentRequest documentRequest(String template, String fileName) {
-        return DocumentRequest.builder()
+    private DocumentGenerationRequest documentRequest(String template, String fileName) {
+        return DocumentGenerationRequest.builder()
                 .template(template)
                 .fileName(fileName)
                 .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
                 .build();
     }
 
-    private void generateDocumentServiceSuccessStub(DocumentRequest documentRequest) throws JsonProcessingException {
+    private void generateDocumentServiceSuccessStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
                 .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
                         true, true))
@@ -191,7 +191,7 @@ public class HearingNonFastTrackDocumentTest {
                         .withBody(objectMapper.writeValueAsString(document()))));
     }
 
-    private void generateDocumentServiceErrorStub(DocumentRequest documentRequest) throws JsonProcessingException {
+    private void generateDocumentServiceErrorStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
                 .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
                         true, true))

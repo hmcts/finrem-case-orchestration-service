@@ -1,13 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -20,18 +19,18 @@ public abstract class AbstractDocumentService {
     protected final ObjectMapper objectMapper;
 
     public AbstractDocumentService(DocumentClient documentClient,
-                           DocumentConfiguration config,
-                           ObjectMapper objectMapper) {
+                                   DocumentConfiguration config,
+                                   ObjectMapper objectMapper) {
         this.documentClient = documentClient;
         this.config = config;
         this.objectMapper = objectMapper;
     }
 
     CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
-                                          String template, String fileName) {
+                                  String template, String fileName) {
         Document miniFormA =
                 documentClient.generatePDF(
-                        DocumentRequest.builder()
+                        DocumentGenerationRequest.builder()
                                 .template(template)
                                 .fileName(fileName)
                                 .values(Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails))
@@ -42,12 +41,13 @@ public abstract class AbstractDocumentService {
     }
 
 
-    void deleteDocument(String documentUrl, String authorisationToken) {
+    public void deleteDocument(String documentUrl, String authorisationToken) {
         documentClient.deleteDocument(documentUrl, authorisationToken);
     }
 
-    void generateApprovedConsentOrder(CallbackRequest callbackRequest, String authorisationToken) {
-        documentClient.generateApprovedConsentOrder(callbackRequest, authorisationToken);
+    public CaseDocument stampDocument(CaseDocument document, String authorisationToken) {
+        Document stampedDocument = documentClient.stampDocument(toDocument(document), authorisationToken);
+        return caseDocument(stampedDocument);
     }
 
     private CaseDocument caseDocument(Document miniFormA) {
@@ -58,10 +58,17 @@ public abstract class AbstractDocumentService {
         return caseDocument;
     }
 
+    private Document toDocument(CaseDocument caseDocument) {
+        Document document = new Document();
+        document.setBinaryUrl(caseDocument.getDocumentBinaryUrl());
+        document.setFileName(caseDocument.getDocumentFilename());
+        document.setUrl(caseDocument.getDocumentUrl());
+        return document;
+    }
+
     CaseDetails copyOf(CaseDetails caseDetails) {
         try {
-            return objectMapper
-                    .readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
+            return objectMapper.readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
         } catch (IOException e) {
             throw new IllegalStateException();
         }

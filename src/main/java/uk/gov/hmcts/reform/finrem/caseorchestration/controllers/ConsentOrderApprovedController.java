@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -7,22 +9,29 @@ import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+
 import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.builder;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.*;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class ConsentOrderApprovedController implements BaseController{
+public class ConsentOrderApprovedController implements BaseController {
+
+    private ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
     private ConsentOrderApprovedDocumentService service;
@@ -38,18 +47,26 @@ public class ConsentOrderApprovedController implements BaseController{
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
 
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocument(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentOrderApproved(
             @RequestHeader(value = "Authorization") String authorisationToken,
             @NotNull @RequestBody @ApiParam("Callback") CallbackRequest callback) {
 
-        log.info("Received request for approved order generation. Auth token: {}, Case request : {}", authorisationToken,
-                callback);
+        log.info("Received request for approved order generation. Auth token: {}, Case request : {}",
+                authorisationToken, callback);
 
         validateCaseData(callback);
 
-        service.sendForApprovedConsentOrder(callback,authorisationToken);
+        Map<String, Object> caseData = callback.getCaseDetails().getData();
 
-        return ResponseEntity.ok(
-                AboutToStartOrSubmitCallbackResponse.builder().data(callback.getCaseDetails().getData()).build());
+        List<PensionDocumentData> pensionList = mapper.convertValue(caseData.get(PENSION_COLLECTION),
+                new TypeReference<List<PensionDocumentData>>() {
+                });
+
+        if (!isEmpty(pensionList)) {
+            List<PensionDocumentData> stampedPensionList = service.stampDocument(pensionList, authorisationToken);
+            caseData.put(PENSION_COLLECTION_STAMPED, stampedPensionList);
+        }
+
+        return ResponseEntity.ok(builder().data(callback.getCaseDetails().getData()).build());
     }
 }

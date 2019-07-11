@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.util.Map;
 import java.util.concurrent.CompletionException;
@@ -120,7 +121,7 @@ public class HearingDocumentServiceTest {
         private boolean throwException;
 
         @Override
-        public Document generatePDF(DocumentRequest request, String authorizationToken) {
+        public Document generatePDF(DocumentGenerationRequest request, String authorizationToken) {
             if (throwException) {
                 throw new RuntimeException();
             }
@@ -131,6 +132,11 @@ public class HearingDocumentServiceTest {
 
         @Override
         public void deleteDocument(String fileUrl, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void generateApprovedConsentOrder(CallbackRequest callback, String authorizationToken) {
             throw new UnsupportedOperationException();
         }
 

@@ -18,6 +18,11 @@ public class CCDConfigConstant {
     public static final String MINI_FORM_A = "miniFormA";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_TEXT = "generalLetterBody";
+    public static final String CONSENT_ORDER_LATEST= "latestConsentOrder";
+    public static final String CONSENT_ORDER_LATEST_STAMPED = "latestConsentOrderStamped";
+    public static final String PENSION_COLLECTION = "pensionCollection";
+    public static final String PENSION_COLLECTION_STAMPED = "pensionCollectionStamped";
+
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
     public static final String FEES = "Fees";

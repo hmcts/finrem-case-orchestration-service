@@ -97,9 +97,7 @@ public class SetUpUtils {
     public static Document document() {
         Document document = new Document();
         document.setBinaryUrl(BINARY_URL);
-        document.setCreatedOn("22 Oct 2018");
         document.setFileName(FILE_NAME);
-        document.setMimeType("application/pdf");
         document.setUrl(DOC_URL);
 
         return document;

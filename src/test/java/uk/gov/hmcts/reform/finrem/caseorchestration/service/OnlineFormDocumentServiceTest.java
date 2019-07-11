@@ -3,12 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -82,13 +83,18 @@ public class OnlineFormDocumentServiceTest {
         }
 
         @Override
-        public Document generatePDF(DocumentRequest generateDocumentRequest, String authorizationToken) {
+        public Document generatePDF(DocumentGenerationRequest generateDocumentRequest, String authorizationToken) {
             latch.countDown();
             return document();
         }
 
         @Override
         public void deleteDocument(String fileUrl, String authorizationToken) {
+            latch.countDown();
+        }
+
+        @Override
+        public void generateApprovedConsentOrder(CallbackRequest callback, String authorizationToken) {
             latch.countDown();
         }
     }

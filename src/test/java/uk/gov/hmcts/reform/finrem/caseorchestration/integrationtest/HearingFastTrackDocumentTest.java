@@ -7,7 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.util.Collections;
 
@@ -23,8 +23,8 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
     private static final String API_URL = "/case-orchestration/documents/hearing";
 
     @Override
-    protected DocumentRequest documentRequest() {
-        return DocumentRequest.builder()
+    protected DocumentGenerationRequest documentRequest() {
+        return DocumentGenerationRequest.builder()
                 .template(documentConfiguration.getFormCFastTrackTemplate())
                 .fileName(documentConfiguration.getFormCFileName())
                 .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))

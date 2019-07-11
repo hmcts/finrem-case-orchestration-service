@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.io.InputStream;
 import java.util.List;
@@ -51,7 +51,7 @@ public class RefusalOrderDocumentServiceTest {
         document.setUrl(DOC_URL);
 
         generatorClient = Mockito.mock(DocumentClient.class);
-        when(generatorClient.generatePDF(isA(DocumentRequest.class), eq(AUTH_TOKEN))).thenReturn(document);
+        when(generatorClient.generatePDF(isA(DocumentGenerationRequest.class), eq(AUTH_TOKEN))).thenReturn(document);
 
         service = new RefusalOrderDocumentService(generatorClient, config, mapper);
     }

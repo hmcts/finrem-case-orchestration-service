@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.io.InputStream;
 import java.util.List;
@@ -74,13 +74,18 @@ public class GeneralLetterServiceTest {
         private Map<String, Object> value;
 
         @Override
-        public Document generatePDF(DocumentRequest request, String authorizationToken) {
+        public Document generatePDF(DocumentGenerationRequest request, String authorizationToken) {
             this.value = request.getValues();
             return document();
         }
 
         @Override
         public void deleteDocument(String fileUrl, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void generateApprovedConsentOrder(CallbackRequest callback, String authorizationToken) {
             throw new UnsupportedOperationException();
         }
 

@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Document {
     private String url;
-    private String mimeType;
-    private String createdOn;
     private String fileName;
     private String binaryUrl;
 }
