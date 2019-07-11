@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.ObjectUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,8 +26,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @SuppressWarnings("unchecked")
 public class PBAValidateController implements BaseController {
 
-    @Value("${ccd.threadDelay}")
-    private boolean ccdThreadDelay;
 
     private final PBAValidationService pbaValidationService;
 
@@ -53,27 +50,6 @@ public class PBAValidateController implements BaseController {
             }
             log.info("PBA number is valid.");
         }
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().build());
-    }
-
-    @SuppressWarnings("unchecked")
-    @PostMapping(path = "/add-note", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> addNote(
-            @RequestHeader(value = "Authorization", required = false) String authToken,
-            @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request for PBA validate. Auth token: {}, Case request : {}", authToken, callbackRequest);
-
-        log.info("ccdThreadDelay = " + ccdThreadDelay);
-
-        if (ccdThreadDelay) {
-            try {
-                long time = 90000;
-                Thread.sleep(time);
-            } catch (Exception e) {
-                log.info("caught Exception.... " + e);
-            }
-        }
-
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().build());
     }
 
