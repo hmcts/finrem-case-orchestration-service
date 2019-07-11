@@ -10,9 +10,22 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
+import javax.ws.rs.core.MediaType;
+import java.io.File;
+
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @RunWith(SerenityRunner.class)
@@ -570,6 +583,69 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         }
     }
 
+    @Test
+    public void verifyShouldUpdateCaseDataWithLatestConsentOrder() throws Exception {
+
+        jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
+                "amend-consent-order-by-solicitor.json");
+        System.out.println("ULR : " + amendCaseDetailsUrl);
+
+        if (     jsonPathEvaluator.get("latestConsentOrder") == null
+        ) {
+
+            Assert.fail("The latestConsentOrder field is not available.");
+        }
+    }
+
+
+    @Test
+    public void verifyShouldSetLatestDraftConsentOrderWhenACaseIsCreated() throws Exception {
+
+        jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
+                "draft-consent-order.json");
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_binary_url"), is("http://file1.binary"));
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_filename"), is("file1"));
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_url"), is("http://file1"));
+    }
+
+
+    @Test
+    public void verifyshouldUpdateLatestDraftConsentOrderWhenACaseIsAmended() throws Exception {
+
+        jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
+                "amend-consent-order-by-solicitor.json");
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_binary_url"), is("http://file2.binary"));
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_filename"), is("file2"));
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_url"), is("http://file2"));
+
+    }
+
+
+    @Test
+    public void shouldReturnLatestAmendedConsentOrderWhenACaseIsAmendedByCaseWorker() throws Exception {
+
+        jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
+                "amend-consent-order-by-caseworker.json");
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_binary_url"),
+                is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_filename"),
+                is("Notification for ABC - Contested.docx"));
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_url"),
+                is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838"));
+
+    }
+
+    @Test
+    public void shouldReturnLatestAmendedConsentOrderWhenACaseIsRespondedBySolictor() throws Exception {
+
+        jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
+                "respond-to-order-solicitor.json");
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_binary_url"), is("http://doc1/binary"));
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_filename"), is("doc1"));
+        assertThat(jsonPathEvaluator.get("latestConsentOrder.document_url"), is("http://doc1"));
+    }
+
+
     private JsonPath amendCaseDetails(String url, String journeyType, String jsonFileName) {
 
         Response response = SerenityRest.given()
@@ -582,6 +658,5 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         assertEquals(statusCode, 200);
         return response.jsonPath().setRoot("data");
     }
-
 
 }
