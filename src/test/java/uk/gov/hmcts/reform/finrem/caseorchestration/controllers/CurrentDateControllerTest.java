@@ -19,6 +19,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN
 public class CurrentDateControllerTest extends BaseControllerTest {
 
     private static final String API_URL = "/case-orchestration/fields/authorisation3/get-current-date";
+    private static final String CCD_DELAY_API_URL = "/case-orchestration/fields/ccd-thread-delay/get-current-date";
 
     @Test
     public void badRequestWhenGettingCurrentDate() throws Exception {
@@ -42,6 +43,20 @@ public class CurrentDateControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.authorisation3", is(notNullValue())));
+    }
+
+    @Test
+    public void getCurrentDateForCCDThreadDelayField() throws Exception {
+        doValidCaseDataSetUp();
+
+        mvc.perform(post(CCD_DELAY_API_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.ccd-thread-delay", is(notNullValue())));
 
     }
+
 }

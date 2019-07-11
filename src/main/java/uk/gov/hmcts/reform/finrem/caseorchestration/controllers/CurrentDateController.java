@@ -43,6 +43,13 @@ public class CurrentDateController implements BaseController {
         log.info("Received request for generating general letter. Auth token: {}, Case request : {}",
                 authorisationToken, callback);
 
+        if (field.equalsIgnoreCase("ccd-thread-delay")) {
+            try {
+                Thread.sleep(90000L);
+            } catch (InterruptedException e) {
+            }
+        }
+
         validateCaseData(callback);
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
