@@ -43,6 +43,13 @@ public class CurrentDateController implements BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to generate current date for '{}' in the URL path : {}", field, caseDetails.getId());
 
+        if (field.equalsIgnoreCase("ccd-thread-delay")) {
+            try {
+                Thread.sleep(90000L);
+            } catch (InterruptedException e) {
+            }
+        }
+
         validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
