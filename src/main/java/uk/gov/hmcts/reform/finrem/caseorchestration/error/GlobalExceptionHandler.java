@@ -31,4 +31,10 @@ public class GlobalExceptionHandler {
         log.error(exception.getMessage(), exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(SERVER_ERROR_MSG);
     }
+
+    @ExceptionHandler(NoSuchFieldExistsException.class)
+    ResponseEntity<Object> handleNoSuchFieldExistsException(NoSuchFieldExistsException exception) {
+        log.error(exception.getMessage(), exception);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(SERVER_ERROR_MSG);
+    }
 }

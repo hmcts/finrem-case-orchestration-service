@@ -6,7 +6,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import javax.ws.rs.core.MediaType;
@@ -16,6 +19,7 @@ import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -45,6 +49,8 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
 
     @MockBean
     private OnlineFormDocumentService onlineFormDocumentService;
+    @MockBean
+    private ConsentOrderService consentOrderService;
 
     @Before
     public void setUp() {
@@ -678,6 +684,20 @@ public class CaseMaintenanceControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.uploadAdditionalDocument").exists());
     }
 
+    @Test
+    public void shouldUpdateCaseDataWithLatestConsentOrder() throws Exception {
+        when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/latestConsentedConsentOrder/"
+                        + "amend-consent-order-by-solicitor.json").toURI()));
+        mvc.perform(post("/case-orchestration/update-case")
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.latestConsentOrder").exists());
+    }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();

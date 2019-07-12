@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,5 +39,13 @@ abstract class BaseControllerTest extends BaseTest {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/pba-validate.json").toURI()));
+    }
+
+    CaseDocument getCaseDocument() {
+        CaseDocument caseDocument = new CaseDocument();
+        caseDocument.setDocumentUrl("http://doc1");
+        caseDocument.setDocumentBinaryUrl("http://doc1/binary");
+        caseDocument.setDocumentFilename("doc1");
+        return caseDocument;
     }
 }
