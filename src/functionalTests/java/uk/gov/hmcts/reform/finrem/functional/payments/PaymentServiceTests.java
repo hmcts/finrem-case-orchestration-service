@@ -84,6 +84,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     @Test
+    @Ignore
     public void verifyPBAValidationTest() {
 
         utils.validatePostSuccess(pbaValidate, "pba-validate1.json" ,consentedDir );
