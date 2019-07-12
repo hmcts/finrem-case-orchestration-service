@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 @Slf4j
 public class ConsentOrderApprovedDocumentService extends AbstractDocumentService {
@@ -25,28 +27,22 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         super(documentClient, config, objectMapper);
     }
 
-    public CaseDocument stampDocument(CaseDocument document, String authorisationToken) {
-        return super.stampDocument(document, authorisationToken);
-    }
-
-
     public List<PensionDocumentData> stampDocument(List<PensionDocumentData> pensionList, String authorisationToken) {
-        List<PensionDocumentData> stampedPensionList = pensionList.stream()
-                .map(data -> stampDocument(data, authorisationToken)).collect(Collectors.toList());
-        return stampedPensionList;
+        return pensionList.stream()
+                .map(data -> stampDocument(data, authorisationToken)).collect(toList());
     }
 
-    private PensionDocumentData stampDocument(PensionDocumentData pensionDocumentData, String authorisationToken) {
-        PensionDocumentData stampedPensionData = copyOf(pensionDocumentData);
-        CaseDocument document = pensionDocumentData.getPensionDocument().getDocument();
+    private PensionDocumentData stampDocument(PensionDocumentData pensionDocument, String authorisationToken) {
+        CaseDocument document = pensionDocument.getPensionDocument().getDocument();
         CaseDocument stampedDocument = stampDocument(document, authorisationToken);
+        PensionDocumentData stampedPensionData = copyOf(pensionDocument);
         stampedPensionData.getPensionDocument().setDocument(stampedDocument);
         return stampedPensionData;
     }
 
-    PensionDocumentData copyOf(PensionDocumentData pensionDocumentData) {
+    PensionDocumentData copyOf(PensionDocumentData pensionDocument) {
         try {
-            return objectMapper.readValue(objectMapper.writeValueAsString(pensionDocumentData), PensionDocumentData.class);
+            return objectMapper.readValue(objectMapper.writeValueAsString(pensionDocument), PensionDocumentData.class);
         } catch (IOException e) {
             throw new IllegalStateException();
         }

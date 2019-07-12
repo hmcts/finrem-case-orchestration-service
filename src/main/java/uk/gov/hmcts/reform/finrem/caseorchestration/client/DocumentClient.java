@@ -14,7 +14,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public interface DocumentClient {
 
     @PostMapping(
-            path = "/version/1/generatePDF",
+            path = "/version/1/generate-pdf",
             headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
     Document generatePDF(
@@ -27,7 +27,7 @@ public interface DocumentClient {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @PostMapping(
-            path = "/version/1/stampDocument",
+            path = "/version/1/stamp-document",
             headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
     Document stampDocument(

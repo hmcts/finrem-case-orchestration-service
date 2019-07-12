@@ -59,7 +59,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHeari
 @Category(IntegrationTest.class)
 public class HearingNonFastTrackDocumentTest {
 
-    private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generatePDF";
+    private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
     private static final String API_URL = "/case-orchestration/documents/hearing";
 
     @Autowired

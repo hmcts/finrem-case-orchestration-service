@@ -52,7 +52,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 @Category(IntegrationTest.class)
 public abstract class AbstractDocumentTest {
 
-    private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generatePDF";
+    private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
     private static final String TEMP_URL = "http://doc1";
     private static final String DELETE_DOCUMENT_CONTEXT_PATH = "/version/1/delete-pdf-document";
     private static final String IDAM_SERVICE_CONTEXT_PATH = "/details";

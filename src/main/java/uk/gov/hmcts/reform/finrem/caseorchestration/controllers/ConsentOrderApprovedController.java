@@ -9,11 +9,9 @@ import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
@@ -57,16 +55,19 @@ public class ConsentOrderApprovedController implements BaseController {
         validateCaseData(callback);
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
+        List<PensionDocumentData> pensionDocuments = getPensionDocuments(caseData);
 
-        List<PensionDocumentData> pensionList = mapper.convertValue(caseData.get(PENSION_COLLECTION),
-                new TypeReference<List<PensionDocumentData>>() {
-                });
-
-        if (!isEmpty(pensionList)) {
-            List<PensionDocumentData> stampedPensionList = service.stampDocument(pensionList, authorisationToken);
+        if (!isEmpty(pensionDocuments)) {
+            List<PensionDocumentData> stampedPensionList = service.stampDocument(pensionDocuments, authorisationToken);
             caseData.put(PENSION_COLLECTION_STAMPED, stampedPensionList);
         }
 
         return ResponseEntity.ok(builder().data(callback.getCaseDetails().getData()).build());
+    }
+
+    private List<PensionDocumentData> getPensionDocuments(Map<String, Object> caseData) {
+        return mapper.convertValue(caseData.get(PENSION_COLLECTION),
+                new TypeReference<List<PensionDocumentData>>() {
+                });
     }
 }

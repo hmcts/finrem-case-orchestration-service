@@ -85,7 +85,7 @@ public class GeneralLetterServiceTest {
         }
 
         @Override
-        public void generateApprovedConsentOrder(CallbackRequest callback, String authorizationToken) {
+        public Document stampDocument(Document document, String authorizationToken) {
             throw new UnsupportedOperationException();
         }
 
