@@ -221,7 +221,7 @@ dependencyCheck {
     suppressionFile = 'dependency-check-suppressions.xml'
 }
 
-checkstyle.toolVersion = '7.2'
+checkstyle.toolVersion = '8.18'
 checkstyle.configFile = new File(rootDir, "checkstyle.xml")
 
 // make build fail on Checkstyle issues (https://github.com/gradle/gradle/issues/881)
