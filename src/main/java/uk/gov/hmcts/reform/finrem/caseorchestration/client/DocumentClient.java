@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
@@ -23,6 +25,13 @@ public interface DocumentClient {
     Document generatePDF(
             @RequestBody DocumentRequest generateDocumentRequest,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+
+    @PostMapping(
+        path = "/version/1/bulk-print",
+        headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
+    )
+    void bulkPrint(
+        @RequestBody BulkPrintRequest bulkPrintRequest);
 
     @DeleteMapping(path = "/version/1/delete-pdf-document")
     void deleteDocument(
