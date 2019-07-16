@@ -3,10 +3,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
@@ -85,6 +87,11 @@ public class OnlineFormDocumentServiceTest {
         public Document generatePDF(DocumentRequest generateDocumentRequest, String authorizationToken) {
             latch.countDown();
             return document();
+        }
+
+        @Override
+        public void bulkPrint(BulkPrintRequest bulkPrintRequest) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
