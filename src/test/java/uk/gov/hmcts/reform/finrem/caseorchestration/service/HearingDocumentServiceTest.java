@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -12,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.util.Map;
 import java.util.concurrent.CompletionException;
@@ -19,7 +19,6 @@ import java.util.concurrent.CompletionException;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
@@ -62,7 +61,7 @@ public class HearingDocumentServiceTest {
     public void generateFastTrackFormC() {
         Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
         doCaseDocumentAssert((CaseDocument) result.get("formC"));
-        ((TestDocumentClient)generatorClient).verifyAdditionalFastTrackFields();
+        ((TestDocumentClient) generatorClient).verifyAdditionalFastTrackFields();
     }
 
     @Test
@@ -70,7 +69,7 @@ public class HearingDocumentServiceTest {
         Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN,
                 makeItJudiciaryFastTrackDecisionCase());
         doCaseDocumentAssert((CaseDocument) result.get("formC"));
-        ((TestDocumentClient)generatorClient).verifyAdditionalFastTrackFields();
+        ((TestDocumentClient) generatorClient).verifyAdditionalFastTrackFields();
     }
 
     @Test
@@ -78,7 +77,7 @@ public class HearingDocumentServiceTest {
         Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
         doCaseDocumentAssert((CaseDocument) result.get("formC"));
         doCaseDocumentAssert((CaseDocument) result.get("formG"));
-        ((TestDocumentClient)generatorClient).verifyAdditionalNonFastTrackFields();
+        ((TestDocumentClient) generatorClient).verifyAdditionalNonFastTrackFields();
     }
 
     @Test(expected = CompletionException.class)
@@ -138,6 +137,12 @@ public class HearingDocumentServiceTest {
 
         @Override
         public void deleteDocument(String fileUrl, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public DocumentValidationResponse checkUploadedFileType(String fileUrl,
+                                                                String authorizationToken) {
             throw new UnsupportedOperationException();
         }
 

@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.io.InputStream;
@@ -17,6 +18,8 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
 
     @Autowired
     private ConsentOrderService consentOrderService;
+
+    private DocumentHelper documentHelper;
 
     private CallbackRequest callbackRequest;
     private ObjectMapper objectMapper = new ObjectMapper();

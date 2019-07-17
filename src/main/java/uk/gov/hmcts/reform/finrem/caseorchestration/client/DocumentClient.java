@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -27,14 +27,23 @@ public interface DocumentClient {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @PostMapping(
-        path = "/version/1/bulk-print",
-        headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
+            path = "/version/1/bulk-print",
+            headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
     void bulkPrint(
-        @RequestBody BulkPrintRequest bulkPrintRequest);
+            @RequestBody BulkPrintRequest bulkPrintRequest);
 
     @DeleteMapping(path = "/version/1/delete-pdf-document")
     void deleteDocument(
             @RequestParam("fileUrl") String fileUrl,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+
+    @PostMapping(
+            path = "/file-upload-check",
+            headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
+    )
+    DocumentValidationResponse checkUploadedFileType(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
+            @RequestParam("fileBinaryUrl") String fileUrl
+    );
 }
