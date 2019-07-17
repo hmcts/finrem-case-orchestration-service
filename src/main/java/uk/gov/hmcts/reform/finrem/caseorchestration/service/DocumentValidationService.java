@@ -52,7 +52,7 @@ public class DocumentValidationService {
         return DocumentValidationResponse.builder()
                 .errors(singletonList("Unsupported Event or field")).build();
 
-}
+    }
 
     private DocumentValidationResponse validateLatestRespondToOrderDocument(String authorizationToken,
                                                                             Map<String, Object> caseData) {
