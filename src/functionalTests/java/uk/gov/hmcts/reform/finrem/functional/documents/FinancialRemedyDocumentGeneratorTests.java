@@ -32,8 +32,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private static String SOLICITOR_REF_HEARING = "LL01";
     private static String DOCUMENT_FORMC = "Form C";
     private static String DOCUMENT_FORMG = "Form G";
-    private static String CONFIRMATION_BODY="confirmation_body";
-    private static String BULKPRINT_SUCCESSMSG="Bulk print is successful.";
+    private static String CONFIRMATION_BODY = "confirmation_body";
+    private static String BULKPRINT_SUCCESSMSG = "Bulk print is successful.";
     private static String CONTESTED_FORMG_JSON = "validate-hearing-withoutfastTrackDecision1.json";
     private String contestedDir = "/json/contested/";
     private String consentedDir = "/json/consented/";
@@ -76,8 +76,10 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void verifyBulkPrintDocumentGenerationShouldReturnOkResponseCode() {
-        jsonPathEvaluator= utils.getResponseData(caseOrchestration+"/bulk-print",CONTESTED_FORMC_JSON,contestedDir, CONFIRMATION_BODY);
-        assertTrue("Bulk Printing not successful",jsonPathEvaluator.get().toString().equalsIgnoreCase(BULKPRINT_SUCCESSMSG));
+        jsonPathEvaluator = utils.getResponseData(caseOrchestration + "/bulk-print",
+                CONTESTED_FORMC_JSON,contestedDir, CONFIRMATION_BODY);
+        assertTrue("Bulk Printing not successful",jsonPathEvaluator.get()
+                .toString().equalsIgnoreCase(BULKPRINT_SUCCESSMSG));
 
     }
 
