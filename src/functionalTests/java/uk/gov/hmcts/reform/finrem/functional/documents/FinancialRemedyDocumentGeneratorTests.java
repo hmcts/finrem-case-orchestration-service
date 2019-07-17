@@ -68,6 +68,16 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Value("${cos.document.hearing.api}")
     private String generateHearingUrl;
 
+    @Value("${case.orchestration.api}")
+    private String caseOrchestration;
+
+
+    @Test
+    public void verifyBulkPrintDocumentGenerationShouldReturnOkResponseCode() {
+        jsonPathEvaluator= utils.getResponseData(caseOrchestration+"/bulk-print",CONTESTED_FORMC_JSON,contestedDir, CONFIRMATION_BODY);
+        assertTrue("Bulk Printing not successful",jsonPathEvaluator.get().toString().equalsIgnoreCase(BULKPRINT_SUCCESSMSG));
+
+    }
 
     @Test
     public void verifyContestedDraftDocumentGenerationShouldReturnOkResponseCode() {
