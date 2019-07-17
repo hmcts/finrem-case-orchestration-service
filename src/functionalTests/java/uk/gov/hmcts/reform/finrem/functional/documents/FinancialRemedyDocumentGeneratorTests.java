@@ -32,6 +32,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private static String SOLICITOR_REF_HEARING = "LL01";
     private static String DOCUMENT_FORMC = "Form C";
     private static String DOCUMENT_FORMG = "Form G";
+    private static String CONFIRMATION_BODY="confirmation_body";
+    private static String BULKPRINT_SUCCESSMSG="Bulk print is successful.";
     private static String CONTESTED_FORMG_JSON = "validate-hearing-withoutfastTrackDecision1.json";
     private String contestedDir = "/json/contested/";
     private String consentedDir = "/json/consented/";
