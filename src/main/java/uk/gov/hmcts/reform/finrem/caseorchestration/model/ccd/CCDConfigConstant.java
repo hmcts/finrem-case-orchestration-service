@@ -18,6 +18,7 @@ public class CCDConfigConstant {
     public static final String MINI_FORM_A = "miniFormA";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_TEXT = "generalLetterBody";
+    public static final String APPROVED_CONSENT_ORDER_LETTER = "approvedConsentOrderLetter";
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
     public static final String FEES = "Fees";
@@ -43,5 +44,4 @@ public class CCDConfigConstant {
     public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
     public static final String ROLES = "roles";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
-
 }

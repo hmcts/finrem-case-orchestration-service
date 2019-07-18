@@ -28,4 +28,6 @@ public class DocumentConfiguration {
     private String contestedDraftMiniFormFileName;
     private String generalLetterTemplate;
     private String generalLetterFileName;
+    private String approvedConsentOrderTemplate;
+    private String approvedConsentOrderFileName;
 }

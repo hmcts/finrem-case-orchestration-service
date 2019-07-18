@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -12,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentReque
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
 public abstract class AbstractDocumentService {
@@ -31,12 +31,15 @@ public abstract class AbstractDocumentService {
 
     CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
                                           String template, String fileName) {
+
+        Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails);
+
         Document miniFormA =
                 documentClient.generatePDF(
                         DocumentRequest.builder()
                                 .template(template)
                                 .fileName(fileName)
-                                .values(Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails))
+                                .values(caseDetailsMap)
                                 .build(),
                         authorisationToken);
 
