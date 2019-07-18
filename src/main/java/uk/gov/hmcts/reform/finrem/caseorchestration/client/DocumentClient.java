@@ -7,10 +7,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+
+import java.util.UUID;
 
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -30,7 +31,7 @@ public interface DocumentClient {
         path = "/version/1/bulk-print",
         headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
-    void bulkPrint(
+    UUID bulkPrint(
         @RequestBody BulkPrintRequest bulkPrintRequest);
 
     @DeleteMapping(path = "/version/1/delete-pdf-document")
