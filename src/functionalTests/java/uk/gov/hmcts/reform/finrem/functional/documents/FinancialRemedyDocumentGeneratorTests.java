@@ -81,8 +81,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 MINIFORMA_CONTESTED_JSON,contestedDir, DATAPATH);
         System.out.println("response is :" + jsonPathEvaluator.prettyPrint());
 
-        if (jsonPathEvaluator.get("bulkPrintLetterId") == null)
-        {
+        if (jsonPathEvaluator.get("bulkPrintLetterId") == null) {
             Assert.fail("bulk Printing not successfull");
         }
 
