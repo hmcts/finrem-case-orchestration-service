@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentReque
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.UUID;
 
 public abstract class AbstractDocumentService {
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
@@ -42,8 +43,8 @@ public abstract class AbstractDocumentService {
         return caseDocument(miniFormA);
     }
 
-    void bulkPrint(BulkPrintRequest bulkPrintRequest) {
-        documentClient.bulkPrint(bulkPrintRequest);
+    UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
+        return documentClient.bulkPrint(bulkPrintRequest);
     }
 
     void deleteDocument(String documentUrl, String authorisationToken) {

@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletionException;
 
 import static org.hamcrest.Matchers.is;
@@ -132,7 +133,7 @@ public class HearingDocumentServiceTest {
         }
 
         @Override
-        public void bulkPrint(BulkPrintRequest bulkPrintRequest) {
+        public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
             throw new UnsupportedOperationException();
         }
 
