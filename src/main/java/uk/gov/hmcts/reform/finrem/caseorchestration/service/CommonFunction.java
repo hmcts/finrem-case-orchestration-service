@@ -8,7 +8,11 @@ import java.util.function.BiFunction;
 
 public class CommonFunction {
 
-    public static BiFunction<Map<String, Object>, String, String> getString = (stringObjectMap, key) ->
+    private CommonFunction(){
+
+    }
+
+    public static final BiFunction<Map<String, Object>, String, String> getString = (stringObjectMap, key) ->
         stringObjectMap.entrySet().stream()
             .filter(s -> s.getKey().equals(key))
             .map(s -> s.getValue())
@@ -16,7 +20,7 @@ public class CommonFunction {
             .findFirst()
             .orElse(StringUtils.EMPTY);
 
-    public static BiFunction<Map<String, Object>, String, Optional<Object>> getValue = (stringObjectMap, key) ->
+    public static final BiFunction<Map<String, Object>, String, Optional<Object>> getValue = (stringObjectMap, key) ->
         stringObjectMap.entrySet().stream()
             .filter(s -> s.getKey().equals(key))
             .map(s -> s.getValue())
