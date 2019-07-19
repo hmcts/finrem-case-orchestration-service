@@ -43,27 +43,36 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
     }
 
     private void addBulkPrintCoverSheet(CaseDetails caseDetails) {
-        Optional<Object> respondentAddressObj = getValue.apply(caseDetails.getData(), "respondentAddress");
+        BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder = BulkPrintCoverSheet.builder()
+            .ccdNumber(caseDetails.getId().toString())
+            .recipientName(
+                getString.apply(caseDetails.getData(), "appRespondentFMName")
+                    .concat(" ").concat(getString.apply(caseDetails.getData(), "appRespondentLName")));
 
-        if (respondentAddressObj.isPresent()) {
-            Map<String, Object> respondentAddress = (Map) respondentAddressObj.get();
-            BulkPrintCoverSheet bulkPrintCoverSheet =
-                BulkPrintCoverSheet.builder()
-                    .ccdNumber(caseDetails.getId().toString())
-                    .recipientName(
-                        getString.apply(respondentAddress, "appRespondentFMName")
-                            + " "
-                            + getString.apply(respondentAddress, "appRespondentLName"))
-                    .addressLine1(getString.apply(respondentAddress, "AddressLine1"))
-                    .addressLine2(getString.apply(respondentAddress, "AddressLine2"))
-                    .addressLine3(getString.apply(respondentAddress, "AddressLine3"))
-                    .county(getString.apply(respondentAddress, "County"))
-                    .country(getString.apply(respondentAddress, "Country"))
-                    .postTown(getString.apply(respondentAddress, "PostTown"))
-                    .postCode(getString.apply(respondentAddress, "PostCode"))
-                    .build();
-            caseDetails.getData().put("bulkPrintCoverSheet", bulkPrintCoverSheet);
+        Optional<Object> respondentAddress = getValue.apply(caseDetails.getData(), "respondentAddress");
+        Optional<Object> solicitorAddress = getValue.apply(caseDetails.getData(), "solicitorAddress");
+
+        if (solicitorAddress.isPresent()) {
+            caseDetails.getData().put("bulkPrintCoverSheet", getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder,
+                (Map) solicitorAddress.get()));
+        } else if (respondentAddress.isPresent()) {
+            caseDetails.getData().put("bulkPrintCoverSheet",  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder,
+                (Map) respondentAddress.get()));
         }
+    }
+
+    private BulkPrintCoverSheet getBulkPrintCoverSheet(
+        BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder,
+        Map<String, Object> address) {
+        return bulkPrintCoverSheetBuilder
+            .addressLine1(getString.apply(address, "AddressLine1"))
+            .addressLine2(getString.apply(address, "AddressLine2"))
+            .addressLine3(getString.apply(address, "AddressLine3"))
+            .county(getString.apply(address, "County"))
+            .country(getString.apply(address, "Country"))
+            .postTown(getString.apply(address, "PostTown"))
+            .postCode(getString.apply(address, "PostCode"))
+            .build();
     }
 
 }

@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 
 import javax.validation.constraints.NotNull;
@@ -34,6 +35,9 @@ public class BulkPrintController implements BaseController {
 
     @Autowired
     private GenerateCoverSheetService coverSheetService;
+
+    @Autowired
+    private ConsentOrderService consentOrderService;
 
     @PostMapping(
         path = "/bulk-print",
@@ -62,11 +66,15 @@ public class BulkPrintController implements BaseController {
 
         validateCaseData(callback);
         Map<String, Object> caseData = callback.getCaseDetails().getData();
-        CaseDocument caseDocument = coverSheetService.generateCoverSheet(callback.getCaseDetails(), authorisationToken);
+        CaseDocument coverSheetDocument = coverSheetService.generateCoverSheet(callback.getCaseDetails(),
+            authorisationToken);
 
-        UUID letterId = bulkPrintService.sendForBulkPrint(caseDocument, callback.getCaseDetails());
-        caseData.put("bulkPrintCoverSheet", caseDocument);
+        UUID letterId = bulkPrintService.sendForBulkPrint(coverSheetDocument, callback.getCaseDetails());
+        caseData.put("bulkPrintCoverSheet", coverSheetDocument);
         caseData.put("bulkPrintLetterId", letterId);
+
+        CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callback);
+        caseData.put("latestConsentOrder", caseDocument);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
             .build());
