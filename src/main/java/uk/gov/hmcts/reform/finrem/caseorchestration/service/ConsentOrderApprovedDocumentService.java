@@ -5,14 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -27,20 +28,31 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         super(documentClient, config, objectMapper);
     }
 
-    public List<PensionDocumentData> stampDocument(List<PensionDocumentData> pensionList, String authorisationToken) {
-        return pensionList.stream()
-                .map(data -> stampDocument(data, authorisationToken)).collect(toList());
+
+    public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
+        return generateDocument(authToken, caseDetails,
+                config.getApprovedConsentOrderTemplate(),
+                config.getApprovedConsentOrderFileName());
     }
 
-    private PensionDocumentData stampDocument(PensionDocumentData pensionDocument, String authorisationToken) {
+    public CaseDocument annexStampDocument(CaseDocument document, String authToken) {
+        return super.annexStampDocument(document, authToken);
+    }
+
+    public List<PensionDocumentData> stampPensionDocuments(List<PensionDocumentData> pensionList, String authToken) {
+        return pensionList.stream()
+                .map(data -> stampPensionDocuments(data, authToken)).collect(toList());
+    }
+
+    private PensionDocumentData stampPensionDocuments(PensionDocumentData pensionDocument, String authToken) {
         CaseDocument document = pensionDocument.getPensionDocument().getDocument();
-        CaseDocument stampedDocument = stampDocument(document, authorisationToken);
+        CaseDocument stampedDocument = stampDocument(document, authToken);
         PensionDocumentData stampedPensionData = copyOf(pensionDocument);
         stampedPensionData.getPensionDocument().setDocument(stampedDocument);
         return stampedPensionData;
     }
 
-    PensionDocumentData copyOf(PensionDocumentData pensionDocument) {
+    private PensionDocumentData copyOf(PensionDocumentData pensionDocument) {
         try {
             return objectMapper.readValue(objectMapper.writeValueAsString(pensionDocument), PensionDocumentData.class);
         } catch (IOException e) {

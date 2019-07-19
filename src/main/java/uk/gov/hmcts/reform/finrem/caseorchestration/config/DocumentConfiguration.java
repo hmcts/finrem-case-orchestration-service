@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "document")
 public class DocumentConfiguration {
+    private String bulkPrintTemplate;
+    private String bulkPrintFileName;
     private String miniFormTemplate;
     private String miniFormFileName;
     private String rejectedOrderTemplate;
@@ -26,4 +28,6 @@ public class DocumentConfiguration {
     private String contestedDraftMiniFormFileName;
     private String generalLetterTemplate;
     private String generalLetterFileName;
+    private String approvedConsentOrderTemplate;
+    private String approvedConsentOrderFileName;
 }

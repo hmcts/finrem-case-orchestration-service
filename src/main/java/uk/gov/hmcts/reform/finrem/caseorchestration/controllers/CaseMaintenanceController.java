@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import java.util.ArrayList;
@@ -39,6 +41,9 @@ public class CaseMaintenanceController implements BaseController {
     @Autowired
     private OnlineFormDocumentService onlineFormDocumentService;
 
+    @Autowired
+    private ConsentOrderService consentOrderService;
+
     @PostMapping(path = "/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Handles update Case details and cleans up the data fields based on the options choosen")
     @ApiResponses(value = {
@@ -59,7 +64,15 @@ public class CaseMaintenanceController implements BaseController {
         updatePropertyDetails(caseData);
         updateRespondentSolicitorAddress(caseData);
         updateD81Details(caseData);
+        updateLatestConsentOrder(ccdRequest);
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    private void updateLatestConsentOrder(CallbackRequest callbackRequest) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
+        caseData.put("latestConsentOrder", consentOrderService.getLatestConsentOrderData(callbackRequest));
     }
 
     @PostMapping(path = "/update-contested-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

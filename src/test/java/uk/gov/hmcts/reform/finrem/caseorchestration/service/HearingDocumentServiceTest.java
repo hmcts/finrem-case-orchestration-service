@@ -9,10 +9,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletionException;
 
 import static org.hamcrest.Matchers.is;
@@ -131,12 +133,22 @@ public class HearingDocumentServiceTest {
         }
 
         @Override
+        public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public void deleteDocument(String fileUrl, String authorizationToken) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void generateApprovedConsentOrder(CallbackRequest callback, String authorizationToken) {
+        public Document stampDocument(Document document, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Document annexStampDocument(Document document, String authorizationToken) {
             throw new UnsupportedOperationException();
         }
 

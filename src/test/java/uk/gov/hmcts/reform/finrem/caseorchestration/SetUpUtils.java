@@ -7,12 +7,9 @@ import feign.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.*;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
@@ -34,6 +31,8 @@ public class SetUpUtils {
     public static final String BINARY_URL = DOC_URL + "/binary";
     public static final String FILE_NAME = "app_docs.pdf";
     public static final String REJECTED_ORDER_TYPE = "General Order";
+    public static final String PENSION_TYPE = "PPF1";
+    public static final String PENSION_ID = "1";
 
     public static  final int INTERNAL_SERVER_ERROR = HttpStatus.INTERNAL_SERVER_ERROR.value();
     public static  final int BAD_REQUEST = HttpStatus.BAD_REQUEST.value();
@@ -45,6 +44,10 @@ public class SetUpUtils {
 
     public static InvalidCaseDataException invalidCaseDataError() {
         return new InvalidCaseDataException(BAD_REQUEST, "Bad request");
+    }
+
+    public static NoSuchFieldExistsException noSuchFieldExistsCaseDataError() {
+        return new NoSuchFieldExistsException("Field Does not exists");
     }
 
     public static HttpServerErrorException httpServerError() {
@@ -110,6 +113,23 @@ public class SetUpUtils {
         caseDocument.setDocumentBinaryUrl(BINARY_URL);
 
         return caseDocument;
+    }
+
+
+    public static PensionDocument pensionDocument() {
+        PensionDocument document = new PensionDocument();
+        document.setDocument(caseDocument());
+        document.setType(PENSION_TYPE);
+
+        return document;
+    }
+
+    public static PensionDocumentData pensionDocumentData() {
+        PensionDocumentData document = new PensionDocumentData();
+        document.setPensionDocument(pensionDocument());
+        document.setId(PENSION_ID);
+
+        return document;
     }
 
     public static void doCaseDocumentAssert(CaseDocument result) {

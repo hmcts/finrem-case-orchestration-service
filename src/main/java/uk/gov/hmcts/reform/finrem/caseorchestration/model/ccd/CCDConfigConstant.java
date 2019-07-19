@@ -16,13 +16,11 @@ public class CCDConfigConstant {
     public static final String D81_QUESTION = "d81Question";
     //Document related
     public static final String MINI_FORM_A = "miniFormA";
+    public static final String PENSION_DOCS_COLLECTION = "pensionCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_TEXT = "generalLetterBody";
-    public static final String CONSENT_ORDER_LATEST= "latestConsentOrder";
-    public static final String CONSENT_ORDER_LATEST_STAMPED = "latestConsentOrderStamped";
-    public static final String PENSION_COLLECTION = "pensionCollection";
-    public static final String PENSION_COLLECTION_STAMPED = "pensionCollectionStamped";
-
+    public static final String LATEST_CONSENT_ORDER = "latestConsentOrder";
+    public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
     public static final String FEES = "Fees";
@@ -48,5 +46,4 @@ public class CCDConfigConstant {
     public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
     public static final String ROLES = "roles";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
-
 }

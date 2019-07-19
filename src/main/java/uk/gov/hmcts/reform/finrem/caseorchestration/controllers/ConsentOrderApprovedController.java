@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -12,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
@@ -19,16 +23,18 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
-import static uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.builder;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.*;
+import static org.springframework.util.ObjectUtils.isEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "/case-orchestration")
-@Slf4j
 public class ConsentOrderApprovedController implements BaseController {
-
     private ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
@@ -46,28 +52,64 @@ public class ConsentOrderApprovedController implements BaseController {
     })
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentOrderApproved(
-            @RequestHeader(value = "Authorization") String authorisationToken,
-            @NotNull @RequestBody @ApiParam("Callback") CallbackRequest callback) {
-
-        log.info("Received request for approved order generation. Auth token: {}, Case request : {}",
-                authorisationToken, callback);
+            @RequestHeader(value = "Authorization") String authToken,
+            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         validateCaseData(callback);
-
         Map<String, Object> caseData = callback.getCaseDetails().getData();
-        List<PensionDocumentData> pensionDocuments = getPensionDocuments(caseData);
+        CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
+        List<PensionDocumentData> pensionDocs = getPensionDocuments(caseData);
 
-        if (!isEmpty(pensionDocuments)) {
-            List<PensionDocumentData> stampedPensionList = service.stampDocument(pensionDocuments, authorisationToken);
-            caseData.put(PENSION_COLLECTION_STAMPED, stampedPensionList);
+
+        log.info("ConsentOrderApprovedController called with latestConsentOrder = {}, pensionDocs = {}",
+                latestConsentOrder, pensionDocs);
+
+        if (!isEmpty(latestConsentOrder)) {
+            CaseDocument letter = service.generateApprovedConsentOrderLetter(
+                    callback.getCaseDetails(), authToken);
+            CaseDocument consentOrderAnnexStamped = service.annexStampDocument(latestConsentOrder, authToken);
+
+            log.info("letter= {}, consentOrderAnnexStamped = {}", letter, consentOrderAnnexStamped);
+
+            ApprovedOrder approvedOrder = ApprovedOrder.builder()
+                    .orderLetter(letter)
+                    .consentOrder(consentOrderAnnexStamped)
+                    .build();
+
+            if (!isEmpty(pensionDocs)) {
+                List<PensionDocumentData> stampedPensionDocs = service.stampPensionDocuments(pensionDocs, authToken);
+                log.info(" stampedPensionDocs = {}", stampedPensionDocs);
+                approvedOrder.setPensionDocuments(stampedPensionDocs);
+            }
+
+            ApprovedOrderData approvedOrderData = ApprovedOrderData.builder()
+                    .approvedOrder(approvedOrder)
+                    .build();
+            log.info("approvedOrderData = {}", approvedOrderData);
+
+            List<ApprovedOrderData> approvedOrders = asList(approvedOrderData);
+            caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
         }
 
-        return ResponseEntity.ok(builder().data(callback.getCaseDetails().getData()).build());
+        return ResponseEntity.ok(
+                AboutToStartOrSubmitCallbackResponse.builder()
+                        .data(caseData)
+                        .errors(ImmutableList.of())
+                        .warnings(ImmutableList.of())
+                        .build());
+    }
+
+
+    private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {
+        return mapper.convertValue(caseData.get(LATEST_CONSENT_ORDER),
+                new TypeReference<CaseDocument>() {
+                });
     }
 
     private List<PensionDocumentData> getPensionDocuments(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(PENSION_COLLECTION),
+        return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION),
                 new TypeReference<List<PensionDocumentData>>() {
                 });
     }
+
 }
