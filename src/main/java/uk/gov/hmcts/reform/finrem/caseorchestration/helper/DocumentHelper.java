@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
@@ -13,17 +12,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 
 @Component
 public class DocumentHelper {
 
     private static final String CONSENT_ORDER_COLLECTION = "amendedConsentOrderCollection";
-    private static final String CONSENT_ORDER_MSG = "amendedConsentOrderCollection doesn't have documents in case_data";
     private static final String RESPOND_TO_ORDER_DOCUMENTS = "respondToOrderDocuments";
-    private static final String DOCUMENT_DOESN_T_EXISTS = "AmendedConsentOrder type document doesn't exists.";
     private ObjectMapper objectMapper;
     private static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
 
@@ -33,22 +32,24 @@ public class DocumentHelper {
 
 
     public CaseDocument getLatestAmendedConsentOrder(Map<String, Object> caseData) {
-        return ofNullable(caseData.get(CONSENT_ORDER_COLLECTION))
+        Optional<AmendedConsentOrderData> reduce = ofNullable(caseData.get(CONSENT_ORDER_COLLECTION))
                 .map(this::convertToAmendedConsentOrderDataList)
-                .orElseThrow(() -> new NoSuchFieldExistsException(CONSENT_ORDER_MSG))
+                .orElse(emptyList())
                 .stream()
-                .reduce((first, second) -> second)
-                .orElseThrow(() -> new NoSuchFieldExistsException(CONSENT_ORDER_MSG))
-                .getConsentOrder()
-                .getAmendedConsentOrder();
+                .reduce((first, second) -> second);
+        return reduce
+                .map(consentOrderData -> consentOrderData.getConsentOrder().getAmendedConsentOrder())
+                .orElseGet(() -> convertToCaseDocument(caseData.get("latestConsentOrder")));
+
+
     }
 
     public List<CaseDocument> getPensionDocumentsData(Map<String, Object> caseData) {
         return ofNullable(caseData.get("pensionCollection"))
                 .map(this::convertToPensionCollectionDataList)
-                .orElseThrow(() -> new NoSuchFieldExistsException(CONSENT_ORDER_MSG))
+                .orElse(emptyList())
                 .stream()
-                .map(PensionCollectionData::getPensionDocument)
+                .map(PensionCollectionData::getPensionDocumentData)
                 .map(PensionDocumentData::getPensionDocument)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -79,16 +80,18 @@ public class DocumentHelper {
         });
     }
 
-    public CaseDocument getLatestRespondToOrderDocuments(Map<String, Object> caseData) {
-        return ofNullable(caseData.get(RESPOND_TO_ORDER_DOCUMENTS))
+    public Optional<CaseDocument> getLatestRespondToOrderDocuments(Map<String, Object> caseData) {
+        Optional<RespondToOrderData> respondToOrderData = ofNullable(caseData.get(RESPOND_TO_ORDER_DOCUMENTS))
                 .map(this::convertToRespondToOrderDataList)
-                .orElseThrow(() -> new NoSuchFieldExistsException(DOCUMENT_DOESN_T_EXISTS))
+                .orElse(emptyList())
                 .stream()
                 .filter(DocumentHelper::isAmendedConsentOrderType)
-                .reduce((first, second) -> second)
-                .orElseThrow(() -> new NoSuchFieldExistsException(DOCUMENT_DOESN_T_EXISTS))
-                .getRespondToOrder()
-                .getDocumentLink();
+                .reduce((first, second) -> second);
+        if (respondToOrderData.isPresent()) {
+            return respondToOrderData
+                    .map(respondToOrderData1 -> respondToOrderData.get().getRespondToOrder().getDocumentLink());
+        }
+        return Optional.empty();
 
     }
 }

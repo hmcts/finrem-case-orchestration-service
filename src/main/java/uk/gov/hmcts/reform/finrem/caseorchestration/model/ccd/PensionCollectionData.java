@@ -10,5 +10,5 @@ public class PensionCollectionData {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
-    private PensionDocumentData pensionDocument;
+    private PensionDocumentData pensionDocumentData;
 }

@@ -1,8 +1,8 @@
 {
-  "token": "token1",
+  "token": "test_token",
   "event_id": "FR_solicitorCreate",
   "case_details": {
-    "id" : "12345678",
+    "id": "12345678",
     "jurisdiction": "divorce",
     "state": "created",
     "case_data": {
@@ -77,8 +77,19 @@
             "typeOfDocument": "pdf",
             "uploadedDocument": {
               "document_url": "http://file1",
-              "document_filename": "file1",
+              "document_filename": "file1.pdf",
               "document_binary_url": "http://file1.binary"
+            }
+          }
+        },
+        {
+          "id": "2",
+          "value": {
+            "typeOfDocument": "pdf",
+            "uploadedDocument": {
+              "document_url": "http://file2",
+              "document_filename": "file2.pdf",
+              "document_binary_url": "http://file2.binary"
             }
           }
         }
@@ -262,6 +273,30 @@
             },
             "DocumentDateAdded": "2010-01-02",
             "DocumentFileName": "file1"
+          }
+        }
+      ],
+      "amendedConsentOrderCollection": [
+        {
+          "id": "ee93319d-32af-4b73-a9b1-a1dc4e9e8778",
+          "value": {
+            "amendedConsentOrder": {
+              "document_url": "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c4788387",
+              "document_filename": "Notification for HWF - Contested.docx",
+              "document_binary_url": "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c4788387/binary"
+            },
+            "amendedConsentOrderDate": "2018-10-10"
+          }
+        },
+        {
+          "id": "ee93319d-32af-4b73-a9b1-a1dc4e9e8779",
+          "value": {
+            "amendedConsentOrder": {
+              "document_url": "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838",
+              "document_filename": "Notification for ABC - Contested.docx",
+              "document_binary_url": "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"
+            },
+            "amendedConsentOrderDate": "2018-11-10"
           }
         }
       ]

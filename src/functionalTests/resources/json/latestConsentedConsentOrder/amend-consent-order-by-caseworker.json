@@ -77,8 +77,19 @@
             "typeOfDocument": "pdf",
             "uploadedDocument": {
               "document_url": "http://file1",
-              "document_filename": "file1",
+              "document_filename": "file1.pdf",
               "document_binary_url": "http://file1.binary"
+            }
+          }
+        },
+        {
+          "id": "2",
+          "value": {
+            "typeOfDocument": "pdf",
+            "uploadedDocument": {
+              "document_url": "http://file2",
+              "document_filename": "file2.pdf",
+              "document_binary_url": "http://file2.binary"
             }
           }
         }
@@ -271,7 +282,7 @@
           "value": {
             "amendedConsentOrder": {
               "document_url": "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c4788387",
-              "document_filename": "Notification for HWF - Contested.docx",
+              "document_filename": "Notification for HWF - Contested.pdf",
               "document_binary_url": "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c4788387/binary"
             },
             "amendedConsentOrderDate": "2018-10-10"
@@ -282,7 +293,7 @@
           "value": {
             "amendedConsentOrder": {
               "document_url": "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838",
-              "document_filename": "Notification for ABC - Contested.docx",
+              "document_filename": "Notification for ABC - Contested.pdf",
               "document_binary_url": "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"
             },
             "amendedConsentOrderDate": "2018-11-10"

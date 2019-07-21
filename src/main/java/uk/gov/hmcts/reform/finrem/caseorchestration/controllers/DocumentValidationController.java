@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -15,15 +14,17 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentValidationService;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
-import java.util.Objects;
 
+import static java.util.Objects.nonNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.builder;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -32,9 +33,6 @@ public class DocumentValidationController implements BaseController {
 
     @Autowired
     private DocumentValidationService service;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @PostMapping(path = "/field/{field}/file-upload-check", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
@@ -58,15 +56,11 @@ public class DocumentValidationController implements BaseController {
     private AboutToStartOrSubmitCallbackResponse response(CallbackRequest callbackRequest, String field,
                                                           String authorisationToken) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        if (Objects.nonNull(caseData.get(field))) {
+        AboutToStartOrSubmitCallbackResponseBuilder builder = builder();
+        if (nonNull(caseData.get(field))) {
             DocumentValidationResponse response = service.validateDocument(callbackRequest, field, authorisationToken);
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(caseData)
-                    .errors(response.getErrors())
-                    .build();
+            return builder.data(caseData).errors(response.getErrors()).build();
         }
-        return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseData)
-                .build();
+        return builder().data(caseData).build();
     }
 }
