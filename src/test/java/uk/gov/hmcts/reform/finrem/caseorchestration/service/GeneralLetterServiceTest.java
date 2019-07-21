@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValid
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -82,7 +83,7 @@ public class GeneralLetterServiceTest {
         }
 
         @Override
-        public void bulkPrint(BulkPrintRequest bulkPrintRequest) {
+        public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
             throw new UnsupportedOperationException();
         }
 

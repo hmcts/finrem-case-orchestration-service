@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValid
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
@@ -90,7 +91,7 @@ public class OnlineFormDocumentServiceTest {
         }
 
         @Override
-        public void bulkPrint(BulkPrintRequest bulkPrintRequest) {
+        public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
             throw new UnsupportedOperationException();
         }
 

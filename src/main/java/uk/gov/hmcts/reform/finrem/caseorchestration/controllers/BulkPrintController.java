@@ -14,10 +14,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 
 import javax.validation.constraints.NotNull;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -27,7 +31,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class BulkPrintController implements BaseController {
 
     @Autowired
-    private BulkPrintService service;
+    private BulkPrintService bulkPrintService;
+
+    @Autowired
+    private GenerateCoverSheetService coverSheetService;
+
+    @Autowired
+    private ConsentOrderService consentOrderService;
 
     @PostMapping(
         path = "/bulk-print",
@@ -36,16 +46,16 @@ public class BulkPrintController implements BaseController {
     @ApiOperation(value = "Handles bulk print")
     @ApiResponses(
         value = {
-          @ApiResponse(
-              code = 200,
-              message =
-                "Callback was processed successFully or in case of an error message is "
-                    + "attached to the case",
-              response = AboutToStartOrSubmitCallbackResponse.class),
-          @ApiResponse(code = 400, message = "Bad Request"),
-          @ApiResponse(code = 500, message = "Internal Server Error")
+            @ApiResponse(
+                code = 200,
+                message =
+                    "Callback was processed successFully or in case of an error message is "
+                        + "attached to the case",
+                response = AboutToStartOrSubmitCallbackResponse.class),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 500, message = "Internal Server Error")
         })
-    public ResponseEntity<SubmittedCallbackResponse> bulkPrint(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> bulkPrint(
         @RequestHeader(value = "Authorization", required = false) String authorisationToken,
         @NotNull @RequestBody @ApiParam("Callback") CallbackRequest callback) {
 
@@ -55,10 +65,18 @@ public class BulkPrintController implements BaseController {
             callback);
 
         validateCaseData(callback);
+        Map<String, Object> caseData = callback.getCaseDetails().getData();
+        CaseDocument coverSheetDocument = coverSheetService.generateCoverSheet(callback.getCaseDetails(),
+            authorisationToken);
 
-        service.sendForBulkPrint(callback.getCaseDetails(), authorisationToken);
+        UUID letterId = bulkPrintService.sendForBulkPrint(coverSheetDocument, callback.getCaseDetails());
+        caseData.put("bulkPrintCoverSheet", coverSheetDocument);
+        caseData.put("bulkPrintLetterId", letterId);
 
-        return ResponseEntity.ok(SubmittedCallbackResponse.builder().confirmationBody("Bulk print is successful.")
-                .build());
+        CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callback);
+        caseData.put("latestConsentOrder", caseDocument);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
+            .build());
     }
 }

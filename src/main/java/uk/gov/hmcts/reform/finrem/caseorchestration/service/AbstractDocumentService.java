@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentReque
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Map;
+import java.util.UUID;
 
 public abstract class AbstractDocumentService {
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
@@ -29,20 +31,23 @@ public abstract class AbstractDocumentService {
 
     CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
                                           String template, String fileName) {
+
+        Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails);
+
         Document miniFormA =
                 documentClient.generatePDF(
                         DocumentRequest.builder()
                                 .template(template)
                                 .fileName(fileName)
-                                .values(Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails))
+                                .values(caseDetailsMap)
                                 .build(),
                         authorisationToken);
 
         return caseDocument(miniFormA);
     }
 
-    void bulkPrint(BulkPrintRequest bulkPrintRequest) {
-        documentClient.bulkPrint(bulkPrintRequest);
+    UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
+        return documentClient.bulkPrint(bulkPrintRequest);
     }
 
     void deleteDocument(String documentUrl, String authorisationToken) {
