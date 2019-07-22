@@ -4,6 +4,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +33,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private static String SOLICITOR_REF_HEARING = "LL01";
     private static String DOCUMENT_FORMC = "Form C";
     private static String DOCUMENT_FORMG = "Form G";
+    private static String DATAPATH = "data";
+    private static String BULKPRINT_SUCCESSMSG = "Bulk print is successful.";
     private static String CONTESTED_FORMG_JSON = "validate-hearing-withoutfastTrackDecision1.json";
     private String contestedDir = "/json/contested/";
     private String consentedDir = "/json/consented/";
@@ -68,6 +71,21 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Value("${cos.document.hearing.api}")
     private String generateHearingUrl;
 
+    @Value("${case.orchestration.api}")
+    private String caseOrchestration;
+
+
+    @Test
+    public void verifyBulkPrintDocumentGenerationShouldReturnOkResponseCode() {
+        jsonPathEvaluator = utils.getResponseData(caseOrchestration + "/bulk-print",
+                MINIFORMA_CONTESTED_JSON,contestedDir, DATAPATH);
+        System.out.println("response is :" + jsonPathEvaluator.prettyPrint());
+
+        if (jsonPathEvaluator.get("bulkPrintLetterId") == null) {
+            Assert.fail("bulk Printing not successfull");
+        }
+
+    }
 
     @Test
     public void verifyContestedDraftDocumentGenerationShouldReturnOkResponseCode() {
