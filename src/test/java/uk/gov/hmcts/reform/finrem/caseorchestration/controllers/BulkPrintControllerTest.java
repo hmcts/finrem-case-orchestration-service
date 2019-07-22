@@ -35,9 +35,6 @@ public class BulkPrintControllerTest extends BaseControllerTest {
     @MockBean
     private GenerateCoverSheetService coverSheetService;
 
-    @MockBean
-    private ConsentOrderService consentOrderService;
-
     @Test
     public void shouldSuccessfullyReturnStatus200() throws Exception {
         UUID randomId = UUID.randomUUID();
@@ -47,7 +44,6 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
         when(coverSheetService.generateCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(bulkPrintService.sendForBulkPrint(any(), any())).thenReturn(randomId);
-        when(consentOrderService.getLatestConsentOrderData(any())).thenReturn(new CaseDocument());
 
         mvc.perform(
             post("/case-orchestration/bulk-print")
@@ -57,8 +53,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.bulkPrintCoverSheet").exists())
-            .andExpect(jsonPath("$.data.bulkPrintLetterId", is(randomId.toString())))
-            .andExpect(jsonPath("$.data.latestConsentOrder").exists());
+            .andExpect(jsonPath("$.data.bulkPrintLetterId", is(randomId.toString())));
         verify(bulkPrintService).sendForBulkPrint(any(), any());
         verify(coverSheetService).generateCoverSheet(any(), any());
     }
@@ -77,7 +72,6 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isInternalServerError());
         verifyZeroInteractions(bulkPrintService);
-        verifyZeroInteractions(consentOrderService);
         verify(coverSheetService).generateCoverSheet(any(), any());
     }
 
@@ -94,7 +88,6 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isInternalServerError());
-        verifyZeroInteractions(consentOrderService);
         verify(coverSheetService).generateCoverSheet(any(), any());
         verify(bulkPrintService).sendForBulkPrint(any(), any());
     }

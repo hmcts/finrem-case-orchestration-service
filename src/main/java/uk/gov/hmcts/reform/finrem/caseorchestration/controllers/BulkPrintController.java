@@ -36,9 +36,6 @@ public class BulkPrintController implements BaseController {
     @Autowired
     private GenerateCoverSheetService coverSheetService;
 
-    @Autowired
-    private ConsentOrderService consentOrderService;
-
     @PostMapping(
         path = "/bulk-print",
         consumes = APPLICATION_JSON_VALUE,
@@ -72,9 +69,6 @@ public class BulkPrintController implements BaseController {
         UUID letterId = bulkPrintService.sendForBulkPrint(coverSheetDocument, callback.getCaseDetails());
         caseData.put("bulkPrintCoverSheet", coverSheetDocument);
         caseData.put("bulkPrintLetterId", letterId);
-
-        CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callback);
-        caseData.put("latestConsentOrder", caseDocument);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
             .build());
