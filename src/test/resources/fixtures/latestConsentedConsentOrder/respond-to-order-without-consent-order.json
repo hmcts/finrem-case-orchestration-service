@@ -1,6 +1,6 @@
 {
-  "token": "token1",
-  "event_id": "FR_solicitorCreate",
+  "token": "test_token",
+  "event_id": "FR_respondToOrder",
   "case_details": {
     "id" : "12345678",
     "jurisdiction": "divorce",
@@ -254,11 +254,24 @@
         {
           "id": "1",
           "value": {
-            "DocumentType": "pdf",
+            "DocumentType": "OtherDocument",
             "DocumentLink": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
+              "document_binary_url": "http://doc1/binary"
+            },
+            "DocumentDateAdded": "2010-01-02",
+            "DocumentFileName": "file1"
+          }
+        },
+        {
+          "id": "2",
+          "value": {
+            "DocumentType": "OtherDocument",
+            "DocumentLink": {
+              "document_url": "http://doc2",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc2/binary"
             },
             "DocumentDateAdded": "2010-01-02",
             "DocumentFileName": "file1"

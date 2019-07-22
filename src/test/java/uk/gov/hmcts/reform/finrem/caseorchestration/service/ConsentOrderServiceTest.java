@@ -50,17 +50,20 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
     public void shouldReturnLatestAmendedConsentOrderWhenACaseIsAmendedByCaseWorker() throws Exception {
         setUpCaseDetails("amend-consent-order-by-caseworker.json");
         CaseDocument latestConsentOrderData = consentOrderService.getLatestConsentOrderData(callbackRequest);
-        assertThat(latestConsentOrderData.getDocumentUrl(), is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838"));
-        assertThat(latestConsentOrderData.getDocumentFilename(), is("Notification for ABC - Contested.docx"));
-        assertThat(latestConsentOrderData.getDocumentBinaryUrl(), is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
+        assertThat(latestConsentOrderData.getDocumentUrl(),
+                is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838"));
+        assertThat(latestConsentOrderData.getDocumentFilename(),
+                is("Notification for ABC - Contested.docx"));
+        assertThat(latestConsentOrderData.getDocumentBinaryUrl(),
+                is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
     }
 
     @Test
-    public void shouldReturnLatestAmendedConsentOrderWhenACaseIsRespondedBySolictor() throws Exception {
+    public void shouldReturnLatestAmendedConsentOrderWhenACaseIsRespondedBySolicitor() throws Exception {
         setUpCaseDetails("respond-to-order-solicitor.json");
         CaseDocument latestConsentOrderData = consentOrderService.getLatestConsentOrderData(callbackRequest);
-        assertThat(latestConsentOrderData.getDocumentUrl(), is("http://doc1"));
-        assertThat(latestConsentOrderData.getDocumentFilename(), is("doc1"));
-        assertThat(latestConsentOrderData.getDocumentBinaryUrl(), is("http://doc1/binary"));
+        assertThat(latestConsentOrderData.getDocumentUrl(), is("http://doc2"));
+        assertThat(latestConsentOrderData.getDocumentFilename(), is("doc2"));
+        assertThat(latestConsentOrderData.getDocumentBinaryUrl(), is("http://doc2/binary"));
     }
 }

@@ -9,9 +9,9 @@
       "d81Question": "No",
       "PBAreference": "ABCD",
       "consentOrder": {
-        "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
+        "document_url":"http://dm-store:8080/documents/0ddb806e-54f5-4780-96d5-37cb7869a63a",
+        "document_filename":"ConsentOrder.pdf",
+        "document_binary_url":"http://dm-store:8080/documents/0ddb806e-54f5-4780-96d5-37cb7869a63a/binary"
       },
       "d81Applicant": {
         "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",

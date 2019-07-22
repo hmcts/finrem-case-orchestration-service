@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -48,7 +49,7 @@ public class BulkPrintServiceTest {
 
     private CaseDetails caseDetails() throws Exception {
         try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/bulk-print.json")) {
+                     getClass().getResourceAsStream("/fixtures/bulk-print.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }
@@ -71,6 +72,12 @@ public class BulkPrintServiceTest {
 
         @Override
         public void deleteDocument(String fileUrl, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public DocumentValidationResponse checkUploadedFileType(String authorizationToken,
+                                                                String fileUrl) {
             throw new UnsupportedOperationException();
         }
 
