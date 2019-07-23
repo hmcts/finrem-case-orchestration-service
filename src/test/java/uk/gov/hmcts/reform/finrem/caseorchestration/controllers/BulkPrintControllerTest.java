@@ -42,7 +42,8 @@ public class BulkPrintControllerTest extends BaseControllerTest {
         UUID randomId = UUID.randomUUID();
         requestContent =
             objectMapper.readTree(
-                new File(getClass().getResource("/fixtures/contested/bulk_print_consent_order_not_approved.json").toURI()));
+                new File(getClass().getResource("/fixtures/contested/bulk_print_consent_order_not_approved.json")
+                    .toURI()));
 
         when(coverSheetService.generateCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(bulkPrintService.sendForBulkPrint(any(), any())).thenReturn(randomId);
