@@ -87,7 +87,7 @@ public class BulkPrintController implements BaseController {
             caseData.put(STATE, ConsentedStatus.CONSENT_ORDER_MADE.getId());
         }
 
-        log.info("Current case state: {} and end case state ",callback.getCaseDetails().getState(),caseData.get(STATE));
+        log.info("Current case state: {} and end case state {} ",callback.getCaseDetails().getState(),caseData.get(STATE));
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
             .build());
