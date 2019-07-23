@@ -23,6 +23,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_RESPONSE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 
 @WebMvcTest(BulkPrintController.class)
 public class BulkPrintControllerTest extends BaseControllerTest {
@@ -36,11 +38,12 @@ public class BulkPrintControllerTest extends BaseControllerTest {
     private GenerateCoverSheetService coverSheetService;
 
     @Test
-    public void shouldSuccessfullyReturnStatus200() throws Exception {
+    public void shouldSuccessfullyReturnStatus200ForNotApproved() throws Exception {
         UUID randomId = UUID.randomUUID();
         requestContent =
             objectMapper.readTree(
-                new File(getClass().getResource("/fixtures/contested/hwf.json").toURI()));
+                new File(getClass().getResource("/fixtures/contested/bulk_print_consent_order_not_approved.json")
+                    .toURI()));
 
         when(coverSheetService.generateCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(bulkPrintService.sendForBulkPrint(any(), any())).thenReturn(randomId);
@@ -53,7 +56,33 @@ public class BulkPrintControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.bulkPrintCoverSheet").exists())
-            .andExpect(jsonPath("$.data.bulkPrintLetterId", is(randomId.toString())));
+            .andExpect(jsonPath("$.data.bulkPrintLetterId", is(randomId.toString())))
+            .andExpect(jsonPath("$.data.state", is(AWAITING_RESPONSE.getId())));
+        verify(bulkPrintService).sendForBulkPrint(any(), any());
+        verify(coverSheetService).generateCoverSheet(any(), any());
+    }
+
+
+    @Test
+    public void shouldSuccessfullyReturnStatus200ForApproved() throws Exception {
+        UUID randomId = UUID.randomUUID();
+        requestContent =
+            objectMapper.readTree(
+                new File(getClass().getResource("/fixtures/contested/bulk_print_consent_order_approved.json").toURI()));
+
+        when(coverSheetService.generateCoverSheet(any(), any())).thenReturn(new CaseDocument());
+        when(bulkPrintService.sendForBulkPrint(any(), any())).thenReturn(randomId);
+
+        mvc.perform(
+            post("/case-orchestration/bulk-print")
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.bulkPrintCoverSheet").exists())
+            .andExpect(jsonPath("$.data.bulkPrintLetterId", is(randomId.toString())))
+            .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.getId())));
         verify(bulkPrintService).sendForBulkPrint(any(), any());
         verify(coverSheetService).generateCoverSheet(any(), any());
     }

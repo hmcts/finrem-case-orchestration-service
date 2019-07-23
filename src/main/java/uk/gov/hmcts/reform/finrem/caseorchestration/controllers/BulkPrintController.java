@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
@@ -24,6 +25,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -67,8 +71,18 @@ public class BulkPrintController implements BaseController {
             authorisationToken);
 
         UUID letterId = bulkPrintService.sendForBulkPrint(coverSheetDocument, callback.getCaseDetails());
-        caseData.put("bulkPrintCoverSheet", coverSheetDocument);
-        caseData.put("bulkPrintLetterId", letterId);
+
+        caseData.put(BULK_PRINT_COVER_SHEET, coverSheetDocument);
+
+        caseData.put(BULK_PRINT_LETTER_ID, letterId);
+
+        if (callback.getCaseDetails().getState().equals(ConsentedStatus.CONSENT_ORDER_NOT_APPROVED.getId())) {
+            caseData.put(STATE, ConsentedStatus.AWAITING_RESPONSE.getId());
+        }
+
+        if (callback.getCaseDetails().getState().equals(ConsentedStatus.CONSENT_ORDER_APPROVED.getId())) {
+            caseData.put(STATE, ConsentedStatus.CONSENT_ORDER_MADE.getId());
+        }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
             .build());
