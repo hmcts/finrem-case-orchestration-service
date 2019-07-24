@@ -88,6 +88,18 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     @Test
+    public void verifyDocumentValidationShouldReturnOkResponseCode() {
+        jsonPathEvaluator = utils.getResponseData(caseOrchestration + "/field/consentOrder/file-upload-check",
+                MINIFORMA_CONTESTED_JSON,contestedDir, DATAPATH);
+        System.out.println("response is :" + jsonPathEvaluator.prettyPrint());
+
+        if (jsonPathEvaluator.get("bulkPrintLetterId") == null) {
+            Assert.fail("bulk Printing not successfull");
+        }
+
+    }
+
+    @Test
     public void verifyContestedDraftDocumentGenerationShouldReturnOkResponseCode() {
         utils.validatePostSuccess(generateContestedUrl,CONTESTED_FORMC_JSON,contestedDir);
     }
