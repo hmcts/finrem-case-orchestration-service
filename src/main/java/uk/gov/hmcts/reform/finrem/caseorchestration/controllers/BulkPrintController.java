@@ -75,7 +75,10 @@ public class BulkPrintController implements BaseController {
 
         caseData.put(BULK_PRINT_LETTER_ID, letterId);
 
-        log.info("Current case state: {}",callback.getCaseDetails().getState());
+        log.info("Current CaseDetails state: {} and case data state ",callback.getCaseDetails().getState(),
+            caseData.get(STATE));
+
+        caseData.put(STATE, callback.getCaseDetails().getState());
 
         if (callback.getCaseDetails().getState().equals(ConsentedStatus.CONSENT_ORDER_NOT_APPROVED.getId())) {
             log.info("switching to: {}",ConsentedStatus.AWAITING_RESPONSE.getId());
@@ -87,7 +90,7 @@ public class BulkPrintController implements BaseController {
             caseData.put(STATE, ConsentedStatus.CONSENT_ORDER_MADE.getId());
         }
 
-        log.info("Current case state: {} and end case state {} ",callback.getCaseDetails().getState(),
+            log.info("Current case state: {} and end case state {} ",callback.getCaseDetails().getState(),
             caseData.get(STATE));
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
