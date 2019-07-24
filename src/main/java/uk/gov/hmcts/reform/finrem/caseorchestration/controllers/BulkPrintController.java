@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 
 import javax.validation.constraints.NotNull;
@@ -76,13 +75,20 @@ public class BulkPrintController implements BaseController {
 
         caseData.put(BULK_PRINT_LETTER_ID, letterId);
 
+        log.info("Current case state: {}",callback.getCaseDetails().getState());
+
         if (callback.getCaseDetails().getState().equals(ConsentedStatus.CONSENT_ORDER_NOT_APPROVED.getId())) {
+            log.info("switching to: {}",ConsentedStatus.AWAITING_RESPONSE.getId());
             caseData.put(STATE, ConsentedStatus.AWAITING_RESPONSE.getId());
         }
 
         if (callback.getCaseDetails().getState().equals(ConsentedStatus.CONSENT_ORDER_APPROVED.getId())) {
+            log.info("switching to: {}",ConsentedStatus.CONSENT_ORDER_MADE.getId());
             caseData.put(STATE, ConsentedStatus.CONSENT_ORDER_MADE.getId());
         }
+
+        log.info("Current case state: {} and end case state {} ",callback.getCaseDetails().getState(),
+            caseData.get(STATE));
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
             .build());
