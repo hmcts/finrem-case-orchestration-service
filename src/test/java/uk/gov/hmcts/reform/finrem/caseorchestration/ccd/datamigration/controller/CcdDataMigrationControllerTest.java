@@ -19,13 +19,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(CcdDataMigrationController.class)
@@ -58,8 +61,10 @@ public class CcdDataMigrationControllerTest {
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = ccdMigrationRequest.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
+        caseData.remove(STATE);
         return objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDetails.getData()).build());
+                .data(caseData).build());
     }
 
     private void doMigrateSetup() {
@@ -76,7 +81,7 @@ public class CcdDataMigrationControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedCaseData()))
-                .andExpect(jsonPath("$.data.amountToPay", is("5000")))
+                .andExpect(jsonPath("$.data", not(hasKey(STATE))))
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
