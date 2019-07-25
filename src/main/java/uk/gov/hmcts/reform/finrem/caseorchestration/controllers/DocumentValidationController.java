@@ -59,8 +59,8 @@ public class DocumentValidationController implements BaseController {
         AboutToStartOrSubmitCallbackResponseBuilder builder = builder();
         if (nonNull(caseData.get(field))) {
             DocumentValidationResponse response = service.validateDocument(callbackRequest, field, authorisationToken);
-            return builder.data(caseData).errors(response.getErrors()).build();
+            return builder.errors(response.getErrors()).build();
         }
-        return builder().data(caseData).build();
+        return builder().build();
     }
 }
