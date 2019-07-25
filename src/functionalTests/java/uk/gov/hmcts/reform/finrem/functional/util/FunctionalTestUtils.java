@@ -5,6 +5,7 @@ import io.restassured.http.Header;
 import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
 import org.pdfbox.cos.COSDocument;
 import org.pdfbox.pdfparser.PDFParser;
@@ -30,6 +31,7 @@ import static org.junit.Assert.assertEquals;
 
 @ContextConfiguration(classes = TestContextConfiguration.class)
 @Component
+@Slf4j
 public class FunctionalTestUtils {
 
     @Autowired
@@ -160,7 +162,6 @@ public class FunctionalTestUtils {
     }
 
     public JsonPath getResponseData(String url, String filename, String journeyType, String dataPath) {
-
         Response response = SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(getHeader())
@@ -169,6 +170,22 @@ public class FunctionalTestUtils {
                 .when().post(url)
                 .andReturn();
 
+
+        jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
+        int statusCode = response.getStatusCode();
+        assertEquals(statusCode, 200);
+        return jsonPathEvaluator;
+    }
+
+    public JsonPath getResponseData(String url, CallbackRequest callbackRequest, String dataPath) {
+        log.info("callbackRequest.toString() >> " + callbackRequest.toString());
+        Response response = SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(getHeader())
+                .contentType("application/json")
+                .body(callbackRequest)
+                .when().post(url)
+                .andReturn();
 
         jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
         int statusCode = response.getStatusCode();
@@ -192,23 +209,5 @@ public class FunctionalTestUtils {
                 .body(getJsonFromFile(jsonFileName, journeyType))
                 .when().post(url).getStatusCode();
     }
-
-    public JsonPath getResponseData(String url, CallbackRequest callbackRequest, String dataPath) {
-        System.out.println("callbackRequest.toString() >> " + callbackRequest.toString());
-        Response response = SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(getHeader())
-                .contentType("application/json")
-                .body(callbackRequest)
-                .when().post(url)
-                .andReturn();
-
-
-        jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
-        int statusCode = response.getStatusCode();
-        assertEquals(statusCode, 200);
-        return jsonPathEvaluator;
-    }
-
 
 }
