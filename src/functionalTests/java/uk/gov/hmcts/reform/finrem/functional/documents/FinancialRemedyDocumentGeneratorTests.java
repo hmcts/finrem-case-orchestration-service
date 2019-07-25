@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SerenityRunner.class)
@@ -93,11 +92,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void verifyDocumentGenerationPostResponseContent() {
-
-        JsonPath jsonPathEvaluator = generateDocument(MINIFORMA_JSON, generatorUrl, consentedDir);
-
-        assertTrue(jsonPathEvaluator.get("data.state").toString()
-                .equalsIgnoreCase("applicationIssued"));
+        generateDocument(MINIFORMA_JSON, generatorUrl, consentedDir);
     }
 
     @Test
@@ -112,39 +107,31 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyContestedDocumentGenerationPostResponseContent() {
 
-        JsonPath jsonPathEvaluator = generateDocument(MINIFORMA_CONTESTED_JSON,
+        generateDocument(MINIFORMA_CONTESTED_JSON,
                 generateContestedUrl, contestedDir);
 
-        assertTrue(jsonPathEvaluator.get("data.state").toString()
-                .equalsIgnoreCase("applicationIssued"));
     }
 
     @Test
     public void verifyContestedDraftDocumentGenerationPostResponseContent() {
 
-        JsonPath jsonPathEvaluator = generateDocument(MINIFORMA_CONTESTED_JSON,
+        generateDocument(MINIFORMA_CONTESTED_JSON,
                 generateContestedDraftUrl, contestedDir);
-
-        assertNull(jsonPathEvaluator.get("data.state."));
     }
 
 
     @Test
     public void verifyContestedFormCDocumentGenerationPostResponseContent() {
 
-        JsonPath jsonPathEvaluator = generateDocument(CONTESTED_FORMC_JSON, generateHearingUrl, contestedDir);
+        generateDocument(CONTESTED_FORMC_JSON, generateHearingUrl, contestedDir);
 
-        assertTrue(jsonPathEvaluator.get("data.state.").toString()
-                .equalsIgnoreCase("prepareForHearing"));
     }
 
     @Test
     public void verifyContestedFormGDocumentGenerationPostResponseContent() {
 
-        JsonPath jsonPathEvaluator = generateDocument(CONTESTED_FORMG_JSON, generateHearingUrl, contestedDir);
+        generateDocument(CONTESTED_FORMG_JSON, generateHearingUrl, contestedDir);
 
-        assertTrue(jsonPathEvaluator.get("data.state").toString()
-                .equalsIgnoreCase("prepareForHearing"));
     }
 
     @Test

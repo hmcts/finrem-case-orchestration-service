@@ -102,7 +102,6 @@ public class PBAPaymentTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.data.state", is(APPLICATION_SUBMITTED.toString())))
                 .andExpect(jsonPath("$.data.PBAPaymentReference", is("REF0001")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0600")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("5000")))

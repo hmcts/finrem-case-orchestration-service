@@ -21,9 +21,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_ISSUED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -49,8 +47,6 @@ public class ContestedDocumentController implements BaseController {
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         CaseDocument document = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
-        caseData.put(STATE, APPLICATION_ISSUED.toString());
-
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }

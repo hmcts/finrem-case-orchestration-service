@@ -25,6 +25,7 @@ import java.util.Map;
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -65,7 +66,6 @@ public class CaseMaintenanceController implements BaseController {
         updateRespondentSolicitorAddress(caseData);
         updateD81Details(caseData);
         updateLatestConsentOrder(ccdRequest);
-
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
