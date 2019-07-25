@@ -12,11 +12,11 @@ import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.util.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 
@@ -59,7 +59,7 @@ public class FunctionalTestUtils {
         }
     }
 
-    public String getJsonFromFile(String fileName , String directory) {
+    public String getJsonFromFile(String fileName, String directory) {
         try {
             File file = ResourceUtils.getFile(this.getClass().getResource(directory + fileName));
             return new String(Files.readAllBytes(file.toPath()));
@@ -72,7 +72,7 @@ public class FunctionalTestUtils {
     public Headers getHeadersWithUserId() {
 
         return Headers.headers(
-                new Header("ServiceAuthorization",   tokenGenerator.generate()),
+                new Header("ServiceAuthorization", tokenGenerator.generate()),
                 new Header("user-roles", "caseworker-divorce"),
                 new Header("user-id", userId));
     }
@@ -81,13 +81,13 @@ public class FunctionalTestUtils {
         return Headers.headers(
 
                 new Header("Authorization", "Bearer "
-                 + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
+                        + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
                 //new Header("Authorization", "Bearer " + idamUtils.getClientAuthToken()),
                 new Header("Content-Type", ContentType.JSON.toString()));
     }
 
     public String getAuthoToken() {
-        return idamUtils.generateUserTokenWithNoRoles(idamUserName,idamUserPassword);
+        return idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword);
     }
 
     public Headers getHeader() {
@@ -181,16 +181,33 @@ public class FunctionalTestUtils {
                 .relaxedHTTPSValidation()
                 .headers(getHeader())
                 .contentType("application/json")
-                .body(getJsonFromFile(filename , journeyType))
+                .body(getJsonFromFile(filename, journeyType))
                 .when().post(url).andReturn();
     }
 
-    public int getStatusCode( String url, String jsonFileName,String journeyType) {
+    public int getStatusCode(String url, String jsonFileName, String journeyType) {
         return SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(getHeaders())
                 .body(getJsonFromFile(jsonFileName, journeyType))
                 .when().post(url).getStatusCode();
+    }
+
+    public JsonPath getResponseData(String url, CallbackRequest callbackRequest, String dataPath) {
+        System.out.println("callbackRequest.toString() >> " + callbackRequest.toString());
+        Response response = SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(getHeader())
+                .contentType("application/json")
+                .body(callbackRequest)
+                .when().post(url)
+                .andReturn();
+
+
+        jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
+        int statusCode = response.getStatusCode();
+        assertEquals(statusCode, 200);
+        return jsonPathEvaluator;
     }
 
 

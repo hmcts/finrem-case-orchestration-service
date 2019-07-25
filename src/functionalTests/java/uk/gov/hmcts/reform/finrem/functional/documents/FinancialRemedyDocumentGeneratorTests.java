@@ -5,19 +5,18 @@ import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SerenityRunner.class)
-
 public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
+    private static final String PATH = "/fixtures/latestConsentedConsentOrder/";
 
     private static String SOLICITOR_FIRM = "Michael Jones & Partners";
     private static String SOLICITOR_NAME = "Jane Smith";
@@ -67,7 +66,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private String generateContestedDraftUrl;
 
 
-
     @Value("${cos.document.hearing.api}")
     private String generateHearingUrl;
 
@@ -78,19 +76,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Test
     public void verifyBulkPrintDocumentGenerationShouldReturnOkResponseCode() {
         jsonPathEvaluator = utils.getResponseData(caseOrchestration + "/bulk-print",
-                MINIFORMA_CONTESTED_JSON,contestedDir, DATAPATH);
-        System.out.println("response is :" + jsonPathEvaluator.prettyPrint());
-
-        if (jsonPathEvaluator.get("bulkPrintLetterId") == null) {
-            Assert.fail("bulk Printing not successfull");
-        }
-
-    }
-
-    @Test
-    public void verifyDocumentValidationShouldReturnOkResponseCode() {
-        jsonPathEvaluator = utils.getResponseData(caseOrchestration + "/field/consentOrder/file-upload-check",
-                MINIFORMA_CONTESTED_JSON,contestedDir, DATAPATH);
+                MINIFORMA_CONTESTED_JSON, contestedDir, DATAPATH);
         System.out.println("response is :" + jsonPathEvaluator.prettyPrint());
 
         if (jsonPathEvaluator.get("bulkPrintLetterId") == null) {
@@ -101,7 +87,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void verifyContestedDraftDocumentGenerationShouldReturnOkResponseCode() {
-        utils.validatePostSuccess(generateContestedUrl,CONTESTED_FORMC_JSON,contestedDir);
+        utils.validatePostSuccess(generateContestedUrl, CONTESTED_FORMC_JSON, contestedDir);
     }
 
     @Test
