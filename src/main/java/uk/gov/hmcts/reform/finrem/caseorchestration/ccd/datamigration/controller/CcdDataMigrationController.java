@@ -18,8 +18,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import java.util.Map;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 
 @RestController
@@ -27,9 +27,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequestMapping(value = "/ccd-data-migration")
 @Slf4j
 public class CcdDataMigrationController {
-    public static final String AMOUNT_TO_PAY = "amountToPay";
-    public static final String AMOUNT_TO_PAY_5000 = "5000";
-    public static final String HELP_WITH_FEES_QUESTION = "helpWithFeesQuestion";
 
     @PostMapping(value = "/migrate", consumes = APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
@@ -43,7 +40,7 @@ public class CcdDataMigrationController {
         boolean shouldMigrateCase = shouldMigrateCase(caseData);
         log.info("shouldMigrateCase >>> {}", shouldMigrateCase);
         if (shouldMigrateCase) {
-            caseData.put(AMOUNT_TO_PAY, AMOUNT_TO_PAY_5000);
+            caseData.remove(STATE);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
         } else {
             return AboutToStartOrSubmitCallbackResponse.builder().build();
@@ -51,12 +48,8 @@ public class CcdDataMigrationController {
     }
 
     private boolean shouldMigrateCase(Map<String, Object> caseData) {
-        String amountToPay = ObjectUtils.toString(caseData.get(AMOUNT_TO_PAY));
-        String helpWithFees = ObjectUtils.toString(caseData.get(HELP_WITH_FEES_QUESTION));
-        log.info("amountToPay >>> {}", amountToPay);
-        log.info("helpWithFees >>> {}", helpWithFees);
-        return isEmpty(amountToPay) && isNotEmpty(helpWithFees)
-                && (helpWithFees.equalsIgnoreCase("yes")
-                || helpWithFees.equalsIgnoreCase("no"));
+        String state = ObjectUtils.toString(caseData.get(STATE));
+        log.info("state >>> {}", state);
+        return !isEmpty(state);
     }
 }
