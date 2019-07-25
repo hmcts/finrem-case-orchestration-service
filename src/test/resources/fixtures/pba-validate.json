@@ -5,6 +5,7 @@
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_data": {
+      "state": "applicationDrafted",
       "PBANumber": "PBA123",
       "d81Question": "No",
       "PBAreference": "ABCD",

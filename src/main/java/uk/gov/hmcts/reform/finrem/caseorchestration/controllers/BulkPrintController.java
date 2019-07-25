@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
@@ -26,7 +25,6 @@ import java.util.UUID;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -74,24 +72,6 @@ public class BulkPrintController implements BaseController {
         caseData.put(BULK_PRINT_COVER_SHEET, coverSheetDocument);
 
         caseData.put(BULK_PRINT_LETTER_ID, letterId);
-
-        log.info("Current CaseDetails state: {} and case data state ", callback.getCaseDetails().getState(),
-            caseData.get(STATE));
-
-        caseData.put(STATE, callback.getCaseDetails().getState());
-
-        if (callback.getCaseDetails().getState().equals(ConsentedStatus.CONSENT_ORDER_NOT_APPROVED.getId())) {
-            log.info("switching to: {}", ConsentedStatus.AWAITING_RESPONSE.getId());
-            caseData.put(STATE, ConsentedStatus.AWAITING_RESPONSE.getId());
-        }
-
-        if (callback.getCaseDetails().getState().equals(ConsentedStatus.CONSENT_ORDER_APPROVED.getId())) {
-            log.info("switching to: {}", ConsentedStatus.CONSENT_ORDER_MADE.getId());
-            caseData.put(STATE, ConsentedStatus.CONSENT_ORDER_MADE.getId());
-        }
-
-        log.info("Current case state: {} and end case state {} ", callback.getCaseDetails().getState(),
-            caseData.get(STATE));
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
             .build());

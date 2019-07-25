@@ -21,7 +21,6 @@ import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.APPLICATION_SUBMITTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMOUNT_TO_PAY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_SUMMARY;
@@ -58,7 +57,6 @@ public class PBAPaymentController implements BaseController {
                 if (!paymentResponse.isPaymentSuccess()) {
                     return paymentFailure(mapOfCaseData, paymentResponse);
                 }
-                mapOfCaseData.put(STATE, APPLICATION_SUBMITTED.toString());
                 mapOfCaseData.put(PBA_PAYMENT_REFERENCE, paymentResponse.getReference());
                 log.info("Payment succeeded.");
             } else {

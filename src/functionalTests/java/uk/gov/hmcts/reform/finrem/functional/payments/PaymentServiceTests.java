@@ -188,8 +188,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private void validatePostSuccessForPBAPayment(String url, String fileName, String journeyType)
             throws InterruptedException {
         Thread.sleep(120000);
-        assertTrue(utils.getResponseData(url, fileName, journeyType,dataPath).get("state").toString()
-                    .equalsIgnoreCase("applicationSubmitted"));
+        utils.getResponseData(url, fileName, journeyType, dataPath);
     }
 
     private void validateFeeLookUpPayment(String url, String fileName, String journeyType) {

@@ -56,8 +56,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.bulkPrintCoverSheet").exists())
-            .andExpect(jsonPath("$.data.bulkPrintLetterId", is(randomId.toString())))
-            .andExpect(jsonPath("$.data.state", is(AWAITING_RESPONSE.getId())));
+            .andExpect(jsonPath("$.data.bulkPrintLetterId", is(randomId.toString())));
         verify(bulkPrintService).sendForBulkPrint(any(), any());
         verify(coverSheetService).generateCoverSheet(any(), any());
     }
@@ -81,8 +80,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.bulkPrintCoverSheet").exists())
-            .andExpect(jsonPath("$.data.bulkPrintLetterId", is(randomId.toString())))
-            .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.getId())));
+            .andExpect(jsonPath("$.data.bulkPrintLetterId", is(randomId.toString())));
         verify(bulkPrintService).sendForBulkPrint(any(), any());
         verify(coverSheetService).generateCoverSheet(any(), any());
     }

@@ -162,7 +162,6 @@ public class HearingNonFastTrackDocumentTest {
         CaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getData().put("formC", caseDocument());
         caseDetails.getData().put("formG", caseDocument());
-        caseDetails.getData().put("state", "prepareForHearing");
 
         return objectMapper.writeValueAsString(
                 AboutToStartOrSubmitCallbackResponse.builder()

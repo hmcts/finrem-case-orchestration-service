@@ -49,8 +49,6 @@ public class DocumentController implements BaseController {
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         CaseDocument document = service.generateMiniFormA(authorisationToken, callback.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
-        caseData.put(STATE, APPLICATION_ISSUED.toString());
-
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }
