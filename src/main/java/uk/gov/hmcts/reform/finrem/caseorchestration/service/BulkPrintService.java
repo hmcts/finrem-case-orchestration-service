@@ -13,20 +13,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequ
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
-import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getValue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentTranslator.convertDocument;
 
 @Service
 @Slf4j
 public class BulkPrintService extends AbstractDocumentService {
-    public static final String UPLOAD_ORDER = "uploadOrder";
-    private static final String DOCUMENT_LINK = "DocumentLink";
-    private static final String DOCUMENT_URL = "document_binary_url";
-    private static final String VALUE = "value";
+
 
     @Autowired
     public BulkPrintService(
@@ -41,29 +35,13 @@ public class BulkPrintService extends AbstractDocumentService {
         bulkPrintDocuments.add(
             BulkPrintDocument.builder().binaryFileUrl(coverSheet.getDocumentBinaryUrl()).build());
 
-        log.info("extracting order documents from case data  for bulk print. ");
-        List<Map> documentList =
-            ofNullable(caseDetails.getData().get(UPLOAD_ORDER))
-                .map(i -> (List<Map>) i)
-                .orElse(new ArrayList<>());
+        bulkPrintDocuments.addAll(convertDocument(caseDetails, "uploadOrder", "DocumentLink"));
+        bulkPrintDocuments.addAll(convertDocument(caseDetails, "pensionCollection", "uploadedDocument"));
+        bulkPrintDocuments.addAll(convertDocument(caseDetails, "latestConsentOrder"));
+        bulkPrintDocuments.addAll(convertDocument(caseDetails, "approvedConsentOrderLetter"));
 
-        for (Map<String, Object> document : documentList) {
-
-            Map<String, Object> value = ((Map) document.get(VALUE));
-
-            Optional<Object> documentLinkObj = getValue.apply(value, DOCUMENT_LINK);
-
-            if (documentLinkObj.isPresent()) {
-                Map<String, Object> documentLink = (Map) documentLinkObj.get();
-                bulkPrintDocuments.add(
-                    BulkPrintDocument.builder()
-                        .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
-                        .build());
-            }
-        }
         log.info(
-            " {} order documents with cover sheet are sent bulk print.", bulkPrintDocuments.size());
-
+            " {} Order documents including cover sheet are sent bulk print.", bulkPrintDocuments.size());
         return bulkPrint(
             BulkPrintRequest.builder()
                 .caseId(caseDetails.getId().toString())

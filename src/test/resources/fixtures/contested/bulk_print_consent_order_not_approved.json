@@ -5,6 +5,23 @@
     "jurisdiction": "DIVORCE",
     "state": "orderMade",
     "case_data": {
+      "uploadOrder":[
+        {
+          "id":"92d30d00-1cd6-4ab1-aca9-cd361d21634e",
+          "value":{
+            "DocumentLink":{
+              "document_url":"http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7",
+              "document_filename":"case_001.pdf",
+              "document_binary_url":"http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7/binary"
+            },
+            "DocumentType":"Other",
+            "DocumentComment":null,
+            "DocumentFileName":null,
+            "DocumentDateAdded":null,
+            "DocumentEmailContent":null
+          }
+        }
+      ],
       "helpWithFeesQuestion": "Yes",
       "applicantLName":"Guy",
       "dateOfMarriage":"1111-01-01",
