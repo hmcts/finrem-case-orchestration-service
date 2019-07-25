@@ -25,7 +25,6 @@ import java.util.Map;
 import static java.util.Objects.nonNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.builder;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -60,9 +59,8 @@ public class DocumentValidationController implements BaseController {
         AboutToStartOrSubmitCallbackResponseBuilder builder = builder();
         if (nonNull(caseData.get(field))) {
             DocumentValidationResponse response = service.validateDocument(callbackRequest, field, authorisationToken);
-            return builder.data(caseData).errors(response.getErrors()).build();
+            return builder.errors(response.getErrors()).build();
         }
-        caseData.put(STATE, callbackRequest.getCaseDetails().getState());
-        return builder().data(caseData).build();
+        return builder().build();
     }
 }
