@@ -42,6 +42,12 @@ abstract class BaseControllerTest extends BaseTest {
                 .getResource("/fixtures/pba-validate.json").toURI()));
     }
 
+    void doMissingLatestConsentOrder() throws IOException, URISyntaxException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/hwf.json").toURI()));
+    }
+
     CaseDocument getCaseDocument() {
         CaseDocument caseDocument = new CaseDocument();
         caseDocument.setDocumentUrl("http://doc1");

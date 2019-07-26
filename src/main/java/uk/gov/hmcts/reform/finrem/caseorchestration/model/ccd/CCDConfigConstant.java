@@ -16,9 +16,11 @@ public class CCDConfigConstant {
     public static final String D81_QUESTION = "d81Question";
     //Document related
     public static final String MINI_FORM_A = "miniFormA";
+    public static final String PENSION_DOCS_COLLECTION = "pensionCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_TEXT = "generalLetterBody";
-    public static final String APPROVED_CONSENT_ORDER_LETTER = "approvedConsentOrderLetter";
+    public static final String LATEST_CONSENT_ORDER = "latestConsentOrder";
+    public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
     public static final String FEES = "Fees";

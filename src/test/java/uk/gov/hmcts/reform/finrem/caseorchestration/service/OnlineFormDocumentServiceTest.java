@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.util.HashMap;
@@ -85,7 +85,7 @@ public class OnlineFormDocumentServiceTest {
         }
 
         @Override
-        public Document generatePDF(DocumentRequest generateDocumentRequest, String authorizationToken) {
+        public Document generatePDF(DocumentGenerationRequest generateDocumentRequest, String authorizationToken) {
             latch.countDown();
             return document();
         }
@@ -105,5 +105,16 @@ public class OnlineFormDocumentServiceTest {
                                                                 String fileUrl) {
             return  DocumentValidationResponse.builder().build();
         }
+
+        @Override
+        public Document stampDocument(Document document, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Document annexStampDocument(Document document, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
     }
 }

@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -44,10 +44,9 @@ public class ConsentOrderController implements BaseController {
                 authToken, callbackRequest);
 
         validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
-        caseData.put("latestConsentOrder", caseDocument);
+        caseData.put(LATEST_CONSENT_ORDER, caseDocument);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }

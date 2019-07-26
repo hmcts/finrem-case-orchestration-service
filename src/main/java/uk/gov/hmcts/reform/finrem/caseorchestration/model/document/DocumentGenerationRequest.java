@@ -12,7 +12,7 @@ import java.util.Map;
 @Data
 @Builder
 @ApiModel(description = "Request body model for Document Generation Request")
-public class DocumentRequest {
+public class DocumentGenerationRequest {
     @ApiModelProperty(value = "Name of the template", required = true)
     @JsonProperty(value = "template", required = true)
     @NotBlank

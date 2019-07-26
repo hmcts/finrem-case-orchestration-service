@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.io.InputStream;
@@ -59,7 +59,7 @@ public class BulkPrintServiceTest {
         private Map<String, Object> value;
 
         @Override
-        public Document generatePDF(DocumentRequest request, String authorizationToken) {
+        public Document generatePDF(DocumentGenerationRequest request, String authorizationToken) {
             value = request.getValues();
             return document();
         }
@@ -78,6 +78,17 @@ public class BulkPrintServiceTest {
         @Override
         public DocumentValidationResponse checkUploadedFileType(String authorizationToken,
                                                                 String fileUrl) {
+            throw new UnsupportedOperationException();
+        }
+
+
+        @Override
+        public Document stampDocument(Document document, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Document annexStampDocument(Document document, String authorizationToken) {
             throw new UnsupportedOperationException();
         }
 

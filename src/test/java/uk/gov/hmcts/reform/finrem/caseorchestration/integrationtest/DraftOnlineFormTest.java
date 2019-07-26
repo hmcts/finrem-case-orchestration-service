@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.util.Collections;
 
@@ -19,8 +19,8 @@ public class DraftOnlineFormTest extends GenerateMiniFormATest {
     }
 
     @Override
-    protected DocumentRequest documentRequest() {
-        return DocumentRequest.builder()
+    protected DocumentGenerationRequest documentRequest() {
+        return DocumentGenerationRequest.builder()
                 .template(documentConfiguration.getContestedDraftMiniFormTemplate())
                 .fileName(documentConfiguration.getContestedDraftMiniFormFileName())
                 .values(Collections.singletonMap("caseDetails",

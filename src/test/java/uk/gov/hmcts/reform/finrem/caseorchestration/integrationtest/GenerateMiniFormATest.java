@@ -7,7 +7,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -63,8 +63,8 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
     }
 
     @Override
-    protected DocumentRequest documentRequest() {
-        return DocumentRequest.builder()
+    protected DocumentGenerationRequest documentRequest() {
+        return DocumentGenerationRequest.builder()
                 .template(documentConfiguration.getMiniFormTemplate())
                 .fileName(documentConfiguration.getMiniFormFileName())
                 .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))

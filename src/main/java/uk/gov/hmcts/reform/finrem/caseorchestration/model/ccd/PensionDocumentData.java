@@ -12,3 +12,4 @@ public class PensionDocumentData {
     @JsonProperty("uploadedDocument")
     private CaseDocument pensionDocument;
 }
+
