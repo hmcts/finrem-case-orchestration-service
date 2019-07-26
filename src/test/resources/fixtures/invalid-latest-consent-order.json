@@ -9,9 +9,9 @@
       "d81Question": "No",
       "PBAreference": "ABCD",
       "consentOrder": {
-        "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
+        "document_url":"http://dm-store:8080/documents/0ddb806e-54f5-4780-96d5-37cb7869a63a",
+        "document_filename":"ConsentOrder.pdf",
+        "document_binary_url":"http://dm-store:8080/documents/0ddb806e-54f5-4780-96d5-37cb7869a63a/binary"
       },
       "d81Applicant": {
         "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
@@ -23,9 +23,9 @@
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
         "document_binary_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
       },
-      "applicantSolicitorFirm": "Michael Jones & Partners",
-      "applicantSolicitorName": "Jane Smith",
-      "applicantLName": "Williams",
+      "solicitorFirm": "Mr",
+      "solicitorName": "Solictor",
+      "applicantLName": "Guy",
       "authorisation3": "2010-01-01",
       "solicitorEmail": "test@admin.com",
       "solicitorPhone": "9963472494",
@@ -64,9 +64,19 @@
       "authorisationFirm": "test",
       "authorisationName": "test",
       "divorceCaseNumber": "DD12D12345",
-      "issueDate" : "2019-03-04",
-      "hearingDate" : "2019-06-24",
-      "fastTrackDecision" : "yes",
+      "pensionCollection": [
+        {
+          "id": "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",
+          "value": {
+            "typeOfDocument": "Form P2",
+            "uploadedDocument": {
+              "document_url": "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589",
+              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+              "document_binary_url": "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589/binary"
+            }
+          }
+        }
+      ],
       "respondentAddress": {
         "County": "Essex",
         "Country": "United Kingdom",
@@ -78,7 +88,7 @@
       },
       "solicitorDXnumber": null,
       "appRespondentLName": "Korivi",
-      "solicitorReference": "JAW052018",
+      "solicitorReference": "LL01",
       "appRespondentFMName": "test",
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
@@ -109,35 +119,7 @@
         "document_binary_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
       },
       "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "No",
-      "caseAllocatedTo": "Yes",
-      "natureOfApplicationChecklist":[
-        "periodicalPaymentOrder",
-        "Lump Sum Order",
-        "Pension Sharing Order",
-        "Pension Attachment Order",
-        "Pension Compensation Sharing Order",
-        "Pension Compensation Attachment Order",
-        "propertyAdjustmentOrder"
-      ],
-      "MIAMDomesticViolenceChecklist":[
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_2",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_3",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_4",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_5",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_6",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_7",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_8",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_13",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_15",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_23",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_22",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_20",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_19",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_18",
-        "FR_ms_MIAMDomesticViolenceChecklist_Value_11"
-      ]
+      "solicitorAgreeToReceiveEmails": "No"
     }
   }
 }

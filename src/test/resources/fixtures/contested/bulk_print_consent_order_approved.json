@@ -5,91 +5,131 @@
     "jurisdiction": "DIVORCE",
     "state": "consentOrderApproved",
     "case_data": {
+      "uploadOrder":[
+        {
+          "id":"92d30d00-1cd6-4ab1-aca9-cd361d21634e",
+          "value":{
+            "DocumentLink":{
+              "document_url":"http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7",
+              "document_filename":"case_001.pdf",
+              "document_binary_url":"http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7/binary"
+            },
+            "DocumentType":"Other",
+            "DocumentComment":null,
+            "DocumentFileName":null,
+            "DocumentDateAdded":null,
+            "DocumentEmailContent":null
+          }
+        }
+      ],
+      "pensionCollection": [
+        {
+          "id": "63c0570f-25bf-4d18-99ed-8c13c2c5dafa",
+          "value": {
+            "typeOfDocument": "Form PPF1",
+            "uploadedDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/b7dbf1d2-d0e1-4996-aba3-e409c1b49364",
+              "document_filename": "D81 Form.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/b7dbf1d2-d0e1-4996-aba3-e409c1b49364/binary"
+            }
+          }
+        }
+      ],
+      "approvedConsentOrderLetter": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/51f1fce6-1246-43b0-9ab0-08434d9af008",
+        "document_filename": "ApprovedConsentOrderLetter.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/51f1fce6-1246-43b0-9ab0-08434d9af008/binary"
+      },
+      "latestConsentOrder": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/9c4419ef-6be7-4014-9fc8-2335faa25fa8",
+        "document_filename": "D81 Form.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/9c4419ef-6be7-4014-9fc8-2335faa25fa8/binary"
+      },
       "helpWithFeesQuestion": "Yes",
-      "applicantLName":"Guy",
-      "dateOfMarriage":"1111-01-01",
-      "mortgageDetail":"test",
-      "netValueOfHome":"dfdf",
-      "applicantFMName":"Poor",
-      "dateOfSepration":"1111-01-01",
-      "propertyAddress":"test",
-      "respondentEmail":null,
-      "respondentLName":"test",
-      "respondentPhone":null,
-      "respondentFMName":"test",
-      "divorceCaseNumber":"DD12D12345",
-      "fastTrackDecision":"Yes",
-      "respondentAddress":{
-        "County":"",
-        "Country":"",
-        "PostCode":"",
-        "PostTown":"SRIKALAHASTI",
-        "AddressLine1":"House no: 6-354-2, Gandhi Street, Srikalahasti, Chittor District",
-        "AddressLine2":"Srikalahasti, Chittor District",
-        "AddressLine3":""
+      "applicantLName": "Guy",
+      "dateOfMarriage": "1111-01-01",
+      "mortgageDetail": "test",
+      "netValueOfHome": "dfdf",
+      "applicantFMName": "Poor",
+      "dateOfSepration": "1111-01-01",
+      "propertyAddress": "test",
+      "respondentEmail": null,
+      "respondentLName": "test",
+      "respondentPhone": null,
+      "respondentFMName": "test",
+      "divorceCaseNumber": "DD12D12345",
+      "fastTrackDecision": "Yes",
+      "respondentAddress": {
+        "County": "",
+        "Country": "",
+        "PostCode": "",
+        "PostTown": "SRIKALAHASTI",
+        "AddressLine1": "House no: 6-354-2, Gandhi Street, Srikalahasti, Chittor District",
+        "AddressLine2": "Srikalahasti, Chittor District",
+        "AddressLine3": ""
       },
-      "allocatedCourtList":"nottingham",
-      "familyMediatorMIAM":"Yes",
-      "petitionIssuedDate":"1111-01-01",
-      "solicitorReference":"LL01",
-      "divorceStageReached":"Decree Nisi",
-      "nottinghamCourtList":"FR_s_NottinghamList_2",
-      "reasonForLocalCourt":"dfff",
-      "uploadScanned4AForm":{
-        "document_url":"http://dm-store:8080/documents/728daa26-507e-4c53-8c5b-a86d14d7aa82",
-        "document_filename":"Test Document 1.doc",
-        "document_binary_url":"http://dm-store:8080/documents/728daa26-507e-4c53-8c5b-a86d14d7aa82/binary"
+      "allocatedCourtList": "nottingham",
+      "familyMediatorMIAM": "Yes",
+      "petitionIssuedDate": "1111-01-01",
+      "solicitorReference": "LL01",
+      "divorceStageReached": "Decree Nisi",
+      "nottinghamCourtList": "FR_s_NottinghamList_2",
+      "reasonForLocalCourt": "dfff",
+      "uploadScanned4AForm": {
+        "document_url": "http://dm-store:8080/documents/728daa26-507e-4c53-8c5b-a86d14d7aa82",
+        "document_filename": "Test Document 1.doc",
+        "document_binary_url": "http://dm-store:8080/documents/728daa26-507e-4c53-8c5b-a86d14d7aa82/binary"
       },
-      "promptForAnyDocument":"No",
-      "applicantAttendedMIAM":"No",
-      "claimingExemptionMIAM":"Yes",
-      "divorceDecreeNisiDate":"1111-01-01",
-      "isApplicantsHomeCourt":"No",
-      "respondentRepresented":"No",
-      "applicantSolicitorFirm":"test firm",
-      "applicantSolicitorName":"Test",
-      "divorceUploadEvidence1":{
-        "document_url":"http://dm-store:8080/documents/f406f22d-ed3b-4aba-beda-88e008b61301",
-        "document_filename":"Test Document 1.doc",
-        "document_binary_url":"http://dm-store:8080/documents/f406f22d-ed3b-4aba-beda-88e008b61301/binary"
+      "promptForAnyDocument": "No",
+      "applicantAttendedMIAM": "No",
+      "claimingExemptionMIAM": "Yes",
+      "divorceDecreeNisiDate": "1111-01-01",
+      "isApplicantsHomeCourt": "No",
+      "respondentRepresented": "No",
+      "applicantSolicitorFirm": "test firm",
+      "applicantSolicitorName": "Test",
+      "divorceUploadEvidence1": {
+        "document_url": "http://dm-store:8080/documents/f406f22d-ed3b-4aba-beda-88e008b61301",
+        "document_filename": "Test Document 1.doc",
+        "document_binary_url": "http://dm-store:8080/documents/f406f22d-ed3b-4aba-beda-88e008b61301/binary"
       },
-      "applicantSolicitorEmail":"test@admin.com",
-      "applicantSolicitorPhone":"9963472494",
-      "benefitPaymentChecklist":[
+      "applicantSolicitorEmail": "test@admin.com",
+      "applicantSolicitorPhone": "9963472494",
+      "benefitPaymentChecklist": [
         "Step child or step children",
         "In addition to child support maintenance already paid under a Child Support Agency assessment",
         "To meet expenses arising from a child’s disability",
         "To meet expenses incurred by a child being in educated or training for work",
         "The child or the person with care of the child or the absent parent of the child is not habitually resident in the United Kingdom"
       ],
-      "fastTrackDecisionReason":[
+      "fastTrackDecisionReason": [
         "reason_1",
         "reason_2",
         "reason_3"
       ],
-      "estimatedAssetsChecklist":[
+      "estimatedAssetsChecklist": [
         "estimatedAssetsChecklist_1",
         "estimatedAssetsChecklist_2",
         "estimatedAssetsChecklist_3",
         "estimatedAssetsChecklist_4"
       ],
-      "nameOfCourtDivorceCentre":"test",
-      "otherReasonForComplexity":"Yes",
-      "applicantSolicitorAddress":{
-        "County":"",
-        "Country":"United Kingdom",
-        "PostCode":"SE12 9SE",
-        "PostTown":"London",
-        "AddressLine1":"250 Marvels Lane",
-        "AddressLine2":"Srikalahasti, Chittor District",
-        "AddressLine3":""
+      "nameOfCourtDivorceCentre": "test",
+      "otherReasonForComplexity": "Yes",
+      "applicantSolicitorAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "250 Marvels Lane",
+        "AddressLine2": "Srikalahasti, Chittor District",
+        "AddressLine3": ""
       },
-      "detailPotentialAllegation":"sfsffsd",
-      "applicantSolicitorDXnumber":null,
-      "benefitForChildrenDecision":"No",
-      "paymentForChildrenDecision":"Yes",
-      "addToComplexityListOfCourts":"trueDontKnow",
-      "natureOfApplicationChecklist":[
+      "detailPotentialAllegation": "sfsffsd",
+      "applicantSolicitorDXnumber": null,
+      "benefitForChildrenDecision": "No",
+      "paymentForChildrenDecision": "Yes",
+      "addToComplexityListOfCourts": "trueDontKnow",
+      "natureOfApplicationChecklist": [
         "periodicalPaymentOrder",
         "propertyAdjustmentOrder",
         "Pension Compensation Attachment Order",
@@ -98,15 +138,15 @@
         "Pension Sharing Order",
         "Lump Sum Order"
       ],
-      "otherReasonForComplexityText":"sdff",
-      "potentialAllegationChecklist":[
+      "otherReasonForComplexityText": "sdff",
+      "potentialAllegationChecklist": [
         "potentialAllegationChecklist_1",
         "potentialAllegationChecklist_2",
         "potentialAllegationChecklist_3",
         "notApplicable"
       ],
-      "additionalPropertyOrderDecision":"No",
-      "applicantSolicitorConsentForEmails":"Yes"
+      "additionalPropertyOrderDecision": "No",
+      "applicantSolicitorConsentForEmails": "Yes"
     }
   }
 }
