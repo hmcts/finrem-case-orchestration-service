@@ -87,18 +87,46 @@
       "generalLetterRecipientAddress": "",
       "generalLetterCreatedBy": "",
       "generalLetterBody": "Test content for the letter body",
-      "uploadOrder": [
+      "uploadOrder":[
         {
-          "id": "1",
+          "id":"92d30d00-1cd6-4ab1-aca9-cd361d21634e",
+          "value":{
+            "DocumentLink":{
+              "document_url":"http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7",
+              "document_filename":"case_001.pdf",
+              "document_binary_url":"http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7/binary"
+            },
+            "DocumentType":"Other",
+            "DocumentComment":null,
+            "DocumentFileName":null,
+            "DocumentDateAdded":null,
+            "DocumentEmailContent":null
+          }
+        }
+      ],
+      "pensionCollection": [
+        {
+          "id": "63c0570f-25bf-4d18-99ed-8c13c2c5dafa",
           "value": {
-            "DocumentLink": {
-              "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
-              "document_filename": "app_docs.pdf",
-              "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
+            "typeOfDocument": "Form PPF1",
+            "uploadedDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/b7dbf1d2-d0e1-4996-aba3-e409c1b49364",
+              "document_filename": "D81 Form.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/b7dbf1d2-d0e1-4996-aba3-e409c1b49364/binary"
             }
           }
         }
-      ]
+      ],
+      "approvedConsentOrderLetter": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/51f1fce6-1246-43b0-9ab0-08434d9af008",
+        "document_filename": "ApprovedConsentOrderLetter.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/51f1fce6-1246-43b0-9ab0-08434d9af008/binary"
+      },
+      "latestConsentOrder": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/9c4419ef-6be7-4014-9fc8-2335faa25fa8",
+        "document_filename": "D81 Form.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/9c4419ef-6be7-4014-9fc8-2335faa25fa8/binary"
+      }
     }
   }
 }

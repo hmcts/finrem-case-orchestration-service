@@ -66,7 +66,7 @@ public class BulkPrintServiceTest {
 
         @Override
         public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
-            assertThat(bulkPrintRequest.getBulkPrintDocuments().size(), is(2));
+            assertThat(bulkPrintRequest.getBulkPrintDocuments().size(), is(5));
             return letterId;
         }
 

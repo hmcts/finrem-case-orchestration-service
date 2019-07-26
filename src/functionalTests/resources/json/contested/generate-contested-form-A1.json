@@ -67,19 +67,6 @@
       "issueDate" : "2019-03-04",
       "hearingDate" : "2019-06-24",
       "fastTrackDecision" : "yes",
-      "pensionCollection": [
-        {
-          "id": "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",
-          "value": {
-            "typeOfDocument": "Form P2",
-            "uploadedDocument": {
-              "document_url": "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589",
-              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-              "document_binary_url": "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589/binary"
-            }
-          }
-        }
-      ],
       "respondentAddress": {
         "County": "Essex",
         "Country": "United Kingdom",
