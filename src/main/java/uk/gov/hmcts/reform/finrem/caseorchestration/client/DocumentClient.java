@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.util.UUID;
 
@@ -40,6 +41,16 @@ public interface DocumentClient {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @PostMapping(
+            path = "/file-upload-check",
+            headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
+    )
+    DocumentValidationResponse checkUploadedFileType(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
+            @RequestParam("fileBinaryUrl") String fileUrl
+    );
+
+
+    @PostMapping(
             path = "/version/1/stamp-document",
             headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
@@ -54,4 +65,5 @@ public interface DocumentClient {
     Document annexStampDocument(
             @RequestBody Document document,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+
 }

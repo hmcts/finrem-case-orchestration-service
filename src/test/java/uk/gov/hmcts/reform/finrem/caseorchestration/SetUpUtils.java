@@ -9,7 +9,13 @@ import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.*;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
@@ -116,17 +122,17 @@ public class SetUpUtils {
     }
 
 
-    public static PensionDocument pensionDocument() {
-        PensionDocument document = new PensionDocument();
-        document.setDocument(caseDocument());
-        document.setType(PENSION_TYPE);
+    public static PensionDocumentData pensionDocument() {
+        PensionDocumentData document = new PensionDocumentData();
+        document.setPensionDocument(caseDocument());
+        document.setTypeOfDocument(PENSION_TYPE);
 
         return document;
     }
 
-    public static PensionDocumentData pensionDocumentData() {
-        PensionDocumentData document = new PensionDocumentData();
-        document.setPensionDocument(pensionDocument());
+    public static PensionCollectionData pensionDocumentData() {
+        PensionCollectionData document = new PensionCollectionData();
+        document.setPensionDocumentData(pensionDocument());
         document.setId(PENSION_ID);
 
         return document;

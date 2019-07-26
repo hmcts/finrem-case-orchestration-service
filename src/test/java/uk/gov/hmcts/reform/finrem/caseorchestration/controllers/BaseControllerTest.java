@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 abstract class BaseControllerTest extends BaseTest {
+    public static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
     @Autowired
     protected WebApplicationContext applicationContext;
@@ -39,6 +40,12 @@ abstract class BaseControllerTest extends BaseTest {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/pba-validate.json").toURI()));
+    }
+
+    void doMissingLatestConsentOrder() throws IOException, URISyntaxException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/hwf.json").toURI()));
     }
 
     CaseDocument getCaseDocument() {

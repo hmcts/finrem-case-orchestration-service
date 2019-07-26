@@ -9,8 +9,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,22 +38,24 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         return super.annexStampDocument(document, authToken);
     }
 
-    public List<PensionDocumentData> stampPensionDocuments(List<PensionDocumentData> pensionList, String authToken) {
+    public List<PensionCollectionData> stampPensionDocuments(List<PensionCollectionData> pensionList,
+                                                             String authToken) {
         return pensionList.stream()
                 .map(data -> stampPensionDocuments(data, authToken)).collect(toList());
     }
 
-    private PensionDocumentData stampPensionDocuments(PensionDocumentData pensionDocument, String authToken) {
-        CaseDocument document = pensionDocument.getPensionDocument().getDocument();
+    private PensionCollectionData stampPensionDocuments(PensionCollectionData pensionDocument, String authToken) {
+        CaseDocument document = pensionDocument.getPensionDocumentData().getPensionDocument();
         CaseDocument stampedDocument = stampDocument(document, authToken);
-        PensionDocumentData stampedPensionData = copyOf(pensionDocument);
-        stampedPensionData.getPensionDocument().setDocument(stampedDocument);
+        PensionCollectionData stampedPensionData = copyOf(pensionDocument);
+        stampedPensionData.getPensionDocumentData().setPensionDocument(stampedDocument);
         return stampedPensionData;
     }
 
-    private PensionDocumentData copyOf(PensionDocumentData pensionDocument) {
+    private PensionCollectionData copyOf(PensionCollectionData pensionDocument) {
         try {
-            return objectMapper.readValue(objectMapper.writeValueAsString(pensionDocument), PensionDocumentData.class);
+            return objectMapper.readValue(objectMapper.writeValueAsString(pensionDocument),
+                    PensionCollectionData.class);
         } catch (IOException e) {
             throw new IllegalStateException();
         }

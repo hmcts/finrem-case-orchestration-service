@@ -10,13 +10,17 @@ import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
 import javax.validation.constraints.NotNull;
@@ -49,7 +53,7 @@ public class ConsentOrderApprovedController implements BaseController {
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
-    })
+        })
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentOrderApproved(
             @RequestHeader(value = "Authorization") String authToken,
@@ -58,7 +62,7 @@ public class ConsentOrderApprovedController implements BaseController {
         validateCaseData(callback);
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
-        List<PensionDocumentData> pensionDocs = getPensionDocuments(caseData);
+        List<PensionCollectionData> pensionDocs = getPensionDocuments(caseData);
 
 
         log.info("ConsentOrderApprovedController called with latestConsentOrder = {}, pensionDocs = {}",
@@ -77,7 +81,7 @@ public class ConsentOrderApprovedController implements BaseController {
                     .build();
 
             if (!isEmpty(pensionDocs)) {
-                List<PensionDocumentData> stampedPensionDocs = service.stampPensionDocuments(pensionDocs, authToken);
+                List<PensionCollectionData> stampedPensionDocs = service.stampPensionDocuments(pensionDocs, authToken);
                 log.info(" stampedPensionDocs = {}", stampedPensionDocs);
                 approvedOrder.setPensionDocuments(stampedPensionDocs);
             }
@@ -106,9 +110,9 @@ public class ConsentOrderApprovedController implements BaseController {
                 });
     }
 
-    private List<PensionDocumentData> getPensionDocuments(Map<String, Object> caseData) {
+    private List<PensionCollectionData> getPensionDocuments(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION),
-                new TypeReference<List<PensionDocumentData>>() {
+                new TypeReference<List<PensionCollectionData>>() {
                 });
     }
 

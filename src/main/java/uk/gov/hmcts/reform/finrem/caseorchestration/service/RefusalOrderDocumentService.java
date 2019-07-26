@@ -21,17 +21,16 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.translateOrderRefusalCollection;
 
 @Service
 public class RefusalOrderDocumentService extends AbstractDocumentService {
 
-    private static final String ORDER_MADE_STATE = "orderMade";
     private static final String DOCUMENT_COMMENT = "System Generated";
 
     private Function<Pair<CaseDetails, String>, CaseDocument> generateDocument = this::applyGenerateRefusalOrder;
     private Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
-    private UnaryOperator<Map<String, Object>> updateCaseStateToOrderMade = this::updateState;
 
     @Autowired
     public RefusalOrderDocumentService(DocumentClient documentClient,
@@ -45,13 +44,7 @@ public class RefusalOrderDocumentService extends AbstractDocumentService {
                 .andThen(generateDocument)
                 .andThen(createConsentOrderData)
                 .andThen(consentOrderData -> populateConsentOrderData(consentOrderData, caseDetails))
-                .andThen(updateCaseStateToOrderMade)
                 .apply(Pair.of(copyOf(caseDetails), authorisationToken));
-    }
-
-    private Map<String, Object> updateState(Map<String, Object> caseData) {
-        caseData.put("state", ORDER_MADE_STATE);
-        return caseData;
     }
 
     private Map<String, Object> populateConsentOrderData(ConsentOrderData consentOrderData, CaseDetails caseDetails) {

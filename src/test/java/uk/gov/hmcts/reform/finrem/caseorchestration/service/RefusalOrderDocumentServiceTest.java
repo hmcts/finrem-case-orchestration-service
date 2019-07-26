@@ -63,7 +63,6 @@ public class RefusalOrderDocumentServiceTest {
         Map<String, Object> caseData = service.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
         ConsentOrderData consentOrderData = consentOrderData(caseData);
 
-        assertThat(caseData.get("state"), is(equalTo("orderMade")));
         assertThat(consentOrderData.getId(), is(notNullValue()));
         assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(REJECTED_ORDER_TYPE));
         assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));

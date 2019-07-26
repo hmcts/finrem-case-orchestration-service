@@ -263,6 +263,19 @@
             "DocumentDateAdded": "2010-01-02",
             "DocumentFileName": "file1"
           }
+        },
+        {
+          "id": "2",
+          "value": {
+            "DocumentType": "AmendedConsentOrder",
+            "DocumentLink": {
+              "document_url": "http://doc2",
+              "document_filename": "doc2",
+              "document_binary_url": "http://doc2/binary"
+            },
+            "DocumentDateAdded": "2010-01-02",
+            "DocumentFileName": "file1"
+          }
         }
       ]
     }

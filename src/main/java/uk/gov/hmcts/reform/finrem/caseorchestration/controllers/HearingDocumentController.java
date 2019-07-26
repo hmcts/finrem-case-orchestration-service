@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.PREPARE_FOR_HEARING;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -63,7 +61,6 @@ public class HearingDocumentController implements BaseController {
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         caseData.putAll(service.generateHearingDocuments(authorisationToken, callback.getCaseDetails()));
-        caseData.put(STATE, PREPARE_FOR_HEARING.toString());
 
         List<String> warnings = validateHearingService.validateHearingWarnings(callback.getCaseDetails());
         return ResponseEntity.ok(

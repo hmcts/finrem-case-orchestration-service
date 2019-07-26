@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -62,11 +64,14 @@ public class BulkPrintController implements BaseController {
 
         validateCaseData(callback);
         Map<String, Object> caseData = callback.getCaseDetails().getData();
-        CaseDocument caseDocument = coverSheetService.generateCoverSheet(callback.getCaseDetails(), authorisationToken);
+        CaseDocument coverSheetDocument = coverSheetService.generateCoverSheet(callback.getCaseDetails(),
+            authorisationToken);
 
-        UUID letterId = bulkPrintService.sendForBulkPrint(caseDocument, callback.getCaseDetails());
-        caseData.put("bulkPrintCoverSheet", caseDocument);
-        caseData.put("bulkPrintLetterId", letterId);
+        UUID letterId = bulkPrintService.sendForBulkPrint(coverSheetDocument, callback.getCaseDetails());
+
+        caseData.put(BULK_PRINT_COVER_SHEET, coverSheetDocument);
+
+        caseData.put(BULK_PRINT_LETTER_ID, letterId);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
             .build());

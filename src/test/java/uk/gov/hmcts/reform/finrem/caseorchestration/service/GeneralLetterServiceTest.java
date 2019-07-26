@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.io.InputStream;
 import java.util.List;
@@ -56,7 +57,7 @@ public class GeneralLetterServiceTest {
 
         doCaseDocumentAssert(result.get(0).getGeneralLetter().getGeneratedLetter());
         doCaseDocumentAssert(result.get(1).getGeneralLetter().getGeneratedLetter());
-        ((TestDocumentClient)generatorClient).verifyAdditionalFields();
+        ((TestDocumentClient) generatorClient).verifyAdditionalFields();
     }
 
     private CaseDetails caseDetails() throws Exception {
@@ -88,6 +89,12 @@ public class GeneralLetterServiceTest {
 
         @Override
         public void deleteDocument(String fileUrl, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public DocumentValidationResponse checkUploadedFileType(String authorizationToken,
+                                                                String fileUrl) {
             throw new UnsupportedOperationException();
         }
 

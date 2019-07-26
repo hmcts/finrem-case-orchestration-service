@@ -26,10 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 @SuppressWarnings("unchecked")
 public class CaseDataController implements BaseController {
-
-
     private final IdamService idamService;
-
 
     @PostMapping(path = "/contested/set-defaults", consumes = APPLICATION_JSON, produces =
         APPLICATION_JSON)

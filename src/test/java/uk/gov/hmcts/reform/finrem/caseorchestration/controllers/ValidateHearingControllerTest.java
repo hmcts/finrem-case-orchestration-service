@@ -27,7 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ValidateHearingController.class)
 public class ValidateHearingControllerTest extends BaseControllerTest {
-    private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
     @MockBean
     private PBAValidationService pbaValidationService;

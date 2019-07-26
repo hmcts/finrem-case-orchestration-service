@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 
 import java.util.List;
 import java.util.Map;
@@ -18,8 +18,17 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDocumentData;
+
 
 public class ConsentOrderApprovedDocumentServiceTest {
 
@@ -85,14 +94,14 @@ public class ConsentOrderApprovedDocumentServiceTest {
 
     @Test
     public void shouldStampPensionDocuments() {
-        List<PensionDocumentData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
+        List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
 
         when(documentClientMock.stampDocument(any(), anyString()))
                 .thenReturn(document());
 
-        List<PensionDocumentData> stampPensionDocuments = service.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
+        List<PensionCollectionData> stampPensionDocuments = service.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
 
-        stampPensionDocuments.forEach(data -> doCaseDocumentAssert(data.getPensionDocument().getDocument()));
+        stampPensionDocuments.forEach(data -> doCaseDocumentAssert(data.getPensionDocumentData().getPensionDocument()));
         verify(documentClientMock, times(2)).stampDocument(any(), anyString());
     }
 

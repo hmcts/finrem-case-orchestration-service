@@ -162,7 +162,6 @@ public class HearingNonFastTrackDocumentTest {
         CaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getData().put("formC", caseDocument());
         caseDetails.getData().put("formG", caseDocument());
-        caseDetails.getData().put("state", "prepareForHearing");
 
         return objectMapper.writeValueAsString(
                 AboutToStartOrSubmitCallbackResponse.builder()
@@ -179,7 +178,8 @@ public class HearingNonFastTrackDocumentTest {
                 .build();
     }
 
-    private void generateDocumentServiceSuccessStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
+    private void generateDocumentServiceSuccessStub(DocumentGenerationRequest documentRequest)
+            throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
                 .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
                         true, true))
@@ -191,7 +191,8 @@ public class HearingNonFastTrackDocumentTest {
                         .withBody(objectMapper.writeValueAsString(document()))));
     }
 
-    private void generateDocumentServiceErrorStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
+    private void generateDocumentServiceErrorStub(DocumentGenerationRequest documentRequest)
+            throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
                 .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
                         true, true))
