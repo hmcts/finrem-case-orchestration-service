@@ -161,6 +161,23 @@ public class FunctionalTestUtils {
 
     }
 
+
+    public JsonPath getResponseData(String url, String jsonBody, String dataPath) {
+        Response response = SerenityRest.given()
+            .relaxedHTTPSValidation()
+            .headers(getHeader())
+            .contentType("application/json")
+            .body(jsonBody)
+            .when().post(url)
+            .andReturn();
+
+        log.info(response.prettyPrint());
+        jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
+        int statusCode = response.getStatusCode();
+        assertEquals(statusCode, 200);
+        return jsonPathEvaluator;
+    }
+
     public JsonPath getResponseData(String url, String filename, String journeyType, String dataPath) {
         Response response = SerenityRest.given()
                 .relaxedHTTPSValidation()

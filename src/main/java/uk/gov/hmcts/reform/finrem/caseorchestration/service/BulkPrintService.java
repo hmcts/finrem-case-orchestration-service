@@ -15,7 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentTranslator.convertDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentTranslator.approvedOrderCollection;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentTranslator.uploadOrder;
 
 @Service
 @Slf4j
@@ -35,10 +36,15 @@ public class BulkPrintService extends AbstractDocumentService {
         bulkPrintDocuments.add(
             BulkPrintDocument.builder().binaryFileUrl(coverSheet.getDocumentBinaryUrl()).build());
 
-        bulkPrintDocuments.addAll(convertDocument(caseDetails, "uploadOrder", "DocumentLink"));
-        bulkPrintDocuments.addAll(convertDocument(caseDetails, "pensionCollection", "uploadedDocument"));
-        bulkPrintDocuments.addAll(convertDocument(caseDetails, "latestConsentOrder"));
-        bulkPrintDocuments.addAll(convertDocument(caseDetails, "approvedConsentOrderLetter"));
+        List<BulkPrintDocument> approvedOrderCollection = approvedOrderCollection(caseDetails.getData());
+        List<BulkPrintDocument> uploadOrder = uploadOrder(caseDetails.getData());
+
+        if (approvedOrderCollection.size() > 0) {
+            bulkPrintDocuments.addAll(approvedOrderCollection);
+        } else if (uploadOrder.size() > 0) {
+            bulkPrintDocuments.addAll(uploadOrder);
+        }
+
 
         log.info(
             " {} Order documents including cover sheet are sent bulk print.", bulkPrintDocuments.size());

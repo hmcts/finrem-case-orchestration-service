@@ -1,0 +1,46 @@
+{
+  "token": "token_test",
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": 1234567890,
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_data": {
+      "PBANumber": "PBA123456",
+      "d81Question": "No",
+      "PBAreference": "ABCD",
+        "uploadOrder": [
+        {
+          "id": "12d30d00-1cd6-4ab1-aca9-cd361d21634e",
+          "value": {
+            "DocumentLink": {
+              "document_url": "http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7",
+              "document_filename": "case_001.pdf",
+              "document_binary_url": "http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7/binary"
+            },
+            "DocumentType": "Other",
+            "DocumentComment": null,
+            "DocumentFileName": null,
+            "DocumentDateAdded": null,
+            "DocumentEmailContent": null
+          }
+        },
+        {
+          "id": "22d30d00-1cd6-4ab1-aca9-cd361d21634e",
+          "value": {
+            "DocumentLink": {
+              "document_url": "http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7",
+              "document_filename": "case_002.pdf",
+              "document_binary_url": "http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7/binary"
+            },
+            "DocumentType": "Other",
+            "DocumentComment": null,
+            "DocumentFileName": null,
+            "DocumentDateAdded": null,
+            "DocumentEmailContent": null
+          }
+        }
+      ]
+    }
+  }
+}
