@@ -204,5 +204,4 @@ public class FunctionalTestUtils {
                 .body(getJsonFromFile(jsonFileName, journeyType))
                 .when().post(url).getStatusCode();
     }
-
 }
