@@ -267,9 +267,15 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
         JsonPath jsonPathEvaluator = generateDocument(APPROVED_ORDER_JSON, documentApprovedOrderUrl, consentedDir);
 
-        String jsonData = jsonPathEvaluator.get("data.approvedConsentOrderLetter").toString();
+        String orderLetter = jsonPathEvaluator.get("data.approvedOrderCollection[0].value.orderLetter").toString();
+        String consentOrder = jsonPathEvaluator.get("data.approvedOrderCollection[0].value.consentOrder").toString();
+        String pensionDocuments =
+                jsonPathEvaluator.get("data.approvedOrderCollection[0].value.pensionDocuments").toString();
 
-        assertTrue(jsonData.contains("ApprovedConsentOrderLetter.pdf"));
+        assertTrue(orderLetter.contains("ApprovedConsentOrderLetter.pdf"));
+        assertTrue(consentOrder.contains("ConsentOrder.pdf"));
+        assertTrue(pensionDocuments.contains("PensionDocument1.pdf"));
+        assertTrue(pensionDocuments.contains("PensionDocument2.pdf"));
     }
 
     private JsonPath generateDocument(String jsonFileName, String url, String journeyType) {

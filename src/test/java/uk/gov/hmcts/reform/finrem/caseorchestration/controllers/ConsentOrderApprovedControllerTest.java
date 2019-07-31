@@ -35,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.PENSION_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 
 
 @WebMvcTest(ConsentOrderApprovedController.class)
@@ -86,6 +87,23 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
         result.andExpect(status().isOk());
         result.andExpect(jsonPath("$.data", not(hasKey(LATEST_CONSENT_ORDER))));
+    }
+
+    @Test
+    public void pensionDocumentsAreMissing() throws Exception {
+        doMissingPensionDocuments();
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenAnnexStampingDocument().thenReturn(caseDocument());
+        whenStampingDocument().thenReturn(caseDocument());
+        whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
+
+        ResultActions result = mvc.perform(post(endpoint())
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isOk());
+        result.andExpect(jsonPath("$.data", not(hasKey(PENSION_DOCS_COLLECTION))));
     }
 
     @Test

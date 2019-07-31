@@ -48,6 +48,12 @@ abstract class BaseControllerTest extends BaseTest {
                 .getResource("/fixtures/hwf.json").toURI()));
     }
 
+    void doMissingPensionDocuments() throws IOException, URISyntaxException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass()
+                .getResource("/fixtures/missingPensionDocuments.json").toURI()));
+    }
+
     CaseDocument getCaseDocument() {
         CaseDocument caseDocument = new CaseDocument();
         caseDocument.setDocumentUrl("http://doc1");
