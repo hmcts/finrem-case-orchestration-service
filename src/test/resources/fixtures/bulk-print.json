@@ -9,124 +9,107 @@
       "PBANumber": "PBA123456",
       "d81Question": "No",
       "PBAreference": "ABCD",
-      "consentOrder": {
-        "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
-      },
-      "d81Applicant": {
-        "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b/binary"
-      },
-      "d81Respondent": {
-        "document_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
-      },
-      "solicitorFirm": "Mr",
-      "solicitorName": "Solictor",
-      "applicantLName": "Guy",
-      "authorisation3": "2010-01-01",
-      "solicitorEmail": "test@admin.com",
-      "solicitorPhone": "9963472494",
-      "applicantFMName": "Poor",
-      "authorisation2b": "test",
-      "otherCollection": [
+      "uploadOrder": [
         {
-          "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
+          "id": "12d30d00-1cd6-4ab1-aca9-cd361d21634e",
           "value": {
-            "typeOfDocument": "ScheduleOfAssets",
-            "uploadedDocument": {
-              "document_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee",
-              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-              "document_binary_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee/binary"
-            }
-          }
-        }
-      ],
-      "respondentEmail": null,
-      "respondentPhone": "9963472494",
-      "appRespondentRep": "No",
-      "consentOrderText": {
-        "document_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
-      },
-      "solicitorAddress": {
-        "County": "test",
-        "Country": "United Kingdom",
-        "PostCode": "b1 1ab",
-        "PostTown": "SRIKALAHASTI",
-        "AddressLine1": "House no: 6-354-2, Gandhi Street",
-        "AddressLine2": "Srikalahasti, Chittor District",
-        "AddressLine3": "test"
-      },
-      "authorisationFirm": "test",
-      "authorisationName": "test",
-      "divorceCaseNumber": "DD12D12345",
-      "respondentAddress": {
-        "County": "Essex",
-        "Country": "United Kingdom",
-        "PostCode": "SE12 9SE",
-        "PostTown": "London",
-        "AddressLine1": "252 Marvels Lane",
-        "AddressLine2": "AddressGlobalUK",
-        "AddressLine3": "London"
-      },
-      "solicitorDXnumber": null,
-      "appRespondentLName": "Korivi",
-      "solicitorReference": "LL01",
-      "appRespondentFMName": "test",
-      "divorceStageReached": "Decree Nisi",
-      "helpWithFeesQuestion": "No",
-      "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "Yes",
-      "generalLetterAddressTo": "applicantSolicitor",
-      "generalLetterRecipient": "",
-      "generalLetterRecipientAddress": "",
-      "generalLetterCreatedBy": "",
-      "generalLetterBody": "Test content for the letter body",
-      "uploadOrder":[
-        {
-          "id":"92d30d00-1cd6-4ab1-aca9-cd361d21634e",
-          "value":{
-            "DocumentLink":{
-              "document_url":"http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7",
-              "document_filename":"case_001.pdf",
-              "document_binary_url":"http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7/binary"
+            "DocumentLink": {
+              "document_url": "http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7",
+              "document_filename": "case_001.pdf",
+              "document_binary_url": "http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7/binary"
             },
-            "DocumentType":"Other",
-            "DocumentComment":null,
-            "DocumentFileName":null,
-            "DocumentDateAdded":null,
-            "DocumentEmailContent":null
+            "DocumentType": "Other",
+            "DocumentComment": null,
+            "DocumentFileName": null,
+            "DocumentDateAdded": null,
+            "DocumentEmailContent": null
           }
-        }
-      ],
-      "pensionCollection": [
+        },
         {
-          "id": "63c0570f-25bf-4d18-99ed-8c13c2c5dafa",
+          "id": "22d30d00-1cd6-4ab1-aca9-cd361d21634e",
           "value": {
-            "typeOfDocument": "Form PPF1",
-            "uploadedDocument": {
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/b7dbf1d2-d0e1-4996-aba3-e409c1b49364",
-              "document_filename": "D81 Form.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/b7dbf1d2-d0e1-4996-aba3-e409c1b49364/binary"
-            }
+            "DocumentLink": {
+              "document_url": "http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7",
+              "document_filename": "case_002.pdf",
+              "document_binary_url": "http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7/binary"
+            },
+            "DocumentType": "Other",
+            "DocumentComment": null,
+            "DocumentFileName": null,
+            "DocumentDateAdded": null,
+            "DocumentEmailContent": null
           }
         }
       ],
-      "approvedConsentOrderLetter": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/51f1fce6-1246-43b0-9ab0-08434d9af008",
-        "document_filename": "ApprovedConsentOrderLetter.pdf",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/51f1fce6-1246-43b0-9ab0-08434d9af008/binary"
-      },
-      "latestConsentOrder": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/9c4419ef-6be7-4014-9fc8-2335faa25fa8",
-        "document_filename": "D81 Form.pdf",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/9c4419ef-6be7-4014-9fc8-2335faa25fa8/binary"
-      }
+      "approvedOrderCollection": [
+        {
+          "id": "00ffa155-e60f-499a-9295-77b598bf16d1",
+          "value": {
+            "orderLetter": {
+              "document_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8",
+              "document_filename": "ApprovedConsentOrderLetter.pdf",
+              "document_binary_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8/binary"
+            },
+            "consentOrder": {
+              "document_url": "http://localhost:4506/documents/3e3b6389-a9da-4b1e-b7d0-e949701efcd1",
+              "document_filename": "011.pdf",
+              "document_binary_url": "http://localhost:4506/documents/3e3b6389-a9da-4b1e-b7d0-e949701efcd1/binary"
+            },
+            "pensionDocuments": [
+              {
+                "id": "3bc538b9-8a6e-4fd1-84de-eeb01460f900",
+                "value": {
+                  "typeOfDocument": "Form PPF2",
+                  "uploadedDocument": {
+                    "document_url": "http://localhost:4506/documents/0be0f91e-04e1-4db4-b43e-70e40bb3d952",
+                    "document_filename": "006.pdf",
+                    "document_binary_url": "http://localhost:4506/documents/0be0f91e-04e1-4db4-b43e-70e40bb3d952/binary"
+                  }
+                }
+              },
+              {
+                "id": "5b9be58f-c368-411a-bd3a-ff1c104ba87f",
+                "value": {
+                  "typeOfDocument": "Form PPF1",
+                  "uploadedDocument": {
+                    "document_url": "http://localhost:4506/documents/ba37e288-cf8d-426b-a368-7f237be756b7",
+                    "document_filename": "014.pdf",
+                    "document_binary_url": "http://localhost:4506/documents/ba37e288-cf8d-426b-a368-7f237be756b7/binary"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "00ffa155-e60f-499a-9295-77b598bf16d1",
+          "value": {
+            "orderLetter": {
+              "document_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8",
+              "document_filename": "ApprovedConsentOrderLetter.pdf",
+              "document_binary_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8/binary"
+            },
+            "consentOrder": {
+              "document_url": "http://localhost:4506/documents/3e3b6389-a9da-4b1e-b7d0-e949701efcd1",
+              "document_filename": "011.pdf",
+              "document_binary_url": "http://localhost:4506/documents/3e3b6389-a9da-4b1e-b7d0-e949701efcd1/binary"
+            },
+            "pensionDocuments": [
+              {
+                "id": "3bc538b9-8a6e-4fd1-84de-eeb01460f900",
+                "value": {
+                  "typeOfDocument": "Form PPF2",
+                  "uploadedDocument": {
+                    "document_url": "http://localhost:4506/documents/0be0f91e-04e1-4db4-b43e-70e40bb3d952",
+                    "document_filename": "006.pdf",
+                    "document_binary_url": "http://localhost:4506/documents/0be0f91e-04e1-4db4-b43e-70e40bb3d952/binary"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
     }
   }
 }

@@ -19,17 +19,17 @@ public class BulkPrintDocumentTranslatorTest {
 
     @Test
     public void shouldConvertDocument() throws Exception {
-        List<BulkPrintDocument> bulkPrintDocuments = BulkPrintDocumentTranslator.convertDocument(caseDetails(),
-            "approvedConsentOrderLetter");
+        List<BulkPrintDocument> bulkPrintDocuments = BulkPrintDocumentTranslator
+            .uploadOrder(caseDetails().getData());
         assertThat(bulkPrintDocuments.size(), is(1));
 
     }
 
     @Test
     public void shouldConvertCollectionDocument() throws Exception {
-        List<BulkPrintDocument> bulkPrintDocuments = BulkPrintDocumentTranslator.convertDocument(caseDetails(),
-            "pensionCollection", "uploadedDocument");
-        assertThat(bulkPrintDocuments.size(), is(1));
+        List<BulkPrintDocument> bulkPrintDocuments =
+            BulkPrintDocumentTranslator.approvedOrderCollection(caseDetails().getData());
+        assertThat(bulkPrintDocuments.size(), is(4));
 
     }
 
