@@ -4,6 +4,7 @@ import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
+import org.jruby.RubyProcess;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -280,6 +281,10 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     private JsonPath generateDocument(String jsonFileName, String url, String journeyType) {
 
+        System.out.println(jsonFileName + " , " + url + " , " + journeyType);
+        System.out.println(utils.getJsonFromFile(jsonFileName, journeyType));
+        System.out.println(utils.getHeaders());
+
         Response jsonResponse = SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())
@@ -288,6 +293,8 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
         int statusCode = jsonResponse.getStatusCode();
         assertEquals(200, statusCode);
+
+        System.out.println(jsonResponse);
 
         return jsonResponse.jsonPath();
     }
@@ -310,14 +317,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                     url1 = jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentLink.document_url");
                 } else if (urlType.equals("binary")) {
                     url1 = jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentLink.document_binary_url");
-                }
-                break;
-            case "approvedConsentOrder":
-                jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
-                if (urlType.equals("document")) {
-                    url1 = jsonPathEvaluator.get("data.approvedConsentOrderLetter.document_url");
-                } else if (urlType.equals("binary")) {
-                    url1 = jsonPathEvaluator.get("data.approvedConsentOrderLetter.document_binary_url");
                 }
                 break;
             case "hearing":
