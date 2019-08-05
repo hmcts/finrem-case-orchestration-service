@@ -6,6 +6,7 @@
     "jurisdiction":"divorce",
     "state":"created",
     "case_data": {
+      "state":"created",
       "PBANumber": "PBA123456",
       "d81Question": "No",
       "PBAreference": "ABCD",

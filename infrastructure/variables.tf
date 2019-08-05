@@ -58,6 +58,11 @@ variable "fees_api_url" {
   default = "http://fees-register-api-aat.service.core-compute-aat.internal"
 }
 
+
+variable "idam_api_url" {
+  default = "http://betaDevBccidamAppLB.reform.hmcts.net"
+}
+
 variable "subscription" {}
 
 variable "location" {

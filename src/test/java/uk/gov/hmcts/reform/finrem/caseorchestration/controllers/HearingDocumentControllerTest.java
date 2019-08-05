@@ -30,7 +30,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.PREPARE_FOR_HEARING;
 
 @WebMvcTest(HearingDocumentController.class)
 public class HearingDocumentControllerTest extends BaseControllerTest {
@@ -80,7 +79,6 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.state", is(PREPARE_FOR_HEARING.toString())))
                 .andExpect(jsonPath("$.data.formC.document_url", is(DOC_URL)))
                 .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
                 .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));

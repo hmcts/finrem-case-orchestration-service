@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
 
 @RestController
 @RequiredArgsConstructor

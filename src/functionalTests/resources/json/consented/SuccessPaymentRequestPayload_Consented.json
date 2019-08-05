@@ -1,0 +1,140 @@
+{
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": "17892000",
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_data": {
+      "PBANumber": "PBA0077597",
+      "d81Question": "No",
+      "PBAreference": "ABCD",
+      "consentOrder": {
+        "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
+      },
+      "d81Applicant": {
+        "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b/binary"
+      },
+      "d81Respondent": {
+        "document_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
+      },
+      "solicitorFirm": "Mr",
+      "solicitorName": "Solictor",
+      "applicantLName": "Guy",
+      "authorisation3": "2010-01-01",
+      "solicitorEmail": "test@admin.com",
+      "solicitorPhone": "9963472494",
+      "applicantFMName": "Poor",
+      "authorisation2b": "test",
+      "otherCollection": [
+        {
+          "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
+          "value": {
+            "typeOfDocument": "ScheduleOfAssets",
+            "uploadedDocument": {
+              "document_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee",
+              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+              "document_binary_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee/binary"
+            }
+          }
+        }
+      ],
+      "respondentEmail": "respondent@email.com",
+      "respondentPhone": "9963472494",
+      "appRespondentRep": "No",
+      "consentOrderText": {
+        "document_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
+      },
+      "solicitorAddress": {
+        "County": "test",
+        "Country": "United Kingdom",
+        "PostCode": "b1 1ab",
+        "PostTown": "SRIKALAHASTI",
+        "AddressLine1": "House no: 6-354-2, Gandhi Street",
+        "AddressLine2": "Srikalahasti, Chittor District",
+        "AddressLine3": "test"
+      },
+      "authorisationFirm": "test",
+      "authorisationName": "test",
+      "divorceCaseNumber": "ED12D45678",
+      "pensionCollection": [
+        {
+          "id": "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",
+          "value": {
+            "typeOfDocument": "Form P2",
+            "uploadedDocument": {
+              "document_url": "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589",
+              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+              "document_binary_url": "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589/binary"
+            }
+          }
+        }
+      ],
+      "respondentAddress": {
+        "County": "Essex",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "252 Marvels Lane",
+        "AddressLine2": "AddressGlobalUK",
+        "AddressLine3": "London"
+      },
+      "solicitorDXnumber": "DX12345",
+      "appRespondentLName": "Korivi",
+      "solicitorReference": "LL01",
+      "appRespondentFMName": "test",
+      "divorceStageReached": "Decree Nisi",
+      "helpWithFeesQuestion": "No",
+      "natureOfApplication2": [
+        "Lump Sum Order",
+        "Periodical Payment Order",
+        "Pension Sharing Order",
+        "Pension Attachment Order",
+        "Pension Compensation Sharing Order",
+        "Pension Compensation Attachment Order",
+        "A settlement or a transfer of property",
+        "Property Adjustment  Order"
+      ],
+      "natureOfApplication5": "No",
+      "natureOfApplication6": [
+        "Step Child or Step Children",
+        "disability expenses",
+        "In addition to child support",
+        "training",
+        "When not habitually resident"
+      ],
+      "natureOfApplication7": "test",
+      "natureOfApplication3a": "test",
+      "natureOfApplication3b": "test",
+      "divorceUploadEvidence1": {
+        "document_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
+      },
+      "orderForChildrenQuestion1": "Yes",
+      "solicitorAgreeToReceiveEmails": "No",
+      "amountToPay":"1000",
+      "orderSummary":{
+        "PaymentReference":"Ref99",
+        "PaymentTotal":"1000",
+        "Fees":[
+          {
+            "value":{
+              "FeeDescription":"desc",
+              "FeeVersion":"v1",
+              "FeeCode":"code1",
+              "FeeAmount":"1000"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

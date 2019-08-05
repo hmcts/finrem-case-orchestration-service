@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.util.Collections;
 
@@ -13,15 +13,16 @@ public class ContestedOnlineFormTest extends GenerateMiniFormATest {
 
     @Override
     protected String getTestFixture() {
-        return "/fixtures/contested/validate-hearing-with-fastTrackDecision.json";
+        return "/fixtures/contested/generate-contested-form-A.json";
     }
 
     @Override
-    protected DocumentRequest documentRequest() {
-        return DocumentRequest.builder()
+    protected DocumentGenerationRequest documentRequest() {
+        return DocumentGenerationRequest.builder()
                 .template(documentConfiguration.getContestedMiniFormTemplate())
                 .fileName(documentConfiguration.getContestedMiniFormFileName())
-                .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+                .values(Collections.singletonMap("caseDetails",
+                        copyWithOptionValueTranslation(request.getCaseDetails())))
                 .build();
     }
 }

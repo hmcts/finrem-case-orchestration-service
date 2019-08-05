@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ import java.util.Map;
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -32,13 +35,15 @@ public class CaseMaintenanceController implements BaseController {
     private static final String DIVORCE_STAGE_REACHED = "divorceStageReached";
     private static final String DIVORCE_UPLOAD_EVIDENCE_2 = "divorceUploadEvidence2";
     private static final String DIVORCE_DECREE_ABSOLUTE_DATE = "divorceDecreeAbsoluteDate";
-    private static final String DIVORCE_PETITION_ISSUED_DATE = "divorcePetitionIssuedDate";
     private static final String DIVORCE_UPLOAD_PETITION = "divorceUploadPetition";
     private static final String DIVORCE_UPLOAD_EVIDENCE_1 = "divorceUploadEvidence1";
     private static final String DIVORCE_DECREE_NISI_DATE = "divorceDecreeNisiDate";
 
     @Autowired
     private OnlineFormDocumentService onlineFormDocumentService;
+
+    @Autowired
+    private ConsentOrderService consentOrderService;
 
     @PostMapping(path = "/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Handles update Case details and cleans up the data fields based on the options choosen")
@@ -60,7 +65,14 @@ public class CaseMaintenanceController implements BaseController {
         updatePropertyDetails(caseData);
         updateRespondentSolicitorAddress(caseData);
         updateD81Details(caseData);
+        updateLatestConsentOrder(ccdRequest);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    private void updateLatestConsentOrder(CallbackRequest callbackRequest) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
+        caseData.put("latestConsentOrder", consentOrderService.getLatestConsentOrderData(callbackRequest));
     }
 
     @PostMapping(path = "/update-contested-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -280,15 +292,11 @@ public class CaseMaintenanceController implements BaseController {
             // remove Decree Absolute details
             caseData.put(DIVORCE_UPLOAD_EVIDENCE_2, null);
             caseData.put(DIVORCE_DECREE_ABSOLUTE_DATE, null);
-            // remove petition issue date data
-            caseData.put(DIVORCE_PETITION_ISSUED_DATE, null);
             caseData.put(DIVORCE_UPLOAD_PETITION, null);
         } else if (equalsTo((String) caseData.get(DIVORCE_STAGE_REACHED), "Decree Absolute")) {
             // remove Decree Nisi details
             caseData.put(DIVORCE_UPLOAD_EVIDENCE_1, null);
             caseData.put(DIVORCE_DECREE_NISI_DATE, null);
-            // remove petition issue date data
-            caseData.put(DIVORCE_PETITION_ISSUED_DATE, null);
             caseData.put(DIVORCE_UPLOAD_PETITION, null);
         } else {
             // remove Decree Nisi details

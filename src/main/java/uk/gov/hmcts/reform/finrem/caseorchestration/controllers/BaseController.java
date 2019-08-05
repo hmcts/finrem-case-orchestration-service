@@ -22,7 +22,7 @@ public interface BaseController {
         }
     }
 
-    default boolean isConsentedApplication(Map<String, Object> caseData) {
+    static boolean isConsentedApplication(Map<String, Object> caseData) {
         return isNotEmpty((String) caseData.get(D81_QUESTION));
     }
 

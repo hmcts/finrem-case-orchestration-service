@@ -20,7 +20,7 @@ public class ValidateHearingService {
 
     public static final String DATE_BETWEEN_6_AND_10_WEEKS =
             "Date of the Fast Track hearing must be between 6 and 10 weeks.";
-    public static final String DATE_BETWEEN_12_AND_14_WEEKS = "Date of the hearing must be between 12 and 14 weeks.";
+    public static final String DATE_BETWEEN_12_AND_16_WEEKS = "Date of the hearing must be between 12 and 16 weeks.";
     public static final String MUST_FIELD_ERROR = "Issue Date , fast track decision or hearingDate is empty";
 
     public List<String> validateHearingErrors(CaseDetails caseDetails) {
@@ -52,11 +52,10 @@ public class ValidateHearingService {
                     hearingLocalDate)) {
                 return ImmutableList.of(DATE_BETWEEN_6_AND_10_WEEKS);
             }
-        } else if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(12), issueLocalDate.plusWeeks(14),
+        } else if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(12), issueLocalDate.plusWeeks(16),
                 hearingLocalDate)) {
-            return ImmutableList.of(DATE_BETWEEN_12_AND_14_WEEKS);
+            return ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS);
         }
-
         return ImmutableList.of();
     }
 

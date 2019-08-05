@@ -7,11 +7,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
@@ -82,14 +85,36 @@ public class OnlineFormDocumentServiceTest {
         }
 
         @Override
-        public Document generatePDF(DocumentRequest generateDocumentRequest, String authorizationToken) {
+        public Document generatePDF(DocumentGenerationRequest generateDocumentRequest, String authorizationToken) {
             latch.countDown();
             return document();
+        }
+
+        @Override
+        public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public void deleteDocument(String fileUrl, String authorizationToken) {
             latch.countDown();
         }
+
+        @Override
+        public DocumentValidationResponse checkUploadedFileType(String authorizationToken,
+                                                                String fileUrl) {
+            return  DocumentValidationResponse.builder().build();
+        }
+
+        @Override
+        public Document stampDocument(Document document, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Document annexStampDocument(Document document, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
     }
 }

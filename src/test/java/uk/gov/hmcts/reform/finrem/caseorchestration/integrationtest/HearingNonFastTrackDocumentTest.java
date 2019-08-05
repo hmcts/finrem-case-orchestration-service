@@ -25,7 +25,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,7 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_14_WEEKS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_16_WEEKS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.MUST_FIELD_ERROR;
 
 @RunWith(SpringRunner.class)
@@ -59,7 +59,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHeari
 @Category(IntegrationTest.class)
 public class HearingNonFastTrackDocumentTest {
 
-    private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generatePDF";
+    private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
     private static final String API_URL = "/case-orchestration/documents/hearing";
 
     @Autowired
@@ -142,11 +142,11 @@ public class HearingNonFastTrackDocumentTest {
                 .andExpect(content().json(expectedErrorData(), true));
     }
 
-    private DocumentRequest formGDocumentRequest() {
+    private DocumentGenerationRequest formGDocumentRequest() {
         return documentRequest(config.getFormGTemplate(), config.getFormGFileName());
     }
 
-    private DocumentRequest formCDocumentRequest() {
+    private DocumentGenerationRequest formCDocumentRequest() {
         return documentRequest(config.getFormCNonFastTrackTemplate(), config.getFormCFileName());
     }
 
@@ -162,24 +162,24 @@ public class HearingNonFastTrackDocumentTest {
         CaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getData().put("formC", caseDocument());
         caseDetails.getData().put("formG", caseDocument());
-        caseDetails.getData().put("state", "prepareForHearing");
 
         return objectMapper.writeValueAsString(
                 AboutToStartOrSubmitCallbackResponse.builder()
                         .data(caseDetails.getData())
-                        .warnings(ImmutableList.of(DATE_BETWEEN_12_AND_14_WEEKS))
+                        .warnings(ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS))
                         .build());
     }
 
-    private DocumentRequest documentRequest(String template, String fileName) {
-        return DocumentRequest.builder()
+    private DocumentGenerationRequest documentRequest(String template, String fileName) {
+        return DocumentGenerationRequest.builder()
                 .template(template)
                 .fileName(fileName)
                 .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
                 .build();
     }
 
-    private void generateDocumentServiceSuccessStub(DocumentRequest documentRequest) throws JsonProcessingException {
+    private void generateDocumentServiceSuccessStub(DocumentGenerationRequest documentRequest)
+            throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
                 .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
                         true, true))
@@ -191,7 +191,8 @@ public class HearingNonFastTrackDocumentTest {
                         .withBody(objectMapper.writeValueAsString(document()))));
     }
 
-    private void generateDocumentServiceErrorStub(DocumentRequest documentRequest) throws JsonProcessingException {
+    private void generateDocumentServiceErrorStub(DocumentGenerationRequest documentRequest)
+            throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
                 .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
                         true, true))

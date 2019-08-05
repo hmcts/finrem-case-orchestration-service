@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.finrem.functional.util;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.http.Headers;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
 import org.pdfbox.cos.COSDocument;
 import org.pdfbox.pdfparser.PDFParser;
@@ -11,11 +13,11 @@ import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.util.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 
@@ -24,9 +26,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
+import static org.junit.Assert.assertEquals;
+
 
 @ContextConfiguration(classes = TestContextConfiguration.class)
 @Component
+@Slf4j
 public class FunctionalTestUtils {
 
     @Autowired
@@ -43,6 +48,7 @@ public class FunctionalTestUtils {
     @Autowired
     private IdamUtils idamUtils;
     private String token;
+    private JsonPath jsonPathEvaluator;
 
 
     public String getJsonFromFile(String fileName) {
@@ -55,10 +61,20 @@ public class FunctionalTestUtils {
         }
     }
 
+    public String getJsonFromFile(String fileName, String directory) {
+        try {
+            File file = ResourceUtils.getFile(this.getClass().getResource(directory + fileName));
+            return new String(Files.readAllBytes(file.toPath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public Headers getHeadersWithUserId() {
 
         return Headers.headers(
-                new Header("ServiceAuthorization",   tokenGenerator.generate()),
+                new Header("ServiceAuthorization", tokenGenerator.generate()),
                 new Header("user-roles", "caseworker-divorce"),
                 new Header("user-id", userId));
     }
@@ -67,13 +83,13 @@ public class FunctionalTestUtils {
         return Headers.headers(
 
                 new Header("Authorization", "Bearer "
-                 + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
+                        + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
                 //new Header("Authorization", "Bearer " + idamUtils.getClientAuthToken()),
                 new Header("Content-Type", ContentType.JSON.toString()));
     }
 
     public String getAuthoToken() {
-        return idamUtils.generateUserTokenWithNoRoles(idamUserName,idamUserPassword);
+        return idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword);
     }
 
     public Headers getHeader() {
@@ -136,6 +152,74 @@ public class FunctionalTestUtils {
         }
 
         return parsedText;
+    }
+
+
+    public void validatePostSuccess(String url, String filename, String journeyType) {
+        int statusCode = getResponse(url, filename, journeyType).getStatusCode();
+        assertEquals(statusCode, 200);
+
+    }
+
+
+    public JsonPath getResponseData(String url, String jsonBody, String dataPath) {
+        Response response = SerenityRest.given()
+            .relaxedHTTPSValidation()
+            .headers(getHeader())
+            .contentType("application/json")
+            .body(jsonBody)
+            .when().post(url)
+            .andReturn();
+
+        log.info(response.prettyPrint());
+        jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
+        int statusCode = response.getStatusCode();
+        assertEquals(statusCode, 200);
+        return jsonPathEvaluator;
+    }
+
+    public JsonPath getResponseData(String url, String filename, String journeyType, String dataPath) {
+        Response response = SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(getHeader())
+                .contentType("application/json")
+                .body(getJsonFromFile(filename, journeyType))
+                .when().post(url)
+                .andReturn();
+
+
+        jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
+        int statusCode = response.getStatusCode();
+        assertEquals(statusCode, 200);
+        return jsonPathEvaluator;
+    }
+
+    public Response getResponseData(String url, CallbackRequest callbackRequest) {
+        log.info("callbackRequest.toString() >> " + callbackRequest.toString());
+        return SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(getHeader())
+                .contentType("application/json")
+                .body(callbackRequest)
+                .when().post(url)
+                .andReturn();
+    }
+
+    public Response getResponse(String url, String filename, String journeyType) {
+        return SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(getHeader())
+                .contentType("application/json")
+                .body(getJsonFromFile(filename, journeyType))
+                .when().post(url).andReturn();
+    }
+
+    public int getStatusCode(String url, String jsonFileName, String journeyType) {
+        return SerenityRest.given()
+                .relaxedHTTPSValidation()
+                .headers(getHeaders())
+                .body(getJsonFromFile(jsonFileName, journeyType))
+                .when().post(url).getStatusCode();
     }
 
 }
