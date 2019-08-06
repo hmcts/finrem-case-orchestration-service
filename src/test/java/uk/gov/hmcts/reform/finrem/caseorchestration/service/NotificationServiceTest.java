@@ -26,6 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_HWF_SUCCESSFUL = "http://localhost:8086/notify/hwf-successful";
     private static final String END_POINT_ASSIGNED_TO_JUDGE = "http://localhost:8086/notify/assign-to-judge";
+    private static final String END_POINT_REASSIGNED_JUDGE = "http://localhost:8086/notify/reassign-judge";
     private static final String END_POINT_CONSENT_ORDER_MADE = "http://localhost:8086/notify/consent-order-made";
     private static final String END_POINT_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/"
             + "consent-order-not-approved";
@@ -84,13 +85,32 @@ public class NotificationServiceTest extends BaseServiceTest {
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
 
-
         try {
             notificationService.sendAssignToJudgeConfirmationEmail(getCallbackRequest());
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
+    }
 
+    @Test
+    public void sendReassignToJudgeNotificationEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_REASSIGNED_JUDGE))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendReassignToJudgeConfirmationEmail(callbackRequest);
+    }
+
+    @Test
+    public void throwExceptionWhenReassignToJudgeNotificationEmailIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_REASSIGNED_JUDGE))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+
+        try {
+            notificationService.sendReassignToJudgeConfirmationEmail(getCallbackRequest());
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
+        }
     }
 
     @Test

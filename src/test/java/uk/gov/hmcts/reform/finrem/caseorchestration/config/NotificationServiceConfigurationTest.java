@@ -16,6 +16,7 @@ public class NotificationServiceConfigurationTest extends BaseServiceTest {
         assertEquals("/notify", underTest.getApi());
         assertEquals("/hwf-successful", underTest.getHwfSuccessful());
         assertEquals("/assign-to-judge", underTest.getAssignToJudge());
+        assertEquals("/reassign-judge", underTest.getReassignJudge());
         assertEquals("/consent-order-made", underTest.getConsentOrderMade());
         assertEquals("/consent-order-not-approved", underTest.getConsentOrderNotApproved());
         assertEquals("/consent-order-available", underTest.getConsentOrderAvailable());

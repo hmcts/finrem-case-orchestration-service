@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class NotificationsControllerTest {
     private static final String HWF_SUCCESSFUL_EMAIL_URL = "/case-orchestration/notify/hwf-successful";
     private static final String ASSIGN_TO_JUDGE_URL = "/case-orchestration/notify/assign-to-judge";
+    private static final String REASSIGN_JUDGE = "/case-orchestration/notify/reassign-judge";
     private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
     private static final String CONSENT_ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/"
             + "consent-order-not-approved";
@@ -100,6 +101,29 @@ public class NotificationsControllerTest {
 
         verifyNoMoreInteractions(notificationService);
 
+    }
+
+    @Test
+    public void sendReassignToJudgeConfirmationEmail() throws Exception {
+        buildCcdRequest("/fixtures/ccd-request-with-solicitor-email-consent.json");
+        mockMvc.perform(post(REASSIGN_JUDGE)
+                .content(requestContent.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+                .sendReassignToJudgeConfirmationEmail(any(CallbackRequest.class));
+    }
+
+    @Test
+    public void shouldNotSendReassignToJudgeConfirmationEmail() throws Exception {
+        buildCcdRequest("/fixtures/model/ccd-request.json");
+        mockMvc.perform(post(REASSIGN_JUDGE)
+                .content(requestContent.toString())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verifyNoMoreInteractions(notificationService);
     }
 
     @Test

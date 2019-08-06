@@ -47,6 +47,11 @@ public class NotificationService {
         sendNotificationEmail(callbackRequest, uri);
     }
 
+    public void sendReassignToJudgeConfirmationEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getReassignJudge());
+        sendNotificationEmail(callbackRequest, uri);
+    }
+
     public void sendConsentOrderMadeConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderMade());
         sendNotificationEmail(callbackRequest, uri);

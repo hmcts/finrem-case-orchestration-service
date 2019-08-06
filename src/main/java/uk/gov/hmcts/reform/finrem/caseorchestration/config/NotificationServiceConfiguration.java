@@ -12,6 +12,7 @@ public class NotificationServiceConfiguration {
     private String api;
     private String hwfSuccessful;
     private String assignToJudge;
+    private String reassignJudge;
     private String consentOrderMade;
     private String consentOrderNotApproved;
     private String consentOrderAvailable;

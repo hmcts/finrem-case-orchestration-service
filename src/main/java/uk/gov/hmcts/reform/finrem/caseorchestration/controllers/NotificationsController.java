@@ -65,6 +65,22 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
+    @PostMapping(value = "/case-orchestration/notify/reassign-judge", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send e-mail for Case reassigned to Judge Successful.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "Case reassigned to Judge e-mail sent successfully",
+                    response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendReassignToJudgeConfirmationEmail(
+            @RequestBody CallbackRequest callbackRequest) {
+        log.info(LOG_MESSAGE, callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        if (isSolicitorAgreedToReceiveEmails(caseData, "solicitorAgreeToReceiveEmails")) {
+            notificationService.sendReassignToJudgeConfirmationEmail(callbackRequest);
+        }
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
     @PostMapping(value = "/case-orchestration/notify/consent-order-made", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for Consent Order Made.")
     @ApiResponses(value = {
