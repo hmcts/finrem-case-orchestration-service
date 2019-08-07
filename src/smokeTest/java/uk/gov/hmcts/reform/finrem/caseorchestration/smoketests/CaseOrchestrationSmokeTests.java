@@ -60,7 +60,6 @@ public class CaseOrchestrationSmokeTests {
                 .headers("Content-Type", "application/json")
                 .when()
                 .post(url + feeLookupEndPoint)
-                .()
                 .then()
                 .statusCode(HttpStatus.OK.value());
     }
