@@ -13,8 +13,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
 
 import javax.ws.rs.core.MediaType;
@@ -30,13 +30,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.REJECTED_ORDER_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDataWithPreviewOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDataWithUploadOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
 
@@ -46,6 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError
 public class RejectedOrderDocumentControllerTest {
 
     private static final String API_URL = "/case-orchestration/documents/consent-order-not-approved";
+    private static final String PREVIEW_API_URL = "/case-orchestration/documents/preview-consent-order-not-approved";
 
     @Autowired
     private WebApplicationContext applicationContext;
@@ -111,4 +114,48 @@ public class RejectedOrderDocumentControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
     }
+
+    @Test
+    public void previewConsentOrderNotApprovedSuccess() throws Exception {
+        when(documentService.previewConsentOrderNotApproved(eq(AUTH_TOKEN), isA(CaseDetails.class)))
+                .thenReturn(caseDataWithPreviewOrder());
+
+        mvc.perform(post(PREVIEW_API_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.orderRefusalPreviewDocument", is(notNullValue())))
+                .andExpect(jsonPath("$.data.orderRefusalPreviewDocument.document_url", is(DOC_URL)))
+                .andExpect(
+                        jsonPath("$.data.orderRefusalPreviewDocument.document_filename", is(FILE_NAME)))
+                .andExpect(
+                        jsonPath("$.data.orderRefusalPreviewDocument.document_binary_url",
+                                is(BINARY_URL)))
+                .andExpect(jsonPath("$.errors", hasSize(0)))
+                .andExpect(jsonPath("$.warnings", hasSize(0)));
+    }
+
+    @Test
+    public void previewConsentOrderNotApproved400() throws Exception {
+        mvc.perform(post(PREVIEW_API_URL)
+                .content("kwuilebge")
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void previewConsentOrderNotApproved500() throws Exception {
+        when(documentService.generateConsentOrderNotApproved(eq(AUTH_TOKEN), isA(CaseDetails.class)))
+                .thenThrow(feignError());
+
+        mvc.perform(post(PREVIEW_API_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
+    }
+
 }

@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
@@ -69,6 +70,22 @@ public class RefusalOrderDocumentServiceTest {
         assertThat(consentOrderData.getConsentOrder().getDocumentComment(), is(equalTo("System Generated")));
 
         doCaseDocumentAssert(consentOrderData.getConsentOrder().getDocumentLink());
+    }
+
+    @Test
+    public void previewConsentOrderNotApproved() throws Exception {
+        CaseDetails caseDetails = caseDetails();
+
+        Map<String, Object> caseData = service.previewConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+
+        CaseDocument caseDocument = getCaseDocument(caseData);
+
+        doCaseDocumentAssert(caseDocument);
+    }
+
+    private CaseDocument getCaseDocument(Map<String, Object> caseData) {
+        Object orderRefusalPreviewDocument = caseData.get("orderRefusalPreviewDocument");
+        return mapper.convertValue(orderRefusalPreviewDocument, CaseDocument.class);
     }
 
     private ConsentOrderData consentOrderData(Map<String, Object> caseData) {
