@@ -148,7 +148,7 @@ public class RejectedOrderDocumentControllerTest {
 
     @Test
     public void previewConsentOrderNotApproved500() throws Exception {
-        when(documentService.generateConsentOrderNotApproved(eq(AUTH_TOKEN), isA(CaseDetails.class)))
+        when(documentService.previewConsentOrderNotApproved(eq(AUTH_TOKEN), isA(CaseDetails.class)))
                 .thenThrow(feignError());
 
         mvc.perform(post(PREVIEW_API_URL)
