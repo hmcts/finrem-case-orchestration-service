@@ -39,7 +39,38 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
 
     @Test
-    public void shouldSuccessfullyReturnAsAdmin() throws Exception {
+    public void shouldSuccessfullyReturnAsAdminConsented() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/hwf.json").toURI()));
+        mvc.perform(post("/case-orchestration/consented/set-defaults")
+            .content(requestContent.toString())
+            .header("Authorization", BEARER_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.isAdmin", is(YES)));
+    }
+
+    @Test
+    public void shouldSuccessfullyReturnNotAsAdminConsented() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/validate-hearing-successfully.json").toURI()));
+        mvc.perform(post("/case-orchestration/consented/set-defaults")
+            .content(requestContent.toString())
+            .header("Authorization", BEARER_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.isAdmin", is(NO)))
+            .andExpect(jsonPath("$.data.applicantRepresented", is(YES)));
+    }
+
+    @Test
+    public void shouldSuccessfullyReturnAsAdminContested() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
         requestContent = objectMapper.readTree(new File(getClass()
@@ -54,7 +85,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSuccessfullyReturnNotAsAdmin() throws Exception {
+    public void shouldSuccessfullyReturnNotAsAdminContested() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
 
         requestContent = objectMapper.readTree(new File(getClass()
