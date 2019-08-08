@@ -19,9 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.translateOrderRefusalCollection;
 
 @Service
@@ -47,6 +45,21 @@ public class RefusalOrderDocumentService extends AbstractDocumentService {
                 .apply(Pair.of(copyOf(caseDetails), authorisationToken));
     }
 
+    public Map<String, Object> previewConsentOrderNotApproved(
+            String authorisationToken, final CaseDetails caseDetails) {
+        return translateOrderRefusalCollection
+                .andThen(generateDocument)
+                .andThen(caseDocument -> populateConsentOrderNotApproved(caseDocument, caseDetails))
+                .apply(Pair.of(copyOf(caseDetails), authorisationToken));
+    }
+
+    private Map<String, Object> populateConsentOrderNotApproved(CaseDocument caseDocument, CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        caseData.put("orderRefusalPreviewDocument", caseDocument);
+        return caseData;
+    }
+
+
     private Map<String, Object> populateConsentOrderData(ConsentOrderData consentOrderData, CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -54,7 +67,6 @@ public class RefusalOrderDocumentService extends AbstractDocumentService {
                 .map(this::convertToUploadOrderList)
                 .orElse(new ArrayList<>());
         uploadOrder.add(consentOrderData);
-
         caseData.put("uploadOrder", uploadOrder);
         return caseData;
     }
@@ -80,6 +92,7 @@ public class RefusalOrderDocumentService extends AbstractDocumentService {
     }
 
     private List<ConsentOrderData> convertToUploadOrderList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<ConsentOrderData>>() {});
+        return objectMapper.convertValue(object, new TypeReference<List<ConsentOrderData>>() {
+        });
     }
 }
