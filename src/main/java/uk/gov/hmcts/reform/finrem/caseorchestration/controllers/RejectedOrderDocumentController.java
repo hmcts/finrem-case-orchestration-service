@@ -58,7 +58,8 @@ public class RejectedOrderDocumentController {
 
     @PostMapping(path = "/documents/preview-consent-order-not-approved", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles Consent order not approved order generation for pre view. Serves as a callback from CCD")
+    @ApiOperation(value = "Handles Consent order not approved order generation for pre view."
+            + " Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
                     + "attached to the case",
