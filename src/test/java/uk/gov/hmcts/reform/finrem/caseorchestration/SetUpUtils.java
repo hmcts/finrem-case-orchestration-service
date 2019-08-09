@@ -75,6 +75,12 @@ public class SetUpUtils {
         return caseData;
     }
 
+    public static Map<String, Object> caseDataWithPreviewOrder() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("orderRefusalPreviewDocument", caseDocument());
+        return caseData;
+    }
+
     public static Map<String, Object> generalLetterDataMap() {
         return ImmutableMap.of(GENERAL_LETTER, ImmutableList.of(generalLetterData()));
     }

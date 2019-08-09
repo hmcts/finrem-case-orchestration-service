@@ -44,6 +44,8 @@
         <gav regex="true">^com\.fasterxml\.jackson\.(core|datatype|module):jackson-.*:.*$</gav>
         <cve>CVE-2016-7051</cve>
         <cve>CVE-2019-12814</cve>
+        <cve>CVE-2019-14379</cve>
+        <cve>CVE-2019-14439</cve>
     </suppress>
     <suppress>
         <notes><![CDATA[

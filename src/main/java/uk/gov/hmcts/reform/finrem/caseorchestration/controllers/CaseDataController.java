@@ -28,9 +28,21 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class CaseDataController implements BaseController {
     private final IdamService idamService;
 
+    @PostMapping(path = "/consented/set-defaults", consumes = APPLICATION_JSON, produces =
+        APPLICATION_JSON)
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setConsentedDefaultValues(
+        @RequestHeader(value = "Authorization", required = false) String authToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("Setting default values for contested journey.");
+        validateCaseData(callbackRequest);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        setData(authToken, caseData);
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
     @PostMapping(path = "/contested/set-defaults", consumes = APPLICATION_JSON, produces =
         APPLICATION_JSON)
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setDefaultValues(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedDefaultValues(
         @RequestHeader(value = "Authorization", required = false) String authToken,
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Setting default values for contested journey.");
