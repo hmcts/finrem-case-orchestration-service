@@ -29,7 +29,11 @@ public class ServiceUtils {
     public Map<String,String> uploadFileToEMStore(String fileToUpload, String fileContentType) throws JSONException {
         File file = null;
         try {
-            file = Paths.get(Objects.requireNonNull(getClass().getClassLoader().getResource(fileToUpload)).toURI()).toFile();
+            file = Paths.get(Objects.requireNonNull(getClass()
+                    .getClassLoader()
+                    .getResource(fileToUpload))
+                    .toURI())
+                    .toFile();
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -46,7 +50,7 @@ public class ServiceUtils {
         Map<String,String> uploadedDocument = new HashMap<>();
         uploadedDocument.put("document_url",fileUploadResponse.get("fileUrl").toString());
         uploadedDocument.put("document_filename",fileUploadResponse.get("fileName").toString());
-        uploadedDocument.put("document_binary_url",fileUploadResponse.get("fileUrl").toString()+"/binary");
+        uploadedDocument.put("document_binary_url",fileUploadResponse.get("fileUrl").toString() + "/binary");
 
         return uploadedDocument;
     }
