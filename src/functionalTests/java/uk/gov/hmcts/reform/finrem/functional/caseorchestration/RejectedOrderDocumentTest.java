@@ -41,7 +41,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
     CallbackRequest callbackRequest = null;
 
     @Test
-    public void previewConsentOrderNotApproved(){
+    public void verifyPreviewConsentOrderNotApproved() {
 
         InputStream resourceAsStream =  getClass().getResourceAsStream(consentedDir + "approved-consent-order.json");
         DocumentContext documentContext = JsonPath.parse(resourceAsStream);
@@ -57,13 +57,16 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
 
         Response response = functionalTestUtils.getResponseData(previewConsentOrderNotApprovedEndPoint,callbackRequest);
 
-        List<Object> orderRefusalPreviewDocuments = JsonPath.parse(response.asString()).read("$.data[?(@.orderRefusalPreviewDocument)]");
-        Assert.assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
-        Assert.assertTrue("Order Refusal Preview Document not found ", orderRefusalPreviewDocuments.size()> 0);
+        List<Object> orderRefusalPreviewDocuments = JsonPath.parse(response.asString())
+            .read("$.data[?(@.orderRefusalPreviewDocument)]");
+        Assert.assertEquals("Request failed " + response.getStatusCode(), 200,
+            response.getStatusCode());
+        Assert.assertTrue("Order Refusal Preview Document not found ",
+            orderRefusalPreviewDocuments.size() > 0);
     }
 
     @Test
-    public void consentOrderNotApproved(){
+    public void verifyConsentOrderNotApproved() {
 
         InputStream resourceAsStream =  getClass().getResourceAsStream(consentedDir + "approved-consent-order.json");
         DocumentContext documentContext = JsonPath.parse(resourceAsStream);
