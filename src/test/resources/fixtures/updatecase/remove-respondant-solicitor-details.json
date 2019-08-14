@@ -29,12 +29,8 @@
         "document_filename": "file1",
         "document_binary_url": "http://file1.binary"
       },
-      "solicitorFirm": "FirmA",
-      "solicitorName": "Solictor",
-      "applicantLName": "Guy",
-      "authorisation3": "2010-01-01",
-      "solicitorEmail": "test@admin.com",
-      "solicitorPhone": "1234",
+      "applicantRepresented": "No",
+
       "applicantFMName": "Poor",
       "authorisation2b": "test",
       "otherCollection": [
