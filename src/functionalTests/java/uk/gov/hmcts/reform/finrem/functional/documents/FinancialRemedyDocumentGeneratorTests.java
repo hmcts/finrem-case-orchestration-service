@@ -269,16 +269,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     }
 
-    @Test
-    public void verifyApprovedConsentOrderDocumentGenerationPostResponseContent() {
-
-        JsonPath jsonPathEvaluator = generateDocument(APPROVED_ORDER_JSON, documentApprovedOrderUrl, consentedDir);
-
-        String jsonData = jsonPathEvaluator.get("data.approvedConsentOrderLetter").toString();
-
-        assertTrue(jsonData.contains("ApprovedConsentOrderLetter.pdf"));
-    }
-
     private JsonPath generateDocument(String jsonFileName, String url, String journeyType) {
 
         Response jsonResponse = SerenityRest.given()
