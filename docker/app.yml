@@ -448,8 +448,12 @@ services:
 
 
   payments-database:
-    image: postgres:11-alpine
     container_name: payments-database
+    image: postgres:11-alpine
+    environment:
+      - POSTGRES_USER=payment
+      - POSTGRES_PASSWORD=payment
+      - POSTGRES_DB=payment
     ports:
       - 5430:5432
 
