@@ -1,4 +1,4 @@
-FROM hmcts/cnp-java-base:openjdk-8u181-jre-alpine3.8-1.0
+FROM hmctspublic.azurecr.io/base/java:openjdk-8-distroless-1.0
 
 ENV APP finrem-case-orchestration.jar
 ENV APPLICATION_TOTAL_MEMORY 1024M
