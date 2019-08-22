@@ -42,7 +42,7 @@ public class PBAPaymentController implements BaseController {
     @PostMapping(path = "/pba-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPayment(
             @RequestHeader(value = "Authorization", required = false) String authToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
+            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) throws Exception {
         log.info("Received request for PBA payment for consented . Auth token: {}, Case request : {}", authToken,
                 callbackRequest);
 
@@ -59,6 +59,7 @@ public class PBAPaymentController implements BaseController {
                 }
                 mapOfCaseData.put(PBA_PAYMENT_REFERENCE, paymentResponse.getReference());
                 log.info("Payment succeeded.");
+                Thread.sleep(50000L);
             } else {
                 log.info("PBA Payment Reference already exists.");
             }
