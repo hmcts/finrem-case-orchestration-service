@@ -8,7 +8,7 @@ services:
     ports:
       - 9000:9000
     environment:
-      IDAM_API_URL: http://sidam-api:5000
+      IDAM_API_URL: http://idam-api:5000
       FINREM_NOTIFICATION_SERVICE_BASE_URL: http://finrem-notification-service:8086
       DOCUMENT_GENERATOR_SERVICE_API_BASEURL: http://finrem-document-generator-client:4009
       PAYMENT_SERVICE_API_BASEURL: http://finrem-payment-service:9001
@@ -34,17 +34,17 @@ services:
       - dm-store
 
   ccd-api-gateway:
-    image: "hmctspublic.azurecr.io/ccd/api-gateway-web:${CCD_API_GATEWAY_TAG:-latest}"
+    image: "${CCD_API_GATEWAY_USE_LOCAL-hmctspublic.azurecr.io/}ccd/api-gateway-web:${CCD_API_GATEWAY_TAG:-latest}"
     container_name: ccd-api-gateway-web
     environment:
-      IDAM_BASE_URL: http://sidam-api:5000
-      IDAM_USER_URL: http://sidam-api:5000
+      IDAM_BASE_URL: http://idam-api:5000
+      IDAM_USER_URL: http://idam-api:5000
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       IDAM_SERVICE_KEY: "${IDAM_KEY_CCD_GATEWAY}"
-      IDAM_OAUTH2_LOGOUT_ENDPOINT: http://sidam-api:5000/session/:token
+      IDAM_OAUTH2_LOGOUT_ENDPOINT: http://idam-api:5000/session/:token
       IDAM_OAUTH2_CLIENT_ID: ccd_gateway
       IDAM_OAUTH2_CLIENT_SECRET: "${OAUTH2_CLIENT_CCD_GATEWAY}"
-      IDAM_OAUTH2_TOKEN_ENDPOINT: http://sidam-api:5000/oauth2/token
+      IDAM_OAUTH2_TOKEN_ENDPOINT: http://idam-api:5000/oauth2/token
       PROXY_AGGREGATED: http://ccd-data-store-api:4452
       PROXY_DATA: http://ccd-data-store-api:4452
       PROXY_DEFINITION_IMPORT: http://ccd-definition-store-api:4451
@@ -61,7 +61,7 @@ services:
       - dm-store
 
   ccd-user-profile-api:
-    image: "hmctspublic.azurecr.io/ccd/user-profile-api:${CCD_USER_PROFILE_API_TAG:-latest}"
+    image: "${CCD_USER_PROFILE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/user-profile-api:${CCD_USER_PROFILE_API_TAG:-latest}"
     environment:
       USER_PROFILE_DB_HOST: ccd-shared-database
       USER_PROFILE_DB_PORT: 5432
@@ -83,7 +83,7 @@ services:
       - service-auth-provider-api
 
   ccd-definition-store-api:
-    image: "hmctspublic.azurecr.io/ccd/definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
+    image: "${CCD_DEFINITION_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
     environment:
       DEFINITION_STORE_DB_HOST: ccd-shared-database
       DEFINITION_STORE_DB_PORT: 5432
@@ -111,7 +111,7 @@ services:
       - service-auth-provider-api
 
   ccd-data-store-api:
-    image: "hmctspublic.azurecr.io/ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
+    image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
     environment:
       DATA_STORE_DB_HOST: ccd-shared-database
       DATA_STORE_DB_PORT: 5432
@@ -149,6 +149,11 @@ services:
       JAVA_OPTS: -Xms128m -Xmx512m -Dlogging.level.uk.gov.hmcts=DEBUG
       SPRING_DATASOURCE_URL: jdbc:postgresql://shared-db:5432/openidm?currentSchema=fridam
       TESTING_SUPPORT_ENABLED: "true"
+      STRATEGIC_ADMIN_URL: http://idam-web-admin:8082
+      STRATEGIC_WEBPUBLIC_URL: http://idam-web-public:9002
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATASOURCE_USERNAME: openidm
+      SPRING_DATASOURCE_PASSWORD: openidm
       IDAM_SUPERUSER_EMAIL: ccd@hmcts.net
       SPRING_MAIL_HOST: smtp-server
       IDAM_TESTING_SUPPORT_ENABLED: "true"
@@ -178,7 +183,7 @@ services:
       - fr-idm
       - shared-db
   fr-am:
-    image: "hmctsprivate.azurecr.io/idam/idam-fr-am:latest"
+    image: "hmctsprivate.azurecr.io/idam/idam-fr-am:cmc"
     environment:
       JAVA_OPTS: -Xms128m -Xmx512m
     ports:
@@ -186,7 +191,6 @@ services:
       - 1389:1389
     depends_on:
       - shared-db
-
   fr-idm:
     image: "hmctsprivate.azurecr.io/idam/idam-fr-idm:latest"
     ports:
@@ -198,7 +202,6 @@ services:
     depends_on:
       - fr-am
       - shared-db
-
   shared-db:
     image: "hmctsprivate.azurecr.io/idam/shared-db:latest"
     ports:
@@ -214,7 +217,9 @@ services:
     links:
       - sidam-api
     depends_on:
-      - sidam-api
+      - fr-am
+      - fr-idm
+      - shared-db
 
   idam-web-public:
     image: "hmctspublic.azurecr.io/idam/web-public:latest"
@@ -257,8 +262,7 @@ services:
       MICROSERVICEKEYS_RD_PROFESSIONAL_API: "AAAAAAAAAAAAAAAA"
 
   dm-store:
-    image: "hmctspublic.azurecr.io/dm/store:latest"
-    command: --wait-for-database 30
+    image: "${DM_STORE_USE_LOCAL-hmctspublic.azurecr.io/}dm/store:${DM_STORE_TAG:-latest}"
     healthcheck:
       disable: true
     environment:
@@ -306,6 +310,7 @@ services:
       - ccd-shared-database
       - sidam-api
       - service-auth-provider-api
+      - azure-storage-emulator-azurite
     ports:
       - 4506:8080
     #   debug port exposed
@@ -334,7 +339,7 @@ services:
       DB_USERNAME:
       DB_PASSWORD:
     ports:
-      - 5001:5432
+      - 5050:5432
     volumes:
       - ccd-docker-ccd-shared-database-data:/var/lib/postgresql/data
 
@@ -351,7 +356,7 @@ services:
     container_name: finrem-payment-service
     environment:
       IDAM_API_URL: http://sidam-api:5000
-      PAYMENT_API_URL: http://payments-api:8080
+      PAYMENT_API_URL: http://payments-api:8383
       FEES_API_URL: http://fees-register-api-aat.service.core-compute-aat.internal
       PRD_API_URL: http://rd-professional-api:8090
       AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://service-auth-provider-api:8080
@@ -389,63 +394,68 @@ services:
       - sidam-api
 
   payments-api:
-    image: hmctspublic.azurecr.io/payment/api:latest
-    container_name: payments-api
+    image: hmctspublic.azurecr.io/payment/api
     environment:
+      - auth.provider.service.client.baseUrl=http://service-auth-provider-api:8080/
+      - auth.idam.client.baseUrl=https://idam-test.dev.ccidam.reform.hmcts.net
+      - CARD_PAYMENTS_REPORT_SCHEDULER_ENABLED=true
+      - CARD_PAYMENTS_EMAIL_FROM=no-reply@reform.hmcts.net
+      - CARD_PAYMENTS_EMAIL_TO=pepito@grillo.com
+      - CARD_PAYMENTS_EMAIL_MESSAGE=hi
+      - CARD_PAYMENTS_EMAIL_SUBJECT=Docker Env Card Payments Reconciliation Report
+      - BAR_PAYMENTS_REPORT_SCHEDULER_ENABLED=true
+      - BAR_PAYMENTS_EMAIL_FROM=no-reply@reform.hmcts.net
+      - BAR_PAYMENTS_EMAIL_TO=pepito@grillo.com
+      - BAR_PAYMENTS_EMAIL_MESSAGE=hi
+      - BAR_PAYMENTS_EMAIL_SUBJECT=Docker Env Bar Payments Reconciliation Report
+      - FEATURE_PAYMENTS_SEARCH=true
+      - FEES_REGISTER_URL=http://fees-register-api-aat.service.core-compute-aat.internal
+      - GOV_PAY_AUTH_KEY_CMC=la0ohpqa9er1bub2hddieeesc6sabbbqn4smkkve7s9ailn3n9d3hbnhc3
+      - GOV_PAY_AUTH_KEY_DIVORCE_FRONTEND=la0ohpqa9er1bub2hddieeesc6sabbbqn4smkkve7s9ailn3n9d3hbnhc3
+      - GOV_PAY_AUTH_KEY_PROBATE_FRONTEND=la0ohpqa9er1bub2hddieeesc6sabbbqn4smkkve7s9ailn3n9d3hbnhc3
+      - GOV_PAY_OPERATIONAL_SERVICES=ccd_gw
+      - GOV_PAY_URL=https://publicapi.payments.service.gov.uk/v1/payments
+      - payments.report.file.location=.
+      - PBA_CMC_PAYMENTS_REPORT_SCHEDULER_ENABLED=true
+      - PBA_CMC_PAYMENTS_EMAIL_FROM=no-reply@reform.hmcts.net
+      - PBA_CMC_PAYMENTS_EMAIL_TO=pepito@grillo.com
+      - PBA_CMC_PAYMENTS_EMAIL_MESSAGE=hi
+      - PBA_CMC_PAYMENTS_EMAIL_SUBJECT=Docker Env Card Payments Reconciliation Report
+      - PBA_PROBATE_PAYMENTS_REPORT_SCHEDULER_ENABLED=true
+      - PBA_PROBATE_PAYMENTS_EMAIL_FROM=no-reply@reform.hmcts.net
+      - PBA_PROBATE_PAYMENTS_EMAIL_TO=pepito@grillo.com
+      - PBA_PROBATE_PAYMENTS_EMAIL_MESSAGE=hi
+      - PBA_PROBATE_PAYMENTS_EMAIL_SUBJECT=Docker Env Card Payments Reconciliation Report
+      - PBA_FINREM_PAYMENTS_REPORT_SCHEDULER_ENABLED=true
+      - PBA_FINREM_PAYMENTS_EMAIL_FROM=no-reply@reform.hmcts.net
+      - PBA_FINREM_PAYMENTS_EMAIL_TO=pepito@grillo.com
+      - PBA_FINREM_PAYMENTS_EMAIL_MESSAGE=hi
+      - PBA_FINREM_PAYMENTS_EMAIL_SUBJECT=Docker Env Card Payments Reconciliation Report
+      - PBA_DIVORCE_PAYMENTS_REPORT_SCHEDULER_ENABLED=true
+      - PBA_DIVORCE_PAYMENTS_EMAIL_FROM=no-reply@reform.hmcts.net
+      - PBA_DIVORCE_PAYMENTS_EMAIL_TO=pepito@grillo.com
+      - PBA_DIVORCE_PAYMENTS_EMAIL_MESSAGE=hi
+      - PBA_DIVORCE_PAYMENTS_EMAIL_SUBJECT=Docker Env Card Payments Reconciliation Report
+      - REFORM_ENVIRONMENT=aat
+      - REFORM_SERVICE_NAME=payment-api
+      - REFORM_TEAM=cc
       - SPRING_DATASOURCE_URL=jdbc:postgresql://payments-database:5432/payment
       - SPRING_DATASOURCE_USERNAME=payment
       - SPRING_DATASOURCE_PASSWORD=payment
-      - AUTH_PROVIDER_SERVICE_CLIENT_BASEURL=http://service-auth-provider-api:8080/
-      - FEES_REGISTER_URL=http://fees-register-api-aat.service.core-compute-aat.internal
-      - PAYMENTS_REPORT_FILE_LOCATION=.
-      - PBA_CMC_PAYMENTS_EMAIL_FROM=no-reply@reform.hmcts.net
-      - CARD_PAYMENTS_REPORT_SCHEDULER_ENABLED=true
-      - PBA_DIVORCE_PAYMENTS_EMAIL_SUBJECT=AAT Env - PBA Reconciliation Report for Divorce
-      - GOV_PAY_AUTH_KEY_PROBATE_FRONTEND=238mpukgl3uonfrqpt7ndqvr82ok75i3t8v66156q470k474iai66ukhdf
-      - PBA_CMC_PAYMENTS_REPORT_SCHEDULER_ENABLED=true
-      - GOV_PAY_OPERATIONAL_SERVICES=ccd_gw
-      - CARD_PAYMENTS_EMAIL_TO=Oluwakemi.Benson@hmcts.net,Leonie.Watson@Justice.gov.uk,kevin.harper@hmcts.net,Krishna.Nuthalapati@HMCTS.NET
-      - PAYMENT_AUDIT_FILE=%HOME%\\LogFiles\\payment-audit.log
-      - PBA_CMC_PAYMENTS_EMAIL_TO=Oluwakemi.Benson@hmcts.net,Leonie.Watson@Justice.gov.uk,kevin.harper@hmcts.net,Krishna.Nuthalapati@HMCTS.NET
+      - SPRING_LIQUIBASE_ENABLED=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_TRUST=*
       - SPRING_MAIL_PORT=25
       - SPRING_MAIL_HOST=mta.reform.hmcts.net
-      - GOV_PAY_URL=https://publicapi.payments.service.gov.uk/v1/payments
-      - PBA_DIVORCE_PAYMENTS_EMAIL_FROM=no-reply@reform.hmcts.net
-      - PBA_DIVORCE_PAYMENTS_EMAIL_MESSAGE=Hi <br/><br/>Please find attached today''s Payment by Account reconciliation report. <br/><br/>Regards <br/><br/>Payments team<br/><br/>
-      - PAYMENT_SERVER_URL=http://localhost:8383
-      - GOV_PAY_AUTH_KEY_REFERENCE=DummyKey
-      - PBA_CMC_PAYMENTS_EMAIL_MESSAGE=Hi <br/><br/>Please find attached today''s Payment by Account reconciliation report. <br/><br/>Regards <br/><br/>Payments team<br/><br/>
-      - REFORM_SERVICE_NAME=payment-api
-      - AUTH_IDAM_CLIENT_BASEURL=http://sidam-api:5000
-      - GOV_PAY_AUTH_KEY_CMC=DummyKey
-      - PBA_CMC_PAYMENTS_EMAIL_SUBJECT=AAT Env - PBA Reconciliation Report for CMC
-      - CARD_PAYMENTS_EMAIL_FROM=no-reply@reform.hmcts.net
-      - CARD_PAYMENTS_EMAIL_MESSAGE=Hi <br/><br/>Please find attached today''s reconciliation report. <br/><br/>Regards <br/><br/>Payments team<br/><br/>
-      - GOV_PAY_AUTH_KEY_DIVORCE_FRONTEND=DummyKey
-      - FEATURE_PAYMENTS_SEARCH=true
-      - PBA_DIVORCE_PAYMENTS_REPORT_SCHEDULER_ENABLED=true
-      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_TRUST=*
-      - WEBSITE_LOCAL_CACHE_OPTION=Always
-      - PBA_DIVORCE_PAYMENTS_EMAIL_TO=Oluwakemi.Benson@hmcts.net,Leonie.Watson@Justice.gov.uk,kevin.harper@hmcts.net,Krishna.Nuthalapati@HMCTS.NET
-      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE=true
-      - APPINSIGHTS_INSTRUMENTATIONKEY=57b197f7-87bb-4dbf-b812-8572521c620a
-      - CARD_PAYMENTS_EMAIL_SUBJECT=AAT Env - Card Payments Reconciliation Report
-      - TRUSTED_S2S_SERVICE_NAMES=cmc,probate_frontend,divorce_frontend,ccd_gw,bar_api,api_gw,finrem_payment_service
-      - ASB_CONNECTION_STRING=dummy
-      - http_proxy
-      - https_proxy
-      - no_proxy
+      - TRUSTED_S2S_SERVICE_NAMES=cmc,probate_frontend,divorce_frontend,ccd_gw,bar_api,api_gw,finrem_payment_service,ccpay_bubble,jui_webapp
+      - PAYBUBBLE_HOME_URL=https://ccpay-bubble-frontend-aat.service.core-compute-aat.internal
+      - PCI_PAL_CALLBACK_URL=https://core-api-mgmt-aat.azure-api.net/telephony-api/telephony/callback
+      - ASB_CONNECTION_STRING=some-azure-service-bus-connection-string
     ports:
       - 8383:8080
-    links:
-      - payments-database
-      - service-auth-provider-api
-      - sidam-api
     depends_on:
       - payments-database
       - service-auth-provider-api
-      - sidam-api
-
 
   payments-database:
     container_name: payments-database
