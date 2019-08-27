@@ -2,16 +2,18 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalData;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.copyToOrderRefusalCollection;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.translateOrderRefusalCollection;
 
 public class OrderRefusalTranslatorTest {
@@ -19,20 +21,21 @@ public class OrderRefusalTranslatorTest {
     private CaseDetails caseDetails;
     private ObjectMapper mapper = new ObjectMapper();
 
-    @Before
-    public void setUpCaseDetails() throws Exception {
+    private void setUpCaseDetails(String fileName) throws Exception {
         try (InputStream resourceAsStream =
-                     getClass().getResourceAsStream("/fixtures/model/case-details-multiple-orders.json")) {
+                     getClass().getResourceAsStream(fileName)) {
             caseDetails = mapper.readValue(resourceAsStream, CaseDetails.class);
         }
     }
 
     @Test
-    public void modifyOrderRefusalCollection() {
-        CaseDetails result = translateOrderRefusalCollection(caseDetails);
+    public void shouldTranslateOrderRefusalCollection() throws Exception {
+        setUpCaseDetails("/fixtures/model/case-details-multiple-orders.json");
 
-        OrderRefusalData orderRefusalData = orderRefusalDataList(result);
-        List<String> orderRefusal = orderRefusalData.getOrderRefusal().getOrderRefusal();
+        CaseDetails result = translateOrderRefusalCollection(caseDetails);
+        Map<String, Object> data = result.getData();
+        List<OrderRefusalData> orderRefusalData = orderRefusalDataList(data, "orderRefusalCollectionNew");
+        List<String> orderRefusal = orderRefusalData.get(0).getOrderRefusal().getOrderRefusal();
 
         assertThat(orderRefusal, hasItems(
                 "Insufficient information provided – A",
@@ -42,11 +45,27 @@ public class OrderRefusalTranslatorTest {
                 "Other"));
     }
 
-    private OrderRefusalData orderRefusalDataList(CaseDetails result) {
-        List<OrderRefusalData> list =
-                mapper.convertValue(result.getData().get("orderRefusalCollection"),
-                        new TypeReference<List<OrderRefusalData>>() {});
+    @Test
+    public void shouldCopyToOrderRefusalCollection() throws Exception {
+        setUpCaseDetails("/fixtures/model/copy-case-details-multiple-orders.json");
 
-        return list.get(0);
+        Map<String, Object> data = copyToOrderRefusalCollection(caseDetails);
+
+        List<OrderRefusalData> orderRefusalData = orderRefusalDataList(data, "orderRefusalCollection");
+        List<String> orderRefusal = orderRefusalData.get(0).getOrderRefusal().getOrderRefusal();
+
+        assertThat(orderRefusalData.size(), is(2));
+        assertThat(orderRefusal, hasItems(
+                "Insufficient information provided – A",
+                "Insufficient information provided – B",
+                "Transferred to Applicant’s home Court - A",
+                "Transferred to Applicant's home Court - B",
+                "Other"));
+    }
+
+    private List<OrderRefusalData> orderRefusalDataList(Map<String, Object> data, String field) {
+        return mapper.convertValue(data.get(field),
+                new TypeReference<List<OrderRefusalData>>() {
+                });
     }
 }

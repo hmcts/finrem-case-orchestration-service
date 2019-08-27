@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
@@ -59,7 +61,7 @@ public class RefusalOrderDocumentServiceTest {
 
     @Test
     public void generateConsentOrderNotApproved() throws Exception {
-        CaseDetails caseDetails = caseDetails();
+        CaseDetails caseDetails = caseDetails("/fixtures/model/case-details.json");
 
         Map<String, Object> caseData = service.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
         ConsentOrderData consentOrderData = consentOrderData(caseData);
@@ -73,8 +75,27 @@ public class RefusalOrderDocumentServiceTest {
     }
 
     @Test
+    public void multipleRefusalOrdersGenerateConsentOrderNotApproved() throws Exception {
+        CaseDetails caseDetails = caseDetails("/fixtures/model/copy-case-details-multiple-orders.json");
+
+        Map<String, Object> caseData = service.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        ConsentOrderData consentOrderData = consentOrderData(caseData);
+        List<OrderRefusalData> orderRefusalData = refusalOrderCollection(caseData);
+        assertThat(orderRefusalData.size(), is(2));
+        assertThat(orderRefusalData.get(0).getId(), Is.is("1"));
+        assertThat(orderRefusalData.get(1).getId(), Is.is("2"));
+
+        assertThat(consentOrderData.getId(), is(notNullValue()));
+        assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(REJECTED_ORDER_TYPE));
+        assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));
+        assertThat(consentOrderData.getConsentOrder().getDocumentComment(), is(equalTo("System Generated")));
+
+        doCaseDocumentAssert(consentOrderData.getConsentOrder().getDocumentLink());
+    }
+
+    @Test
     public void previewConsentOrderNotApproved() throws Exception {
-        CaseDetails caseDetails = caseDetails();
+        CaseDetails caseDetails = caseDetails("/fixtures/model/case-details.json");
 
         Map<String, Object> caseData = service.previewConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
 
@@ -90,7 +111,8 @@ public class RefusalOrderDocumentServiceTest {
 
     private ConsentOrderData consentOrderData(Map<String, Object> caseData) {
         List<ConsentOrderData> list =
-                mapper.convertValue(caseData.get("uploadOrder"), new TypeReference<List<ConsentOrderData>>() {});
+                mapper.convertValue(caseData.get("uploadOrder"), new TypeReference<List<ConsentOrderData>>() {
+                });
 
         return list
                 .stream()
@@ -98,9 +120,15 @@ public class RefusalOrderDocumentServiceTest {
                 .findFirst().orElseThrow(() -> new IllegalStateException(REJECTED_ORDER_TYPE + " missing"));
     }
 
-    private CaseDetails caseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/model/case-details.json")) {
+    private CaseDetails caseDetails(String name) throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(name)) {
             return mapper.readValue(resourceAsStream, CaseDetails.class);
         }
+    }
+
+    private List<OrderRefusalData> refusalOrderCollection(Map<String, Object> caseData) {
+        return mapper.convertValue(caseData.get("orderRefusalCollection"),
+                new TypeReference<List<OrderRefusalData>>() {
+                });
     }
 }
