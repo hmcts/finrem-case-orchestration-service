@@ -4,7 +4,7 @@
 ## Options:
 ##    - role: Comma-separated list of roles. Roles must exist in IDAM (i.e `caseworker-probate,caseworker-probate-solicitor`)
 ##    - email: Email address
-##    - password: User's password. Default to `password`.
+##    - password: User's password. Default to `Pa55word11`. Weak passwords that do not match the password criteria by SIDAM will cause use creation to fail, and such failure may not be expressly communicated to the user.
 ##    - surname: Last name. Default to `Test`.
 ##    - forename: First name. Default to `User`.
 ##
@@ -13,7 +13,7 @@
 
 rolesStr=$1
 email=$2
-password=${3:-password}
+password=${3:-Pa55word11}
 surname=${4:-Test}
 forename=${5:-User}
 
@@ -36,6 +36,8 @@ for i in "${roles[@]}"; do
   firstRole=false
 done
 rolesJson="${rolesJson}]"
+
+echo "Creating caseworker $email"
 
 curl -XPOST \
   http://localhost:5000/testing-support/accounts \
