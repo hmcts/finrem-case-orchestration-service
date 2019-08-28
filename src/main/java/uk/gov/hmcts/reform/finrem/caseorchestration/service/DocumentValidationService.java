@@ -1,8 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.ImmutableList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
@@ -16,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 
@@ -67,6 +71,12 @@ public class DocumentValidationService {
 
     private DocumentValidationResponse validatePensionDocuments(String authorizationToken,
                                                                 Map<String, Object> caseData) {
+        if (documentHelper.isInvalidPensionDocuments(caseData)) {
+            return DocumentValidationResponse.builder()
+                    .errors(ImmutableList.of("Please upload a document"))
+                    .build();
+        }
+
         List<CaseDocument> caseDocuments = documentHelper.getPensionDocumentsData(caseData);
         if (!caseDocuments.isEmpty()) {
             return validateDocuments(authorizationToken, caseDocuments);

@@ -37,6 +37,14 @@
       "solicitorPhone": "1234",
       "applicantFMName": "Poor",
       "authorisation2b": "test",
+      "pensionCollection": [
+        {
+          "id": "1",
+          "value": {
+            "typeOfDocument": "Form P2"
+          }
+        }
+      ],
       "otherCollection": [
         {
           "id": "1",
