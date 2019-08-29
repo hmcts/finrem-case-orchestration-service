@@ -8,11 +8,12 @@ services:
     ports:
       - 9000:9000
     environment:
-      IDAM_API_URL: http://idam-api:5000
+      IDAM_API_URL: http://sidam-api:5000
       FINREM_NOTIFICATION_SERVICE_BASE_URL: http://finrem-notification-service:8086
       DOCUMENT_GENERATOR_SERVICE_API_BASEURL: http://finrem-document-generator-client:4009
       PAYMENT_SERVICE_API_BASEURL: http://finrem-payment-service:9001
       PRD_API_URL: http://rd-professional-api:8090
+      APPINSIGHTS_INSTRUMENTATIONKEY: fake-key
     depends_on:
       - ccd-case-management-web
       - finrem-payment-service
@@ -41,9 +42,9 @@ services:
       IDAM_USER_URL: http://sidam-api:5000
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       IDAM_SERVICE_KEY: "${IDAM_KEY_CCD_GATEWAY}"
-      IDAM_OAUTH2_LOGOUT_ENDPOINT: http://idam-api:5000/session/:token
+      IDAM_OAUTH2_LOGOUT_ENDPOINT: http://sidam-api:5000/session/:token
       IDAM_OAUTH2_CLIENT_ID: ccd_gateway
-      IDAM_OAUTH2_CLIENT_SECRET: "${OAUTH2_CLIENT_CCD_GATEWAY}"
+      IDAM_OAUTH2_CLIENT_SECRET: ccd_gateway_secret
       IDAM_OAUTH2_TOKEN_ENDPOINT: http://sidam-api:5000/oauth2/token
       PROXY_AGGREGATED: http://ccd-data-store-api:4452
       PROXY_DATA: http://ccd-data-store-api:4452
@@ -185,6 +186,7 @@ services:
       - 5051:5432
     volumes:
       - ccd-docker-idam-shared-database-data:/var/lib/postgresql/data
+
 
   idam-web-admin:
     image: "hmctspublic.azurecr.io/idam/web-admin:latest"
