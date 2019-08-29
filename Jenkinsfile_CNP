@@ -28,7 +28,6 @@ withPipeline(type, product, app) {
     enableDockerBuild()
     installCharts()
     loadVaultSecrets(secrets)
-    setVaultName(product)
 
     after('functionalTest:aat') {
         steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/site/serenity/**/*'
