@@ -1,16 +1,5 @@
 #!groovy
 
-properties([
-        [
-                $class: 'GithubProjectProperty',
-                displayName: 'Finrem Case Orchestration',
-                projectUrlStr: 'https://github.com/hmcts/finrem-case-orchestration-service'
-        ],
-        pipelineTriggers([
-                [$class: 'GitHubPushTrigger']
-        ])
-])
-
 @Library("Infrastructure")
 
 def type = "java"
