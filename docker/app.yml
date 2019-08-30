@@ -335,10 +335,11 @@ services:
     container_name: finrem-payment-service
     environment:
       IDAM_API_URL: http://sidam-api:5000
-      PAYMENT_API_URL: http://payments-api:8383
+      PAYMENT_API_URL: http://payments-api:8080
       FEES_API_URL: http://fees-register-api-aat.service.core-compute-aat.internal
       PRD_API_URL: http://rd-professional-api:8090
       AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://service-auth-provider-api:8080
+      APPINSIGHTS_INSTRUMENTATIONKEY: fake-key
     ports:
      - 9001:9001
     depends_on:
@@ -352,6 +353,7 @@ services:
       PDF_SERVICE_ACCESS_KEY: "${PDF_SERVICE_ACCESS_KEY}"
       EVIDENCE_MANAGEMENT_CLIENT_API_BASEURL: http://evidence-management-client-api:4006
       AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://service-auth-provider-api:8080
+      APPINSIGHTS_INSTRUMENTATIONKEY: fake-key
     ports:
       - 4009:4009
     depends_on:
@@ -365,6 +367,7 @@ services:
       - DOCUMENT_MANAGEMENT_STORE_URL=http://dm-store:8080
       - IDAM_API_URL=http://sidam-api:5000
       - AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE=finrem_document_generator
+      - APPINSIGHTS_INSTRUMENTATIONKEY=fake-key
     ports:
       - 4006:4006
     depends_on:

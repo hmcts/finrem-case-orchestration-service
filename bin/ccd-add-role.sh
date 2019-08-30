@@ -28,6 +28,8 @@ esac
 binFolder=$(dirname "$0")
 
 userToken="$(${binFolder}/idam-user-token.sh)"
+
+echo "$userToken"
 serviceToken="$(${binFolder}/idam-service-token.sh ccd_gw)"
 
 curl -XPUT \
