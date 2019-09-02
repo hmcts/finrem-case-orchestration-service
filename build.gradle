@@ -100,7 +100,7 @@ def versions = [
         commonsIo               : '2.5',
         feignHttpClient         : '9.5.1',
         wiremockVersion         : '2.18.0',
-        reformsJavaLogging      : '4.0.1',
+        reformsJavaLogging      : '5.0.1',
         serviceTokenGenerator   : '1.0.4',
         commonsLang3            : '3.7',
         jsonAssert              : '1.2.3',

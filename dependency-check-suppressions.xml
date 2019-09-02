@@ -114,4 +114,9 @@
         <cpe>cpe:2.3:a:checkstyle:checkstyle:7.2:*:*:*:*:*:*:*</cpe>
         <cve>CVE-2019-9658</cve>
     </suppress>
+    <suppress>
+        <notes>Ignore jackson</notes>
+        <gav regex="true">.*</gav>
+        <cve>CVE-2019-12384</cve>
+    </suppress>
 </suppressions>
