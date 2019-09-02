@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.ObjectUtils;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
@@ -115,7 +116,7 @@ public class NotificationsController implements BaseController {
 
     private boolean isSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData,
                                                      String solicitorAgreeToReceiveEmails) {
-        return "Yes".equalsIgnoreCase(ObjectUtils.toString(mapOfCaseData
+        return "Yes".equalsIgnoreCase(Objects.toString(mapOfCaseData
                 .get(solicitorAgreeToReceiveEmails)));
     }
 }

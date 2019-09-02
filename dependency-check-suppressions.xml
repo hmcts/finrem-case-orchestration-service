@@ -119,4 +119,20 @@
         <gav regex="true">.*</gav>
         <cve>CVE-2019-12384</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+            This is a false positive on gradle-pi-test
+            which fails because it is prefixed with gradle ]]>
+        </notes>
+        <gav regex="true">.*</gav>
+        <cve>CVE-2019-11065</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+            This is a false positive on gradle-pi-test
+            which fails because it is prefixed with gradle ]]>
+        </notes>
+        <gav regex="true">.*</gav>
+        <cve>CVE-2019-15052</cve>
+    </suppress>
 </suppressions>

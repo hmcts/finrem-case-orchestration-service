@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.ObjectUtils;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -14,8 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.Notificat
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Objects;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
@@ -94,12 +95,12 @@ public class NotificationService {
                                                          String solicitorName,
                                                          String solicitorEmail) {
         NotificationRequest notificationRequest = new NotificationRequest();
-        notificationRequest.setCaseReferenceNumber(ObjectUtils.toString(callbackRequest.getCaseDetails().getId()));
+        notificationRequest.setCaseReferenceNumber(Objects.toString(callbackRequest.getCaseDetails().getId()));
         Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
-        notificationRequest.setSolicitorReferenceNumber(ObjectUtils.toString(mapOfCaseData.get(solicitorReference)));
-        notificationRequest.setName(ObjectUtils.toString(mapOfCaseData.get(solicitorName)));
-        notificationRequest.setNotificationEmail(ObjectUtils.toString(mapOfCaseData.get(solicitorEmail)));
-        notificationRequest.setSelectedCourt(ObjectUtils.toString(mapOfCaseData.get(ALLOCATED_COURT_LIST)));
+        notificationRequest.setSolicitorReferenceNumber(Objects.toString(mapOfCaseData.get(solicitorReference)));
+        notificationRequest.setName(Objects.toString(mapOfCaseData.get(solicitorName)));
+        notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorEmail)));
+        notificationRequest.setSelectedCourt(Objects.toString(mapOfCaseData.get(ALLOCATED_COURT_LIST)));
         return notificationRequest;
     }
 

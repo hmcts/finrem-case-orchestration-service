@@ -67,7 +67,6 @@ public class DocumentValidationTests extends IntegrationTestBase {
         Response response = utils.getResponseData(responseToOrderFileCheckUrl, callbackRequest);
         int statusCode = response.getStatusCode();
         assertEquals(statusCode, 200);
-        log.info(response.getBody().prettyPrint());
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -79,7 +78,6 @@ public class DocumentValidationTests extends IntegrationTestBase {
         Response response = utils.getResponseData(pensionDocumentFileCheckUrl, callbackRequest);
         int statusCode = response.getStatusCode();
         assertEquals(statusCode, 200);
-        log.info(response.getBody().prettyPrint());
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -91,7 +89,6 @@ public class DocumentValidationTests extends IntegrationTestBase {
         Response response = utils.getResponseData(consentOrderFileCheckUrl, callbackRequest);
         int statusCode = response.getStatusCode();
         assertEquals(statusCode, 200);
-        log.info(response.getBody().prettyPrint());
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -103,7 +100,6 @@ public class DocumentValidationTests extends IntegrationTestBase {
         Response response = utils.getResponseData(amendConsentOrderCollectionCheckUrl, callbackRequest);
         int statusCode = response.getStatusCode();
         assertEquals(statusCode, 200);
-        log.info(response.getBody().prettyPrint());
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -111,15 +107,12 @@ public class DocumentValidationTests extends IntegrationTestBase {
     private CaseDocument generateCaseDocument(String fileName) throws Exception {
         // generate pdf document to set it as consent order
         JsonPath jsonPathEvaluator = generateDocument(fileName, generatorUrl, consentedDir);
-        log.info("response is :" + jsonPathEvaluator.prettyPrint());
         CaseDocument caseDocument = getCaseDocument(jsonPathEvaluator);
-        log.info("case document " + caseDocument.getDocumentBinaryUrl());
-        return caseDocument;
 
+        return caseDocument;
     }
 
     private io.restassured.path.json.JsonPath generateDocument(String jsonFileName, String url, String journeyType) {
-
         Response jsonResponse = SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(utils.getHeaders())
