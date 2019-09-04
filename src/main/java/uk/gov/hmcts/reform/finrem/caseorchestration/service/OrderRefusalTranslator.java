@@ -121,7 +121,7 @@ public final class OrderRefusalTranslator {
         List<OrderRefusalData> transformedPair2 = right.stream()
                 .map(orderRefusalData -> transform(orderRefusalData, id.incrementAndGet()))
                 .collect(toList());
-        pair1.getRight().addAll(transformedPair2);
+        pair1.getRight().addAll(right);
     }
 
     private static OrderRefusalData transform(OrderRefusalData orderRefusalData, int id) {
