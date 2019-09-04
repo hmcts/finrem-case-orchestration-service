@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.ObjectUtils;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
+import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
@@ -52,7 +53,7 @@ public class PBAPaymentController implements BaseController {
         feeLookup(authToken, callbackRequest, mapOfCaseData);
         if (isPBAPayment(mapOfCaseData)) {
             if (isPBAPaymentReferenceDoesNotExists(mapOfCaseData)) {
-                String ccdCaseId = ObjectUtils.toString(callbackRequest.getCaseDetails().getId());
+                String ccdCaseId = Objects.toString(callbackRequest.getCaseDetails().getId());
                 PaymentResponse paymentResponse = pbaPaymentService.makePayment(authToken, ccdCaseId, mapOfCaseData);
                 if (!paymentResponse.isPaymentSuccess()) {
                     return paymentFailure(mapOfCaseData, paymentResponse);

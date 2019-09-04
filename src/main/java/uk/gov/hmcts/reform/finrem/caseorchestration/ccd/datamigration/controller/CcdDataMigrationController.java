@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.ObjectUtils;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -16,8 +15,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 
 import java.util.Map;
+import java.util.Objects;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.aspectj.util.LangUtil.isEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
@@ -48,7 +48,7 @@ public class CcdDataMigrationController {
     }
 
     private boolean shouldMigrateCase(Map<String, Object> caseData) {
-        String state = ObjectUtils.toString(caseData.get(STATE));
+        String state = Objects.toString(caseData.get(STATE), "");
         log.info("state >>> {}", state);
         return !isEmpty(state);
     }

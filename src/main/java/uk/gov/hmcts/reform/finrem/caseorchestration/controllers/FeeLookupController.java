@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.ObjectUtils;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
@@ -71,7 +72,7 @@ public class FeeLookupController implements BaseController {
     private OrderSummary createOrderSummary(Map<String, Object> caseRequestData, FeeItem feeItem) {
         return OrderSummary.builder()
                 .paymentTotal(feeItem.getValue().getFeeAmount())
-                .paymentReference(ObjectUtils.toString(caseRequestData.get(PBA_REFERENCE)))
+                .paymentReference(Objects.toString(caseRequestData.get(PBA_REFERENCE)))
                 .fees(ImmutableList.of(feeItem))
                 .build();
     }
@@ -84,7 +85,7 @@ public class FeeLookupController implements BaseController {
     }
 
     private FeeValue createFeeValue(FeeResponse feeResponse) {
-        String amountToPay = ObjectUtils.toString(feeResponse
+        String amountToPay = Objects.toString(feeResponse
                 .getFeeAmount().multiply(BigDecimal.valueOf(100)).longValue());
         return FeeValue.builder()
                 .feeCode(feeResponse.getCode())
