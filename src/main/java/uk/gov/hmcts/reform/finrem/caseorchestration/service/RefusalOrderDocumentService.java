@@ -40,7 +40,7 @@ public class RefusalOrderDocumentService extends AbstractDocumentService {
     public Map<String, Object> generateConsentOrderNotApproved(
             String authorisationToken, final CaseDetails caseDetails) {
 
-         translateOrderRefusalCollection
+        translateOrderRefusalCollection
                 .andThen(generateDocument)
                 .andThen(createConsentOrderData)
                 .andThen(consentOrderData -> populateConsentOrderData(consentOrderData, caseDetails))
