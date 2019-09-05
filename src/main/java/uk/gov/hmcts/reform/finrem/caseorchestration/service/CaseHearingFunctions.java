@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.apache.commons.lang.ObjectUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -27,7 +27,7 @@ final class CaseHearingFunctions {
     static UnaryOperator<CaseDetails> addNonFastTrackFields = caseDetails -> {
         Map<String, Object> data = caseDetails.getData();
 
-        String hearingDate = ObjectUtils.toString(data.get(HEARING_DATE));
+        String hearingDate = Objects.toString(data.get(HEARING_DATE));
         LocalDate hearingLocalDate = LocalDate.parse(hearingDate);
 
         data.put("formCCreatedDate", new Date());
@@ -38,7 +38,7 @@ final class CaseHearingFunctions {
     };
 
     static Function<Map<String, Object>, Boolean> isFastTrackApplication = caseData -> {
-        String fastTrackDecision = ObjectUtils.toString(caseData.get(FAST_TRACK_DECISION));
+        String fastTrackDecision = Objects.toString(caseData.get(FAST_TRACK_DECISION));
         String caseAllocatedTo = (String) caseData.get(CASE_ALLOCATED_TO);
 
         return Optional.ofNullable(caseAllocatedTo)

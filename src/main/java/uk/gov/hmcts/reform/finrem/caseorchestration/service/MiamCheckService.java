@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang.ObjectUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_ATTENDANCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_EXEMPTION;
@@ -19,8 +19,8 @@ public class MiamCheckService {
 
     public List<String> miamExemptAttendCheck(CaseDetails  caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        String applicantAttended = ObjectUtils.toString(caseData.get(MIAM_ATTENDANCE));
-        String claimingExemption = ObjectUtils.toString(caseData.get(MIAM_EXEMPTION));
+        String applicantAttended = Objects.toString(caseData.get(MIAM_ATTENDANCE));
+        String claimingExemption = Objects.toString(caseData.get(MIAM_EXEMPTION));
 
         if (applicantAttended.equalsIgnoreCase("no")
                 && claimingExemption.equalsIgnoreCase("no")) {

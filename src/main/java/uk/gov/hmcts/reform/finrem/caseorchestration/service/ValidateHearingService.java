@@ -1,14 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
@@ -25,9 +26,9 @@ public class ValidateHearingService {
 
     public List<String> validateHearingErrors(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        String issueDate = ObjectUtils.toString(caseData.get(ISSUE_DATE));
-        String hearingDate = ObjectUtils.toString(caseData.get(HEARING_DATE));
-        String fastTrackDecision = ObjectUtils.toString(caseData.get(FAST_TRACK_DECISION));
+        String issueDate = Objects.toString(caseData.get(ISSUE_DATE), "");
+        String hearingDate = Objects.toString(caseData.get(HEARING_DATE), "");
+        String fastTrackDecision = Objects.toString(caseData.get(FAST_TRACK_DECISION), "");
 
 
         if (StringUtils.isBlank(issueDate) || StringUtils.isBlank(fastTrackDecision)
@@ -40,8 +41,8 @@ public class ValidateHearingService {
 
     public List<String> validateHearingWarnings(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        String issueDate = ObjectUtils.toString(caseData.get(ISSUE_DATE));
-        String hearingDate = ObjectUtils.toString(caseData.get(HEARING_DATE));
+        String issueDate = Objects.toString(caseData.get(ISSUE_DATE), "");
+        String hearingDate = Objects.toString(caseData.get(HEARING_DATE), "");
 
         LocalDate issueLocalDate = LocalDate.parse(issueDate);
         LocalDate hearingLocalDate = LocalDate.parse(hearingDate);
