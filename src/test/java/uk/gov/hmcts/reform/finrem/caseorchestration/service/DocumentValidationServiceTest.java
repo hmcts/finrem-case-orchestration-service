@@ -15,6 +15,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse.builder;
@@ -131,11 +132,12 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldNotThrowErrorWhenFileTypeValidationForEmptyPensionCollection() throws Exception {
-        setUpCaseDetails("validate-pension-collection-without-pension-data.json");
+    public void shouldThrowErrorWhenEmptyPensionDocument() throws Exception {
+        setUpCaseDetails("validate-pension-collection-without-case-document.json");
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
                 "pensionCollection", BEARER_TOKEN);
-        assertThat(response.getErrors(), nullValue());
+
+        assertEquals(response.getErrors(), singletonList("Please upload a document"));
     }
 
     @Test

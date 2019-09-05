@@ -55,6 +55,14 @@ public class DocumentHelper {
                 .collect(Collectors.toList());
     }
 
+    public boolean isInvalidPensionDocuments(Map<String, Object> caseData) {
+        return !ofNullable(caseData.get("pensionCollection"))
+                .map(this::convertToPensionCollectionDataList)
+                .orElse(emptyList())
+                .stream()
+                .map(PensionCollectionData::getPensionDocumentData)
+                .noneMatch(pensionDocumentData -> Objects.isNull(pensionDocumentData.getPensionDocument()));
+    }
 
     public CaseDocument convertToCaseDocument(Object object) {
         objectMapper = new ObjectMapper();
