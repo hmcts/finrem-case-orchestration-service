@@ -52,8 +52,8 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.bulkPrintCoverSheet").exists())
-            .andExpect(jsonPath("$.data.bulkPrintLetterId", is(randomId.toString())));
+            .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes").exists())
+            .andExpect(jsonPath("$.data.bulkPrintLetterIdRes", is(randomId.toString())));
         verify(bulkPrintService).sendForBulkPrint(any(), any());
         verify(coverSheetService).generateRespondentCoverSheet(any(), any());
     }

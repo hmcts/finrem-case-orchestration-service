@@ -3,9 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.google.common.collect.ImmutableList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
@@ -19,7 +17,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 
@@ -61,7 +58,7 @@ public class DocumentValidationService {
         }
         log.info("Invalid request with caseField = {} , event = {}", field, callbackRequest.getEventId());
         return DocumentValidationResponse.builder()
-                .build();
+            .build();
 
     }
 
@@ -73,8 +70,8 @@ public class DocumentValidationService {
                                                                 Map<String, Object> caseData) {
         if (documentHelper.isInvalidPensionDocuments(caseData)) {
             return DocumentValidationResponse.builder()
-                    .errors(ImmutableList.of("Please upload a document"))
-                    .build();
+                .errors(ImmutableList.of("Please upload a document"))
+                .build();
         }
 
         List<CaseDocument> caseDocuments = documentHelper.getPensionDocumentsData(caseData);
@@ -94,7 +91,7 @@ public class DocumentValidationService {
 
     private boolean createOrAmendApplication(CallbackRequest callbackRequest) {
         return FR_SOLICITOR_CREATE.equalsIgnoreCase(callbackRequest.getEventId())
-                || FR_AMEND_APPLICATION_DETAILS.equalsIgnoreCase(callbackRequest.getEventId());
+            || FR_AMEND_APPLICATION_DETAILS.equalsIgnoreCase(callbackRequest.getEventId());
     }
 
     private boolean consentOrder(String field) {
@@ -104,8 +101,8 @@ public class DocumentValidationService {
     private DocumentValidationResponse validateRespondToOrderDocument(String authToken, Map<String, Object> caseData) {
         Optional<CaseDocument> caseDocument = documentHelper.getLatestRespondToOrderDocuments(caseData);
         DocumentValidationResponse response = caseDocument
-                .map(document -> documentClient.checkUploadedFileType(authToken, document.getDocumentBinaryUrl()))
-                .orElseGet(() -> DocumentValidationResponse.builder().build());
+            .map(document -> documentClient.checkUploadedFileType(authToken, document.getDocumentBinaryUrl()))
+            .orElseGet(() -> DocumentValidationResponse.builder().build());
         return response;
     }
 
@@ -125,14 +122,14 @@ public class DocumentValidationService {
         DocumentValidationResponseBuilder builder = DocumentValidationResponse.builder();
 
         List<DocumentValidationResponse> responses = caseDocuments.stream()
-                .map(caseDocument1 -> validate(authToken, caseDocument1))
-                .map(CompletableFuture::join)
-                .collect(toList());
+            .map(caseDocument1 -> validate(authToken, caseDocument1))
+            .map(CompletableFuture::join)
+            .collect(toList());
 
         responses.stream()
-                .filter(DocumentValidationService::hasErrors)
-                .findAny()
-                .ifPresent(documentValidationResponse -> getErrors(builder, documentValidationResponse));
+            .filter(DocumentValidationService::hasErrors)
+            .findAny()
+            .ifPresent(documentValidationResponse -> getErrors(builder, documentValidationResponse));
         return builder.build();
     }
 
@@ -143,6 +140,6 @@ public class DocumentValidationService {
 
     private CompletableFuture<DocumentValidationResponse> validate(String authToken, CaseDocument caseDocument) {
         return CompletableFuture.supplyAsync(() ->
-                documentClient.checkUploadedFileType(authToken, caseDocument.getDocumentBinaryUrl()));
+            documentClient.checkUploadedFileType(authToken, caseDocument.getDocumentBinaryUrl()));
     }
 }
