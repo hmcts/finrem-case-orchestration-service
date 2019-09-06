@@ -52,9 +52,27 @@ public class OrderRefusalTranslatorTest {
         Map<String, Object> data = copyToOrderRefusalCollection(caseDetails);
 
         List<OrderRefusalData> orderRefusalData = orderRefusalDataList(data, "orderRefusalCollection");
-        List<String> orderRefusal = orderRefusalData.get(0).getOrderRefusal().getOrderRefusal();
+        List<String> orderRefusal = orderRefusalData.get(1).getOrderRefusal().getOrderRefusal();
 
         assertThat(orderRefusalData.size(), is(2));
+        assertThat(orderRefusal, hasItems(
+                "Insufficient information provided – A",
+                "Insufficient information provided – B",
+                "Transferred to Applicant’s home Court - A",
+                "Transferred to Applicant's home Court - B",
+                "Other"));
+    }
+
+    @Test
+    public void shouldReturnOrderRefusalCollectionNewWhenOrderRefusalCollectionIsEmpty() throws Exception {
+        setUpCaseDetails("/fixtures/model/copy-order-refusal-collection-empty.json");
+
+        Map<String, Object> data = copyToOrderRefusalCollection(caseDetails);
+
+        List<OrderRefusalData> orderRefusalData = orderRefusalDataList(data, "orderRefusalCollection");
+        List<String> orderRefusal = orderRefusalData.get(0).getOrderRefusal().getOrderRefusal();
+
+        assertThat(orderRefusalData.size(), is(1));
         assertThat(orderRefusal, hasItems(
                 "Insufficient information provided – A",
                 "Insufficient information provided – B",

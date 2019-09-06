@@ -82,7 +82,7 @@ public class RefusalOrderDocumentServiceTest {
         List<OrderRefusalData> orderRefusalData = refusalOrderCollection(caseData);
         assertThat(orderRefusalData.size(), is(2));
         assertThat(orderRefusalData.get(0).getId(), Is.is("1"));
-        assertThat(orderRefusalData.get(1).getId(), Is.is("2"));
+        assertThat(orderRefusalData.get(1).getId(), Is.is("1"));
         ConsentOrderData consentOrderData = consentOrderData(caseData);
         assertThat(consentOrderData.getId(), is(notNullValue()));
         assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(REJECTED_ORDER_TYPE));

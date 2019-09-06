@@ -18,7 +18,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-import static com.google.common.collect.ImmutableList.of;
+import static java.util.Objects.*;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 public final class OrderRefusalTranslator {
@@ -48,35 +49,26 @@ public final class OrderRefusalTranslator {
     private static Pair<CaseDetails, List<OrderRefusalData>> applyPickLatest(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        List<OrderRefusalData> orderRefusalCollection = Optional.ofNullable(caseData.get("orderRefusalCollectionNew"))
+        List<OrderRefusalData> orderRefusalCollectionNew = ofNullable(caseData.get("orderRefusalCollectionNew"))
                 .map(OrderRefusalTranslator::convertToRefusalOrderList)
                 .orElse(Collections.emptyList());
 
-        return Pair.of(caseDetails, orderRefusalCollection);
+        return Pair.of(caseDetails, orderRefusalCollectionNew);
     }
 
     private static Pair<CaseDetails, List<OrderRefusalData>> applyPickOrderRefusalCollection(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        List<OrderRefusalData> orderRefusalCollection = Optional.ofNullable(caseData.get("orderRefusalCollection"))
+        List<OrderRefusalData> orderRefusalCollection = ofNullable(caseData.get("orderRefusalCollection"))
                 .map(OrderRefusalTranslator::convertToRefusalOrderList)
                 .orElse(Collections.emptyList());
 
-        return ImmutablePair.of(caseDetails, refusalOrderList(orderRefusalCollection));
+        return ImmutablePair.of(caseDetails, orderRefusalCollection);
     }
 
     private static List<OrderRefusalData> convertToRefusalOrderList(Object object) {
         return MAPPER.convertValue(object, new TypeReference<List<OrderRefusalData>>() {
         });
-    }
-
-    private static List<OrderRefusalData> refusalOrderList(List<OrderRefusalData> list) {
-        return list.isEmpty() ? list : constructOrderRefusalList(list);
-    }
-
-    private static ImmutableList<OrderRefusalData> constructOrderRefusalList(
-            List<OrderRefusalData> orderRefusalCollection) {
-        return of(orderRefusalCollection.get(orderRefusalCollection.size() - 1));
     }
 
     private static CaseDetails applyTranslate(Pair<CaseDetails, List<OrderRefusalData>> pair) {
@@ -97,18 +89,16 @@ public final class OrderRefusalTranslator {
         return caseDetails;
     }
 
-
     public static CaseDetails translateOrderRefusalCollection(CaseDetails caseDetails) {
         return pickLatestOrderRefusal.andThen(translate).apply(caseDetails);
     }
 
     public static Map<String, Object> copyToOrderRefusalCollection(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
-        if (Objects.nonNull(data.get("orderRefusalCollectionNew"))) {
+        if (nonNull(data.get("orderRefusalCollectionNew"))) {
             Pair<CaseDetails, List<OrderRefusalData>> orderRefusalNew = pickLatestOrderRefusal.apply(caseDetails);
             Pair<CaseDetails, List<OrderRefusalData>> orderRefusalCollection = pickOrderRefusalCollection
                     .apply(caseDetails);
-            ;
             data.put("orderRefusalCollection", append(orderRefusalCollection, orderRefusalNew));
             data.put("orderRefusalCollectionNew", null);
         }
@@ -119,8 +109,8 @@ public final class OrderRefusalTranslator {
                                                  Pair<CaseDetails, List<OrderRefusalData>> orderRefusalNew) {
         if (!orderRefusalCollection.getRight().isEmpty()) {
             List<OrderRefusalData> orderRefusalDataList = new ArrayList<>();
-            orderRefusalDataList.addAll(orderRefusalCollection.getRight());
-            orderRefusalDataList.addAll(orderRefusalNew.getRight());
+            orderRefusalDataList.addAll(orderRefusalCollection.getValue());
+            orderRefusalDataList.addAll(orderRefusalNew.getValue());
             return orderRefusalDataList;
         }
         return orderRefusalNew.getRight();
