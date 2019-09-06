@@ -26,23 +26,54 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
         super(documentClient, config, objectMapper);
     }
 
-    public CaseDocument generateCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
+    public CaseDocument generateRespondentCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
         log.info(
-            "Generating cover sheet {} from {} for bulk print for case id {} ",
+            "Generating Respondent cover sheet {} from {} for bulk print for case id {} ",
             config.getBulkPrintFileName(),
             config.getBulkPrintTemplate(),
             caseDetails.getId().toString());
-        addBulkPrintCoverSheet(caseDetails);
+        prepareRespondentCoverSheet(caseDetails);
         return generateDocument(
             authorisationToken,
             caseDetails,
             config.getBulkPrintTemplate(),
             config.getBulkPrintFileName());
-
-
     }
 
-    private void addBulkPrintCoverSheet(CaseDetails caseDetails) {
+    public CaseDocument generateApplicantCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
+        log.info(
+            "Generating Applicant cover sheet {} from {} for bulk print for case id {} ",
+            config.getBulkPrintFileName(),
+            config.getBulkPrintTemplate(),
+            caseDetails.getId().toString());
+        prepareApplicantCoverSheet(caseDetails);
+        return generateDocument(
+            authorisationToken,
+            caseDetails,
+            config.getBulkPrintTemplate(),
+            config.getBulkPrintFileName());
+    }
+
+    private void prepareApplicantCoverSheet(CaseDetails caseDetails) {
+        BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder = BulkPrintCoverSheet.builder()
+            .ccdNumber(caseDetails.getId().toString())
+            .recipientName(
+                getString.apply(caseDetails.getData(), "applicantFMName")
+                    .concat(" ").concat(getString.apply(caseDetails.getData(), "applicantLName")));
+
+        Optional<Object> respondentAddress = getValue.apply(caseDetails.getData(), "applicantAddress");
+        Optional<Object> solicitorAddress = getValue.apply(caseDetails.getData(), "solicitorAddress");
+
+        if (solicitorAddress.isPresent()) {
+            caseDetails.getData().put("bulkPrintCoverSheet", getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder,
+                (Map) solicitorAddress.get()));
+        } else if (respondentAddress.isPresent()) {
+            caseDetails.getData().put("bulkPrintCoverSheet",  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder,
+                (Map) respondentAddress.get()));
+        }
+    }
+
+    private void prepareRespondentCoverSheet(CaseDetails caseDetails) {
         BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder = BulkPrintCoverSheet.builder()
             .ccdNumber(caseDetails.getId().toString())
             .recipientName(
@@ -50,7 +81,7 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
                     .concat(" ").concat(getString.apply(caseDetails.getData(), "appRespondentLName")));
 
         Optional<Object> respondentAddress = getValue.apply(caseDetails.getData(), "respondentAddress");
-        Optional<Object> solicitorAddress = getValue.apply(caseDetails.getData(), "solicitorAddress");
+        Optional<Object> solicitorAddress = getValue.apply(caseDetails.getData(), "rSolicitorAddress");
 
         if (solicitorAddress.isPresent()) {
             caseDetails.getData().put("bulkPrintCoverSheet", getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder,
