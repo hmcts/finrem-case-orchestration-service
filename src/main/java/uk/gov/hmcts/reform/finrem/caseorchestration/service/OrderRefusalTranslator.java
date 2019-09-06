@@ -9,12 +9,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalData;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -105,27 +105,24 @@ public final class OrderRefusalTranslator {
     public static Map<String, Object> copyToOrderRefusalCollection(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         if (Objects.nonNull(data.get("orderRefusalCollectionNew"))) {
-            Pair<CaseDetails, List<OrderRefusalData>> pair1 = pickLatestOrderRefusal.apply(caseDetails);
-            Pair<CaseDetails, List<OrderRefusalData>> pair2 = pickOrderRefusalCollection.apply(caseDetails);
-            append(pair1, pair2);
-            data.put("orderRefusalCollection", pair1.getRight());
+            Pair<CaseDetails, List<OrderRefusalData>> orderRefusalNew = pickLatestOrderRefusal.apply(caseDetails);
+            Pair<CaseDetails, List<OrderRefusalData>> orderRefusalCollection = pickOrderRefusalCollection
+                    .apply(caseDetails);
+            ;
+            data.put("orderRefusalCollection", append(orderRefusalCollection, orderRefusalNew));
             data.put("orderRefusalCollectionNew", null);
         }
         return data;
     }
 
-    private static void append(Pair<CaseDetails, List<OrderRefusalData>> pair1,
-                               Pair<CaseDetails, List<OrderRefusalData>> pair2) {
-        List<OrderRefusalData> right = pair2.getRight();
-        AtomicInteger id = new AtomicInteger(pair1.getRight().size());
-        List<OrderRefusalData> transformedPair2 = right.stream()
-                .map(orderRefusalData -> transform(orderRefusalData, id.incrementAndGet()))
-                .collect(toList());
-        pair1.getRight().addAll(right);
-    }
-
-    private static OrderRefusalData transform(OrderRefusalData orderRefusalData, int id) {
-        orderRefusalData.setId(String.valueOf(id));
-        return orderRefusalData;
+    private static List<OrderRefusalData> append(Pair<CaseDetails, List<OrderRefusalData>> orderRefusalCollection,
+                                                 Pair<CaseDetails, List<OrderRefusalData>> orderRefusalNew) {
+        if (!orderRefusalCollection.getRight().isEmpty()) {
+            List<OrderRefusalData> orderRefusalDataList = new ArrayList<>();
+            orderRefusalDataList.addAll(orderRefusalCollection.getRight());
+            orderRefusalDataList.addAll(orderRefusalNew.getRight());
+            return orderRefusalDataList;
+        }
+        return orderRefusalNew.getRight();
     }
 }
