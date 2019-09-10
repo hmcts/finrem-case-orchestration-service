@@ -26,13 +26,13 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
 @PactTestFor(providerName = "SIDAM_Provider", port = "8889")
 @SpringBootTest({
     "idam.url: http://localhost:8889"
-})
+    })
 public class SidamServiceConsumerTest {
 
 
     @Autowired
     private IdamService idamService;
-    private final String AUTH_TOKEN = "someAuthorizationToken";
+    private static final String AUTH_TOKEN = "someAuthorizationToken";
 
     @Pact(state = "SIDAM Returns user details",
         provider = "SIDAM_Service", consumer = "finrem_caseorchetration_service")
