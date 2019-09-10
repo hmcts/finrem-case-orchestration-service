@@ -86,7 +86,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
         jsonPathEvaluator = utils.getResponseData(caseOrchestration + "/bulk-print", payload, DATAPATH);
         System.out.println("response is :" + jsonPathEvaluator.prettyPrint());
 
-        if (jsonPathEvaluator.get("bulkPrintLetterId") == null) {
+        if (jsonPathEvaluator.get("bulkPrintLetterIdRes") == null) {
             Assert.fail("bulk Printing not successfull");
         }
 

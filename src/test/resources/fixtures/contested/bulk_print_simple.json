@@ -6,7 +6,7 @@
     "state": "consentOrderApproved",
     "case_data": {
       "applicantRepresented": "Yes",
-      "solicitorAgreeToReceiveEmails": "Yes",
+      "solicitorAgreeToReceiveEmails": "No",
       "uploadOrder":[
         {
           "id":"92d30d00-1cd6-4ab1-aca9-cd361d21634e",

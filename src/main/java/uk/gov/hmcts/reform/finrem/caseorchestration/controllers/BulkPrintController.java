@@ -78,13 +78,13 @@ public class BulkPrintController implements BaseController {
 
         caseData.put(BULK_PRINT_LETTER_ID_RES, letterId);
 
-        boolean solicitorAgreeToReceiveEmails = (Boolean) getValue
-            .apply(callback.getCaseDetails().getData(), "solicitorAgreeToReceiveEmails").orElse(Boolean.FALSE);
+        String solicitorAgreeToReceiveEmails =  (String) getValue
+            .apply(callback.getCaseDetails().getData(), "solicitorAgreeToReceiveEmails").orElse("");
 
-        boolean applicantRepresented = (Boolean) getValue
-            .apply(callback.getCaseDetails().getData(), "applicantRepresented").orElse(Boolean.FALSE);
+        String applicantRepresented = (String) getValue
+            .apply(callback.getCaseDetails().getData(), "applicantRepresented").orElse("");
 
-        if (solicitorAgreeToReceiveEmails || !applicantRepresented) {
+        if ( "No".equalsIgnoreCase(applicantRepresented) || "No".equalsIgnoreCase(solicitorAgreeToReceiveEmails) ) {
             CaseDocument coverSheetApp = coverSheetService
                 .generateApplicantCoverSheet(callback.getCaseDetails(), authorisationToken);
 

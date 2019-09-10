@@ -64,6 +64,36 @@ public class BulkPrintControllerTest extends BaseControllerTest {
         verify(coverSheetService).generateApplicantCoverSheet(any(), any());
     }
 
+
+    @Test
+    public void shouldSendForBulkPrintPackWithRespondentAndApplicantAddressAsSolicitorEmailIsNo() throws Exception {
+        final UUID randomId = UUID.randomUUID();
+        requestContent =
+                objectMapper.readTree(
+                        new File(getClass()
+                                .getResource("/fixtures/contested/bulk_print_simple.json")
+                                .toURI()));
+
+        when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenReturn(new CaseDocument());
+        when(coverSheetService.generateApplicantCoverSheet(any(), any())).thenReturn(new CaseDocument());
+        when(bulkPrintService.sendForBulkPrint(any(), any())).thenReturn(randomId);
+
+        mvc.perform(
+                post("/case-orchestration/bulk-print")
+                        .content(requestContent.toString())
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes").exists())
+                .andExpect(jsonPath("$.data.bulkPrintLetterIdRes", is(randomId.toString())))
+                .andExpect(jsonPath("$.data.bulkPrintCoverSheetApp").exists())
+                .andExpect(jsonPath("$.data.bulkPrintLetterIdApp", is(randomId.toString())));
+        verify(bulkPrintService, times(2)).sendForBulkPrint(any(), any());
+        verify(coverSheetService).generateRespondentCoverSheet(any(), any());
+        verify(coverSheetService).generateApplicantCoverSheet(any(), any());
+    }
+
     @Test
     public void shouldSendForBulkPrintPackWithOnlyRespondentAddress() throws Exception {
         final UUID randomId = UUID.randomUUID();
