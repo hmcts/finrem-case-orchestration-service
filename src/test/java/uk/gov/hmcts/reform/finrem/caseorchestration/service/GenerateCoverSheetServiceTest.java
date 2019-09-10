@@ -38,8 +38,16 @@ public class GenerateCoverSheetServiceTest {
     }
 
     @Test
-    public void sendForBulkPrint() throws Exception {
+    public void shouldGenerateRespondentCoverSheet() throws Exception {
         CaseDocument caseDocument = coverSheetService.generateRespondentCoverSheet(caseDetails(), "AUTH_TOKEN");
+        assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
+        assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
+        assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
+    }
+
+    @Test
+    public void shouldGenerateApplicantCoverSheet() throws Exception {
+        CaseDocument caseDocument = coverSheetService.generateApplicantCoverSheet(caseDetails(), "AUTH_TOKEN");
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));

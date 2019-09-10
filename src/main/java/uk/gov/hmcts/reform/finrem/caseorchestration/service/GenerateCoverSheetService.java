@@ -20,6 +20,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 public class GenerateCoverSheetService extends AbstractDocumentService {
 
+    public static final String BULK_PRINT_COVER_SHEET = "bulkPrintCoverSheet";
+
     @Autowired
     public GenerateCoverSheetService(
         DocumentClient documentClient, DocumentConfiguration config, ObjectMapper objectMapper) {
@@ -65,10 +67,10 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
         Optional<Object> solicitorAddress = getValue.apply(caseDetails.getData(), "solicitorAddress");
 
         if (solicitorAddress.isPresent()) {
-            caseDetails.getData().put("bulkPrintCoverSheet", getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder,
+            caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder,
                 (Map) solicitorAddress.get()));
         } else if (respondentAddress.isPresent()) {
-            caseDetails.getData().put("bulkPrintCoverSheet",  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder,
+            caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder,
                 (Map) respondentAddress.get()));
         }
     }
@@ -84,10 +86,10 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
         Optional<Object> solicitorAddress = getValue.apply(caseDetails.getData(), "rSolicitorAddress");
 
         if (solicitorAddress.isPresent()) {
-            caseDetails.getData().put("bulkPrintCoverSheet", getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder,
+            caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder,
                 (Map) solicitorAddress.get()));
         } else if (respondentAddress.isPresent()) {
-            caseDetails.getData().put("bulkPrintCoverSheet",  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder,
+            caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder,
                 (Map) respondentAddress.get()));
         }
     }

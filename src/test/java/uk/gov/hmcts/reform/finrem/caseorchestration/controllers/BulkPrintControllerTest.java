@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -35,43 +36,72 @@ public class BulkPrintControllerTest extends BaseControllerTest {
     private GenerateCoverSheetService coverSheetService;
 
     @Test
-    public void shouldSuccessfullyReturnStatus200() throws Exception {
-        UUID randomId = UUID.randomUUID();
+    public void shouldSendForBulkPrintPackWithRespondentAndApplicantAddress() throws Exception {
+        final UUID randomId = UUID.randomUUID();
         requestContent =
-            objectMapper.readTree(
-                new File(getClass().getResource("/fixtures/contested/bulk_print_consent_order_not_approved.json")
-                    .toURI()));
+                objectMapper.readTree(
+                        new File(getClass()
+                                .getResource("/fixtures/contested/bulk_print_consent_order_not_approved.json")
+                                .toURI()));
+
+        when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenReturn(new CaseDocument());
+        when(coverSheetService.generateApplicantCoverSheet(any(), any())).thenReturn(new CaseDocument());
+        when(bulkPrintService.sendForBulkPrint(any(), any())).thenReturn(randomId);
+
+        mvc.perform(
+                post("/case-orchestration/bulk-print")
+                        .content(requestContent.toString())
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes").exists())
+                .andExpect(jsonPath("$.data.bulkPrintLetterIdRes", is(randomId.toString())))
+                .andExpect(jsonPath("$.data.bulkPrintCoverSheetApp").exists())
+                .andExpect(jsonPath("$.data.bulkPrintLetterIdApp", is(randomId.toString())));
+        verify(bulkPrintService, times(2)).sendForBulkPrint(any(), any());
+        verify(coverSheetService).generateRespondentCoverSheet(any(), any());
+        verify(coverSheetService).generateApplicantCoverSheet(any(), any());
+    }
+
+    @Test
+    public void shouldSendForBulkPrintPackWithOnlyRespondentAddress() throws Exception {
+        final UUID randomId = UUID.randomUUID();
+        requestContent =
+                objectMapper.readTree(
+                        new File(getClass()
+                                .getResource("/fixtures/contested/bulk_print_consent_order_approved.json")
+                                .toURI()));
 
         when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(bulkPrintService.sendForBulkPrint(any(), any())).thenReturn(randomId);
 
         mvc.perform(
-            post("/case-orchestration/bulk-print")
-                .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes").exists())
-            .andExpect(jsonPath("$.data.bulkPrintLetterIdRes", is(randomId.toString())));
+                post("/case-orchestration/bulk-print")
+                        .content(requestContent.toString())
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes").exists())
+                .andExpect(jsonPath("$.data.bulkPrintLetterIdRes", is(randomId.toString())));
         verify(bulkPrintService).sendForBulkPrint(any(), any());
         verify(coverSheetService).generateRespondentCoverSheet(any(), any());
     }
 
-
     @Test
     public void shouldThrowExceptionOnCoverSheetGeneration() throws Exception {
         requestContent =
-            objectMapper.readTree(
-                new File(getClass().getResource("/fixtures/contested/hwf.json").toURI()));
+                objectMapper.readTree(
+                        new File(getClass().getResource("/fixtures/contested/hwf.json").toURI()));
 
         when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenThrow(feignError());
         mvc.perform(
-            post("/case-orchestration/bulk-print")
-                .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isInternalServerError());
+                post("/case-orchestration/bulk-print")
+                        .content(requestContent.toString())
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
         verifyZeroInteractions(bulkPrintService);
         verify(coverSheetService).generateRespondentCoverSheet(any(), any());
     }
@@ -79,16 +109,16 @@ public class BulkPrintControllerTest extends BaseControllerTest {
     @Test
     public void shouldThrowExceptionOnSendForBulkPrint() throws Exception {
         requestContent =
-            objectMapper.readTree(
-                new File(getClass().getResource("/fixtures/contested/hwf.json").toURI()));
+                objectMapper.readTree(
+                        new File(getClass().getResource("/fixtures/contested/hwf.json").toURI()));
         when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(bulkPrintService.sendForBulkPrint(any(), any())).thenThrow(feignError());
         mvc.perform(
-            post("/case-orchestration/bulk-print")
-                .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isInternalServerError());
+                post("/case-orchestration/bulk-print")
+                        .content(requestContent.toString())
+                        .header("Authorization", BEARER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
         verify(coverSheetService).generateRespondentCoverSheet(any(), any());
         verify(bulkPrintService).sendForBulkPrint(any(), any());
     }
