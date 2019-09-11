@@ -171,7 +171,6 @@ public class FunctionalTestUtils {
             .when().post(url)
             .andReturn();
 
-        log.info(response.prettyPrint());
         jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
         int statusCode = response.getStatusCode();
         assertEquals(statusCode, 200);
@@ -195,7 +194,6 @@ public class FunctionalTestUtils {
     }
 
     public Response getResponseData(String url, CallbackRequest callbackRequest) {
-        log.info("callbackRequest.toString() >> " + callbackRequest.toString());
         return SerenityRest.given()
                 .relaxedHTTPSValidation()
                 .headers(getHeader())

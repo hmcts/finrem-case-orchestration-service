@@ -23,8 +23,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getValue;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -63,15 +66,34 @@ public class BulkPrintController implements BaseController {
             callback);
 
         validateCaseData(callback);
+
         Map<String, Object> caseData = callback.getCaseDetails().getData();
-        CaseDocument coverSheetDocument = coverSheetService.generateCoverSheet(callback.getCaseDetails(),
-            authorisationToken);
 
-        UUID letterId = bulkPrintService.sendForBulkPrint(coverSheetDocument, callback.getCaseDetails());
+        CaseDocument coverSheetRes = coverSheetService
+            .generateRespondentCoverSheet(callback.getCaseDetails(), authorisationToken);
 
-        caseData.put(BULK_PRINT_COVER_SHEET, coverSheetDocument);
+        UUID letterId = bulkPrintService.sendForBulkPrint(coverSheetRes, callback.getCaseDetails());
 
-        caseData.put(BULK_PRINT_LETTER_ID, letterId);
+        caseData.put(BULK_PRINT_COVER_SHEET_RES, coverSheetRes);
+
+        caseData.put(BULK_PRINT_LETTER_ID_RES, letterId);
+
+        String solicitorAgreeToReceiveEmails =  (String) getValue
+            .apply(callback.getCaseDetails().getData(), "solicitorAgreeToReceiveEmails").orElse("");
+
+        String applicantRepresented = (String) getValue
+            .apply(callback.getCaseDetails().getData(), "applicantRepresented").orElse("");
+
+        if ( "No".equalsIgnoreCase(applicantRepresented) || "No".equalsIgnoreCase(solicitorAgreeToReceiveEmails) ) {
+            CaseDocument coverSheetApp = coverSheetService
+                .generateApplicantCoverSheet(callback.getCaseDetails(), authorisationToken);
+
+            UUID letterIdApp = bulkPrintService.sendForBulkPrint(coverSheetApp, callback.getCaseDetails());
+
+            caseData.put(BULK_PRINT_COVER_SHEET_APP, coverSheetApp);
+
+            caseData.put(BULK_PRINT_LETTER_ID_APP, letterIdApp);
+        }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
             .build());

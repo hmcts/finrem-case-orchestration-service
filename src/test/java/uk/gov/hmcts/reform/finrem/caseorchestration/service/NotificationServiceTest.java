@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertThat;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
@@ -195,7 +195,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(CONSENTED_SOLICITOR_EMAIL, "test@test.com");
         caseData.put(CONSENTED_SOLICITOR_NAME, "solicitorName");
         caseData.put(SOLICITOR_REFERENCE, "56789");
-        caseData.put(BULK_PRINT_LETTER_ID, "notingham");
+        caseData.put(BULK_PRINT_LETTER_ID_RES, "notingham");
         return CallbackRequest.builder()
                 .caseDetails(CaseDetails.builder()
                         .id(12345L)

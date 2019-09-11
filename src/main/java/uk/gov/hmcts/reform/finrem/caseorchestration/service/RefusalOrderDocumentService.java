@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.copyToOrderRefusalCollection;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.translateOrderRefusalCollection;
 
 @Service
@@ -38,11 +39,13 @@ public class RefusalOrderDocumentService extends AbstractDocumentService {
 
     public Map<String, Object> generateConsentOrderNotApproved(
             String authorisationToken, final CaseDetails caseDetails) {
-        return translateOrderRefusalCollection
+
+        translateOrderRefusalCollection
                 .andThen(generateDocument)
                 .andThen(createConsentOrderData)
                 .andThen(consentOrderData -> populateConsentOrderData(consentOrderData, caseDetails))
                 .apply(Pair.of(copyOf(caseDetails), authorisationToken));
+        return copyToOrderRefusalCollection(caseDetails);
     }
 
     public Map<String, Object> previewConsentOrderNotApproved(

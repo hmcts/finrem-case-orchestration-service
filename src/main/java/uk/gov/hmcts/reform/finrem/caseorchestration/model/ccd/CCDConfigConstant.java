@@ -46,6 +46,8 @@ public class CCDConfigConstant {
     public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
     public static final String ROLES = "roles";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
-    public static final String BULK_PRINT_LETTER_ID = "bulkPrintLetterId";
-    public static final String BULK_PRINT_COVER_SHEET = "bulkPrintCoverSheet";
+    public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
+    public static final String BULK_PRINT_LETTER_ID_APP = "bulkPrintLetterIdApp";
+    public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
+    public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
 }

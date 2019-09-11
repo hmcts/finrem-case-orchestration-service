@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.google.common.collect.ImmutableList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.ObjectUtils;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
@@ -40,7 +41,7 @@ public class PBAValidateController implements BaseController {
 
         Map<String,Object> caseData = callbackRequest.getCaseDetails().getData();
         if (isPBAPayment(caseData)) {
-            String pbaNumber = ObjectUtils.toString(caseData.get(PBA_NUMBER));
+            String pbaNumber = Objects.toString(caseData.get(PBA_NUMBER));
             log.info("Validate PBA Number :  {}",pbaNumber );
             if (!pbaValidationService.isValidPBA(authToken, pbaNumber)) {
                 log.info("PBA number is invalid.");
