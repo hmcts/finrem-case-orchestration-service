@@ -6,7 +6,8 @@
     "jurisdiction":"divorce",
     "state":"created",
     "case_data": {
-      "state":"created",
+      "judgeAllocated": "Option1",
+      "amountToPay": "5000",
       "PBANumber": "PBA123456",
       "d81Question": "No",
       "PBAreference": "ABCD",
