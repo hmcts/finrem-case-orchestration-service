@@ -135,4 +135,119 @@
         <gav regex="true">.*</gav>
         <cve>CVE-2019-15052</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+            file name: jetty-webapp-9.4.14.v20181114.jar]]>
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-webapp@.*$</packageUrl>
+        <cve>CVE-2019-10241</cve>
+        <cve>CVE-2019-10247</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+            file name: jetty-servlet-9.4.14.v20181114.jar]]>
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-servlet@.*$</packageUrl>
+        <cve>CVE-2019-10241</cve>
+        <cve>CVE-2019-10247</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+            file name: jetty-security-9.4.14.v20181114.jar]]>
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-security@.*$</packageUrl>
+        <cve>CVE-2019-10241</cve>
+        <cve>CVE-2019-10247</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: jetty-server-9.4.14.v20181114.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-server@.*$</packageUrl>
+        <cve>CVE-2019-10241</cve>
+        <cve>CVE-2019-10247</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: kotlin-stdlib-jdk8-1.2.71.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/kotlin-stdlib-jdk8@.*$</packageUrl>
+        <cve>CVE-2019-10101</cve>
+        <cve>CVE-2019-10102</cve>
+        <cve>CVE-2019-10103</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: kotlin-reflect-1.2.71.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/kotlin-reflect@.*$</packageUrl>
+        <cve>CVE-2019-10101</cve>
+        <cve>CVE-2019-10102</cve>
+        <cve>CVE-2019-10103</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: jetty-http-9.4.14.v20181114.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-http@.*$</packageUrl>
+        <cve>CVE-2019-10241</cve>
+        <cve>CVE-2019-10247</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jetty-continuation-9.4.14.v20181114.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-continuation@.*$</packageUrl>
+        <cve>CVE-2019-10241</cve>
+        <cve>CVE-2019-10247</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jetty-xml-9.4.14.v20181114.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-xml@.*$</packageUrl>
+        <cve>CVE-2019-10241</cve>
+        <cve>CVE-2019-10247</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: jetty-util-9.4.14.v20181114.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-util@.*$</packageUrl>
+        <cve>CVE-2019-10241</cve>
+        <cve>CVE-2019-10247</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: kotlin-stdlib-jdk7-1.2.71.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/kotlin-stdlib-jdk7@.*$</packageUrl>
+        <cve>CVE-2019-10101</cve>
+        <cve>CVE-2019-10102</cve>
+        <cve>CVE-2019-10103</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: kotlin-stdlib-1.2.71.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/kotlin-stdlib@.*$</packageUrl>
+        <cve>CVE-2019-10101</cve>
+        <cve>CVE-2019-10102</cve>
+        <cve>CVE-2019-10103</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[
+   file name: kotlin-stdlib-common-1.2.71.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/kotlin-stdlib-common@.*$</packageUrl>
+        <cve>CVE-2019-10101</cve>
+        <cve>CVE-2019-10102</cve>
+        <cve>CVE-2019-10103</cve>
+    </suppress>
+
 </suppressions>
