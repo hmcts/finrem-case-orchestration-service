@@ -151,7 +151,7 @@ def versions = [
         sonarPitest             : '0.5',
         ccdClient               : '4.3.1',
         commonsBeanUtils                : '1.9.4',
-        pact_version                    : '3.5.24'
+        pact_version                    : '3.5.0'
 
 ]
 
