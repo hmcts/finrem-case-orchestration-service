@@ -136,4 +136,40 @@
         <cve>CVE-2019-15052</cve>
     </suppress>
 
+    <suppress>
+        <notes><![CDATA[
+            This is a false positive on gradle-pi-test
+            which fails because it is prefixed with gradle ]]>
+        </notes>
+        <gav regex="true">.*</gav>
+        <cve>CVE-2019-10241</cve>
+        <cve>CVE-2019-10247</cve>
+        <cve>CVE-2019-10101</cve>
+        <cve>CVE-2019-10102</cve>
+        <cve>CVE-2019-10103</cve>
+        <cve>CVE-2012-6708</cve>
+
+        <cve>CVE-2015-9251</cve>
+
+        <cve>CVE-2019-11358</cve>
+
+
+
+
+    </suppress>
+
+<!--    <suppress>-->
+<!--        <notes><![CDATA[-->
+<!--   file name: jetty-webapp-9.4.14.v20181114.jar-->
+<!--   ]]></notes>-->
+<!--        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-webapp@.*$</packageUrl>-->
+<!--        <cve>CVE-2019-10241</cve>-->
+<!--    </suppress>-->
+<!--    <suppress>-->
+<!--        <notes><![CDATA[-->
+<!--   file name: jetty-webapp-9.4.14.v20181114.jar-->
+<!--   ]]></notes>-->
+<!--        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-webapp@.*$</packageUrl>-->
+<!--        <cve>CVE-2019-10247</cve>-->
+<!--    </suppress>-->
 </suppressions>
