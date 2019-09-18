@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getValue;
 
@@ -20,7 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 public class GenerateCoverSheetService extends AbstractDocumentService {
 
-    public static final String BULK_PRINT_COVER_SHEET = "bulkPrintCoverSheet";
+
 
     @Autowired
     public GenerateCoverSheetService(

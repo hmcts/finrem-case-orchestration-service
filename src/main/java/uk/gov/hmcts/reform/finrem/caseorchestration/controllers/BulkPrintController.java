@@ -72,17 +72,26 @@ public class BulkPrintController implements BaseController {
         CaseDocument coverSheetRes = coverSheetService
             .generateRespondentCoverSheet(callback.getCaseDetails(), authorisationToken);
 
-        UUID letterId = bulkPrintService.sendForBulkPrint(coverSheetRes, callback.getCaseDetails());
+        UUID letterIdRes = bulkPrintService.sendForBulkPrint(coverSheetRes, callback.getCaseDetails());
 
         caseData.put(BULK_PRINT_COVER_SHEET_RES, coverSheetRes);
 
-        caseData.put(BULK_PRINT_LETTER_ID_RES, letterId);
+        caseData.put(BULK_PRINT_LETTER_ID_RES, letterIdRes);
+        log.info(
+                "Generated Respondent CoverSheet for bulk print. coversheet: {}, letterId : {}",
+                coverSheetRes,
+                letterIdRes);
 
         String solicitorAgreeToReceiveEmails =  (String) getValue
             .apply(callback.getCaseDetails().getData(), "solicitorAgreeToReceiveEmails").orElse("");
 
         String applicantRepresented = (String) getValue
             .apply(callback.getCaseDetails().getData(), "applicantRepresented").orElse("");
+
+        log.info(
+                "Bulk print. solicitorAgreeToReceiveEmails: {}, applicantRepresented : {}",
+                solicitorAgreeToReceiveEmails,
+                applicantRepresented);
 
         if ( "No".equalsIgnoreCase(applicantRepresented) || "No".equalsIgnoreCase(solicitorAgreeToReceiveEmails) ) {
             CaseDocument coverSheetApp = coverSheetService
@@ -93,6 +102,11 @@ public class BulkPrintController implements BaseController {
             caseData.put(BULK_PRINT_COVER_SHEET_APP, coverSheetApp);
 
             caseData.put(BULK_PRINT_LETTER_ID_APP, letterIdApp);
+
+            log.info(
+                    "Generated Applicant CoverSheet for bulk print. coversheet: {}, letterId : {}",
+                    coverSheetApp,
+                    letterIdApp);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
