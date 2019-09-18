@@ -151,6 +151,38 @@
             "whereShouldHearingTakePlace": "EZ801"
           }
         }
+      ],
+      "orderRefusalCollectionNew": [
+        {
+          "id": "1",
+          "value": {
+            "orderRefusal": [
+              "Insufficient information provided – A",
+              "Insufficient information provided – B",
+              "Transferred to Applicant’s home Court",
+              "Transferred to Applicant's home Court",
+              "Other"
+            ],
+            "orderRefusalDate": "2003-02-01",
+            "orderRefusalDocs": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
+            },
+            "orderRefusalJudge": "District Judge",
+            "orderRefusalOther": "test1",
+            "otherHearingDetails": "test2",
+            "orderRefusalJudgeName": "test3",
+            "orderRefusalNotEnough": [
+              "reason1"
+            ],
+            "estimateLengthOfHearing": "10",
+            "orderRefusalAddComments": "comment1",
+            "orderRefusalNotEnoughOther": "test",
+            "whenShouldHearingTakePlace": "today",
+            "whereShouldHearingTakePlace": "EZ801"
+          }
+        }
       ]
     }
   }
