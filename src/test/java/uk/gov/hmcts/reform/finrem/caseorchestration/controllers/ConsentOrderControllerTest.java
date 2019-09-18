@@ -4,10 +4,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
@@ -30,6 +32,9 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
     @MockBean
     private ConsentOrderService consentOrderService;
 
+    @MockBean
+    private IdamService idamService;
+
     @Before
     public void setUp() {
         super.setUp();
@@ -43,6 +48,7 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
     @Test
     public void shouldUpdateCaseDataWithLatestConsentOrder() throws Exception {
         when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
+        when(idamService.isUserRoleAdmin(any())).thenReturn(false);
         mvc.perform(post("/case-orchestration/update-latest-consent-order")
                 .content(requestContent.toString())
                 .header("Authorization", BEARER_TOKEN)
@@ -50,7 +56,8 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.latestConsentOrder").exists())
-                .andExpect(jsonPath("$.warnings").doesNotExist());;
+                .andExpect(jsonPath("$.data.applicantRepresented").value("Yes"))
+                .andExpect(jsonPath("$.warnings").doesNotExist());
 
     }
 

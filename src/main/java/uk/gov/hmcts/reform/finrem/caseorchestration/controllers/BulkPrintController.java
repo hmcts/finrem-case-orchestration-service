@@ -108,6 +108,7 @@ public class BulkPrintController implements BaseController {
                     coverSheetApp,
                     letterIdApp);
         }
+        log.info("Bulk print is successful.");
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
             .build());
