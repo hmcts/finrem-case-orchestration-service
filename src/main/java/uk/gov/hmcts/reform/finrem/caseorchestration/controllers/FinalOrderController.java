@@ -53,7 +53,7 @@ public class FinalOrderController implements BaseController {
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
-    })
+        })
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> stampFinalOrder(
             @RequestHeader(value = "Authorization") String authToken,
@@ -83,11 +83,11 @@ public class FinalOrderController implements BaseController {
             CaseDocument stampedDocs = service.stampDocument(latestHearingOrder, authToken);
             log.info(" stampedDocs = {}", stampedDocs);
             List<FinalOrderCollectionData> finalOrderCollection = getFinalOrderDocuments(caseData);
-            if(finalOrderCollection == null) {
-                finalOrderCollection =new ArrayList<>();
+            if (finalOrderCollection == null) {
+                finalOrderCollection = new ArrayList<>();
             }
-            FinalOrderCollectionData finalOrderCollectionData=new FinalOrderCollectionData();
-            FinalOrderDocument finalOrderDocument=new FinalOrderDocument();
+            FinalOrderCollectionData finalOrderCollectionData = new FinalOrderCollectionData();
+            FinalOrderDocument finalOrderDocument = new FinalOrderDocument();
             finalOrderDocument.setUploadDraftDocument(stampedDocs);
             finalOrderCollectionData.setFinalOrderDocuments(finalOrderDocument);
             finalOrderCollection.add(finalOrderCollectionData);
