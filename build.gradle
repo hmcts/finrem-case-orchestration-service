@@ -128,7 +128,7 @@ def versions = [
         springfoxSwagger        : '2.9.2',
         commonsIo               : '2.5',
         feignHttpClient         : '9.5.1',
-        wiremockVersion         : '2.18.0',
+        wiremockVersion         : '2.24.1',
         reformsJavaLogging      : '5.0.1',
         serviceTokenGenerator   : '1.0.4',
         commonsLang3            : '3.7',
