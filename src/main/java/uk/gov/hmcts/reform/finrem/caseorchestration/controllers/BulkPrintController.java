@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
@@ -108,6 +109,8 @@ public class BulkPrintController implements BaseController {
                     coverSheetApp,
                     letterIdApp);
         }
+        caseData.remove(BULK_PRINT_COVER_SHEET);
+        log.info("Bulk print is successful.");
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData)
             .build());
