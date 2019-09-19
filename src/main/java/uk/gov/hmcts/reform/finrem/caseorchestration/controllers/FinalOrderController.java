@@ -53,7 +53,7 @@ public class FinalOrderController implements BaseController {
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
-    })
+        })
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> stampFinalOrder(
             @RequestHeader(value = "Authorization") String authToken,

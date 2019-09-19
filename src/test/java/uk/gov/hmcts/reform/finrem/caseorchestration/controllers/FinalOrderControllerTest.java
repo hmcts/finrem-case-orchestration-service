@@ -82,6 +82,7 @@ public class FinalOrderControllerTest extends BaseControllerTest {
         assertResult(result);
 
     }
+
     @Test
     public void finalOrderSuccessWithoutOrder() throws Exception {
         doCaseDataSetUpWithoutOrder();
