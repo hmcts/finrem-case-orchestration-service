@@ -18,17 +18,21 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinalOrderCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinalOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.ObjectUtils.isEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 
 @Slf4j
@@ -49,7 +53,7 @@ public class FinalOrderController implements BaseController {
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
-        })
+    })
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> stampFinalOrder(
             @RequestHeader(value = "Authorization") String authToken,
@@ -63,13 +67,7 @@ public class FinalOrderController implements BaseController {
         log.info("FinalOrderController called with latestHearingOrder = {}",
                 latestHearingOrder);
 
-        if (!isEmpty(latestHearingOrder)) {
-
-            CaseDocument stampedDocs = service.stampDocument(latestHearingOrder, authToken);
-            log.info(" stampedDocs = {}", stampedDocs);
-
-            caseData.put(FINAL_ORDER, stampedDocs);
-        }
+        stampAndAddToCollection(caseData, latestHearingOrder, authToken);
 
         return ResponseEntity.ok(
                 AboutToStartOrSubmitCallbackResponse.builder()
@@ -79,9 +77,34 @@ public class FinalOrderController implements BaseController {
                         .build());
     }
 
+    private void stampAndAddToCollection(Map<String, Object> caseData, CaseDocument latestHearingOrder,
+                                         String authToken) {
+        if (!isEmpty(latestHearingOrder)) {
+            CaseDocument stampedDocs = service.stampDocument(latestHearingOrder, authToken);
+            log.info(" stampedDocs = {}", stampedDocs);
+            List<FinalOrderCollectionData> finalOrderCollection = getFinalOrderDocuments(caseData);
+            if(finalOrderCollection == null) {
+                finalOrderCollection =new ArrayList<>();
+            }
+            FinalOrderCollectionData finalOrderCollectionData=new FinalOrderCollectionData();
+            FinalOrderDocument finalOrderDocument=new FinalOrderDocument();
+            finalOrderDocument.setUploadDraftDocument(stampedDocs);
+            finalOrderCollectionData.setFinalOrderDocuments(finalOrderDocument);
+            finalOrderCollection.add(finalOrderCollectionData);
+            caseData.put(FINAL_ORDER_COLLECTION, finalOrderCollection);
+        }
+
+    }
+
     private List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
                 new TypeReference<List<HearingOrderCollectionData>>() {
+                });
+    }
+
+    private List<FinalOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
+        return mapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION),
+                new TypeReference<List<FinalOrderCollectionData>>() {
                 });
     }
 

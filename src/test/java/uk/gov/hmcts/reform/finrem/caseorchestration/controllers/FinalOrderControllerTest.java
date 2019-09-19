@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
@@ -65,6 +66,7 @@ public class FinalOrderControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON));
 
         result.andExpect(status().isOk());
+        result.andDo(print());
         assertResult(result);
 
     }
@@ -74,7 +76,7 @@ public class FinalOrderControllerTest extends BaseControllerTest {
     }
 
     private void assertResult(ResultActions result) throws Exception {
-        String path = "$.data.finalOrder.";
+        String path = "$.data.finalOrderCollection[1].value.uploadDraftDocument.";
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
                 .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
                 .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));

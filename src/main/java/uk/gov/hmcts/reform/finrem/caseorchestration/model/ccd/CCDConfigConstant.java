@@ -21,7 +21,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_LETTER_TEXT = "generalLetterBody";
     public static final String LATEST_CONSENT_ORDER = "latestConsentOrder";
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
-    public static final String FINAL_ORDER = "finalOrder";
+    public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
