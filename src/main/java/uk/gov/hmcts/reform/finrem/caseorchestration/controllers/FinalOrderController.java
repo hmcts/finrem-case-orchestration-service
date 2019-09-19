@@ -49,11 +49,11 @@ public class FinalOrderController implements BaseController {
     @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
-                    + "attached to the case",
+                                                       + "attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
-        })
+    })
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> stampFinalOrder(
             @RequestHeader(value = "Authorization") String authToken,
@@ -61,13 +61,15 @@ public class FinalOrderController implements BaseController {
 
         validateCaseData(callback);
         Map<String, Object> caseData = callback.getCaseDetails().getData();
-        CaseDocument latestHearingOrder = getHearingOrderDocuments(caseData)
-                .get(0).getHearingOrderDocuments().getUploadDraftDocument();
+        List<HearingOrderCollectionData> hearingOrderCollectionData = getHearingOrderDocuments(caseData);
+        if (hearingOrderCollectionData != null && hearingOrderCollectionData.size() > 0) {
+            CaseDocument latestHearingOrder = hearingOrderCollectionData
+                                                      .get(0).getHearingOrderDocuments().getUploadDraftDocument();
+            log.info("FinalOrderController called with latestHearingOrder = {}",
+                    latestHearingOrder);
 
-        log.info("FinalOrderController called with latestHearingOrder = {}",
-                latestHearingOrder);
-
-        stampAndAddToCollection(caseData, latestHearingOrder, authToken);
+            stampAndAddToCollection(caseData, latestHearingOrder, authToken);
+        }
 
         return ResponseEntity.ok(
                 AboutToStartOrSubmitCallbackResponse.builder()

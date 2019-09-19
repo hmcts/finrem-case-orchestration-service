@@ -44,6 +44,18 @@ public class FinalOrderControllerTest extends BaseControllerTest {
                 .getResource("/fixtures/final-order-for-stamping.json").toURI()));
     }
 
+    void doCaseDataSetUpWithoutOrder() throws IOException, URISyntaxException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass()
+              .getResource("/fixtures/final-order-for-stamping-without-hearing-order.json").toURI()));
+    }
+
+    void doCaseDataSetUpFirstTime() throws IOException, URISyntaxException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass()
+                  .getResource("/fixtures/final-order-for-stamping-without-exsisting-order.json").toURI()));
+    }
+
     @Test
     public void finalOrder400Error() throws Exception {
         doEmtpyCaseDataSetUp();
@@ -68,6 +80,37 @@ public class FinalOrderControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk());
         result.andDo(print());
         assertResult(result);
+
+    }
+    @Test
+    public void finalOrderSuccessWithoutOrder() throws Exception {
+        doCaseDataSetUpWithoutOrder();
+        whenStampingDocument().thenReturn(caseDocument());
+
+        ResultActions result = mvc.perform(post(endpoint())
+                                                   .content(requestContent.toString())
+                                                   .header("Authorization", AUTH_TOKEN)
+                                                   .contentType(MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isOk());
+        result.andDo(print());
+
+
+    }
+
+    @Test
+    public void finalOrderSuccessWithoutFinalOrder() throws Exception {
+        doCaseDataSetUpFirstTime();
+        whenStampingDocument().thenReturn(caseDocument());
+
+        ResultActions result = mvc.perform(post(endpoint())
+                                                   .content(requestContent.toString())
+                                                   .header("Authorization", AUTH_TOKEN)
+                                                   .contentType(MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isOk());
+        result.andDo(print());
+
 
     }
 
