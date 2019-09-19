@@ -48,6 +48,22 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
     @Test
     public void shouldUpdateCaseDataWithLatestConsentOrder() throws Exception {
         when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
+        when(idamService.isUserRoleAdmin(any())).thenReturn(true);
+        mvc.perform(post("/case-orchestration/update-latest-consent-order")
+                .content(requestContent.toString())
+                .header("Authorization", BEARER_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(jsonPath("$.data.latestConsentOrder").exists())
+                .andExpect(jsonPath("$.data.applicantRepresented").doesNotExist())
+                .andExpect(jsonPath("$.warnings").doesNotExist());
+
+    }
+
+    @Test
+    public void shouldUpdateCaseDataWithApplicantRepresented() throws Exception {
+        when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
         when(idamService.isUserRoleAdmin(any())).thenReturn(false);
         mvc.perform(post("/case-orchestration/update-latest-consent-order")
                 .content(requestContent.toString())
