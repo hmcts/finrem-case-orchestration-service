@@ -26,19 +26,8 @@
             }
           }
         }
-      ],
-      "finalOrderCollection": [
-        {
-          "id": 6,
-          "value": {
-            "uploadDraftDocument": {
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/e0f1a60f-85b7-462a-add1-1eedcf05032b",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/e0f1a60f-85b7-462a-add1-1eedcf05032b/binary",
-              "document_filename": "one.pdf"
-            }
-          }
-        }
       ]
+
     }
   }
 }
