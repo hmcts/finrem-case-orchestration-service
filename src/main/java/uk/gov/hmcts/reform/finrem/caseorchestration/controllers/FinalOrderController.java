@@ -18,9 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinalOrderCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinalOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
 import javax.validation.constraints.NotNull;
@@ -53,7 +52,7 @@ public class FinalOrderController implements BaseController {
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
-    })
+        })
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> stampFinalOrder(
             @RequestHeader(value = "Authorization") String authToken,
@@ -87,18 +86,18 @@ public class FinalOrderController implements BaseController {
             CaseDocument stampedDocs = service.stampDocument(latestHearingOrder, authToken);
             log.info(" stampedDocs = {}", stampedDocs);
 
-            List<FinalOrderCollectionData> finalOrderCollection = getFinalOrderDocuments(caseData);
+            List<HearingOrderCollectionData> finalOrderCollection = getFinalOrderDocuments(caseData);
             log.info(" existing = {}", finalOrderCollection);
 
             if (finalOrderCollection == null) {
                 finalOrderCollection = new ArrayList<>();
             }
 
-            finalOrderCollection.add(FinalOrderCollectionData.builder()
-                                             .finalOrderDocuments(FinalOrderDocument
-                                                                          .builder()
-                                                                          .uploadDraftDocument(stampedDocs)
-                                                                          .build())
+            finalOrderCollection.add(HearingOrderCollectionData.builder()
+                                             .hearingOrderDocuments(HearingOrderDocument
+                                                                            .builder()
+                                                                            .uploadDraftDocument(stampedDocs)
+                                                                            .build())
                                              .build());
             log.info(" finalOrderCollection = {}", finalOrderCollection);
             caseData.put(FINAL_ORDER_COLLECTION, finalOrderCollection);
@@ -113,9 +112,9 @@ public class FinalOrderController implements BaseController {
                 });
     }
 
-    private List<FinalOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
+    private List<HearingOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION),
-                new TypeReference<List<FinalOrderCollectionData>>() {
+                new TypeReference<List<HearingOrderCollectionData>>() {
                 });
     }
 
