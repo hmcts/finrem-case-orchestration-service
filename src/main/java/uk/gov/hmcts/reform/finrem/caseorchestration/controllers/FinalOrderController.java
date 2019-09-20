@@ -18,9 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinalOrderCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FinalOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
 import javax.validation.constraints.NotNull;
@@ -60,9 +59,11 @@ public class FinalOrderController implements BaseController {
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         validateCaseData(callback);
+        log.info("stampFinalOrder called with case data = {}",
+                callback.getCaseDetails().getData());
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         List<HearingOrderCollectionData> hearingOrderCollectionData = getHearingOrderDocuments(caseData);
-        if (hearingOrderCollectionData != null && hearingOrderCollectionData.size() > 0) {
+        if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
             CaseDocument latestHearingOrder = hearingOrderCollectionData
                                                       .get(0).getHearingOrderDocuments().getUploadDraftDocument();
             log.info("FinalOrderController called with latestHearingOrder = {}",
@@ -84,16 +85,23 @@ public class FinalOrderController implements BaseController {
         if (!isEmpty(latestHearingOrder)) {
             CaseDocument stampedDocs = service.stampDocument(latestHearingOrder, authToken);
             log.info(" stampedDocs = {}", stampedDocs);
-            List<FinalOrderCollectionData> finalOrderCollection = getFinalOrderDocuments(caseData);
+
+            List<HearingOrderCollectionData> finalOrderCollection = getFinalOrderDocuments(caseData);
+            log.info(" existing = {}", finalOrderCollection);
+
             if (finalOrderCollection == null) {
                 finalOrderCollection = new ArrayList<>();
             }
-            FinalOrderCollectionData finalOrderCollectionData = new FinalOrderCollectionData();
-            FinalOrderDocument finalOrderDocument = new FinalOrderDocument();
-            finalOrderDocument.setUploadDraftDocument(stampedDocs);
-            finalOrderCollectionData.setFinalOrderDocuments(finalOrderDocument);
-            finalOrderCollection.add(finalOrderCollectionData);
+
+            finalOrderCollection.add(HearingOrderCollectionData.builder()
+                                             .hearingOrderDocuments(HearingOrderDocument
+                                                                            .builder()
+                                                                            .uploadDraftDocument(stampedDocs)
+                                                                            .build())
+                                             .build());
+            log.info(" finalOrderCollection = {}", finalOrderCollection);
             caseData.put(FINAL_ORDER_COLLECTION, finalOrderCollection);
+            log.info("stampFinalOrder end.");
         }
 
     }
@@ -104,9 +112,9 @@ public class FinalOrderController implements BaseController {
                 });
     }
 
-    private List<FinalOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
+    private List<HearingOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION),
-                new TypeReference<List<FinalOrderCollectionData>>() {
+                new TypeReference<List<HearingOrderCollectionData>>() {
                 });
     }
 

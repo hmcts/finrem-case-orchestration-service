@@ -44,13 +44,13 @@ public class FinalOrderControllerTest extends BaseControllerTest {
                 .getResource("/fixtures/final-order-for-stamping.json").toURI()));
     }
 
-    void doCaseDataSetUpWithoutOrder() throws IOException, URISyntaxException {
+    void doCaseDataSetUpWithoutANyHearingOrder() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
               .getResource("/fixtures/final-order-for-stamping-without-hearing-order.json").toURI()));
     }
 
-    void doCaseDataSetUpFirstTime() throws IOException, URISyntaxException {
+    void doCaseDataSetUpWithoutAnyFinalOrder() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                   .getResource("/fixtures/final-order-for-stamping-without-exsisting-order.json").toURI()));
@@ -79,13 +79,16 @@ public class FinalOrderControllerTest extends BaseControllerTest {
 
         result.andExpect(status().isOk());
         result.andDo(print());
-        assertResult(result);
+        String path = "$.data.finalOrderCollection[1].value.uploadDraftDocument.";
+        result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
+                .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
+                .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
 
     }
 
     @Test
-    public void finalOrderSuccessWithoutOrder() throws Exception {
-        doCaseDataSetUpWithoutOrder();
+    public void finalOrderSuccessWithoutAnyHearingOrder() throws Exception {
+        doCaseDataSetUpWithoutANyHearingOrder();
         whenStampingDocument().thenReturn(caseDocument());
 
         ResultActions result = mvc.perform(post(endpoint())
@@ -100,8 +103,8 @@ public class FinalOrderControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void finalOrderSuccessWithoutFinalOrder() throws Exception {
-        doCaseDataSetUpFirstTime();
+    public void finalOrderSuccessWithoutAnyFinalOrder() throws Exception {
+        doCaseDataSetUpWithoutAnyFinalOrder();
         whenStampingDocument().thenReturn(caseDocument());
 
         ResultActions result = mvc.perform(post(endpoint())
@@ -111,6 +114,10 @@ public class FinalOrderControllerTest extends BaseControllerTest {
 
         result.andExpect(status().isOk());
         result.andDo(print());
+        String path = "$.data.finalOrderCollection[0].value.uploadDraftDocument.";
+        result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
+                .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
+                .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
 
 
     }
@@ -119,12 +126,7 @@ public class FinalOrderControllerTest extends BaseControllerTest {
         return when(service.stampDocument(isA(CaseDocument.class), anyString()));
     }
 
-    private void assertResult(ResultActions result) throws Exception {
-        String path = "$.data.finalOrderCollection[1].value.uploadDraftDocument.";
-        result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
-                .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
-                .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
-    }
+
 
 
 }
