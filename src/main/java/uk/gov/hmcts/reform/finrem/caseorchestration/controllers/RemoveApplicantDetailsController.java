@@ -53,8 +53,6 @@ public class RemoveApplicantDetailsController implements BaseController {
             caseData.remove("applicantAddress");
             caseData.remove("applicantPhone");
             caseData.remove("applicantEmail");
-            caseData.remove("applicantFMName");
-            caseData.remove("applicantLName");
         } else {
             caseData.remove("applicantSolicitorName");
             caseData.remove("applicantSolicitorFirm");
