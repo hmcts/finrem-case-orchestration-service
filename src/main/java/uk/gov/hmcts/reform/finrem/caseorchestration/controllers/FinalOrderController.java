@@ -53,16 +53,18 @@ public class FinalOrderController implements BaseController {
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
-        })
+    })
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> stampFinalOrder(
             @RequestHeader(value = "Authorization") String authToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         validateCaseData(callback);
+        log.info("stampFinalOrder called with case data = {}",
+                callback.getCaseDetails().getData());
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         List<HearingOrderCollectionData> hearingOrderCollectionData = getHearingOrderDocuments(caseData);
-        if (hearingOrderCollectionData != null && hearingOrderCollectionData.size() > 0) {
+        if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
             CaseDocument latestHearingOrder = hearingOrderCollectionData
                                                       .get(0).getHearingOrderDocuments().getUploadDraftDocument();
             log.info("FinalOrderController called with latestHearingOrder = {}",
@@ -84,16 +86,23 @@ public class FinalOrderController implements BaseController {
         if (!isEmpty(latestHearingOrder)) {
             CaseDocument stampedDocs = service.stampDocument(latestHearingOrder, authToken);
             log.info(" stampedDocs = {}", stampedDocs);
+
             List<FinalOrderCollectionData> finalOrderCollection = getFinalOrderDocuments(caseData);
+            log.info(" existing = {}", finalOrderCollection);
+
             if (finalOrderCollection == null) {
                 finalOrderCollection = new ArrayList<>();
             }
-            FinalOrderCollectionData finalOrderCollectionData = new FinalOrderCollectionData();
-            FinalOrderDocument finalOrderDocument = new FinalOrderDocument();
-            finalOrderDocument.setUploadDraftDocument(stampedDocs);
-            finalOrderCollectionData.setFinalOrderDocuments(finalOrderDocument);
-            finalOrderCollection.add(finalOrderCollectionData);
+
+            finalOrderCollection.add(FinalOrderCollectionData.builder()
+                                             .finalOrderDocuments(FinalOrderDocument
+                                                                          .builder()
+                                                                          .uploadDraftDocument(stampedDocs)
+                                                                          .build())
+                                             .build());
+            log.info(" finalOrderCollection = {}", finalOrderCollection);
             caseData.put(FINAL_ORDER_COLLECTION, finalOrderCollection);
+            log.info("stampFinalOrder end.");
         }
 
     }
