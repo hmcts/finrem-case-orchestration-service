@@ -6,8 +6,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -60,9 +58,9 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.applicantAddress") .doesNotExist())
                 .andExpect(jsonPath("$.data.applicantPhone").doesNotExist())
                 .andExpect(jsonPath("$.data.applicantEmail").doesNotExist())
-                .andExpect(jsonPath("$.data.applicantFMName").doesNotExist())
-                .andExpect(jsonPath("$.data.applicantLName").doesNotExist())
 
+                .andExpect(jsonPath("$.data.applicantFMName", is("Poor")))
+                .andExpect(jsonPath("$.data.applicantLName", is("Guy")))
                 .andExpect(jsonPath("$.data.applicantSolicitorName", is("SolName99")))
                 .andExpect(jsonPath("$.data.applicantSolicitorFirm", is("SolFirm99")))
                 .andExpect(jsonPath("$.data.solicitorReference", is("SolRef99")))
