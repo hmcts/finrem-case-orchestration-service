@@ -35,7 +35,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
         requestContent = objectMapper.readTree(new File(getClass()
-                                                                .getResource("/fixtures/move-values-sample.json").toURI()));
+                                                                .getResource("/fixtures/move-values-sample.json")
+                                                                .toURI()));
         mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/uploadHearingOrderRO")
                             .content(requestContent.toString())
                             .header("Authorization", BEARER_TOKEN)
@@ -69,7 +70,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
         requestContent = objectMapper.readTree(new File(getClass()
-                                                                .getResource("/fixtures/move-values-sample.json").toURI()));
+                                                                .getResource("/fixtures/move-values-sample.json")
+                                                                .toURI()));
         mvc.perform(post("/case-orchestration/move-collection/someString/to/uploadHearingOrder")
                             .content(requestContent.toString())
                             .header("Authorization", BEARER_TOKEN)
@@ -84,7 +86,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
         requestContent = objectMapper.readTree(new File(getClass()
-                                                                .getResource("/fixtures/move-values-sample.json").toURI()));
+                                                                .getResource("/fixtures/move-values-sample.json")
+                                                                .toURI()));
         mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/someString")
                             .content(requestContent.toString())
                             .header("Authorization", BEARER_TOKEN)
@@ -99,7 +102,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
         requestContent = objectMapper.readTree(new File(getClass()
-                                                                .getResource("/fixtures/move-values-sample.json").toURI()));
+                                                                .getResource("/fixtures/move-values-sample.json")
+                                                                .toURI()));
         mvc.perform(post("/case-orchestration/move-collection/empty/to/uploadHearingOrder")
                             .content(requestContent.toString())
                             .header("Authorization", BEARER_TOKEN)
