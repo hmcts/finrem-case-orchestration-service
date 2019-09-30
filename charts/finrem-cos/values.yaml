@@ -1,13 +1,13 @@
 java:
+  ingressHost: "finrem-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
   applicationPort: '9000'
   livenessPath: '/health'
   environment:
-      APPLICATION_INSIGHTS_IKEY: '97f6a0e1-6be6-44b0-97bf-d03852b7791f'
-      SLOT: 'PRODUCTION'
-      REFORM_SERVICE_NAME: 'cos'
-      REFORM_TEAM: 'finrem'
-      APPINSIGHTS_INSTRUMENTATIONKEY : '97f6a0e1-6be6-44b0-97bf-d03852b7791f'
-  image: 'https://hmcts.azurecr.io/hmcts/finrem-case-orchestration-service:latest'
+    DOCUMENT_GENERATOR_SERVICE_API_BASEURL: "http://finrem-dgcs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+    FINREM_NOTIFICATION_SERVICE_BASE_URL: "http://finrem-ns-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+    IDAM_API_URL: "https://idam-api.platform.hmcts.net"
+    PAYMENT_SERVICE_API_BASEURL: "http://finrem-ps-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+    SWAGGER_ENABLED: false
   keyVaults:
     finrem:
       resourceGroup: finrem
