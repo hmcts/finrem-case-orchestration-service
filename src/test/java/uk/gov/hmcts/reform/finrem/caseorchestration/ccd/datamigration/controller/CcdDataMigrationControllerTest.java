@@ -139,31 +139,4 @@ public class CcdDataMigrationControllerTest {
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
 
-//    @Test
-//    public void shouldNotDoMigrationAsAlreadyStringArray() throws Exception {
-//        doMigrateSetup();
-//
-//        mvc.perform(post(MIGRATE_URL)
-//                            .content(objectMapper.writeValueAsString(ccdAlreadyMigratedRequest()))
-//                            .header("Authorization", BEARER_TOKEN)
-//                            .contentType(MediaType.APPLICATION_JSON))
-//                .andDo(print())
-//                .andExpect(jsonPath("$.data", isEmptyOrNullString()))
-//                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-//                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
-//    }
-//
-//    @Test
-//    public void shouldNotDoMigrationAsDoesntContainField() throws Exception {
-//        doMigrateSetup();
-//
-//        mvc.perform(post(MIGRATE_URL)
-//                            .content(objectMapper.writeValueAsString(ccdRequestWithoutField()))
-//                            .header("Authorization", BEARER_TOKEN)
-//                            .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.data", isEmptyOrNullString()))
-//                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-//                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
-//    }
 }
