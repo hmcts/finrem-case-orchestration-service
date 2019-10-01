@@ -1,4 +1,6 @@
 java:
+  # aadIdentityName needs to be unset as it's not used in preview env yet
+  aadIdentityName:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   environment:
