@@ -32,7 +32,7 @@ public class SidamServiceConsumerTest {
 
     @Autowired
     private IdamService idamService;
-    private static final String AUTH_TOKEN = "someAuthorizationToken";
+    private static final String AUTH_TOKEN = "Bearer .someAuthorizationToken";
 
     @Pact(state = "SIDAM Returns user details",
         provider = "SIDAM_Service", consumer = "finrem_caseorchetration_service")

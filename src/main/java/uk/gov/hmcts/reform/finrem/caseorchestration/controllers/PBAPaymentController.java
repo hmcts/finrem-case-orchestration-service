@@ -66,6 +66,7 @@ public class PBAPaymentController implements BaseController {
         } else {
             mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
         }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
     }
 

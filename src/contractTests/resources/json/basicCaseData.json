@@ -1,0 +1,29 @@
+{
+  "case_details": {
+    "id": 0,
+    "jurisdiction": "string",
+    "case_type_id": "string",
+    "created_date": "2019-09-19T14:41:52.812Z",
+    "last_modified": "2019-09-19T14:41:52.812Z",
+    "state": "string",
+    "locked_by_user_id": 0,
+    "security_level": 0,
+    "case_data": {},
+    "security_classification": "PUBLIC",
+    "callback_response_status": "string"
+  },
+  "case_details_before": {
+    "id": 0,
+    "jurisdiction": "string",
+    "case_type_id": "string",
+    "created_date": "2019-09-19T14:41:52.813Z",
+    "last_modified": "2019-09-19T14:41:52.813Z",
+    "state": "string",
+    "locked_by_user_id": 0,
+    "security_level": 0,
+    "case_data": {},
+    "security_classification": "PUBLIC",
+    "callback_response_status": "string"
+  },
+  "event_id": "string"
+}

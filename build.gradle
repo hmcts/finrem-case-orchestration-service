@@ -91,16 +91,19 @@ sourceSets {
     }
 
     contract {
-        java {
-            compileClasspath += main.output + test.output
-            runtimeClasspath += main.output + test.output
-            srcDirs = ['src/contractTests/java']
+//        java {
+//            compileClasspath += main.output
+//            runtimeClasspath += main.output
+//            srcDirs = ['src/contractTests/java']
+//
+//
+//        }
+//        resources {
+//            srcDirs = ['src/contractTests/resources']
+//        }
 
-
-        }
-        resources {
-            srcDirs = ['src/contractTests/resources']
-        }
+        java.srcDir 'src/contractTests/java'
+        resources.srcDir 'src/contractTests/resources'
 
     }
 }
@@ -247,16 +250,27 @@ dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
-    contractCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testCompile  group: 'au.com.dius', name: 'pact-jvm-provider-spring_2.12', version: versions.pact_version
+//    contractCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+    contractCompile ('au.com.dius:pact-jvm-provider-junit5_2.12:'+ versions.pact_version)
+    contractCompile  group: 'au.com.dius', name: 'pact-jvm-provider-spring_2.12', version: versions.pact_version
     contractCompile  group: 'au.com.dius', name: 'pact-jvm-provider-spring_2.12', version: versions.pact_version
     contractCompile group: 'au.com.dius', name: 'pact-jvm-consumer-junit5_2.12', version: versions.pact_version
     contractCompile group: 'au.com.dius', name: 'pact-jvm-consumer-java8_2.12', version: versions.pact_version
-    contractCompile("org.junit.jupiter:junit-jupiter-api:5.3.2")
-    contractCompile("org.junit.jupiter:junit-jupiter-engine:5.3.2")
-    contractImplementation('org.junit.jupiter:junit-jupiter-api:5.3.2')
+    contractCompile group: 'net.serenity-bdd', name: 'serenity-core', version: '2.0.11'
+    contractCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: '2.0.11'
+    contractCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '2.0.11'
+    contractCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '2.0.11'
+    contractCompile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
+    contractCompile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '1.0.4'
+    contractCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
+    contractRuntime("org.junit.jupiter:junit-jupiter-engine:5.3.2")
+
+    contractCompile('org.junit.jupiter:junit-jupiter-api:5.3.2')
+
+
     contractCompile sourceSets.main.runtimeClasspath
-    contractCompile sourceSets.test.runtimeClasspath
+//    contractCompile sourceSets.contract.runtimeClasspath
+
 }
 def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
@@ -356,9 +370,25 @@ bootJar {
 pact {
     publish {
         pactDirectory = 'target/pacts'
-        pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?:'http://localhost:80'
+        pactBrokerUrl = System.getenv("pactBrokerUrl") ?:'http://localhost1:80'
         tags = [System.getenv("PACT_BRANCH_NAME") ?:'Dev']
         version = versions.pact_version
+    }
+
+    serviceProviders{
+        'Finrem_Cos_Service'{
+            protocol = 'http'
+            host = 'localhost'
+            port = 8080
+            path = '/'
+            hasPactsWith('manyConsumers') {
+
+                // Will define a consumer for each pact file in the directory.
+                // Consumer name is read from contents of pact file
+                pactFileLocation = file('target/pacts')
+
+            }
+        }
     }
 }
 
@@ -375,7 +405,10 @@ task functional(type: Test) {
     finalizedBy aggregate
 }
 
-task contractTest(type: Test) {
+task contract(type: Test) {
+//    PACT_BROKER_FULL_URL = "https://pact-broker.platform.hmcts.net"
+    useJUnitPlatform()
+
     description = "Runs Contract Tests"
     setTestClassesDirs(sourceSets.contract.output.classesDirs)
     setClasspath(sourceSets.contract.runtimeClasspath)

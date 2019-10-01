@@ -83,7 +83,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     //TODO Fix it later when PRD service is up and running
     @Test
-    @Ignore
+//    @Ignore
     public void verifyPBAValidationTest() throws InterruptedException {
         Thread.sleep(120000);
         utils.validatePostSuccess(pbaValidate, "pba-validate1.json" ,consentedDir );
