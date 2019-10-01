@@ -174,7 +174,19 @@ dependencyManagement {
             entry 'jackson-core'
             entry 'jackson-databind'
         }
+
         dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
+
+        // solves CVE-2014-3488, CVE-2015-2156, CVE-2019-16869
+        dependencySet(group: 'io.netty', version: '4.1.42.Final') {
+            entry 'netty-buffer'
+            entry 'netty-codec'
+            entry 'netty-codec-http'
+            entry 'netty-common'
+            entry 'netty-handler'
+            entry 'netty-resolver'
+            entry 'netty-transport'
+        }
     }
 }
 
