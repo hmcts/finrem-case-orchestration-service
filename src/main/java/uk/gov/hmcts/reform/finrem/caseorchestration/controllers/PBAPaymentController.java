@@ -47,6 +47,14 @@ public class PBAPaymentController implements BaseController {
         log.info("Received request for PBA payment for consented . Auth token: {}, Case request : {}", authToken,
                 callbackRequest);
 
+        log.info("************  Sleeping Before Processing PBA Payment");
+        try {
+            Thread.sleep(300 * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        log.info("************  Processing PBA Payment");
+
         validateCaseData(callbackRequest);
 
         final Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
@@ -66,6 +74,7 @@ public class PBAPaymentController implements BaseController {
         } else {
             mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
         }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
     }
 
