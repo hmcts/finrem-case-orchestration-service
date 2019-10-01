@@ -2,5 +2,10 @@ java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   environment:
+    REFORM_ENVIRONMENT: aat
+    AUTH_PROVIDER_SERVICE_CLIENT_BASEURL : "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     IDAM_API_URL: "https://idam-api.aat.platform.hmcts.net"
-    SWAGGER_ENABLED: true
+    IDAM_S2S_URL : "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+    DOCUMENT_GENERATOR_SERVICE_API_BASEURL : "http://finrem-dgcs-aat.service.core-compute-aat.internal"
+    FINREM_NOTIFICATION_SERVICE_BASE_URL : "http://finrem-ns-aat.service.core-compute-aat.internal"
+    PAYMENT_SERVICE_API_BASEURL : "http://finrem-ps-aat.service.core-compute-aat.internal"

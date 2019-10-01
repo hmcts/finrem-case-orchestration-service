@@ -381,3 +381,4 @@ task contractTest(type: Test) {
     setClasspath(sourceSets.contract.runtimeClasspath)
     finalizedBy aggregate
 }
+
