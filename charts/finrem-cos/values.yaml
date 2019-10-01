@@ -1,5 +1,4 @@
 java:
-  aadIdentityName: finrem
   ingressHost: "finrem-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
   applicationPort: '9000'
   livenessPath: '/health'
@@ -11,6 +10,7 @@ java:
     SWAGGER_ENABLED: false
   keyVaults:
     finrem:
+      resourceGroup: finrem
       secrets:
         - finrem-doc-s2s-auth-secret
         - idam-secret
