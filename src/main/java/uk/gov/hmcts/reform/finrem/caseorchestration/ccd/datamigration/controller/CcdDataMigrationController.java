@@ -46,57 +46,61 @@ public class CcdDataMigrationController {
     public CallbackResponse migrate(
             @RequestHeader(value = "Authorization") final String authorisationToken,
             @RequestBody @ApiParam("CaseData") final CallbackRequest ccdRequest) {
-        log.info("ccdMigrationRequest >>> authorisationToken {}, ccdRequest {}", authorisationToken, ccdRequest);
+        log.info("Financial Remedy Migration: ccdMigrationRequest >>> authorisationToken {}, ccdRequest {}",
+                authorisationToken, ccdRequest);
         final Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
         boolean migrationRequired = false;
         final Object caseId = ccdRequest.getCaseDetails().getId();
         final Object judgeAllocated = caseData.get(JUDGE_ALLOCATED);
-
+        log.info("Financial Remedy Migration: Value for judgeAllocated  >>> {}", judgeAllocated);
         if (nonNull(judgeAllocated) && !ObjectUtils.isEmpty(judgeAllocated)) {
             if (judgeAllocated instanceof String) {
                 final String value = Objects.toString(judgeAllocated);
                 caseData.put(JUDGE_ALLOCATED, new String[]{value});
             }
-            log.info("Migrating value for judgeAllocated  >>> {}", caseId);
+            log.info("Financial Remedy Migration: Migrating value for judgeAllocated  >>> {}", caseId);
             migrationRequired = true;
         }
 
         final Object allocatedCourtList = caseData.get(ALLOCATED_COURT_LIST);
+        log.info("Financial Remedy Migration: Value for allocatedCourtList  >>> {}", allocatedCourtList);
         if (nonNull(allocatedCourtList) && !ObjectUtils.isEmpty(allocatedCourtList)) {
             if (allocatedCourtList instanceof String) {
                 courtData(caseData, ALLOCATED_COURT_LIST, NOTTINGHAM_COURT_LIST, CFC_COURT_LIST);
             }
-            log.info("Migrating value for allocatedCourtList  >>> {}", caseId);
             migrationRequired = true;
         }
 
         final Object allocatedCourtListSL = caseData.get(ALLOCATED_COURT_LIST_SL);
+        log.info("Financial Remedy Migration: Value for allocatedCourtListSL  >>> {}", allocatedCourtListSL);
         if (nonNull(allocatedCourtListSL) && !ObjectUtils.isEmpty(allocatedCourtListSL)) {
             if (allocatedCourtListSL instanceof String) {
                 courtData(caseData, ALLOCATED_COURT_LIST_SL, NOTTINGHAM_COURT_LIST_SL, CFC_COURT_LIST_SL);
             }
-            log.info("Migrating value for allocatedCourtListSL  >>> {}", caseId);
             migrationRequired = true;
         }
 
         final Object allocatedCourtListGA = caseData.get(ALLOCATED_COURT_LIST_GA);
+        log.info("Financial Remedy Migration: Value for allocatedCourtListGA  >>> {}", allocatedCourtListGA);
         if (nonNull(allocatedCourtListGA) && !ObjectUtils.isEmpty(allocatedCourtListGA)) {
             if (allocatedCourtListGA instanceof String) {
                 courtData(caseData, ALLOCATED_COURT_LIST_GA, NOTTINGHAM_COURT_LIST_GA, CFC_COURT_LIST_GA);
             }
-            log.info("Migrating value for allocatedCourtListGA  >>> {}", caseId);
             migrationRequired = true;
         }
 
         if (migrationRequired) {
+            log.info("Financial Remedy Migration: End of case migration");
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
         } else {
+            log.info("Financial Remedy Migration: Returning Value without migration");
             return AboutToStartOrSubmitCallbackResponse.builder().build();
         }
     }
 
     private void courtData(final Map<String, Object> caseData, final String allocatedCourtListKey,
                            final String nottinghamCourtListKey, final String cfcCourtListKey) {
+        log.info("Financial Remedy Migration: Migrating value for   >>> {}", allocatedCourtListKey);
         final Object allocatedCourtList = caseData.get(allocatedCourtListKey);
         final String allocatedCourtListStr = Objects.toString(allocatedCourtList);
         final Map<String, Object> map = new HashMap<>();
