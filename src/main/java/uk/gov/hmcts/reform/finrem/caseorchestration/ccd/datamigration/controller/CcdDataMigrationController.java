@@ -46,24 +46,24 @@ public class CcdDataMigrationController {
     public CallbackResponse migrate(
             @RequestHeader(value = "Authorization") final String authorisationToken,
             @RequestBody @ApiParam("CaseData") final CallbackRequest ccdRequest) {
-        log.info("Financial Remedy Migration: ccdMigrationRequest >>> authorisationToken {}, ccdRequest {}",
+        log.info("FR Migration: ccdMigrationRequest >>> authorisationToken {}, ccdRequest {}",
                 authorisationToken, ccdRequest);
         final Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
         boolean migrationRequired = false;
         final Object caseId = ccdRequest.getCaseDetails().getId();
         final Object judgeAllocated = caseData.get(JUDGE_ALLOCATED);
-        log.info("Financial Remedy Migration: Value for judgeAllocated  >>> {}", judgeAllocated);
+        log.info("FR Migration: {} ,judgeAllocated : {}", caseId, judgeAllocated);
         if (nonNull(judgeAllocated) && !ObjectUtils.isEmpty(judgeAllocated)) {
             if (judgeAllocated instanceof String) {
                 final String value = Objects.toString(judgeAllocated);
                 caseData.put(JUDGE_ALLOCATED, new String[]{value});
             }
-            log.info("Financial Remedy Migration: Migrating value for judgeAllocated  >>> {}", caseId);
+            log.info("FR Migration: {} Migrating judgeAllocated.", caseId);
             migrationRequired = true;
         }
 
         final Object allocatedCourtList = caseData.get(ALLOCATED_COURT_LIST);
-        log.info("Financial Remedy Migration: Value for allocatedCourtList  >>> {}", allocatedCourtList);
+        log.info("FR Migration: {} ,allocatedCourtList :{}", caseId, allocatedCourtList);
         if (nonNull(allocatedCourtList) && !ObjectUtils.isEmpty(allocatedCourtList)) {
             if (allocatedCourtList instanceof String) {
                 courtData(caseData, ALLOCATED_COURT_LIST, NOTTINGHAM_COURT_LIST, CFC_COURT_LIST);
@@ -72,7 +72,7 @@ public class CcdDataMigrationController {
         }
 
         final Object allocatedCourtListSL = caseData.get(ALLOCATED_COURT_LIST_SL);
-        log.info("Financial Remedy Migration: Value for allocatedCourtListSL  >>> {}", allocatedCourtListSL);
+        log.info("FR Migration: {} , allocatedCourtListSL : {}", caseId, allocatedCourtListSL);
         if (nonNull(allocatedCourtListSL) && !ObjectUtils.isEmpty(allocatedCourtListSL)) {
             if (allocatedCourtListSL instanceof String) {
                 courtData(caseData, ALLOCATED_COURT_LIST_SL, NOTTINGHAM_COURT_LIST_SL, CFC_COURT_LIST_SL);
@@ -81,7 +81,7 @@ public class CcdDataMigrationController {
         }
 
         final Object allocatedCourtListGA = caseData.get(ALLOCATED_COURT_LIST_GA);
-        log.info("Financial Remedy Migration: Value for allocatedCourtListGA  >>> {}", allocatedCourtListGA);
+        log.info("FR Migration: {} , allocatedCourtListGA {}", caseId, allocatedCourtListGA);
         if (nonNull(allocatedCourtListGA) && !ObjectUtils.isEmpty(allocatedCourtListGA)) {
             if (allocatedCourtListGA instanceof String) {
                 courtData(caseData, ALLOCATED_COURT_LIST_GA, NOTTINGHAM_COURT_LIST_GA, CFC_COURT_LIST_GA);
@@ -90,17 +90,17 @@ public class CcdDataMigrationController {
         }
 
         if (migrationRequired) {
-            log.info("Financial Remedy Migration: End of case migration");
+            log.info("FR Migration: {}, End of case migration {} ", caseId, caseData);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
         } else {
-            log.info("Financial Remedy Migration: Returning Value without migration");
+            log.info("FR Migration:{} Returning without migration", caseId);
             return AboutToStartOrSubmitCallbackResponse.builder().build();
         }
     }
 
     private void courtData(final Map<String, Object> caseData, final String allocatedCourtListKey,
                            final String nottinghamCourtListKey, final String cfcCourtListKey) {
-        log.info("Financial Remedy Migration: Migrating value for   >>> {}", allocatedCourtListKey);
+        log.info("FR Migration: migrating {} ", allocatedCourtListKey);
         final Object allocatedCourtList = caseData.get(allocatedCourtListKey);
         final String allocatedCourtListStr = Objects.toString(allocatedCourtList);
         final Map<String, Object> map = new HashMap<>();
@@ -108,12 +108,12 @@ public class CcdDataMigrationController {
             map.put("region", "midlands");
             map.put("midlandsList", "nottingham");
             map.put("nottinghamCourtList", Objects.toString(caseData.get(nottinghamCourtListKey)));
-            caseData.put(nottinghamCourtListKey, null);
+            caseData.remove(nottinghamCourtListKey);
         } else if (allocatedCourtListStr.equalsIgnoreCase("cfc")) {
             map.put("region", "london");
             map.put("londonList", "cfc");
             map.put("cfcCourtList", Objects.toString(caseData.get(cfcCourtListKey)));
-            caseData.put(cfcCourtListKey, null);
+            caseData.remove(cfcCourtListKey);
         }
         caseData.put(allocatedCourtListKey, map);
     }

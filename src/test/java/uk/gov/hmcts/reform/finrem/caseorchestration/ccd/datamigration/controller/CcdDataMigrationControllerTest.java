@@ -90,17 +90,14 @@ public class CcdDataMigrationControllerTest {
                 .andExpect(jsonPath("$.data.allocatedCourtList.midlandsList", is("nottingham")))
                 .andExpect(jsonPath("$.data.allocatedCourtList.nottinghamCourtList",
                         is("FR_s_NottinghamList_8")))
-                .andExpect(jsonPath("$.data.nottinghamCourtList", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.data.allocatedCourtListSL.region", is("midlands")))
                 .andExpect(jsonPath("$.data.allocatedCourtListSL.midlandsList", is("nottingham")))
                 .andExpect(jsonPath("$.data.allocatedCourtListSL.nottinghamCourtList",
                         is("FR_s_NottinghamList_1")))
-                .andExpect(jsonPath("$.data.nottinghamCourtListSL", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.data.allocatedCourtListGA.region", is("midlands")))
                 .andExpect(jsonPath("$.data.allocatedCourtListGA.midlandsList", is("nottingham")))
                 .andExpect(jsonPath("$.data.allocatedCourtListGA.nottinghamCourtList",
                         is("FR_s_NottinghamList_2")))
-                .andExpect(jsonPath("$.data.nottinghamCourtListGA", isEmptyOrNullString()))
 
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
@@ -121,19 +118,16 @@ public class CcdDataMigrationControllerTest {
                 .andExpect(jsonPath("$.data.allocatedCourtList.londonList", is("cfc")))
                 .andExpect(jsonPath("$.data.allocatedCourtList.cfcCourtList",
                         is("FR_s_CFCList_1")))
-                .andExpect(jsonPath("$.data.cfcCourtList", isEmptyOrNullString()))
 
                 .andExpect(jsonPath("$.data.allocatedCourtListSL.region", is("london")))
                 .andExpect(jsonPath("$.data.allocatedCourtListSL.londonList", is("cfc")))
                 .andExpect(jsonPath("$.data.allocatedCourtListSL.cfcCourtList",
                         is("FR_s_CFCList_2")))
-                .andExpect(jsonPath("$.data.cfcCourtListSL", isEmptyOrNullString()))
 
                 .andExpect(jsonPath("$.data.allocatedCourtListGA.region", is("london")))
                 .andExpect(jsonPath("$.data.allocatedCourtListGA.londonList", is("cfc")))
                 .andExpect(jsonPath("$.data.allocatedCourtListGA.cfcCourtList",
                         is("FR_s_CFCList_3")))
-                .andExpect(jsonPath("$.data.cfcCourtListGA", isEmptyOrNullString()))
 
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
