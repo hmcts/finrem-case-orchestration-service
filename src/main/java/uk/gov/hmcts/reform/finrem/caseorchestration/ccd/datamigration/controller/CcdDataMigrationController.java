@@ -56,7 +56,6 @@ public class CcdDataMigrationController {
         log.info("FR Migration: {} ,judgeAllocated : {}", caseId, judgeAllocated);
         if (nonNull(judgeAllocated) && !ObjectUtils.isEmpty(judgeAllocated)) {
             if (judgeAllocated instanceof String) {
-                final String value = Objects.toString(judgeAllocated);
                 caseData.put(JUDGE_ALLOCATED, Arrays.asList(judgeAllocated));
             }
             log.info("FR Migration: {} Migrating judgeAllocated.", caseId);
