@@ -55,7 +55,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         return paymentResponse;
     }
 
-    @Ignore
     @Test
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
         doEmtpyCaseDataSetUp();
@@ -89,7 +88,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         when(feeService.getApplicationFee(CONSENTED)).thenReturn(fee(CONSENTED));
     }
 
-    @Ignore
     @Test
     public void shouldNotDoPBAPaymentWhenPaymentIsDoneWithHWF() throws Exception {
         doHWFSetUp();
@@ -109,7 +107,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         verify(pbaPaymentService, never()).makePayment(anyString(), anyString(), any());
     }
 
-    @Ignore
     @Test
     public void shouldReturnErrorWhenPbaPaymentFails() throws Exception {
         doPBASetUp(false);
@@ -124,7 +121,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
 
     }
 
-    @Ignore
     @Test
     public void shouldDoPbaPayment() throws Exception {
         doPBASetUp(true);
@@ -143,7 +139,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         verify(pbaPaymentService, times(1)).makePayment(anyString(), anyString(), any());
     }
 
-    @Ignore
     @Test
     public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
