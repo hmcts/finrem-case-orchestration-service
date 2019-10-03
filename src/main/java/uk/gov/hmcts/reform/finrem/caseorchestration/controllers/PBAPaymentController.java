@@ -57,6 +57,7 @@ public class PBAPaymentController implements BaseController {
             Thread.sleep(300 * 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
         log.info("************  Processing PBA Payment");
 
