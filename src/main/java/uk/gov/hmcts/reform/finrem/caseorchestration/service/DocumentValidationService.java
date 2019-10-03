@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.google.common.collect.ImmutableList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,11 +67,6 @@ public class DocumentValidationService {
 
     private DocumentValidationResponse validatePensionDocuments(String authorizationToken,
                                                                 Map<String, Object> caseData) {
-        if (documentHelper.isInvalidPensionDocuments(caseData)) {
-            return DocumentValidationResponse.builder()
-                .errors(ImmutableList.of("Please upload a document"))
-                .build();
-        }
 
         List<CaseDocument> caseDocuments = documentHelper.getPensionDocumentsData(caseData);
         if (!caseDocuments.isEmpty()) {
