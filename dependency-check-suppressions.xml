@@ -149,23 +149,23 @@
         <cve>CVE-2019-10102</cve>
         <cve>CVE-2019-10103</cve>
         <cve>CVE-2012-6708</cve>
-
         <cve>CVE-2015-9251</cve>
-
         <cve>CVE-2019-11358</cve>
-
         <cve>CVE-2019-16370</cve>
         <cve>CVE-2019-14540</cve>
         <cve>CVE-2019-16335</cve>
         <cve>CVE-2019-16370</cve>
-
-        <cve>CVE-2014-3488</cve>
-        <cve>CVE-2015-2156</cve>
-        <cve>CVE-2019-16869</cve>
-
-
     </suppress>
 
+    <suppress>
+        <notes><![CDATA[
+			Netty before 4.1.42.
+			]]></notes>
+        <gav regex="true">.*</gav>
+        <cve>CVE-2019-16869</cve>
+        <cve>CVE-2015-2156</cve>
+        <cve>CVE-2014-3488</cve>
+    </suppress>
 <!--    <suppress>-->
 <!--        <notes><![CDATA[-->
 <!--   file name: jetty-webapp-9.4.14.v20181114.jar-->
