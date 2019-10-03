@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -55,8 +56,7 @@ public class CcdDataMigrationController {
         log.info("FR Migration: {} ,judgeAllocated : {}", caseId, judgeAllocated);
         if (nonNull(judgeAllocated) && !ObjectUtils.isEmpty(judgeAllocated)) {
             if (judgeAllocated instanceof String) {
-                final String value = Objects.toString(judgeAllocated);
-                caseData.put(JUDGE_ALLOCATED, new String[]{value});
+                caseData.put(JUDGE_ALLOCATED, Arrays.asList(judgeAllocated));
             }
             log.info("FR Migration: {} Migrating judgeAllocated.", caseId);
             migrationRequired = true;
