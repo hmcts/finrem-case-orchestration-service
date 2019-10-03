@@ -57,9 +57,10 @@ public class CcdDataMigrationController {
         if (nonNull(judgeAllocated) && !ObjectUtils.isEmpty(judgeAllocated)) {
             if (judgeAllocated instanceof String) {
                 caseData.put(JUDGE_ALLOCATED, Arrays.asList(judgeAllocated));
+                log.info("FR Migration: {} Migrating judgeAllocated.", caseId);
+                migrationRequired = true;
             }
-            log.info("FR Migration: {} Migrating judgeAllocated.", caseId);
-            migrationRequired = true;
+
         }
 
         final Object allocatedCourtList = caseData.get(ALLOCATED_COURT_LIST);
@@ -67,8 +68,8 @@ public class CcdDataMigrationController {
         if (nonNull(allocatedCourtList) && !ObjectUtils.isEmpty(allocatedCourtList)) {
             if (allocatedCourtList instanceof String) {
                 courtData(caseData, ALLOCATED_COURT_LIST, NOTTINGHAM_COURT_LIST, CFC_COURT_LIST);
+                migrationRequired = true;
             }
-            migrationRequired = true;
         }
 
         final Object allocatedCourtListSL = caseData.get(ALLOCATED_COURT_LIST_SL);
@@ -76,8 +77,8 @@ public class CcdDataMigrationController {
         if (nonNull(allocatedCourtListSL) && !ObjectUtils.isEmpty(allocatedCourtListSL)) {
             if (allocatedCourtListSL instanceof String) {
                 courtData(caseData, ALLOCATED_COURT_LIST_SL, NOTTINGHAM_COURT_LIST_SL, CFC_COURT_LIST_SL);
+                migrationRequired = true;
             }
-            migrationRequired = true;
         }
 
         final Object allocatedCourtListGA = caseData.get(ALLOCATED_COURT_LIST_GA);
@@ -85,8 +86,8 @@ public class CcdDataMigrationController {
         if (nonNull(allocatedCourtListGA) && !ObjectUtils.isEmpty(allocatedCourtListGA)) {
             if (allocatedCourtListGA instanceof String) {
                 courtData(caseData, ALLOCATED_COURT_LIST_GA, NOTTINGHAM_COURT_LIST_GA, CFC_COURT_LIST_GA);
+                migrationRequired = true;
             }
-            migrationRequired = true;
         }
 
         if (migrationRequired) {
