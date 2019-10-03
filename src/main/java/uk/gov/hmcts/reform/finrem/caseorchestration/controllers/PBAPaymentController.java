@@ -48,17 +48,14 @@ public class PBAPaymentController implements BaseController {
     @PostMapping(path = "/pba-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPayment(
             @RequestHeader(value = "Authorization", required = false) String authToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
+            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) throws InterruptedException {
         log.info("Received request for PBA payment for consented . Auth token: {}, Case request : {}", authToken,
                 callbackRequest);
 
         log.info("************  Sleeping Before Processing PBA Payment for sec " + (pbaPaymentDelayForTest));
-        try {
-            Thread.sleep(pbaPaymentDelayForTest * 1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+
+        Thread.sleep(pbaPaymentDelayForTest * 1000);
+
         log.info("************  Processing PBA Payment");
 
         validateCaseData(callbackRequest);
