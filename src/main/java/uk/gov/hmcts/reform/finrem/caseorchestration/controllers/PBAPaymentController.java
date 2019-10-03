@@ -42,7 +42,7 @@ public class PBAPaymentController implements BaseController {
 
     // is used for Duplicate payments testing.
     @Value("${duplicate.pba.payments.test.delay}")
-    private int pbaPaymentDelayForTest;
+    private long pbaPaymentDelayForTest;
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
