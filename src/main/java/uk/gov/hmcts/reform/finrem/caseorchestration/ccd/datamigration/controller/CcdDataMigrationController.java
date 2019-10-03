@@ -54,38 +54,34 @@ public class CcdDataMigrationController {
         final Object caseId = ccdRequest.getCaseDetails().getId();
         final Object judgeAllocated = caseData.get(JUDGE_ALLOCATED);
         log.info("FR Migration: {} ,judgeAllocated : {}", caseId, judgeAllocated);
-        if (nonNull(judgeAllocated) && !ObjectUtils.isEmpty(judgeAllocated)) {
-            if (judgeAllocated instanceof String) {
-                caseData.put(JUDGE_ALLOCATED, Arrays.asList(judgeAllocated));
-            }
+        if (nonNull(judgeAllocated) && !ObjectUtils.isEmpty(judgeAllocated)
+                    && judgeAllocated instanceof String) {
+            caseData.put(JUDGE_ALLOCATED, Arrays.asList(judgeAllocated));
             log.info("FR Migration: {} Migrating judgeAllocated.", caseId);
             migrationRequired = true;
         }
 
         final Object allocatedCourtList = caseData.get(ALLOCATED_COURT_LIST);
         log.info("FR Migration: {} ,allocatedCourtList :{}", caseId, allocatedCourtList);
-        if (nonNull(allocatedCourtList) && !ObjectUtils.isEmpty(allocatedCourtList)) {
-            if (allocatedCourtList instanceof String) {
-                courtData(caseData, ALLOCATED_COURT_LIST, NOTTINGHAM_COURT_LIST, CFC_COURT_LIST);
-            }
+        if (nonNull(allocatedCourtList) && !ObjectUtils.isEmpty(allocatedCourtList)
+                    && allocatedCourtList instanceof String) {
+            courtData(caseData, ALLOCATED_COURT_LIST, NOTTINGHAM_COURT_LIST, CFC_COURT_LIST);
             migrationRequired = true;
         }
 
         final Object allocatedCourtListSL = caseData.get(ALLOCATED_COURT_LIST_SL);
         log.info("FR Migration: {} , allocatedCourtListSL : {}", caseId, allocatedCourtListSL);
-        if (nonNull(allocatedCourtListSL) && !ObjectUtils.isEmpty(allocatedCourtListSL)) {
-            if (allocatedCourtListSL instanceof String) {
-                courtData(caseData, ALLOCATED_COURT_LIST_SL, NOTTINGHAM_COURT_LIST_SL, CFC_COURT_LIST_SL);
-            }
+        if (nonNull(allocatedCourtListSL) && !ObjectUtils.isEmpty(allocatedCourtListSL)
+                    && allocatedCourtListSL instanceof String) {
+            courtData(caseData, ALLOCATED_COURT_LIST_SL, NOTTINGHAM_COURT_LIST_SL, CFC_COURT_LIST_SL);
             migrationRequired = true;
         }
 
         final Object allocatedCourtListGA = caseData.get(ALLOCATED_COURT_LIST_GA);
         log.info("FR Migration: {} , allocatedCourtListGA {}", caseId, allocatedCourtListGA);
-        if (nonNull(allocatedCourtListGA) && !ObjectUtils.isEmpty(allocatedCourtListGA)) {
-            if (allocatedCourtListGA instanceof String) {
-                courtData(caseData, ALLOCATED_COURT_LIST_GA, NOTTINGHAM_COURT_LIST_GA, CFC_COURT_LIST_GA);
-            }
+        if (nonNull(allocatedCourtListGA) && !ObjectUtils.isEmpty(allocatedCourtListGA)
+                    && allocatedCourtListGA instanceof String) {
+            courtData(caseData, ALLOCATED_COURT_LIST_GA, NOTTINGHAM_COURT_LIST_GA, CFC_COURT_LIST_GA);
             migrationRequired = true;
         }
 
