@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +40,10 @@ public class PBAPaymentController implements BaseController {
     private final FeeService feeService;
     private final PBAPaymentService pbaPaymentService;
 
+    // is used for Duplicate payments testing.
+    @Value("${duplicate.pba.payments.test.delay}")
+    private int pbaPaymentDelayForTest;
+
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPayment(
@@ -47,9 +52,9 @@ public class PBAPaymentController implements BaseController {
         log.info("Received request for PBA payment for consented . Auth token: {}, Case request : {}", authToken,
                 callbackRequest);
 
-        log.info("************  Sleeping Before Processing PBA Payment");
+        log.info("************  Sleeping Before Processing PBA Payment for sec " + (pbaPaymentDelayForTest));
         try {
-            Thread.sleep(300 * 1000);
+            Thread.sleep(pbaPaymentDelayForTest * 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
