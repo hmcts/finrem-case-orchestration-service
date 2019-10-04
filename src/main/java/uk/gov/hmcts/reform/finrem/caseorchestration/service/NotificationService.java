@@ -176,56 +176,49 @@ public class NotificationService {
     }
 
     private String getWalesFRC(HashMap allocatedCourtMap) {
-        Object walesList = allocatedCourtMap.get("walesList");
-        if (Objects.nonNull(walesList)) {
-            if (NEWPORT.equalsIgnoreCase(walesList.toString())) {
-                return NEWPORT;
-            } else if (SWANSEA.equalsIgnoreCase(walesList.toString())) {
-                return SWANSEA;
-            }
+        String walesList = (String) allocatedCourtMap.get("walesList");
+        if (NEWPORT.equalsIgnoreCase(walesList)) {
+            return NEWPORT;
+        } else if (SWANSEA.equalsIgnoreCase(walesList)) {
+            return SWANSEA;
         }
         return EMPTY;
     }
 
     private String getSouthEastFRC(HashMap allocatedCourtMap) {
-        Object southEastList = allocatedCourtMap.get("southEastList");
-        if (Objects.nonNull(southEastList)) {
-            if (KENTFRC.equalsIgnoreCase(southEastList.toString())) {
-                return KENTFRC;
-            }
+        String southEastList = (String) allocatedCourtMap.get("southEastList");
+        if (KENTFRC.equalsIgnoreCase(southEastList)) {
+            return KENTFRC;
         }
         return EMPTY;
     }
 
     private String getNorthEastFRC(HashMap allocatedCourtMap) {
-        Object northEastList = allocatedCourtMap.get("northEastList");
-        if (Objects.nonNull(northEastList)) {
-            if (CLEAVELAND.equalsIgnoreCase(northEastList.toString())) {
-                return CLEAVELAND;
-            } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList.toString())) {
-                return NWYORKSHIRE;
-            } else if (HSYORKSHIRE.equalsIgnoreCase(northEastList.toString())) {
-                return HSYORKSHIRE;
-            }
+        String northEastList = (String) allocatedCourtMap.get("northEastList");
+        if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
+            return CLEAVELAND;
+        } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList.toString())) {
+            return NWYORKSHIRE;
+        } else if (HSYORKSHIRE.equalsIgnoreCase(northEastList.toString())) {
+            return HSYORKSHIRE;
         }
         return null;
     }
 
     private String getNorthWestFRC(HashMap allocatedCourtMap) {
-        Object northWestList = allocatedCourtMap.get("northWestList");
-        if (Objects.nonNull(northWestList)) {
-            if ("liverpool".equalsIgnoreCase(northWestList.toString())) {
-                return "liverpool";
-            } else if ("manchester".equalsIgnoreCase(northWestList.toString())) {
-                return "manchester";
-            }
+        String northWestList = (String) allocatedCourtMap.get("northWestList");
+        if ("liverpool".equalsIgnoreCase(northWestList)) {
+            return "liverpool";
+        } else if ("manchester".equalsIgnoreCase(northWestList)) {
+            return "manchester";
         }
         return EMPTY;
     }
 
+
     private String getLondonFRC(HashMap allocatedCourtMap) {
-        Object londonList = allocatedCourtMap.get("londonList");
-        if ("cfc".equalsIgnoreCase(londonList.toString())) {
+        String londonList = (String) allocatedCourtMap.get("londonList");
+        if ("cfc".equalsIgnoreCase(londonList)) {
             return "cfc";
         }
         return EMPTY;
@@ -233,10 +226,10 @@ public class NotificationService {
 
 
     private String getMidlandFRC(HashMap allocatedCourtMap) {
-        Object midlandsList = allocatedCourtMap.get("midlandsList");
-        if (NOTTINGHAM.equalsIgnoreCase(midlandsList.toString())) {
+        String midlandsList = (String) allocatedCourtMap.get("midlandsList");
+        if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
             return NOTTINGHAM;
-        } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList.toString())) {
+        } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
             return BIRMINGHAM;
         }
         return EMPTY;
