@@ -90,10 +90,10 @@ public class CcdDataMigrationControllerTest {
                 .andExpect(jsonPath("$.data.allocatedCourtList.midlandsList", is("nottingham")))
                 .andExpect(jsonPath("$.data.allocatedCourtList.nottinghamCourtList",
                         is("FR_s_NottinghamList_8")))
-                .andExpect(jsonPath("$.data.allocatedCourtListSL.region", is("midlands")))
-                .andExpect(jsonPath("$.data.allocatedCourtListSL.midlandsList", is("nottingham")))
-                .andExpect(jsonPath("$.data.allocatedCourtListSL.nottinghamCourtList",
-                        is("FR_s_NottinghamList_1")))
+                .andExpect(jsonPath("$.data.regionListSL", is("midlands")))
+                .andExpect(jsonPath("$.data.allocatedCourtListSL", is("nottingham")))
+                .andExpect(jsonPath("$.data.nottinghamCourtListSL", is("FR_s_NottinghamList_1")))
+
                 .andExpect(jsonPath("$.data.allocatedCourtListGA.region", is("midlands")))
                 .andExpect(jsonPath("$.data.allocatedCourtListGA.midlandsList", is("nottingham")))
                 .andExpect(jsonPath("$.data.allocatedCourtListGA.nottinghamCourtList",
@@ -119,10 +119,9 @@ public class CcdDataMigrationControllerTest {
                 .andExpect(jsonPath("$.data.allocatedCourtList.cfcCourtList",
                         is("FR_s_CFCList_1")))
 
-                .andExpect(jsonPath("$.data.allocatedCourtListSL.region", is("london")))
-                .andExpect(jsonPath("$.data.allocatedCourtListSL.londonList", is("cfc")))
-                .andExpect(jsonPath("$.data.allocatedCourtListSL.cfcCourtList",
-                        is("FR_s_CFCList_2")))
+                .andExpect(jsonPath("$.data.regionListSL", is("london")))
+                .andExpect(jsonPath("$.data.allocatedCourtListSL", is("cfc")))
+                .andExpect(jsonPath("$.data.cfcCourtListSL", is("FR_s_CFCList_2")))
 
                 .andExpect(jsonPath("$.data.allocatedCourtListGA.region", is("london")))
                 .andExpect(jsonPath("$.data.allocatedCourtListGA.londonList", is("cfc")))
