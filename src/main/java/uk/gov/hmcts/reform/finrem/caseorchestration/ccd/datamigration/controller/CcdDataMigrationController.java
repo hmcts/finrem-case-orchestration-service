@@ -110,12 +110,12 @@ public class CcdDataMigrationController {
             map.put("region", "midlands");
             map.put("midlandsList", "nottingham");
             map.put("nottinghamCourtList", Objects.toString(caseData.get(nottinghamCourtListKey)));
-            caseData.remove(nottinghamCourtListKey);
+            caseData.put(nottinghamCourtListKey,null);
         } else if (allocatedCourtListStr.equalsIgnoreCase("cfc")) {
             map.put("region", "london");
             map.put("londonList", "cfc");
             map.put("cfcCourtList", Objects.toString(caseData.get(cfcCourtListKey)));
-            caseData.remove(cfcCourtListKey);
+            caseData.put(cfcCourtListKey,null);
         }
         caseData.put(allocatedCourtListKey, map);
     }
