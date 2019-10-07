@@ -290,19 +290,81 @@ public class NotificationServiceTest extends BaseServiceTest {
         }
     }
 
+    @Test
+    public void sendNoContestedHwfSuccessfulNotificationEmailForNottingham() {
+        String courtList = "{\"region\": \"midlands\", \"midlandsList\" :null,"
+                + " \"nottinghamCourtList\" :null}";
+        callbackRequest = getContestedCallbackRequest(courtList);
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+    }
 
-    private CallbackRequest getCallbackRequest() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put("d81Question", "No");
-        caseData.put("solicitorEmail", "test@test.com");
-        caseData.put("solicitorName", "solicitorName");
-        caseData.put("solicitorReference", "56789");
-        return CallbackRequest.builder()
-                .caseDetails(CaseDetails.builder()
-                        .id(12345L)
-                        .data(caseData)
-                        .build())
-                .build();
+    @Test
+    public void sendNoContestedHwfSuccessfulNotificationEmailForLondon() {
+        String courtList = "{\"region\": \"london\", \"londonList\" :null,"
+                + " \"londonCourtList\" : null}";
+        callbackRequest = getContestedCallbackRequest(courtList);
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+    }
+
+    @Test
+    public void sendNoContestedHwfSuccessfulNotificationEmailForNoSelectedRegion() {
+        String courtList = "{\"region\": null, \"londonList\" :null,"
+                + " \"londonCourtList\" : null}";
+        callbackRequest = getContestedCallbackRequest(courtList);
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+    }
+
+    @Test
+    public void sendNoContestedHwfSuccessfulNotificationEmailForLiverPool() {
+        String courtList = "{\"region\": \"northwest\", \"northWestList\" :null,"
+                + " \"liverpoolCourtList\" : null}";
+        callbackRequest = getContestedCallbackRequest(courtList);
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+    }
+
+    @Test
+    public void sendNoContestedHwfSuccessfulNotificationEmailForKent() {
+        String courtList = "{\"region\": \"southeast\", \"southEastList\" :null,"
+                + " \"kentCourtList\" : null}";
+        callbackRequest = getContestedCallbackRequest(courtList);
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+    }
+
+    @Test
+    public void sendNoContestedHwfSuccessfulNotificationEmailForCleaveLand() {
+        String courtList = "{\"region\": \"northeast\", \"northEastList\" :null,"
+                + " \"cleavelandCourtList\" :null}";
+        callbackRequest = getContestedCallbackRequest(courtList);
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+    }
+
+    @Test
+    public void sendNoContestedHwfSuccessfulNotificationEmailForSwansea() {
+        String courtList = "{\"region\": \"wales\", \"walesList\" :null,"
+                + " \"swanseaCourtList\" : null}";
+        callbackRequest = getContestedCallbackRequest(courtList);
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
     }
 
     private CallbackRequest getContestedCallbackRequest(String courtList) {
@@ -313,6 +375,20 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(SOLICITOR_REFERENCE, "56789");
         caseData.put(ALLOCATED_COURT_LIST, courtList);
         caseData.put(BULK_PRINT_LETTER_ID_RES, "notingham");
+        return CallbackRequest.builder()
+                .caseDetails(CaseDetails.builder()
+                        .id(12345L)
+                        .data(caseData)
+                        .build())
+                .build();
+    }
+
+    private CallbackRequest getCallbackRequest() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("d81Question", "No");
+        caseData.put("solicitorEmail", "test@test.com");
+        caseData.put("solicitorName", "solicitorName");
+        caseData.put("solicitorReference", "56789");
         return CallbackRequest.builder()
                 .caseDetails(CaseDetails.builder()
                         .id(12345L)

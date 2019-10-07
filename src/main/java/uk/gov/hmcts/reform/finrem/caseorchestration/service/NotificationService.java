@@ -197,12 +197,12 @@ public class NotificationService {
         String northEastList = (String) allocatedCourtMap.get("northEastList");
         if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
             return CLEAVELAND;
-        } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList.toString())) {
+        } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
             return NWYORKSHIRE;
-        } else if (HSYORKSHIRE.equalsIgnoreCase(northEastList.toString())) {
+        } else if (HSYORKSHIRE.equalsIgnoreCase(northEastList)) {
             return HSYORKSHIRE;
         }
-        return null;
+        return EMPTY;
     }
 
     private String getNorthWestFRC(HashMap allocatedCourtMap) {
