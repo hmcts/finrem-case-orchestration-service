@@ -120,8 +120,9 @@ public class CcdDataMigrationControllerTest {
                         is("FR_s_CFCList_1")))
 
                 .andExpect(jsonPath("$.data.regionListSL", is("london")))
-                .andExpect(jsonPath("$.data.allocatedCourtListSL", is("cfc")))
+                .andExpect(jsonPath("$.data.londonFRCListSL", is("cfc")))
                 .andExpect(jsonPath("$.data.cfcCourtListSL", is("FR_s_CFCList_2")))
+                .andExpect(jsonPath("$.data.allocatedCourtListSL", isEmptyOrNullString()))
 
                 .andExpect(jsonPath("$.data.allocatedCourtListGA.region", is("london")))
                 .andExpect(jsonPath("$.data.allocatedCourtListGA.londonList", is("cfc")))

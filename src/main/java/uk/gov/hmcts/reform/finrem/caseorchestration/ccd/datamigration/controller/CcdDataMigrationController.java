@@ -79,6 +79,8 @@ public class CcdDataMigrationController {
                 migrationRequired = true;
             } else if (allocatedCourtListStr.equalsIgnoreCase("cfc")) {
                 caseData.put("regionListSL", "london");
+                caseData.put("allocatedCourtListSL",null);
+                caseData.put("londonFRCListSL","cfc");
                 migrationRequired = true;
             }
         }
