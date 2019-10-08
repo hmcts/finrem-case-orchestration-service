@@ -74,6 +74,7 @@ public class CcdDataMigrationController {
         if (nonNull(allocatedCourtListSL) && !ObjectUtils.isEmpty(allocatedCourtListSL)
                     && allocatedCourtListSL instanceof String) {
             final String allocatedCourtListStr = Objects.toString(allocatedCourtList);
+            log.info("FR Migration: {} allocatedCourtListSL ", allocatedCourtListStr);
             if (allocatedCourtListStr.equalsIgnoreCase("nottingham")) {
                 log.info("FR Migration: {} nottingham ", caseId);
                 caseData.put("regionListSL", "midlands");
