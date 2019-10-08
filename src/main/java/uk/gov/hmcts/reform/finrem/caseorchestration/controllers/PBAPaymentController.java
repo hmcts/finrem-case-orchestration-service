@@ -52,12 +52,6 @@ public class PBAPaymentController implements BaseController {
         log.info("Received request for PBA payment for consented . Auth token: {}, Case request : {}", authToken,
                 callbackRequest);
 
-        log.info("************  Sleeping Before Processing PBA Payment for sec " + (pbaPaymentDelayForTest));
-
-        Thread.sleep(pbaPaymentDelayForTest * 1000);
-
-        log.info("************  Processing PBA Payment");
-
         validateCaseData(callbackRequest);
 
         final Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
