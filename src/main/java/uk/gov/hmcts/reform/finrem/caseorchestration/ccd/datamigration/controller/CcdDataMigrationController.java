@@ -49,10 +49,11 @@ public class CcdDataMigrationController {
             @RequestBody @ApiParam("CaseData") final CallbackRequest ccdRequest) {
         log.info("FRMig: ccdMigrationRequest >>> authorisationToken {}, ccdRequest {}",
                 authorisationToken, ccdRequest);
-        final Map<String, Object> caseData = ccdRequest.getCaseDetailsBefore().getData();
+        final Map<String, Object> beforeCaseData = ccdRequest.getCaseDetailsBefore().getData();
+        final Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
         boolean migrationRequired = false;
         final Object caseId = ccdRequest.getCaseDetails().getId();
-        final Object judgeAllocated = caseData.get(JUDGE_ALLOCATED);
+        final Object judgeAllocated = beforeCaseData.get(JUDGE_ALLOCATED);
         log.info("FRMig: {} ,judgeAllocated : {}", caseId, judgeAllocated);
         if (nonNull(judgeAllocated) && !ObjectUtils.isEmpty(judgeAllocated)
                     && judgeAllocated instanceof String) {
@@ -61,15 +62,15 @@ public class CcdDataMigrationController {
             migrationRequired = true;
         }
 
-        final Object allocatedCourtList = caseData.get(ALLOCATED_COURT_LIST);
+        final Object allocatedCourtList = beforeCaseData.get(ALLOCATED_COURT_LIST);
         log.info("FRMig: {} ,allocatedCourtList :{}", caseId, allocatedCourtList);
         if (nonNull(allocatedCourtList) && !ObjectUtils.isEmpty(allocatedCourtList)
                     && allocatedCourtList instanceof String) {
-            courtData(caseData, ALLOCATED_COURT_LIST, NOTTINGHAM_COURT_LIST, CFC_COURT_LIST);
+            courtData(beforeCaseData,caseData, ALLOCATED_COURT_LIST, NOTTINGHAM_COURT_LIST, CFC_COURT_LIST);
             migrationRequired = true;
         }
 
-        final Object allocatedCourtListSL = caseData.get(ALLOCATED_COURT_LIST_SL);
+        final Object allocatedCourtListSL = beforeCaseData.get(ALLOCATED_COURT_LIST_SL);
         log.info("FRMig: {} , allocatedCourtListSL : {}", caseId, allocatedCourtListSL);
         if (nonNull(allocatedCourtListSL) && !ObjectUtils.isEmpty(allocatedCourtListSL)
                     && allocatedCourtListSL instanceof String) {
@@ -88,11 +89,11 @@ public class CcdDataMigrationController {
             }
         }
 
-        final Object allocatedCourtListGA = caseData.get(ALLOCATED_COURT_LIST_GA);
+        final Object allocatedCourtListGA = beforeCaseData.get(ALLOCATED_COURT_LIST_GA);
         log.info("FRMig: {} , allocatedCourtListGA {}", caseId, allocatedCourtListGA);
         if (nonNull(allocatedCourtListGA) && !ObjectUtils.isEmpty(allocatedCourtListGA)
                     && allocatedCourtListGA instanceof String) {
-            courtData(caseData, ALLOCATED_COURT_LIST_GA, NOTTINGHAM_COURT_LIST_GA, CFC_COURT_LIST_GA);
+            courtData(beforeCaseData,caseData, ALLOCATED_COURT_LIST_GA, NOTTINGHAM_COURT_LIST_GA, CFC_COURT_LIST_GA);
             migrationRequired = true;
         }
 
@@ -105,23 +106,23 @@ public class CcdDataMigrationController {
         }
     }
 
-    private void courtData(final Map<String, Object> caseData, final String allocatedCourtListKey,
+    private void courtData(final Map<String, Object> beforeCaseDataRO, final Map<String, Object> caseData, final String allocatedCourtListKey,
                            final String nottinghamCourtListKey, final String cfcCourtListKey) {
         log.info("FRMig: migrating {} ", allocatedCourtListKey);
-        final Object allocatedCourtList = caseData.get(allocatedCourtListKey);
+        final Object allocatedCourtList = beforeCaseDataRO.get(allocatedCourtListKey);
         final String allocatedCourtListStr = Objects.toString(allocatedCourtList);
         final Map<String, Object> map = new HashMap<>();
         log.info("FRMig: allocatedCourtListStr {} ", allocatedCourtListStr);
         if (allocatedCourtListStr.equalsIgnoreCase("nottingham")) {
             map.put("region", "midlands");
             map.put("midlandsList", "nottingham");
-            map.put("nottinghamCourtList", Objects.toString(caseData.get(nottinghamCourtListKey)));
+            map.put("nottinghamCourtList", Objects.toString(beforeCaseDataRO.get(nottinghamCourtListKey)));
             caseData.put(nottinghamCourtListKey,null);
             caseData.put(allocatedCourtListKey, map);
         } else if (allocatedCourtListStr.equalsIgnoreCase("cfc")) {
             map.put("region", "london");
             map.put("londonList", "cfc");
-            map.put("cfcCourtList", Objects.toString(caseData.get(cfcCourtListKey)));
+            map.put("cfcCourtList", Objects.toString(beforeCaseDataRO.get(cfcCourtListKey)));
             caseData.put(cfcCourtListKey,null);
             caseData.put(allocatedCourtListKey, map);
         }
