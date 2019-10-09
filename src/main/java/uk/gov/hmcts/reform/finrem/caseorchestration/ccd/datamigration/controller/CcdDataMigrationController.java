@@ -106,7 +106,8 @@ public class CcdDataMigrationController {
         }
     }
 
-    private void courtData(final Map<String, Object> beforeCaseDataRO, final Map<String, Object> caseData, final String allocatedCourtListKey,
+    private void courtData(final Map<String, Object> beforeCaseDataRO, final Map<String, Object> caseData,
+                           final String allocatedCourtListKey,
                            final String nottinghamCourtListKey, final String cfcCourtListKey) {
         log.info("FRMig: migrating {} ", allocatedCourtListKey);
         final Object allocatedCourtList = beforeCaseDataRO.get(allocatedCourtListKey);
