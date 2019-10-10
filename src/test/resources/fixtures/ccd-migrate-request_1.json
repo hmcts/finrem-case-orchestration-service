@@ -14,5 +14,19 @@
       "nottinghamCourtListGA": "FR_s_NottinghamList_2",
       "judgeAllocated": "FR_judgeAllocatedList_3"
     }
+  },
+  "case_details_before": {
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "created",
+    "case_data": {
+      "allocatedCourtList": "nottingham",
+      "nottinghamCourtList": "FR_s_NottinghamList_8",
+      "allocatedCourtListSL": "nottingham",
+      "nottinghamCourtListSL": "FR_s_NottinghamList_1",
+      "allocatedCourtListGA": "nottingham",
+      "nottinghamCourtListGA": "FR_s_NottinghamList_2",
+      "judgeAllocated": "FR_judgeAllocatedList_3"
+    }
   }
 }

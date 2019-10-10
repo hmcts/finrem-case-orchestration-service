@@ -83,15 +83,12 @@
         <cve>CVE-2018-8088</cve>
     </suppress>
     <suppress>
-        <notes>CVE-2018-1258: we do not use Spring Method Security, so this does not affect us. see
-            https://pivotal.io/security/cve-2018-1258
-        </notes>
+        <notes>CVE-2018-1258: we do not use Spring Method Security, so this does not affect us. see https://pivotal.io/security/cve-2018-1258</notes>
         <cve>CVE-2018-1258</cve>
     </suppress>
     <suppress>
         <notes>We are using SecureRandom without a custom seed so not affected. This will however be
-            fixed with spring boot 2.1.4 upgrade which is using spring-security.* of 5.1.5 or higher
-        </notes>
+            fixed with spring boot 2.1.4 upgrade which is using spring-security.* of 5.1.5 or higher</notes>
         <gav regex="true">.*</gav>
         <cve>CVE-2019-3795</cve>
     </suppress>
@@ -106,14 +103,14 @@
         <cve>CVE-2019-0232</cve>
     </suppress>
     <suppress>
-        <notes>owasp 5.1 requires bcprov-jdk15on-1.56.jar updated .</notes>
+        <notes>owasp 5.1 requires bcprov-jdk15on-1.56.jar updated . </notes>
         <cpe>cpe:2.3:a:bouncycastle:legion-of-the-bouncy-castle-java-crytography-api:1.56:*:*:*:*:*:*:*)</cpe>
         <cve>CVE-2017-13098</cve>
         <cve>CVE-2018-1000180</cve>
         <cve>CVE-2018-1000613</cve>
     </suppress>
     <suppress>
-        <notes>check style needs upgrade</notes>
+        <notes>check style needs upgrade </notes>
         <cpe>cpe:2.3:a:checkstyle:checkstyle:7.2:*:*:*:*:*:*:*</cpe>
         <cve>CVE-2019-9658</cve>
     </suppress>
@@ -170,18 +167,18 @@
         <cve>CVE-2019-16942</cve>
         <cve>CVE-2019-16943</cve>
     </suppress>
-    <!--    <suppress>-->
-    <!--        <notes><![CDATA[-->
-    <!--   file name: jetty-webapp-9.4.14.v20181114.jar-->
-    <!--   ]]></notes>-->
-    <!--        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-webapp@.*$</packageUrl>-->
-    <!--        <cve>CVE-2019-10241</cve>-->
-    <!--    </suppress>-->
-    <!--    <suppress>-->
-    <!--        <notes><![CDATA[-->
-    <!--   file name: jetty-webapp-9.4.14.v20181114.jar-->
-    <!--   ]]></notes>-->
-    <!--        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-webapp@.*$</packageUrl>-->
-    <!--        <cve>CVE-2019-10247</cve>-->
-    <!--    </suppress>-->
+<!--    <suppress>-->
+<!--        <notes><![CDATA[-->
+<!--   file name: jetty-webapp-9.4.14.v20181114.jar-->
+<!--   ]]></notes>-->
+<!--        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-webapp@.*$</packageUrl>-->
+<!--        <cve>CVE-2019-10241</cve>-->
+<!--    </suppress>-->
+<!--    <suppress>-->
+<!--        <notes><![CDATA[-->
+<!--   file name: jetty-webapp-9.4.14.v20181114.jar-->
+<!--   ]]></notes>-->
+<!--        <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty-webapp@.*$</packageUrl>-->
+<!--        <cve>CVE-2019-10247</cve>-->
+<!--    </suppress>-->
 </suppressions>
