@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -119,7 +118,7 @@ public class NotificationService {
         notificationRequest.setSolicitorReferenceNumber(Objects.toString(mapOfCaseData.get(solicitorReference)));
         notificationRequest.setName(Objects.toString(mapOfCaseData.get(solicitorName)));
         notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorEmail)));
-        String allocatedCourtList = (String) mapOfCaseData.get(ALLOCATED_COURT_LIST);
+        Object allocatedCourtList = mapOfCaseData.get(ALLOCATED_COURT_LIST);
         if (CONTESTED.equalsIgnoreCase(caseType)) {
             String selectedCourt = getSelectedCourt(allocatedCourtList);
             log.info("selectedCourt is  {} for contested case Id : {}", selectedCourt,
@@ -149,9 +148,8 @@ public class NotificationService {
         return isNotEmpty((String) caseData.get(D81_QUESTION));
     }
 
-    private String getSelectedCourt(String allocatedCourtList) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        HashMap allocatedCourtMap = objectMapper.readValue(allocatedCourtList, HashMap.class);
+    private String getSelectedCourt(Object allocatedCourtList) throws IOException {
+        HashMap<String, Object> allocatedCourtMap = (HashMap<String, Object>) allocatedCourtList;
         String region = (String) allocatedCourtMap.get(REGION);
         if ("midlands".equalsIgnoreCase(region)) {
             return getMidlandFRC(allocatedCourtMap);
@@ -175,7 +173,7 @@ public class NotificationService {
         return EMPTY;
     }
 
-    private String getWalesFRC(HashMap allocatedCourtMap) {
+    private String getWalesFRC(Map allocatedCourtMap) {
         String walesList = (String) allocatedCourtMap.get("walesList");
         if (NEWPORT.equalsIgnoreCase(walesList)) {
             return NEWPORT;
@@ -185,7 +183,7 @@ public class NotificationService {
         return EMPTY;
     }
 
-    private String getSouthEastFRC(HashMap allocatedCourtMap) {
+    private String getSouthEastFRC(Map allocatedCourtMap) {
         String southEastList = (String) allocatedCourtMap.get("southEastList");
         if (KENTFRC.equalsIgnoreCase(southEastList)) {
             return KENTFRC;
@@ -193,7 +191,7 @@ public class NotificationService {
         return EMPTY;
     }
 
-    private String getNorthEastFRC(HashMap allocatedCourtMap) {
+    private String getNorthEastFRC(Map allocatedCourtMap) {
         String northEastList = (String) allocatedCourtMap.get("northEastList");
         if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
             return CLEAVELAND;
@@ -205,7 +203,7 @@ public class NotificationService {
         return EMPTY;
     }
 
-    private String getNorthWestFRC(HashMap allocatedCourtMap) {
+    private String getNorthWestFRC(Map allocatedCourtMap) {
         String northWestList = (String) allocatedCourtMap.get("northWestList");
         if ("liverpool".equalsIgnoreCase(northWestList)) {
             return "liverpool";
@@ -216,7 +214,7 @@ public class NotificationService {
     }
 
 
-    private String getLondonFRC(HashMap allocatedCourtMap) {
+    private String getLondonFRC(Map allocatedCourtMap) {
         String londonList = (String) allocatedCourtMap.get("londonList");
         if ("cfc".equalsIgnoreCase(londonList)) {
             return "cfc";
@@ -225,7 +223,7 @@ public class NotificationService {
     }
 
 
-    private String getMidlandFRC(HashMap allocatedCourtMap) {
+    private String getMidlandFRC(Map allocatedCourtMap) {
         String midlandsList = (String) allocatedCourtMap.get("midlandsList");
         if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
             return NOTTINGHAM;
