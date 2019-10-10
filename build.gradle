@@ -124,7 +124,7 @@ configurations {
 }
 
 def versions = [
-        lombokVersion           : '1.16.18',
+        lombokVersion           : '1.18.6',
         springfoxSwagger        : '2.9.2',
         commonsIo               : '2.5',
         feignHttpClient         : '9.5.1',

@@ -14,5 +14,19 @@
       "cfcCourtListGA": "FR_s_CFCList_3",
       "judgeAllocated": "FR_judgeAllocatedList_3"
     }
+  },
+  "case_details_before": {
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "created",
+    "case_data": {
+      "allocatedCourtList": "cfc",
+      "cfcCourtList": "FR_s_CFCList_1",
+      "allocatedCourtListSL": "cfc",
+      "cfcCourtListSL": "FR_s_CFCList_2",
+      "allocatedCourtListGA": "cfc",
+      "cfcCourtListGA": "FR_s_CFCList_3",
+      "judgeAllocated": "FR_judgeAllocatedList_3"
+    }
   }
 }
