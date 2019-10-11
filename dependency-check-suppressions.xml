@@ -166,6 +166,7 @@
         <cve>CVE-2014-3488</cve>
         <cve>CVE-2019-16942</cve>
         <cve>CVE-2019-16943</cve>
+        <cve>CVE-2019-17267</cve>
     </suppress>
 <!--    <suppress>-->
 <!--        <notes><![CDATA[-->
