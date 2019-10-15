@@ -88,7 +88,7 @@ public class CcdDataMigrationControllerTest {
                             .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.data.applicantRepresented", is("No")))
+                .andExpect(jsonPath("$.data", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
