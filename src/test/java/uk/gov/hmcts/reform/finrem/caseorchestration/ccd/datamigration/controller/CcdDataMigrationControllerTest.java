@@ -39,7 +39,7 @@ public class CcdDataMigrationControllerTest {
     private MockMvc mvc;
     private CallbackRequest ccdMigrationRequest;
 
-    private CallbackRequest ccdMigrationRequestType1() throws IOException {
+    private CallbackRequest ccdMigrationRequestType() throws IOException {
         final String migrateRequestJson = "/fixtures/ccd-migrate-request_1.json";
         try (final InputStream resourceAsStream = getClass().getResourceAsStream(migrateRequestJson)) {
             ccdMigrationRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
@@ -47,13 +47,6 @@ public class CcdDataMigrationControllerTest {
         return ccdMigrationRequest;
     }
 
-    private CallbackRequest ccdMigrationRequestType2() throws IOException {
-        final String migrateRequestJson = "/fixtures/ccd-migrate-request_2.json";
-        try (final InputStream resourceAsStream = getClass().getResourceAsStream(migrateRequestJson)) {
-            ccdMigrationRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
-        }
-        return ccdMigrationRequest;
-    }
 
     private CallbackRequest ccdAlreadyMigratedRequest() throws IOException {
         final String alreadyMigratedRequestJson = "/fixtures/ccd-already-migrated-request.json";
@@ -63,13 +56,7 @@ public class CcdDataMigrationControllerTest {
         return ccdMigrationRequest;
     }
 
-    private CallbackRequest ccdRequestWithoutField() throws IOException {
-        final String withoutFieldJson = "/fixtures/ccd-request-without-field.json";
-        try (final InputStream resourceAsStream = getClass().getResourceAsStream(withoutFieldJson)) {
-            ccdMigrationRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
-        }
-        return ccdMigrationRequest;
-    }
+
 
     private void doMigrateSetup() {
         mvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
@@ -80,58 +67,16 @@ public class CcdDataMigrationControllerTest {
         doMigrateSetup();
 
         mvc.perform(post(MIGRATE_URL)
-                            .content(objectMapper.writeValueAsString(ccdMigrationRequestType1()))
+                            .content(objectMapper.writeValueAsString(ccdMigrationRequestType()))
                             .header("Authorization", BEARER_TOKEN)
                             .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.data.judgeAllocated", contains("FR_judgeAllocatedList_3")))
-                .andExpect(jsonPath("$.data.allocatedCourtList.region", is("midlands")))
-                .andExpect(jsonPath("$.data.allocatedCourtList.midlandsList", is("nottingham")))
-                .andExpect(jsonPath("$.data.allocatedCourtList.nottinghamCourtList",
-                        is("FR_s_NottinghamList_8")))
-                .andExpect(jsonPath("$.data.regionListSL", is("midlands")))
-                .andExpect(jsonPath("$.data.allocatedCourtListSL", is("nottingham")))
-                .andExpect(jsonPath("$.data.nottinghamCourtListSL", is("FR_s_NottinghamList_1")))
-
-                .andExpect(jsonPath("$.data.allocatedCourtListGA.region", is("midlands")))
-                .andExpect(jsonPath("$.data.allocatedCourtListGA.midlandsList", is("nottingham")))
-                .andExpect(jsonPath("$.data.allocatedCourtListGA.nottinghamCourtList",
-                        is("FR_s_NottinghamList_2")))
-
+                .andExpect(jsonPath("$.data.applicantRepresented", is("Yes")))
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
 
-    @Test
-    public void shouldDoMigrationType2() throws Exception {
-        doMigrateSetup();
-
-        mvc.perform(post(MIGRATE_URL)
-                            .content(objectMapper.writeValueAsString(ccdMigrationRequestType2()))
-                            .header("Authorization", BEARER_TOKEN)
-                            .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.judgeAllocated", contains("FR_judgeAllocatedList_3")))
-                .andExpect(jsonPath("$.data.allocatedCourtList.region", is("london")))
-                .andExpect(jsonPath("$.data.allocatedCourtList.londonList", is("cfc")))
-                .andExpect(jsonPath("$.data.allocatedCourtList.cfcCourtList",
-                        is("FR_s_CFCList_1")))
-
-                .andExpect(jsonPath("$.data.regionListSL", is("london")))
-                .andExpect(jsonPath("$.data.londonFRCListSL", is("cfc")))
-                .andExpect(jsonPath("$.data.cfcCourtListSL", is("FR_s_CFCList_2")))
-                .andExpect(jsonPath("$.data.allocatedCourtListSL", isEmptyOrNullString()))
-
-                .andExpect(jsonPath("$.data.allocatedCourtListGA.region", is("london")))
-                .andExpect(jsonPath("$.data.allocatedCourtListGA.londonList", is("cfc")))
-                .andExpect(jsonPath("$.data.allocatedCourtListGA.cfcCourtList",
-                        is("FR_s_CFCList_3")))
-
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
-    }
 
     @Test
     public void shouldNotMigrate() throws Exception {
@@ -143,23 +88,11 @@ public class CcdDataMigrationControllerTest {
                             .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.data", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.data.applicantRepresented", is("No")))
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
 
-    @Test
-    public void shouldNotDoMigrationAsDoesntContainField() throws Exception {
-        doMigrateSetup();
 
-        mvc.perform(post(MIGRATE_URL)
-                            .content(objectMapper.writeValueAsString(ccdRequestWithoutField()))
-                            .header("Authorization", BEARER_TOKEN)
-                            .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
-    }
 
 }

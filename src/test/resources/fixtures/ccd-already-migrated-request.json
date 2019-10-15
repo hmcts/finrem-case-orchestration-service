@@ -5,6 +5,7 @@
     "id": "12345678",
     "jurisdiction": "divorce",
     "state": "created",
+    "applicantRepresented": "No" ,
     "case_data": {
       "data": {
         "allocatedCourtList": {

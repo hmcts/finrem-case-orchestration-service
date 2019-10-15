@@ -31,6 +31,8 @@ public class ConsentOrderController implements BaseController {
 
     @Autowired
     private ConsentOrderService consentOrderService;
+    @Autowired
+    private IdamService idamService;
 
     @PostMapping(path = "/update-latest-consent-order", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
@@ -51,7 +53,9 @@ public class ConsentOrderController implements BaseController {
         CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
         caseData.put(LATEST_CONSENT_ORDER, caseDocument);
 
-
+        if (!idamService.isUserRoleAdmin(authToken)) {
+            caseData.put(APPLICANT_REPRESENTED, YES);
+        }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }
