@@ -1,5 +1,4 @@
 java:
-  aadIdentityName: finrem
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   environment:
