@@ -5,7 +5,6 @@ java:
   image: 'https://hmcts.azurecr.io/hmcts/finrem-case-orchestration-service:latest'
   keyVaults:
     finrem:
-      resourceGroup: finrem
       secrets:
         - finrem-doc-s2s-auth-secret
         - idam-secret
