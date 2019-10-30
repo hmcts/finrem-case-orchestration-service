@@ -1,0 +1,32 @@
+---
+version: '3.0'
+
+services:
+  fr-am:
+    image: hmctsprivate.azurecr.io/idam/idam-fr-am:latest
+    hostname: localam
+    depends_on:
+      - shared-db
+  fr-idm:
+    image: hmctsprivate.azurecr.io/idam/idam-fr-idm:latest
+    hostname: localidm
+    depends_on:
+      - fr-am
+      - shared-db
+  shared-db:
+    image: hmctsprivate.azurecr.io/idam/shared-db:latest
+  smtp-server:
+    image: mailhog/mailhog
+  idam-api:
+    image: hmctspublic.azurecr.io/idam/api:stable
+    depends_on:
+      - fr-am
+      - shared-db
+  idam-web-public:
+    image: hmctspublic.azurecr.io/idam/web-public:stable
+    depends_on:
+      - idam-api
+  idam-web-admin:
+    image: hmctspublic.azurecr.io/idam/web-admin:stable
+    depends_on:
+      - idam-api

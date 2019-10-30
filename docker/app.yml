@@ -8,7 +8,7 @@ services:
     ports:
       - 9000:9000
     environment:
-      IDAM_API_URL: http://sidam-api:5000
+      IDAM_API_URL: http://idam-api:5000
       FINREM_NOTIFICATION_SERVICE_BASE_URL: http://finrem-notification-service:8086
       DOCUMENT_GENERATOR_SERVICE_API_BASEURL: http://finrem-document-generator-client:4009
       PAYMENT_SERVICE_API_BASEURL: http://finrem-payment-service:9001
@@ -18,6 +18,8 @@ services:
       - ccd-case-management-web
       - finrem-payment-service
       - finrem-document-generator-client
+    networks:
+      - ccd-network
 
   ccd-case-management-web:
     image: "hmctspublic.azurecr.io/ccd/case-management-web:${CCD_CASE_MANAGEMENT_WEB_TAG:-latest}"
@@ -33,19 +35,21 @@ services:
     depends_on:
       - ccd-api-gateway
       - dm-store
+    networks:
+      - ccd-network
 
   ccd-api-gateway:
     image: "${CCD_API_GATEWAY_USE_LOCAL-hmctspublic.azurecr.io/}ccd/api-gateway-web:${CCD_API_GATEWAY_TAG:-latest}"
     container_name: ccd-api-gateway-web
     environment:
-      IDAM_BASE_URL: http://sidam-api:5000
-      IDAM_USER_URL: http://sidam-api:5000
+      IDAM_BASE_URL: http://idam-api:5000
+      IDAM_USER_URL: http://idam-api:5000
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       IDAM_SERVICE_KEY: "${IDAM_KEY_CCD_GATEWAY}"
-      IDAM_OAUTH2_LOGOUT_ENDPOINT: http://sidam-api:5000/session/:token
+      IDAM_OAUTH2_LOGOUT_ENDPOINT: http://idam-api:5000/session/:token
       IDAM_OAUTH2_CLIENT_ID: ccd_gateway
       IDAM_OAUTH2_CLIENT_SECRET: ccd_gateway_secret
-      IDAM_OAUTH2_TOKEN_ENDPOINT: http://sidam-api:5000/oauth2/token
+      IDAM_OAUTH2_TOKEN_ENDPOINT: http://idam-api:5000/oauth2/token
       PROXY_AGGREGATED: http://ccd-data-store-api:4452
       PROXY_DATA: http://ccd-data-store-api:4452
       PROXY_DEFINITION_IMPORT: http://ccd-definition-store-api:4451
@@ -60,6 +64,8 @@ services:
       - ccd-definition-store-api
       - ccd-data-store-api
       - dm-store
+    networks:
+      - ccd-network
 
   ccd-user-profile-api:
     image: "${CCD_USER_PROFILE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/user-profile-api:${CCD_USER_PROFILE_API_TAG:-latest}"
@@ -82,34 +88,8 @@ services:
     links:
       - ccd-shared-database
       - service-auth-provider-api
-
-  ccd-definition-store-api:
-    image: "${CCD_DEFINITION_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
-    environment:
-      DEFINITION_STORE_DB_HOST: ccd-shared-database
-      DEFINITION_STORE_DB_PORT: 5432
-      DEFINITION_STORE_DB_USERNAME: "${DB_USERNAME}"
-      DEFINITION_STORE_DB_PASSWORD: "${DB_PASSWORD}"
-      DEFINITION_STORE_DB_USE_SSL: "${DB_USE_SSL}"
-      DEFINITION_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DEFINITION_STORE}"
-      DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin,finrem_ccd_data_migrator
-      USER_PROFILE_HOST: http://ccd-user-profile-api:4453
-      IDAM_USER_URL: http://sidam-api:5000
-      IDAM_S2S_URL: http://service-auth-provider-api:8080
-      REFORM_SERVICE_NAME: ccd-definition-store-api
-      REFORM_TEAM: ccd
-      REFORM_ENVIRONMENT: local
-      APPINSIGHTS_INSTRUMENTATIONKEY: key
-    ports:
-      - 4451:4451
-    depends_on:
-      - ccd-shared-database
-      - ccd-user-profile-api
-    links:
-      - ccd-shared-database
-      - ccd-user-profile-api
-      - sidam-api
-      - service-auth-provider-api
+    networks:
+      - ccd-network
 
   ccd-data-store-api:
     image: "${CCD_DATA_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/data-store-api:${CCD_DATA_STORE_API_TAG:-latest}"
@@ -124,7 +104,7 @@ services:
       DATA_STORE_S2S_AUTHORISED_SERVICES: ccd_gw,finrem_ccd_data_migrator
       DEFINITION_STORE_HOST: http://ccd-definition-store-api:4451
       USER_PROFILE_HOST: http://ccd-user-profile-api:4453
-      IDAM_USER_URL: http://sidam-api:5000
+      IDAM_USER_URL: http://idam-api:5000
       IDAM_S2S_URL: http://service-auth-provider-api:8080
       REFORM_SERVICE_NAME: ccd-data-store-api
       REFORM_TEAM: ccd
@@ -141,80 +121,129 @@ services:
       - ccd-shared-database
       - ccd-user-profile-api
       - ccd-definition-store-api
-      - sidam-api
+      - idam-api
       - service-auth-provider-api
+    networks:
+      - ccd-network
 
-  sidam-api:
-    image: "hmctspublic.azurecr.io/idam/api:latest"
+  ccd-definition-store-api:
+    image: "${CCD_DEFINITION_STORE_API_USE_LOCAL-hmctspublic.azurecr.io/}ccd/definition-store-api:${CCD_DEFINITION_STORE_API_TAG:-latest}"
     environment:
-      JAVA_OPTS: -Xms128m -Xmx512m -Dlogging.level.uk.gov.hmcts=DEBUG
-      SPRING_DATASOURCE_URL: jdbc:postgresql://shared-db:5432/openidm?currentSchema=fridam
-      TESTING_SUPPORT_ENABLED: "true"
+      DEFINITION_STORE_DB_HOST: ccd-shared-database
+      DEFINITION_STORE_DB_PORT: 5432
+      DEFINITION_STORE_DB_USERNAME: "${DB_USERNAME}"
+      DEFINITION_STORE_DB_PASSWORD: "${DB_PASSWORD}"
+      DEFINITION_STORE_DB_USE_SSL: "${DB_USE_SSL}"
+      DEFINITION_STORE_IDAM_KEY: "${IDAM_KEY_CCD_DEFINITION_STORE}"
+      DEFINITION_STORE_S2S_AUTHORISED_SERVICES: ccd_data,ccd_gw,ccd_admin,finrem_ccd_data_migrator
+      USER_PROFILE_HOST: http://ccd-user-profile-api:4453
+      IDAM_USER_URL: http://idam-api:5000
+      IDAM_S2S_URL: http://service-auth-provider-api:8080
+      REFORM_SERVICE_NAME: ccd-definition-store-api
+      REFORM_TEAM: ccd
+      REFORM_ENVIRONMENT: local
+      APPINSIGHTS_INSTRUMENTATIONKEY: key
     ports:
-      - 5000:5000
-    links:
-      - fr-am
-      - fr-idm
-      - shared-db
+      - 4451:4451
     depends_on:
-      - fr-am
-      - fr-idm
-      - shared-db
+      - ccd-shared-database
+      - ccd-user-profile-api
+    links:
+      - ccd-shared-database
+      - ccd-user-profile-api
+      - idam-api
+      - service-auth-provider-api
+    networks:
+      - ccd-network
+
   fr-am:
-    image: "hmctsprivate.azurecr.io/idam/idam-fr-am:cmc"
-    environment:
-      JAVA_OPTS: -Xms128m -Xmx512m
+    image: hmctsprivate.azurecr.io/idam/idam-fr-am:latest
+    hostname: localam
+    depends_on:
+      - shared-db
     ports:
       - 8080:8080
       - 1389:1389
-    depends_on:
-      - shared-db
+    networks:
+      - ccd-network
   fr-idm:
-    image: "hmctsprivate.azurecr.io/idam/idam-fr-idm:latest"
-    ports:
-      - 18080:18080
-      - 9010:9010
-    environment:
-      JAVA_TOOL_OPTIONS: -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=vm-ubuntu16 -Dcom.sun.management.jmxremote.rmi.port=9010
-      JAVA_OPTS: -Xms128m -Xmx512m
+    image: hmctsprivate.azurecr.io/idam/idam-fr-idm:latest
+    hostname: localidm
     depends_on:
       - fr-am
       - shared-db
+    ports:
+      - 18080:18080
+      - 9010:9010
+    networks:
+      - ccd-network
+
   shared-db:
-    image: "hmctsprivate.azurecr.io/idam/shared-db:latest"
+    image: hmctsprivate.azurecr.io/idam/shared-db:latest
     ports:
-      - 5051:5432
-    volumes:
-      - ccd-docker-idam-shared-database-data:/var/lib/postgresql/data
+      - 5432:5432
+    networks:
+      - ccd-network
 
-
-  idam-web-admin:
-    image: "hmctspublic.azurecr.io/idam/web-admin:latest"
-    environment:
-      JAVA_OPTS: -Xms128m -Xmx512m
-      STRATEGIC_SERVICE_URL: http://sidam-api:5000
-    ports:
-      - 8082:8080
-    links:
-      - sidam-api
+  idam-api:
+    image: hmctspublic.azurecr.io/idam/api:stable
     depends_on:
-      - sidam-api
+      - fr-am
+      - shared-db
+    ports:
+      - 5000:5000
+    tmpfs: /opt/app/es
+    environment:
+      - JAVA_OPTS=-Xms128m -Xms512m
+      - IDAMHEALTHCHECK_AM_ENABLED=false
+      - IDAMHEALTHCHECK_IDM_ENABLED=false
+      - STRATEGIC_ADMIN_URL=http://idam-web-admin:8082
+      - STRATEGIC_WEBPUBLIC_URL=http://idam-web-public:9002
+      - SPRING_PROFILES_ACTIVE=local
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://shared-db:5432/openidm?currentSchema=fridam
+      - SPRING_DATASOURCE_USERNAME=openidm
+      - SPRING_DATASOURCE_PASSWORD=openidm
+      - SECURITY_OAUTH2_CLIENT_CLIENTSECRET=password
+      - SECURITY_OAUTH2_CLIENT_PRE_ESTABLISHED_REDIRECT_URI=http://idam-web-public:9002/login
+      - SECURITY_OAUTH2_CLIENT_REGISTERED_REDIRECT_URI=http://idam-web-public:9002/login
+      - IDAM_SPI_FORGEROCK_AM_ROOT=http://fr-am:8080/openam
+      - IDAM_SPI_FORGEROCK_AM_TOPLEVELHOST=fr-am
+      - IDAM_SPI_FORGEROCK_AM_USERNAME=amadmin
+      - IDAM_SPI_FORGEROCK_AM_PASSWORD=Pa55word11
+      - IDAM_SPI_FORGEROCK_AM_JWKSURIFOROAUTH2CLIENTS=http://fr-am:8080/openam/oauth2/hmcts/connect/jwk_uri
+      - IDAM_SPI_FORGEROCK_IDM_ROOT=http://fr-idm:18080/openidm
+      - IDAM_SPI_FORGEROCK_IDM_USERNAME=openidm-admin
+      - IDAM_SPI_FORGEROCK_IDM_PASSWORD=openidm-admin
+      - IDAM_SPI_FORGEROCK_IDM_PIN_DEFAULTPASSWORD=BlaBlaBlackSh33p
+      - APPSETTING_NODE_PATH=/opt/app
+    networks:
+      - ccd-network
 
   idam-web-public:
-    image: "hmctspublic.azurecr.io/idam/web-public:latest"
-    environment:
-      STRATEGIC_SERVICE_URL: http://sidam-api:5000
-      IDAM_CONTINUE_URL_VALIDATOR_ENFORCE_TLS: "false"
-      REFORM_SERVICE_NAME: sidam-api
-      REFORM_TEAM: idam
-      REFORM_ENVIRONMENT: local
-      JAVA_OPTS: -Xms128m -Xmx512m
-    ports:
-      - 3501:8080
-    links:
-      - sidam-api
+    image: hmctspublic.azurecr.io/idam/web-public:stable
     depends_on:
-      - sidam-api
+      - idam-api
+    ports:
+      - 9002:8080
+    environment:
+      - JAVA_OPTS=-Xms128m -Xms512m
+      - STRATEGIC_SERVICE_URL=http://idam-api:5000
+    networks:
+      - ccd-network
+
+  idam-web-admin:
+    image: hmctspublic.azurecr.io/idam/web-admin:stable
+    depends_on:
+      - idam-api
+    ports:
+      - 8082:8080
+    networks:
+      - ccd-network
+    environment:
+      - JAVA_OPTS=-Xms128m -Xms512m
+      - STRATEGIC_SERVICE_URL=http://idam-api:5000
+      - STRATEGIC_PUBLIC_URL=http://idam-web-public:9002
+
 
   service-auth-provider-api:
     image: "hmctspublic.azurecr.io/rpe/service-auth-provider:latest"
@@ -239,6 +268,8 @@ services:
       MICROSERVICEKEYS_FINREM_CCD_DATA_MIGRATOR: "AAAAAAAAAAAAAAAA"
       MICROSERVICEKEYS_DIVORCE: "AAAAAAAAAAAAAAAA"
       MICROSERVICEKEYS_RD_PROFESSIONAL_API: "AAAAAAAAAAAAAAAA"
+    networks:
+      - ccd-network
 
   dm-store:
     image: "${DM_STORE_USE_LOCAL-hmctspublic.azurecr.io/}dm/store:${DM_STORE_TAG:-latest}"
@@ -261,7 +292,7 @@ services:
       SPRING_PROFILES_ACTIVE: dev
       IDAM_TESTING_SUPPORT_ENABLED: "true"
       LOGGING_LEVEL_UK_GOV_HMCTS_IDAM: DEBUG
-      IDAM_USER_BASE_URI: http://sidam-api:5000
+      IDAM_USER_BASE_URI: http://idam-api:5000
       IDAM_S2S_BASE_URI: http://service-auth-provider-api:8080
       S2S_NAMES_WHITELIST: sscs,divorce,ccd,em_gw,document-management-store,ccd_gw,idam-api,fpl_case_service,finrem_document_generator
       http_proxy:
@@ -283,17 +314,20 @@ services:
     #    JAVA_OPTS: -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
     links:
       - ccd-shared-database
-      - sidam-api
+      - idam-api
       - service-auth-provider-api
     depends_on:
       - ccd-shared-database
-      - sidam-api
+      - idam-api
       - service-auth-provider-api
       - azure-storage-emulator-azurite
     ports:
       - 4506:8080
     #   debug port exposed
     #   - 5006:5005
+    networks:
+      - ccd-network
+
 
   azure-storage-emulator-azurite:
     image: arafato/azurite
@@ -301,11 +335,15 @@ services:
       - 10000:10000
     environment:
       executable: "blob"
+    networks:
+      - ccd-network
     volumes:
       - ccd-docker-azure-blob-data:/opt/azurite/folder
 
   smtp-server:
     image: mailhog/mailhog
+    networks:
+      - ccd-network
 
 
   ccd-shared-database:
@@ -319,6 +357,8 @@ services:
       DB_PASSWORD:
     ports:
       - 5050:5432
+    networks:
+      - ccd-network
     volumes:
       - ccd-docker-ccd-shared-database-data:/var/lib/postgresql/data
 
@@ -328,23 +368,27 @@ services:
     environment:
       UK_GOV_NOTIFY_API_KEY: "${UK_GOV_NOTIFY_API_KEY}"
     ports:
-     - 8086:8086
+      - 8086:8086
+    networks:
+      - ccd-network
 
   finrem-payment-service:
     image: hmcts/finrem-payment-service:latest
     container_name: finrem-payment-service
     environment:
-      IDAM_API_URL: http://sidam-api:5000
+      IDAM_API_URL: http://idam-api:5000
       PAYMENT_API_URL: http://payments-api:8080
       FEES_API_URL: http://fees-register-api-aat.service.core-compute-aat.internal
       PRD_API_URL: http://rd-professional-api:8090
       AUTH_PROVIDER_SERVICE_CLIENT_BASEURL: http://service-auth-provider-api:8080
       APPINSIGHTS_INSTRUMENTATIONKEY: fake-key
     ports:
-     - 9001:9001
+      - 9001:9001
     depends_on:
-      - sidam-api
+      - idam-api
       - payments-api
+    networks:
+      - ccd-network
 
   finrem-document-generator-client:
     image: hmcts/finrem-document-generator-client:latest
@@ -358,6 +402,8 @@ services:
       - 4009:4009
     depends_on:
       - finrem-evidence-management-client-api
+    networks:
+      - ccd-network
 
   finrem-evidence-management-client-api:
     image: hmcts/finrem-evidence-management-client-api:latest
@@ -365,7 +411,7 @@ services:
     environment:
       - AUTH_PROVIDER_SERVICE_CLIENT_BASEURL=http://service-auth-provider-api:8080
       - DOCUMENT_MANAGEMENT_STORE_URL=http://dm-store:8080
-      - IDAM_API_URL=http://sidam-api:5000
+      - IDAM_API_URL=http://idam-api:5000
       - AUTH_PROVIDER_SERVICE_CLIENT_MICROSERVICE=finrem_document_generator
       - APPINSIGHTS_INSTRUMENTATIONKEY=fake-key
     ports:
@@ -373,7 +419,9 @@ services:
     depends_on:
       - service-auth-provider-api
       - dm-store
-      - sidam-api
+      - idam-api
+    networks:
+      - ccd-network
 
   payments-api:
     image: hmctspublic.azurecr.io/payment/api
@@ -438,6 +486,8 @@ services:
     depends_on:
       - payments-database
       - service-auth-provider-api
+    networks:
+      - ccd-network
 
   payments-database:
     container_name: payments-database
@@ -448,6 +498,8 @@ services:
       - POSTGRES_DB=payment
     ports:
       - 5430:5432
+    networks:
+      - ccd-network
 
   rd-professional-api:
     image: hmctspublic.azurecr.io/rd/professional-api:latest
@@ -478,6 +530,8 @@ services:
     depends_on:
       - rd-professional-db
       - service-auth-provider-api
+    networks:
+      - ccd-network
 
   rd-professional-db:
     build:
@@ -490,10 +544,16 @@ services:
       - POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-dbrefdata}"
     ports:
       - 5428:5432
+    networks:
+      - ccd-network
+
 
 volumes:
   ccd-docker-ccd-shared-database-data:
   ccd-docker-azure-blob-data:
   rd-professional-db-volume:
-  ccd-docker-idam-shared-database-data:
+
+networks:
+  ccd-network:
+    external: true
 
