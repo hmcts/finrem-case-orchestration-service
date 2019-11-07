@@ -13,7 +13,6 @@ You will receive a notification via email confirming the outcome of the help wit
 # If you need help 
 You can contact the court if you need help. 
 ************************************************************
-South West Regional Divorce Centre
-<br/>Email: HMCTSFinancialRemedy@justice.gov.uk
-<br/>Phone: 0300 303 0642 (from 8.30am to 5pm)
-<br/>https://courttribunalfinder.service.gov.uk/courts/south-west-regional-divorce-centre
+Courts and Tribunals Service Centre
+PO Box 12746, Harlow, CM20 9QZ
+<br/>Email: ContactFinancialRemedy@justice.gov.uk

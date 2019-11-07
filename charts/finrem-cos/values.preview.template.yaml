@@ -1,4 +1,5 @@
 java:
+  aadIdentityName:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   environment:
@@ -9,3 +10,4 @@ java:
     DOCUMENT_GENERATOR_SERVICE_API_BASEURL : "http://finrem-dgcs-aat.service.core-compute-aat.internal"
     FINREM_NOTIFICATION_SERVICE_BASE_URL : "http://finrem-ns-aat.service.core-compute-aat.internal"
     PAYMENT_SERVICE_API_BASEURL : "http://finrem-ps-aat.service.core-compute-aat.internal"
+
