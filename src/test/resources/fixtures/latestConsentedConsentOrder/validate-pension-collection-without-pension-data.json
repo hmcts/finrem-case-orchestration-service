@@ -1,12 +1,11 @@
 {
   "token": "test_token",
-  "event_id": "event1",
+  "event_id": "FR_solicitorCreate",
   "case_details": {
-    "id" : "12345678",
-    "jurisdiction":"divorce",
-    "state":"created",
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "created",
     "case_data": {
-      "state":"created",
       "PBANumber": "PBA123456",
       "d81Question": "No",
       "PBAreference": "ABCD",
@@ -33,6 +32,7 @@
       "solicitorFirm": "FirmA",
       "solicitorName": "Solictor",
       "applicantLName": "Guy",
+      "authorisation3": "2010-01-01",
       "solicitorEmail": "test@admin.com",
       "solicitorPhone": "1234",
       "applicantFMName": "Poor",
@@ -70,19 +70,6 @@
       "authorisationFirm": "test",
       "authorisationName": "test",
       "divorceCaseNumber": "DD12D12345",
-      "pensionCollection": [
-        {
-          "id": "1",
-          "value": {
-            "typeOfDocument": "pdf",
-            "uploadedDocument": {
-              "document_url": "http://file1",
-              "document_filename": "file1",
-              "document_binary_url": "http://file1.binary"
-            }
-          }
-        }
-      ],
       "respondentAddress": {
         "County": "essex",
         "Country": "UK",
@@ -115,13 +102,15 @@
         "document_filename": "file1",
         "document_binary_url": "http://file1.binary"
       },
+      "divorceDecreeNisiDate": "2010-01-01",
       "divorceUploadEvidence2": {
         "document_url": "http://file2",
         "document_filename": "file2",
         "document_binary_url": "http://file2.binary"
       },
+      "divorceDecreeAbsoluteDate": "2010-01-01",
       "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "No",
+      "solicitorAgreeToReceiveEmails": "Yes",
       "orderDirection": "test",
       "orderDirectionOpt1": {
         "document_url": "http://file1",
@@ -131,16 +120,26 @@
       "orderDirectionAbsolute": "test",
       "orderDirectionJudge": "test",
       "orderDirectionJudgeName": "test",
+      "orderDirectionDate": "2010-01-01",
+      "dueDate": "2010-01-01",
+      "issueDate": "2010-01-01",
       "orderDirectionAddComments": "test",
       "orderDirectionOpt2": "test",
       "assignedToJudgeReason": "test",
       "assignedToJudge": "judge1",
+      "referToJudgeDate": "2010-01-01",
       "referToJudgeText": "test",
+      "referToJudgeDateFromAwaitingResponse": "2010-01-01",
       "referToJudgeTextFromAwaitingResponse": "test",
+      "referToJudgeDateFromOrderMade": "2010-01-01",
       "referToJudgeTextFromOrderMade": "test",
+      "referToJudgeDateFromConsOrdApproved": "2010-01-01",
       "referToJudgeTextFromConsOrdApproved": "test",
+      "referToJudgeDateFromConsOrdMade": "2010-01-01",
       "referToJudgeTextFromConsOrdMade": "test",
+      "referToJudgeDateFromClose": "2010-01-01",
       "referToJudgeTextFromClose": "test",
+      "referToJudgeDateFromRespondToOrder": "2010-01-01",
       "referToJudgeTextFromRespondToOrder": "test",
       "orderRefusalCollection": [
         {
@@ -149,6 +148,7 @@
             "orderRefusal": [
               "Other"
             ],
+            "orderRefusalDate": "2003-02-01",
             "orderRefusalDocs": {
               "document_url": "http://doc1",
               "document_filename": "doc1",
@@ -156,8 +156,16 @@
             },
             "orderRefusalJudge": "District Judge",
             "orderRefusalOther": "test1",
+            "otherHearingDetails": "test2",
             "orderRefusalJudgeName": "test3",
-            "orderRefusalAddComments": "comment1"
+            "orderRefusalNotEnough": [
+              "reason1"
+            ],
+            "estimateLengthOfHearing": "10",
+            "orderRefusalAddComments": "comment1",
+            "orderRefusalNotEnoughOther": "test",
+            "whenShouldHearingTakePlace": "today",
+            "whereShouldHearingTakePlace": "EZ801"
           }
         }
       ],
@@ -172,6 +180,7 @@
               "document_binary_url": "http://doc1.binary"
             },
             "DocumentEmailContent": "email-content",
+            "DocumentDateAdded": "2010-01-02",
             "DocumentComment": "doc-comment",
             "DocumentFileName": "file1"
           }
@@ -188,6 +197,7 @@
               "document_binary_url": "http://doc1.binary"
             },
             "DocumentEmailContent": "email-content",
+            "DocumentDateAdded": "2010-01-02",
             "DocumentComment": "doc-comment",
             "DocumentFileName": "file1"
           }
@@ -204,6 +214,7 @@
               "document_binary_url": "http://doc1.binary"
             },
             "DocumentEmailContent": "email-content",
+            "DocumentDateAdded": "2010-01-02",
             "DocumentComment": "doc-comment",
             "DocumentFileName": "file1"
           }
@@ -221,6 +232,7 @@
             },
             "generalOrder_judgeList": "district judge",
             "generalOrder_judgeName": "judge1",
+            "generalOrder_dateOfOrder": "2010-01-02",
             "generalOrder_comments": "comment1"
           }
         }
@@ -235,19 +247,32 @@
               "document_filename": "doc1",
               "document_binary_url": "http://doc1.binary"
             },
+            "DocumentDateAdded": "2010-01-02",
             "DocumentFileName": "file1"
           }
         }
       ],
       "amendedConsentOrderCollection": [
         {
-          "id": "1",
+          "id": "ee93319d-32af-4b73-a9b1-a1dc4e9e8778",
           "value": {
             "amendedConsentOrder": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            }
+              "document_url": "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c4788387",
+              "document_filename": "Notification for HWF - Contested.docx",
+              "document_binary_url": "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c4788387/binary"
+            },
+            "amendedConsentOrderDate": "2018-10-10"
+          }
+        },
+        {
+          "id": "ee93319d-32af-4b73-a9b1-a1dc4e9e8779",
+          "value": {
+            "amendedConsentOrder": {
+              "document_url": "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838",
+              "document_filename": "Notification for ABC - Contested.docx",
+              "document_binary_url": "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"
+            },
+            "amendedConsentOrderDate": "2018-11-10"
           }
         }
       ]

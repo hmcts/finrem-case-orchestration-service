@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,11 +40,15 @@ public class PBAPaymentController implements BaseController {
     private final FeeService feeService;
     private final PBAPaymentService pbaPaymentService;
 
+    // is used for Duplicate payments testing.
+    @Value("${duplicate.pba.payments.test.delay}")
+    private long pbaPaymentDelayForTest;
+
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPayment(
             @RequestHeader(value = "Authorization", required = false) String authToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
+            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) throws InterruptedException {
         log.info("Received request for PBA payment for consented . Auth token: {}, Case request : {}", authToken,
                 callbackRequest);
 
@@ -66,6 +71,7 @@ public class PBAPaymentController implements BaseController {
         } else {
             mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
         }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
     }
 

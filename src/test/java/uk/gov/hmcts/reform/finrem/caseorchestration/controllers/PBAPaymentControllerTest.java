@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -137,7 +138,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), anyString(), any());
     }
-
 
     @Test
     public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists() throws Exception {

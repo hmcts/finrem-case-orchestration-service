@@ -2,255 +2,34 @@
   "token": "test_token",
   "event_id": "event1",
   "case_details": {
-    "id" : "12345678",
-    "jurisdiction":"divorce",
-    "state":"created",
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "created",
     "case_data": {
-      "amountToPay": "5000",
-      "PBANumber": "PBA123456",
-      "d81Question": "No",
-      "PBAreference": "ABCD",
-      "consentOrder": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
+      "data": {
+        "allocatedCourtList": {
+          "cfcCourtList": "FR_s_NottinghamList_1",
+          "midlandsList": "cfc",
+          "region": "london"
+        },
+        "allocatedCourtListSL": {
+          "londonList": "cfc",
+          "cfcCourtList": "FR_s_CFCList_2",
+          "region": "london"
+        },
+        "allocatedCourtListGA": {
+          "londonList": "cfc",
+          "cfcCourtList": "FR_s_CFCList_3",
+          "region": "london"
+        },
+        "judgeAllocated": [
+          "FR_judgeAllocatedList_3"
+        ]
       },
-      "d81Joint": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
-      },
-      "d81Applicant": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
-      },
-      "d81Respondent": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
-      },
-      "solicitorFirm": "FirmA",
-      "solicitorName": "Solictor",
-      "applicantLName": "Guy",
-      "solicitorEmail": "test@admin.com",
-      "solicitorPhone": "1234",
-      "applicantFMName": "Poor",
-      "authorisation2b": "test",
-      "otherCollection": [
-        {
-          "id": "1",
-          "value": {
-            "typeOfDocument": "pdf",
-            "uploadedDocument": {
-              "document_url": "http://file1",
-              "document_filename": "file1",
-              "document_binary_url": "http://file1.binary"
-            }
-          }
-        }
-      ],
-      "respondentEmail": "test@test.com",
-      "respondentPhone": "9963472494",
-      "appRespondentRep": "No",
-      "consentOrderText": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
-      },
-      "solicitorAddress": {
-        "County": "essex",
-        "Country": "UK",
-        "PostCode": "b1 1ab",
-        "PostTown": "london",
-        "AddressLine1": "line1",
-        "AddressLine2": "line2",
-        "AddressLine3": "line3"
-      },
-      "authorisationFirm": "test",
-      "authorisationName": "test",
-      "divorceCaseNumber": "DD12D12345",
-      "pensionCollection": [
-        {
-          "id": "1",
-          "value": {
-            "typeOfDocument": "pdf",
-            "uploadedDocument": {
-              "document_url": "http://file1",
-              "document_filename": "file1",
-              "document_binary_url": "http://file1.binary"
-            }
-          }
-        }
-      ],
-      "respondentAddress": {
-        "County": "essex",
-        "Country": "UK",
-        "PostCode": "b1 1ab",
-        "PostTown": "london",
-        "AddressLine1": "line1",
-        "AddressLine2": "line2",
-        "AddressLine3": "line3"
-      },
-      "solicitorDXnumber": "dx1",
-      "appRespondentLName": "smith",
-      "solicitorReference": "LL01",
-      "appRespondentFMName": "john",
-      "divorceStageReached": "Decree Nisi",
-      "helpWithFeesQuestion": "No",
-      "natureOfApplication2": [
-        "item1",
-        "item2"
-      ],
-      "natureOfApplication5": "No",
-      "natureOfApplication6": [
-        "item1",
-        "item2"
-      ],
-      "natureOfApplication7": "test",
-      "natureOfApplication3a": "test",
-      "natureOfApplication3b": "test",
-      "divorceUploadEvidence1": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
-      },
-      "divorceUploadEvidence2": {
-        "document_url": "http://file2",
-        "document_filename": "file2",
-        "document_binary_url": "http://file2.binary"
-      },
-      "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "No",
-      "orderDirection": "test",
-      "orderDirectionOpt1": {
-        "document_url": "http://file1",
-        "document_filename": "file1",
-        "document_binary_url": "http://file1.binary"
-      },
-      "orderDirectionAbsolute": "test",
-      "orderDirectionJudge": "test",
-      "orderDirectionJudgeName": "test",
-      "orderDirectionAddComments": "test",
-      "orderDirectionOpt2": "test",
-      "assignedToJudgeReason": "test",
-      "assignedToJudge": "judge1",
-      "referToJudgeText": "test",
-      "referToJudgeTextFromAwaitingResponse": "test",
-      "referToJudgeTextFromOrderMade": "test",
-      "referToJudgeTextFromConsOrdApproved": "test",
-      "referToJudgeTextFromConsOrdMade": "test",
-      "referToJudgeTextFromClose": "test",
-      "referToJudgeTextFromRespondToOrder": "test",
-      "orderRefusalCollection": [
-        {
-          "id": "1",
-          "value": {
-            "orderRefusal": [
-              "Other"
-            ],
-            "orderRefusalDocs": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "orderRefusalJudge": "District Judge",
-            "orderRefusalOther": "test1",
-            "orderRefusalJudgeName": "test3",
-            "orderRefusalAddComments": "comment1"
-          }
-        }
-      ],
-      "uploadConsentOrderDocuments": [
-        {
-          "id": "1",
-          "value": {
-            "DocumentType": "pdf",
-            "DocumentLink": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "DocumentEmailContent": "email-content",
-            "DocumentComment": "doc-comment",
-            "DocumentFileName": "file1"
-          }
-        }
-      ],
-      "uploadOrder": [
-        {
-          "id": "1",
-          "value": {
-            "DocumentType": "pdf",
-            "DocumentLink": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "DocumentEmailContent": "email-content",
-            "DocumentComment": "doc-comment",
-            "DocumentFileName": "file1"
-          }
-        }
-      ],
-      "uploadDocuments": [
-        {
-          "id": "1",
-          "value": {
-            "DocumentType": "pdf",
-            "DocumentLink": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "DocumentEmailContent": "email-content",
-            "DocumentComment": "doc-comment",
-            "DocumentFileName": "file1"
-          }
-        }
-      ],
-      "generalOrderCollection": [
-        {
-          "id": "1",
-          "value": {
-            "generalOrder_order": "order1",
-            "generalOrder_documentUpload": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "generalOrder_judgeList": "district judge",
-            "generalOrder_judgeName": "judge1",
-            "generalOrder_comments": "comment1"
-          }
-        }
-      ],
-      "respondToOrderDocuments": [
-        {
-          "id": "1",
-          "value": {
-            "DocumentType": "pdf",
-            "DocumentLink": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            },
-            "DocumentFileName": "file1"
-          }
-        }
-      ],
-      "amendedConsentOrderCollection": [
-        {
-          "id": "1",
-          "value": {
-            "amendedConsentOrder": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
-            }
-          }
-        }
-      ]
+      "data_classification": null,
+      "security_classification": null,
+      "errors": null,
+      "warnings": null
     }
   }
 }

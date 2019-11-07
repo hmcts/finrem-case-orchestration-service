@@ -65,7 +65,8 @@ public class FinalOrderController implements BaseController {
         List<HearingOrderCollectionData> hearingOrderCollectionData = getHearingOrderDocuments(caseData);
         if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
             CaseDocument latestHearingOrder = hearingOrderCollectionData
-                                                      .get(0).getHearingOrderDocuments().getUploadDraftDocument();
+                                                      .get(hearingOrderCollectionData.size() - 1)
+                                                      .getHearingOrderDocuments().getUploadDraftDocument();
             log.info("FinalOrderController called with latestHearingOrder = {}",
                     latestHearingOrder);
 
