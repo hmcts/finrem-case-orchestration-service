@@ -3,21 +3,20 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.CaseCreationDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.SuccessfulTransformationResponse;
 
 import javax.validation.Valid;
-import javax.ws.rs.core.MediaType;
 import java.util.Collections;
+
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @RestController
@@ -25,11 +24,10 @@ public class TransformationController {
 
     @PostMapping(
             path = "/transform-exception-record",
-            consumes = MediaType.APPLICATION_JSON,
-            produces = MediaType.APPLICATION_JSON
+            consumes = APPLICATION_JSON,
+            produces = APPLICATION_JSON
         )
     @ApiOperation(value = "Transform exception record into case data if valid.")
-
     @ApiResponses({
             @ApiResponse(code = 200, response = SuccessfulTransformationResponse.class,
                     message = "Transformation of exception record into case data has been successful"
