@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.bulkscan.TransformationController;
 
 import java.io.File;
 

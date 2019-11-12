@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
+package uk.gov.hmcts.reform.finrem.caseorchestration.controllers.bulkscan;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
