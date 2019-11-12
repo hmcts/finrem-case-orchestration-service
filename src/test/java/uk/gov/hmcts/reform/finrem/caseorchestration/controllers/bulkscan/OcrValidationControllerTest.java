@@ -4,11 +4,8 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.ForbiddenException;
@@ -27,8 +24,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(OcrValidationController.class)
 public class OcrValidationControllerTest extends BaseControllerTest {
 
-    public static final String BULKSCAN_VALIDATION_BASIC_FORM_JSON = "fixtures/bulkscan/validation/basic-form.json";
-    public static final String BULkSCAN_VALIDATION_VALID_OCR_RESPONSE_JSON = "fixtures/bulkscan/validation/valid-ocr-response.json";
+    private static final String BULKSCAN_VALIDATION_BASIC_FORM_JSON = "fixtures/bulkscan/validation/basic-form.json";
+    private static final String BULKSCAN_VALIDATION_VALID_OCR_RESPONSE_JSON =
+            "fixtures/bulkscan/validation/valid-ocr-response.json";
 
     @MockBean
     private AuthService authService;
@@ -98,7 +96,7 @@ public class OcrValidationControllerTest extends BaseControllerTest {
                                 .content(requestBody)
                 )
                 .andExpect(status().isOk())
-                .andExpect(content().json(readResource(BULkSCAN_VALIDATION_VALID_OCR_RESPONSE_JSON)));
+                .andExpect(content().json(readResource(BULKSCAN_VALIDATION_VALID_OCR_RESPONSE_JSON)));
     }
 
     private String readResource(final String fileName) throws IOException {

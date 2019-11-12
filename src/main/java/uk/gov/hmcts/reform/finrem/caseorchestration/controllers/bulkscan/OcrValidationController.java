@@ -6,7 +6,11 @@ import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrDataValidationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AuthService;
@@ -34,7 +38,7 @@ public class OcrValidationController {
             path = "/forms/{form-type}/validate-ocr",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
-    )
+        )
     @ApiOperation("Validates OCR form data based on form type")
     @ApiResponses({
             @ApiResponse(
@@ -43,7 +47,7 @@ public class OcrValidationController {
             @ApiResponse(code = 401, message = "Provided S2S token is missing or invalid"),
             @ApiResponse(code = 403, message = "S2S token is not authorized to use the service"),
             @ApiResponse(code = 404, message = "Form type not found")
-    })
+        })
     public ResponseEntity<OcrValidationResponse> validateOcrData(
             @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader,
             @PathVariable(name = "form-type", required = false) String formType,
