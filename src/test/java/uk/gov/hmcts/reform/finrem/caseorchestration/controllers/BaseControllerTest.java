@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-abstract class BaseControllerTest extends BaseTest {
+public abstract class BaseControllerTest extends BaseTest {
     public static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
     @Autowired
