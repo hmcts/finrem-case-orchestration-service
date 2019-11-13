@@ -11,7 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.ForbiddenException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.UnauthenticatedException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApiError;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.ResponseEntity.status;
 
 @ControllerAdvice
