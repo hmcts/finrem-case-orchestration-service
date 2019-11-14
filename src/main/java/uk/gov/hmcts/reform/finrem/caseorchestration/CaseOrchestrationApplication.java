@@ -9,8 +9,8 @@ import uk.gov.hmcts.reform.authorisation.healthcheck.ServiceAuthHealthIndicator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.PaymentClient;
 
-@SpringBootApplication(exclude = {ServiceAuthHealthIndicator.class})
-@EnableFeignClients(basePackageClasses = {DocumentClient.class, PaymentClient.class})
+@SpringBootApplication
+@EnableFeignClients
 public class CaseOrchestrationApplication {
 
     public static void main(String[] args) {

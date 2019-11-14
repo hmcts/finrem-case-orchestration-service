@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import feign.FeignException;
+import feign.Request;
 import feign.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpServerErrorException;
@@ -44,7 +45,10 @@ public class SetUpUtils {
     public static  final int BAD_REQUEST = HttpStatus.BAD_REQUEST.value();
 
     public static FeignException feignError() {
-        Response response = Response.builder().status(INTERNAL_SERVER_ERROR).headers(ImmutableMap.of()).build();
+        Response response = Response.builder().status(INTERNAL_SERVER_ERROR)
+            .headers(ImmutableMap.of())
+            .request(Request.create(Request.HttpMethod.GET, "", ImmutableMap.of(), Request.Body.empty()))
+            .build();
         return FeignException.errorStatus("test", response);
     }
 
