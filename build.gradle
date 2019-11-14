@@ -135,7 +135,7 @@ def versions = [
         junit                   : '4.12',
         nimbus                  : '5.1',
         pdfbox                  : '2.0.8',
-        mockito                 : '2.8.9',
+        mockito                     : '2.8.9',
         powerMock               : '1.7.3',
         puppyCrawl              : '7.6',
         restAssured             : '3.0.3',
