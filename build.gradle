@@ -127,7 +127,7 @@ def versions = [
         lombokVersion           : '1.16.18',
         springfoxSwagger        : '2.9.2',
         commonsIo               : '2.5',
-        wiremockVersion         : '2.25.0',
+        wiremockVersion         : '2.25.1',
         reformsJavaLogging      : '5.0.1',
         serviceTokenGenerator   : '3.0.0',
         commonsLang3            : '3.9',
@@ -135,7 +135,7 @@ def versions = [
         junit                   : '4.12',
         nimbus                  : '5.1',
         pdfbox                  : '2.0.8',
-        mockito                     : '2.8.9',
+        mockito                 : '2.8.9',
         powerMock               : '1.7.3',
         puppyCrawl              : '7.6',
         restAssured             : '3.0.3',
@@ -150,6 +150,13 @@ def versions = [
         pact_version            : '3.5.24'
 
 ]
+
+dependencyManagement {
+    dependencies {
+        // CVE-2019-10086
+        dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
+    }
+}
 
 dependencies {
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
