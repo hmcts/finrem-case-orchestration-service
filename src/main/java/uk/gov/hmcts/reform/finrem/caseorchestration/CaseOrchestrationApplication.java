@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.PaymentClient;
 
 @SpringBootApplication
-@EnableFeignClients(basePackageClasses = {DocumentClient.class, PaymentClient.class})
+@EnableFeignClients
 public class CaseOrchestrationApplication {
 
     public static void main(String[] args) {
