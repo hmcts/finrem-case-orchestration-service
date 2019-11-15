@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.bulkscanprocessor.services;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,9 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.authorisation.validators.AuthTokenValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.UnauthenticatedException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AuthService;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -33,7 +31,7 @@ public class AuthServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = new AuthService(validator, asList("allowed_service1", "allowed_service2"));
+        service = new AuthService(validator);
     }
 
     @AfterEach
