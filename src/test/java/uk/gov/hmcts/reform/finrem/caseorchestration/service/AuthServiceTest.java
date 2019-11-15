@@ -23,48 +23,50 @@ import static org.mockito.Mockito.verify;
 public class AuthServiceTest {
 
     private static final String SERVICE_HEADER = "some-header";
+    private static final String TEST_SERVICE = "some-service";
+    private static final String MISSING_SERVICEAUTH_HEADER_ERROR = "Missing ServiceAuthorization header";
 
     @Mock
-    private AuthTokenValidator validator;
+    private AuthTokenValidator authTokenValidator;
 
-    private AuthService service;
+    private AuthService authService;
 
     @BeforeEach
     public void setUp() {
-        service = new AuthService(validator);
+        authService = new AuthService(authTokenValidator);
     }
 
     @AfterEach
     public void tearDown() {
-        reset(validator);
+        reset(authTokenValidator);
     }
 
     @Test
     public void should_throw_missing_header_exception_when_it_is_null() {
-        Throwable exception = catchThrowable(() -> service.authenticate(null));
+        Throwable exception = catchThrowable(() -> authService.authenticate(null));
 
         assertThat(exception)
                 .isInstanceOf(UnauthenticatedException.class)
-                .hasMessage("Missing ServiceAuthorization header");
+                .hasMessage(MISSING_SERVICEAUTH_HEADER_ERROR);
 
-        verify(validator, never()).getServiceName(anyString());
+        verify(authTokenValidator, never()).getServiceName(anyString());
     }
 
     @Test
     public void should_track_failure_in_service_dependency_when_invalid_token_received() {
-        willThrow(InvalidTokenException.class).given(validator).getServiceName(anyString());
+        willThrow(InvalidTokenException.class).given(authTokenValidator).getServiceName(anyString());
 
-        Throwable exception = catchThrowable(() -> service.authenticate(SERVICE_HEADER));
+        Throwable exception = catchThrowable(() -> authService.authenticate(SERVICE_HEADER));
 
         assertThat(exception).isInstanceOf(InvalidTokenException.class);
     }
 
     @Test
     public void should_track_successful_service_dependency_when_valid_token_received() {
-        given(validator.getServiceName(SERVICE_HEADER)).willReturn("some-service");
+        given(authTokenValidator.getServiceName(SERVICE_HEADER)).willReturn(TEST_SERVICE);
 
-        String serviceName = service.authenticate(SERVICE_HEADER);
+        String serviceName = authService.authenticate(SERVICE_HEADER);
 
-        assertThat(serviceName).isEqualTo("some-service");
+        assertThat(serviceName).isEqualTo(TEST_SERVICE);
     }
 }
