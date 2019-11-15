@@ -56,7 +56,7 @@ public class OcrValidationController {
         String serviceName = authService.authenticate(serviceAuthHeader);
         logger.info("Request received to validate ocr data from service {}", serviceName);
 
-        authService.assertIsAllowedService(serviceName);
+        authService.authenticate(serviceName);
 
         return ok().body(new OcrValidationResponse(emptyList(), emptyList(), SUCCESS));
     }
