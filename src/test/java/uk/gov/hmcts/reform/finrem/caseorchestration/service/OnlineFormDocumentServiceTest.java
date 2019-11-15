@@ -85,7 +85,7 @@ public class OnlineFormDocumentServiceTest {
         }
 
         @Override
-        public Document generatePDF(DocumentGenerationRequest generateDocumentRequest, String authorizationToken) {
+        public Document generatePdf(DocumentGenerationRequest generateDocumentRequest, String authorizationToken) {
             latch.countDown();
             return document();
         }

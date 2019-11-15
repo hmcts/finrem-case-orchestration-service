@@ -94,14 +94,11 @@ public class BulkPrintController implements BaseController {
                 solicitorAgreeToReceiveEmails,
                 applicantRepresented);
 
-        if ( "No".equalsIgnoreCase(applicantRepresented) || "No".equalsIgnoreCase(solicitorAgreeToReceiveEmails) ) {
+        if ("No".equalsIgnoreCase(applicantRepresented) || "No".equalsIgnoreCase(solicitorAgreeToReceiveEmails)) {
             CaseDocument coverSheetApp = coverSheetService
                 .generateApplicantCoverSheet(callback.getCaseDetails(), authorisationToken);
-
             UUID letterIdApp = bulkPrintService.sendForBulkPrint(coverSheetApp, callback.getCaseDetails());
-
             caseData.put(BULK_PRINT_COVER_SHEET_APP, coverSheetApp);
-
             caseData.put(BULK_PRINT_LETTER_ID_APP, letterIdApp);
 
             log.info(

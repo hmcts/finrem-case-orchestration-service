@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
-
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;

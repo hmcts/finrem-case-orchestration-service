@@ -26,8 +26,9 @@ public class ServiceUtils {
     @Autowired
     private FunctionalTestUtils functionalTestUtils;
 
-    public Map<String,String> uploadFileToEMStore(String fileToUpload, String fileContentType) throws JSONException {
+    public Map<String,String> uploadFileToEmStore(String fileToUpload, String fileContentType) throws JSONException {
         File file = null;
+
         try {
             file = Paths.get(Objects.requireNonNull(getClass()
                     .getClassLoader()
@@ -37,6 +38,7 @@ public class ServiceUtils {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
+
         Response response = SerenityRest.given()
                 .headers(functionalTestUtils.getHeader())
                 .multiPart("file", file, fileContentType)

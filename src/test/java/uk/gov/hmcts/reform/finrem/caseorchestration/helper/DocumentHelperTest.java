@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;

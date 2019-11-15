@@ -1,12 +1,10 @@
 package uk.gov.hmcts.reform.finrem.functional.idam;
 
 import io.restassured.RestAssured;
-import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-
 
 import java.util.Base64;
 
@@ -84,6 +82,5 @@ public class IdamUtils implements IdamUserClient {
         System.out.println(response.getBody().asString());
 
         return response.getBody().asString();
-
     }
 }

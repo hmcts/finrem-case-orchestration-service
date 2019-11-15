@@ -28,7 +28,6 @@ import java.nio.file.Files;
 
 import static org.junit.Assert.assertEquals;
 
-
 @ContextConfiguration(classes = TestContextConfiguration.class)
 @Component
 @Slf4j
@@ -49,7 +48,6 @@ public class FunctionalTestUtils {
     private IdamUtils idamUtils;
     private String token;
     private JsonPath jsonPathEvaluator;
-
 
     public String getJsonFromFile(String fileName) {
         try {
@@ -72,7 +70,6 @@ public class FunctionalTestUtils {
     }
 
     public Headers getHeadersWithUserId() {
-
         return Headers.headers(
                 new Header("ServiceAuthorization", tokenGenerator.generate()),
                 new Header("user-roles", "caseworker-divorce"),
@@ -81,7 +78,6 @@ public class FunctionalTestUtils {
 
     public Headers getHeaders() {
         return Headers.headers(
-
                 new Header("Authorization", "Bearer "
                         + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
                 //new Header("Authorization", "Bearer " + idamUtils.getClientAuthToken()),
@@ -93,11 +89,9 @@ public class FunctionalTestUtils {
     }
 
     public Headers getHeader() {
-
         return Headers.headers(
                 new Header("Authorization", "Bearer "
                         + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)));
-
     }
 
 
@@ -112,11 +106,10 @@ public class FunctionalTestUtils {
                 .headers(getHeadersWithUserId())
                 .when().get(documentUrl).andReturn();
 
-        return parsePDFToString(document.getBody().asInputStream());
+        return parsePdfToString(document.getBody().asInputStream());
     }
 
-    public String parsePDFToString(InputStream inputStream) {
-
+    public String parsePdfToString(InputStream inputStream) {
         PDFParser parser;
         PDDocument pdDoc = null;
         COSDocument cosDoc = null;
@@ -158,7 +151,6 @@ public class FunctionalTestUtils {
     public void validatePostSuccess(String url, String filename, String journeyType) {
         int statusCode = getResponse(url, filename, journeyType).getStatusCode();
         assertEquals(statusCode, 200);
-
     }
 
 
@@ -185,7 +177,6 @@ public class FunctionalTestUtils {
                 .body(getJsonFromFile(filename, journeyType))
                 .when().post(url)
                 .andReturn();
-
 
         jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
         int statusCode = response.getStatusCode();
@@ -219,5 +210,4 @@ public class FunctionalTestUtils {
                 .body(getJsonFromFile(jsonFileName, journeyType))
                 .when().post(url).getStatusCode();
     }
-
 }

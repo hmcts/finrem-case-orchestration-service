@@ -12,13 +12,13 @@ import java.io.File;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PaymentConfirmationController.class)
 public class PaymentConfirmationControllerTest extends BaseControllerTest {
@@ -124,7 +124,4 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.confirmation_body", is("contested_pba_confirmation_markup")));
         verify(paymentConfirmationService, times(1)).contestedPbaPaymentConfirmation();
     }
-
-
-
 }

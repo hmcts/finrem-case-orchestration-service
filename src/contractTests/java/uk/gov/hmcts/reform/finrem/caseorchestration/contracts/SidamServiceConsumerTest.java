@@ -21,7 +21,6 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
 
-
 @ExtendWith(PactConsumerTestExt.class)
 @PactTestFor(providerName = "SIDAM_Provider", port = "8889")
 @SpringBootTest({
