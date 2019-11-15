@@ -55,7 +55,7 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
                 .header("Authorization", BEARER_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.data.applicantRepresented", is(YES)))
-                .andExpect(jsonPath("$.data.applicantAddress") .doesNotExist())
+                .andExpect(jsonPath("$.data.applicantAddress").doesNotExist())
                 .andExpect(jsonPath("$.data.applicantPhone").doesNotExist())
                 .andExpect(jsonPath("$.data.applicantEmail").doesNotExist())
 

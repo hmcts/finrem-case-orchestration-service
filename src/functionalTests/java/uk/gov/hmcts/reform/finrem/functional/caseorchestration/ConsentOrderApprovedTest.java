@@ -47,7 +47,7 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
 
         Map<String,String> uploadedDoc = null;
         try {
-            uploadedDoc = serviceUtils.uploadFileToEMStore("fileTypes/sample.pdf","application/pdf");
+            uploadedDoc = serviceUtils.uploadFileToEmStore("fileTypes/sample.pdf","application/pdf");
         } catch (JSONException e) {
             throw new RuntimeException("Exception uploading file to evidence store ",e);
         }

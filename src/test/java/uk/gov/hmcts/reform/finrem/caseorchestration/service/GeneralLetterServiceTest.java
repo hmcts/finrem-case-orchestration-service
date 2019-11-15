@@ -77,7 +77,7 @@ public class GeneralLetterServiceTest {
         private Map<String, Object> value;
 
         @Override
-        public Document generatePDF(DocumentGenerationRequest request, String authorizationToken) {
+        public Document generatePdf(DocumentGenerationRequest request, String authorizationToken) {
             this.value = request.getValues();
             return document();
         }

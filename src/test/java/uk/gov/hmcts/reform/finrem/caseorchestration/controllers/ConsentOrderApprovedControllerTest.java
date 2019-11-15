@@ -17,25 +17,22 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
-
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.PENSION_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.PENSION_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
-
 
 @WebMvcTest(ConsentOrderApprovedController.class)
 public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
@@ -46,7 +43,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     public String endpoint() {
         return "/case-orchestration/documents/consent-order-approved";
     }
-
 
     @Test
     public void consentOrderApproved400Error() throws Exception {

@@ -22,13 +22,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDocumentData;
-
 
 public class ConsentOrderApprovedDocumentServiceTest {
 
@@ -54,16 +52,15 @@ public class ConsentOrderApprovedDocumentServiceTest {
     public void shouldGenerateApprovedConsentOrderLetter() {
         Map<String, Object> caseData = ImmutableMap.of();
 
-        when(documentClientMock.generatePDF(any(), anyString()))
+        when(documentClientMock.generatePdf(any(), anyString()))
                 .thenReturn(document());
 
         CaseDocument caseDocument = service.generateApprovedConsentOrderLetter(
                 CaseDetails.builder().data(caseData).build(), AUTH_TOKEN);
 
         doCaseDocumentAssert(caseDocument);
-        verify(documentClientMock, times(1)).generatePDF(any(), anyString());
+        verify(documentClientMock, times(1)).generatePdf(any(), anyString());
     }
-
 
     @Test
     public void shouldAnnexAndStampDocument() {
@@ -91,7 +88,6 @@ public class ConsentOrderApprovedDocumentServiceTest {
         verify(documentClientMock, times(1)).stampDocument(any(), anyString());
     }
 
-
     @Test
     public void shouldStampPensionDocuments() {
         List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
@@ -104,5 +100,4 @@ public class ConsentOrderApprovedDocumentServiceTest {
         stampPensionDocuments.forEach(data -> doCaseDocumentAssert(data.getPensionDocumentData().getPensionDocument()));
         verify(documentClientMock, times(2)).stampDocument(any(), anyString());
     }
-
 }

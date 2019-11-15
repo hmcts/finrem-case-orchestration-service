@@ -122,7 +122,7 @@ public class HearingDocumentServiceTest {
         private boolean throwException;
 
         @Override
-        public Document generatePDF(DocumentGenerationRequest request, String authorizationToken) {
+        public Document generatePdf(DocumentGenerationRequest request, String authorizationToken) {
             if (throwException) {
                 throw new RuntimeException();
             }

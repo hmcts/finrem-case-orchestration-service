@@ -24,7 +24,7 @@ public interface DocumentClient {
             path = "/version/1/generate-pdf",
             headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
-    Document generatePDF(
+    Document generatePdf(
             @RequestBody DocumentGenerationRequest generateDocumentRequest,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
@@ -32,8 +32,7 @@ public interface DocumentClient {
         path = "/version/1/bulk-print",
         headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
-    UUID bulkPrint(
-        @RequestBody BulkPrintRequest bulkPrintRequest);
+    UUID bulkPrint(@RequestBody BulkPrintRequest bulkPrintRequest);
 
     @DeleteMapping(path = "/version/1/delete-pdf-document")
     void deleteDocument(
@@ -48,7 +47,6 @@ public interface DocumentClient {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
             @RequestParam("fileBinaryUrl") String fileUrl
     );
-
 
     @PostMapping(
             path = "/version/1/stamp-document",
@@ -65,5 +63,4 @@ public interface DocumentClient {
     Document annexStampDocument(
             @RequestBody Document document,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
-
 }

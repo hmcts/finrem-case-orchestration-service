@@ -4,7 +4,7 @@ buildscript {
     }
     repositories {
         mavenCentral()
-        maven { url "http://repo1.maven.org/maven2/" }
+        maven { url "https://repo1.maven.org/maven2/" }
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
@@ -26,9 +26,8 @@ plugins {
     id 'org.sonarqube' version '2.7.1'
     id 'org.springframework.boot' version '2.2.0.RELEASE'
     id 'pmd'
-    id "info.solidsoft.pitest" version "1.3.0"
+    id "info.solidsoft.pitest" version "1.4.5"
     id 'au.com.dius.pact' version '3.5.24'
-
 }
 
 
@@ -81,8 +80,6 @@ sourceSets {
             compileClasspath += main.output + test.output
             runtimeClasspath += main.output + test.output
             srcDirs = ['src/functionalTests/java']
-
-
         }
         resources {
             srcDirs = ['src/functionalTests/resources']
@@ -95,8 +92,6 @@ sourceSets {
             compileClasspath += main.output + test.output
             runtimeClasspath += main.output + test.output
             srcDirs = ['src/contractTests/java']
-
-
         }
         resources {
             srcDirs = ['src/contractTests/resources']
@@ -135,15 +130,14 @@ def versions = [
         junit                   : '4.12',
         nimbus                  : '5.1',
         pdfbox                  : '2.0.8',
-        mockito                     : '2.8.9',
+        mockito                 : '2.8.9',
         powerMock               : '1.7.3',
-        puppyCrawl              : '7.6',
         restAssured             : '3.0.3',
-        serenity                : '2.0.11',
+        serenity                : '2.0.82',
         serenityCucumber        : '1.1.3',
         springBoot              : '2.2.0.RELEASE',
-        pitest                  : '1.3.2',
-        gradlePitest            : '1.4.0',
+        pitest                  : '1.4.5',
+        gradlePitest            : '1.4.5',
         sonarPitest             : '0.5',
         ccdClient               : '4.6.4',
         commonsBeanUtils        : '1.9.4',
@@ -155,21 +149,23 @@ dependencyManagement {
     dependencies {
         // CVE-2019-10086
         dependency group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.4'
+        // CVE-2018-10237
+        dependency group: 'com.google.guava', name: 'guava', version: '28.1-jre'
     }
 }
 
 dependencies {
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
-    compile("org.springframework.boot:spring-boot-starter-actuator")
-    compile("org.springframework.boot:spring-boot-configuration-processor")
-    compile group: 'uk.gov.hmcts.reform', name: 'java-logging-appinsights', version: versions.reformsJavaLogging
-    compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
-    compile group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
-    compile group: 'commons-io', name: 'commons-io', version: versions.commonsIo
-    compile(group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger)
-    compile (group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger)
-    compile group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
-    compile (group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.1.3.RELEASE')
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-configuration-processor'
+    implementation group: 'uk.gov.hmcts.reform', name: 'java-logging-appinsights', version: versions.reformsJavaLogging
+    implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
+    implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
+    implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
+    implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
+    implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
+    implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
+    implementation (group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.1.3.RELEASE')
             {
                 exclude group: 'io.reactivex', module: 'io.reactivex'
                 exclude group: 'io.reactivex', module: 'rxnetty'
@@ -177,64 +173,66 @@ dependencies {
                 exclude group: 'io.reactivex', module: 'rxnetty-servo'
             }
 
-    compile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
-    compile group: 'uk.gov.hmcts.reform', name: 'health-spring-boot-starter', version:'0.0.5'
-    compile group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.0.4'
+    implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
+    implementation group: 'uk.gov.hmcts.reform', name: 'health-spring-boot-starter', version:'0.0.5'
+    implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.0.4'
 
-    compile group: 'com.jayway.jsonpath', name:'json-path-assert', version: versions.jsonPathAssert
-    compile group: 'org.pitest', name: 'pitest', version: versions.pitest
-    compile group: 'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
-    compile group: 'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
+    implementation group: 'com.jayway.jsonpath', name:'json-path-assert', version: versions.jsonPathAssert
+    implementation group: 'org.pitest', name: 'pitest', version: versions.pitest
+    implementation group: 'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
+    implementation group: 'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
 
-    compile (group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils) {
+    implementation (group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils) {
         force = true
     }
 
-    runtime('org.springframework.boot:spring-boot-devtools')
+    runtimeOnly 'org.springframework.boot:spring-boot-devtools'
 
-    testCompile(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
+    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
         exclude(module: 'commons-logging')
         exclude(module: 'android-json')
     }
-    testCompile('org.springframework.boot:spring-boot-starter-test')
-    testCompile group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremockVersion
-    testCompile group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremockVersion
+    testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
+    testImplementation  group: 'au.com.dius', name: 'pact-jvm-provider-spring_2.12', version: versions.pact_version
 
-    testSmokeCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
-    testSmokeCompile sourceSets.main.runtimeClasspath
-    testSmokeCompile sourceSets.test.runtimeClasspath
+    testSmokeImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
+    testSmokeImplementation sourceSets.main.runtimeClasspath
+    testSmokeImplementation sourceSets.test.runtimeClasspath
 
-    functionalCompile group: 'junit', name: 'junit', version: versions.junit
-    functionalCompile group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
-    functionalCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
-    functionalCompile group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
-    functionalCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
-    functionalCompile group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
-    functionalCompile group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '1.0.4'
-    functionalCompile group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
-    functionalCompile group: 'junit', name: 'junit', version: versions.junit
-    functionalCompile group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber
-    functionalCompile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
-    functionalCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    functionalCompile group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-    functionalCompile group: 'org.pdfbox', name: 'com.springsource.org.pdfbox', version: '0.7.3'
-    functionalCompile group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
-    functionalCompile group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
+    functionalImplementation group: 'junit', name: 'junit', version: versions.junit
+    functionalImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
+    functionalImplementation group: 'net.serenity-bdd', name: 'serenity-junit', version: versions.serenity
+    functionalImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: versions.serenity
+    functionalImplementation group: 'net.serenity-bdd', name: 'serenity-spring', version: versions.serenity
+    functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
+    functionalImplementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
+    functionalImplementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
+    functionalImplementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
+    functionalImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
+    functionalImplementation group: 'junit', name: 'junit', version: versions.junit
+    functionalImplementation group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber
+    functionalImplementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
+    functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+    functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    functionalImplementation group: 'org.pdfbox', name: 'com.springsource.org.pdfbox', version: '0.7.3'
+    functionalImplementation group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
+    functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
 
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
-    contractCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testCompile  group: 'au.com.dius', name: 'pact-jvm-provider-spring_2.12', version: versions.pact_version
-    contractCompile  group: 'au.com.dius', name: 'pact-jvm-provider-spring_2.12', version: versions.pact_version
-    contractCompile group: 'au.com.dius', name: 'pact-jvm-consumer-junit5_2.12', version: versions.pact_version
-    contractCompile group: 'au.com.dius', name: 'pact-jvm-consumer-java8_2.12', version: versions.pact_version
-    contractCompile("org.junit.jupiter:junit-jupiter-api:5.3.2")
-    contractCompile("org.junit.jupiter:junit-jupiter-engine:5.3.2")
-    contractImplementation('org.junit.jupiter:junit-jupiter-api:5.3.2')
-    contractCompile sourceSets.main.runtimeClasspath
-    contractCompile sourceSets.test.runtimeClasspath
+    contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+    contractImplementation group: 'au.com.dius', name: 'pact-jvm-provider-spring_2.12', version: versions.pact_version
+    contractImplementation group: 'au.com.dius', name: 'pact-jvm-consumer-junit5_2.12', version: versions.pact_version
+    contractImplementation group: 'au.com.dius', name: 'pact-jvm-consumer-java8_2.12', version: versions.pact_version
+    contractImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.2'
+    contractImplementation 'org.junit.jupiter:junit-jupiter-engine:5.3.2'
+    contractImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.2'
+    contractImplementation sourceSets.main.runtimeClasspath
+    contractImplementation sourceSets.test.runtimeClasspath
 }
 def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
@@ -263,7 +261,7 @@ dependencyCheck {
     suppressionFile = 'dependency-check-suppressions.xml'
 }
 
-checkstyle.toolVersion = '7.2'
+checkstyle.toolVersion = '8.26'
 checkstyle.configFile = new File(rootDir, "checkstyle.xml")
 
 // make build fail on Checkstyle issues (https://github.com/gradle/gradle/issues/881)
@@ -361,4 +359,3 @@ task contractTest(type: Test) {
     setClasspath(sourceSets.contract.runtimeClasspath)
     finalizedBy aggregate
 }
-

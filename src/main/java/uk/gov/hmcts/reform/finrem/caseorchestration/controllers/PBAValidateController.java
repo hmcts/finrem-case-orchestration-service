@@ -3,13 +3,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.google.common.collect.ImmutableList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
@@ -27,7 +26,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @SuppressWarnings("unchecked")
 public class PBAValidateController implements BaseController {
 
-
     private final PBAValidationService pbaValidationService;
 
     @SuppressWarnings("unchecked")
@@ -42,7 +40,7 @@ public class PBAValidateController implements BaseController {
         Map<String,Object> caseData = callbackRequest.getCaseDetails().getData();
         if (isPBAPayment(caseData)) {
             String pbaNumber = Objects.toString(caseData.get(PBA_NUMBER));
-            log.info("Validate PBA Number :  {}",pbaNumber );
+            log.info("Validate PBA Number :  {}", pbaNumber);
             if (!pbaValidationService.isValidPBA(authToken, pbaNumber)) {
                 log.info("PBA number is invalid.");
                 return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
@@ -53,5 +51,4 @@ public class PBAValidateController implements BaseController {
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().build());
     }
-
 }

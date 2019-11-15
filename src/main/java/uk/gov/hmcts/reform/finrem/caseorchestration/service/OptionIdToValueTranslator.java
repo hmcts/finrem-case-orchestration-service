@@ -57,7 +57,7 @@ public class OptionIdToValueTranslator {
             fixedListOption.optionsKeys().forEach(optionKey -> {
                 handleTranslation(caseData, optionKey);
             });
-        } );
+        });
     }
 
     private void handleTranslation(Map<String, Object> data, String optionKey) {

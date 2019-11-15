@@ -64,7 +64,7 @@ public class GenerateCoverSheetServiceTest {
 
 
         @Override
-        public Document generatePDF(DocumentGenerationRequest request, String authorizationToken) {
+        public Document generatePdf(DocumentGenerationRequest request, String authorizationToken) {
             assertThat(request.getTemplate(), is("test_template"));
             return document();
         }
