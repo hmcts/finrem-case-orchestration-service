@@ -60,5 +60,4 @@ public class OcrValidationController {
 
         return ok().body(new OcrValidationResponse(emptyList(), emptyList(), SUCCESS));
     }
-
 }

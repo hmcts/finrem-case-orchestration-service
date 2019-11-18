@@ -12,15 +12,22 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.CaseCreationDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.SuccessfulTransformationResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformer.FRFormToCaseTransformer;
 
 import javax.validation.Valid;
 import java.util.Collections;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @RestController
 public class TransformationController {
+
+    private static final String CASE_TYPE_ID = "FINANCIAL_REMEDY";
+    private static final String EVENT_ID = "EVENT_ID";
+
+    private FRFormToCaseTransformer frFormToCaseTransformer = new FRFormToCaseTransformer();
 
     @PostMapping(
             path = "/transform-exception-record",
@@ -42,12 +49,18 @@ public class TransformationController {
             @Valid @RequestBody ExceptionRecord exceptionRecord
     ) {
         log.info("Transforming exception record to case");
-        return ResponseEntity.ok().body(
-                new SuccessfulTransformationResponse(
-                        new CaseCreationDetails("", "", Collections.emptyMap()),
-                        Collections.emptyList()
-                )
-        );
-    }
 
+        Map<String, Object> transformedCaseData = frFormToCaseTransformer.transformIntoCaseData(exceptionRecord);
+
+        SuccessfulTransformationResponse callbackResponse = SuccessfulTransformationResponse.builder()
+                .caseCreationDetails(
+                        new CaseCreationDetails(
+                                CASE_TYPE_ID,
+                                EVENT_ID,
+                                transformedCaseData))
+                .warnings(Collections.emptyList())
+                .build();
+
+        return ResponseEntity.ok(callbackResponse);
+    }
 }

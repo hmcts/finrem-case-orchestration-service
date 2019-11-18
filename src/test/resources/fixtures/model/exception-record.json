@@ -1,5 +1,9 @@
 {
   "case_type_id": "blah",
   "id": "LV481297",
-  "po_box": "PO 17"
+  "po_box": "PO 17",
+  "ocr_data_fields": [
+    { "name": "firstName", "value": "Christopher" },
+    { "name": "lastName", "value": "O'John" }
+  ]
 }
