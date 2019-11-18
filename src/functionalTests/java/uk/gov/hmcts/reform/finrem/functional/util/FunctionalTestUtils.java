@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
-import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
@@ -32,9 +31,6 @@ import static org.junit.Assert.assertEquals;
 @Component
 @Slf4j
 public class FunctionalTestUtils {
-
-    @Autowired
-    private ServiceAuthTokenGenerator tokenGenerator;
 
     @Value("${user.id.url}")
     private String userId;
@@ -71,7 +67,6 @@ public class FunctionalTestUtils {
 
     public Headers getHeadersWithUserId() {
         return Headers.headers(
-                new Header("ServiceAuthorization", tokenGenerator.generate()),
                 new Header("user-roles", "caseworker-divorce"),
                 new Header("user-id", userId));
     }
@@ -80,12 +75,7 @@ public class FunctionalTestUtils {
         return Headers.headers(
                 new Header("Authorization", "Bearer "
                         + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
-                //new Header("Authorization", "Bearer " + idamUtils.getClientAuthToken()),
                 new Header("Content-Type", ContentType.JSON.toString()));
-    }
-
-    public String getAuthoToken() {
-        return idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword);
     }
 
     public Headers getHeader() {
