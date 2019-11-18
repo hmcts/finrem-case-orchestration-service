@@ -63,6 +63,10 @@ variable "idam_api_url" {
   default = "http://betaDevBccidamAppLB.reform.hmcts.net"
 }
 
+variable "idam_s2s-auth_url" {
+  default = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+}
+
 variable "subscription" {}
 
 variable "location" {

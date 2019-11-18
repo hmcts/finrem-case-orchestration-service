@@ -37,3 +37,7 @@ output "fees_api_url" {
 output "idam_api_url" {
   value = "${var.idam_api_url}"
 }
+
+output "idam_s2s-auth_url" {
+  value = "${var.idam_s2s-auth_url}"
+}

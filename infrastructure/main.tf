@@ -34,6 +34,7 @@ module "finrem-cos" {
     REFORM_TEAM                                           = "${var.reform_team}"
     REFORM_ENVIRONMENT                                    = "${var.env}"
     IDAM_API_URL                                          = "${var.idam_api_url}"
+    AUTH_PROVIDER_SERVICE_CLIENT_BASEURL                  = "${var.idam_s2s-auth_url}"
     FINREM_NOTIFICATION_SERVICE_BASE_URL                  = "${var.finrem_ns_url}"
     DOCUMENT_GENERATOR_SERVICE_API_BASEURL                = "${var.document_generator_baseurl}"
     PAYMENT_SERVICE_API_BASEURL                           = "${var.payment_api_url}"
