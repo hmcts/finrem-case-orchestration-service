@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.authorisation.validators.AuthTokenValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.UnauthenticatedException;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class AuthServiceTest {
 
     private static final String SERVICE_HEADER = "some-header";
@@ -31,12 +31,12 @@ public class AuthServiceTest {
 
     private AuthService authService;
 
-    @BeforeEach
+    @Before
     public void setUp() {
         authService = new AuthService(authTokenValidator);
     }
 
-    @AfterEach
+    @After
     public void tearDown() {
         reset(authTokenValidator);
     }
