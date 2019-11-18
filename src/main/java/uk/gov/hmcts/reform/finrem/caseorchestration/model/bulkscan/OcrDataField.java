@@ -2,7 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
+@Data
 public class OcrDataField {
 
     @JsonProperty
