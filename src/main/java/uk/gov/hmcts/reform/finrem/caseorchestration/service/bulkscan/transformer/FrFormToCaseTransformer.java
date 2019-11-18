@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class FRFormToCaseTransformer implements ExceptionRecordToCaseTransformer {
+public class FrFormToCaseTransformer implements ExceptionRecordToCaseTransformer {
 
     private static Map<String, String> ocrToCCDMapping;
 
-    public FRFormToCaseTransformer() {
+    public FrFormToCaseTransformer() {
         ocrToCCDMapping = frExceptionRecordToCcdMap();
     }
 

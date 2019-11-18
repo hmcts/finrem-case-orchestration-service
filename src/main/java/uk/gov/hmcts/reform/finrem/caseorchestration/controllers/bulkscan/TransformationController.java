@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.CaseCreationDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.SuccessfulTransformationResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformer.FRFormToCaseTransformer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformer.FrFormToCaseTransformer;
 
 import javax.validation.Valid;
 import java.util.Collections;
@@ -27,7 +27,7 @@ public class TransformationController {
     private static final String CASE_TYPE_ID = "FINANCIAL_REMEDY";
     private static final String EVENT_ID = "EVENT_ID";
 
-    private FRFormToCaseTransformer frFormToCaseTransformer = new FRFormToCaseTransformer();
+    private FrFormToCaseTransformer frFormToCaseTransformer = new FrFormToCaseTransformer();
 
     @PostMapping(
             path = "/transform-exception-record",
