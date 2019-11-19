@@ -71,7 +71,6 @@ public class DocumentValidationTests extends IntegrationTestBase {
         assertNull(response.jsonPath().get("errors"));
     }
 
-    @Ignore
     @Test
     public void verifyDocumentForPensionCollectionShouldReturnOkResponseCode() throws Exception {
         setUpCaseDetails(CONSENT_ORDER_JSON);
@@ -95,6 +94,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
         assertNull(response.jsonPath().get("errors"));
     }
 
+    @Ignore
     @Test
     public void verifyDocumentForConsentOrderCollectionShouldReturnOkResponseCode() throws Exception {
         setUpCaseDetails("amend-consent-order-by-caseworker.json");
