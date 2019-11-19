@@ -81,6 +81,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
         utils.validatePostSuccess(pbaValidate, "pba-validate1.json", consentedDir);
     }
 
+    @Ignore
     @Test
     public void verifyPBAPaymentSuccessTestConsented() throws InterruptedException {
         validatePostSuccessForPBAPayment(pbaPayment, "SuccessPaymentRequestPayload_Consented.json", consentedDir);
