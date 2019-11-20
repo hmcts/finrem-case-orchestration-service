@@ -82,7 +82,6 @@ public class DocumentValidationTests extends IntegrationTestBase {
         assertNull(response.jsonPath().get("errors"));
     }
 
-    @Ignore
     @Test
     public void verifyDocumentForRespondToOrderShouldReturnOkResponseCode() throws Exception {
         setUpCaseDetails(RESPOND_TO_ORDER_SOLICITOR_JSON);
@@ -94,7 +93,6 @@ public class DocumentValidationTests extends IntegrationTestBase {
         assertNull(response.jsonPath().get("errors"));
     }
 
-    @Ignore
     @Test
     public void verifyDocumentForConsentOrderCollectionShouldReturnOkResponseCode() throws Exception {
         setUpCaseDetails("amend-consent-order-by-caseworker.json");
@@ -105,7 +103,6 @@ public class DocumentValidationTests extends IntegrationTestBase {
         assertEquals(statusCode, 200);
         assertNull(response.jsonPath().get("errors"));
     }
-
 
     private CaseDocument generateCaseDocument(String fileName) throws Exception {
         // generate pdf document to set it as consent order
