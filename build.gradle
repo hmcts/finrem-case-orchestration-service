@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '2.2.0.RELEASE'
+        springBootVersion = '2.2.1.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -116,6 +116,19 @@ configurations {
     functionalRuntime.extendsFrom testRuntime
 }
 
+//configurations.all {
+//    resolutionStrategy {
+//        // fail eagerly on version conflict (includes transitive dependencies)
+//        // e.g. multiple different versions of the same dependency (group and name are equal)
+//        failOnVersionConflict()
+//
+//        // prefer modules that are part of this build (multi-project or composite build) over external modules
+//        preferProjectModules()
+//
+//        force 'io.github.openfeign:feign-httpclient:10.5.0'
+//    }
+//}
+
 def versions = [
         lombokVersion           : '1.16.18',
         springfoxSwagger        : '2.9.2',
@@ -162,10 +175,7 @@ dependencies {
     implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
     implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
     implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
-//    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
-    implementation (group: 'io.github.openfeign', name: 'feign-httpclient', version: '9.5.1') {
-        force = true
-    }
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.1.4.RELEASE'
 
     implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
