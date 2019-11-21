@@ -47,7 +47,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
                 .mimeType("application/pdf")
                 .build();
 
-        when(documentClient.checkUploadedFileType(BEARER_TOKEN, "http://file1.binary"))
+        when(documentClient.checkUploadedFileType(BEARER_TOKEN, "http://file1.binary", 0))
                 .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
                 "consentOrder", BEARER_TOKEN);
@@ -61,7 +61,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
                 .errors(singletonList("Invalid file type"))
                 .build();
 
-        when(documentClient.checkUploadedFileType(BEARER_TOKEN, "http://file1.binary"))
+        when(documentClient.checkUploadedFileType(BEARER_TOKEN, "http://file1.binary", 0))
                 .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
                 "consentOrder", BEARER_TOKEN);
@@ -74,7 +74,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         DocumentValidationResponse documentValidationResponse = builder().mimeType("application/pdf").build();
 
         when(documentClient.checkUploadedFileType(BEARER_TOKEN,
-                "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"))
+                "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary", 0))
                 .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
                 "amendedConsentOrderCollection", BEARER_TOKEN);
@@ -89,7 +89,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
                 .build();
 
         when(documentClient.checkUploadedFileType(BEARER_TOKEN,
-                "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"))
+                "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary", 0))
                 .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
                 "amendedConsentOrderCollection", BEARER_TOKEN);
@@ -102,10 +102,10 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         DocumentValidationResponse documentValidationResponse = builder().mimeType("application/pdf").build();
 
         when(documentClient.checkUploadedFileType(BEARER_TOKEN,
-                "http://file1.binary"))
+                "http://file1.binary", 0))
                 .thenReturn(documentValidationResponse);
         when(documentClient.checkUploadedFileType(BEARER_TOKEN,
-                "http://file2.binary"))
+                "http://file2.binary", 0))
                 .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
                 "pensionCollection", BEARER_TOKEN);
@@ -120,10 +120,10 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
                 .errors(singletonList("Invalid file type")).build();
 
         when(documentClient.checkUploadedFileType(BEARER_TOKEN,
-                "http://file1.binary"))
+                "http://file1.binary", 0))
                 .thenReturn(documentValidationResponse1);
         when(documentClient.checkUploadedFileType(BEARER_TOKEN,
-                "http://file2.binary"))
+                "http://file2.binary", 0))
                 .thenReturn(documentValidationResponse2);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
                 "pensionCollection", BEARER_TOKEN);
@@ -144,7 +144,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         setUpCaseDetails("respond-to-order-solicitor.json");
         DocumentValidationResponse documentValidationResponse = builder().mimeType("application/pdf").build();
         when(documentClient.checkUploadedFileType(BEARER_TOKEN,
-                "http://doc2/binary"))
+                "http://doc2/binary", 0))
                 .thenReturn(documentValidationResponse);
 
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,

@@ -94,7 +94,9 @@ public class GeneralLetterServiceTest {
 
         @Override
         public DocumentValidationResponse checkUploadedFileType(String authorizationToken,
-                                                                String fileUrl) {
+                                                                String fileUrl,
+                                                                int contentLength
+        ) {
             throw new UnsupportedOperationException();
         }
 

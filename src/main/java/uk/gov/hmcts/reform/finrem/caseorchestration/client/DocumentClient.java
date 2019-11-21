@@ -44,9 +44,9 @@ public interface DocumentClient {
             headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
     DocumentValidationResponse checkUploadedFileType(
-            @RequestBody String emptyBody,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
-            @RequestParam("fileBinaryUrl") String fileUrl
+            @RequestParam("fileBinaryUrl") String fileUrl,
+            @RequestHeader(HttpHeaders.CONTENT_LENGTH) int contentLength
     );
 
     @PostMapping(

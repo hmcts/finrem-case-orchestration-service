@@ -143,7 +143,8 @@ public class HearingDocumentServiceTest {
 
         @Override
         public DocumentValidationResponse checkUploadedFileType(String fileUrl,
-                                                                String authorizationToken) {
+                                                                String authorizationToken,
+                                                                int contentLength) {
             throw new UnsupportedOperationException();
         }
 

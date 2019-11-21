@@ -102,7 +102,8 @@ public class OnlineFormDocumentServiceTest {
 
         @Override
         public DocumentValidationResponse checkUploadedFileType(String authorizationToken,
-                                                                String fileUrl) {
+                                                                String fileUrl,
+                                                                int contentLength) {
             return  DocumentValidationResponse.builder().build();
         }
 

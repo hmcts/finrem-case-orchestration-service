@@ -80,7 +80,8 @@ public class GenerateCoverSheetServiceTest {
         }
 
         @Override
-        public DocumentValidationResponse checkUploadedFileType(String authorizationToken, String fileUrl) {
+        public DocumentValidationResponse checkUploadedFileType(String authorizationToken, String fileUrl,
+                                                                int contentLength) {
             throw new UnsupportedOperationException();
         }
 
