@@ -44,7 +44,7 @@ public interface DocumentClient {
             path = "/file-upload-check",
             headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
-    @Body("%7B%7D")
+//    @Body("%7B%7D")
     DocumentValidationResponse checkUploadedFileType(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
             @RequestParam("fileBinaryUrl") String fileUrl
