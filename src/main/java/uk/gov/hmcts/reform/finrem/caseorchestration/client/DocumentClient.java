@@ -21,8 +21,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public interface DocumentClient {
 
     @PostMapping(
-            path = "/version/1/generate-pdf",
-            headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
+        path = "/version/1/generate-pdf",
+        headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
     )
     Document generatePdf(
             @RequestBody DocumentGenerationRequest generateDocumentRequest,
@@ -30,7 +32,9 @@ public interface DocumentClient {
 
     @PostMapping(
         path = "/version/1/bulk-print",
-        headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
+        headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
     )
     UUID bulkPrint(@RequestBody BulkPrintRequest bulkPrintRequest);
 
@@ -40,8 +44,7 @@ public interface DocumentClient {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @PostMapping(
-            path = "/file-upload-check",
-            headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
+        path = "/file-upload-check"
     )
     DocumentValidationResponse checkUploadedFileType(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
@@ -49,16 +52,20 @@ public interface DocumentClient {
     );
 
     @PostMapping(
-            path = "/version/1/stamp-document",
-            headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
+        path = "/version/1/stamp-document",
+        headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
     )
     Document stampDocument(
             @RequestBody Document document,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @PostMapping(
-            path = "/version/1/annex-stamp-document",
-            headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
+        path = "/version/1/annex-stamp-document",
+        headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE
     )
     Document annexStampDocument(
             @RequestBody Document document,
