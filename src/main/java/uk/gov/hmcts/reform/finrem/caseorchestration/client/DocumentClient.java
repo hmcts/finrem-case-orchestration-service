@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.client;
 
-import feign.Body;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -44,8 +43,8 @@ public interface DocumentClient {
             path = "/file-upload-check",
             headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
-    @Body("%7B%7D")
     DocumentValidationResponse checkUploadedFileType(
+            @RequestBody String emptyBody,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
             @RequestParam("fileBinaryUrl") String fileUrl
     );

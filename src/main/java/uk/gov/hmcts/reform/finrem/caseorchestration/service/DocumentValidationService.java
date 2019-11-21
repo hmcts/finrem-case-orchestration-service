@@ -23,6 +23,7 @@ import static java.util.stream.Collectors.toList;
 @Service
 @Slf4j
 public class DocumentValidationService {
+    public static final String BODY_EMPTY = "{\"body\": \"empty\"}";
     private static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
     private static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
     private static final String CONSENT_ORDER = "consentOrder";
@@ -95,7 +96,7 @@ public class DocumentValidationService {
     private DocumentValidationResponse validateRespondToOrderDocument(String authToken, Map<String, Object> caseData) {
         Optional<CaseDocument> caseDocument = documentHelper.getLatestRespondToOrderDocuments(caseData);
         DocumentValidationResponse response = caseDocument
-            .map(document -> documentClient.checkUploadedFileType(authToken, document.getDocumentBinaryUrl()))
+            .map(document -> documentClient.checkUploadedFileType(BODY_EMPTY, authToken, document.getDocumentBinaryUrl()))
             .orElseGet(() -> DocumentValidationResponse.builder().build());
         return response;
     }
@@ -103,13 +104,13 @@ public class DocumentValidationService {
     private DocumentValidationResponse validateConsentOrderDocument(String authToken,
                                                                     Map<String, Object> caseData) {
         CaseDocument caseDocument = documentHelper.convertToCaseDocument(caseData.get("consentOrder"));
-        return documentClient.checkUploadedFileType(authToken, caseDocument.getDocumentBinaryUrl());
+        return documentClient.checkUploadedFileType(BODY_EMPTY, authToken, caseDocument.getDocumentBinaryUrl());
     }
 
     private DocumentValidationResponse validateLatestConsentOrderDocument(String authToken,
                                                                           Map<String, Object> caseData) {
         CaseDocument caseDocument = documentHelper.getLatestAmendedConsentOrder(caseData);
-        return documentClient.checkUploadedFileType(authToken, caseDocument.getDocumentBinaryUrl());
+        return documentClient.checkUploadedFileType(BODY_EMPTY, authToken, caseDocument.getDocumentBinaryUrl());
     }
 
     private DocumentValidationResponse validateDocuments(String authToken, List<CaseDocument> caseDocuments) {
@@ -134,6 +135,6 @@ public class DocumentValidationService {
 
     private CompletableFuture<DocumentValidationResponse> validate(String authToken, CaseDocument caseDocument) {
         return CompletableFuture.supplyAsync(() ->
-            documentClient.checkUploadedFileType(authToken, caseDocument.getDocumentBinaryUrl()));
+            documentClient.checkUploadedFileType(BODY_EMPTY, authToken, caseDocument.getDocumentBinaryUrl()));
     }
 }
