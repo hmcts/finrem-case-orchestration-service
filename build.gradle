@@ -201,7 +201,7 @@ dependencies {
     compile group: 'io.github.openfeign', name: 'feign-httpclient', version: versions.feignHttpClient
     compile group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
     compile group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
-    compile group: 'uk.gov.hmcts.reform', name: 'health-spring-boot-starter', version:'0.0.3'
+    compile group: 'uk.gov.hmcts.reform', name: 'health-spring-boot-starter', version:'0.0.5'
     compile group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.0.4'
 
     compile group: 'com.jayway.jsonpath', name:'json-path-assert', version: versions.jsonPathAssert
