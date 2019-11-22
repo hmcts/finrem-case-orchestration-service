@@ -53,6 +53,9 @@ public class ConsentOrderController implements BaseController {
         CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
         caseData.put(LATEST_CONSENT_ORDER, caseDocument);
 
+        if (!idamService.isUserRoleAdmin(authToken)) {
+            caseData.put(APPLICANT_REPRESENTED, YES);
+        }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }

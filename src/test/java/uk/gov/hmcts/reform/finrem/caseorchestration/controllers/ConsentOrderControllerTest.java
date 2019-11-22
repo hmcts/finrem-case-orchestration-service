@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -45,7 +44,6 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
         }
     }
 
-    @Ignore
     @Test
     public void shouldUpdateCaseDataWithLatestConsentOrder() throws Exception {
         when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
@@ -62,7 +60,6 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
 
     }
 
-    @Ignore
     @Test
     public void shouldUpdateCaseDataWithApplicantRepresented() throws Exception {
         when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
