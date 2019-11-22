@@ -62,7 +62,8 @@ public class OcrValidationController {
         String serviceName = authService.authenticate(serviceAuthHeader);
         logger.info("Request received to validate ocr data from service {}", serviceName);
 
-        OcrValidationResult ocrValidationResult = bulkScanValidationService.validate(formType, request.getOcrDataFields());
+        OcrValidationResult ocrValidationResult = bulkScanValidationService.validate(formType,
+            request.getOcrDataFields());
 
         return ok().body(new OcrValidationResponse(ocrValidationResult));
     }
