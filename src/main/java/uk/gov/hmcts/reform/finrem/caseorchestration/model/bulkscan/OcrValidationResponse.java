@@ -17,13 +17,9 @@ public class OcrValidationResponse {
     public final ValidationStatus status;
 
     @JsonCreator
-    public OcrValidationResponse(
-            List<String> warnings,
-            List<String> errors,
-            ValidationStatus status
-    ) {
-        this.warnings = warnings;
-        this.errors = errors;
-        this.status = status;
+    public OcrValidationResponse(OcrValidationResult ocrValidationResult) {
+        this.warnings = ocrValidationResult.getWarnings();
+        this.errors = ocrValidationResult.getErrors();
+        this.status = ocrValidationResult.getStatus();
     }
 }

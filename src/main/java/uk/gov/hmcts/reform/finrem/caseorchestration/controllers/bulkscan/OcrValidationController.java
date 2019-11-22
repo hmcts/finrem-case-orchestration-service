@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrDataValidationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrValidationResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrValidationResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AuthService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanFormValidator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanValidationService;
 
 import javax.validation.Valid;
 
@@ -27,11 +30,14 @@ public class OcrValidationController {
     private static final Logger logger = getLogger(OcrValidationController.class);
 
     private final AuthService authService;
+    private final BulkScanValidationService bulkScanValidationService;
 
     public OcrValidationController(
-            AuthService authService
+            AuthService authService,
+            BulkScanValidationService bulkScanValidationService
     ) {
         this.authService = authService;
+        this.bulkScanValidationService = bulkScanValidationService;
     }
 
     @PostMapping(
@@ -56,8 +62,8 @@ public class OcrValidationController {
         String serviceName = authService.authenticate(serviceAuthHeader);
         logger.info("Request received to validate ocr data from service {}", serviceName);
 
-        authService.authenticate(serviceName);
+        OcrValidationResult ocrValidationResult = bulkScanValidationService.validate(formType, request.getOcrDataFields());
 
-        return ok().body(new OcrValidationResponse(emptyList(), emptyList(), SUCCESS));
+        return ok().body(new OcrValidationResponse(ocrValidationResult));
     }
 }
