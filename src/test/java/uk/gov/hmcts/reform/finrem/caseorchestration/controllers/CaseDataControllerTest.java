@@ -19,7 +19,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.YES;
 
-
 @WebMvcTest(CaseDataController.class)
 public class CaseDataControllerTest extends BaseControllerTest {
     private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";

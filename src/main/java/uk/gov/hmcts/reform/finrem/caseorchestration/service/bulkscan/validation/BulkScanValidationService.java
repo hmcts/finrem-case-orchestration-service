@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrValidationResult;
@@ -7,13 +8,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrValidation
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class BulkScanValidationService {
 
-    BulkScanFormValidatorFactory bulkScanFormValidatorFactory;
-
-    public BulkScanValidationService(BulkScanFormValidatorFactory bulkScanFormValidatorFactory) {
-        this.bulkScanFormValidatorFactory = bulkScanFormValidatorFactory;
-    }
+    private final BulkScanFormValidatorFactory bulkScanFormValidatorFactory;
 
     public OcrValidationResult validate(String formType, List<OcrDataField> ocrDataFields) {
         BulkScanFormValidator formValidator = bulkScanFormValidatorFactory.getValidator(formType);

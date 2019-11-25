@@ -15,15 +15,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrDataValida
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrValidationResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AuthService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanFormValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanValidationService;
 
 import javax.validation.Valid;
 
-import static java.util.Collections.emptyList;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.ValidationStatus.SUCCESS;
 
 @RestController
 public class OcrValidationController {
