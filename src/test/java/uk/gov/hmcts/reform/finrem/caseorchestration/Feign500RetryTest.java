@@ -33,11 +33,15 @@ public class Feign500RetryTest extends BaseServiceTest {
     @Test
     public void whenDocumentServiceReturns500_thenFeignWillRetry3Times() {
         CaseDetails caseDetails = Mockito.mock(CaseDetails.class);
-        when(caseDetails.getData()).thenReturn(new HashMap<String, Object>() {{
-            put("consentOrder", new HashMap<String, String>() {{
-                put("document_binary_url", "test");
-            }});
-        }});
+        when(caseDetails.getData()).thenReturn(new HashMap<String, Object>() {
+            {
+                put("consentOrder", new HashMap<String, String>() {
+                    {
+                        put("document_binary_url", "test");
+                    }
+                });
+            }
+        });
         CallbackRequest callbackRequest = Mockito.mock(CallbackRequest.class);
         when(callbackRequest.getEventId()).thenReturn("FR_SolicitorCreate");
         when(callbackRequest.getCaseDetails()).thenReturn(caseDetails);
@@ -49,8 +53,8 @@ public class Feign500RetryTest extends BaseServiceTest {
         } catch (FeignException feignException) {
             /* ignore the exception */
         }
-        Assert.assertThat(documentService.countRequestsMatching(RequestPatternBuilder.newRequestPattern(RequestMethod.GET,
-            urlPathMatching("/file-upload-check.*")).build()).getCount(),
+        Assert.assertThat(documentService.countRequestsMatching(RequestPatternBuilder.newRequestPattern(
+            RequestMethod.GET, urlPathMatching("/file-upload-check.*")).build()).getCount(),
             is(3));
     }
 }
