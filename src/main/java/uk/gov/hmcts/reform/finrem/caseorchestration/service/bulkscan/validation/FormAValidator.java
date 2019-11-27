@@ -1,12 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation;
 
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 
 import static java.util.Arrays.asList;
 
-@Component
 public class FormAValidator extends BulkScanFormValidator {
 
     private static final List<String> MANDATORY_FIELDS = asList("PetitionerFirstName", "PetitionerLastName");

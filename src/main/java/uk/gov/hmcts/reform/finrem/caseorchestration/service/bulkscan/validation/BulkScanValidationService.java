@@ -13,7 +13,7 @@ public class BulkScanValidationService {
 
     private final BulkScanFormValidatorFactory bulkScanFormValidatorFactory;
 
-    public OcrValidationResult validate(String formType, List<OcrDataField> ocrDataFields) {
+    public OcrValidationResult validate(String formType, List<OcrDataField> ocrDataFields) throws Exception {
         BulkScanFormValidator formValidator = bulkScanFormValidatorFactory.getValidator(formType);
         formValidator.validate(ocrDataFields);
         return new OcrValidationResult(formValidator.getWarnings(), formValidator.getErrors());

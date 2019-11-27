@@ -1,6 +1,19 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan;
 
-public class BulkScanForms {
+import lombok.Getter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanFormValidator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FormAValidator;
 
-    public static final String FORM_A = "formA";
+@Getter
+public enum BulkScanForms {
+
+    FORM_A("formA", FormAValidator.class);
+
+    private String formName;
+    private Class<? extends BulkScanFormValidator> formValidatorClass;
+
+    BulkScanForms(String formName, Class<? extends BulkScanFormValidator> formValidatorClass) {
+        this.formName = formName;
+        this.formValidatorClass = formValidatorClass;
+    }
 }

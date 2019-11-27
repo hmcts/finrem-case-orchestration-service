@@ -22,19 +22,20 @@ public class BulkScanFormValidationServiceTest extends BaseServiceTest {
     @Mock
     private FormAValidator formAValidator;
 
-    @InjectMocks
+    @Mock
     private BulkScanFormValidatorFactory bulkScanFormValidatorFactory;
 
     private BulkScanValidationService bulkScanValidationService;
 
     @Before
-    public void init() {
+    public void init() throws Exception {
         bulkScanValidationService = new BulkScanValidationService(bulkScanFormValidatorFactory);
+        when(bulkScanFormValidatorFactory.getValidator(BulkScanForms.FORM_A.getFormName())).thenReturn(formAValidator);
     }
 
     @Test
-    public void whenValidateCalled_thenItShouldDelegateToFormValidator() {
-        bulkScanValidationService.validate(BulkScanForms.FORM_A, Collections.emptyList());
+    public void whenValidateCalled_thenItShouldDelegateToFormValidator() throws Exception {
+        bulkScanValidationService.validate(BulkScanForms.FORM_A.getFormName(), Collections.emptyList());
         verify(formAValidator, times(1)).validate(anyList());
     }
 }

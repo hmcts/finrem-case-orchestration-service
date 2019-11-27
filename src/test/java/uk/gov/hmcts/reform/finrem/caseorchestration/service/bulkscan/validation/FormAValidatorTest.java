@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation;
 
-import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrDataField;

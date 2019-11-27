@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,8 +60,15 @@ public class OcrValidationController {
         String serviceName = authService.authenticate(serviceAuthHeader);
         logger.info("Request received to validate ocr data from service {}", serviceName);
 
-        OcrValidationResult ocrValidationResult = bulkScanValidationService.validate(formType,
-            request.getOcrDataFields());
+        OcrValidationResult ocrValidationResult = null;
+        try {
+            ocrValidationResult = bulkScanValidationService.validate(formType,
+                request.getOcrDataFields());
+        } catch (UnsupportedOperationException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
 
         return ok().body(new OcrValidationResponse(ocrValidationResult));
     }
