@@ -122,7 +122,7 @@ def versions = [
         lombokVersion           : '1.16.18',
         springfoxSwagger        : '2.9.2',
         commonsIo               : '2.5',
-        wiremockVersion         : '2.25.1',
+        wiremockVersion         : '2.25.0',
         reformsJavaLogging      : '5.0.1',
         serviceTokenGenerator   : '3.0.0',
         commonsLang3            : '3.9',
