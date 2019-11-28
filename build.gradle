@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '2.2.0.RELEASE'
+        springBootVersion = '2.2.1.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -122,7 +122,7 @@ def versions = [
         lombokVersion           : '1.16.18',
         springfoxSwagger        : '2.9.2',
         commonsIo               : '2.5',
-        wiremockVersion         : '2.25.1',
+        wiremockVersion         : '2.25.0',
         reformsJavaLogging      : '5.0.1',
         serviceTokenGenerator   : '3.0.0',
         commonsLang3            : '3.9',
@@ -135,7 +135,6 @@ def versions = [
         restAssured             : '3.0.3',
         serenity                : '2.0.82',
         serenityCucumber        : '1.1.3',
-        springBoot              : '2.2.0.RELEASE',
         pitest                  : '1.4.5',
         gradlePitest            : '1.4.5',
         sonarPitest             : '0.5',
@@ -155,9 +154,10 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: versions.springBoot
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-configuration-processor'
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     implementation group: 'uk.gov.hmcts.reform', name: 'java-logging-appinsights', version: versions.reformsJavaLogging
     implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
     implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
@@ -165,14 +165,6 @@ dependencies {
     implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
     implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
     implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
-    implementation (group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.1.3.RELEASE')
-            {
-                exclude group: 'io.reactivex', module: 'io.reactivex'
-                exclude group: 'io.reactivex', module: 'rxnetty'
-                exclude group: 'io.reactivex', module: 'rxnetty-contexts'
-                exclude group: 'io.reactivex', module: 'rxnetty-servo'
-            }
-
     implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
     implementation group: 'uk.gov.hmcts.reform', name: 'health-spring-boot-starter', version:'0.0.5'
@@ -187,13 +179,13 @@ dependencies {
         force = true
     }
 
-    runtimeOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
 
     testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
         exclude(module: 'commons-logging')
         exclude(module: 'android-json')
     }
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     testImplementation group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremockVersion
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombokVersion
     testImplementation  group: 'au.com.dius', name: 'pact-jvm-provider-spring_2.12', version: versions.pact_version

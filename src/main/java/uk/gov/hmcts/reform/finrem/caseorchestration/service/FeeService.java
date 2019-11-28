@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.PaymentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j

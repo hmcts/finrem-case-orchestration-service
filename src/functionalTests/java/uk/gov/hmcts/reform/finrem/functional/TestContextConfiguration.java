@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 @PropertySource(value = {"classpath:application-${env}.properties"})
 public class TestContextConfiguration {
 
-
     @Bean
     public ServiceAuthTokenGenerator serviceAuthTokenGenerator(@Value("${idam.s2s-auth.url}")
                                                                        String s2sUrl,

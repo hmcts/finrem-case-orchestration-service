@@ -10,11 +10,16 @@ import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.ForbiddenException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.UnauthenticatedException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrValidationResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AuthService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanValidationService;
 
 import java.io.IOException;
 
+import static java.util.Collections.emptyList;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -28,8 +33,8 @@ public class OcrValidationControllerTest extends BaseControllerTest {
     private static final String BULKSCAN_VALIDATION_VALID_OCR_RESPONSE_JSON =
             "fixtures/bulkscan/validation/valid-ocr-response.json";
 
-    @MockBean
-    private AuthService authService;
+    @MockBean private AuthService authService;
+    @MockBean private BulkScanValidationService bulkScanValidationService;
 
     @Before
     public void setUp() {
@@ -86,21 +91,24 @@ public class OcrValidationControllerTest extends BaseControllerTest {
     public void should_return_success_message_when_ocr_data_is_valid() throws Exception {
         String requestBody = readResource(BULKSCAN_VALIDATION_BASIC_FORM_JSON);
 
+        String testFormName = "PERSONAL";
+
         given(authService.authenticate("testServiceAuthHeader")).willReturn("testServiceName");
+        given(bulkScanValidationService.validate(eq(testFormName), anyList())).willReturn(new OcrValidationResult(
+            emptyList(), emptyList()));
 
         mvc
-                .perform(
-                        post("/forms/PERSONAL/validate-ocr")
-                                .contentType(APPLICATION_JSON_VALUE)
-                                .header("ServiceAuthorization", "testServiceAuthHeader")
-                                .content(requestBody)
-                )
-                .andExpect(status().isOk())
-                .andExpect(content().json(readResource(BULKSCAN_VALIDATION_VALID_OCR_RESPONSE_JSON)));
+            .perform(
+                post(String.format("/forms/%s/validate-ocr", testFormName))
+                    .contentType(APPLICATION_JSON_VALUE)
+                    .header("ServiceAuthorization", "testServiceAuthHeader")
+                    .content(requestBody)
+            )
+            .andExpect(status().isOk())
+            .andExpect(content().json(readResource(BULKSCAN_VALIDATION_VALID_OCR_RESPONSE_JSON)));
     }
 
     private String readResource(final String fileName) throws IOException {
         return Resources.toString(Resources.getResource(fileName), Charsets.UTF_8);
     }
 }
-
