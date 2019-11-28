@@ -35,6 +35,7 @@ public abstract class BulkScanFormValidator {
     }
 
     private void validateMandatoryFields() {
+        log.info("ocrDataFields {}", ocrDataFields);
         log.info("filled form fields {}", getFilledFormFields());
         log.info("warnings 1 {}", warnings);
         warnings.addAll(getWarningsForMissingMandatoryFields());

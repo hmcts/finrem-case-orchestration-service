@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers.bulkscan;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.slf4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +20,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.
 
 import javax.validation.Valid;
 
-import static org.slf4j.LoggerFactory.getLogger;
 import static org.springframework.http.ResponseEntity.ok;
 
+@Slf4j
 @RestController
 public class OcrValidationController {
-    private static final Logger logger = getLogger(OcrValidationController.class);
 
     private final AuthService authService;
     private final BulkScanValidationService bulkScanValidationService;
@@ -58,7 +57,9 @@ public class OcrValidationController {
             @Valid @RequestBody OcrDataValidationRequest request
     ) {
         String serviceName = authService.authenticate(serviceAuthHeader);
-        logger.info("Request received to validate ocr data from service {}", serviceName);
+        log.info("Request received to validate ocr data from service {}", serviceName);
+        log.info("Request {}", request);
+        log.info("Request ocrDataFields", request.getOcrDataFields());
 
         try {
             OcrValidationResult ocrValidationResult = bulkScanValidationService.validate(
