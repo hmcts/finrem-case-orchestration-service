@@ -3,11 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.BulkScanForms;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.BulkScanForm;
 
 import java.util.Collections;
 
@@ -30,12 +29,12 @@ public class BulkScanFormValidationServiceTest extends BaseServiceTest {
     @Before
     public void init() throws Exception {
         bulkScanValidationService = new BulkScanValidationService(bulkScanFormValidatorFactory);
-        when(bulkScanFormValidatorFactory.getValidator(BulkScanForms.FORM_A.getFormName())).thenReturn(formAValidator);
+        when(bulkScanFormValidatorFactory.getValidator(BulkScanForm.FORM_A.getFormName())).thenReturn(formAValidator);
     }
 
     @Test
     public void whenValidateCalled_thenItShouldDelegateToFormValidator() throws Exception {
-        bulkScanValidationService.validate(BulkScanForms.FORM_A.getFormName(), Collections.emptyList());
+        bulkScanValidationService.validate(BulkScanForm.FORM_A.getFormName(), Collections.emptyList());
         verify(formAValidator, times(1)).validate(anyList());
     }
 }

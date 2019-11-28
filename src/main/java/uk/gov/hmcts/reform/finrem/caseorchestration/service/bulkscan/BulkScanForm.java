@@ -5,14 +5,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FormAValidator;
 
 @Getter
-public enum BulkScanForms {
+public enum BulkScanForm {
 
     FORM_A("formA", FormAValidator.class);
 
     private String formName;
     private Class<? extends BulkScanFormValidator> formValidatorClass;
 
-    BulkScanForms(String formName, Class<? extends BulkScanFormValidator> formValidatorClass) {
+    BulkScanForm(String formName, Class<? extends BulkScanFormValidator> formValidatorClass) {
         this.formName = formName;
         this.formValidatorClass = formValidatorClass;
     }

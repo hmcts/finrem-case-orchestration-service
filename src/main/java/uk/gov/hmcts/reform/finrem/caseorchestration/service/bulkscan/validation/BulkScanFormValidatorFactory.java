@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.BulkScanForms;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.BulkScanForm;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -23,14 +23,14 @@ public class BulkScanFormValidatorFactory {
     private Map<String, FactoryBean<? extends BulkScanFormValidator>> mapBulkScanFormNamesToFactoryBeans(
         Set<FactoryBean<? extends BulkScanFormValidator>> factoryBeans
     ) {
-        return Arrays.stream(BulkScanForms.values())
+        return Arrays.stream(BulkScanForm.values())
             .collect(Collectors.toMap(
-                BulkScanForms::getFormName,
+                BulkScanForm::getFormName,
                 bulkScanForm -> findFactoryBeanForBulkScanForm(bulkScanForm, factoryBeans)));
     }
 
     private FactoryBean<? extends BulkScanFormValidator> findFactoryBeanForBulkScanForm(
-        BulkScanForms bulkScanForm, Set<FactoryBean<? extends BulkScanFormValidator>> factoryBeans
+        BulkScanForm bulkScanForm, Set<FactoryBean<? extends BulkScanFormValidator>> factoryBeans
     ) {
         return factoryBeans.stream()
             .filter(factoryBean -> factoryBean.getObjectType().equals(bulkScanForm.getFormValidatorClass()))
