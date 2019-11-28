@@ -21,9 +21,9 @@ public class FormAValidatorTest {
     @Test
     public void whenValidating_missingMandatoryFieldsCauseValidationErrors() {
         formAValidator.validate(Collections.emptyList());
-        assertThat(formAValidator.getWarnings()).isEmpty();
-        assertThat(formAValidator.getErrors()).contains("Mandatory field \"PetitionerFirstName\" is missing");
-        assertThat(formAValidator.getErrors()).contains("Mandatory field \"PetitionerLastName\" is missing");
+        assertThat(formAValidator.getErrors()).isEmpty();
+        assertThat(formAValidator.getWarnings()).contains("Mandatory field \"PetitionerFirstName\" is missing");
+        assertThat(formAValidator.getWarnings()).contains("Mandatory field \"PetitionerLastName\" is missing");
     }
 
     @Test

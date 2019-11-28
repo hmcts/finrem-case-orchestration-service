@@ -60,16 +60,15 @@ public class OcrValidationController {
         String serviceName = authService.authenticate(serviceAuthHeader);
         logger.info("Request received to validate ocr data from service {}", serviceName);
 
-        OcrValidationResult ocrValidationResult = null;
         try {
-            ocrValidationResult = bulkScanValidationService.validate(formType,
-                request.getOcrDataFields());
+            OcrValidationResult ocrValidationResult = bulkScanValidationService.validate(
+                formType, request.getOcrDataFields()
+            );
+            return ok().body(new OcrValidationResponse(ocrValidationResult));
         } catch (UnsupportedOperationException e) {
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        return ok().body(new OcrValidationResponse(ocrValidationResult));
     }
 }
