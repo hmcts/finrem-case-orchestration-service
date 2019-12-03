@@ -1,9 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.util.Map;
 
+@Builder
+@Getter
 public class CaseCreationDetails {
 
     @JsonProperty("case_type_id")

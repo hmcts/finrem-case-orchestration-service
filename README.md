@@ -34,6 +34,11 @@ You can run the application by executing following command:
 
 The application will start locally on `http://localhost:9000`
 
+##API documentation
+
+API documentation is provided with Swagger:
+ - `http://localhost:9000/swagger-ui.html` - UI to interact with the API resources
+
 ## Docker container
 
 ### Docker image
