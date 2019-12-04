@@ -1,53 +1,95 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation;
 
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrDataField;
+import org.apache.commons.lang3.StringUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.in.OcrDataField;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.OcrValidationResult;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static java.lang.String.format;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.produceMapWithoutEmptyEntries;
 
 public abstract class BulkScanFormValidator {
 
-    private final List<String> errors = new ArrayList<>();
-    private final List<String> warnings = new ArrayList<>();
-
-    protected List<OcrDataField> ocrDataFields;
+    protected static final String TRUE = "True";
+    protected static final String BLANK = "";
 
     protected abstract List<String> getMandatoryFields();
 
-    public List<String> getErrors() {
-        return errors;
+    protected abstract List<String> runPostProcessingValidation(Map<String, String> fieldsMap);
+
+    public OcrValidationResult validateBulkScanForm(List<OcrDataField> ocrDataFields) {
+        OcrValidationResult.Builder validationResultBuilder = OcrValidationResult.builder();
+
+        Map<String, String> fieldsMap = produceMapWithoutEmptyEntries(ocrDataFields);
+
+        List<String> validationMessagesForMissingMandatory = produceErrorsForMissingMandatoryFields(fieldsMap);
+        validationMessagesForMissingMandatory.forEach(validationResultBuilder::addWarning);
+
+        List<String> validationMessagesForValuesNotAllowed = produceErrorsForValuesNotAllowed(fieldsMap);
+        validationMessagesForValuesNotAllowed.forEach(validationResultBuilder::addWarning);
+
+        List<String> validationMessagesFromPostProcessingValidation = runPostProcessingValidation(fieldsMap);
+        validationMessagesFromPostProcessingValidation.forEach(validationResultBuilder::addWarning);
+
+        return validationResultBuilder.build();
     }
 
-    public List<String> getWarnings() {
-        return warnings;
-    }
-
-    public void validate(List<OcrDataField> ocrDataFields) {
-        this.ocrDataFields = ocrDataFields;
-        validateMandatoryFields();
-    }
-
-    private void validateMandatoryFields() {
-        warnings.addAll(getWarningsForMissingMandatoryFields());
-    }
-
-    protected Map<String, String> getFilledFormFields() {
-        return ocrDataFields.stream()
-            .filter(field -> isNotBlank(field.getValue()))
-            .collect(toMap(OcrDataField::getName, OcrDataField::getValue));
-    }
-
-    private List<String> getWarningsForMissingMandatoryFields() {
-        Map<String, String> filledFormFields = getFilledFormFields();
-
+    private List<String> produceErrorsForMissingMandatoryFields(Map<String, String> fieldsMap) {
         return getMandatoryFields().stream()
-            .filter(field -> !filledFormFields.containsKey(field))
-            .map(field -> String.format("Mandatory field \"%s\" is missing", field))
+            .filter(f -> !fieldsMap.containsKey(f))
+            .map(f -> String.format("Mandatory field \"%s\" is missing", f))
             .collect(Collectors.toList());
+    }
+
+    private List<String> produceErrorsForValuesNotAllowed(Map<String, String> fieldsMap) {
+        List<String> validationErrorMessages = new ArrayList<>();
+
+        getAllowedValuesPerField().forEach((fieldName, allowedValues) -> {
+            if (fieldsMap.containsKey(fieldName)) {
+                String ocrFieldValue = fieldsMap.get(fieldName);
+                if (!allowedValues.contains(ocrFieldValue)) {
+                    String errorMessage = produceErrorMessageForValueNotAllowed(fieldName, allowedValues);
+                    validationErrorMessages.add(errorMessage);
+                }
+            }
+        });
+
+        return validationErrorMessages;
+    }
+
+    protected abstract Map<String, List<String>> getAllowedValuesPerField();
+
+    private String produceErrorMessageForValueNotAllowed(String fieldName, List<String> allowedValues) {
+        StringBuilder errorMessage = new StringBuilder();
+
+        int arraySize = allowedValues.size();
+        for (int i = 1; i <= arraySize; i++) {
+            String allowedValue = allowedValues.get(i - 1);
+
+            if (StringUtils.isNotBlank(allowedValue)) {
+                errorMessage.append("\"");
+                errorMessage.append(allowedValue);
+                errorMessage.append("\"");
+            } else {
+                errorMessage.append("left blank");
+            }
+
+            boolean lastItem = i == arraySize;
+            if (!lastItem) {
+                boolean itemBeforeLast = i == arraySize - 1;
+                if (!itemBeforeLast) {
+                    errorMessage.append(", ");
+                } else {
+                    errorMessage.append(" or ");
+                }
+            }
+
+        }
+
+        return format("%s must be %s", fieldName, errorMessage.toString());
     }
 }

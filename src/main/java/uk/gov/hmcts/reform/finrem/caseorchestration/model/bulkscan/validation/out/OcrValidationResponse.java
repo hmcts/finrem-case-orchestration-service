@@ -1,10 +1,12 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class OcrValidationResponse {
 
     @JsonProperty("warnings")

@@ -1,28 +1,28 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.in;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Getter;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrDataField;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.in.OcrDataField;
 
 import java.util.List;
 
 @Getter
+@Builder
 public class ExceptionRecord {
 
+    @JsonProperty("case_type_id")
     private final String caseTypeId;
-    private final String id;
-    private final String poBox;
-    private final List<OcrDataField> ocrDataFields;
 
-    public ExceptionRecord(
-            @JsonProperty("case_type_id") String caseTypeId,
-            @JsonProperty("id") String id,
-            @JsonProperty("po_box") String poBox,
-            @JsonProperty("ocr_data_fields") List<OcrDataField> ocrDataFields
-    ) {
-        this.caseTypeId = caseTypeId;
-        this.id = id;
-        this.poBox = poBox;
-        this.ocrDataFields = ocrDataFields;
-    }
+    @JsonProperty("id")
+    private final String id;
+
+    @JsonProperty("po_box")
+    private final String poBox;
+
+    @JsonProperty("form_type")
+    private final String formType;
+
+    @JsonProperty("ocr_data_fields")
+    private final List<OcrDataField> ocrDataFields;
 }

@@ -1,18 +1,37 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformer;
 
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrDataField;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.in.ExceptionRecord;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.in.OcrDataField;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class FrFormToCaseTransformer implements ExceptionRecordToCaseTransformer {
 
-    private static Map<String, String> ocrToCCDMapping;
+@Component
+public class FrFormToCaseTransformer extends BulkScanFormTransformer {
 
-    public FrFormToCaseTransformer() {
+    private static final Map<String, String> ocrToCCDMapping;
+
+    static {
         ocrToCCDMapping = frExceptionRecordToCcdMap();
+    }
+
+    @Override
+    protected Map<String, String> getOcrToCCDMapping() {
+        return ocrToCCDMapping;
+    }
+
+    @Override
+    Map<String, Object> runFormSpecificTransformation(List<OcrDataField> ocrDataFields) {
+        return null;
+    }
+
+    @Override
+    Map<String, Object> runPostMappingModification(Map<String, Object> ccdTransformedFields) {
+        return null;
     }
 
     private static Map<String, String> frExceptionRecordToCcdMap() {

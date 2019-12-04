@@ -1,43 +1,50 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.UnsupportedFormTypeException;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.rules.ExpectedException.none;
 
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = CaseOrchestrationApplication.class)
-@TestPropertySource(locations = "/application.properties")
+@RunWith(MockitoJUnitRunner.class)
 public class BulkScanFormValidatorFactoryTest {
 
     @Rule
     public ExpectedException expectedException = none();
 
-    @Autowired
-    private BulkScanFormValidatorFactory bulkScanFormValidatorFactory;
+    @Mock
+    private FormAValidator formAValidator;
 
-    @Test
-    public void shouldReturnValidatorForFormA() throws Exception {
-        BulkScanFormValidator validator = bulkScanFormValidatorFactory.getValidator("formA");
+    @InjectMocks
+    private BulkScanFormValidatorFactory classUnderTest;
 
-        assertThat(validator, is(instanceOf(FormAValidator.class)));
+    @Before
+    public void setUp() {
+        classUnderTest.initBean();
     }
 
     @Test
-    public void shouldThrowExceptionWhenFormTypeIsNotSupported() throws Exception {
-        expectedException.expect(UnsupportedOperationException.class);
+    public void shouldReturnValidatorForFormA() throws UnsupportedFormTypeException {
+        BulkScanFormValidator validator = classUnderTest.getValidator("formA");
+
+        assertThat(validator, is(instanceOf(FormAValidator.class)));
+        assertThat(validator, is(formAValidator));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenFormTypeIsNotSupported() throws UnsupportedFormTypeException {
+        expectedException.expect(UnsupportedFormTypeException.class);
         expectedException.expectMessage("\"unsupportedFormType\" form type is not supported");
 
-        bulkScanFormValidatorFactory.getValidator("unsupportedFormType");
+        classUnderTest.getValidator("unsupportedFormType");
     }
 }
