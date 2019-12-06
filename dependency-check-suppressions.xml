@@ -19,4 +19,16 @@
         <cve>CVE-2015-2156</cve>
         <cve>CVE-2019-16869</cve>
     </suppress>
+
+    <suppress>
+        <notes>Vulnerability applies Eclipse Jetty. Default unhandled Error response content does not escape Exception messages in stacktraces included in error output.</notes>
+        <cve>CVE-2019-17632</cve>
+    </suppress>
+
+    <suppress>
+        <notes>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</notes>
+        <packageUrl regex="true">^pkg:javascript/handlebars\.js@.*$</packageUrl>
+        <vulnerabilityName>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</vulnerabilityName>
+    </suppress>
+
 </suppressions>
