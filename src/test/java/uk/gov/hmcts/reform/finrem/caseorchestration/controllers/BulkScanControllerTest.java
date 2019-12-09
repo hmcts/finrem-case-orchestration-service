@@ -39,13 +39,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class BulkScanControllerTest extends BaseControllerTest {
 
     private static final String EXCEPTION_RECORD_JSON_PATH = "/fixtures/model/exception-record.json";
+    private static final String VALIDATION_BASIC_FORM_JSON_PATH = "fixtures/bulkscan/validation/basic-form.json";
+    private static final String VALIDATION_VALID_OCR_RESPONSE_JSON_PATH = "fixtures/bulkscan/validation/valid-ocr-response.json";
+    private static final String VALIDATE_API_URL = "/forms/PERSONAL/validate-ocr";
     private static final String TRANSFORM_API_URL = "/transform-exception-record";
     private static final String UPDATE_API_URL = "/update-case";
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private static final String SERVICE_AUTHORIZATION = "ServiceAuthorization";
 
-    private static final String BULKSCAN_VALIDATION_BASIC_FORM_JSON = "fixtures/bulkscan/validation/basic-form.json";
-    private static final String BULKSCAN_VALIDATION_VALID_OCR_RESPONSE_JSON =
-        "fixtures/bulkscan/validation/valid-ocr-response.json";
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @MockBean
     private AuthService authService;
@@ -59,13 +61,13 @@ public class BulkScanControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void should_return_401_status_when_auth_service_throws_unauthenticated_exception() throws Exception {
-        String requestBody = readResource(BULKSCAN_VALIDATION_BASIC_FORM_JSON);
+    public void shouldReturn401StatusWhenAuthServiceThrowsUnauthenticatedException() throws Exception {
+        String requestBody = readResource(VALIDATION_BASIC_FORM_JSON_PATH);
         given(authService.authenticate("")).willThrow(UnauthenticatedException.class);
 
         mvc.perform(
-            post("/forms/PERSONAL/validate-ocr")
-                .header("ServiceAuthorization", "")
+            post(VALIDATE_API_URL)
+                .header(SERVICE_AUTHORIZATION, "")
                 .contentType(APPLICATION_JSON_VALUE)
                 .content(requestBody)
         )
@@ -73,13 +75,13 @@ public class BulkScanControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void should_return_401_status_when_auth_service_throws_invalid_token_exception() throws Exception {
-        String requestBody = readResource(BULKSCAN_VALIDATION_BASIC_FORM_JSON);
+    public void shouldReturn401StatusWhenAuthServiceThrowsInvalidTokenException() throws Exception {
+        String requestBody = readResource(VALIDATION_BASIC_FORM_JSON_PATH);
         given(authService.authenticate("test-token")).willThrow(InvalidTokenException.class);
 
         mvc.perform(
-            post("/forms/PERSONAL/validate-ocr")
-                .header("ServiceAuthorization", "test-token")
+            post(VALIDATE_API_URL)
+                .header(SERVICE_AUTHORIZATION, "test-token")
                 .contentType(APPLICATION_JSON_VALUE)
                 .content(requestBody)
         )
@@ -87,13 +89,13 @@ public class BulkScanControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void should_return_403_status_when_auth_service_throws_forbidden_exception() throws Exception {
-        String requestBody = readResource(BULKSCAN_VALIDATION_BASIC_FORM_JSON);
+    public void shouldReturn403StatusWhenAuthServiceThrowsForbiddenException() throws Exception {
+        String requestBody = readResource(VALIDATION_BASIC_FORM_JSON_PATH);
         given(authService.authenticate(any())).willThrow(ForbiddenException.class);
 
         mvc.perform(
-            post("/forms/PERSONAL/validate-ocr")
-                .header("ServiceAuthorization", "test-token")
+            post(VALIDATE_API_URL)
+                .header(SERVICE_AUTHORIZATION, "test-token")
                 .contentType(APPLICATION_JSON_VALUE)
                 .content(requestBody)
         )
@@ -102,24 +104,23 @@ public class BulkScanControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void should_return_success_message_when_ocr_data_is_valid() throws Exception {
-        String requestBody = readResource(BULKSCAN_VALIDATION_BASIC_FORM_JSON);
+    public void shouldReturnSuccessMessageWhenOcrDataIsValid() throws Exception {
+        String requestBody = readResource(VALIDATION_BASIC_FORM_JSON_PATH);
 
         String testFormName = "PERSONAL";
 
         given(authService.authenticate("testServiceAuthHeader")).willReturn("testServiceName");
-        given(bulkScanValidationService.validate(eq(testFormName), anyList())).willReturn(new OcrValidationResult(
-            emptyList(), emptyList()));
+        given(bulkScanValidationService.validate(eq(testFormName),
+            anyList())).willReturn(new OcrValidationResult(emptyList(), emptyList()));
 
-        mvc
-            .perform(
-                post(String.format("/forms/%s/validate-ocr", testFormName))
-                    .contentType(APPLICATION_JSON_VALUE)
-                    .header("ServiceAuthorization", "testServiceAuthHeader")
-                    .content(requestBody)
-            )
+        mvc.perform(
+            post(String.format("/forms/%s/validate-ocr", testFormName))
+                .contentType(APPLICATION_JSON_VALUE)
+                .header(SERVICE_AUTHORIZATION, "testServiceAuthHeader")
+                .content(requestBody)
+        )
             .andExpect(status().isOk())
-            .andExpect(content().json(readResource(BULKSCAN_VALIDATION_VALID_OCR_RESPONSE_JSON)));
+            .andExpect(content().json(readResource(VALIDATION_VALID_OCR_RESPONSE_JSON_PATH)));
     }
 
     private String readResource(final String fileName) throws IOException {
@@ -130,6 +131,7 @@ public class BulkScanControllerTest extends BaseControllerTest {
     public void shouldReturnSuccessResponseForTransformationEndpoint() throws Exception {
         JsonNode formToValidate = objectMapper.readTree(new File(getClass()
             .getResource(EXCEPTION_RECORD_JSON_PATH).toURI()));
+
         mvc.perform(post(TRANSFORM_API_URL)
             .contentType(APPLICATION_JSON)
             .content(formToValidate.toString()))
@@ -141,7 +143,7 @@ public class BulkScanControllerTest extends BaseControllerTest {
                     hasJsonPath("$.case_creation_details.*", hasSize(3)),
                     hasJsonPath("$.case_creation_details", allOf(
                         hasJsonPath("case_type_id", is("FINANCIAL_REMEDY")),
-                        hasJsonPath("event_id", is("EVENT_ID")),
+                        hasJsonPath("event_id", is("bulkScanCaseCreate")),
                         hasJsonPath("case_data.*", hasSize(2)),
                         hasJsonPath("case_data", allOf(
                             hasJsonPath("D8FirstName", is("Christopher")),
@@ -155,6 +157,7 @@ public class BulkScanControllerTest extends BaseControllerTest {
     public void shouldReturnSuccessResponseForUpdateEndpoint() throws Exception {
         JsonNode formToValidate = objectMapper.readTree(new File(getClass()
             .getResource(EXCEPTION_RECORD_JSON_PATH).toURI()));
+
         mvc.perform(post(UPDATE_API_URL)
             .contentType(APPLICATION_JSON)
             .content(formToValidate.toString()))

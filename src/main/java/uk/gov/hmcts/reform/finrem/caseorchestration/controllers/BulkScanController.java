@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.in.OcrDataValidationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.OcrValidationResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.CaseCreationDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.update.in.BulkScanCaseUpdateRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.update.output.SuccessfulUpdateResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.in.OcrDataValidationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.OcrValidationResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformer.FrFormToCaseTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanValidationService;
@@ -37,8 +37,6 @@ import static org.springframework.http.ResponseEntity.ok;
 public class BulkScanController {
 
     private static final String CASE_TYPE_ID = "FINANCIAL_REMEDY";
-    // will remove this below
-    private static final String EVENT_ID = "EVENT_ID";
     private static final String CREATE_EVENT_ID = "bulkScanCaseCreate";
     private static final String UPDATE_EVENT_ID = "bulkScanCaseUpdate";
     public static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorization";
@@ -112,7 +110,7 @@ public class BulkScanController {
             .caseCreationDetails(
                 new CaseCreationDetails(
                     CASE_TYPE_ID,
-                    EVENT_ID,
+                    CREATE_EVENT_ID,
                     transformedCaseData))
             .warnings(Collections.emptyList())
             .build();
