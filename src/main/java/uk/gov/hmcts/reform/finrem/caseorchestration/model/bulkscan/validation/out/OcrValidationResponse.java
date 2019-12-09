@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.o
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.ValidationStatus;
 
 import java.util.List;
 

@@ -16,11 +16,4 @@ public class SuccessfulTransformationResponse {
     @JsonProperty("warnings")
     public final List<String> warnings;
 
-    public SuccessfulTransformationResponse(
-        CaseCreationDetails caseCreationDetails,
-        List<String> warnings) {
-        this.caseCreationDetails = caseCreationDetails;
-        this.warnings = warnings;
-    }
-
 }

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out;
 
 import lombok.Getter;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.ValidationStatus;
 
 import java.util.List;
 
