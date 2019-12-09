@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.update.in.transformation.in;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.update.in;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrDataField;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrValidationResult;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.OcrValidationResult;
 
 import java.util.List;
 

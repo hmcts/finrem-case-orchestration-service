@@ -11,7 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.ForbiddenException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.UnauthenticatedException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrValidationResult;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanValidationService;
 
