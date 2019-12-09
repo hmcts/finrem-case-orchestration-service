@@ -32,7 +32,11 @@ You can run the application by executing following command:
     ./gradlew bootRun
 ```
 
-The application will start locally on `http://localhost:9000`
+The application will start locally on: `http://localhost:9000`
+
+### API documentation
+
+API documentation is provided with Swagger. This is available locally at: `http://localhost:9000/swagger-ui.html`
 
 ## Docker container
 
@@ -109,12 +113,11 @@ Go to **bin** folder,
     ./load-pba-reference-data.sh
 ```
 
-
-## Developing
+## Testing
 
 ### Unit tests
 
-To run all unit tests please execute following command:
+To run all unit tests and local functional tests please execute following command:
 
 ```bash
     ./gradlew test
