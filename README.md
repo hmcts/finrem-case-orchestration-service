@@ -32,12 +32,11 @@ You can run the application by executing following command:
     ./gradlew bootRun
 ```
 
-The application will start locally on `http://localhost:9000`
+The application will start locally on: `http://localhost:9000`
 
-**API documentation**
+### API documentation
 
-API documentation is provided with Swagger:
- - `http://localhost:9000/swagger-ui.html` - UI to interact with the API resources
+API documentation is provided with Swagger. This is available locally at: `http://localhost:9000/swagger-ui.html`
 
 ## Docker container
 
@@ -116,15 +115,15 @@ Go to **bin** folder,
 
 ## Testing
 
-**Unit tests**
+### Unit tests
 
-To run all unit tests and local functional tests respectively please execute following command:
+To run all unit tests and local functional tests please execute following command:
 
 ```bash
     ./gradlew test
 ```
 
-**Coding style tests**
+### Coding style tests
 
 To run all checks (including unit tests) please execute following command:
 
@@ -132,13 +131,13 @@ To run all checks (including unit tests) please execute following command:
     ./gradlew check
 ```
 
-**Mutation tests**
+### Mutation tests
 
 To run all mutation tests execute the following command:
 
+```bash
+    ./gradlew pitest
 ```
-./gradlew pitest
-
 
 ## Versioning
 
