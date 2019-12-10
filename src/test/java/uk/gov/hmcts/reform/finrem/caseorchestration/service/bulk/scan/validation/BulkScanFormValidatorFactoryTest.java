@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.exception.bulk.scan.UnsupportedFormTypeException;
+import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanFormValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanFormValidatorFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FormAValidator;
@@ -36,7 +36,7 @@ public class BulkScanFormValidatorFactoryTest {
     }
 
     @Test
-    public void shouldReturnValidatorForNewDivorceCaseForm() throws UnsupportedFormTypeException {
+    public void shouldReturnValidatorForNewDivorceCaseForm() {
         BulkScanFormValidator validator = classUnderTest.getValidator("formA");
 
         assertThat(validator, is(instanceOf(FormAValidator.class)));

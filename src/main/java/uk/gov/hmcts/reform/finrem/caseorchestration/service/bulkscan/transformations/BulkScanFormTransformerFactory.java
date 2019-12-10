@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transforma
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.exception.bulk.scan.UnsupportedFormTypeException;
+import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;

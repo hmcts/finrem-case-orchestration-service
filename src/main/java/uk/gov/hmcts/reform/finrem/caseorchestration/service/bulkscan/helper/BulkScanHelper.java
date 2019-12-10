@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper;
 
+import uk.gov.hmcts.reform.bsp.common.error.FormFieldValidationException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.in.OcrDataField;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.exception.FormFieldValidationException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
