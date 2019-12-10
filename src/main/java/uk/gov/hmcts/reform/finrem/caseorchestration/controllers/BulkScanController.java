@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import uk.gov.hmcts.reform.bsp.common.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.exception.bulk.scan.UnsupportedFormTypeException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.CaseCreationDetails;
@@ -21,9 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.update.output
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.in.OcrDataValidationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.OcrValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.OcrValidationResult;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformations.FormAToCaseTransformer;
 
 import javax.validation.Valid;
 import java.util.Collections;
@@ -67,11 +66,13 @@ public class BulkScanController {
         @ApiResponse(code = 404, message = "Form type not found")
     })
     public ResponseEntity<OcrValidationResponse> validateOcrData(
-        @RequestHeader(name = SERVICE_AUTHORISATION_HEADER, required = false) String serviceAuthHeader,
+        @RequestHeader(name = SERVICE_AUTHORISATION_HEADER) String s2sAuthToken,
         @PathVariable(name = "form-type", required = false) String formType,
         @Valid @RequestBody OcrDataValidationRequest request
     ) {
         log.info("Validating form {} for bulk scanning operation", formType);
+
+        authService.assertIsServiceAllowedToValidate(s2sAuthToken);
 
         ResponseEntity<OcrValidationResponse> response;
 
@@ -87,8 +88,6 @@ public class BulkScanController {
 
         return response;
     }
-
-    private FormAToCaseTransformer formAToCaseTransformer = new FormAToCaseTransformer();
 
     @PostMapping(
         path = "/transform-exception-record",
@@ -106,10 +105,12 @@ public class BulkScanController {
         @ApiResponse(code = 422, message = "Exception record is well-formed, but contains invalid data.")
     })
     public ResponseEntity<SuccessfulTransformationResponse> transformExceptionRecordIntoCase(
-        @RequestHeader(name = SERVICE_AUTHORISATION_HEADER, required = false) String s2sAuthToken,
+        @RequestHeader(name = SERVICE_AUTHORISATION_HEADER) String s2sAuthToken,
         @Valid @RequestBody ExceptionRecord exceptionRecord
     ) {
         log.info("Transforming exception record to case");
+
+        authService.assertIsServiceAllowedToUpdate(s2sAuthToken);
 
         ResponseEntity<SuccessfulTransformationResponse> controllerResponse;
         try {
@@ -148,10 +149,12 @@ public class BulkScanController {
         @ApiResponse(code = 422, message = "Exception record is well-formed, but contains invalid data.")
     })
     public ResponseEntity<SuccessfulUpdateResponse> updateCase(
-        @RequestHeader(name = SERVICE_AUTHORISATION_HEADER, required = false) String s2sAuthToken,
+        @RequestHeader(name = SERVICE_AUTHORISATION_HEADER) String s2sAuthToken,
         @Valid @RequestBody BulkScanCaseUpdateRequest request
     ) {
         log.info("Updates existing case based on exception record");
+
+        authService.assertIsServiceAllowedToUpdate(s2sAuthToken);
 
         SuccessfulUpdateResponse callbackResponse = SuccessfulUpdateResponse.builder()
             .caseUpdateDetails(
