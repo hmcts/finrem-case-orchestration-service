@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers.bulkscan;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,17 +11,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.bsp.common.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrDataValidationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.OcrValidationResult;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanValidationService;
 
 import javax.validation.Valid;
 
 import static org.springframework.http.ResponseEntity.ok;
 
-@Slf4j
 @RestController
 public class OcrValidationController {
 
@@ -56,8 +54,7 @@ public class OcrValidationController {
             @PathVariable(name = "form-type", required = false) String formType,
             @Valid @RequestBody OcrDataValidationRequest request
     ) {
-        String serviceName = authService.authenticate(serviceAuthHeader);
-        log.info("Request received to validate ocr data from service {}", serviceName);
+        authService.assertIsServiceAllowedToValidate(serviceAuthHeader);
 
         try {
             OcrValidationResult ocrValidationResult = bulkScanValidationService.validate(
