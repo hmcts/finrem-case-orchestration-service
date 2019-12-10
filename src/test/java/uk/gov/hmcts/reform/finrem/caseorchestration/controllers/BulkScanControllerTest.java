@@ -1,176 +1,112 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
-import org.junit.Before;
 import org.junit.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.ForbiddenException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.error.UnauthenticatedException;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.finrem.caseorchestration.exception.bulk.scan.UnsupportedFormTypeException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.in.ExceptionRecord;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.CaseCreationDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.SuccessfulTransformationResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.in.OcrDataField;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.in.OcrDataValidationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.OcrValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.OcrValidationResult;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AuthService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanValidationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.List;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static java.util.Collections.emptyList;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.ValidationStatus.ERRORS;
 
-@WebMvcTest(BulkScanController.class)
-public class BulkScanControllerTest extends BaseControllerTest {
+@RunWith(MockitoJUnitRunner.class)
+public class BulkScanControllerTest {
 
-    private static final String EXCEPTION_RECORD_JSON_PATH = "/fixtures/model/exception-record.json";
-    private static final String VALIDATION_BASIC_FORM_JSON_PATH = "fixtures/bulkscan/validation/basic-form.json";
-    private static final String VALIDATION_VALID_OCR_RESPONSE_JSON_PATH = "fixtures/bulkscan/validation/valid-ocr-response.json";
-    private static final String VALIDATE_API_URL = "/forms/PERSONAL/validate-ocr";
-    private static final String TRANSFORM_API_URL = "/transform-exception-record";
-    private static final String UPDATE_API_URL = "/update-case";
-    private static final String SERVICE_AUTHORIZATION = "ServiceAuthorization";
+    private static final String TEST_FORM_TYPE = "testFormType";
+    private static final String TEST_SERVICE_TOKEN = "testServiceToken";
 
+    @Mock
+    private BulkScanService bulkScanService;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    @InjectMocks
+    private BulkScanController bulkScanController;
 
-    @MockBean
-    private AuthService authService;
+    @Test
+    public void shouldReturnValidatorResults() throws UnsupportedFormTypeException {
+        List<OcrDataField> testOcrDataFields = singletonList(new OcrDataField("testName", "testValue"));
+        when(bulkScanService.validateBulkScanForm(eq(TEST_FORM_TYPE), eq(testOcrDataFields))).thenReturn(OcrValidationResult.builder()
+            .addError("this is an error")
+            .addWarning("this is a warning")
+            .build()
+        );
 
-    @MockBean
-    private BulkScanValidationService bulkScanValidationService;
+        ResponseEntity<OcrValidationResponse> response = bulkScanController
+            .validateOcrData(TEST_SERVICE_TOKEN, TEST_FORM_TYPE, new OcrDataValidationRequest(testOcrDataFields));
 
-    @Before
-    public void setUp() {
-        super.setUp();
+        assertThat(response.getStatusCode(), is(OK));
+        OcrValidationResponse responseBody = response.getBody();
+        assertThat(responseBody.getErrors(), hasItem("this is an error"));
+        assertThat(responseBody.getWarnings(), hasItem("this is a warning"));
+        assertThat(responseBody.getStatus(), is(ERRORS));
+        verify(bulkScanService).validateBulkScanForm(ArgumentMatchers.eq(TEST_FORM_TYPE), ArgumentMatchers.eq(testOcrDataFields));
     }
 
     @Test
-    public void shouldReturn401StatusWhenAuthServiceThrowsUnauthenticatedException() throws Exception {
-        String requestBody = readResource(VALIDATION_BASIC_FORM_JSON_PATH);
-        given(authService.authenticate("")).willThrow(UnauthenticatedException.class);
+    public void shouldReturnResourceNotFoundForUnsupportedFormType_ForValidation() throws UnsupportedFormTypeException {
+        List<OcrDataField> testOcrDataFields = singletonList(new OcrDataField("testName", "testValue"));
+        String unsupportedFormType = "unsupportedFormType";
+        when(bulkScanService.validateBulkScanForm(ArgumentMatchers.eq(unsupportedFormType), ArgumentMatchers.eq(testOcrDataFields)))
+            .thenThrow(UnsupportedFormTypeException.class);
 
-        mvc.perform(
-            post(VALIDATE_API_URL)
-                .header(SERVICE_AUTHORIZATION, "")
-                .contentType(APPLICATION_JSON_VALUE)
-                .content(requestBody)
-        )
-            .andExpect(status().isUnauthorized());
+        ResponseEntity<OcrValidationResponse> response = bulkScanController
+            .validateOcrData(TEST_SERVICE_TOKEN, unsupportedFormType, new OcrDataValidationRequest(testOcrDataFields));
+
+        assertThat(response.getStatusCode(), is(HttpStatus.NOT_FOUND));
+        OcrValidationResponse responseBody = response.getBody();
+        assertThat(responseBody, is(nullValue()));
+        verify(bulkScanService).validateBulkScanForm(ArgumentMatchers.eq(unsupportedFormType), ArgumentMatchers.eq(testOcrDataFields));
     }
 
     @Test
-    public void shouldReturn401StatusWhenAuthServiceThrowsInvalidTokenException() throws Exception {
-        String requestBody = readResource(VALIDATION_BASIC_FORM_JSON_PATH);
-        given(authService.authenticate("test-token")).willThrow(InvalidTokenException.class);
+    public void shouldReturnTransformerServiceResults() {
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder().build();
+        when(bulkScanService.transformBulkScanForm(exceptionRecord)).thenReturn(singletonMap("testKey", "testValue"));
 
-        mvc.perform(
-            post(VALIDATE_API_URL)
-                .header(SERVICE_AUTHORIZATION, "test-token")
-                .contentType(APPLICATION_JSON_VALUE)
-                .content(requestBody)
-        )
-            .andExpect(status().isUnauthorized());
+        ResponseEntity<SuccessfulTransformationResponse> response =
+            bulkScanController.transformExceptionRecordIntoCase(TEST_SERVICE_TOKEN, exceptionRecord);
+
+        assertThat(response.getStatusCode(), is(OK));
+        SuccessfulTransformationResponse transformationResponse = response.getBody();
+        assertThat(transformationResponse.getWarnings(), is(emptyList()));
+        CaseCreationDetails caseCreationDetails = transformationResponse.getCaseCreationDetails();
+        assertThat(caseCreationDetails.getCaseTypeId(), is("FINANCIAL_REMEDY"));
+        assertThat(caseCreationDetails.getEventId(), is("bulkScanCaseCreate"));
+        assertThat(caseCreationDetails.getCaseData(), hasEntry("testKey", "testValue"));
     }
 
     @Test
-    public void shouldReturn403StatusWhenAuthServiceThrowsForbiddenException() throws Exception {
-        String requestBody = readResource(VALIDATION_BASIC_FORM_JSON_PATH);
-        given(authService.authenticate(any())).willThrow(ForbiddenException.class);
+    public void shouldReturnErrorForUnsupportedFormType_ForTransformation() {
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder().build();
+        when(bulkScanService.transformBulkScanForm(exceptionRecord)).thenThrow(UnsupportedFormTypeException.class);
 
-        mvc.perform(
-            post(VALIDATE_API_URL)
-                .header(SERVICE_AUTHORIZATION, "test-token")
-                .contentType(APPLICATION_JSON_VALUE)
-                .content(requestBody)
-        )
-            .andExpect(status().isForbidden())
-            .andExpect(content().json("{\"error\":\"S2S token is not authorized to use the service\"}"));
-    }
+        ResponseEntity response = bulkScanController.transformExceptionRecordIntoCase(TEST_SERVICE_TOKEN, exceptionRecord);
 
-    @Test
-    public void shouldReturnSuccessMessageWhenOcrDataIsValid() throws Exception {
-        String requestBody = readResource(VALIDATION_BASIC_FORM_JSON_PATH);
-
-        String testFormName = "PERSONAL";
-
-        given(authService.authenticate("testServiceAuthHeader")).willReturn("testServiceName");
-        given(bulkScanValidationService.validate(eq(testFormName),
-            anyList())).willReturn(new OcrValidationResult(emptyList(), emptyList()));
-
-        mvc.perform(
-            post(String.format("/forms/%s/validate-ocr", testFormName))
-                .contentType(APPLICATION_JSON_VALUE)
-                .header(SERVICE_AUTHORIZATION, "testServiceAuthHeader")
-                .content(requestBody)
-        )
-            .andExpect(status().isOk())
-            .andExpect(content().json(readResource(VALIDATION_VALID_OCR_RESPONSE_JSON_PATH)));
-    }
-
-    private String readResource(final String fileName) throws IOException {
-        return Resources.toString(Resources.getResource(fileName), Charsets.UTF_8);
-    }
-
-    @Test
-    public void shouldReturnSuccessResponseForTransformationEndpoint() throws Exception {
-        JsonNode formToValidate = objectMapper.readTree(new File(getClass()
-            .getResource(EXCEPTION_RECORD_JSON_PATH).toURI()));
-
-        mvc.perform(post(TRANSFORM_API_URL)
-            .contentType(APPLICATION_JSON)
-            .content(formToValidate.toString()))
-            .andExpect(status().isOk())
-            .andExpect(content().string(
-                allOf(
-                    isJson(),
-                    hasJsonPath("$.warnings", equalTo(emptyList())),
-                    hasJsonPath("$.case_creation_details.*", hasSize(3)),
-                    hasJsonPath("$.case_creation_details", allOf(
-                        hasJsonPath("case_type_id", is("FINANCIAL_REMEDY")),
-                        hasJsonPath("event_id", is("bulkScanCaseCreate")),
-                        hasJsonPath("case_data.*", hasSize(2)),
-                        hasJsonPath("case_data", allOf(
-                            hasJsonPath("D8FirstName", is("Christopher")),
-                            hasJsonPath("D8LastName", is("O'John"))
-                        ))
-                    ))
-                )));
-    }
-
-    @Test
-    public void shouldReturnSuccessResponseForUpdateEndpoint() throws Exception {
-        JsonNode formToValidate = objectMapper.readTree(new File(getClass()
-            .getResource(EXCEPTION_RECORD_JSON_PATH).toURI()));
-
-        mvc.perform(post(UPDATE_API_URL)
-            .contentType(APPLICATION_JSON)
-            .content(formToValidate.toString()))
-            .andExpect(status().isOk())
-            .andExpect(content().string(
-                allOf(
-                    isJson(),
-                    hasJsonPath("$.warnings", equalTo(emptyList())),
-                    hasJsonPath("$.case_update_details.*", hasSize(3)),
-                    hasJsonPath("$.case_update_details", allOf(
-                        hasJsonPath("case_type_id", is("FINANCIAL_REMEDY")),
-                        hasJsonPath("event_id", is("bulkScanCaseUpdate"))
-                    ))
-                )));
+        assertThat(response.getStatusCode(), is(UNPROCESSABLE_ENTITY));
     }
 }

@@ -2,19 +2,21 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.o
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 
 import java.util.List;
 
+@Getter
 public class OcrValidationResponse {
 
     @JsonProperty("warnings")
-    public final List<String> warnings;
+    private final List<String> warnings;
 
     @JsonProperty("errors")
-    public final List<String> errors;
+    private final List<String> errors;
 
     @JsonProperty("status")
-    public final ValidationStatus status;
+    private final ValidationStatus status;
 
     @JsonCreator
     public OcrValidationResponse(OcrValidationResult ocrValidationResult) {
