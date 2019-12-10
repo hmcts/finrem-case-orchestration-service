@@ -20,7 +20,6 @@ import static org.springframework.http.ResponseEntity.status;
 public class GlobalExceptionHandler {
 
     public static final String SERVER_ERROR_MSG = "Some server side exception occurred. Please check logs for details";
-    private static final ApiError API_ERROR_FORBIDDEN = new ApiError("S2S token is not authorized to use the service");
 
     @ExceptionHandler(FeignException.class)
     ResponseEntity<Object> handleFeignException(FeignException exception) {
@@ -50,17 +49,5 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ApiError> handleInvalidTokenException(InvalidTokenException exc) {
         log.warn(exc.getMessage(), exc);
         return status(UNAUTHORIZED).body(new ApiError(exc.getMessage()));
-    }
-
-    @ExceptionHandler(UnauthenticatedException.class)
-    protected ResponseEntity<ApiError> handleUnauthenticatedException(UnauthenticatedException exc) {
-        log.warn(exc.getMessage(), exc);
-        return status(UNAUTHORIZED).body(new ApiError(exc.getMessage()));
-    }
-
-    @ExceptionHandler(ForbiddenException.class)
-    protected ResponseEntity<ApiError> handleForbiddenException(ForbiddenException exc) {
-        log.warn(exc.getMessage(), exc);
-        return status(FORBIDDEN).body(API_ERROR_FORBIDDEN);
     }
 }
