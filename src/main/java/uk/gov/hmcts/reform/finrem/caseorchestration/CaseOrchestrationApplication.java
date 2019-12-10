@@ -6,7 +6,9 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {
+    "uk.gov.hmcts.reform.finrem", "uk.gov.hmcts.reform.bsp.common"
+})
 @EnableFeignClients
 public class CaseOrchestrationApplication {
 

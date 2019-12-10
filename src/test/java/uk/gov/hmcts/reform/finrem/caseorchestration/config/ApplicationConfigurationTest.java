@@ -30,5 +30,4 @@ public class ApplicationConfigurationTest {
     public void createObjectMapper() {
         assertThat(applicationConfiguration.objectMapper(Jackson2ObjectMapperBuilder.json()), is(notNullValue()));
     }
-
 }
