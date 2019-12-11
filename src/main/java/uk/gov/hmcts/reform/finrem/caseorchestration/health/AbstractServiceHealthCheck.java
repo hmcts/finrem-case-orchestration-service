@@ -29,11 +29,8 @@ public abstract class AbstractServiceHealthCheck implements HealthIndicator {
         try {
             ResponseEntity<Object> response = restTemplate.getForEntity(uri, Object.class);
             return response.getStatusCode() == (HttpStatus.OK) ? statusHealthy() : statusUnknown();
-        } catch (HttpStatusCodeException ex) {
-            log.error("Http exception occurred while doing health check on", ex);
-            return statusError(ex);
         } catch (Exception ex) {
-            log.error("Unknown exception occurred while doing health check", ex);
+            log.error("Exception while checking health on {}, exception: {}", uri, ex);
             return statusError(ex);
         }
     }
