@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.bsp.common.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 
 import java.io.File;
@@ -26,6 +28,8 @@ public class UpdateControllerTest extends BaseControllerTest {
     private static final String EXCEPTION_RECORD_JSON_PATH = "/fixtures/model/exception-record.json";
     private static final String API_URL = "/update-case";
     private ObjectMapper objectMapper = new ObjectMapper();
+
+    @MockBean private AuthService authService;
 
     @Test
     public void shouldReturnSuccessResponseForUpdateEndpoint() throws Exception {
