@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public abstract class BulkScanFormTransformer {
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_REFERENCE;
 
-    private static final String BULK_SCAN_CASE_REFERENCE = "bulkScanCaseReference";
+public abstract class BulkScanFormTransformer {
 
     public Map<String, Object> transformIntoCaseData(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException {
         List<OcrDataField> ocrDataFields = exceptionRecord.getOcrDataFields();

@@ -33,6 +33,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_CREATE_EVENT_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.UNSUPPORTED_FORM_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.ValidationStatus.ERRORS;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -77,7 +79,7 @@ public class BulkScanControllerTest {
     @Test
     public void shouldReturnResourceNotFoundForUnsupportedFormType_ForValidation() throws UnsupportedFormTypeException {
         List<OcrDataField> testOcrDataFields = singletonList(new OcrDataField(TEST_KEY, TEST_VALUE));
-        String unsupportedFormType = "unsupportedFormType";
+        String unsupportedFormType = UNSUPPORTED_FORM_TYPE;
         when(bulkScanService.validateBulkScanForm(eq(unsupportedFormType), eq(testOcrDataFields)))
             .thenThrow(UnsupportedFormTypeException.class);
 
@@ -105,7 +107,7 @@ public class BulkScanControllerTest {
         assertThat(transformationResponse.getWarnings(), is(emptyList()));
         CaseCreationDetails caseCreationDetails = transformationResponse.getCaseCreationDetails();
         assertThat(caseCreationDetails.getCaseTypeId(), is("FINANCIAL_REMEDY"));
-        assertThat(caseCreationDetails.getEventId(), is("bulkScanCaseCreate"));
+        assertThat(caseCreationDetails.getEventId(), is(BULK_SCAN_CASE_CREATE_EVENT_ID));
         assertThat(caseCreationDetails.getCaseData(), hasEntry(TEST_KEY, TEST_VALUE));
 
         verify(authService).assertIsServiceAllowedToUpdate(TEST_SERVICE_TOKEN);

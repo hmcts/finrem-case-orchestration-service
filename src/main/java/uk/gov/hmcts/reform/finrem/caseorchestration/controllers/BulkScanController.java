@@ -30,6 +30,10 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_CREATE_EVENT_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_UPDATE_EVENT_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_FR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
 @Slf4j
 @Controller
@@ -39,11 +43,6 @@ public class BulkScanController {
     Consented CaseTypeID is: FinancialRemedyMVP2
     Contested CaseTypeID is: FinancialRemedyContested
      */
-
-    private static final String CASE_TYPE_ID = "FINANCIAL_REMEDY";
-    private static final String CREATE_EVENT_ID = "bulkScanCaseCreate";
-    private static final String UPDATE_EVENT_ID = "bulkScanCaseUpdate";
-    public static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorization";
 
     @Autowired
     private BulkScanService bulkScanService;
@@ -119,8 +118,8 @@ public class BulkScanController {
             SuccessfulTransformationResponse callbackResponse = SuccessfulTransformationResponse.builder()
                 .caseCreationDetails(
                     new CaseCreationDetails(
-                        CASE_TYPE_ID,
-                        CREATE_EVENT_ID,
+                        CASE_TYPE_ID_FR,
+                        BULK_SCAN_CASE_CREATE_EVENT_ID,
                         transformedCaseData))
                 .build();
 
@@ -161,8 +160,8 @@ public class BulkScanController {
                 CaseCreationDetails
                     .builder()
                     .caseData(request.getCaseData())
-                    .caseTypeId(CASE_TYPE_ID)
-                    .eventId(UPDATE_EVENT_ID)
+                    .caseTypeId(CASE_TYPE_ID_FR)
+                    .eventId(BULK_SCAN_CASE_UPDATE_EVENT_ID)
                     .build()
             ).warnings(Collections.emptyList())
             .build();

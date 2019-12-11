@@ -10,10 +10,11 @@ import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.collection.IsMapWithSize.aMapWithSize;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
 
 public class FormAToCaseTransformerTest {
 
@@ -26,7 +27,7 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = classUnderTest.transformIntoCaseData(exceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-            hasEntry("bulkScanCaseReference", "test_case_id")
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID)
         ));
     }
 
@@ -38,11 +39,11 @@ public class FormAToCaseTransformerTest {
 
         assertThat(transformedCaseData, allOf(
             aMapWithSize(1),
-            hasEntry("bulkScanCaseReference", "test_case_id")
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID)
         ));
     }
 
     private ExceptionRecord createExceptionRecord(List<OcrDataField> ocrDataFields) {
-        return ExceptionRecord.builder().id("test_case_id").ocrDataFields(ocrDataFields).build();
+        return ExceptionRecord.builder().id(TEST_CASE_ID).ocrDataFields(ocrDataFields).build();
     }
 }
