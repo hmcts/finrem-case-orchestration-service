@@ -20,7 +20,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.fee;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONTESTED;
 
@@ -28,7 +30,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType
 public class FeeLookupControllerTest extends BaseControllerTest {
 
     private static final String FEE_LOOKUP_URL = "/case-orchestration/fee-lookup";
-    private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
     @MockBean
     private FeeService feeService;
@@ -43,13 +44,12 @@ public class FeeLookupControllerTest extends BaseControllerTest {
         when(feeService.getApplicationFee(applicationType)).thenReturn(fee(applicationType));
     }
 
-
     @Test
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
         doEmtpyCaseDataSetUp();
         mvc.perform(post(FEE_LOOKUP_URL)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(is(GlobalExceptionHandler.SERVER_ERROR_MSG)));
@@ -60,7 +60,7 @@ public class FeeLookupControllerTest extends BaseControllerTest {
         doFeeLookupSetUp(CONSENTED);
         mvc.perform(post(FEE_LOOKUP_URL)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
@@ -72,13 +72,12 @@ public class FeeLookupControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
 
-
     @Test
     public void shouldDoContestedFeeLookup() throws Exception {
         doFeeLookupSetUp(CONTESTED);
         mvc.perform(post(FEE_LOOKUP_URL)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))

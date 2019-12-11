@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformat
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.rules.ExpectedException.none;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.UNSUPPORTED_FORM_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BULK_UNSUPPORTED_FORM_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.BulkScanForms.FORM_A;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -45,6 +45,6 @@ public class BulkScanFormTransformerFactoryTest {
         expectedException.expect(UnsupportedFormTypeException.class);
         expectedException.expectMessage("Form type \"unsupportedFormType\" is not supported.");
 
-        bulkScanFormTransformerFactory.getTransformer(UNSUPPORTED_FORM_TYPE);
+        bulkScanFormTransformerFactory.getTransformer(TEST_BULK_UNSUPPORTED_FORM_TYPE);
     }
 }

@@ -23,23 +23,26 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @WebMvcTest(UpdateContestedCaseController.class)
 public class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
-
-    public static final String CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE = "/case-orchestration/update-contested-case";
-    private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
+    private static final String CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE = "/case-orchestration/update-contested-case";
     private static final String DATA_DIVORCE_UPLOAD_EVIDENCE_1 = "$.data.divorceUploadEvidence1";
     private static final String DATA_DIVORCE_DECREE_NISI_DATE = "$.data.divorceDecreeNisiDate";
     private static final String DIVORCE_PETITION_ISSUED_DATE = "$.data.divorcePetitionIssuedDate";
     private static final String DATA_DIVORCE_UPLOAD_PETITION = "$.data.divorceUploadPetition";
     private static final String DATA_DIVORCE_UPLOAD_EVIDENCE_2 = "$.data.divorceUploadEvidence2";
     private static final String DATA_DIVORCE_DECREE_ABSOLUTE_DATE = "$.data.divorceDecreeAbsoluteDate";
+
+    private static final String FEE_LOOKUP_JSON = "/fixtures/fee-lookup.json";
+
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private JsonNode requestContent;
@@ -59,14 +62,14 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldDeleteNDecreeAbsoluteWhenSolicitorChooseToDecreeNisiForContested() throws Exception {
-        when(onlineFormDocumentService.generateDraftContestedMiniFormA(eq(BEARER_TOKEN), isA(CaseDetails.class)))
+        when(onlineFormDocumentService.generateDraftContestedMiniFormA(eq(AUTH_TOKEN), isA(CaseDetails.class)))
             .thenReturn(caseDocument());
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/amend-divorce-details-decree-nisi.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -87,7 +90,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/contested/amend-divorce-details-decree-absolute.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -103,7 +106,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/contested/amend-divorce-details-petition-issued.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -121,7 +124,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/contested/remove-property-adjustment-order-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -136,7 +139,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/contested/remove-property-adjustment-order-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -151,7 +154,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/contested/remove-additional-property-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -164,7 +167,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/contested/remove-periodic-payment-order-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -176,11 +179,11 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     @Test
     public void shouldUpdatePeriodicPaymentDetailsWhenPaymentForChildrenIsUncheckedForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/"
-                + "update-periodic-payment-details-for-no-payment-for-children.json").toURI()));
+            .getResource(
+                "/fixtures/contested/update-periodic-payment-details-for-no-payment-for-children.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -191,11 +194,11 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     @Test
     public void shouldUpdatePeriodicPaymentDetailsWhenBenefitsForChildrenForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/"
-                + "update-periodic-payment-details-with-benefits-for-children.json").toURI()));
+            .getResource(
+                "/fixtures/contested/update-periodic-payment-details-with-benefits-for-children.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -208,7 +211,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/contested/remove-respondent-solicitor-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -227,7 +230,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/contested/remove-respondent-address-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -242,7 +245,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/contested/remove-respondent-address-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -255,7 +258,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/contested/remove-respondent-solicitor-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -268,7 +271,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/contested/remove-complexity-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -286,7 +289,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/contested/remove-other-reason-for-complexity.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -299,7 +302,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/contested/is-applicant-home-court.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -312,7 +315,7 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/contested/remove-exceptions-when-applicant-attended-miam.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -323,17 +326,16 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.MIAMUrgencyReasonChecklist").doesNotExist())
             .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").doesNotExist())
             .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").doesNotExist());
-
     }
 
     @Test
     public void shouldUpdateMiamExceptionsWhenApplicantNotClaimingExceptionsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/"
-                + "update-miam-exceptions-when-applicant-not-claiming-exemption.json").toURI()));
+            .getResource(
+                "/fixtures/contested/update-miam-exceptions-when-applicant-not-claiming-exemption.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print()).andExpect(jsonPath("$.data.applicantAttendedMIAM").exists())
@@ -344,17 +346,16 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.MIAMUrgencyReasonChecklist").doesNotExist())
             .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").doesNotExist())
             .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").doesNotExist());
-
     }
 
     @Test
     public void shouldUpdateMiamExceptionsWhenApplicantHasFamilyMediatorForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/"
-                + "update-miam-exceptions-when-applicant-attended-family-mediator.json").toURI()));
+            .getResource(
+                "/fixtures/contested/update-miam-exceptions-when-applicant-attended-family-mediator.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -363,17 +364,15 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.MIAMUrgencyReasonChecklist").doesNotExist())
             .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").doesNotExist())
             .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").doesNotExist());
-
     }
 
     @Test
     public void shouldRemoveDomesticViolenceCheckListForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/"
-                + "remove-domestic-violence-checklist.json").toURI()));
+            .getResource("/fixtures/contested/remove-domestic-violence-checklist.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -382,17 +381,15 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.MIAMUrgencyReasonChecklist").exists())
             .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").exists())
             .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").exists());
-
     }
 
     @Test
     public void shouldRemoveUrgencyCheckListForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/"
-                + "remove-urgency-checklist.json").toURI()));
+            .getResource("/fixtures/contested/remove-urgency-checklist.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -401,17 +398,15 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.MIAMUrgencyReasonChecklist").doesNotExist())
             .andExpect(jsonPath("$.data.MIAMPreviousAttendanceChecklist").exists())
             .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").exists());
-
     }
 
     @Test
     public void shouldRemovePreviousMiamAttendanceCheckListForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/"
-                + "remove-previousMiamAttendance-checklist.json").toURI()));
+            .getResource("/fixtures/contested/remove-previousMiamAttendance-checklist.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -426,11 +421,10 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     @Test
     public void shouldRemoveOtherGroundsMiamCheckListForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/"
-                + "remove-other-checklist.json").toURI()));
+            .getResource("/fixtures/contested/remove-other-checklist.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -441,15 +435,13 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.MIAMOtherGroundsChecklist").doesNotExist());
     }
 
-
     @Test
     public void shouldNotRemoveMiamCheckListForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/"
-                + "do-not-remove-checklists.json").toURI()));
+            .getResource("/fixtures/contested/do-not-remove-checklists.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -463,11 +455,10 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     @Test
     public void shouldRemoveMiamCertificationDetailsWhenApplicantIsNotAttendedMiamForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/"
-                + "remove-miam-certification-details.json").toURI()));
+            .getResource("/fixtures/contested/remove-miam-certification-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -482,11 +473,11 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     @Test
     public void shouldCleanupMiamCertificationWhenApplicantAttendedMiamForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/"
-                + "cleanup-miam-certification-details-when-applicant-attended-miam.json").toURI()));
+            .getResource(
+                "/fixtures/contested/cleanup-miam-certification-details-when-applicant-attended-miam.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -501,11 +492,10 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     @Test
     public void shouldCleanupAdditionalDocumentsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/"
-                + "cleanup-addtional-documents.json").toURI()));
+            .getResource("/fixtures/contested/cleanup-addtional-documents.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -516,11 +506,10 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotCleanupAdditionalDocumentsForContested() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/"
-                + "remove-property-adjustment-order-details.json").toURI()));
+            .getResource("/fixtures/contested/remove-property-adjustment-order-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CONTESTED_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -528,14 +517,9 @@ public class UpdateContestedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.uploadAdditionalDocument").exists());
     }
 
-
     private void doRequestSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(jsonFixture()).toURI()));
-    }
-
-    private String jsonFixture() {
-        return "/fixtures/fee-lookup.json";
+            .getResource(FEE_LOOKUP_JSON).toURI()));
     }
 }

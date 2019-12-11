@@ -62,7 +62,6 @@ public class NotificationsControllerTest {
 
         verify(notificationService, times(1))
                 .sendHWFSuccessfulConfirmationEmail(any(CallbackRequest.class));
-
     }
 
     @Test
@@ -74,7 +73,6 @@ public class NotificationsControllerTest {
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
-
     }
 
     @Test
@@ -87,7 +85,6 @@ public class NotificationsControllerTest {
 
         verify(notificationService, times(1))
                 .sendAssignToJudgeConfirmationEmail(any(CallbackRequest.class));
-
     }
 
     @Test
@@ -99,7 +96,6 @@ public class NotificationsControllerTest {
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
-
     }
 
     @Test
@@ -112,7 +108,6 @@ public class NotificationsControllerTest {
 
         verify(notificationService, times(1))
                 .sendConsentOrderMadeConfirmationEmail(any(CallbackRequest.class));
-
     }
 
     @Test
@@ -136,7 +131,6 @@ public class NotificationsControllerTest {
 
         verify(notificationService, times(1))
                 .sendConsentOrderNotApprovedEmail(any(CallbackRequest.class));
-
     }
 
     @Test
@@ -160,7 +154,6 @@ public class NotificationsControllerTest {
 
         verify(notificationService, times(1))
                 .sendConsentOrderAvailableEmail(any(CallbackRequest.class));
-
     }
 
     @Test
@@ -184,7 +177,6 @@ public class NotificationsControllerTest {
 
         verify(notificationService, times(1))
                 .sendContestedHwfSuccessfulConfirmationEmail(any(CallbackRequest.class));
-
     }
 
     @Test
@@ -197,8 +189,6 @@ public class NotificationsControllerTest {
 
         verifyNoMoreInteractions(notificationService);
     }
-
-
 
     private void buildCcdRequest(String fileName) throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();

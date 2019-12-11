@@ -24,7 +24,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.fee;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler.SERVER_ERROR_MSG;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
@@ -33,7 +35,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus
 public class PBAPaymentControllerTest extends BaseControllerTest {
 
     private static final String PBA_PAYMENT_URL = "/case-orchestration/pba-payment";
-    private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
     @MockBean
     private FeeService feeService;
@@ -57,7 +58,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         doEmtpyCaseDataSetUp();
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(is(SERVER_ERROR_MSG)));
@@ -90,7 +91,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         doHWFSetUp();
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.state", is(AWAITING_HWF_DECISION.toString())))
@@ -109,7 +110,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         doPBASetUp(false);
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
@@ -123,7 +124,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         doPBASetUp(true);
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
@@ -136,13 +137,12 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         verify(pbaPaymentService, times(1)).makePayment(anyString(), anyString(), any());
     }
 
-
     @Test
     public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))

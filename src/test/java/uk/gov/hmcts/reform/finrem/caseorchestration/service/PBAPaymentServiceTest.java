@@ -100,7 +100,6 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                 is("You have insufficient funds available"));
     }
 
-
     @Test
     public void accountOnHold() throws Exception {
         setupCaseData();
@@ -132,7 +131,6 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
         assertThat(paymentResponse.getStatusHistories().get(0).getErrorMessage(), is("Your account is on hold"));
     }
 
-
     @Test
     public void accountDeleted() throws Exception {
         setupCaseData();
@@ -163,7 +161,6 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
         assertThat(paymentResponse.getStatusHistories().get(0).getErrorCode(), is("CA-E0004"));
         assertThat(paymentResponse.getStatusHistories().get(0).getErrorMessage(), is("Your account is deleted"));
     }
-
 
     @Test
     public void accessIsDenied() throws Exception {

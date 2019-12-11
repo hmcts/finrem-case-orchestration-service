@@ -14,9 +14,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.help
 
 public abstract class BulkScanFormValidator {
 
-    protected static final String TRUE = "True";
-    protected static final String BLANK = "";
-
     protected abstract List<String> getMandatoryFields();
 
     protected abstract List<String> runPostProcessingValidation(Map<String, String> fieldsMap);

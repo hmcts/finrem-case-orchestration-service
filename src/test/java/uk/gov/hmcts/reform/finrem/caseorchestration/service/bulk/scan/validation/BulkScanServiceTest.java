@@ -28,7 +28,7 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.UNSUPPORTED_FORM_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BULK_UNSUPPORTED_FORM_TYPE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BulkScanServiceTest {
@@ -73,9 +73,9 @@ public class BulkScanServiceTest {
     public void shouldRethrowUnsupportedFormTypeExceptionFromFactory() {
         expectedException.expect(UnsupportedFormTypeException.class);
         List<OcrDataField> ocrDataFields = singletonList(new OcrDataField(TEST_KEY, TEST_VALUE));
-        when(bulkScanFormValidatorFactory.getValidator(UNSUPPORTED_FORM_TYPE)).thenThrow(UnsupportedFormTypeException.class);
+        when(bulkScanFormValidatorFactory.getValidator(TEST_BULK_UNSUPPORTED_FORM_TYPE)).thenThrow(UnsupportedFormTypeException.class);
 
-        bulkScanService.validateBulkScanForm(UNSUPPORTED_FORM_TYPE, ocrDataFields);
+        bulkScanService.validateBulkScanForm(TEST_BULK_UNSUPPORTED_FORM_TYPE, ocrDataFields);
     }
 
     @Test
@@ -98,8 +98,8 @@ public class BulkScanServiceTest {
     public void shouldRethrowUnsupportedFormTypeExceptionFromFormTransformerFactory() {
         expectedException.expect(UnsupportedFormTypeException.class);
 
-        ExceptionRecord exceptionRecord = ExceptionRecord.builder().formType(UNSUPPORTED_FORM_TYPE).build();
-        when(bulkScanFormTransformerFactory.getTransformer(UNSUPPORTED_FORM_TYPE)).thenThrow(UnsupportedFormTypeException.class);
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder().formType(TEST_BULK_UNSUPPORTED_FORM_TYPE).build();
+        when(bulkScanFormTransformerFactory.getTransformer(TEST_BULK_UNSUPPORTED_FORM_TYPE)).thenThrow(UnsupportedFormTypeException.class);
 
         bulkScanService.transformBulkScanForm(exceptionRecord);
     }

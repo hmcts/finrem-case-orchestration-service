@@ -22,11 +22,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @WebMvcTest(FinalOrderController.class)
 public class FinalOrderControllerTest extends BaseControllerTest {
@@ -62,7 +63,7 @@ public class FinalOrderControllerTest extends BaseControllerTest {
 
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -74,15 +75,15 @@ public class FinalOrderControllerTest extends BaseControllerTest {
 
         ResultActions result = mvc.perform(post(endpoint())
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON));
 
         result.andExpect(status().isOk());
         result.andDo(print());
         String path = "$.data.finalOrderCollection[1].value.uploadDraftDocument.";
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
-                .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
-                .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
+            .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
+            .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
 
     }
 
@@ -92,14 +93,12 @@ public class FinalOrderControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
 
         ResultActions result = mvc.perform(post(endpoint())
-                                                   .content(requestContent.toString())
-                                                   .header("Authorization", AUTH_TOKEN)
-                                                   .contentType(MediaType.APPLICATION_JSON));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON));
 
         result.andExpect(status().isOk());
         result.andDo(print());
-
-
     }
 
     @Test
@@ -108,25 +107,19 @@ public class FinalOrderControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
 
         ResultActions result = mvc.perform(post(endpoint())
-                                                   .content(requestContent.toString())
-                                                   .header("Authorization", AUTH_TOKEN)
-                                                   .contentType(MediaType.APPLICATION_JSON));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON));
 
         result.andExpect(status().isOk());
         result.andDo(print());
         String path = "$.data.finalOrderCollection[0].value.uploadDraftDocument.";
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
-                .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
-                .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
-
-
+            .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
+            .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
     }
 
     private OngoingStubbing<CaseDocument> whenStampingDocument() {
         return when(service.stampDocument(isA(CaseDocument.class), anyString()));
     }
-
-
-
-
 }

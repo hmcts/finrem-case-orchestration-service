@@ -14,7 +14,6 @@ public class ApplicationTypeTest {
         assertEquals("contested", CONTESTED.toString());
     }
 
-
     @Test
     public void covertAllApplicationTypes() {
         assertEquals(ApplicationType.from("consented"), CONSENTED);
@@ -34,5 +33,4 @@ public class ApplicationTypeTest {
     public void throwIllegalArumentException() {
         ApplicationType.from("abcd");
     }
-
 }

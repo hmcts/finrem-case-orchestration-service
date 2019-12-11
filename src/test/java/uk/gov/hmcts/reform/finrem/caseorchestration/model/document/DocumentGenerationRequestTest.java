@@ -11,8 +11,8 @@ import static org.junit.Assert.assertThat;
 
 public class DocumentGenerationRequestTest {
 
-    public static final Map<String, Object> VALUES = ImmutableMap.of("K", "V");
-    public static final String TEMPLATE_NAME = "TEMPLATE";
+    private static final Map<String, Object> VALUES = ImmutableMap.of("K", "V");
+    private static final String TEMPLATE_NAME = "TEMPLATE";
 
     @Test
     public void properties() {

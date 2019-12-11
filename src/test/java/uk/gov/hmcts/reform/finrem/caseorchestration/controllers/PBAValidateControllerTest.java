@@ -22,13 +22,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @WebMvcTest(PBAValidateController.class)
 public class PBAValidateControllerTest extends BaseControllerTest {
 
     private static final String PBA_NUMBER = "PBA123";
     private static final String PBA_VALIDATE_URL = "/case-orchestration/pba-validate";
-    private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
     @MockBean
     private PBAValidationService pbaValidationService;
@@ -38,7 +39,7 @@ public class PBAValidateControllerTest extends BaseControllerTest {
         doEmtpyCaseDataSetUp();
         mvc.perform(post(PBA_VALIDATE_URL)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(is(GlobalExceptionHandler.SERVER_ERROR_MSG)));
@@ -49,7 +50,7 @@ public class PBAValidateControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/pba-validate.json").toURI()));
 
-        when(pbaValidationService.isValidPBA(BEARER_TOKEN, PBA_NUMBER)).thenReturn(isValidPBA);
+        when(pbaValidationService.isValidPBA(AUTH_TOKEN, PBA_NUMBER)).thenReturn(isValidPBA);
     }
 
     private void doHWFSetUp() throws Exception {
@@ -63,7 +64,7 @@ public class PBAValidateControllerTest extends BaseControllerTest {
         doHWFSetUp();
         mvc.perform(post(PBA_VALIDATE_URL)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
@@ -76,12 +77,12 @@ public class PBAValidateControllerTest extends BaseControllerTest {
         doValidatePBASetUp(false);
         mvc.perform(post(PBA_VALIDATE_URL)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
-        verify(pbaValidationService, times(1)).isValidPBA(BEARER_TOKEN, PBA_NUMBER);
+        verify(pbaValidationService, times(1)).isValidPBA(AUTH_TOKEN, PBA_NUMBER);
     }
 
     @Test
@@ -89,11 +90,11 @@ public class PBAValidateControllerTest extends BaseControllerTest {
         doValidatePBASetUp(true);
         mvc.perform(post(PBA_VALIDATE_URL)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
-        verify(pbaValidationService, times(1)).isValidPBA(BEARER_TOKEN, PBA_NUMBER);
+        verify(pbaValidationService, times(1)).isValidPBA(AUTH_TOKEN, PBA_NUMBER);
     }
 }

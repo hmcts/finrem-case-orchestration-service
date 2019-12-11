@@ -16,7 +16,6 @@ public class BulkPrintDocumentTranslatorTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-
     @Test
     public void shouldConvertDocument() throws Exception {
         List<BulkPrintDocument> bulkPrintDocuments = BulkPrintDocumentTranslator
@@ -39,6 +38,4 @@ public class BulkPrintDocumentTranslatorTest {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }
-
-
 }

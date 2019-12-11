@@ -34,14 +34,15 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_CREATE_EVENT_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.UNSUPPORTED_FORM_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_FR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BULK_FORM_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BULK_UNSUPPORTED_FORM_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SERVICE_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.ValidationStatus.ERRORS;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BulkScanControllerTest {
 
-    private static final String TEST_FORM_TYPE = "testFormType";
-    private static final String TEST_SERVICE_TOKEN = "testServiceToken";
     private static final String TEST_KEY = "testKey";
     private static final String TEST_VALUE = "testValue";
 
@@ -57,21 +58,21 @@ public class BulkScanControllerTest {
     @Test
     public void shouldReturnValidatorResults() {
         List<OcrDataField> testOcrDataFields = singletonList(new OcrDataField(TEST_KEY, TEST_VALUE));
-        when(bulkScanService.validateBulkScanForm(eq(TEST_FORM_TYPE), eq(testOcrDataFields))).thenReturn(OcrValidationResult.builder()
+        when(bulkScanService.validateBulkScanForm(eq(TEST_BULK_FORM_TYPE), eq(testOcrDataFields))).thenReturn(OcrValidationResult.builder()
             .addError("this is an error")
             .addWarning("this is a warning")
             .build()
         );
 
         ResponseEntity<OcrValidationResponse> response = bulkScanController
-            .validateOcrData(TEST_SERVICE_TOKEN, TEST_FORM_TYPE, new OcrDataValidationRequest(testOcrDataFields));
+            .validateOcrData(TEST_SERVICE_TOKEN, TEST_BULK_FORM_TYPE, new OcrDataValidationRequest(testOcrDataFields));
 
         assertThat(response.getStatusCode(), is(OK));
         OcrValidationResponse responseBody = response.getBody();
         assertThat(responseBody.getErrors(), hasItem("this is an error"));
         assertThat(responseBody.getWarnings(), hasItem("this is a warning"));
         assertThat(responseBody.getStatus(), is(ERRORS));
-        verify(bulkScanService).validateBulkScanForm(eq(TEST_FORM_TYPE), eq(testOcrDataFields));
+        verify(bulkScanService).validateBulkScanForm(eq(TEST_BULK_FORM_TYPE), eq(testOcrDataFields));
 
         verify(authService).assertIsServiceAllowedToValidate(TEST_SERVICE_TOKEN);
     }
@@ -79,7 +80,7 @@ public class BulkScanControllerTest {
     @Test
     public void shouldReturnResourceNotFoundForUnsupportedFormType_ForValidation() throws UnsupportedFormTypeException {
         List<OcrDataField> testOcrDataFields = singletonList(new OcrDataField(TEST_KEY, TEST_VALUE));
-        String unsupportedFormType = UNSUPPORTED_FORM_TYPE;
+        String unsupportedFormType = TEST_BULK_UNSUPPORTED_FORM_TYPE;
         when(bulkScanService.validateBulkScanForm(eq(unsupportedFormType), eq(testOcrDataFields)))
             .thenThrow(UnsupportedFormTypeException.class);
 
@@ -106,7 +107,7 @@ public class BulkScanControllerTest {
         SuccessfulTransformationResponse transformationResponse = response.getBody();
         assertThat(transformationResponse.getWarnings(), is(emptyList()));
         CaseCreationDetails caseCreationDetails = transformationResponse.getCaseCreationDetails();
-        assertThat(caseCreationDetails.getCaseTypeId(), is("FINANCIAL_REMEDY"));
+        assertThat(caseCreationDetails.getCaseTypeId(), is(CASE_TYPE_ID_FR));
         assertThat(caseCreationDetails.getEventId(), is(BULK_SCAN_CASE_CREATE_EVENT_ID));
         assertThat(caseCreationDetails.getCaseData(), hasEntry(TEST_KEY, TEST_VALUE));
 

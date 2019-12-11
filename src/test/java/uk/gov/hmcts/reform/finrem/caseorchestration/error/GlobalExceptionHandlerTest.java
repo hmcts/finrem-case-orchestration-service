@@ -44,5 +44,4 @@ public class GlobalExceptionHandlerTest {
         assertThat(actual.getStatusCodeValue(), is(INTERNAL_SERVER_ERROR));
         assertThat(actual.getBody(), is(SERVER_ERROR_MSG));
     }
-
 }

@@ -17,7 +17,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.rules.ExpectedException.none;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.UNSUPPORTED_FORM_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BULK_UNSUPPORTED_FORM_TYPE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BulkScanFormValidatorFactoryTest {
@@ -49,6 +49,6 @@ public class BulkScanFormValidatorFactoryTest {
         expectedException.expect(UnsupportedFormTypeException.class);
         expectedException.expectMessage("\"unsupportedFormType\" form type is not supported");
 
-        classUnderTest.getValidator(UNSUPPORTED_FORM_TYPE);
+        classUnderTest.getValidator(TEST_BULK_UNSUPPORTED_FORM_TYPE);
     }
 }

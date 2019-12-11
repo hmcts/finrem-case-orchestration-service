@@ -68,7 +68,6 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
-
     }
 
     @Test
@@ -91,7 +90,6 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
-
     }
 
     @Test
@@ -112,7 +110,6 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
-
     }
 
     @Test
@@ -154,7 +151,6 @@ public class NotificationServiceTest extends BaseServiceTest {
             assertThat(ex.getMessage(), Is.is("500 Internal Server Error"));
         }
     }
-
 
     @Test
     public void sendContestedHwfSuccessfulNotificationEmailForNottingham() {
@@ -305,7 +301,6 @@ public class NotificationServiceTest extends BaseServiceTest {
                 .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
     }
-
 
     @Test
     public void throwExceptionWhenContestedHwfSuccessfulNotificationEmail() {

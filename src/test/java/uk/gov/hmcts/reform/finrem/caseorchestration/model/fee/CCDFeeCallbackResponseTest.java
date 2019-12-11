@@ -11,6 +11,7 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 
 public class CCDFeeCallbackResponseTest {
+
     protected CCDFeeCallbackResponse ccdResponse;
 
     @Before
@@ -20,7 +21,6 @@ public class CCDFeeCallbackResponseTest {
                 .getResource("/fixtures/model/fee/ccd-fee-callback-response.json").toURI()),
                 CCDFeeCallbackResponse.class);
     }
-
 
     @Test
     public void shouldCreateCCDFeeCallbackResponse() {

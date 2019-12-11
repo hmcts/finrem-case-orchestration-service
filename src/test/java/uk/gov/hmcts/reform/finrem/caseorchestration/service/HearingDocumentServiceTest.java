@@ -20,11 +20,11 @@ import java.util.concurrent.CompletionException;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 
@@ -175,11 +175,8 @@ public class HearingDocumentServiceTest {
         void verifyAdditionalNonFastTrackFields() {
             Map<String, Object> data = data();
             assertThat(data.get("formCCreatedDate"), is(notNullValue()));
-
             assertThat(data.get("hearingDateLess35Days"), is(notNullValue()));
             assertThat(data.get("hearingDateLess14Days"), is(notNullValue()));
         }
-
-
     }
 }

@@ -39,11 +39,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @Controller
 public class BulkScanController {
 
-    /*
-    Consented CaseTypeID is: FinancialRemedyMVP2
-    Contested CaseTypeID is: FinancialRemedyContested
-     */
-
     @Autowired
     private BulkScanService bulkScanService;
 

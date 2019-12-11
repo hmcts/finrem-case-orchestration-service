@@ -11,12 +11,16 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.YES;
 
 @WebMvcTest(RemoveApplicantDetailsController.class)
 public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
-    private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
+
+    private static final String REMOVE_DETAILS_URL = "/case-orchestration/remove-details";
+
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
@@ -24,9 +28,9 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/amend-applicant-solicitor-details.json").toURI()));
 
-        mvc.perform(post("/case-orchestration/remove-details")
+        mvc.perform(post(REMOVE_DETAILS_URL)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.data.applicantRepresented", is(NO)))
                 .andExpect(jsonPath("$.data.applicantAddress", is(notNullValue())))
@@ -50,9 +54,9 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/amend-applicant-details.json").toURI()));
 
-        mvc.perform(post("/case-orchestration/remove-details")
+        mvc.perform(post(REMOVE_DETAILS_URL)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.data.applicantRepresented", is(YES)))
                 .andExpect(jsonPath("$.data.applicantAddress").doesNotExist())

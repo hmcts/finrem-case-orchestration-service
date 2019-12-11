@@ -2,10 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.ResultMatcher;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 
@@ -20,12 +18,13 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.generalLetterDataMap;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @WebMvcTest(GeneralLetterController.class)
 public class GeneralLetterControllerTest extends BaseControllerTest {
@@ -44,7 +43,7 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
 
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.generalLetterCollection[0].id", is(notNullValue())))
@@ -65,7 +64,7 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
 
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -77,7 +76,7 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
 
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
     }
@@ -85,5 +84,4 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
     private OngoingStubbing<Map<String, Object>> whenServiceGeneratesDocument() {
         return when(documentService.createGeneralLetter(eq(AUTH_TOKEN), isA(CaseDetails.class)));
     }
-
 }

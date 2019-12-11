@@ -93,7 +93,5 @@ public class GenerateCoverSheetServiceTest {
         public Document annexStampDocument(Document document, String authorizationToken) {
             throw new UnsupportedOperationException();
         }
-
-
     }
 }

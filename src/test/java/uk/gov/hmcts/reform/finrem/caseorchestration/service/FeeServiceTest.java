@@ -46,7 +46,6 @@ public class FeeServiceTest extends BaseServiceTest {
         assertThat(feeResponse.getVersion(), is("1.0"));
     }
 
-
     @Test
     public void retrieveContestedApplicationFee() {
         paymentService.stubFor(get(urlPathEqualTo(FEE_LOOKUP_API))

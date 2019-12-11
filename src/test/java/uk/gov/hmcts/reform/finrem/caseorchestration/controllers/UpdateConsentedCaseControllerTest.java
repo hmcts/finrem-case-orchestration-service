@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
@@ -22,12 +21,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @WebMvcTest(UpdateConsentedCaseController.class)
 public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
 
-    public static final String CASE_ORCHESTRATION_UPDATE_CASE = "/case-orchestration/update-case";
-    private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
+    private static final String CASE_ORCHESTRATION_UPDATE_CASE = "/case-orchestration/update-case";
+    private static final String FEE_LOOKUP_JSON = "/fixtures/fee-lookup.json";
+
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private JsonNode requestContent;
@@ -51,7 +53,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/updatecase/amend-divorce-details-decree-nisi.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -65,7 +67,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/updatecase/amend-divorce-details-decree-absolute.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header("Authorization", AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -79,7 +81,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/updatecase/amend-divorce-details-d81-joint.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -94,7 +96,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/updatecase/amend-divorce-details-d81-individual.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -109,7 +111,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/updatecase/remove-property-adjustment-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -123,7 +125,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/updatecase/amend-property-adjustment-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -137,7 +139,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/updatecase/amend-periodic-payment-order-without-agreement.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -152,7 +154,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/updatecase/amend-periodic-payment-order.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -166,7 +168,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/updatecase/amend-remove-periodic-payment-order.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -182,7 +184,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/updatecase/remove-respondant-solicitor-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -195,7 +197,6 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.rSolicitorPhone").doesNotExist());
     }
 
-
     @Test
     public void shouldUpdateCaseDataWithLatestConsentOrder() throws Exception {
         when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
@@ -204,13 +205,12 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
                 + "amend-consent-order-by-solicitor.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.latestConsentOrder").exists());
     }
-
 
     @Test
     public void shouldDeleteApplicantSolicitorDetailsIfApplicantNotRepresentedBySolicitor() throws Exception {
@@ -218,7 +218,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/updatecase/remove-respondant-solicitor-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
-            .header("Authorization", BEARER_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())
@@ -234,11 +234,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
     private void doRequestSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(jsonFixture()).toURI()));
-    }
-
-    private String jsonFixture() {
-        return "/fixtures/fee-lookup.json";
+            .getResource(FEE_LOOKUP_JSON).toURI()));
     }
 }
 
