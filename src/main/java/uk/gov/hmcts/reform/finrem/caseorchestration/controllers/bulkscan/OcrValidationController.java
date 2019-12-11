@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers.bulkscan;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,18 +23,11 @@ import javax.validation.Valid;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
+@RequiredArgsConstructor
 public class OcrValidationController {
 
     private final AuthService authService;
     private final BulkScanValidationService bulkScanValidationService;
-
-    public OcrValidationController(
-            AuthService authService,
-            BulkScanValidationService bulkScanValidationService
-    ) {
-        this.authService = authService;
-        this.bulkScanValidationService = bulkScanValidationService;
-    }
 
     @PostMapping(
             path = "/forms/{form-type}/validate-ocr",
