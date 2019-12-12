@@ -3,12 +3,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers.bulkscan;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.bsp.common.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.CaseCreationDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.SuccessfulTransformationResponse;
@@ -20,9 +21,11 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-@Slf4j
 @RestController
+@RequiredArgsConstructor
 public class TransformationController {
+
+    private final AuthService authService;
 
     private static final String CASE_TYPE_ID = "FINANCIAL_REMEDY";
     private static final String EVENT_ID = "EVENT_ID";
@@ -48,7 +51,7 @@ public class TransformationController {
             @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader,
             @Valid @RequestBody ExceptionRecord exceptionRecord
     ) {
-        log.info("Transforming exception record to case");
+        authService.assertIsServiceAllowedToUpdate(serviceAuthHeader);
 
         Map<String, Object> transformedCaseData = frFormToCaseTransformer.transformIntoCaseData(exceptionRecord);
 
