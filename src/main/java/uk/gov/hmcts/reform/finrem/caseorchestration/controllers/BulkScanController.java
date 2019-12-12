@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseCreationDetails;
+import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bsp.common.model.update.in.BulkScanCaseUpdateRequest;
 import uk.gov.hmcts.reform.bsp.common.model.update.output.SuccessfulUpdateResponse;
@@ -31,7 +32,6 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_CREATE_EVENT_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_FR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
@@ -39,6 +39,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @Controller
 @RequiredArgsConstructor
 public class BulkScanController {
+
+    private static final String CREATE_EVENT_ID = "bulkScanCaseCreate";
+    private static final String UPDATE_EVENT_ID = "bulkScanCaseUpdate";
 
     @Autowired
     private BulkScanService bulkScanService;
@@ -115,6 +118,7 @@ public class BulkScanController {
                 .caseCreationDetails(
                     new CaseCreationDetails(
                         CASE_TYPE_ID_FR,
+                        CREATE_EVENT_ID,
                         transformedCaseData))
                 .build();
 
@@ -152,12 +156,10 @@ public class BulkScanController {
 
         SuccessfulUpdateResponse callbackResponse = SuccessfulUpdateResponse.builder()
             .caseUpdateDetails(
-                CaseCreationDetails
-                    .builder()
-                    .caseData(request.getCaseData())
-                    .caseTypeId(CASE_TYPE_ID_FR)
-                    .build()
-            ).warnings(Collections.emptyList())
+                new CaseUpdateDetails(
+                    CASE_TYPE_ID_FR,
+                    request.getCaseData()))
+            .warnings(Collections.emptyList())
             .build();
 
         return ResponseEntity.ok(callbackResponse);
