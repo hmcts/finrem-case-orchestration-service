@@ -51,7 +51,7 @@ public class UpdateController {
             @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader,
             @Valid @RequestBody BulkScanCaseUpdateRequest request
     ) {
-        authService.assertIsServiceAllowedToValidate(serviceAuthHeader);
+        authService.assertIsServiceAllowedToUpdate(serviceAuthHeader);
 
         SuccessfulUpdateResponse callbackResponse = SuccessfulUpdateResponse.builder()
             .caseUpdateDetails(

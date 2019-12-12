@@ -51,7 +51,7 @@ public class TransformationController {
             @RequestHeader(name = "ServiceAuthorization", required = false) String serviceAuthHeader,
             @Valid @RequestBody ExceptionRecord exceptionRecord
     ) {
-        authService.assertIsServiceAllowedToValidate(serviceAuthHeader);
+        authService.assertIsServiceAllowedToUpdate(serviceAuthHeader);
 
         Map<String, Object> transformedCaseData = frFormToCaseTransformer.transformIntoCaseData(exceptionRecord);
 
