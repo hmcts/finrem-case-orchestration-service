@@ -10,6 +10,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class FeeResponseTest {
+
     FeeResponse feeResponse;
 
     @Before
@@ -27,5 +28,4 @@ public class FeeResponseTest {
         assertThat(feeResponse.getVersion(), is("v1"));
         assertThat(feeResponse.getFeeAmount(), is(BigDecimal.valueOf(50)));
     }
-
 }

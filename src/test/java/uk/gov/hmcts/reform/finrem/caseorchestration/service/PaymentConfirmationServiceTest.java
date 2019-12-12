@@ -34,7 +34,6 @@ public class PaymentConfirmationServiceTest extends BaseServiceTest {
                 containsString("* Process the application for help with fees"));
     }
 
-
     @Test
     public void verifyContestedPBAPaymentConfirmation() throws Exception {
         String confirmation = paymentConfirmationService.contestedPbaPaymentConfirmation();
@@ -44,7 +43,6 @@ public class PaymentConfirmationServiceTest extends BaseServiceTest {
                         + "(where applicable)"));
         assertThat(confirmation, containsString("* A First Appointment hearing will be set"));
     }
-
 
     @Test
     public void verifyContestedHWFPaymentConfirmation() throws Exception {
@@ -56,5 +54,4 @@ public class PaymentConfirmationServiceTest extends BaseServiceTest {
         assertThat(confirmation, containsString("You will receive a notification via email confirming the "
                 + "outcome of the help with fees application."));
     }
-
 }

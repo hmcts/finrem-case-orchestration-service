@@ -13,6 +13,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 public class ConsentOrderServiceTest extends BaseServiceTest {
+
     private static final String PATH = "/fixtures/latestConsentedConsentOrder/";
 
     @Autowired

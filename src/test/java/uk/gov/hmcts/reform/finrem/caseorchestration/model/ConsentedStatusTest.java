@@ -10,6 +10,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.PREPARE_FOR_HEARING;
 
 public class ConsentedStatusTest {
+
     @Test
     public void checkAllStatusValues() {
         assertEquals("consentOrderApproved", CONSENT_ORDER_APPROVED.toString());

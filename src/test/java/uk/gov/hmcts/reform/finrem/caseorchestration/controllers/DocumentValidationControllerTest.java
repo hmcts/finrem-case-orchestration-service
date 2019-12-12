@@ -25,13 +25,18 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse.builder;
 
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(DocumentValidationController.class)
 public class DocumentValidationControllerTest extends BaseControllerTest {
-    private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
+
+    private static final String AMEND_CONSENT_ORDER_BY_SOL_JSON
+        = "/fixtures/latestConsentedConsentOrder/amend-consent-order-by-solicitor.json";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -49,7 +54,7 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
                 .post("/case-orchestration/field/consentOrder/file-upload-check")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(javax.ws.rs.core.MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -69,7 +74,7 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
                 .post("/case-orchestration/field/consentOrder/file-upload-check")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(javax.ws.rs.core.MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -88,7 +93,7 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
                 .post("/case-orchestration/field/yyyyy/file-upload-check")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestContent.toString())
-                .header("Authorization", BEARER_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(javax.ws.rs.core.MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -98,10 +103,6 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
     private void doRequestSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource(jsonFixture()).toURI()));
-    }
-
-    private String jsonFixture() {
-        return "/fixtures/latestConsentedConsentOrder/amend-consent-order-by-solicitor.json";
+                .getResource(AMEND_CONSENT_ORDER_BY_SOL_JSON).toURI()));
     }
 }

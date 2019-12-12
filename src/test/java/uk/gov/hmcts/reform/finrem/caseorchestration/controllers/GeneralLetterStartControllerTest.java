@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
 @WebMvcTest(GeneralLetterStartController.class)
 public class GeneralLetterStartControllerTest extends BaseControllerTest {
@@ -40,7 +41,7 @@ public class GeneralLetterStartControllerTest extends BaseControllerTest {
 
         mvc.perform(post("/case-orchestration/general-letter-start")
                 .content(requestContent.toString())
-                .header("Authorization", bearerToken)
+                .header(AUTHORIZATION_HEADER, bearerToken)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.generalLetterAddressTo", is(nullValue())))
@@ -56,7 +57,7 @@ public class GeneralLetterStartControllerTest extends BaseControllerTest {
 
         mvc.perform(post("/case-orchestration/general-letter-start")
                 .content(requestContent.toString())
-                .header("Authorization", bearerToken)
+                .header(AUTHORIZATION_HEADER, bearerToken)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -69,7 +70,7 @@ public class GeneralLetterStartControllerTest extends BaseControllerTest {
 
         mvc.perform(post("/case-orchestration/general-letter-start")
                 .content(requestContent.toString())
-                .header("Authorization", bearerToken)
+                .header(AUTHORIZATION_HEADER, bearerToken)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
     }

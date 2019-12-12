@@ -23,13 +23,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(CcdDataMigrationController.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 public class CcdDataMigrationControllerTest {
+
     private static final String MIGRATE_URL = "/ccd-data-migration/migrate";
-    private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
@@ -55,8 +57,6 @@ public class CcdDataMigrationControllerTest {
         return ccdMigrationRequest;
     }
 
-
-
     private void doMigrateSetup() {
         mvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
     }
@@ -67,7 +67,7 @@ public class CcdDataMigrationControllerTest {
 
         mvc.perform(post(MIGRATE_URL)
                             .content(objectMapper.writeValueAsString(ccdMigrationRequestType()))
-                            .header("Authorization", BEARER_TOKEN)
+                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                             .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -76,14 +76,13 @@ public class CcdDataMigrationControllerTest {
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
 
-
     @Test
     public void shouldNotMigrate() throws Exception {
         doMigrateSetup();
 
         mvc.perform(post(MIGRATE_URL)
                             .content(objectMapper.writeValueAsString(ccdAlreadyMigratedRequest()))
-                            .header("Authorization", BEARER_TOKEN)
+                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                             .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -91,7 +90,4 @@ public class CcdDataMigrationControllerTest {
                 .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
                 .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
     }
-
-
-
 }

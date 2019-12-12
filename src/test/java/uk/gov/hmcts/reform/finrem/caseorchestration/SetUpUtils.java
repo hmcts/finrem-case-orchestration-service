@@ -33,7 +33,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class SetUpUtils {
 
-    public static final String AUTH_TOKEN = "Bearer eyJhbGJbpjciOiJIUzI1NiJ9";
     public static final String DOC_URL = "http://dm-store/lhjbyuivu87y989hijbb";
     public static final String BINARY_URL = DOC_URL + "/binary";
     public static final String FILE_NAME = "app_docs.pdf";
@@ -130,7 +129,6 @@ public class SetUpUtils {
 
         return caseDocument;
     }
-
 
     public static PensionDocumentData pensionDocument() {
         PensionDocumentData document = new PensionDocumentData();

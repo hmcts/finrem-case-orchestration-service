@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
@@ -41,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.REJECTED_O
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDataWithPreviewOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDataWithUploadOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(RejectedOrderDocumentController.class)
@@ -78,7 +79,7 @@ public class RejectedOrderDocumentControllerTest {
 
         mvc.perform(post(API_URL)
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.uploadOrder[0].id", is(notNullValue())))
@@ -98,7 +99,7 @@ public class RejectedOrderDocumentControllerTest {
     public void generateConsentOrderNotApproved400() throws Exception {
         mvc.perform(post(API_URL)
                 .content("kwuilebge")
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -110,7 +111,7 @@ public class RejectedOrderDocumentControllerTest {
 
         mvc.perform(post(API_URL)
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
     }
@@ -122,7 +123,7 @@ public class RejectedOrderDocumentControllerTest {
 
         mvc.perform(post(PREVIEW_API_URL)
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -141,7 +142,7 @@ public class RejectedOrderDocumentControllerTest {
     public void previewConsentOrderNotApproved400() throws Exception {
         mvc.perform(post(PREVIEW_API_URL)
                 .content("kwuilebge")
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
@@ -153,9 +154,8 @@ public class RejectedOrderDocumentControllerTest {
 
         mvc.perform(post(PREVIEW_API_URL)
                 .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
     }
-
 }

@@ -32,5 +32,4 @@ public class DocumentValidationResponseTest {
 
         assertThat(response, is(equalTo(response1)));
     }
-
 }

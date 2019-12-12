@@ -17,11 +17,19 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse.builder;
 
 public class DocumentValidationServiceTest extends BaseServiceTest {
+
     private static final String PATH = "/fixtures/latestConsentedConsentOrder/";
-    private static final String BEARER_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
+    private static final String CONSENT_ORDER = "consentOrder";
+    private static final String APPLICATION_PDF = "application/pdf";
+    private static final String DRFAT_CONSENT_ORDER_JSON = "draft-consent-order.json";
+    private static final String VALIDATE_PENSION_COLLECTION_JSON = "validate-pension-collection.json";
+    private static final String VALIDATE_PENSION_COLLECTION_WITHOUT_DATA_JSON
+        = "validate-pension-collection-without-pension-data.json";
+    private static final String RESPOND_TO_ORDER_SOL_JSON = "respond-to-order-solicitor.json";
 
     @Autowired
     private DocumentValidationService documentValidationService;
@@ -42,43 +50,43 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldSuccessWhenFileTypeValidationForConsentOrderField() throws Exception {
-        setUpCaseDetails("draft-consent-order.json");
+        setUpCaseDetails(DRFAT_CONSENT_ORDER_JSON);
         DocumentValidationResponse documentValidationResponse = builder()
-                .mimeType("application/pdf")
+                .mimeType(APPLICATION_PDF)
                 .build();
 
-        when(documentClient.checkUploadedFileType(BEARER_TOKEN, "http://file1.binary"))
+        when(documentClient.checkUploadedFileType(AUTH_TOKEN, "http://file1.binary"))
                 .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "consentOrder", BEARER_TOKEN);
-        assertThat(response.getMimeType(), is("application/pdf"));
+            CONSENT_ORDER, AUTH_TOKEN);
+        assertThat(response.getMimeType(), is(APPLICATION_PDF));
     }
 
     @Test
     public void shouldThrowErrorWhenFileTypeValidationForConsentOrderField() throws Exception {
-        setUpCaseDetails("draft-consent-order.json");
+        setUpCaseDetails(DRFAT_CONSENT_ORDER_JSON);
         DocumentValidationResponse documentValidationResponse = builder()
                 .errors(singletonList("Invalid file type"))
                 .build();
 
-        when(documentClient.checkUploadedFileType(BEARER_TOKEN, "http://file1.binary"))
+        when(documentClient.checkUploadedFileType(AUTH_TOKEN, "http://file1.binary"))
                 .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "consentOrder", BEARER_TOKEN);
+            CONSENT_ORDER, AUTH_TOKEN);
         assertThat(response.getErrors(), hasItem("Invalid file type"));
     }
 
     @Test
     public void shouldSuccessWhenFileTypeValidationForAmendConsentOrderCollection() throws Exception {
         setUpCaseDetails("amend-consent-order-by-caseworker.json");
-        DocumentValidationResponse documentValidationResponse = builder().mimeType("application/pdf").build();
+        DocumentValidationResponse documentValidationResponse = builder().mimeType(APPLICATION_PDF).build();
 
-        when(documentClient.checkUploadedFileType(BEARER_TOKEN,
+        when(documentClient.checkUploadedFileType(AUTH_TOKEN,
                 "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"))
                 .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "amendedConsentOrderCollection", BEARER_TOKEN);
-        assertThat(response.getMimeType(), is("application/pdf"));
+                "amendedConsentOrderCollection", AUTH_TOKEN);
+        assertThat(response.getMimeType(), is(APPLICATION_PDF));
     }
 
     @Test
@@ -88,83 +96,83 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
                 .errors(singletonList("Invalid file type"))
                 .build();
 
-        when(documentClient.checkUploadedFileType(BEARER_TOKEN,
+        when(documentClient.checkUploadedFileType(AUTH_TOKEN,
                 "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"))
                 .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "amendedConsentOrderCollection", BEARER_TOKEN);
+                "amendedConsentOrderCollection", AUTH_TOKEN);
         assertThat(response.getErrors(), hasItem("Invalid file type"));
     }
 
     @Test
     public void shouldSuccessWhenFileTypeValidationForPensionCollection() throws Exception {
-        setUpCaseDetails("validate-pension-collection.json");
-        DocumentValidationResponse documentValidationResponse = builder().mimeType("application/pdf").build();
+        setUpCaseDetails(VALIDATE_PENSION_COLLECTION_JSON);
+        DocumentValidationResponse documentValidationResponse = builder().mimeType(APPLICATION_PDF).build();
 
-        when(documentClient.checkUploadedFileType(BEARER_TOKEN,
+        when(documentClient.checkUploadedFileType(AUTH_TOKEN,
                 "http://file1.binary"))
                 .thenReturn(documentValidationResponse);
-        when(documentClient.checkUploadedFileType(BEARER_TOKEN,
+        when(documentClient.checkUploadedFileType(AUTH_TOKEN,
                 "http://file2.binary"))
                 .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "pensionCollection", BEARER_TOKEN);
+                "pensionCollection", AUTH_TOKEN);
         assertThat(response.getErrors(), nullValue());
     }
 
     @Test
     public void shouldReturnErrorWhenFileTypeValidationForPensionCollection() throws Exception {
-        setUpCaseDetails("validate-pension-collection.json");
-        DocumentValidationResponse documentValidationResponse1 = builder().mimeType("application/pdf").build();
+        setUpCaseDetails(VALIDATE_PENSION_COLLECTION_JSON);
+        DocumentValidationResponse documentValidationResponse1 = builder().mimeType(APPLICATION_PDF).build();
         DocumentValidationResponse documentValidationResponse2 = builder()
                 .errors(singletonList("Invalid file type")).build();
 
-        when(documentClient.checkUploadedFileType(BEARER_TOKEN,
+        when(documentClient.checkUploadedFileType(AUTH_TOKEN,
                 "http://file1.binary"))
                 .thenReturn(documentValidationResponse1);
-        when(documentClient.checkUploadedFileType(BEARER_TOKEN,
+        when(documentClient.checkUploadedFileType(AUTH_TOKEN,
                 "http://file2.binary"))
                 .thenReturn(documentValidationResponse2);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "pensionCollection", BEARER_TOKEN);
+                "pensionCollection", AUTH_TOKEN);
         assertThat(response.getErrors(), hasItem("Invalid file type"));
     }
 
     @Test
     public void shouldNotThrowErrorWhenFileTypeValidationForEmptyPensionCollection() throws Exception {
-        setUpCaseDetails("validate-pension-collection-without-pension-data.json");
+        setUpCaseDetails(VALIDATE_PENSION_COLLECTION_WITHOUT_DATA_JSON);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "pensionCollection", BEARER_TOKEN);
+                "pensionCollection", AUTH_TOKEN);
 
         assertThat(response.getErrors(), nullValue());
     }
 
     @Test
     public void shouldReturnSuccessWhenFileTypeValidationForRespondToOrderCollection() throws Exception {
-        setUpCaseDetails("respond-to-order-solicitor.json");
-        DocumentValidationResponse documentValidationResponse = builder().mimeType("application/pdf").build();
-        when(documentClient.checkUploadedFileType(BEARER_TOKEN,
+        setUpCaseDetails(RESPOND_TO_ORDER_SOL_JSON);
+        DocumentValidationResponse documentValidationResponse = builder().mimeType(APPLICATION_PDF).build();
+        when(documentClient.checkUploadedFileType(AUTH_TOKEN,
                 "http://doc2/binary"))
                 .thenReturn(documentValidationResponse);
 
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "respondToOrderDocuments", BEARER_TOKEN);
+                "respondToOrderDocuments", AUTH_TOKEN);
         assertThat(response.getErrors(), nullValue());
     }
 
     @Test
     public void shouldReturnErrorWhenFileTypeValidationForRespondToOrderCollection() throws Exception {
-        setUpCaseDetails("respond-to-order-solicitor.json");
+        setUpCaseDetails(RESPOND_TO_ORDER_SOL_JSON);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "respondToOrderDocuments", BEARER_TOKEN);
+                "respondToOrderDocuments", AUTH_TOKEN);
         assertThat(response.getErrors(), nullValue());
     }
 
     @Test
     public void shouldReturnErrorWhenFileTypeValidationWithInvalidField() throws Exception {
-        setUpCaseDetails("respond-to-order-solicitor.json");
+        setUpCaseDetails(RESPOND_TO_ORDER_SOL_JSON);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "ssss", BEARER_TOKEN);
+                "ssss", AUTH_TOKEN);
         assertThat(response.getErrors(), nullValue());
     }
 

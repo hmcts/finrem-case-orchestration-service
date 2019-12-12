@@ -96,6 +96,4 @@ public class BulkPrintServiceTest {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }
-
-
 }

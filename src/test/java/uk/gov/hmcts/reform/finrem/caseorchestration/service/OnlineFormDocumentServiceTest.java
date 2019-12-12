@@ -17,9 +17,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 public class OnlineFormDocumentServiceTest {
 
@@ -115,6 +115,5 @@ public class OnlineFormDocumentServiceTest {
         public Document annexStampDocument(Document document, String authorizationToken) {
             throw new UnsupportedOperationException();
         }
-
     }
 }
