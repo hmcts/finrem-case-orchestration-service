@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -37,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 
 @Slf4j
 @Controller
+@RequiredArgsConstructor
 public class BulkScanController {
 
     @Autowired
