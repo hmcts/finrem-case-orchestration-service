@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformations;
 
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.in.OcrDataField;
+import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
 
 import java.util.HashMap;
 import java.util.List;

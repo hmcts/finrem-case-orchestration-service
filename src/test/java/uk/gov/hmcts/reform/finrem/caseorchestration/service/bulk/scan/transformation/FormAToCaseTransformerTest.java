@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation;
 
 import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.in.ExceptionRecord;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.in.OcrDataField;
+import uk.gov.hmcts.reform.bsp.common.model.transformation.in.ExceptionRecord;
+import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformations.FormAToCaseTransformer;
 
 import java.util.List;

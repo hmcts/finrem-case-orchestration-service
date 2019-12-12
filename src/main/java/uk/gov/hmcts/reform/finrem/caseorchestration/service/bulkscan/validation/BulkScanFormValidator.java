@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation;
 
 import org.apache.commons.lang3.StringUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.in.OcrDataField;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.OcrValidationResult;
+import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
+import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 
 import java.util.ArrayList;
 import java.util.List;

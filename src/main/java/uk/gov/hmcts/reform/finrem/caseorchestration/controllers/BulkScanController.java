@@ -14,15 +14,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
+import uk.gov.hmcts.reform.bsp.common.model.transformation.in.ExceptionRecord;
+import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseCreationDetails;
+import uk.gov.hmcts.reform.bsp.common.model.transformation.output.SuccessfulTransformationResponse;
+import uk.gov.hmcts.reform.bsp.common.model.update.in.BulkScanCaseUpdateRequest;
+import uk.gov.hmcts.reform.bsp.common.model.update.output.SuccessfulUpdateResponse;
+import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataValidationRequest;
+import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResponse;
+import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.service.AuthService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.in.ExceptionRecord;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.CaseCreationDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.transformation.output.SuccessfulTransformationResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.update.in.BulkScanCaseUpdateRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.update.output.SuccessfulUpdateResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.in.OcrDataValidationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.OcrValidationResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulkscan.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 
 import javax.validation.Valid;
@@ -32,7 +32,6 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_CREATE_EVENT_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_UPDATE_EVENT_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_FR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
@@ -116,7 +115,6 @@ public class BulkScanController {
                 .caseCreationDetails(
                     new CaseCreationDetails(
                         CASE_TYPE_ID_FR,
-                        BULK_SCAN_CASE_CREATE_EVENT_ID,
                         transformedCaseData))
                 .build();
 
@@ -158,7 +156,6 @@ public class BulkScanController {
                     .builder()
                     .caseData(request.getCaseData())
                     .caseTypeId(CASE_TYPE_ID_FR)
-                    .eventId(BULK_SCAN_CASE_UPDATE_EVENT_ID)
                     .build()
             ).warnings(Collections.emptyList())
             .build();

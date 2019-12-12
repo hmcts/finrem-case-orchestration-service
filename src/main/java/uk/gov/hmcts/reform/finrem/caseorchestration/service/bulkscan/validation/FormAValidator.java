@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.BulkScanValidationPatterns.CCD_PHONE_NUMBER_REGEX;
+import static uk.gov.hmcts.reform.bsp.common.model.validation.BulkScanValidationPatterns.CCD_PHONE_NUMBER_REGEX;
 
 @Component
 public class FormAValidator extends BulkScanFormValidator {
