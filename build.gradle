@@ -117,6 +117,7 @@ configurations {
 }
 
 def versions = [
+        bspCommonLib            : '0.0.13',
         ccdClient               : '4.6.4',
         commonsBeanUtils        : '1.9.4',
         commonsIo               : '2.5',
@@ -170,7 +171,7 @@ dependencies {
     implementation group: 'uk.gov.hmcts.reform', name: 'java-logging-appinsights', version: versions.reformsJavaLogging
     implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.0.4'
     implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
-    implementation group: 'uk.gov.hmcts.reform', name: 'bsp-common-lib', version: '0.0.5'
+    implementation group: 'uk.gov.hmcts.reform', name: 'bsp-common-lib', version: versions.bspCommonLib
 
     implementation (group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils) {
         force = true

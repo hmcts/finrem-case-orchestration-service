@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import uk.gov.hmcts.reform.bsp.common.config.BulkScanEndpoints;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseCreationDetails;
+import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bsp.common.model.update.in.BulkScanCaseUpdateRequest;
 import uk.gov.hmcts.reform.bsp.common.model.update.output.SuccessfulUpdateResponse;
@@ -23,6 +25,7 @@ import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataValidationReque
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResponse;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.service.AuthService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.event.bulkscan.BulkScanEvents;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 
 import javax.validation.Valid;
@@ -31,7 +34,6 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_CREATE_EVENT_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_FR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
@@ -47,7 +49,7 @@ public class BulkScanController {
     private AuthService authService;
 
     @PostMapping(
-        path = "/forms/{form-type}/validate-ocr",
+        path = BulkScanEndpoints.VALIDATE,
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE
     )
@@ -85,7 +87,7 @@ public class BulkScanController {
     }
 
     @PostMapping(
-        path = "/transform-exception-record",
+        path = BulkScanEndpoints.TRANSFORM,
         consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON
     )
@@ -115,6 +117,7 @@ public class BulkScanController {
                 .caseCreationDetails(
                     new CaseCreationDetails(
                         CASE_TYPE_ID_FR,
+                        BulkScanEvents.CREATE.getEventName(),
                         transformedCaseData))
                 .build();
 
@@ -127,7 +130,7 @@ public class BulkScanController {
     }
 
     @PostMapping(
-        path = "/update-case",
+        path = BulkScanEndpoints.UPDATE,
         consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON
     )
@@ -152,14 +155,13 @@ public class BulkScanController {
 
         SuccessfulUpdateResponse callbackResponse = SuccessfulUpdateResponse.builder()
             .caseUpdateDetails(
-                CaseCreationDetails
+                CaseUpdateDetails
                     .builder()
-                    .caseData(request.getCaseData())
                     .caseTypeId(CASE_TYPE_ID_FR)
-                    .build()
-            ).warnings(Collections.emptyList())
+                    .caseData(request.getCaseData())
+                    .build())
+            .warnings(Collections.emptyList())
             .build();
-
         return ResponseEntity.ok(callbackResponse);
     }
 }

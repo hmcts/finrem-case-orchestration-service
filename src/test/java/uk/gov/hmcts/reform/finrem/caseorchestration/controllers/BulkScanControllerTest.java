@@ -10,7 +10,10 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseCreationDetails;
+import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.SuccessfulTransformationResponse;
+import uk.gov.hmcts.reform.bsp.common.model.update.in.BulkScanCaseUpdateRequest;
+import uk.gov.hmcts.reform.bsp.common.model.update.output.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataValidationRequest;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResponse;
@@ -19,6 +22,7 @@ import uk.gov.hmcts.reform.bsp.common.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -77,7 +81,7 @@ public class BulkScanControllerTest {
     }
 
     @Test
-    public void shouldReturnResourceNotFoundForUnsupportedFormType_ForValidation() throws UnsupportedFormTypeException {
+    public void shouldReturnResourceNotFoundForUnsupportedFormType_ForValidation() {
         List<OcrDataField> testOcrDataFields = singletonList(new OcrDataField(TEST_KEY, TEST_VALUE));
         String unsupportedFormType = TEST_BULK_UNSUPPORTED_FORM_TYPE;
         when(bulkScanService.validateBulkScanForm(eq(unsupportedFormType), eq(testOcrDataFields)))
@@ -107,13 +111,34 @@ public class BulkScanControllerTest {
         assertThat(transformationResponse.getWarnings(), is(emptyList()));
         CaseCreationDetails caseCreationDetails = transformationResponse.getCaseCreationDetails();
         assertThat(caseCreationDetails.getCaseTypeId(), is(CASE_TYPE_ID_FR));
+        assertThat(caseCreationDetails.getEventId(), is("caseCreate"));
         assertThat(caseCreationDetails.getCaseData(), hasEntry(TEST_KEY, TEST_VALUE));
 
         verify(authService).assertIsServiceAllowedToUpdate(TEST_SERVICE_TOKEN);
     }
 
     @Test
-    public void shouldReturnErrorForUnsupportedFormType_ForTransformation() throws UnsupportedFormTypeException {
+    public void shouldReturnUpdateServiceResults() {
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder().build();
+        Map<String, Object> caseData = singletonMap(TEST_KEY, TEST_VALUE);
+
+        BulkScanCaseUpdateRequest bulkScanCaseUpdateRequest = new BulkScanCaseUpdateRequest(exceptionRecord, singletonMap(TEST_KEY, TEST_VALUE));
+
+        ResponseEntity<SuccessfulUpdateResponse> response =
+            bulkScanController.updateCase(TEST_SERVICE_TOKEN, bulkScanCaseUpdateRequest);
+
+        assertThat(response.getStatusCode(), is(OK));
+        SuccessfulUpdateResponse updateResponse = response.getBody();
+        assertThat(updateResponse.getWarnings(), is(emptyList()));
+        CaseUpdateDetails caseUpdateDetails = updateResponse.getCaseUpdateDetails();
+        assertThat(caseUpdateDetails.getCaseTypeId(), is(CASE_TYPE_ID_FR));
+        assertThat(caseUpdateDetails.getCaseData(), hasEntry(TEST_KEY, TEST_VALUE));
+
+        verify(authService).assertIsServiceAllowedToUpdate(TEST_SERVICE_TOKEN);
+    }
+
+    @Test
+    public void shouldReturnErrorForUnsupportedFormType_ForTransformation() {
         ExceptionRecord exceptionRecord = ExceptionRecord.builder().build();
         when(bulkScanService.transformBulkScanForm(exceptionRecord)).thenThrow(UnsupportedFormTypeException.class);
 
