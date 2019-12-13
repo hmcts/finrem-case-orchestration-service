@@ -117,7 +117,7 @@ public class BulkScanController {
                 .caseCreationDetails(
                     new CaseCreationDetails(
                         CASE_TYPE_ID_FR,
-                        BulkScanEvents.CREATE.name(),
+                        BulkScanEvents.CREATE.getEventName(),
                         transformedCaseData))
                 .build();
 
