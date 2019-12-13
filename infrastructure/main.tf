@@ -16,7 +16,7 @@ locals {
 }
 
 module "finrem-cos" {
-  source                          = "git@github.com:hmcts/cnp-module-webapp?ref=master"
+  source                          = "git@github.com:hmcts/cnp-module-webapp?ref=revert-159-tf-0.12.x"
   product                         = "${var.product}-${var.component}"
   location                        = "${var.location}"
   env                             = "${var.env}"
