@@ -155,12 +155,13 @@ public class BulkScanController {
 
         SuccessfulUpdateResponse callbackResponse = SuccessfulUpdateResponse.builder()
             .caseUpdateDetails(
-                new CaseUpdateDetails(
-                    CASE_TYPE_ID_FR,
-                    request.getCaseData()))
+                CaseUpdateDetails
+                    .builder()
+                    .caseTypeId(CASE_TYPE_ID_FR)
+                    .caseData(request.getCaseData())
+                    .build())
             .warnings(Collections.emptyList())
             .build();
-
         return ResponseEntity.ok(callbackResponse);
     }
 }
