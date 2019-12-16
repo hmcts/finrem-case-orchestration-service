@@ -53,24 +53,4 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         return erToCcdFieldsMap;
     }
 
-    private Optional<List<String>> commaSeparatedEntryTransformer(String fieldNameWithMultipleValues,
-                                                        List<OcrDataField> ocrDataFields) {
-        return ocrDataFields.stream()
-            .filter(f -> f.getName().equals(fieldNameWithMultipleValues))
-            .map(OcrDataField::getValue)
-            .findFirst()
-            .map(commaSeparatedString -> Splitter.on(", ").splitToList(commaSeparatedString))
-            .map(checkedElementsList ->
-                    checkedElementsList.stream()
-                        .map(checkedElement -> transformOcrValueToCCDValue(checkedElement))
-                        .collect(Collectors.toList())
-            );
-    }
-
-    private String transformOcrValueToCCDValue(String checkedElement) {
-        // TODO check element against map and return corresponding CCD value - perhaps querying a map - need an efficient solution
-        // will be executed multiple times (possibly more than 20)
-        return null;
-    }
-
 }

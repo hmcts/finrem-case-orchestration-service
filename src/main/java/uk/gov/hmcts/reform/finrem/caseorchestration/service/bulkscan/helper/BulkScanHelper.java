@@ -1,13 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableMap;
 import uk.gov.hmcts.reform.bsp.common.error.FormFieldValidationException;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.time.format.ResolverStyle.STRICT;
 import static java.util.stream.Collectors.toMap;
@@ -33,4 +35,36 @@ public class BulkScanHelper {
             throw new FormFieldValidationException(String.format("%s must be a valid date", formFieldName));
         }
     }
+
+    public static Optional<List<String>> getCommaSeparatedValueFromOcrDataField(String fieldNameWithMultipleValues,
+                                                                                List<OcrDataField> ocrDataFields) {
+        //TODO clarify what the delimiter is - comma followed by space?
+        //TODO modify tests if delimiter changes
+        return ocrDataFields.stream()
+            .filter(f -> f.getName().equals(fieldNameWithMultipleValues))
+            .map(OcrDataField::getValue)
+            .findFirst()
+            .map(commaSeparatedString -> Splitter.on(", ").splitToList(commaSeparatedString));
+    }
+
+    public static Optional<String> commaSeparatedEntryTransformer(String fieldNameWithMultipleValues,
+                                                                  List<OcrDataField> ocrDataFields,
+                                                                  Map<String, String> ocrFieldToCcdFieldMap) {
+        return getCommaSeparatedValueFromOcrDataField(fieldNameWithMultipleValues, ocrDataFields)
+            .map(checkedElementsList ->
+                checkedElementsList.stream()
+                    .map(ocrFieldToCcdFieldMap::get)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList()).toString()
+            );
+    }
+
+    public static final Map<String, String> miamDomesticViolenceChecklistMap = new HashMap<String, String>() {{
+        put("ArrestedRelevantDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_1");
+        put("RelevantPoliceCautionDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_2");
+        put("RelevantCriminalProceedingsDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_3");
+        put("blah", "ccd-blah-is-the-superior-blah");
+        put("noWay", "placeholder1");
+    }};
+
 }
