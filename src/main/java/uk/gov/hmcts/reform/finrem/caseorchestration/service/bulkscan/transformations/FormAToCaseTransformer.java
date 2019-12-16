@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transforma
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
     private static final Map<String, String> ocrToCCDMapping;
 
     static {
-        ocrToCCDMapping = d8ExceptionRecordToCcdMap();
+        ocrToCCDMapping = formAExceptionRecordToCcdMap();
     }
 
     @Override
@@ -24,14 +25,11 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
     @Override
     protected Map<String, Object> runFormSpecificTransformation(List<OcrDataField> ocrDataFields) {
-        Map<String, Object> modifiedMap = new HashMap<>();
-
-        return modifiedMap;
+        return Collections.emptyMap();
     }
 
     @Override
     Map<String, Object> runPostMappingModification(Map<String, Object> transformedCaseData) {
-
         return transformedCaseData;
     }
 
@@ -42,13 +40,14 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             .findFirst();
     }
 
-    private static Map<String, String> d8ExceptionRecordToCcdMap() {
-        Map<String, String> erToCcdFieldsMap = new HashMap<>();
+    private static Map<String, String> formAExceptionRecordToCcdMap() {
+        Map<String, String> exceptionRecordToCcdFieldsMap = new HashMap<>();
 
-        // Section 2 - About you (the applicant/petitioner)
-        erToCcdFieldsMap.put("PetitionerFirstName", "D8PetitionerFirstName");
-        erToCcdFieldsMap.put("PetitionerLastName", "D8PetitionerLastName");
+        // Section 2 - Requirement to attend MIAM
+        exceptionRecordToCcdFieldsMap.put("claimingExemptionMIAM", "claimingExemptionMIAM");
+        exceptionRecordToCcdFieldsMap.put("familyMediatorMIAM", "familyMediatorMIAM");
+        exceptionRecordToCcdFieldsMap.put("applicantAttendedMIAM", "applicantAttendedMIAM");
 
-        return erToCcdFieldsMap;
+        return exceptionRecordToCcdFieldsMap;
     }
 }
