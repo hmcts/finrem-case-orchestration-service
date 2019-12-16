@@ -26,7 +26,7 @@ public class BulkScanIntegrationTest {
     private String bulkScanTransformationAndUpdateMicroService;
 
     @Value("${case.orchestration.api}")
-    private String cosBaseURL;
+    private String cosBaseUrl;
 
     private static final String FORM_JSON_PATH = "/json/bulkscan/basic.json";
     private static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorisation";
@@ -113,7 +113,7 @@ public class BulkScanIntegrationTest {
             .header(SERVICE_AUTHORISATION_HEADER, token)
             .relaxedHTTPSValidation()
             .body(VALID_BODY)
-            .post(cosBaseURL + endpointName);
+            .post(cosBaseUrl + endpointName);
         return response;
     }
 
@@ -123,7 +123,7 @@ public class BulkScanIntegrationTest {
             .header(SERVICE_AUTHORISATION_HEADER, token)
             .relaxedHTTPSValidation()
             .body(VALID_BODY)
-            .post(cosBaseURL + endpointName);
+            .post(cosBaseUrl + endpointName);
         return response;
     }
 

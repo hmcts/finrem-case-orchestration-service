@@ -59,7 +59,6 @@ public class IdamUtils implements IdamUserClient {
     }
 
     public String generateUserTokenWithValidMicroService(String microServiceName) {
-
         Response response = SerenityRest.given()
                 .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .relaxedHTTPSValidation()
@@ -71,9 +70,9 @@ public class IdamUtils implements IdamUserClient {
                     + " body: " + response.getBody().prettyPrint());
         }
 
-        assert response.getStatusCode()==200:"Error generating code from IDAM: " + response.getStatusCode();
-        String token = response.getBody().asString();
-        return "Bearer " + token;
+        assert response.getStatusCode() == 200 : "Error generating code from IDAM: " + response.getStatusCode();
+
+        return "Bearer " + response.getBody().asString();
     }
 
     private String idamCodeUrl() {
