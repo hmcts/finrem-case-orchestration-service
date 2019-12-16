@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.functional.bulkscan;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,18 +31,22 @@ public class BulkScanIntegrationTest {
 
     private static final String FORM_JSON_PATH = "/json/bulkscan/basic.json";
     private static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorisation";
-    private static String VALID_BODY;
-    private static String VALIDATION_END_POINT = "/forms/{form-type}/validate-ocr";
+    private static String body;
+    private static String token;
+    private static String VALIDATION_END_POINT = "/forms/formA/validate-ocr";
     private static String TRANSFORMATION_END_POINT = "/transform-exception-record";
     private static String UPDATE_END_POINT = "/update-case";
 
+    @Before
+    public void setup() throws Exception {
+        body = loadValidBody();
+    }
+
     @Test
-    public void shouldGetSuccessfulResponsesWhenUsingWhitelistedServiceForValidationEndPoint()  throws Exception {
+    public void shouldGetSuccessfulResponsesWhenUsingWhitelistedServiceForValidationEndPoint() {
         String token = idamUtilsS2SAuthorization.generateUserTokenWithValidMicroService(bulkScanValidationMicroService);
-        VALID_BODY = loadResourceAsString(FORM_JSON_PATH);
 
-        Response forValidationEndpoint = responseForValidationEndpoint(token, VALIDATION_END_POINT);
-
+        Response forValidationEndpoint = responseForValidationEndpoint(token);
 
         assert forValidationEndpoint.getStatusCode() == 200 : "Service is not authorised to OCR validation "
             + forValidationEndpoint.getStatusCode();
@@ -50,10 +55,9 @@ public class BulkScanIntegrationTest {
     @Test
     public void shouldGetServiceDeniedWhenUsingNonWhitelistedServiceForValidationEndPoint()  throws Exception {
         String token = idamUtilsS2SAuthorization.generateUserTokenWithValidMicroService(bulkScanTransformationAndUpdateMicroService);
+        body = loadValidBody();
 
-        VALID_BODY = loadResourceAsString(FORM_JSON_PATH);
-
-        Response forValidationEndpoint = responseForValidationEndpoint(token,VALIDATION_END_POINT);
+        Response forValidationEndpoint = responseForValidationEndpoint(token);
 
         assert forValidationEndpoint.getStatusCode() == 403 : "Not matching with expected Error code "
             + forValidationEndpoint.getStatusCode();
@@ -63,19 +67,17 @@ public class BulkScanIntegrationTest {
     public void shouldGetSuccessfulResponsesWhenUsingWhitelistedServiceForTransformationEndPoint()  throws Exception {
         String token = idamUtilsS2SAuthorization.generateUserTokenWithValidMicroService(bulkScanTransformationAndUpdateMicroService);
 
-        VALID_BODY = loadResourceAsString(FORM_JSON_PATH);
+        body = loadValidBody();
         Response forTransformationEndpoint = responseForEndpoint(token, TRANSFORMATION_END_POINT);
 
         assert forTransformationEndpoint.getStatusCode() == 200 : "Service is not authorised to transform OCR data to case"
             + forTransformationEndpoint.getStatusCode();
-
     }
 
     @Test
     public void shouldGetServiceDeniedWhenUsingNonWhitelistedServiceForTransformationEndPoint()  throws Exception {
         String token = idamUtilsS2SAuthorization.generateUserTokenWithValidMicroService(bulkScanValidationMicroService);
-
-        VALID_BODY = loadResourceAsString(FORM_JSON_PATH);
+        body = loadValidBody();
 
         Response forTransformationEndpoint = responseForEndpoint(token, TRANSFORMATION_END_POINT);
 
@@ -86,20 +88,18 @@ public class BulkScanIntegrationTest {
     @Test
     public void shouldGetSuccessfulResponsesWhenUsingWhitelistedServiceForUpdateEndPoint()  throws Exception {
         String token = idamUtilsS2SAuthorization.generateUserTokenWithValidMicroService(bulkScanTransformationAndUpdateMicroService);
+        body = loadValidBody();
 
-        VALID_BODY = loadResourceAsString(FORM_JSON_PATH);
         Response forUpdateEndpoint = responseForEndpoint(token, UPDATE_END_POINT);
 
         assert forUpdateEndpoint.getStatusCode() == 200 : "Service is not authorised to transform OCR data to case"
             + forUpdateEndpoint.getStatusCode();
-
     }
 
     @Test
     public void shouldGetServiceDeniedWhenUsingNonWhitelistedServiceForUpdateEndPoint()  throws Exception {
         String token = idamUtilsS2SAuthorization.generateUserTokenWithValidMicroService(bulkScanValidationMicroService);
-
-        VALID_BODY = loadResourceAsString(FORM_JSON_PATH);
+        body = loadValidBody();
 
         Response forUpdateEndpoint = responseForEndpoint(token, UPDATE_END_POINT);
 
@@ -108,32 +108,25 @@ public class BulkScanIntegrationTest {
     }
 
     private Response responseForEndpoint(String token, String endpointName) {
-        Response  response = SerenityRest.given()
+        return SerenityRest.given()
             .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
             .header(SERVICE_AUTHORISATION_HEADER, token)
             .relaxedHTTPSValidation()
-            .body(VALID_BODY)
+            .body(body)
             .post(cosBaseUrl + endpointName);
-        return response;
     }
 
-    private Response responseForValidationEndpoint(String token, String endpointName) {
-        Response  response = SerenityRest.given()
+    private Response responseForValidationEndpoint(String token) {
+        return SerenityRest.given()
             .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
             .header(SERVICE_AUTHORISATION_HEADER, token)
             .relaxedHTTPSValidation()
-            .body(VALID_BODY)
-            .post(cosBaseUrl + endpointName);
-        return response;
+            .body(body)
+            .post(cosBaseUrl + VALIDATION_END_POINT);
     }
 
-    private static String loadResourceAsString(final String filePath) throws Exception {
-        URL url = BulkScanIntegrationTest.class.getClassLoader().getResource(filePath);
-
-        if (url == null) {
-            throw new IllegalArgumentException(String.format("Could not find resource in path %s", filePath));
-        }
-
+    private static String loadValidBody() throws Exception {
+        URL url = BulkScanIntegrationTest.class.getClassLoader().getResource(FORM_JSON_PATH);
         return new String(Files.readAllBytes(Paths.get(url.toURI())));
     }
 }

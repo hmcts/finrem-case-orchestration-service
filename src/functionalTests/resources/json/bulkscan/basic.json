@@ -2,8 +2,9 @@
   "case_type_id": "FinancialRemedyContested",
   "id": "LV481297",
   "po_box": "PO 17",
-  "form_type": "form_a",
+  "form_type": "formA",
   "ocr_data_fields": [
-    { "name": "field", "value": "content" }
+    { "name": "PetitionerFirstName", "value": "John" },
+    { "name": "PetitionerLastName", "value": "Smith" }
   ]
-}s
+}
