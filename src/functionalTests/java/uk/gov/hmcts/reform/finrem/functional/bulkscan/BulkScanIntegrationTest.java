@@ -29,7 +29,7 @@ public class BulkScanIntegrationTest {
     @Value("${case.orchestration.api}")
     private String cosBaseUrl;
 
-    private static final String FORM_JSON_PATH = "/json/bulkscan/basic.json";
+    private static final String FORM_JSON_PATH = "json/bulkscan/basic.json";
     private static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorisation";
     private static String body;
     private static String token;
