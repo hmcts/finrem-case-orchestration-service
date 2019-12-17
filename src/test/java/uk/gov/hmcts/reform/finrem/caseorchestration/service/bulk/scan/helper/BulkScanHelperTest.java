@@ -77,18 +77,22 @@ public class BulkScanHelperTest {
     @Test
     public void checkCommaSeparatedEntryTransformerReturnsCorrectly() {
         List<OcrDataField> ocrDataFields = singletonList(
-            new OcrDataField("exampleMultipleValue",
-                "ArrestedRelevantDomesticViolenceOffence, RelevantCriminalProceedingsDomesticViolenceOffence, noWay, blah")
+            new OcrDataField("exampleMultipleValueField",
+                "ArrestedRelevantDomesticViolenceOffence, RelevantCriminalProceedingsDomesticViolenceOffence, " +
+                    "FindingOfFactProceedingsUnitedKingdomDomesticViolence, " +
+                    "LetterOrganisationDomesticViolenceSupportStatementDescriptionReason, " +
+                    "LetterSecretaryOfStateLeaveToRemain289BImmigrationAct")
         );
 
         Optional<String> transformedListOfValues =
-            commaSeparatedEntryTransformer("testChecklist", ocrDataFields, miamDomesticViolenceChecklistMap);
+            commaSeparatedEntryTransformer("exampleMultipleValueField", ocrDataFields, miamDomesticViolenceChecklistMap);
 
         assertThat(transformedListOfValues.isPresent(), is(true));
         transformedListOfValues.ifPresent(result -> assertThat(result, equalTo(
             "[FR_ms_MIAMDomesticViolenceChecklist_Value_1, " +
-                "FR_ms_MIAMDomesticViolenceChecklist_Value_3, " +
-                "placeholder1, ccd-blah-is-the-superior-blah]")
+                "FR_ms_MIAMDomesticViolenceChecklist_Value_3, FR_ms_MIAMDomesticViolenceChecklist_Value_9, " +
+                "FR_ms_MIAMDomesticViolenceChecklist_Value_18, FR_ms_MIAMDomesticViolenceChecklist_Value_21]"
+                )
         ));
     }
 
@@ -106,8 +110,7 @@ public class BulkScanHelperTest {
         assertThat(transformedListOfValues.isPresent(), is(true));
         transformedListOfValues.ifPresent(result -> assertThat(result, equalTo(
             "[FR_ms_MIAMDomesticViolenceChecklist_Value_1, " +
-                "FR_ms_MIAMDomesticViolenceChecklist_Value_3, " +
-                "placeholder1, ccd-blah-is-the-superior-blah]")
+                "FR_ms_MIAMDomesticViolenceChecklist_Value_3]")
         ));
     }
 }
