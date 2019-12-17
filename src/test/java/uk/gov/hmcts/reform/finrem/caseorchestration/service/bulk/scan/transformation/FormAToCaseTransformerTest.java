@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformat
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -18,24 +19,33 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CA
 
 public class FormAToCaseTransformerTest {
 
-    private final FormAToCaseTransformer classUnderTest = new FormAToCaseTransformer();
+    private final FormAToCaseTransformer formAToCaseTransformer = new FormAToCaseTransformer();
 
     @Test
     public void shouldTransformFieldsAccordingly() {
-        ExceptionRecord exceptionRecord = createExceptionRecord(singletonList(new OcrDataField("D8ReasonForDivorceSeparationDate", "20/11/2008")));
+        ExceptionRecord exceptionRecord = createExceptionRecord(asList(
+            new OcrDataField("claimingExemptionMIAM", "Yes"),
+            new OcrDataField("familyMediatorMIAM", "No"),
+            new OcrDataField("applicantAttendedMIAM", "No")
+        ));
 
-        Map<String, Object> transformedCaseData = classUnderTest.transformIntoCaseData(exceptionRecord);
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(exceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID)
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry("claimingExemptionMIAM", "Yes"),
+            hasEntry("familyMediatorMIAM", "No"),
+            hasEntry("applicantAttendedMIAM", "No")
         ));
     }
 
     @Test
     public void shouldNotReturnUnexpectedField() {
-        ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(new OcrDataField("UnexpectedName", "UnexpectedValue")));
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
+            new OcrDataField("UnexpectedName", "UnexpectedValue")
+        ));
 
-        Map<String, Object> transformedCaseData = classUnderTest.transformIntoCaseData(incomingExceptionRecord);
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
             aMapWithSize(1),
