@@ -119,15 +119,6 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
     }
 
     private String loadValidBody() {
-        return "{\n"
-                + "  \"case_type_id\": \"FinancialRemedyContested\",\n"
-                + "  \"id\": \"LV481297\",\n"
-                + "  \"po_box\": \"PO 17\",\n"
-                + "  \"form_type\": \"formA\",\n"
-                + "  \"ocr_data_fields\": [\n"
-                + "    { \"name\": \"PetitionerFirstName\", \"value\": \"John\" },\n"
-                + "    { \"name\": \"PetitionerLastName\", \"value\": \"Smith\" }\n"
-                + "  ]\n"
-                + "}";
+        return "{}";
     }
 }
