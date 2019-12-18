@@ -10,10 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 @Slf4j
 public class BulkScanIntegrationTest {
 
@@ -29,7 +25,6 @@ public class BulkScanIntegrationTest {
     @Value("${case.orchestration.api}")
     private String cosBaseUrl;
 
-    private static final String FORM_JSON_PATH = "/json/bulkscan/basic.json";
     private static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorisation";
     private static String body;
     private static String VALIDATION_END_POINT = "/forms/formA/validate-ocr";
@@ -37,7 +32,7 @@ public class BulkScanIntegrationTest {
     private static String UPDATE_END_POINT = "/update-case";
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         body = loadValidBody();
     }
 
@@ -124,8 +119,16 @@ public class BulkScanIntegrationTest {
             .post(cosBaseUrl + VALIDATION_END_POINT);
     }
 
-    private static String loadValidBody() throws Exception {
-        URL url = BulkScanIntegrationTest.class.getClassLoader().getResource(FORM_JSON_PATH);
-        return new String(Files.readAllBytes(Paths.get(url.toURI())));
+    private String loadValidBody() {
+        return "{\n" +
+                "  \"case_type_id\": \"FinancialRemedyContested\",\n" +
+                "  \"id\": \"LV481297\",\n" +
+                "  \"po_box\": \"PO 17\",\n" +
+                "  \"form_type\": \"formA\",\n" +
+                "  \"ocr_data_fields\": [\n" +
+                "    { \"name\": \"PetitionerFirstName\", \"value\": \"John\" },\n" +
+                "    { \"name\": \"PetitionerLastName\", \"value\": \"Smith\" }\n" +
+                "  ]\n" +
+                "}";
     }
 }
