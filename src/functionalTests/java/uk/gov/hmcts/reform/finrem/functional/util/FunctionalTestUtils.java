@@ -98,7 +98,6 @@ public class FunctionalTestUtils {
                         + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)));
     }
 
-
     public Headers getNewHeaders() {
         return Headers.headers(
                 new Header("Content-Type", "application/json"));
@@ -151,12 +150,10 @@ public class FunctionalTestUtils {
         return parsedText;
     }
 
-
     public void validatePostSuccess(String url, String filename, String journeyType) {
         int statusCode = getResponse(url, filename, journeyType).getStatusCode();
         assertEquals(200, statusCode);
     }
-
 
     public JsonPath getResponseData(String url, String jsonBody, String dataPath) {
         Response response = SerenityRest.given()

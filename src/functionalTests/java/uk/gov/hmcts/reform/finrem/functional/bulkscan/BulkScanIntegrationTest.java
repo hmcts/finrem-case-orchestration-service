@@ -21,7 +21,7 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
     @Value("${auth.provider.bulkscan.update.microservice}")
     private String bulkScanTransformationAndUpdateMicroService;
 
-    @Value("${case.orchestration.api}")
+    @Value("${case.orchestration.api-bsp}")
     private String cosBaseUrl;
 
     private static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorisation";
