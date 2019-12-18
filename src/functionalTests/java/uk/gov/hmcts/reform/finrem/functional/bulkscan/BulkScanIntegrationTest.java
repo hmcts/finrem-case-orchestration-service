@@ -2,22 +2,18 @@ package uk.gov.hmcts.reform.finrem.functional.bulkscan;
 
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
+import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration;
-import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
+import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
-@ContextConfiguration(classes = TestContextConfiguration.class)
+@RunWith(SerenityRunner.class)
 @Slf4j
-public class BulkScanIntegrationTest {
-
-    @Autowired
-    private IdamUtils idamUtilsS2SAuthorization;
+public class BulkScanIntegrationTest extends IntegrationTestBase {
 
     @Value("${auth.provider.bulkscan.validate.microservice}")
     private String bulkScanValidationMicroService;
@@ -41,7 +37,7 @@ public class BulkScanIntegrationTest {
 
     @Test
     public void shouldGetSuccessfulResponsesWhenUsingWhitelistedServiceForValidationEndPoint() {
-        String token = idamUtilsS2SAuthorization.generateUserTokenWithValidMicroService(bulkScanValidationMicroService);
+        String token = utils.getS2SToken(bulkScanValidationMicroService);
 
         Response forValidationEndpoint = responseForValidationEndpoint(token);
 
@@ -51,7 +47,7 @@ public class BulkScanIntegrationTest {
 
     @Test
     public void shouldGetServiceDeniedWhenUsingNonWhitelistedServiceForValidationEndPoint()  throws Exception {
-        String token = idamUtilsS2SAuthorization.generateUserTokenWithValidMicroService(bulkScanTransformationAndUpdateMicroService);
+        String token = utils.getS2SToken(bulkScanTransformationAndUpdateMicroService);
         body = loadValidBody();
 
         Response forValidationEndpoint = responseForValidationEndpoint(token);
@@ -62,7 +58,7 @@ public class BulkScanIntegrationTest {
 
     @Test
     public void shouldGetSuccessfulResponsesWhenUsingWhitelistedServiceForTransformationEndPoint()  throws Exception {
-        String token = idamUtilsS2SAuthorization.generateUserTokenWithValidMicroService(bulkScanTransformationAndUpdateMicroService);
+        String token = utils.getS2SToken(bulkScanTransformationAndUpdateMicroService);
 
         body = loadValidBody();
         Response forTransformationEndpoint = responseForEndpoint(token, TRANSFORMATION_END_POINT);
@@ -73,7 +69,7 @@ public class BulkScanIntegrationTest {
 
     @Test
     public void shouldGetServiceDeniedWhenUsingNonWhitelistedServiceForTransformationEndPoint()  throws Exception {
-        String token = idamUtilsS2SAuthorization.generateUserTokenWithValidMicroService(bulkScanValidationMicroService);
+        String token = utils.getS2SToken(bulkScanValidationMicroService);
         body = loadValidBody();
 
         Response forTransformationEndpoint = responseForEndpoint(token, TRANSFORMATION_END_POINT);
@@ -84,7 +80,7 @@ public class BulkScanIntegrationTest {
 
     @Test
     public void shouldGetSuccessfulResponsesWhenUsingWhitelistedServiceForUpdateEndPoint()  throws Exception {
-        String token = idamUtilsS2SAuthorization.generateUserTokenWithValidMicroService(bulkScanTransformationAndUpdateMicroService);
+        String token = utils.getS2SToken(bulkScanTransformationAndUpdateMicroService);
         body = loadValidBody();
 
         Response forUpdateEndpoint = responseForEndpoint(token, UPDATE_END_POINT);
@@ -95,7 +91,7 @@ public class BulkScanIntegrationTest {
 
     @Test
     public void shouldGetServiceDeniedWhenUsingNonWhitelistedServiceForUpdateEndPoint()  throws Exception {
-        String token = idamUtilsS2SAuthorization.generateUserTokenWithValidMicroService(bulkScanValidationMicroService);
+        String token = utils.getS2SToken(bulkScanValidationMicroService);
         body = loadValidBody();
 
         Response forUpdateEndpoint = responseForEndpoint(token, UPDATE_END_POINT);

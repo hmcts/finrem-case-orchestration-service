@@ -88,6 +88,10 @@ public class FunctionalTestUtils {
         return idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword);
     }
 
+    public String getS2SToken(String callerMicroservice) {
+        return idamUtils.generateUserTokenWithValidMicroService(callerMicroservice);
+    }
+
     public Headers getHeader() {
         return Headers.headers(
                 new Header("Authorization", "Bearer "
