@@ -24,7 +24,7 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
     @Value("${case.orchestration.api-bsp}")
     private String cosBaseUrl;
 
-    private static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorisation";
+    private static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorization";
     private static String body;
     private static String VALIDATION_END_POINT = "/forms/formA/validate-ocr";
     private static String TRANSFORMATION_END_POINT = "/transform-exception-record";
