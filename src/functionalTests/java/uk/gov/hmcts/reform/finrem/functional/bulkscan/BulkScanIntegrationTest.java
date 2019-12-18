@@ -8,8 +8,11 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 
+@ContextConfiguration(classes = TestContextConfiguration.class)
 @Slf4j
 public class BulkScanIntegrationTest {
 
