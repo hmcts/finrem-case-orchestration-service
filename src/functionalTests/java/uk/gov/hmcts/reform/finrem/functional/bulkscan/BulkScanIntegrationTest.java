@@ -11,12 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 @RunWith(SerenityRunner.class)
 @Slf4j
 public class BulkScanIntegrationTest extends IntegrationTestBase {
@@ -31,7 +25,6 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
     private String cosBaseUrl;
 
     private static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorization";
-    private static final String FORM_JSON_PATH = "/json/bulkscan/basic.json";
     private static final String VALIDATION_END_POINT = "/forms/formA/validate-ocr";
     private static final String TRANSFORMATION_END_POINT = "/transform-exception-record";
     private static final String UPDATE_END_POINT = "/update-case";
@@ -127,17 +120,15 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
     }
 
     private String loadValidBody() {
-        URI uri;
-        try {
-            uri = BulkScanIntegrationTest.class.getClassLoader().getResource(FORM_JSON_PATH).toURI();
-        } catch (URISyntaxException exception) {
-            throw new RuntimeException(exception.getMessage());
-        }
-
-        try {
-            return new String(Files.readAllBytes(Paths.get(uri)));
-        } catch (IOException exception) {
-            throw new RuntimeException(exception.getMessage());
-        }
+        return "{\n"
+            + "  \"case_type_id\": \"FinancialRemedyContested\",\n"
+            + "  \"id\": \"LV481297\",\n"
+            + "  \"po_box\": \"PO 17\",\n"
+            + "  \"form_type\": \"formA\",\n"
+            + "  \"ocr_data_fields\": [\n"
+            + "    { \"name\": \"PetitionerFirstName\", \"value\": \"John\" },\n"
+            + "    { \"name\": \"PetitionerLastName\", \"value\": \"Smith\" }\n"
+            + "  ]\n"
+            + "}";
     }
 }
