@@ -1,12 +1,21 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformations;
 
-import com.google.common.base.Splitter;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
 
-import javax.swing.text.html.Option;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.getCommaSeparatedValueFromOcrDataField;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.maimUrgencyChecklistToCcdFieldNames;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.miamDomesticViolenceChecklistToCcdFieldNames;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.miamExemptionsChecklistToCcdFieldNames;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.miamOtherGroundsChecklistToCcdFieldNames;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.miamPreviousAttendanceChecklistToCcdFieldNames;
 
 @Component
 public class FormAToCaseTransformer extends BulkScanFormTransformer {
@@ -26,6 +35,12 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
     protected Map<String, Object> runFormSpecificTransformation(List<OcrDataField> ocrDataFields) {
         Map<String, Object> modifiedMap = new HashMap<>();
 
+        commaSeparatedEntryTransformer("MIAMExemptionsChecklist", miamExemptionsChecklistToCcdFieldNames, ocrDataFields, modifiedMap);
+        commaSeparatedEntryTransformer("MIAMDomesticViolenceChecklist", miamDomesticViolenceChecklistToCcdFieldNames, ocrDataFields, modifiedMap);
+        commaSeparatedEntryTransformer("MIAMUrgencyChecklist", maimUrgencyChecklistToCcdFieldNames, ocrDataFields, modifiedMap);
+        commaSeparatedEntryTransformer("MIAMPreviousAttendanceChecklist", miamPreviousAttendanceChecklistToCcdFieldNames, ocrDataFields, modifiedMap);
+        commaSeparatedEntryTransformer("MIAMOtherGroundsChecklist", miamOtherGroundsChecklistToCcdFieldNames, ocrDataFields, modifiedMap);
+
         return modifiedMap;
     }
 
@@ -42,6 +57,26 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             .findFirst();
     }
 
+    private void commaSeparatedEntryTransformer(String commaSeparatedEntryKey,
+                                                Map<String, String> ocrFieldNamesToCcdFieldNames,
+                                                List<OcrDataField> ocrDataFields,
+                                                Map<String, Object> modifiedMap) {
+
+        Optional<String> commaSeparatedEntryValue = getValueFromOcrDataFields(commaSeparatedEntryKey, ocrDataFields);
+
+        if (commaSeparatedEntryValue.isPresent()) {
+            List<String> transformedCommaSeparatedValue =
+                getCommaSeparatedValueFromOcrDataField(commaSeparatedEntryValue.get())
+                    .stream()
+                    .map(ocrFieldNamesToCcdFieldNames::get)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            if (!transformedCommaSeparatedValue.isEmpty()) {
+                modifiedMap.put(commaSeparatedEntryKey, transformedCommaSeparatedValue);
+            }
+        }
+    }
 
     private static Map<String, String> d8ExceptionRecordToCcdMap() {
         Map<String, String> erToCcdFieldsMap = new HashMap<>();

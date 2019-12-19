@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -11,7 +12,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static uk.gov.hmcts.reform.bsp.common.model.validation.BulkScanValidationPatterns.CCD_PHONE_NUMBER_REGEX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.getCommaSeparatedValueFromOcrDataField;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.maimUrgencyChecklistToCcdFieldNames;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.miamDomesticViolenceChecklistToCcdFieldNames;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.miamExemptionsChecklistToCcdFieldNames;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.miamOtherGroundsChecklistToCcdFieldNames;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.miamPreviousAttendanceChecklistToCcdFieldNames;
 
 @Component
 public class FormAValidator extends BulkScanFormValidator {
@@ -39,24 +45,45 @@ public class FormAValidator extends BulkScanFormValidator {
 
     @Override
     protected List<String> runPostProcessingValidation(Map<String, String> fieldsMap) {
-        List<String> errorMessages = Stream.of(
-            validateFieldMatchesRegex(fieldsMap, "D8PetitionerPhoneNumber", CCD_PHONE_NUMBER_REGEX)
+
+        return Stream.of(
+            validateNonMandatoryCommaSeparatedField(fieldsMap,
+                "MIAMExemptionsChecklist", miamExemptionsChecklistToCcdFieldNames),
+            validateNonMandatoryCommaSeparatedField(fieldsMap,
+                "MIAMDomesticViolenceChecklist", miamDomesticViolenceChecklistToCcdFieldNames),
+            validateNonMandatoryCommaSeparatedField(fieldsMap,
+                "MIAMUrgencyChecklist", maimUrgencyChecklistToCcdFieldNames),
+            validateNonMandatoryCommaSeparatedField(fieldsMap,
+                "MIAMPreviousAttendanceChecklist", miamPreviousAttendanceChecklistToCcdFieldNames),
+            validateNonMandatoryCommaSeparatedField(fieldsMap,
+                "MIAMOtherGroundsChecklist", miamOtherGroundsChecklistToCcdFieldNames)
         )
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
-
-        return errorMessages;
     }
 
-    private static List<String> validateFieldMatchesRegex(Map<String, String> fieldsMap, String fieldKey, String validationRegex) {
-        List<String> validationMessages = new ArrayList<>();
+    private static List<String> validateNonMandatoryCommaSeparatedField(Map<String, String> fieldsMap, String commaSeparatedFieldKey,
+                                                                        Map<String, String> validOcrFieldNamesToCcdFieldNames) {
+        List<String> validationWarningMessages = new ArrayList<>();
 
-        if (fieldsMap.containsKey(fieldKey)) {
-            String valueToValidate = fieldsMap.get(fieldKey);
-            if (!valueToValidate.matches(validationRegex)) {
-                validationMessages.add(fieldKey + " is not in a valid format");
-            }
+        String commaSeparatedFieldValue = fieldsMap.getOrDefault(commaSeparatedFieldKey, "");
+
+        if (StringUtils.isEmpty(commaSeparatedFieldValue)) {
+            return validationWarningMessages;
         }
-        return validationMessages;
+
+        boolean noInvalidValuesDetected = getCommaSeparatedValueFromOcrDataField(commaSeparatedFieldValue)
+            .stream()
+            .map(validOcrFieldNamesToCcdFieldNames::containsKey)
+            .reduce(Boolean::logicalAnd)
+            .orElse(false);
+
+        if (!noInvalidValuesDetected) {
+            validationWarningMessages.add(
+                String.format("%s contains a value that is not accepted.", commaSeparatedFieldKey)
+            );
+        }
+
+        return validationWarningMessages;
     }
 }
