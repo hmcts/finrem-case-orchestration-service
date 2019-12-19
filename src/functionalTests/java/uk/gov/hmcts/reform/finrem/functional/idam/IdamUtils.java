@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.functional.idam;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import net.serenitybdd.rest.SerenityRest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,8 @@ public class IdamUtils implements IdamUserClient {
     @Value("${idam.whitelist.url}")
     private String idamRedirectUri;
 
+    @Value("${idam.s2s-auth.url}")
+    private String idamS2sAuthUrl;
 
     @Value("${idam.api.secret}")
     private String idamSecret;
@@ -53,6 +56,23 @@ public class IdamUtils implements IdamUserClient {
         System.out.println("token -----> " + token);
 
         return token;
+    }
+
+    public String generateUserTokenWithValidMicroService(String microServiceName) {
+        Response response = SerenityRest.given()
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .relaxedHTTPSValidation()
+                .body(String.format("{\"microservice\": \"%s\"}", microServiceName))
+                .post(idamS2sAuthUrl + "/testing-support/lease");
+
+        if (response.getStatusCode() >= 300) {
+            throw new IllegalStateException("Token generation failed with code: " + response.getStatusCode()
+                    + " body: " + response.getBody().prettyPrint());
+        }
+
+        assert response.getStatusCode() == 200 : "Error generating code from IDAM: " + response.getStatusCode();
+
+        return "Bearer " + response.getBody().asString();
     }
 
     private String idamCodeUrl() {

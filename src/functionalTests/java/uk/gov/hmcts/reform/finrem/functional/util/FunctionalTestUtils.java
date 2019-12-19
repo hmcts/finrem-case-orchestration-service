@@ -88,12 +88,15 @@ public class FunctionalTestUtils {
         return idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword);
     }
 
+    public String getS2SToken(String callerMicroservice) {
+        return idamUtils.generateUserTokenWithValidMicroService(callerMicroservice);
+    }
+
     public Headers getHeader() {
         return Headers.headers(
                 new Header("Authorization", "Bearer "
                         + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)));
     }
-
 
     public Headers getNewHeaders() {
         return Headers.headers(
@@ -147,12 +150,10 @@ public class FunctionalTestUtils {
         return parsedText;
     }
 
-
     public void validatePostSuccess(String url, String filename, String journeyType) {
         int statusCode = getResponse(url, filename, journeyType).getStatusCode();
         assertEquals(200, statusCode);
     }
-
 
     public JsonPath getResponseData(String url, String jsonBody, String dataPath) {
         Response response = SerenityRest.given()
