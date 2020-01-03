@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableMap;
 import uk.gov.hmcts.reform.bsp.common.error.FormFieldValidationException;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
 
@@ -47,14 +48,14 @@ public class BulkScanHelper {
         return Splitter.on(", ").splitToList(commaSeparatedString);
     }
 
-    public static final Map<String, String> miamExemptionsChecklistToCcdFieldNames = new HashMap<String, String>() {{
+    public static final Map<String, String> miamExemptionsChecklistToCcdFieldNames = ImmutableMap.copyOf(new HashMap<String, String>() {{
             put("domesticViolence", "domesticViolence");
             put("urgency", "urgency");
             put("previousMIAMattendance", "previousMIAMattendance");
             put("other", "other");
-        }};
+        }});
 
-    public static final Map<String, String> miamDomesticViolenceChecklistToCcdFieldNames = new HashMap<String, String>() {{
+    public static final Map<String, String> miamDomesticViolenceChecklistToCcdFieldNames = ImmutableMap.copyOf(new HashMap<String, String>() {{
             put("ArrestedRelevantDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_1");
             put("RelevantPoliceCautionDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_2");
             put("RelevantCriminalProceedingsDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_3");
@@ -78,25 +79,25 @@ public class BulkScanHelper {
             put("LetterPublicAuthorityRiskDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_20");
             put("LetterSecretaryOfStateLeaveToRemain289BImmigrationAct", "FR_ms_MIAMDomesticViolenceChecklist_Value_21");
             put("EvidenceAbuseRelatesFinancialMatters", "FR_ms_MIAMDomesticViolenceChecklist_Value_22");
-        }};
+        }});
 
-    public static final Map<String, String> maimUrgencyChecklistToCcdFieldNames = new HashMap<String, String>() {{
+    public static final Map<String, String> maimUrgencyChecklistToCcdFieldNames = ImmutableMap.copyOf(new HashMap<String, String>() {{
             put("RiskLifeLibertyPhysicalSafety", "FR_ms_MIAMUrgencyReasonChecklist_Value_1");
             put("DelayRiskMiscarriageOfJustice", "FR_ms_MIAMUrgencyReasonChecklist_Value_2");
             put("DelayCauseUnreasonableHardship", "FR_ms_MIAMUrgencyReasonChecklist_Value_3");
             put("DelayCauseIrretrievableProblemsDealingWithDispute", "FR_ms_MIAMUrgencyReasonChecklist_Value_4");
             put("RiskScheduleJurisdiction", "FR_ms_MIAMUrgencyReasonChecklist_Value_5");
-        }};
+        }});
 
-    public static final Map<String, String> miamPreviousAttendanceChecklistToCcdFieldNames = new HashMap<String, String>() {{
+    public static final Map<String, String> miamPreviousAttendanceChecklistToCcdFieldNames = ImmutableMap.copyOf(new HashMap<String, String>() {{
             put("4MonthsPriorAttendedMIAM", "FR_ms_MIAMPreviousAttendanceChecklist_Value_1");
             put("AnotherDisputeResolution", "FR_ms_MIAMPreviousAttendanceChecklist_Value_2");
             put("4MonthsPriorApplicationConfirmingMIAMExemption", "FR_ms_MIAMPreviousAttendanceChecklist_Value_3");
             put("ExistingProceedingsAttendedMIAMBeforeInitiating", "FR_ms_MIAMPreviousAttendanceChecklist_Value_4");
             put("ExistingProceedingsMIAMExemptionApplied", "FR_ms_MIAMPreviousAttendanceChecklist_Value_5");
-        }};
+        }});
 
-    public static final Map<String, String> miamOtherGroundsChecklistToCcdFieldNames = new HashMap<String, String>() {{
+    public static final Map<String, String> miamOtherGroundsChecklistToCcdFieldNames = ImmutableMap.copyOf(new HashMap<String, String>() {{
             put("ApplicantBankruptApplicationForBankruptcyOrder", "FR_ms_MIAMOtherGroundsChecklist_Value_1");
             put("ApplicantBankruptPetitionByForBankruptcyOrder", "FR_ms_MIAMOtherGroundsChecklist_Value_2");
             put("ApplicantBankruptBankruptcyOrderInRespectOfProspectiveApplicant.", "FR_ms_MIAMOtherGroundsChecklist_Value_3");
@@ -108,6 +109,6 @@ public class BulkScanHelper {
             put("ChildProspectivePartiesRule12", "FR_ms_MIAMOtherGroundsChecklist_Value_9");
             put("ApplicantContactedAuthorisedFamilyMediatorsNotAvailable", "FR_ms_MIAMOtherGroundsChecklist_Value_10");
             put("NoAuthorisedFamilyMediatorWithinFifteenMiles", "FR_ms_MIAMOtherGroundsChecklist_Value_11");
-        }};
+        }});
 
 }
