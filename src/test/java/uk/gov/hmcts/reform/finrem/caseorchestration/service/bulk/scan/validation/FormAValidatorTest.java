@@ -20,22 +20,21 @@ import static uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStat
 
 public class FormAValidatorTest {
 
-    private final FormAValidator classUnderTest = new FormAValidator();
+    private final FormAValidator formAValidator = new FormAValidator();
     private List<OcrDataField> listOfAllMandatoryFields;
 
     @Before
     public void setup() {
-        List<OcrDataField> listOfAllMandatoryFieldsImmutable = asList(
-            new OcrDataField("PetitionerFirstName", "Peter"),
-            new OcrDataField("PetitionerLastName", "Griffin")
-        );
-
-        listOfAllMandatoryFields = new ArrayList<>(listOfAllMandatoryFieldsImmutable);
+        listOfAllMandatoryFields = new ArrayList<>(asList(
+            new OcrDataField("claimingExemptionMIAM", "No"),
+            new OcrDataField("familyMediatorMIAM", "No"),
+            new OcrDataField("applicantAttendedMIAM", "No")
+        ));
     }
 
     @Test
     public void shouldPassValidationWhenMandatoryFieldsArePresent() {
-        OcrValidationResult validationResult = classUnderTest.validateBulkScanForm(listOfAllMandatoryFields);
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(listOfAllMandatoryFields);
 
         assertThat(validationResult.getStatus(), is(SUCCESS));
         assertThat(validationResult.getWarnings(), is(emptyList()));
@@ -44,39 +43,48 @@ public class FormAValidatorTest {
 
     @Test
     public void shouldFailValidationWhenMandatoryFieldsAreMissing() {
-        OcrValidationResult validationResult = classUnderTest.validateBulkScanForm(emptyList());
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(emptyList());
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
         assertThat(validationResult.getErrors(), is(emptyList()));
         assertThat(validationResult.getWarnings(), hasItems(
-            "Mandatory field \"PetitionerFirstName\" is missing",
-            "Mandatory field \"PetitionerLastName\" is missing"
+            "Mandatory field \"claimingExemptionMIAM\" is missing",
+            "Mandatory field \"familyMediatorMIAM\" is missing",
+            "Mandatory field \"applicantAttendedMIAM\" is missing"
         ));
     }
 
     @Test
     public void shouldFailValidationWhenMandatoryFieldIsPresentButEmpty() {
-        OcrValidationResult validationResult = classUnderTest.validateBulkScanForm(asList(
-            new OcrDataField("PetitionerFirstName", "Kratos")
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(asList(
+            new OcrDataField("claimingExemptionMIAM", ""),
+            new OcrDataField("familyMediatorMIAM", ""),
+            new OcrDataField("applicantAttendedMIAM", "")
         ));
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
         assertThat(validationResult.getErrors(), is(emptyList()));
         assertThat(validationResult.getWarnings(), hasItems(
-            "Mandatory field \"PetitionerLastName\" is missing"
+            "Mandatory field \"claimingExemptionMIAM\" is missing",
+            "Mandatory field \"familyMediatorMIAM\" is missing",
+            "Mandatory field \"applicantAttendedMIAM\" is missing"
         ));
     }
 
     @Test
     public void shouldFailFieldsHavingInvalidValues() {
-        OcrValidationResult validationResult = classUnderTest.validateBulkScanForm(asList(
-            new OcrDataField("D8LegalProcess", "Bankruptcy")
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(asList(
+            new OcrDataField("claimingExemptionMIAM", "Maybe"),
+            new OcrDataField("familyMediatorMIAM", "Not really sure"),
+            new OcrDataField("applicantAttendedMIAM", "Let me get back to you on it")
         ));
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
         assertThat(validationResult.getErrors(), is(emptyList()));
         assertThat(validationResult.getWarnings(), hasItems(
-            "D8LegalProcess must be \"Divorce\", \"Dissolution\" or \"Judicial (separation)\""
+            "claimingExemptionMIAM must be \"Yes\" or \"No\"",
+            "familyMediatorMIAM must be \"Yes\" or \"No\"",
+            "applicantAttendedMIAM must be \"Yes\" or \"No\""
         ));
     }
 
@@ -99,7 +107,7 @@ public class FormAValidatorTest {
         );
 
         listOfAllMandatoryFields.addAll(nonMandatoryFieldsWithEmptyValues);
-        OcrValidationResult validationResult = classUnderTest.validateBulkScanForm(listOfAllMandatoryFields);
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(listOfAllMandatoryFields);
         assertThat(validationResult.getStatus(), is(SUCCESS));
         assertThat(validationResult.getWarnings(), is(emptyList()));
         assertThat(validationResult.getErrors(), is(emptyList()));
@@ -132,7 +140,7 @@ public class FormAValidatorTest {
             new OcrDataField("MIAMOtherGroundsChecklist", otherGroundsValue)
         ));
 
-        OcrValidationResult validationResult = classUnderTest.validateBulkScanForm(listOfAllMandatoryFields);
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(listOfAllMandatoryFields);
 
         assertThat(validationResult.getStatus(), is(SUCCESS));
         assertThat(validationResult.getWarnings(), is(emptyList()));
@@ -155,7 +163,7 @@ public class FormAValidatorTest {
             new OcrDataField("MIAMPreviousAttendanceChecklist", previousAttendanceValue)
         ));
 
-        OcrValidationResult validationResult = classUnderTest.validateBulkScanForm(listOfAllMandatoryFields);
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(listOfAllMandatoryFields);
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
         assertThat(validationResult.getWarnings(), hasItems(
@@ -173,7 +181,7 @@ public class FormAValidatorTest {
             new OcrDataField("MIAMOtherGroundsChecklist", otherGroundsValue)
         );
 
-        OcrValidationResult validationResult = classUnderTest.validateBulkScanForm(listOfAllMandatoryFields);
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(listOfAllMandatoryFields);
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
         assertThat(validationResult.getWarnings(), hasItem(

@@ -37,7 +37,7 @@ public class BulkScanHelper {
         }
     }
 
-    public static List<String> getCommaSeparatedValueFromOcrDataField(String commaSeparatedString) {
+    public static List<String> getCommaSeparatedValuesFromOcrDataField(String commaSeparatedString) {
         //TODO clarify what the delimiter is - comma followed by space?
         //TODO modify tests if delimiter changes
         //TODO trim empty spaces or count as warning - perhaps incorrectly scanned so needs flagged?

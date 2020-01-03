@@ -16,7 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.rules.ExpectedException.none;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.getCommaSeparatedValueFromOcrDataField;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.getCommaSeparatedValuesFromOcrDataField;
 
 public class BulkScanHelperTest {
 
@@ -45,7 +45,7 @@ public class BulkScanHelperTest {
     @Test
     public void getCorrectListOfCommaSeparatedValuesFromOcrFieldsMap() {
         List<String> convertedListOfValues =
-            getCommaSeparatedValueFromOcrDataField("domesticViolence, urgency, previousMIAMattendance, other");
+            getCommaSeparatedValuesFromOcrDataField("domesticViolence, urgency, previousMIAMattendance, other");
 
         assertThat(convertedListOfValues, CoreMatchers.allOf(
             hasSize(4),
@@ -56,7 +56,7 @@ public class BulkScanHelperTest {
     @Test
     public void getEmptyListOfCommaSeparatedValuesFromEmptyString() {
         List<String> convertedListOfValues =
-            getCommaSeparatedValueFromOcrDataField("");
+            getCommaSeparatedValuesFromOcrDataField("");
 
         assertThat(convertedListOfValues, CoreMatchers.is(empty()));
     }

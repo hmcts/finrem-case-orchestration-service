@@ -5,7 +5,6 @@ import uk.gov.hmcts.reform.bsp.common.model.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformations.FormAToCaseTransformer;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -23,24 +22,33 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CA
 
 public class FormAToCaseTransformerTest {
 
-    private final FormAToCaseTransformer classUnderTest = new FormAToCaseTransformer();
+    private final FormAToCaseTransformer formAToCaseTransformer = new FormAToCaseTransformer();
 
     @Test
     public void shouldTransformFieldsAccordingly() {
-        ExceptionRecord exceptionRecord = createExceptionRecord(singletonList(new OcrDataField("D8ReasonForDivorceSeparationDate", "20/11/2008")));
+        ExceptionRecord exceptionRecord = createExceptionRecord(asList(
+            new OcrDataField("claimingExemptionMIAM", "Yes"),
+            new OcrDataField("familyMediatorMIAM", "No"),
+            new OcrDataField("applicantAttendedMIAM", "No")
+        ));
 
-        Map<String, Object> transformedCaseData = classUnderTest.transformIntoCaseData(exceptionRecord);
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(exceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID)
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry("claimingExemptionMIAM", "Yes"),
+            hasEntry("familyMediatorMIAM", "No"),
+            hasEntry("applicantAttendedMIAM", "No")
         ));
     }
 
     @Test
     public void shouldNotReturnUnexpectedField() {
-        ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(new OcrDataField("UnexpectedName", "UnexpectedValue")));
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
+            new OcrDataField("UnexpectedName", "UnexpectedValue")
+        ));
 
-        Map<String, Object> transformedCaseData = classUnderTest.transformIntoCaseData(incomingExceptionRecord);
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
             aMapWithSize(1),
@@ -82,7 +90,7 @@ public class FormAToCaseTransformerTest {
             new OcrDataField("MIAMOtherGroundsChecklist", otherGroundsValue)
         ));
 
-        Map<String, Object> transformedCaseData = classUnderTest.transformIntoCaseData(exceptionRecord);
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(exceptionRecord);
 
         List<String> expectedExemptionsResult = asList("domesticViolence", "urgency", "previousMIAMattendance");
         assertThat(transformedCaseData, hasEntry("MIAMExemptionsChecklist", expectedExemptionsResult));
@@ -123,7 +131,7 @@ public class FormAToCaseTransformerTest {
         ExceptionRecord exceptionRecord = createExceptionRecord(singletonList(
             new OcrDataField("MIAMDomesticViolenceChecklist", domesticViolenceValue)));
 
-        Map<String, Object> transformedCaseData = classUnderTest.transformIntoCaseData(exceptionRecord);
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(exceptionRecord);
 
         List<String> expectedCommaSeparatedList = asList(
             "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
@@ -142,7 +150,7 @@ public class FormAToCaseTransformerTest {
         ExceptionRecord exceptionRecord = createExceptionRecord(singletonList(
             new OcrDataField("MIAMDomesticViolenceChecklist", domesticViolenceValue)));
 
-        Map<String, Object> transformedCaseData = classUnderTest.transformIntoCaseData(exceptionRecord);
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(exceptionRecord);
 
         List<String> expectedCommaSeparatedList = asList(
             "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
@@ -156,7 +164,7 @@ public class FormAToCaseTransformerTest {
     public void commaSeparatedEntryTransformerDoesNotTransformFieldsWithoutValues() {
         ExceptionRecord exceptionRecord = createExceptionRecord(singletonList(new OcrDataField("MIAMDomesticViolenceChecklist", "")));
 
-        Map<String, Object> transformedCaseData = classUnderTest.transformIntoCaseData(exceptionRecord);
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(exceptionRecord);
 
         assertThat(transformedCaseData, not(hasEntry("MIAMDomesticViolenceChecklist", emptyList())));
         assertThat(transformedCaseData, not(hasKey("MIAMDomesticViolenceChecklist")));

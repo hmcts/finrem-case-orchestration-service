@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.functional.util.FunctionalTestUtils;
 @ContextConfiguration(classes = uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration.class)
 public abstract class IntegrationTestBase {
 
-
     public static String caseOrchestrationUrl;
     public static String serviceAuthUrl;
 
@@ -22,7 +21,6 @@ public abstract class IntegrationTestBase {
     public SpringIntegrationMethodRule springIntegration;
     @Autowired
     protected FunctionalTestUtils utils;
-
 
     public IntegrationTestBase() {
         this.springIntegration = new SpringIntegrationMethodRule();
@@ -43,5 +41,4 @@ public abstract class IntegrationTestBase {
     public void serviceAuthUrl(@Value("${idam.s2s-auth.url}") String serviceAuthUrl) {
         this.serviceAuthUrl = serviceAuthUrl;
     }
-
 }

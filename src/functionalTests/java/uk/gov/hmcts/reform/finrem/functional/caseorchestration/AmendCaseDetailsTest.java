@@ -15,7 +15,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 @RunWith(SerenityRunner.class)
-
 public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Value("${cos.amend.case.details}")
