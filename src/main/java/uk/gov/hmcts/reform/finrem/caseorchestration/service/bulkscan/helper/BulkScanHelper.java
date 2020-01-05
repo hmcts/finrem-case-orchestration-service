@@ -53,7 +53,8 @@ public class BulkScanHelper {
             put("urgency", "urgency");
             put("previousMIAMattendance", "previousMIAMattendance");
             put("other", "other");
-        }});
+        }
+    });
 
     public static final Map<String, String> miamDomesticViolenceChecklistToCcdFieldNames = ImmutableMap.copyOf(new HashMap<String, String>() {{
             put("ArrestedRelevantDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_1");
@@ -79,7 +80,8 @@ public class BulkScanHelper {
             put("LetterPublicAuthorityRiskDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_20");
             put("LetterSecretaryOfStateLeaveToRemain289BImmigrationAct", "FR_ms_MIAMDomesticViolenceChecklist_Value_21");
             put("EvidenceAbuseRelatesFinancialMatters", "FR_ms_MIAMDomesticViolenceChecklist_Value_22");
-        }});
+        }
+    });
 
     public static final Map<String, String> maimUrgencyChecklistToCcdFieldNames = ImmutableMap.copyOf(new HashMap<String, String>() {{
             put("RiskLifeLibertyPhysicalSafety", "FR_ms_MIAMUrgencyReasonChecklist_Value_1");
@@ -87,7 +89,8 @@ public class BulkScanHelper {
             put("DelayCauseUnreasonableHardship", "FR_ms_MIAMUrgencyReasonChecklist_Value_3");
             put("DelayCauseIrretrievableProblemsDealingWithDispute", "FR_ms_MIAMUrgencyReasonChecklist_Value_4");
             put("RiskScheduleJurisdiction", "FR_ms_MIAMUrgencyReasonChecklist_Value_5");
-        }});
+        }
+    });
 
     public static final Map<String, String> miamPreviousAttendanceChecklistToCcdFieldNames = ImmutableMap.copyOf(new HashMap<String, String>() {{
             put("4MonthsPriorAttendedMIAM", "FR_ms_MIAMPreviousAttendanceChecklist_Value_1");
@@ -95,7 +98,8 @@ public class BulkScanHelper {
             put("4MonthsPriorApplicationConfirmingMIAMExemption", "FR_ms_MIAMPreviousAttendanceChecklist_Value_3");
             put("ExistingProceedingsAttendedMIAMBeforeInitiating", "FR_ms_MIAMPreviousAttendanceChecklist_Value_4");
             put("ExistingProceedingsMIAMExemptionApplied", "FR_ms_MIAMPreviousAttendanceChecklist_Value_5");
-        }});
+        }
+    });
 
     public static final Map<String, String> miamOtherGroundsChecklistToCcdFieldNames = ImmutableMap.copyOf(new HashMap<String, String>() {{
             put("ApplicantBankruptApplicationForBankruptcyOrder", "FR_ms_MIAMOtherGroundsChecklist_Value_1");
@@ -109,6 +113,6 @@ public class BulkScanHelper {
             put("ChildProspectivePartiesRule12", "FR_ms_MIAMOtherGroundsChecklist_Value_9");
             put("ApplicantContactedAuthorisedFamilyMediatorsNotAvailable", "FR_ms_MIAMOtherGroundsChecklist_Value_10");
             put("NoAuthorisedFamilyMediatorWithinFifteenMiles", "FR_ms_MIAMOtherGroundsChecklist_Value_11");
-        }});
-
+        }
+    });
 }
