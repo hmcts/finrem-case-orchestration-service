@@ -48,71 +48,64 @@ public class BulkScanHelper {
         return Splitter.on(", ").splitToList(commaSeparatedString);
     }
 
-    public static final Map<String, String> miamExemptionsChecklistToCcdFieldNames = ImmutableMap.copyOf(new HashMap<String, String>() {{
-            put("domesticViolence", "domesticViolence");
-            put("urgency", "urgency");
-            put("previousMIAMattendance", "previousMIAMattendance");
-            put("other", "other");
-        }
-    });
+    public static final Map<String, String> miamExemptionsChecklistToCcdFieldNames = ImmutableMap.of(
+        "domesticViolence", "domesticViolence",
+        "urgency", "urgency",
+        "previousMIAMattendance", "previousMIAMattendance",
+        "other", "other"
+    );
+        
+    public static final Map<String, String> miamDomesticViolenceChecklistToCcdFieldNames = ImmutableMap.<String, String>builder()
+        .put("ArrestedRelevantDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_1")
+        .put("RelevantPoliceCautionDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_2")
+        .put("RelevantCriminalProceedingsDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_3")
+        .put("RelevantConvictionDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_4")
+        .put("CourtOrderBindingInConnectionDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_5")
+        .put("DomesticViolenceProtectionNotice", "FR_ms_MIAMDomesticViolenceChecklist_Value_6")
+        .put("RelevantProtectiveInjunction", "FR_ms_MIAMDomesticViolenceChecklist_Value_7")
+        .put("UndertakingSection46Or63EFamilyLawActOrScotlandNorthernIrelandProtectiveInjunction", "FR_ms_MIAMDomesticViolenceChecklist_Value_8")
+        .put("FindingOfFactProceedingsUnitedKingdomDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_9")
+        .put("ExpertReportProceedingsUnitedKingdomAssessedBeingAtRisk", "FR_ms_MIAMDomesticViolenceChecklist_Value_10")
+        .put("ReportHealthProfessionalInjuriesConsistentDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_11")
+        .put("ReportHealthProfessionalConfirmingReferralSpecialistVictimsDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_12")
+        .put("LetterMemberRiskAssessmentConferenceOtherLocalSafeguardingForumRiskDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_13")
+        .put("LetterIndependentDomesticViolenceAdvisorProvidingSupport", "FR_ms_MIAMDomesticViolenceChecklist_Value_15")
+        .put("LetterIndependentSexualViolenceAdvisorProvidingSupport", "FR_ms_MIAMDomesticViolenceChecklist_Value_16")
+        .put("LetterLocalAuthorityOrHousingAssociationRiskOrDescriptionSpecificMattersDescriptionSupportProvided", "FR_ms_MIAMDomesticViolenceChecklist_Value_17")
+        .put("LetterOrganisationDomesticViolenceSupportStatementDescriptionReason", "FR_ms_MIAMDomesticViolenceChecklist_Value_18")
+        .put("ReportOrganisationDomesticViolenceSupportAdmissionToRefuge", "FR_ms_MIAMDomesticViolenceChecklist_Value_19")
+        .put("LetterPublicAuthorityRiskDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_20")
+        .put("LetterSecretaryOfStateLeaveToRemain289BImmigrationAct", "FR_ms_MIAMDomesticViolenceChecklist_Value_21")
+        .put("EvidenceAbuseRelatesFinancialMatters", "FR_ms_MIAMDomesticViolenceChecklist_Value_22")
+        .build();
 
-    public static final Map<String, String> miamDomesticViolenceChecklistToCcdFieldNames = ImmutableMap.copyOf(new HashMap<String, String>() {{
-            put("ArrestedRelevantDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_1");
-            put("RelevantPoliceCautionDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_2");
-            put("RelevantCriminalProceedingsDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_3");
-            put("RelevantConvictionDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_4");
-            put("CourtOrderBindingInConnectionDomesticViolenceOffence", "FR_ms_MIAMDomesticViolenceChecklist_Value_5");
-            put("DomesticViolenceProtectionNotice", "FR_ms_MIAMDomesticViolenceChecklist_Value_6");
-            put("RelevantProtectiveInjunction", "FR_ms_MIAMDomesticViolenceChecklist_Value_7");
-            put("UndertakingSection46Or63EFamilyLawActOrScotlandNorthernIrelandProtectiveInjunction", "FR_ms_MIAMDomesticViolenceChecklist_Value_8");
-            put("FindingOfFactProceedingsUnitedKingdomDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_9");
-            put("ExpertReportProceedingsUnitedKingdomAssessedBeingAtRisk", "FR_ms_MIAMDomesticViolenceChecklist_Value_10");
-            put("ReportHealthProfessionalInjuriesConsistentDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_11");
-            put("ReportHealthProfessionalConfirmingReferralSpecialistVictimsDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_12");
-            put("LetterMemberRiskAssessmentConferenceOtherLocalSafeguardingForumRiskDomesticViolence",
-                "FR_ms_MIAMDomesticViolenceChecklist_Value_13");
-            put("LetterIndependentDomesticViolenceAdvisorProvidingSupport", "FR_ms_MIAMDomesticViolenceChecklist_Value_15");
-            put("LetterIndependentSexualViolenceAdvisorProvidingSupport", "FR_ms_MIAMDomesticViolenceChecklist_Value_16");
-            put("LetterLocalAuthorityOrHousingAssociationRiskOrDescriptionSpecificMattersDescriptionSupportProvided",
-                "FR_ms_MIAMDomesticViolenceChecklist_Value_17");
-            put("LetterOrganisationDomesticViolenceSupportStatementDescriptionReason", "FR_ms_MIAMDomesticViolenceChecklist_Value_18");
-            put("ReportOrganisationDomesticViolenceSupportAdmissionToRefuge", "FR_ms_MIAMDomesticViolenceChecklist_Value_19");
-            put("LetterPublicAuthorityRiskDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_20");
-            put("LetterSecretaryOfStateLeaveToRemain289BImmigrationAct", "FR_ms_MIAMDomesticViolenceChecklist_Value_21");
-            put("EvidenceAbuseRelatesFinancialMatters", "FR_ms_MIAMDomesticViolenceChecklist_Value_22");
-        }
-    });
+    public static final Map<String, String> maimUrgencyChecklistToCcdFieldNames = ImmutableMap.of(
+            "RiskLifeLibertyPhysicalSafety", "FR_ms_MIAMUrgencyReasonChecklist_Value_1",
+            "DelayRiskMiscarriageOfJustice", "FR_ms_MIAMUrgencyReasonChecklist_Value_2",
+            "DelayCauseUnreasonableHardship", "FR_ms_MIAMUrgencyReasonChecklist_Value_3",
+            "DelayCauseIrretrievableProblemsDealingWithDispute", "FR_ms_MIAMUrgencyReasonChecklist_Value_4",
+            "RiskScheduleJurisdiction", "FR_ms_MIAMUrgencyReasonChecklist_Value_5"
+    );
 
-    public static final Map<String, String> maimUrgencyChecklistToCcdFieldNames = ImmutableMap.copyOf(new HashMap<String, String>() {{
-            put("RiskLifeLibertyPhysicalSafety", "FR_ms_MIAMUrgencyReasonChecklist_Value_1");
-            put("DelayRiskMiscarriageOfJustice", "FR_ms_MIAMUrgencyReasonChecklist_Value_2");
-            put("DelayCauseUnreasonableHardship", "FR_ms_MIAMUrgencyReasonChecklist_Value_3");
-            put("DelayCauseIrretrievableProblemsDealingWithDispute", "FR_ms_MIAMUrgencyReasonChecklist_Value_4");
-            put("RiskScheduleJurisdiction", "FR_ms_MIAMUrgencyReasonChecklist_Value_5");
-        }
-    });
-
-    public static final Map<String, String> miamPreviousAttendanceChecklistToCcdFieldNames = ImmutableMap.copyOf(new HashMap<String, String>() {{
-            put("4MonthsPriorAttendedMIAM", "FR_ms_MIAMPreviousAttendanceChecklist_Value_1");
-            put("AnotherDisputeResolution", "FR_ms_MIAMPreviousAttendanceChecklist_Value_2");
-            put("4MonthsPriorApplicationConfirmingMIAMExemption", "FR_ms_MIAMPreviousAttendanceChecklist_Value_3");
-            put("ExistingProceedingsAttendedMIAMBeforeInitiating", "FR_ms_MIAMPreviousAttendanceChecklist_Value_4");
-            put("ExistingProceedingsMIAMExemptionApplied", "FR_ms_MIAMPreviousAttendanceChecklist_Value_5");
-        }
-    });
-
-    public static final Map<String, String> miamOtherGroundsChecklistToCcdFieldNames = ImmutableMap.copyOf(new HashMap<String, String>() {{
-            put("ApplicantBankruptApplicationForBankruptcyOrder", "FR_ms_MIAMOtherGroundsChecklist_Value_1");
-            put("ApplicantBankruptPetitionByForBankruptcyOrder", "FR_ms_MIAMOtherGroundsChecklist_Value_2");
-            put("ApplicantBankruptBankruptcyOrderInRespectOfProspectiveApplicant.", "FR_ms_MIAMOtherGroundsChecklist_Value_3");
-            put("NotContactDetailsForRespondents", "FR_ms_MIAMOtherGroundsChecklist_Value_4");
-            put("ApplicationMadeWithoutNotice", "FR_ms_MIAMOtherGroundsChecklist_Value_5");
-            put("DisabilityOrInabilityPreventAttendance", "FR_ms_MIAMOtherGroundsChecklist_Value_6");
-            put("CannotAttendInPrisonOrOtherInstitution", "FR_ms_MIAMOtherGroundsChecklist_Value_7");
-            put("NotHabituallyResident", "FR_ms_MIAMOtherGroundsChecklist_Value_8");
-            put("ChildProspectivePartiesRule12", "FR_ms_MIAMOtherGroundsChecklist_Value_9");
-            put("ApplicantContactedAuthorisedFamilyMediatorsNotAvailable", "FR_ms_MIAMOtherGroundsChecklist_Value_10");
-            put("NoAuthorisedFamilyMediatorWithinFifteenMiles", "FR_ms_MIAMOtherGroundsChecklist_Value_11");
-        }
-    });
+    public static final Map<String, String> miamPreviousAttendanceChecklistToCcdFieldNames = ImmutableMap.of(
+            "4MonthsPriorAttendedMIAM", "FR_ms_MIAMPreviousAttendanceChecklist_Value_1",
+            "AnotherDisputeResolution", "FR_ms_MIAMPreviousAttendanceChecklist_Value_2",
+            "4MonthsPriorApplicationConfirmingMIAMExemption", "FR_ms_MIAMPreviousAttendanceChecklist_Value_3",
+            "ExistingProceedingsAttendedMIAMBeforeInitiating", "FR_ms_MIAMPreviousAttendanceChecklist_Value_4",
+            "ExistingProceedingsMIAMExemptionApplied", "FR_ms_MIAMPreviousAttendanceChecklist_Value_5"
+    );
+    
+    public static final Map<String, String> miamOtherGroundsChecklistToCcdFieldNames = ImmutableMap.<String, String>builder()
+        .put("ApplicantBankruptApplicationForBankruptcyOrder", "FR_ms_MIAMOtherGroundsChecklist_Value_1")
+        .put("ApplicantBankruptPetitionByForBankruptcyOrder", "FR_ms_MIAMOtherGroundsChecklist_Value_2")
+        .put("ApplicantBankruptBankruptcyOrderInRespectOfProspectiveApplicant.", "FR_ms_MIAMOtherGroundsChecklist_Value_3")
+        .put("NotContactDetailsForRespondents", "FR_ms_MIAMOtherGroundsChecklist_Value_4")
+        .put("ApplicationMadeWithoutNotice", "FR_ms_MIAMOtherGroundsChecklist_Value_5")
+        .put("DisabilityOrInabilityPreventAttendance", "FR_ms_MIAMOtherGroundsChecklist_Value_6")
+        .put("CannotAttendInPrisonOrOtherInstitution", "FR_ms_MIAMOtherGroundsChecklist_Value_7")
+        .put("NotHabituallyResident", "FR_ms_MIAMOtherGroundsChecklist_Value_8")
+        .put("ChildProspectivePartiesRule12", "FR_ms_MIAMOtherGroundsChecklist_Value_9")
+        .put("ApplicantContactedAuthorisedFamilyMediatorsNotAvailable", "FR_ms_MIAMOtherGroundsChecklist_Value_10")
+        .put("NoAuthorisedFamilyMediatorWithinFifteenMiles", "FR_ms_MIAMOtherGroundsChecklist_Value_11")
+        .build();
 }
