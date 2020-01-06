@@ -31,10 +31,4 @@
         <vulnerabilityName>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</vulnerabilityName>
     </suppress>
 
-    <suppress>
-        <notes>Tomcat for which no reference was found in the project's gradle config</notes>
-        <cve>CVE-2019-12418</cve>
-        <cve>CVE-2019-17563</cve>
-    </suppress>
-
 </suppressions>
