@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.getCommaSeparatedValueFromOcrDataField;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.maimUrgencyChecklistToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.miamDomesticViolenceChecklistToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.miamExemptionsChecklistToCcdFieldNames;
@@ -23,7 +23,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
     private static final Map<String, String> ocrToCCDMapping;
 
     static {
-        ocrToCCDMapping = d8ExceptionRecordToCcdMap();
+        ocrToCCDMapping = formAExceptionRecordToCcdMap();
     }
 
     @Override
@@ -46,7 +46,6 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
     @Override
     Map<String, Object> runPostMappingModification(Map<String, Object> transformedCaseData) {
-
         return transformedCaseData;
     }
 
@@ -66,7 +65,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
         if (commaSeparatedEntryValue.isPresent()) {
             List<String> transformedCommaSeparatedValue =
-                getCommaSeparatedValueFromOcrDataField(commaSeparatedEntryValue.get())
+                getCommaSeparatedValuesFromOcrDataField(commaSeparatedEntryValue.get())
                     .stream()
                     .map(ocrFieldNamesToCcdFieldNames::get)
                     .filter(Objects::nonNull)
@@ -78,14 +77,14 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         }
     }
 
-    private static Map<String, String> d8ExceptionRecordToCcdMap() {
-        Map<String, String> erToCcdFieldsMap = new HashMap<>();
+    private static Map<String, String> formAExceptionRecordToCcdMap() {
+        Map<String, String> exceptionRecordToCcdFieldsMap = new HashMap<>();
 
-        // Section 2 - About you (the applicant/petitioner)
-        erToCcdFieldsMap.put("PetitionerFirstName", "D8PetitionerFirstName");
-        erToCcdFieldsMap.put("PetitionerLastName", "D8PetitionerLastName");
+        // Section 2 - Requirement to attend MIAM
+        exceptionRecordToCcdFieldsMap.put("claimingExemptionMIAM", "claimingExemptionMIAM");
+        exceptionRecordToCcdFieldsMap.put("familyMediatorMIAM", "familyMediatorMIAM");
+        exceptionRecordToCcdFieldsMap.put("applicantAttendedMIAM", "applicantAttendedMIAM");
 
-        return erToCcdFieldsMap;
+        return exceptionRecordToCcdFieldsMap;
     }
-
 }

@@ -39,7 +39,7 @@ public class BulkScanHelper {
             throw new FormFieldValidationException(String.format("%s must be a valid date", formFieldName));
         }
     }
-
+    
     /**
      * The following assumptions are in place.
      * - the delimiter is a comma followed by a space ", "
