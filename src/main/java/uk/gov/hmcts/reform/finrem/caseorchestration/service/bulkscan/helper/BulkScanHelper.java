@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,10 +67,12 @@ public class BulkScanHelper {
         .put("ExpertReportProceedingsUnitedKingdomAssessedBeingAtRisk", "FR_ms_MIAMDomesticViolenceChecklist_Value_10")
         .put("ReportHealthProfessionalInjuriesConsistentDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_11")
         .put("ReportHealthProfessionalConfirmingReferralSpecialistVictimsDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_12")
-        .put("LetterMemberRiskAssessmentConferenceOtherLocalSafeguardingForumRiskDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_13")
+        .put("LetterMemberRiskAssessmentConferenceOtherLocalSafeguardingForumRiskDomesticViolence",
+            "FR_ms_MIAMDomesticViolenceChecklist_Value_13")
         .put("LetterIndependentDomesticViolenceAdvisorProvidingSupport", "FR_ms_MIAMDomesticViolenceChecklist_Value_15")
         .put("LetterIndependentSexualViolenceAdvisorProvidingSupport", "FR_ms_MIAMDomesticViolenceChecklist_Value_16")
-        .put("LetterLocalAuthorityOrHousingAssociationRiskOrDescriptionSpecificMattersDescriptionSupportProvided", "FR_ms_MIAMDomesticViolenceChecklist_Value_17")
+        .put("LetterLocalAuthorityOrHousingAssociationRiskOrDescriptionSpecificMattersDescriptionSupportProvided",
+            "FR_ms_MIAMDomesticViolenceChecklist_Value_17")
         .put("LetterOrganisationDomesticViolenceSupportStatementDescriptionReason", "FR_ms_MIAMDomesticViolenceChecklist_Value_18")
         .put("ReportOrganisationDomesticViolenceSupportAdmissionToRefuge", "FR_ms_MIAMDomesticViolenceChecklist_Value_19")
         .put("LetterPublicAuthorityRiskDomesticViolence", "FR_ms_MIAMDomesticViolenceChecklist_Value_20")
