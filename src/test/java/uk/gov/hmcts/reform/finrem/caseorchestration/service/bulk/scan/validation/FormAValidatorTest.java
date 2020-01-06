@@ -11,7 +11,6 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -165,9 +164,8 @@ public class FormAValidatorTest {
     }
 
     @Test
-    // TODO - clarify if expected behaviour - see comment in BulkScanHelper
-    public void shouldFailValidateNonMandatoryCommaSeparatedFieldContainingBlankStringsOfSpaces() {
-        String otherGroundsValue = "ApplicantBankruptApplicationForBankruptcyOrder, ChildProspectivePartiesRule12,     ";
+    public void shouldPassValidateNonMandatoryCommaSeparatedFieldContainingEmptyStringsAndStringsWithSpaces() {
+        String otherGroundsValue = "ApplicantBankruptApplicationForBankruptcyOrder,   ChildProspectivePartiesRule12,   ";
 
         listOfAllMandatoryFields.add(
             new OcrDataField("MIAMOtherGroundsChecklist", otherGroundsValue)
@@ -175,10 +173,7 @@ public class FormAValidatorTest {
 
         OcrValidationResult validationResult = classUnderTest.validateBulkScanForm(listOfAllMandatoryFields);
 
-        assertThat(validationResult.getStatus(), is(WARNINGS));
-        assertThat(validationResult.getWarnings(), hasItem(
-            "MIAMOtherGroundsChecklist contains a value that is not accepted."
-        ));
-
+        assertThat(validationResult.getStatus(), is(SUCCESS));
+        assertThat(validationResult.getWarnings(), is(emptyList()));
     }
 }

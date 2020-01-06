@@ -60,4 +60,16 @@ public class BulkScanHelperTest {
 
         assertThat(convertedListOfValues, CoreMatchers.is(empty()));
     }
+
+    @Test
+    public void getListOfCommaSeparatedValuesFromStringWithBlankSpaces() {
+        List<String> convertedListOfValues =
+            getCommaSeparatedValueFromOcrDataField("    ,     , blah,   , string with spaces,  wat  ");
+
+        assertThat(convertedListOfValues, CoreMatchers.allOf(
+            hasSize(3),
+            CoreMatchers.equalTo(Arrays.asList("blah", "string with spaces", "wat")
+            )));
+
+    }
 }

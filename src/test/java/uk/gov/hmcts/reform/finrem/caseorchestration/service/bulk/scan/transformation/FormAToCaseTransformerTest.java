@@ -5,7 +5,6 @@ import uk.gov.hmcts.reform.bsp.common.model.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformations.FormAToCaseTransformer;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 

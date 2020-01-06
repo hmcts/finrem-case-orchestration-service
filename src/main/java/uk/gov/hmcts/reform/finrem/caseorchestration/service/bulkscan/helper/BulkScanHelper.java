@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper;
 
 import com.google.common.base.Splitter;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.error.FormFieldValidationException;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
 
@@ -11,6 +12,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static java.time.format.ResolverStyle.STRICT;
 import static java.util.stream.Collectors.toMap;
@@ -37,14 +40,25 @@ public class BulkScanHelper {
         }
     }
 
+    /**
+     * The following assumptions are in place.
+     * - the delimiter is a comma followed by a space ", "
+     * - leading and trailing white spaces for each entry are removed - consequentially an empty entry will be discarded
+     * so a warning will not be raised on further processing
+     *
+     * @param commaSeparatedString the comma separated string containing entries to be parsed
+     * @return a list of strings without empty values
+     */
     public static List<String> getCommaSeparatedValueFromOcrDataField(String commaSeparatedString) {
-        //TODO clarify what the delimiter is - comma followed by space?
-        //TODO modify tests if delimiter changes
-        //TODO trim empty spaces or count as warning - perhaps incorrectly scanned so needs flagged?
         if (commaSeparatedString.isEmpty()) {
             return Collections.emptyList();
         }
-        return Splitter.on(", ").splitToList(commaSeparatedString);
+        return Splitter.on(", ").splitToList(commaSeparatedString)
+            .stream()
+            .filter(Objects::nonNull)
+            .map(String::trim)
+            .filter(StringUtils::isNotBlank)
+            .collect(Collectors.toList());
     }
 
     public static final Map<String, String> miamExemptionsChecklistToCcdFieldNames = new HashMap<String, String>() {{
