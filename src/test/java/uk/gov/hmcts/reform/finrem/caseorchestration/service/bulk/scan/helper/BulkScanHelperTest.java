@@ -64,7 +64,7 @@ public class BulkScanHelperTest {
     @Test
     public void getListOfCommaSeparatedValuesFromStringWithBlankSpaces() {
         List<String> convertedListOfValues =
-            getCommaSeparatedValueFromOcrDataField("    ,     , blah,   , string with spaces,  wat  ");
+            getCommaSeparatedValuesFromOcrDataField("    ,     , blah,   , string with spaces,  wat  ");
 
         assertThat(convertedListOfValues, CoreMatchers.allOf(
             hasSize(3),

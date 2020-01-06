@@ -39,7 +39,7 @@ public class BulkScanHelper {
             throw new FormFieldValidationException(String.format("%s must be a valid date", formFieldName));
         }
     }
-    
+
     /**
      * The following assumptions are in place.
      * - the delimiter is a comma followed by a space ", "
@@ -49,7 +49,7 @@ public class BulkScanHelper {
      * @param commaSeparatedString the comma separated string containing entries to be parsed
      * @return a list of strings without empty values
      */
-    public static List<String> getCommaSeparatedValueFromOcrDataField(String commaSeparatedString) {
+    public static List<String> getCommaSeparatedValuesFromOcrDataField(String commaSeparatedString) {
         if (commaSeparatedString.isEmpty()) {
             return Collections.emptyList();
         }
