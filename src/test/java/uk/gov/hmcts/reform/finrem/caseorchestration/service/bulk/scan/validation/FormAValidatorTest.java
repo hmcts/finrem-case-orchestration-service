@@ -89,6 +89,99 @@ public class FormAValidatorTest {
 
     @Test
     public void shouldPassForNonMandatoryEmptyFields() {
-        // placeholder for future work - in case form A has only mandatory fields remove the test
+        List<OcrDataField> nonMandatoryFieldsWithEmptyValues = asList(
+            new OcrDataField("PetitionerSolicitorName", ""),
+            new OcrDataField("D8SolicitorReference", ""),
+            new OcrDataField("PetitionerSolicitorFirm", ""),
+            new OcrDataField("PetitionerSolicitorAddressPostCode", ""),
+            new OcrDataField("PetitionerSolicitorPhone", ""),
+            new OcrDataField("PetitionerSolicitorEmail", ""),
+            new OcrDataField("D8PetitionerCorrespondencePostcode", ""),
+
+            new OcrDataField("MIAMExemptionsChecklist", ""),
+            new OcrDataField("MIAMDomesticViolenceChecklist", ""),
+            new OcrDataField("MIAMUrgencyChecklist", ""),
+            new OcrDataField("MIAMPreviousAttendanceChecklist", ""),
+            new OcrDataField("MIAMOtherGroundsChecklist", "")
+        );
+
+        listOfAllMandatoryFields.addAll(nonMandatoryFieldsWithEmptyValues);
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(listOfAllMandatoryFields);
+        assertThat(validationResult.getStatus(), is(SUCCESS));
+        assertThat(validationResult.getWarnings(), is(emptyList()));
+        assertThat(validationResult.getErrors(), is(emptyList()));
+    }
+
+    @Test
+    public void shouldPassValidateNonMandatoryCommaSeparatedFieldContainingAcceptedValues() {
+        String exemptionsValue = "domesticViolence, previousMIAMattendance";
+
+        String domesticViolenceValue = "ArrestedRelevantDomesticViolenceOffence, "
+            + "RelevantProtectiveInjunction, "
+            + "UndertakingSection46Or63EFamilyLawActOrScotlandNorthernIrelandProtectiveInjunction, "
+            + "LetterMemberRiskAssessmentConferenceOtherLocalSafeguardingForumRiskDomesticViolence, "
+            + "LetterLocalAuthorityOrHousingAssociationRiskOrDescriptionSpecificMattersDescriptionSupportProvided";
+
+        String urgencyValue = "RiskLifeLibertyPhysicalSafety, DelayCauseUnreasonableHardship, RiskScheduleJurisdiction";
+
+        String previousAttendanceValue = "AnotherDisputeResolution";
+
+        String otherGroundsValue = "ApplicantBankruptApplicationForBankruptcyOrder, ApplicationMadeWithoutNotice, "
+            + "CannotAttendInPrisonOrOtherInstitution, ChildProspectivePartiesRule12, "
+            + "ApplicantContactedAuthorisedFamilyMediatorsNotAvailable, "
+            + "NoAuthorisedFamilyMediatorWithinFifteenMiles";
+
+        listOfAllMandatoryFields.addAll(asList(
+            new OcrDataField("MIAMExemptionsChecklist", exemptionsValue),
+            new OcrDataField("MIAMDomesticViolenceChecklist", domesticViolenceValue),
+            new OcrDataField("MIAMUrgencyChecklist", urgencyValue),
+            new OcrDataField("MIAMPreviousAttendanceChecklist", previousAttendanceValue),
+            new OcrDataField("MIAMOtherGroundsChecklist", otherGroundsValue)
+        ));
+
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(listOfAllMandatoryFields);
+
+        assertThat(validationResult.getStatus(), is(SUCCESS));
+        assertThat(validationResult.getWarnings(), is(emptyList()));
+        assertThat(validationResult.getErrors(), is(emptyList()));
+    }
+
+    @Test
+    public void shouldFailValidateNonMandatoryCommaSeparatedFieldContainingInvalidValues() {
+        String domesticViolenceValue = "ArrestedRelevantDomesticViolenceOffence, "
+            + "invalid, insert random here,"
+            + "UndertakingSection46Or63EFamilyLawActOrScotlandNorthernIrelandProtectiveInjunction";
+
+        String urgencyValue = "RiskLifeLibertyPhysicalSafety";
+
+        String previousAttendanceValue = "AnotherDisputeeResolutionn";
+
+        listOfAllMandatoryFields.addAll(asList(
+            new OcrDataField("MIAMDomesticViolenceChecklist", domesticViolenceValue),
+            new OcrDataField("MIAMUrgencyChecklist", urgencyValue),
+            new OcrDataField("MIAMPreviousAttendanceChecklist", previousAttendanceValue)
+        ));
+
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(listOfAllMandatoryFields);
+
+        assertThat(validationResult.getStatus(), is(WARNINGS));
+        assertThat(validationResult.getWarnings(), hasItems(
+            "MIAMDomesticViolenceChecklist contains a value that is not accepted.",
+            "MIAMPreviousAttendanceChecklist contains a value that is not accepted."
+        ));
+    }
+
+    @Test
+    public void shouldPassValidateNonMandatoryCommaSeparatedFieldContainingEmptyStringsAndStringsWithSpaces() {
+        String otherGroundsValue = "ApplicantBankruptApplicationForBankruptcyOrder,   ChildProspectivePartiesRule12,   ";
+
+        listOfAllMandatoryFields.add(
+            new OcrDataField("MIAMOtherGroundsChecklist", otherGroundsValue)
+        );
+
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(listOfAllMandatoryFields);
+
+        assertThat(validationResult.getStatus(), is(SUCCESS));
+        assertThat(validationResult.getWarnings(), is(emptyList()));
     }
 }

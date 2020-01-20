@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.helper;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -7,11 +8,15 @@ import uk.gov.hmcts.reform.bsp.common.error.FormFieldValidationException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 import static java.time.Month.FEBRUARY;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.rules.ExpectedException.none;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.getCommaSeparatedValuesFromOcrDataField;
 
 public class BulkScanHelperTest {
 
@@ -24,9 +29,9 @@ public class BulkScanHelperTest {
     public void shouldTransformDateWithRightLeapYearDate() {
         LocalDate date = BulkScanHelper.transformFormDateIntoLocalDate(DATE_FIELD_NAME, "29/02/2020");
 
-        assertThat(date.getDayOfMonth(), is(29));
-        assertThat(date.getMonth(), is(FEBRUARY));
-        assertThat(date.getYear(), is(2020));
+        assertThat(date.getDayOfMonth(), CoreMatchers.is(29));
+        assertThat(date.getMonth(), CoreMatchers.is(FEBRUARY));
+        assertThat(date.getYear(), CoreMatchers.is(2020));
     }
 
     @Test
@@ -35,5 +40,36 @@ public class BulkScanHelperTest {
         expectedException.expectMessage("DateFieldName must be a valid date");
 
         BulkScanHelper.transformFormDateIntoLocalDate(DATE_FIELD_NAME, "29/02/2019");
+    }
+
+    @Test
+    public void getCorrectListOfCommaSeparatedValuesFromOcrFieldsMap() {
+        List<String> convertedListOfValues =
+            getCommaSeparatedValuesFromOcrDataField("domesticViolence, urgency, previousMIAMattendance, other");
+
+        assertThat(convertedListOfValues, CoreMatchers.allOf(
+            hasSize(4),
+            CoreMatchers.equalTo(Arrays.asList("domesticViolence", "urgency", "previousMIAMattendance", "other")
+            )));
+    }
+
+    @Test
+    public void getEmptyListOfCommaSeparatedValuesFromEmptyString() {
+        List<String> convertedListOfValues =
+            getCommaSeparatedValuesFromOcrDataField("");
+
+        assertThat(convertedListOfValues, CoreMatchers.is(empty()));
+    }
+
+    @Test
+    public void getListOfCommaSeparatedValuesFromStringWithBlankSpaces() {
+        List<String> convertedListOfValues =
+            getCommaSeparatedValuesFromOcrDataField("    ,     , blah,   , string with spaces,  wat  ");
+
+        assertThat(convertedListOfValues, CoreMatchers.allOf(
+            hasSize(3),
+            CoreMatchers.equalTo(Arrays.asList("blah", "string with spaces", "wat")
+            )));
+
     }
 }
