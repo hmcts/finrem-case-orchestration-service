@@ -44,13 +44,7 @@ public class CaseOrchestrationSmokeTests {
     @Before
     public void setUp() {
         RestAssured.useRelaxedHTTPSValidation();
-        config = RestAssured.config()
-                .httpClient(HttpClientConfig.httpClientConfig()
-                        .setParam("http.connection.timeout", connectionTimeOut)
-                        .setParam("http.socket.timeout", socketTimeOut)
-                        .setParam("http.connection-manager.timeout", connectionManagerTimeOut));
-
-
+        config = RestAssured.config().httpClient(httpClientConfig());
     }
 
     @Test
@@ -64,9 +58,25 @@ public class CaseOrchestrationSmokeTests {
                 .statusCode(HttpStatus.OK.value());
     }
 
-    private  CallbackRequest getRequestFromFile(String fileName) throws IOException {
+    private CallbackRequest getRequestFromFile(String fileName) throws IOException {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(fileName)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
+    }
+
+    private HttpClientConfig httpClientConfig() {
+        HttpClientConfig httpClientConfig = HttpClientConfig.httpClientConfig();
+
+        if (connectionTimeOut >= 0) {
+            httpClientConfig.setParam("http.connection.timeout", connectionTimeOut);
+        }
+        if (socketTimeOut >= 0) {
+            httpClientConfig.setParam("http.socket.timeout", socketTimeOut);
+        }
+        if (connectionManagerTimeOut >= 0) {
+            httpClientConfig.setParam("http.connection-manager.timeout", connectionManagerTimeOut);
+        }
+
+        return httpClientConfig;
     }
 }

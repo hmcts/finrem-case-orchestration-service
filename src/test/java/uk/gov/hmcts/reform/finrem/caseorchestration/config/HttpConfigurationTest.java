@@ -21,8 +21,8 @@ public class HttpConfigurationTest {
 
     @Test
     public void shouldCreateHttpConfigFromAppProperties() {
-        assertThat(httpConfiguration.getReadTimeout(), is(60000));
-        assertThat(httpConfiguration.getRequestTimeout(), is(60000));
-        assertThat(httpConfiguration.getTimeout(), is(60000));
+        assertThat(httpConfiguration.getReadTimeout(), is(-1));
+        assertThat(httpConfiguration.getRequestTimeout(), is(-1));
+        assertThat(httpConfiguration.getTimeout(), is(-1));
     }
 }
