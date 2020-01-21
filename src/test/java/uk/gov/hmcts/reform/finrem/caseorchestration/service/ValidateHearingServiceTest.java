@@ -24,7 +24,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHeari
 
 public class ValidateHearingServiceTest {
 
-    private static final String error = "Issue Date , fast track decision or hearingDate is empty";
+    private static final String ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY =
+        "Issue Date, fast track decision or hearingDate is empty";
+
     private ValidateHearingService service = new ValidateHearingService();
 
     @Test
@@ -33,7 +35,7 @@ public class ValidateHearingServiceTest {
                 asList(pairOf(FAST_TRACK_DECISION, "Yes"), pairOf(HEARING_DATE, new Date()));
 
         List<String> errors = doTestErrors(pairs);
-        assertThat(errors, hasItem(error));
+        assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
     }
 
     @Test
@@ -42,7 +44,7 @@ public class ValidateHearingServiceTest {
                 asList(pairOf(ISSUE_DATE, new Date()), pairOf(HEARING_DATE, new Date()));
 
         List<String> errors = doTestErrors(pairs);
-        assertThat(errors, hasItem(error));
+        assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
     }
 
     @Test
@@ -51,7 +53,7 @@ public class ValidateHearingServiceTest {
                 asList(pairOf(ISSUE_DATE, new Date()), pairOf(FAST_TRACK_DECISION, "Yes"));
 
         List<String> errors = doTestErrors(pairs);
-        assertThat(errors, hasItem(error));
+        assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
     }
 
     @Test

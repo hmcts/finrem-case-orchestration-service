@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(SerenityRunner.class)
 public class ValidateHearingDatesTest extends IntegrationTestBase {
 
@@ -35,7 +34,7 @@ public class ValidateHearingDatesTest extends IntegrationTestBase {
     @Test
     public void verifyShouldThrowErrorWhenIssueDateAndHearingDateAreEmpty() {
 
-        assertEquals("Issue Date , fast track decision or hearingDate is empty",
+        assertEquals("Issue Date, fast track decision or hearingDate is empty",
                 getResponse(validateHearing, "pba-validate1.json",consentedDir).jsonPath().get("errors[0]"));
     }
 
@@ -77,6 +76,4 @@ public class ValidateHearingDatesTest extends IntegrationTestBase {
         return response;
 
     }
-
-
 }

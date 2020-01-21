@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
@@ -22,7 +23,7 @@ public class ValidateHearingService {
     public static final String DATE_BETWEEN_6_AND_10_WEEKS =
             "Date of the Fast Track hearing must be between 6 and 10 weeks.";
     public static final String DATE_BETWEEN_12_AND_16_WEEKS = "Date of the hearing must be between 12 and 16 weeks.";
-    public static final String MUST_FIELD_ERROR = "Issue Date , fast track decision or hearingDate is empty";
+    public static final String REQUIRED_FIELD_EMPTY_ERROR = "Issue Date, fast track decision or hearingDate is empty";
 
     public List<String> validateHearingErrors(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
@@ -30,13 +31,8 @@ public class ValidateHearingService {
         String hearingDate = Objects.toString(caseData.get(HEARING_DATE), "");
         String fastTrackDecision = Objects.toString(caseData.get(FAST_TRACK_DECISION), "");
 
-
-        if (StringUtils.isBlank(issueDate) || StringUtils.isBlank(fastTrackDecision)
-                || StringUtils.isBlank(hearingDate)) {
-            return  ImmutableList.of(MUST_FIELD_ERROR);
-        }
-
-        return ImmutableList.of();
+        return Stream.of(issueDate, hearingDate, fastTrackDecision).anyMatch(StringUtils::isBlank) ?
+            ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR) : ImmutableList.of();
     }
 
     public List<String> validateHearingWarnings(CaseDetails caseDetails) {

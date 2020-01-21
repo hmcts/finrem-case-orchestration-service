@@ -29,9 +29,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 public class ValidateHearingControllerTest extends BaseControllerTest {
 
     private static final String VALIDATE_HEARING_JSON = "/case-orchestration/validate-hearing";
-
-    @MockBean
-    private PBAValidationService pbaValidationService;
+    public static final String ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY =
+        "Issue Date, fast track decision or hearingDate is empty";
 
     @MockBean
     private ValidateHearingService validateHearingService;
@@ -52,7 +51,7 @@ public class ValidateHearingControllerTest extends BaseControllerTest {
     @Test
     public void shouldThrowErrorWhenIssueDateAndHearingDateAreEmpty() throws Exception {
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class)))
-                .thenReturn(ImmutableList.of("Issue Date , fast track decision or hearingDate is empty"));
+                .thenReturn(ImmutableList.of(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
 
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/pba-validate.json").toURI()));
@@ -63,7 +62,7 @@ public class ValidateHearingControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.errors[0]",
-                        Matchers.is("Issue Date , fast track decision or hearingDate is empty")));
+                        Matchers.is(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY)));
     }
 
     @Test

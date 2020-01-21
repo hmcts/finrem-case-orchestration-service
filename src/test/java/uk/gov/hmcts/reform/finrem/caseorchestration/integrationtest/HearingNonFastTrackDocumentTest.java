@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.ImmutableList;
+import com.google.common.io.Resources;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -22,9 +23,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -34,6 +33,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGener
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Date;
 
@@ -54,7 +54,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.DATE_BETWEEN_12_AND_16_WEEKS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.MUST_FIELD_ERROR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService.REQUIRED_FIELD_EMPTY_ERROR;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -67,6 +67,7 @@ public class HearingNonFastTrackDocumentTest {
 
     private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
     private static final String API_URL = "/case-orchestration/documents/hearing";
+    private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
 
     @Autowired
     protected ObjectMapper objectMapper;
@@ -80,12 +81,16 @@ public class HearingNonFastTrackDocumentTest {
     @ClassRule
     public static WireMockClassRule documentGeneratorService = new WireMockClassRule(4009);
 
-    protected static CallbackRequest request;
+    private static String requestJson;
+    protected CallbackRequest request;
 
     @BeforeClass
-    public static void startWiremock() {
+    public static void startWiremock() throws IOException {
         System.out.println("Wiremock start: " + new Date());
         documentGeneratorService.start();
+
+        requestJson = Resources.toString(HearingNonFastTrackDocumentTest.class.getResource(JSON_CONTENT_PATH), StandardCharsets.UTF_8);
+
         do {
             System.out.println("Wiremock is running: " + documentGeneratorService.isRunning());
             System.out.println(new Date());
@@ -94,15 +99,7 @@ public class HearingNonFastTrackDocumentTest {
 
     @Before
     public void setUp() throws IOException {
-        if (request == null) {
-            try (InputStream resourceAsStream = getClass().getResourceAsStream(jsonContent())) {
-                request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
-            }
-        }
-    }
-
-    private String jsonContent() {
-        return "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
+        request = objectMapper.readValue(requestJson, CallbackRequest.class);
     }
 
     @Test
@@ -151,7 +148,7 @@ public class HearingNonFastTrackDocumentTest {
         String body = mvcResult.getResponse().getContentAsString();
         System.out.println(String.format("Status: %d, body: %s", status, body));
         Assert.fail();
-        // .andExpect(status().isInternalServerError());
+        //  .andExpect(status().isInternalServerError());
     }
 
     private void doMissingMustFieldTest(String missingFieldKey) throws Exception {
@@ -178,7 +175,7 @@ public class HearingNonFastTrackDocumentTest {
     private String expectedErrorData() throws JsonProcessingException {
         return objectMapper.writeValueAsString(
                 AboutToStartOrSubmitCallbackResponse.builder()
-                        .errors(ImmutableList.of(MUST_FIELD_ERROR))
+                        .errors(ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR))
                         .build());
     }
 
