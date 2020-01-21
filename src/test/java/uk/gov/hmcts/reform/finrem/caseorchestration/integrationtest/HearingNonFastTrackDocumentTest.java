@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -118,10 +117,9 @@ public class HearingNonFastTrackDocumentTest {
         generateDocumentServiceSuccessStub(formGDocumentRequest());
 
         MvcResult mvcResult;
-
-        int retry = 5;
+        int requestsMade = 0;
         do {
-            if (retry < 5) {
+            if (requestsMade > 0) {
                 Thread.sleep(100);
             }
             mvcResult = webClient.perform(MockMvcRequestBuilders.post(API_URL)
@@ -130,8 +128,11 @@ public class HearingNonFastTrackDocumentTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
-        } while (--retry > 0 && mvcResult.getResponse().getStatus() == HttpStatus.INTERNAL_SERVER_ERROR.value());
-        System.out.println("Out on retry " + (retry + 1));
+        } while (++requestsMade < 5 && mvcResult.getResponse().getStatus() == HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+        if (requestsMade > 1) {
+            System.out.println("generateFormCAndFormGSuccess requests made: " + requestsMade);
+        }
 
         assertThat(mvcResult.getResponse().getStatus(), is(HttpStatus.OK.value()));
         assertThat(mvcResult.getResponse().getContentAsString(), is(expectedCaseData()));

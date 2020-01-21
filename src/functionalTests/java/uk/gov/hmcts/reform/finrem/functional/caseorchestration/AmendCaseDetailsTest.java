@@ -127,7 +127,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         }
     }
 
-
     @Test
     public void verifyAmendRemoveRespondantSolicitorDetails() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
@@ -144,8 +143,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         }
     }
 
-
-
     @Test
     public void verifyDeleteDecreeNisiWhenSolicitorChooseToDecreeAbsoluteForContested() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,contestedDir,
@@ -158,7 +155,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         }
 
     }
-
 
     @Test
     public void verifyDeleteDecreeAbsoluteWhenSolicitorChooseToDecreeNisiForContested() {
@@ -323,7 +319,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         }
     }
 
-
     @Test
     public void verifyShouldRemoveMiamExceptionsWhenApplicantAttendedMiamForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -361,7 +356,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                     + "in the result.");
         }
     }
-
 
     @Test
     public void verifyShouldUpdateMiamExceptionsWhenApplicantHasFamilyMediatorForContested() {
@@ -465,7 +459,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         }
     }
 
-
     @Test
     public void verifyShouldSetLatestDraftConsentOrderWhenACaseIsCreated() throws Exception {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
@@ -474,7 +467,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         assertThat(jsonPathEvaluator.get("latestConsentOrder.document_filename"), is("file1"));
         assertThat(jsonPathEvaluator.get("latestConsentOrder.document_url"), is("http://file1"));
     }
-
 
     @Test
     public void verifyshouldUpdateLatestDraftConsentOrderWhenACaseIsAmended() throws Exception {
@@ -487,7 +479,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     }
 
-
     @Test
     public void shouldReturnLatestAmendedConsentOrderWhenACaseIsAmendedByCaseWorker() throws Exception {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
@@ -498,7 +489,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 is("Notification for ABC - Contested.docx"));
         assertThat(jsonPathEvaluator.get("latestConsentOrder.document_url"),
                 is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838"));
-
     }
 
     @Test
