@@ -234,13 +234,12 @@ def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/*
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication']
 
 sonarqube {
-    println "echo sonarqube"
     properties {
-        property "sonar.exclusions", sonarExclusions.join(', ')
         property "sonar.projectKey", "finrem-case-orchestration"
+        property "sonar.exclusions", sonarExclusions.join(', ')
         property "sonar.dynamicAnalysis", "reuseReports"
         property "sonar.java.coveragePlugin", "jacoco"
-        property "sonar.jacoco.reportPaths", "${project.buildDir}/jacoco/test.exec"
+        property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
         property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
     }
 }
@@ -272,13 +271,9 @@ jacocoTestReport {
     executionData(test)
 
     reports {
-        xml {
-            enabled true
-        }
-
-        html {
-            enabled true
-        }
+        xml.enabled = true
+        csv.enabled = false
+        xml.destination file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
     }
 }
 
