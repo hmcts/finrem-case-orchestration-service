@@ -84,7 +84,7 @@ public class HearingNonFastTrackDocumentTest {
         do {
             System.out.println("Wiremock is running: " + documentGeneratorService.isRunning());
             System.out.println(new Date());
-        } while (!documentGeneratorService.isRunning())
+        } while (!documentGeneratorService.isRunning());
     }
 
     @Before
