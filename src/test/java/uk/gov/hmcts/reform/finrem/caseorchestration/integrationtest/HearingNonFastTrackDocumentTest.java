@@ -136,6 +136,8 @@ public class HearingNonFastTrackDocumentTest {
         generateDocumentServiceSuccessStub(formCDocumentRequest());
         generateDocumentServiceErrorStub(formGDocumentRequest());
 
+        System.out.println("Performing generateFormCAndFormGServiceError request");
+
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION, AUTH_TOKEN)
