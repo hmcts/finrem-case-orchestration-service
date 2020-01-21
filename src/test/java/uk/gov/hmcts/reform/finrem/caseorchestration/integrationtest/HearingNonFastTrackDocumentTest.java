@@ -131,7 +131,7 @@ public class HearingNonFastTrackDocumentTest {
                 .accept(MediaType.APPLICATION_JSON))
                 .andReturn();
         } while (--retry > 0 && mvcResult.getResponse().getStatus() == HttpStatus.INTERNAL_SERVER_ERROR.value());
-        System.out.println("Out on retry " + (retry+1));
+        System.out.println("Out on retry " + (retry + 1));
 
         assertThat(mvcResult.getResponse().getStatus(), is(HttpStatus.OK.value()));
         assertThat(mvcResult.getResponse().getContentAsString(), is(expectedCaseData()));
