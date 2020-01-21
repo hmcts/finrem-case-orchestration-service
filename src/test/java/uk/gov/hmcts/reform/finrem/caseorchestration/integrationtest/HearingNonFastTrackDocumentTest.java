@@ -5,10 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -22,7 +22,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -32,10 +31,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.Date;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -79,22 +76,16 @@ public class HearingNonFastTrackDocumentTest {
     protected DocumentConfiguration config;
 
     @ClassRule
-    public static WireMockClassRule documentGeneratorService = new WireMockClassRule(4009);
+    public static WireMockClassRule documentGeneratorServiceClass = new WireMockClassRule(4009);
+    @Rule
+    public WireMockClassRule documentGeneratorService = documentGeneratorServiceClass;
 
     private static String requestJson;
     protected CallbackRequest request;
 
     @BeforeClass
-    public static void startWiremock() throws IOException {
-        System.out.println("Wiremock start: " + new Date());
-        documentGeneratorService.start();
-
+    public static void loadJsonString() throws IOException {
         requestJson = Resources.toString(HearingNonFastTrackDocumentTest.class.getResource(JSON_CONTENT_PATH), StandardCharsets.UTF_8);
-
-        do {
-            System.out.println("Wiremock is running: " + documentGeneratorService.isRunning());
-            System.out.println(new Date());
-        } while (!documentGeneratorService.isRunning());
     }
 
     @Before
