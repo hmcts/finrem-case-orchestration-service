@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -22,6 +23,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -39,6 +41,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
@@ -113,13 +117,24 @@ public class HearingNonFastTrackDocumentTest {
         generateDocumentServiceSuccessStub(formCDocumentRequest());
         generateDocumentServiceSuccessStub(formGDocumentRequest());
 
-        webClient.perform(MockMvcRequestBuilders.post(API_URL)
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(content().json(expectedCaseData(), true));
+        MvcResult mvcResult;
+
+        int retry = 5;
+        do {
+            if (retry < 5) {
+                Thread.sleep(100);
+            }
+            mvcResult = webClient.perform(MockMvcRequestBuilders.post(API_URL)
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andReturn();
+        } while (--retry > 0 && mvcResult.getResponse().getStatus() == HttpStatus.INTERNAL_SERVER_ERROR.value());
+        System.out.println("Out on retry " + (retry+1));
+
+        assertThat(mvcResult.getResponse().getStatus(), is(HttpStatus.OK.value()));
+        assertThat(mvcResult.getResponse().getContentAsString(), is(expectedCaseData()));
     }
 
     @Test
