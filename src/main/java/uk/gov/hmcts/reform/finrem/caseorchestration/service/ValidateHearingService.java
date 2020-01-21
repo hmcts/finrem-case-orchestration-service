@@ -31,8 +31,8 @@ public class ValidateHearingService {
         String hearingDate = Objects.toString(caseData.get(HEARING_DATE), "");
         String fastTrackDecision = Objects.toString(caseData.get(FAST_TRACK_DECISION), "");
 
-        return Stream.of(issueDate, hearingDate, fastTrackDecision).anyMatch(StringUtils::isBlank) ?
-            ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR) : ImmutableList.of();
+        return Stream.of(issueDate, hearingDate, fastTrackDecision).anyMatch(StringUtils::isBlank)
+            ? ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR) : ImmutableList.of();
     }
 
     public List<String> validateHearingWarnings(CaseDetails caseDetails) {
