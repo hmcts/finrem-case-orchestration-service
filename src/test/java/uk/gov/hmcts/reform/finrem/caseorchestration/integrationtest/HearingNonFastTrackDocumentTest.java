@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.ImmutableList;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -20,6 +21,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -138,13 +140,17 @@ public class HearingNonFastTrackDocumentTest {
 
         System.out.println("Performing generateFormCAndFormGServiceError request");
 
-        webClient.perform(MockMvcRequestBuilders.post(API_URL)
+        MvcResult mvcResult = webClient.perform(MockMvcRequestBuilders.post(API_URL)
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isInternalServerError());
+            .andReturn();
+        int status = mvcResult.getResponse().getStatus();
+        String body = mvcResult.getResponse().getContentAsString();
+        System.out.println(String.format("Status: %d, body: %s", status, body));
+        Assert.fail();
+//                .andExpect(status().isInternalServerError());
     }
 
     private void doMissingMustFieldTest(String missingFieldKey) throws Exception {
