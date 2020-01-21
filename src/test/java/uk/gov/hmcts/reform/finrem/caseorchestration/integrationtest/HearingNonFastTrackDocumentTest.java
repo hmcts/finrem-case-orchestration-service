@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGener
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
+import java.util.Date;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -80,7 +81,10 @@ public class HearingNonFastTrackDocumentTest {
     @BeforeClass
     public static void startWiremock() {
         documentGeneratorService.start();
-        System.out.println("Wiremock is running: " + documentGeneratorService.isRunning());
+        do {
+            System.out.println("Wiremock is running: " + documentGeneratorService.isRunning());
+            System.out.println(new Date());
+        } while (!documentGeneratorService.isRunning())
     }
 
     @Before
