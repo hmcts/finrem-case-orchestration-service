@@ -123,12 +123,12 @@ public class HearingNonFastTrackDocumentTest {
         generateDocumentServiceSuccessStub(formGDocumentRequest());
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().json(expectedCaseData(), true));
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().json(expectedCaseData(), true));
     }
 
     @Test
@@ -136,19 +136,12 @@ public class HearingNonFastTrackDocumentTest {
         generateDocumentServiceSuccessStub(formCDocumentRequest());
         generateDocumentServiceErrorStub(formGDocumentRequest());
 
-        System.out.println("Performing generateFormCAndFormGServiceError request");
-
-        MvcResult mvcResult = webClient.perform(MockMvcRequestBuilders.post(API_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-            .andReturn();
-        int status = mvcResult.getResponse().getStatus();
-        String body = mvcResult.getResponse().getContentAsString();
-        System.out.println(String.format("Status: %d, body: %s", status, body));
-        Assert.fail();
-        //  .andExpect(status().isInternalServerError());
+        webClient.perform(MockMvcRequestBuilders.post(API_URL)
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isInternalServerError());
     }
 
     private void doMissingMustFieldTest(String missingFieldKey) throws Exception {
@@ -156,12 +149,12 @@ public class HearingNonFastTrackDocumentTest {
         caseDetails.getData().put(missingFieldKey, null);
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().json(expectedErrorData(), true));
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().json(expectedErrorData(), true));
     }
 
     private DocumentGenerationRequest formGDocumentRequest() {
@@ -174,11 +167,10 @@ public class HearingNonFastTrackDocumentTest {
 
     private String expectedErrorData() throws JsonProcessingException {
         return objectMapper.writeValueAsString(
-                AboutToStartOrSubmitCallbackResponse.builder()
-                        .errors(ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR))
-                        .build());
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR))
+                .build());
     }
-
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
@@ -186,42 +178,40 @@ public class HearingNonFastTrackDocumentTest {
         caseDetails.getData().put("formG", caseDocument());
 
         return objectMapper.writeValueAsString(
-                AboutToStartOrSubmitCallbackResponse.builder()
-                        .data(caseDetails.getData())
-                        .warnings(ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS))
-                        .build());
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDetails.getData())
+                .warnings(ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS))
+                .build());
     }
 
     private DocumentGenerationRequest documentRequest(String template, String fileName) {
         return DocumentGenerationRequest.builder()
-                .template(template)
-                .fileName(fileName)
-                .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
-                .build();
+            .template(template)
+            .fileName(fileName)
+            .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+            .build();
     }
 
-    private void generateDocumentServiceSuccessStub(DocumentGenerationRequest documentRequest)
-            throws JsonProcessingException {
+    private void generateDocumentServiceSuccessStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-                .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
-                        true, true))
-                .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
-                .withHeader(CONTENT_TYPE, equalTo("application/json"))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
-                        .withBody(objectMapper.writeValueAsString(document()))));
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
+                true, true))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                .withBody(objectMapper.writeValueAsString(document()))));
     }
 
-    private void generateDocumentServiceErrorStub(DocumentGenerationRequest documentRequest)
-            throws JsonProcessingException {
+    private void generateDocumentServiceErrorStub(DocumentGenerationRequest documentRequest) throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-                .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
-                        true, true))
-                .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
-                .withHeader(CONTENT_TYPE, equalTo("application/json"))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)));
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest),
+                true, true))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)));
     }
 }
