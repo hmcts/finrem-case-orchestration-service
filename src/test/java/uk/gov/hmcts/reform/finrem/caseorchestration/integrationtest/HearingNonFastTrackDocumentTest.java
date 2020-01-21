@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import com.google.common.collect.ImmutableList;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -76,11 +77,13 @@ public class HearingNonFastTrackDocumentTest {
 
     protected CallbackRequest request;
 
-    @Before
+    @BeforeClass
     public void setUp() throws IOException {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(jsonContent())) {
             request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
+        documentGeneratorService.start();
+        System.out.println("Wiremock is running: " + documentGeneratorService.isRunning());
     }
 
     private String jsonContent() {
