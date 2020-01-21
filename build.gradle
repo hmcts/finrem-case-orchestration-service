@@ -227,22 +227,6 @@ dependencies {
     contractImplementation sourceSets.main.runtimeClasspath
     contractImplementation sourceSets.test.runtimeClasspath
 }
-def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/error/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication']
-
-sonarqube {
-    properties {
-        property "sonar.projectKey", "finrem-case-orchestration"
-        property "sonar.exclusions", sonarExclusions.join(', ')
-        property "sonar.dynamicAnalysis", "reuseReports"
-        property "sonar.java.coveragePlugin", "jacoco"
-        property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
-        property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
-    }
-}
 
 // https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
 dependencyCheck {
@@ -284,6 +268,25 @@ jacocoTestCoverageVerification {
                 minimum = 0.8
             }
         }
+    }
+}
+
+project.tasks['sonarqube'].dependsOn jacocoTestReport
+
+def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/**',
+                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
+                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/error/**',
+                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
+                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication']
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "finrem-case-orchestration"
+        property "sonar.exclusions", sonarExclusions.join(', ')
+        property "sonar.dynamicAnalysis", "reuseReports"
+        property "sonar.java.coveragePlugin", "jacoco"
+        property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
+        property "sonar.dependencyCheck.reportPath", "${project.buildDir}/reports/dependency-check-report.xml"
     }
 }
 
