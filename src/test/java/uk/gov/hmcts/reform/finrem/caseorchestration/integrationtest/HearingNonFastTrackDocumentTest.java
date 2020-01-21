@@ -75,15 +75,21 @@ public class HearingNonFastTrackDocumentTest {
     @ClassRule
     public static WireMockClassRule documentGeneratorService = new WireMockClassRule(4009);
 
-    protected CallbackRequest request;
+    protected static CallbackRequest request;
 
     @BeforeClass
-    public void setUp() throws IOException {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(jsonContent())) {
-            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
-        }
+    public static void startWiremock() {
         documentGeneratorService.start();
         System.out.println("Wiremock is running: " + documentGeneratorService.isRunning());
+    }
+
+    @Before
+    public void setUp() throws IOException {
+        if (request == null) {
+            try (InputStream resourceAsStream = getClass().getResourceAsStream(jsonContent())) {
+                request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+            }
+        }
     }
 
     private String jsonContent() {
