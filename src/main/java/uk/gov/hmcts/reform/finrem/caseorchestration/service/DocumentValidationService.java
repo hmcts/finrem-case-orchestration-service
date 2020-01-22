@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -19,9 +19,9 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 
-
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class DocumentValidationService {
     private static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
     private static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
@@ -30,10 +30,8 @@ public class DocumentValidationService {
     private static final String FR_SOLICITOR_CREATE = "FR_SolicitorCreate";
     private static final String FR_AMEND_APPLICATION_DETAILS = "FR_amendApplicationDetails";
 
-    @Autowired
-    private DocumentClient documentClient;
-    @Autowired
-    private DocumentHelper documentHelper;
+    private final DocumentClient documentClient;
+    private final DocumentHelper documentHelper;
 
     private static boolean hasErrors(DocumentValidationResponse documentValidationResponse) {
         return nonNull(documentValidationResponse.getErrors());

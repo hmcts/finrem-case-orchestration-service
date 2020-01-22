@@ -1,28 +1,25 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getLastMapValue;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getValue;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BulkPrintDocumentTranslator {
 
     public static final String DOCUMENT_FILENAME = "document_filename";
     private static final String DOCUMENT_URL = "document_binary_url";
     private static final String VALUE = "value";
-
-    private BulkPrintDocumentTranslator() {
-
-    }
 
     public static List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
         log.info("Extracting {} from case data  for bulk print. ", "approvedOrderCollection");
@@ -60,19 +57,17 @@ public final class BulkPrintDocumentTranslator {
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
 
-        Optional<Object> documentLinkObj = getValue.apply(data, documentName);
+        Object documentLinkObj = data.get(documentName);
 
-        if (documentLinkObj.isPresent()) {
-            Map<String, Object> documentLink = (Map) documentLinkObj.get();
-            bulkPrintDocuments.add(
-                BulkPrintDocument.builder()
-                    .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
-                    .build());
+        if (documentLinkObj != null) {
+            Map<String, Object> documentLink = (Map) documentLinkObj;
+            bulkPrintDocuments.add(BulkPrintDocument.builder()
+                .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
+                .build());
             log.info("{} for bulk print {}", documentName, documentLink.get(DOCUMENT_FILENAME));
         }
         return bulkPrintDocuments;
     }
-
 
     private static List<BulkPrintDocument> convertBulkPrintDocument(Map<String, Object> data, String collectionName,
                                                                     String documentName) {
@@ -84,21 +79,18 @@ public final class BulkPrintDocumentTranslator {
             .orElse(new ArrayList<>());
 
         for (Map<String, Object> document : documentList) {
-
             Map<String, Object> value = ((Map) document.get(VALUE));
 
-            Optional<Object> documentLinkObj = getValue.apply(value, documentName);
+            Object documentLinkObj = value.get(documentName);
 
-            if (documentLinkObj.isPresent()) {
-                Map<String, Object> documentLink = (Map) documentLinkObj.get();
-                bulkPrintDocuments.add(
-                    BulkPrintDocument.builder()
-                        .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
-                        .build());
+            if (documentLinkObj != null) {
+                Map<String, Object> documentLink = (Map) documentLinkObj;
+                bulkPrintDocuments.add(BulkPrintDocument.builder()
+                    .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
+                    .build());
                 log.info("{} file for bulk print {}", collectionName, documentLink.get(DOCUMENT_FILENAME));
             }
         }
         return bulkPrintDocuments;
     }
-
 }
