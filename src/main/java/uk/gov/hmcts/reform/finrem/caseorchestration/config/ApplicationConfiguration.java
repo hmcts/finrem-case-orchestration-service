@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import lombok.RequiredArgsConstructor;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -13,10 +14,10 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
+@RequiredArgsConstructor
 public class ApplicationConfiguration {
 
-    @Autowired
-    private HttpConfiguration httpConfiguration;
+    private final HttpConfiguration httpConfiguration;
 
     @Bean
     public RestTemplate restTemplate() {
@@ -45,5 +46,4 @@ public class ApplicationConfiguration {
                 .setDefaultRequestConfig(config)
                 .build();
     }
-
 }

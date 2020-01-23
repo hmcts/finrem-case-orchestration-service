@@ -28,7 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getValue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -83,16 +83,10 @@ public class BulkPrintController implements BaseController {
                 coverSheetRes,
                 letterIdRes);
 
-        String solicitorAgreeToReceiveEmails =  (String) getValue
-            .apply(callback.getCaseDetails().getData(), "solicitorAgreeToReceiveEmails").orElse("");
+        String solicitorAgreeToReceiveEmails = nullToEmpty(callback.getCaseDetails().getData().get("solicitorAgreeToReceiveEmails"));
+        String applicantRepresented = nullToEmpty(callback.getCaseDetails().getData().get("applicantRepresented"));
 
-        String applicantRepresented = (String) getValue
-            .apply(callback.getCaseDetails().getData(), "applicantRepresented").orElse("");
-
-        log.info(
-                "Bulk print. solicitorAgreeToReceiveEmails: {}, applicantRepresented : {}",
-                solicitorAgreeToReceiveEmails,
-                applicantRepresented);
+        log.info("Bulk print. solicitorAgreeToReceiveEmails: {}, applicantRepresented : {}", solicitorAgreeToReceiveEmails, applicantRepresented);
 
         if ("No".equalsIgnoreCase(applicantRepresented) || "No".equalsIgnoreCase(solicitorAgreeToReceiveEmails)) {
             CaseDocument coverSheetApp = coverSheetService
