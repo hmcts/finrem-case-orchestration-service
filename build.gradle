@@ -40,8 +40,6 @@ apply plugin: 'org.sonarqube'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'net.serenity-bdd.aggregator'
 
-
-
 group = 'uk.gov.hmcts.reform.finrem'
 version = '0.0.1'
 mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
@@ -117,13 +115,14 @@ configurations {
 }
 
 def versions = [
-        bspCommonLib            : '0.0.13',
+        bspCommonLib            : '0.0.15',
         ccdClient               : '4.6.4',
         commonsBeanUtils        : '1.9.4',
         commonsIo               : '2.5',
         commonsLang3            : '3.9',
         gradlePitest            : '1.4.5',
         jsonAssert              : '1.2.3',
+        jsonPathAssert          : '2.2.0',
         junit                   : '4.12',
         lombokVersion           : '1.16.18',
         mockito                 : '2.8.9',
@@ -156,7 +155,6 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation group: 'com.jayway.jsonpath', name:'json-path-assert', version: versions.jsonPathAssert
     implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
     implementation group: 'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
     implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
@@ -197,6 +195,7 @@ dependencies {
     testSmokeImplementation sourceSets.main.runtimeClasspath
     testSmokeImplementation sourceSets.test.runtimeClasspath
 
+    functionalImplementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
     functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
     functionalImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
     functionalImplementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
@@ -214,6 +213,7 @@ dependencies {
     functionalImplementation group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
     functionalImplementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
     functionalImplementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
+    functionalImplementation group: 'uk.gov.hmcts.reform', name: 'bsp-common-lib', version: versions.bspCommonLib
 
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok

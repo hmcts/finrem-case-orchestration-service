@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformations;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
@@ -42,11 +42,6 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         commaSeparatedEntryTransformer("MIAMOtherGroundsChecklist", miamOtherGroundsChecklistToCcdFieldNames, ocrDataFields, modifiedMap);
 
         return modifiedMap;
-    }
-
-    @Override
-    Map<String, Object> runPostMappingModification(Map<String, Object> transformedCaseData) {
-        return transformedCaseData;
     }
 
     private Optional<String> getValueFromOcrDataFields(String fieldName, List<OcrDataField> ocrDataFields) {

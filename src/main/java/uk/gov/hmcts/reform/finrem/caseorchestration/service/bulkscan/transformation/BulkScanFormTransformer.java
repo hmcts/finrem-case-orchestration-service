@@ -1,9 +1,10 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformations;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,8 +41,11 @@ public abstract class BulkScanFormTransformer {
 
     abstract Map<String, String> getOcrToCCDMapping();
 
-    abstract Map<String, Object> runFormSpecificTransformation(List<OcrDataField> ocrDataFields);
+    protected Map<String, Object> runFormSpecificTransformation(List<OcrDataField> ocrDataFields) {
+        return Collections.emptyMap();
+    }
 
-    abstract Map<String, Object> runPostMappingModification(Map<String, Object> ccdTransformedFields);
-
+    protected Map<String, Object> runPostMappingModification(Map<String, Object> ccdTransformedFields) {
+        return ccdTransformedFields;
+    }
 }

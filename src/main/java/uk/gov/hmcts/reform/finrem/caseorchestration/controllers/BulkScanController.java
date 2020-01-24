@@ -17,19 +17,16 @@ import uk.gov.hmcts.reform.bsp.common.config.BulkScanEndpoints;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseCreationDetails;
-import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.SuccessfulTransformationResponse;
-import uk.gov.hmcts.reform.bsp.common.model.update.in.BulkScanCaseUpdateRequest;
-import uk.gov.hmcts.reform.bsp.common.model.update.output.SuccessfulUpdateResponse;
+import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataValidationRequest;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResponse;
-import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.event.bulkscan.BulkScanEvents;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 
 import javax.validation.Valid;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -64,7 +61,7 @@ public class BulkScanController {
     })
     public ResponseEntity<OcrValidationResponse> validateOcrData(
         @RequestHeader(name = SERVICE_AUTHORISATION_HEADER) String s2sAuthToken,
-        @PathVariable(name = "form-type", required = false) String formType,
+        @PathVariable(name = "form-type") String formType,
         @Valid @RequestBody OcrDataValidationRequest request
     ) {
         log.info("Validating form {} for bulk scanning operation", formType);
@@ -74,9 +71,7 @@ public class BulkScanController {
         ResponseEntity<OcrValidationResponse> response;
 
         try {
-            OcrValidationResult ocrValidationResult = bulkScanService
-                .validateBulkScanForm(formType, request.getOcrDataFields());
-            OcrValidationResponse ocrValidationResponse = new OcrValidationResponse(ocrValidationResult);
+            OcrValidationResponse ocrValidationResponse = validateExceptionRecord(formType, request.getOcrDataFields());
             response = ok().body(ocrValidationResponse);
         } catch (UnsupportedFormTypeException unsupportedFormTypeException) {
             log.error(unsupportedFormTypeException.getMessage(), unsupportedFormTypeException);
@@ -111,14 +106,21 @@ public class BulkScanController {
 
         ResponseEntity<SuccessfulTransformationResponse> controllerResponse;
         try {
+            OcrValidationResponse ocrValidationResponse = validateExceptionRecord(
+                exceptionRecord.getFormType(), exceptionRecord.getOcrDataFields()
+            );
+
             Map<String, Object> transformedCaseData = bulkScanService.transformBulkScanForm(exceptionRecord);
 
             SuccessfulTransformationResponse callbackResponse = SuccessfulTransformationResponse.builder()
+                .warnings(ocrValidationResponse.getWarnings())
                 .caseCreationDetails(
                     new CaseCreationDetails(
                         CASE_TYPE_ID_FR,
                         BulkScanEvents.CREATE.getEventName(),
-                        transformedCaseData))
+                        transformedCaseData
+                    )
+                )
                 .build();
 
             controllerResponse = ok(callbackResponse);
@@ -129,39 +131,7 @@ public class BulkScanController {
         return controllerResponse;
     }
 
-    @PostMapping(
-        path = BulkScanEndpoints.UPDATE,
-        consumes = APPLICATION_JSON,
-        produces = APPLICATION_JSON
-    )
-    @ApiOperation(value = "API to update Financial Remedy case data by bulk scan")
-    @ApiResponses({
-        @ApiResponse(code = 200, response = SuccessfulUpdateResponse.class,
-            message = "Update of case data has been successful"
-        ),
-        @ApiResponse(code = 400, message = "Request failed due to malformed syntax (and only for that reason). "
-            + "This response results in a general error presented to the caseworker in CCD"),
-        @ApiResponse(code = 401, message = "Provided S2S token is missing or invalid"),
-        @ApiResponse(code = 403, message = "Calling service is not authorised to use the endpoint"),
-        @ApiResponse(code = 422, message = "Exception record is well-formed, but contains invalid data.")
-    })
-    public ResponseEntity<SuccessfulUpdateResponse> updateCase(
-        @RequestHeader(name = SERVICE_AUTHORISATION_HEADER) String s2sAuthToken,
-        @Valid @RequestBody BulkScanCaseUpdateRequest request
-    ) {
-        log.info("Updates existing case based on exception record");
-
-        authService.assertIsServiceAllowedToUpdate(s2sAuthToken);
-
-        SuccessfulUpdateResponse callbackResponse = SuccessfulUpdateResponse.builder()
-            .caseUpdateDetails(
-                CaseUpdateDetails
-                    .builder()
-                    .caseTypeId(CASE_TYPE_ID_FR)
-                    .caseData(request.getCaseData())
-                    .build())
-            .warnings(Collections.emptyList())
-            .build();
-        return ResponseEntity.ok(callbackResponse);
+    private OcrValidationResponse validateExceptionRecord(String formType, List<OcrDataField> ocrDataFields) {
+        return new OcrValidationResponse(bulkScanService.validateBulkScanForm(formType, ocrDataFields));
     }
 }
