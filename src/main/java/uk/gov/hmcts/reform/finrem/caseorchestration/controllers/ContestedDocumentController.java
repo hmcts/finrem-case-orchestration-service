@@ -35,7 +35,7 @@ public class ContestedDocumentController implements BaseController {
             produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Mini Form A generation. Serves as a callback from CCD")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
+            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is "
                     + "attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
@@ -47,6 +47,7 @@ public class ContestedDocumentController implements BaseController {
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         CaseDocument document = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }

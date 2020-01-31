@@ -36,7 +36,7 @@ public class HearingDocumentController implements BaseController {
             produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
+            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is "
                     + "attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
@@ -53,8 +53,8 @@ public class HearingDocumentController implements BaseController {
         List<String> errors = validateHearingService.validateHearingErrors(callback.getCaseDetails());
         if (!errors.isEmpty()) {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors(errors)
-                    .build());
+                .errors(errors)
+                .build());
         }
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();

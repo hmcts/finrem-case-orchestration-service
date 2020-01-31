@@ -41,6 +41,7 @@ public class CaseDataController implements BaseController {
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -53,6 +54,7 @@ public class CaseDataController implements BaseController {
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -67,6 +69,7 @@ public class CaseDataController implements BaseController {
         log.info("Setting default values for contested journey.");
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
         if (caseData.get(source) != null && (caseData.get(source) instanceof Collection)) {
             if (caseData.get(destination) == null || (caseData.get(destination) instanceof Collection)) {
                 final List destinationList = new ArrayList();
@@ -77,7 +80,6 @@ public class CaseDataController implements BaseController {
                 caseData.put(destination, destinationList);
                 caseData.put(source, null);
             }
-
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());

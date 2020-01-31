@@ -33,14 +33,13 @@ public class UpdateConsentedCaseController implements BaseController {
     private static final String DIVORCE_UPLOAD_EVIDENCE_1 = "divorceUploadEvidence1";
     private static final String DIVORCE_DECREE_NISI_DATE = "divorceDecreeNisiDate";
 
-
     @Autowired
     private ConsentOrderService consentOrderService;
 
     @PostMapping(path = "/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Handles update Case details and cleans up the data fields based on the options choosen")
+    @ApiOperation(value = "Handles Update Case details and cleans up the data fields based on the options chosen")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is "
             + "attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request"),
@@ -59,6 +58,7 @@ public class UpdateConsentedCaseController implements BaseController {
         updateD81Details(caseData);
         updateApplicantOrSolicitorContactDetails(caseData);
         updateLatestConsentOrder(ccdRequest);
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -139,7 +139,6 @@ public class UpdateConsentedCaseController implements BaseController {
         caseData.put("natureOfApplication3b", null);
     }
 
-
     private void updateApplicantOrSolicitorContactDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("applicantRepresented"), "No")) {
             removeApplicanttSolicitorAddress(caseData);
@@ -163,7 +162,6 @@ public class UpdateConsentedCaseController implements BaseController {
         caseData.put("applicantAddress", null);
         caseData.put("applicantPhone", null);
         caseData.put("applicantEmail", null);
-
     }
 
     private boolean equalsTo(String fieldData, String value) {
@@ -173,5 +171,4 @@ public class UpdateConsentedCaseController implements BaseController {
     private boolean hasNotSelected(List<String> list, String option) {
         return nonNull(list) && !list.contains(option);
     }
-
 }

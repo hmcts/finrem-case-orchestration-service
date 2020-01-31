@@ -48,7 +48,7 @@ public class ConsentOrderApprovedController implements BaseController {
             produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
+            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is "
                     + "attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
@@ -75,9 +75,9 @@ public class ConsentOrderApprovedController implements BaseController {
             log.info("letter= {}, consentOrderAnnexStamped = {}", letter, consentOrderAnnexStamped);
 
             ApprovedOrder approvedOrder = ApprovedOrder.builder()
-                    .orderLetter(letter)
-                    .consentOrder(consentOrderAnnexStamped)
-                    .build();
+                .orderLetter(letter)
+                .consentOrder(consentOrderAnnexStamped)
+                .build();
 
             if (!isEmpty(pensionDocs)) {
                 List<PensionCollectionData> stampedPensionDocs = service.stampPensionDocuments(pensionDocs, authToken);
@@ -95,11 +95,11 @@ public class ConsentOrderApprovedController implements BaseController {
         }
 
         return ResponseEntity.ok(
-                AboutToStartOrSubmitCallbackResponse.builder()
-                        .data(caseData)
-                        .errors(ImmutableList.of())
-                        .warnings(ImmutableList.of())
-                        .build());
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseData)
+                .errors(ImmutableList.of())
+                .warnings(ImmutableList.of())
+                .build());
     }
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {

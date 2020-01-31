@@ -41,7 +41,7 @@ public class DraftOnlineDocumentController {
             produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Mini Form A generation. Serves as a callback from CCD")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
+            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is "
                     + "attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
@@ -53,6 +53,7 @@ public class DraftOnlineDocumentController {
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, callback.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
+
         if (!idamService.isUserRoleAdmin(authorisationToken)) {
             log.info("other users.");
             caseData.put(APPLICANT_REPRESENTED, YES);

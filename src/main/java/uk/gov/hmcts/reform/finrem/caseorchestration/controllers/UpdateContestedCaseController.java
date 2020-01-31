@@ -44,7 +44,7 @@ public class UpdateContestedCaseController implements BaseController {
     @ApiOperation(value = "Handles update Contested Case details and cleans up the data fields"
         + " based on the options choosen")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is "
             + "attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request"),
@@ -55,6 +55,7 @@ public class UpdateContestedCaseController implements BaseController {
 
         log.info("Received request for contested - updateCase ");
         validateCaseData(ccdRequest);
+
         Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
         updateDivorceDetailsForContestedCase(caseData);
         updateContestedRespondentDetails(caseData);
@@ -68,6 +69,7 @@ public class UpdateContestedCaseController implements BaseController {
         CaseDocument document = onlineFormDocumentService.generateDraftContestedMiniFormA(authToken,
             ccdRequest.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -239,7 +241,6 @@ public class UpdateContestedCaseController implements BaseController {
         caseData.put("propertyAdjutmentOrderDetail", null);
     }
 
-
     private void updateDivorceDetailsForContestedCase(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get(DIVORCE_STAGE_REACHED), "Decree Nisi")) {
             // remove Decree Absolute details
@@ -261,7 +262,6 @@ public class UpdateContestedCaseController implements BaseController {
         }
     }
 
-
     private void removeRespondentSolicitorAddress(Map<String, Object> caseData) {
         caseData.put("rSolicitorName", null);
         caseData.put("rSolicitorFirm", null);
@@ -271,7 +271,6 @@ public class UpdateContestedCaseController implements BaseController {
         caseData.put("rSolicitorEmail", null);
         caseData.put("rSolicitorDXnumber", null);
     }
-
 
     private void updateContestedRespondentDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("respondentRepresented"), "No")) {
@@ -287,7 +286,6 @@ public class UpdateContestedCaseController implements BaseController {
         caseData.put("respondentEmail", null);
     }
 
-
     private boolean equalsTo(String fieldData, String value) {
         return nonNull(fieldData) && value.equalsIgnoreCase(fieldData.trim());
     }
@@ -295,5 +293,4 @@ public class UpdateContestedCaseController implements BaseController {
     private boolean hasNotSelected(List<String> list, String option) {
         return nonNull(list) && !list.contains(option);
     }
-
 }

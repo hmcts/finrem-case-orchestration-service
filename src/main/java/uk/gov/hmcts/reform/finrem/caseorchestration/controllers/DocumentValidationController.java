@@ -38,7 +38,7 @@ public class DocumentValidationController implements BaseController {
             produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Checks the file type and returns error.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully.",
+            @ApiResponse(code = 200, message = "Callback was processed successfully.",
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
@@ -50,6 +50,7 @@ public class DocumentValidationController implements BaseController {
         log.info("Received request for checkUploadedFileType. Auth token: {}, Case request : {}",
                 authorisationToken, callbackRequest);
         validateCaseData(callbackRequest);
+
         return ResponseEntity.ok(response(callbackRequest, field, authorisationToken));
     }
 
@@ -59,8 +60,10 @@ public class DocumentValidationController implements BaseController {
         AboutToStartOrSubmitCallbackResponseBuilder builder = builder();
         if (nonNull(caseData.get(field))) {
             DocumentValidationResponse response = service.validateDocument(callbackRequest, field, authorisationToken);
+
             return builder.errors(response.getErrors()).build();
         }
+
         return builder().build();
     }
 }

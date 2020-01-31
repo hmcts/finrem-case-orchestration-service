@@ -46,18 +46,7 @@ public class FunctionalTestUtils {
     private String microservice;
     @Autowired
     private IdamUtils idamUtils;
-    private String token;
     private JsonPath jsonPathEvaluator;
-
-    public String getJsonFromFile(String fileName) {
-        try {
-            File file = ResourceUtils.getFile(this.getClass().getResource("/json/" + fileName));
-            return new String(Files.readAllBytes(file.toPath()));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     public String getJsonFromFile(String fileName, String directory) {
         try {
@@ -80,12 +69,7 @@ public class FunctionalTestUtils {
         return Headers.headers(
                 new Header("Authorization", "Bearer "
                         + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
-                //new Header("Authorization", "Bearer " + idamUtils.getClientAuthToken()),
                 new Header("Content-Type", ContentType.JSON.toString()));
-    }
-
-    public String getAuthoToken() {
-        return idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword);
     }
 
     public String getS2SToken(String callerMicroservice) {
@@ -96,11 +80,6 @@ public class FunctionalTestUtils {
         return Headers.headers(
                 new Header("Authorization", "Bearer "
                         + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)));
-    }
-
-    public Headers getNewHeaders() {
-        return Headers.headers(
-                new Header("Content-Type", "application/json"));
     }
 
     public String downloadPdfAndParseToString(String documentUrl) {
@@ -117,7 +96,7 @@ public class FunctionalTestUtils {
         PDDocument pdDoc = null;
         COSDocument cosDoc = null;
         PDFTextStripper pdfStripper;
-        String parsedText = "";
+        String parsedText;
 
         try {
             parser = new PDFParser(inputStream);
@@ -128,7 +107,6 @@ public class FunctionalTestUtils {
             parsedText = pdfStripper.getText(pdDoc);
         } catch (Throwable t) {
             t.printStackTrace();
-
 
             try {
                 if (cosDoc != null) {
@@ -144,7 +122,6 @@ public class FunctionalTestUtils {
 
             }
             throw new Error(t);
-
         }
 
         return parsedText;

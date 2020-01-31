@@ -36,8 +36,8 @@ public class ConsentOrderController implements BaseController {
 
     @PostMapping(path = "/update-latest-consent-order", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "CCD Callback to update the latest consent order d    etails")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Callback was processed successFully or"
+    @ApiOperation(value = "CCD Callback to update the latest consent order details")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Callback was processed successfully or"
             + " in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
@@ -56,6 +56,7 @@ public class ConsentOrderController implements BaseController {
         if (!idamService.isUserRoleAdmin(authToken)) {
             caseData.put(APPLICANT_REPRESENTED, YES);
         }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }

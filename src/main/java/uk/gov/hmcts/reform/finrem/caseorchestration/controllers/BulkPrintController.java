@@ -51,7 +51,7 @@ public class BulkPrintController implements BaseController {
             @ApiResponse(
                 code = 200,
                 message =
-                    "Callback was processed successFully or in case of an error message is "
+                    "Callback was processed successfully or in case of an error message is "
                         + "attached to the case",
                 response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
@@ -76,8 +76,8 @@ public class BulkPrintController implements BaseController {
         UUID letterIdRes = bulkPrintService.sendForBulkPrint(coverSheetRes, callback.getCaseDetails());
 
         caseData.put(BULK_PRINT_COVER_SHEET_RES, coverSheetRes);
-
         caseData.put(BULK_PRINT_LETTER_ID_RES, letterIdRes);
+
         log.info(
                 "Generated Respondent CoverSheet for bulk print. coversheet: {}, letterId : {}",
                 coverSheetRes,

@@ -45,7 +45,7 @@ public class FinalOrderController implements BaseController {
             produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
+            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is "
                                                        + "attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
@@ -61,6 +61,7 @@ public class FinalOrderController implements BaseController {
                 callback.getCaseDetails().getData());
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         List<HearingOrderCollectionData> hearingOrderCollectionData = getHearingOrderDocuments(caseData);
+
         if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
             CaseDocument latestHearingOrder = hearingOrderCollectionData
                                                       .get(hearingOrderCollectionData.size() - 1)
@@ -93,28 +94,25 @@ public class FinalOrderController implements BaseController {
             }
 
             finalOrderCollection.add(HearingOrderCollectionData.builder()
-                                             .hearingOrderDocuments(HearingOrderDocument
-                                                                            .builder()
-                                                                            .uploadDraftDocument(stampedDocs)
-                                                                            .build())
-                                             .build());
+                .hearingOrderDocuments(HearingOrderDocument
+                    .builder()
+                    .uploadDraftDocument(stampedDocs)
+                    .build())
+                .build());
+
             log.info(" finalOrderCollection = {}", finalOrderCollection);
             caseData.put(FINAL_ORDER_COLLECTION, finalOrderCollection);
             log.info("stampFinalOrder end.");
         }
-
     }
 
     private List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
-                new TypeReference<List<HearingOrderCollectionData>>() {
-                });
+            new TypeReference<List<HearingOrderCollectionData>>() {});
     }
 
     private List<HearingOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION),
-                new TypeReference<List<HearingOrderCollectionData>>() {
-                });
+            new TypeReference<List<HearingOrderCollectionData>>() {});
     }
-
 }

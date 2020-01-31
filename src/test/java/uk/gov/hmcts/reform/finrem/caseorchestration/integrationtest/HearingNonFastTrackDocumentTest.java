@@ -44,7 +44,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
@@ -207,7 +207,7 @@ public class HearingNonFastTrackDocumentTest {
             .withHeader(CONTENT_TYPE, equalTo("application/json"))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(objectMapper.writeValueAsString(document()))));
     }
 
@@ -219,6 +219,6 @@ public class HearingNonFastTrackDocumentTest {
             .withHeader(CONTENT_TYPE, equalTo("application/json"))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)));
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
     }
 }

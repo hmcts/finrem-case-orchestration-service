@@ -57,8 +57,9 @@ public class FeeLookupController implements BaseController {
         FeeCaseData feeResponseData = FeeCaseData.builder().build();
         updateCaseWithFee(mapOfCaseData, feeResponseData, feeResponse);
         ObjectMapper objectMapper = new ObjectMapper();
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                .data(objectMapper.convertValue(feeResponseData, Map.class)).build());
+            .data(objectMapper.convertValue(feeResponseData, Map.class)).build());
     }
 
     private void updateCaseWithFee(Map<String, Object> caseRequestData, FeeCaseData feeResponseData,
@@ -71,28 +72,27 @@ public class FeeLookupController implements BaseController {
 
     private OrderSummary createOrderSummary(Map<String, Object> caseRequestData, FeeItem feeItem) {
         return OrderSummary.builder()
-                .paymentTotal(feeItem.getValue().getFeeAmount())
-                .paymentReference(Objects.toString(caseRequestData.get(PBA_REFERENCE)))
-                .fees(ImmutableList.of(feeItem))
-                .build();
+            .paymentTotal(feeItem.getValue().getFeeAmount())
+            .paymentReference(Objects.toString(caseRequestData.get(PBA_REFERENCE)))
+            .fees(ImmutableList.of(feeItem))
+            .build();
     }
 
     private FeeItem createFeeItem(FeeResponse feeResponse) {
         FeeValue feeValue = createFeeValue(feeResponse);
         return FeeItem.builder()
-                .value(feeValue)
-                .build();
+            .value(feeValue)
+            .build();
     }
 
     private FeeValue createFeeValue(FeeResponse feeResponse) {
         String amountToPay = Objects.toString(feeResponse
                 .getFeeAmount().multiply(BigDecimal.valueOf(100)).longValue());
         return FeeValue.builder()
-                .feeCode(feeResponse.getCode())
-                .feeAmount(amountToPay)
-                .feeVersion(feeResponse.getVersion())
-                .feeDescription(feeResponse.getDescription())
-                .build();
+            .feeCode(feeResponse.getCode())
+            .feeAmount(amountToPay)
+            .feeVersion(feeResponse.getVersion())
+            .feeDescription(feeResponse.getDescription())
+            .build();
     }
-
 }

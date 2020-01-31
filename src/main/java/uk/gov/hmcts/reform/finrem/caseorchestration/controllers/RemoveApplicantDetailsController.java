@@ -30,7 +30,7 @@ public class RemoveApplicantDetailsController implements BaseController {
             produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Removes applicant details or applicants solicitor details")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
+            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is "
                     + "attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),

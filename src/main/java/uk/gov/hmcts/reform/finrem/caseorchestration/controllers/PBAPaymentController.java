@@ -49,6 +49,7 @@ public class PBAPaymentController implements BaseController {
 
         final Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
         feeLookup(authToken, callbackRequest, mapOfCaseData);
+
         if (isPBAPayment(mapOfCaseData)) {
             if (isPBAPaymentReferenceDoesNotExists(mapOfCaseData)) {
                 String ccdCaseId = Objects.toString(callbackRequest.getCaseDetails().getId());
@@ -64,6 +65,7 @@ public class PBAPaymentController implements BaseController {
         } else {
             mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
         }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
     }
 
@@ -80,9 +82,9 @@ public class PBAPaymentController implements BaseController {
         String paymentError = paymentResponse.getPaymentError();
         log.info("Payment by PBA number {} failed, payment error : {} ", caseData.get(PBA_NUMBER),
                 paymentResponse.getPaymentError());
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(ImmutableList.of(paymentError))
                 .build());
     }
-
 }

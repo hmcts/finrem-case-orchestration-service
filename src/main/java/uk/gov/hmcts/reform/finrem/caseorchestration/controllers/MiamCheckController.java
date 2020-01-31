@@ -33,7 +33,7 @@ public class MiamCheckController implements BaseController {
             produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Application cannot be made unless the applicant has either attended, or is exempt.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully.",
+            @ApiResponse(code = 200, message = "Callback was processed successfully.",
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")})

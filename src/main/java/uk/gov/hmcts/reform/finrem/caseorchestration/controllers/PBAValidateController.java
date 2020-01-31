@@ -39,14 +39,17 @@ public class PBAValidateController implements BaseController {
         if (isPBAPayment(caseData)) {
             String pbaNumber = Objects.toString(caseData.get(PBA_NUMBER));
             log.info("Validate PBA Number :  {}", pbaNumber);
+
             if (!pbaValidationService.isValidPBA(authToken, pbaNumber)) {
                 log.info("PBA number is invalid.");
+
                 return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
                         .errors(ImmutableList.of("PBA Account Number is not valid, please enter a valid one."))
                         .build());
             }
             log.info("PBA number is valid.");
         }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().build());
     }
 }

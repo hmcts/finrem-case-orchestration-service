@@ -62,5 +62,4 @@ public class PaymentConfirmationController implements BaseController {
         }
         return confirmationBody;
     }
-
 }

@@ -40,14 +40,11 @@ apply plugin: 'org.sonarqube'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'net.serenity-bdd.aggregator'
 
-
-
 group = 'uk.gov.hmcts.reform.finrem'
 version = '0.0.1'
 mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
 
 repositories {
     mavenLocal()
@@ -56,7 +53,6 @@ repositories {
     maven { url "http://repo.maven.apache.org/maven2" }
     maven { url 'https://repo.spring.io/libs-milestone' }
 }
-
 
 sourceSets {
     testSmoke {

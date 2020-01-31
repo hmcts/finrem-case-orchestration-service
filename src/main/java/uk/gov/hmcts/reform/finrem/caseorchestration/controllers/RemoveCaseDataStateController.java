@@ -31,7 +31,7 @@ public class RemoveCaseDataStateController implements BaseController {
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseData.remove(STATE);
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
-
 }

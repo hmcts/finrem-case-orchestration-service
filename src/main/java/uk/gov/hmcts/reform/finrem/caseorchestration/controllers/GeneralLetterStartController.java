@@ -34,7 +34,7 @@ public class GeneralLetterStartController implements BaseController {
             produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Clears previous entered field values. Serves as a callback from CCD")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
+            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is "
                     + "attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),

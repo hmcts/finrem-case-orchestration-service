@@ -34,18 +34,16 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
     private final String contestedDir = "/json/contested/";
     private final String consentedDir = "/json/consented/";
 
-
     @Value("${cos.consentOrder.approved}")
     private String consentOrderApprovedUrl;
-
 
     @Test
     public void verifyConsentOrderApprovedForConsentedCase() {
         CallbackRequest callbackRequest = null;
-        InputStream resourceAsStream = null;
+        InputStream resourceAsStream;
         resourceAsStream = getClass().getResourceAsStream(consentedDir + "approved-consent-order.json");
 
-        Map<String,String> uploadedDoc = null;
+        Map<String,String> uploadedDoc;
         try {
             uploadedDoc = serviceUtils.uploadFileToEmStore("fileTypes/sample.pdf","application/pdf");
         } catch (JSONException e) {
