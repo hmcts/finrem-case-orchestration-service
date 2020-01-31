@@ -24,10 +24,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionD
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Arrays.asList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -64,7 +64,6 @@ public class ConsentOrderApprovedController implements BaseController {
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
         List<PensionCollectionData> pensionDocs = getPensionDocuments(caseData);
 
-
         log.info("ConsentOrderApprovedController called with latestConsentOrder = {}, pensionDocs = {}",
                 latestConsentOrder, pensionDocs);
 
@@ -91,7 +90,7 @@ public class ConsentOrderApprovedController implements BaseController {
                     .build();
             log.info("approvedOrderData = {}", approvedOrderData);
 
-            List<ApprovedOrderData> approvedOrders = asList(approvedOrderData);
+            List<ApprovedOrderData> approvedOrders = Collections.singletonList(approvedOrderData);
             caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
         }
 
@@ -102,7 +101,6 @@ public class ConsentOrderApprovedController implements BaseController {
                         .warnings(ImmutableList.of())
                         .build());
     }
-
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(LATEST_CONSENT_ORDER),
@@ -115,5 +113,4 @@ public class ConsentOrderApprovedController implements BaseController {
                 new TypeReference<List<PensionCollectionData>>() {
                 });
     }
-
 }

@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.functional.notification;
 
 import net.serenitybdd.junit.runners.SerenityRunner;
-import net.serenitybdd.rest.SerenityRest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;

@@ -11,9 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionD
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
 import javax.ws.rs.core.MediaType;
+import java.util.Collections;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -74,7 +74,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenServiceGeneratesDocument().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
-        whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
+        whenStampingPensionDocuments().thenReturn(Collections.singletonList(pensionDocumentData()));
 
         ResultActions result = mvc.perform(post(endpoint())
                 .content(requestContent.toString())
@@ -91,7 +91,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenServiceGeneratesDocument().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
-        whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
+        whenStampingPensionDocuments().thenReturn(Collections.singletonList(pensionDocumentData()));
 
         ResultActions result = mvc.perform(post(endpoint())
                 .content(requestContent.toString())

@@ -26,7 +26,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     private JsonPath jsonPathEvaluator;
     private String contestedDir = "/json/contested/";
     private String consentedDir = "/json/consented/";
-    private String dataPath = "data";
 
     @Test
     public void verifyAmendDivorceDetailsD81Individual() {

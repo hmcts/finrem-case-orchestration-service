@@ -20,10 +20,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-@SuppressWarnings("unchecked")
 public class RemoveCaseDataStateController implements BaseController {
 
-    @SuppressWarnings("unchecked")
     @PostMapping(path = "/remove-case-data-state", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> removeCaseDataState(
             @RequestHeader(value = "Authorization", required = false) String authToken,

@@ -14,7 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import static java.util.Objects.isNull;
@@ -45,8 +45,8 @@ public class CheckLatestConsentOrderController implements BaseController {
 
         if (isNull(caseData.get("latestConsentOrder"))) {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(Arrays.asList("Latest Consent Order Field is empty. "
-                        + "Please use the Upload Consent Order Event instead of Send Order"))
+                .errors(Collections.singletonList("Latest Consent Order Field is empty. "
+                    + "Please use the Upload Consent Order Event instead of Send Order"))
                 .build());
         }
 

@@ -45,12 +45,11 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private static PaymentResponse paymentResponse(boolean success) {
-        PaymentResponse paymentResponse = PaymentResponse.builder()
+        return PaymentResponse.builder()
                 .reference("RC1")
                 .status(success ? "success" : "failed")
                 .message(success ? null : "Access denied")
                 .build();
-        return paymentResponse;
     }
 
     @Test

@@ -107,9 +107,8 @@ public class DocumentValidationTests extends IntegrationTestBase {
     private CaseDocument generateCaseDocument(String fileName) throws Exception {
         // generate pdf document to set it as consent order
         JsonPath jsonPathEvaluator = generateDocument(fileName, generatorUrl, consentedDir);
-        CaseDocument caseDocument = getCaseDocument(jsonPathEvaluator);
 
-        return caseDocument;
+        return getCaseDocument(jsonPathEvaluator);
     }
 
     private io.restassured.path.json.JsonPath generateDocument(String jsonFileName, String url, String journeyType) {

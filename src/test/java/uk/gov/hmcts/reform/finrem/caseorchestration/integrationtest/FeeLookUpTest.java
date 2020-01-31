@@ -57,8 +57,6 @@ public class FeeLookUpTest {
     @ClassRule
     public static WireMockClassRule feeLookUpService = new WireMockClassRule(9001);
 
-    private CallbackRequest request;
-
     public CallbackRequest request(ApplicationType applicationType) throws IOException {
         String fileName = applicationType == CONSENTED
                 ? "/fixtures/fee-lookup.json" : "/fixtures/contested/fee-lookup.json";

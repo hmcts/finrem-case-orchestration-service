@@ -22,11 +22,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseContr
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-@SuppressWarnings("unchecked")
 public class PaymentConfirmationController implements BaseController {
     private final PaymentConfirmationService paymentConfirmationService;
 
-    @SuppressWarnings("unchecked")
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<SubmittedCallbackResponse> paymentConfirmation(
             @RequestHeader(value = "Authorization", required = false) String authToken,

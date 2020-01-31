@@ -60,8 +60,7 @@ public class GenerateCoverSheetServiceTest {
         }
     }
 
-    private class TestDocumentClient implements DocumentClient {
-
+    private static class TestDocumentClient implements DocumentClient {
 
         @Override
         public Document generatePdf(DocumentGenerationRequest request, String authorizationToken) {

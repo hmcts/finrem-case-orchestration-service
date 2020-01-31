@@ -132,7 +132,7 @@ public abstract class AbstractDocumentTest {
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)));
     }
 
-    void idamServiceStub() throws JsonProcessingException {
+    void idamServiceStub() {
         idamService.stubFor(get(urlPathEqualTo(IDAM_SERVICE_CONTEXT_PATH))
             .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
             .withHeader(CONTENT_TYPE, equalTo("application/json"))

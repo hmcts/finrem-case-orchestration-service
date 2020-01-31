@@ -92,10 +92,9 @@ public class DocumentValidationService {
 
     private DocumentValidationResponse validateRespondToOrderDocument(String authToken, Map<String, Object> caseData) {
         Optional<CaseDocument> caseDocument = documentHelper.getLatestRespondToOrderDocuments(caseData);
-        DocumentValidationResponse response = caseDocument
+        return caseDocument
             .map(document -> documentClient.checkUploadedFileType(authToken, document.getDocumentBinaryUrl()))
             .orElseGet(() -> DocumentValidationResponse.builder().build());
-        return response;
     }
 
     private DocumentValidationResponse validateConsentOrderDocument(String authToken,

@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import javax.ws.rs.core.MediaType;

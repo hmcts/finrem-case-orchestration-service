@@ -20,12 +20,10 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-@SuppressWarnings("unchecked")
 public class ValidateHearingController implements BaseController {
 
     private final ValidateHearingService validateHearingService;
 
-    @SuppressWarnings("unchecked")
     @PostMapping(path = "/validate-hearing", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> validateHearing(
         @RequestHeader(value = "Authorization", required = false) String authToken,

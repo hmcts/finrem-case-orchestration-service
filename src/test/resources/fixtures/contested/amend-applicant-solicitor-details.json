@@ -6,11 +6,9 @@
     "state": "applicationDrafted",
     "case_data": {
       "helpWithFeesQuestion": "Yes",
-      "applicantLName":"Guy",
       "dateOfMarriage":"1111-01-01",
       "mortgageDetail":"test",
       "netValueOfHome":"dfdf",
-      "applicantFMName":"Poor",
       "dateOfSepration":"1111-01-01",
       "propertyAddress":"test",
       "respondentEmail":null,

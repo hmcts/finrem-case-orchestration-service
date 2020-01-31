@@ -23,12 +23,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-@SuppressWarnings("unchecked")
 public class PBAValidateController implements BaseController {
 
     private final PBAValidationService pbaValidationService;
 
-    @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-validate", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaValidate(
             @RequestHeader(value = "Authorization", required = false) String authToken,

@@ -14,12 +14,10 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_COURT_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ROLES;
-
 
 @Service
 @RequiredArgsConstructor
@@ -40,12 +38,12 @@ public class IdamService {
     };
 
     private static final  Function<ResponseEntity<Map>, Boolean>  isAdmin =
-        responseEntity -> List.class.cast(responseEntity.getBody().get(ROLES)).stream()
+        responseEntity -> ((List) responseEntity.getBody().get(ROLES)).stream()
         .anyMatch(role -> role.equals(FR_COURT_ADMIN));
 
     private static final  Function<ResponseEntity<Map>, String>  userFullName = responseEntity -> {
         Map body = responseEntity.getBody();
-        return (String)body.get("forename") + " " + body.get("surname");
+        return body.get("forename") + " " + body.get("surname");
     };
 
     public boolean isUserRoleAdmin(String authToken) {
@@ -57,5 +55,4 @@ public class IdamService {
         return userFullName.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
                 buildAuthRequest.apply(authorisationToken), Map.class));
     }
-
 }

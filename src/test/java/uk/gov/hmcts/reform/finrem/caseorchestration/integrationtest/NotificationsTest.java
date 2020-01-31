@@ -18,7 +18,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -151,10 +150,8 @@ public class NotificationsTest {
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
-        String response =
-            objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(caseDetails.getData()).build());
-        return response;
+        return objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDetails.getData()).build());
     }
 
     private void stubForNotification(String url, int value) {
@@ -164,5 +161,4 @@ public class NotificationsTest {
                 .willReturn(aResponse()
                         .withStatus(value)));
     }
-
 }

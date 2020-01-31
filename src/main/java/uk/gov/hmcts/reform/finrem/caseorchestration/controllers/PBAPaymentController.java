@@ -33,13 +33,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-@SuppressWarnings("unchecked")
 public class PBAPaymentController implements BaseController {
 
     private final FeeService feeService;
     private final PBAPaymentService pbaPaymentService;
 
-    @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPayment(
             @RequestHeader(value = "Authorization", required = false) String authToken,
