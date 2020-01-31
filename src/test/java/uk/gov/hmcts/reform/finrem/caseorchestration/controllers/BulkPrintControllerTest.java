@@ -37,8 +37,6 @@ public class BulkPrintControllerTest extends BaseControllerTest {
     private static final String CONTESTED_BULK_PRINT_CONSENT_ORDER_NOT_APPROVED_JSON
         = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
 
-
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockBean

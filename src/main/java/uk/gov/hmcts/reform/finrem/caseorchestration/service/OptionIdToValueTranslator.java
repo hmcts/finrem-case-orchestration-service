@@ -51,7 +51,6 @@ public class OptionIdToValueTranslator {
         }
     }
 
-
     public void translateFixedListOptions(CaseDetails caseDetails) {
         Optional.ofNullable(caseDetails.getData()).ifPresent(caseData -> {
             fixedListOption.optionsKeys().forEach(optionKey -> {

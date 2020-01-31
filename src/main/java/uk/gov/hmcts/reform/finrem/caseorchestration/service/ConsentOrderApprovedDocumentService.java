@@ -48,6 +48,7 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         CaseDocument stampedDocument = stampDocument(document, authToken);
         PensionCollectionData stampedPensionData = copyOf(pensionDocument);
         stampedPensionData.getPensionDocumentData().setPensionDocument(stampedDocument);
+
         return stampedPensionData;
     }
 
@@ -59,5 +60,4 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
             throw new IllegalStateException();
         }
     }
-
 }

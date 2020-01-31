@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.PaymentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.validation.PBAValidationResponse;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -17,6 +16,7 @@ public class PBAValidationService {
         log.info("Inside isValidPBA, authToken : {}, pbaNumber : {}", authToken, pbaNumber);
         PBAValidationResponse pbaResponse = paymentClient.pbaValidate(authToken, pbaNumber);
         log.info("pbaResponse : {}", pbaResponse);
+
         return pbaResponse.isPbaNumberValid();
     }
 }

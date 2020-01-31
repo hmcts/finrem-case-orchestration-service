@@ -54,9 +54,9 @@ public class DocumentValidationService {
             return validateRespondToOrderDocument(authToken, caseData);
         }
         log.info("Invalid request with caseField = {} , event = {}", field, callbackRequest.getEventId());
+
         return DocumentValidationResponse.builder()
             .build();
-
     }
 
     private boolean respondToOrderDocument(CallbackRequest callbackRequest) {

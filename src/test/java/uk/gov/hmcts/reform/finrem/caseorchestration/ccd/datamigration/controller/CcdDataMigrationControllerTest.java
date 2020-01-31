@@ -48,7 +48,6 @@ public class CcdDataMigrationControllerTest {
         return ccdMigrationRequest;
     }
 
-
     private CallbackRequest ccdAlreadyMigratedRequest() throws IOException {
         final String alreadyMigratedRequestJson = "/fixtures/ccd-already-migrated-request.json";
         try (final InputStream resourceAsStream = getClass().getResourceAsStream(alreadyMigratedRequestJson)) {

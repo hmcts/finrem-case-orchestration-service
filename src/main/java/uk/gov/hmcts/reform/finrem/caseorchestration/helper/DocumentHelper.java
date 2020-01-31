@@ -30,7 +30,6 @@ public class DocumentHelper {
         return AMENDED_CONSENT_ORDER.equalsIgnoreCase(respondToOrderData.getRespondToOrder().getDocumentType());
     }
 
-
     public CaseDocument getLatestAmendedConsentOrder(Map<String, Object> caseData) {
         Optional<AmendedConsentOrderData> reduce = ofNullable(caseData.get(CONSENT_ORDER_COLLECTION))
                 .map(this::convertToAmendedConsentOrderDataList)
@@ -40,8 +39,6 @@ public class DocumentHelper {
         return reduce
                 .map(consentOrderData -> consentOrderData.getConsentOrder().getAmendedConsentOrder())
                 .orElseGet(() -> convertToCaseDocument(caseData.get("latestConsentOrder")));
-
-
     }
 
     public List<CaseDocument> getPensionDocumentsData(Map<String, Object> caseData) {
@@ -71,7 +68,6 @@ public class DocumentHelper {
         return objectMapper.convertValue(object, new TypeReference<List<PensionCollectionData>>() {
         });
     }
-
 
     private List<RespondToOrderData> convertToRespondToOrderDataList(Object object) {
         ObjectMapper objectMapper = new ObjectMapper();

@@ -54,7 +54,6 @@ public abstract class AbstractDocumentService {
         documentClient.deleteDocument(documentUrl, authorisationToken);
     }
 
-
     public CaseDocument annexStampDocument(CaseDocument document, String authorisationToken) {
         Document stampedDocument = documentClient.annexStampDocument(toDocument(document), authorisationToken);
         return caseDocument(stampedDocument);

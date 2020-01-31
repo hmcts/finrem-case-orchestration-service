@@ -32,7 +32,6 @@ public final class OrderRefusalTranslator {
     private static Function<CaseDetails, Pair<CaseDetails, List<OrderRefusalData>>> pickOrderRefusalCollection =
             OrderRefusalTranslator::applyPickOrderRefusalCollection;
 
-
     private static Function<Pair<CaseDetails, List<OrderRefusalData>>, CaseDetails> translate =
             OrderRefusalTranslator::applyTranslate;
 
@@ -81,7 +80,6 @@ public final class OrderRefusalTranslator {
                             .map(s -> REFUSAL_KEYS.getOrDefault(s, s))
                             .collect(toList()));
         });
-
 
         return caseDetails;
     }

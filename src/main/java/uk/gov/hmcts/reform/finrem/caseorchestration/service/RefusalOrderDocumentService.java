@@ -62,7 +62,6 @@ public class RefusalOrderDocumentService extends AbstractDocumentService {
         return caseData;
     }
 
-
     private Map<String, Object> populateConsentOrderData(ConsentOrderData consentOrderData, CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 

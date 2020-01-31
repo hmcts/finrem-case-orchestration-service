@@ -15,15 +15,17 @@ import java.util.Optional;
 @Slf4j
 public class ConsentOrderService {
 
-    private static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
-    private static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
     @Autowired
     private DocumentHelper documentHelper;
+
+    private static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
+    private static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
 
     public CaseDocument getLatestConsentOrderData(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
         Optional<CaseDocument> caseDocument;
+
         if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(callbackRequest.getEventId())) {
             caseDocument = documentHelper.getLatestRespondToOrderDocuments(caseData);
         } else if (FR_AMENDED_CONSENT_ORDER.equalsIgnoreCase(callbackRequest.getEventId())) {

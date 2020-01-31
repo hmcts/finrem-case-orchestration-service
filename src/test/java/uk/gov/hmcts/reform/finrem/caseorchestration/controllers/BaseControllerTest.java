@@ -28,7 +28,6 @@ public abstract class BaseControllerTest extends BaseTest {
         mvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
     }
 
-
     void doEmtpyCaseDataSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()

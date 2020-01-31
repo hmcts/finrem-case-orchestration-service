@@ -119,6 +119,7 @@ public class NotificationService {
         notificationRequest.setName(Objects.toString(mapOfCaseData.get(solicitorName)));
         notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorEmail)));
         Object allocatedCourtList = mapOfCaseData.get(ALLOCATED_COURT_LIST);
+
         if (CONTESTED.equalsIgnoreCase(caseType)) {
             String selectedCourt = getSelectedCourt(allocatedCourtList);
             log.info("selectedCourt is  {} for contested case Id : {}", selectedCourt,
@@ -127,7 +128,6 @@ public class NotificationService {
         }
         return notificationRequest;
     }
-
 
     private URI buildUri(String endPoint) {
         return fromHttpUrl(notificationServiceConfiguration.getUrl()
@@ -143,7 +143,6 @@ public class NotificationService {
         return headers;
     }
 
-
     private boolean isConsentedApplication(Map<String, Object> caseData) {
         return isNotEmpty((String) caseData.get(D81_QUESTION));
     }
@@ -151,6 +150,7 @@ public class NotificationService {
     private String getSelectedCourt(Object allocatedCourtList) throws IOException {
         HashMap<String, Object> allocatedCourtMap = (HashMap<String, Object>) allocatedCourtList;
         String region = (String) allocatedCourtMap.get(REGION);
+
         if ("midlands".equalsIgnoreCase(region)) {
             return getMidlandFRC(allocatedCourtMap);
         }
@@ -213,7 +213,6 @@ public class NotificationService {
         return EMPTY;
     }
 
-
     private String getLondonFRC(Map allocatedCourtMap) {
         String londonList = (String) allocatedCourtMap.get("londonList");
         if ("cfc".equalsIgnoreCase(londonList)) {
@@ -221,7 +220,6 @@ public class NotificationService {
         }
         return EMPTY;
     }
-
 
     private String getMidlandFRC(Map allocatedCourtMap) {
         String midlandsList = (String) allocatedCourtMap.get("midlandsList");
@@ -232,5 +230,4 @@ public class NotificationService {
         }
         return EMPTY;
     }
-
 }
