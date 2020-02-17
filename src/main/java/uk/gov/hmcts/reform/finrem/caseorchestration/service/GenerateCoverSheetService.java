@@ -63,9 +63,9 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
         Object respondentAddress = caseDetails.getData().get("applicantAddress");
         Object solicitorAddress = caseDetails.getData().get("solicitorAddress");
 
-        if (solicitorAddress != null) {
+        if (isNotEmpty(solicitorAddress)) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) solicitorAddress));
-        } else if (respondentAddress != null) {
+        } else if (isNotEmpty(respondentAddress)) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) respondentAddress));
         }
     }
@@ -79,11 +79,15 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
         Object respondentAddress = caseDetails.getData().get("respondentAddress");
         Object solicitorAddress = caseDetails.getData().get("rSolicitorAddress");
 
-        if (solicitorAddress != null || !solicitorAddress.toString().equals("")) {
+        if (isNotEmpty(solicitorAddress)) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) solicitorAddress));
-        } else if (respondentAddress != null || !respondentAddress.toString().equals("")) {
+        } else if (isNotEmpty(respondentAddress)) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) respondentAddress));
         }
+    }
+
+    private boolean isNotEmpty(Object caseData) {
+        return !(caseData == null || caseData.toString().trim().isEmpty());
     }
 
     private BulkPrintCoverSheet getBulkPrintCoverSheet(BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder,
