@@ -79,9 +79,9 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
         Object respondentAddress = caseDetails.getData().get("respondentAddress");
         Object solicitorAddress = caseDetails.getData().get("rSolicitorAddress");
 
-        if (solicitorAddress != null) {
+        if (solicitorAddress != null || !solicitorAddress.toString().equals("")) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) solicitorAddress));
-        } else if (respondentAddress != null) {
+        } else if (respondentAddress != null || !respondentAddress.toString().equals("")) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) respondentAddress));
         }
     }
