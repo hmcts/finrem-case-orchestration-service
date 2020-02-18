@@ -28,7 +28,7 @@ public class CurrentDateController implements BaseController {
 
     @PostMapping(path = "/fields/{field}/get-current-date", consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Generates current for the supplied field in the URL path. Serves as a callback from CCD")
+    @ApiOperation(value = "Generates current date for the supplied field in the URL path. Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
                     + "attached to the case",
@@ -39,10 +39,7 @@ public class CurrentDateController implements BaseController {
             @RequestHeader(value = "Authorization") String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback,
             @PathVariable("field") String field) {
-
-        log.info("Received request for generating general letter. Auth token: {}, Case request : {}",
-                authorisationToken, callback);
-
+        
         validateCaseData(callback);
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();

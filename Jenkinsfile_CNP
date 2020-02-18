@@ -25,7 +25,6 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 withPipeline(type, product, app) {
-    enableDockerBuild()
     installCharts()
     loadVaultSecrets(secrets)
 

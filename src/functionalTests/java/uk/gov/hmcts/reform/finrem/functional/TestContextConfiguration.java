@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.functional;
 
 import feign.Feign;
 import feign.jackson.JacksonEncoder;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
