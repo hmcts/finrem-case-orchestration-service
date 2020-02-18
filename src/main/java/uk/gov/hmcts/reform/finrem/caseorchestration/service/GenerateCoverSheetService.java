@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -63,9 +64,9 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
         Object respondentAddress = caseDetails.getData().get("applicantAddress");
         Object solicitorAddress = caseDetails.getData().get("solicitorAddress");
 
-        if (isNotEmpty(solicitorAddress)) {
+        if (StringUtils.isNotBlank(solicitorAddress.toString())) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) solicitorAddress));
-        } else if (isNotEmpty(respondentAddress)) {
+        } else if (StringUtils.isNotBlank(respondentAddress.toString())) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) respondentAddress));
         }
     }
@@ -79,15 +80,11 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
         Object respondentAddress = caseDetails.getData().get("respondentAddress");
         Object solicitorAddress = caseDetails.getData().get("rSolicitorAddress");
 
-        if (isNotEmpty(solicitorAddress)) {
+        if (StringUtils.isNotBlank(solicitorAddress.toString())) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) solicitorAddress));
-        } else if (isNotEmpty(respondentAddress)) {
+        } else if (StringUtils.isNotBlank(respondentAddress.toString())) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) respondentAddress));
         }
-    }
-
-    private boolean isNotEmpty(Object caseData) {
-        return !(caseData == null || caseData.toString().trim().isEmpty());
     }
 
     private BulkPrintCoverSheet getBulkPrintCoverSheet(BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder,
