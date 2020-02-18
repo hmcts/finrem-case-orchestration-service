@@ -14,7 +14,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_COURT_ADMIN;
