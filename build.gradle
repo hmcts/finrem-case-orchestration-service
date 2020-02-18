@@ -132,7 +132,7 @@ def versions = [
         pdfbox                  : '2.0.8',
         pitest                  : '1.4.5',
         powerMock               : '1.7.3',
-        reformsJavaLogging      : '5.0.1',
+        reformLogging           : '5.1.1',
         restAssured             : '3.0.3',
         serenity                : '2.0.90',
         serenityCucumber        : '1.9.49',
@@ -172,7 +172,7 @@ dependencies {
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
     implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
     implementation group: 'uk.gov.hmcts.reform', name: 'health-spring-boot-starter', version:'0.0.5'
-    implementation group: 'uk.gov.hmcts.reform', name: 'java-logging-appinsights', version: versions.reformsJavaLogging
+    implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
     implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.0.4'
     implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
     implementation group: 'uk.gov.hmcts.reform', name: 'bsp-common-lib', version: versions.bspCommonLib
@@ -236,7 +236,7 @@ dependencyCheck {
     suppressionFile = 'dependency-check-suppressions.xml'
 }
 
-checkstyle.toolVersion = '8.26'
+checkstyle.toolVersion = '8.29'
 checkstyle.configFile = new File(rootDir, "checkstyle.xml")
 
 // make build fail on Checkstyle issues (https://github.com/gradle/gradle/issues/881)
