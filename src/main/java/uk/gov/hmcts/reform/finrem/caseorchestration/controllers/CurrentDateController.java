@@ -38,8 +38,8 @@ public class CurrentDateController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateCurrentDateFor(
             @RequestHeader(value = "Authorization") String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback,
-            @PathVariable("field") String field)
-    {
+            @PathVariable("field") String field) {
+        
         validateCaseData(callback);
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
