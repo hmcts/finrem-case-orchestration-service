@@ -1,0 +1,133 @@
+{
+  "token": "token_test",
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": 1234567890,
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_data": {
+      "PBANumber": "PBA123456",
+      "d81Question": "No",
+      "PBAreference": "ABCD",
+      "uploadOrder": [
+        {
+          "id": "12d30d00-1cd6-4ab1-aca9-cd361d21634e",
+          "value": {
+            "DocumentLink": {
+              "document_url": "http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7",
+              "document_filename": "case_001.pdf",
+              "document_binary_url": "http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7/binary"
+            },
+            "DocumentType": "Other",
+            "DocumentComment": null,
+            "DocumentFileName": null,
+            "DocumentDateAdded": null,
+            "DocumentEmailContent": null
+          }
+        },
+        {
+          "id": "22d30d00-1cd6-4ab1-aca9-cd361d21634e",
+          "value": {
+            "DocumentLink": {
+              "document_url": "http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7",
+              "document_filename": "case_002.pdf",
+              "document_binary_url": "http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7/binary"
+            },
+            "DocumentType": "Other",
+            "DocumentComment": null,
+            "DocumentFileName": null,
+            "DocumentDateAdded": null,
+            "DocumentEmailContent": null
+          }
+        }
+      ],
+      "approvedOrderCollection": [
+        {
+          "id": "00ffa155-e60f-499a-9295-77b598bf16d1",
+          "value": {
+            "orderLetter": {
+              "document_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8",
+              "document_filename": "ApprovedConsentOrderLetter.pdf",
+              "document_binary_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8/binary"
+            },
+            "consentOrder": {
+              "document_url": "http://localhost:4506/documents/3e3b6389-a9da-4b1e-b7d0-e949701efcd1",
+              "document_filename": "011.pdf",
+              "document_binary_url": "http://localhost:4506/documents/3e3b6389-a9da-4b1e-b7d0-e949701efcd1/binary"
+            },
+            "pensionDocuments": [
+              {
+                "id": "3bc538b9-8a6e-4fd1-84de-eeb01460f900",
+                "value": {
+                  "typeOfDocument": "Form PPF2",
+                  "uploadedDocument": {
+                    "document_url": "http://localhost:4506/documents/0be0f91e-04e1-4db4-b43e-70e40bb3d952",
+                    "document_filename": "006.pdf",
+                    "document_binary_url": "http://localhost:4506/documents/0be0f91e-04e1-4db4-b43e-70e40bb3d952/binary"
+                  }
+                }
+              },
+              {
+                "id": "5b9be58f-c368-411a-bd3a-ff1c104ba87f",
+                "value": {
+                  "typeOfDocument": "Form PPF1",
+                  "uploadedDocument": {
+                    "document_url": "http://localhost:4506/documents/ba37e288-cf8d-426b-a368-7f237be756b7",
+                    "document_filename": "014.pdf",
+                    "document_binary_url": "http://localhost:4506/documents/ba37e288-cf8d-426b-a368-7f237be756b7/binary"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "00ffa155-e60f-499a-9295-77b598bf16d1",
+          "value": {
+            "orderLetter": {
+              "document_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8",
+              "document_filename": "ApprovedConsentOrderLetter.pdf",
+              "document_binary_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8/binary"
+            },
+            "consentOrder": {
+              "document_url": "http://localhost:4506/documents/3e3b6389-a9da-4b1e-b7d0-e949701efcd1",
+              "document_filename": "011.pdf",
+              "document_binary_url": "http://localhost:4506/documents/3e3b6389-a9da-4b1e-b7d0-e949701efcd1/binary"
+            },
+            "pensionDocuments": [
+              {
+                "id": "3bc538b9-8a6e-4fd1-84de-eeb01460f900",
+                "value": {
+                  "typeOfDocument": "Form PPF2",
+                  "uploadedDocument": {
+                    "document_url": "http://localhost:4506/documents/0be0f91e-04e1-4db4-b43e-70e40bb3d952",
+                    "document_filename": "006.pdf",
+                    "document_binary_url": "http://localhost:4506/documents/0be0f91e-04e1-4db4-b43e-70e40bb3d952/binary"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "solicitorAddress": {
+        "AddressLine1": "",
+        "AddressLine2": "",
+        "AddressLine3": "",
+        "County": "",
+        "Country": "",
+        "PostTown": "",
+        "PostCode": ""
+      },
+      "applicantAddress": {
+        "AddressLine1": "50 Victoria Street",
+        "AddressLine2": "",
+        "AddressLine3": "",
+        "County": null,
+        "Country": "UK",
+        "PostTown": "London",
+        "PostCode": "SE1"
+      }
+    }
+  }
+}

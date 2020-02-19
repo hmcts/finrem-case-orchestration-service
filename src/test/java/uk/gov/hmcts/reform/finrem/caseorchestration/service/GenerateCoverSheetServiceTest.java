@@ -1,12 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.BulkPrintCoverSheet;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -14,9 +16,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.io.InputStream;
+import java.util.Map;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 
@@ -53,9 +56,28 @@ public class GenerateCoverSheetServiceTest {
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
     }
 
+    @Test
+    public void shouldGenerateApplicantCoverSheetWithEmptySolicitorAddress() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
+        coverSheetService.prepareApplicantCoverSheet(caseDetails);
+
+        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
+
+        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("50 Victoria Street"));
+        assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
+        assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
+    }
+
     private CaseDetails caseDetails() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulk-print.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
+    }
+
+    private CaseDetails caseDetailsWithEmptySolAddress() throws Exception {
+        try (InputStream resourceAsStream =
+                     getClass().getResourceAsStream("/fixtures/bulk-print-empty-solicitor-address.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }

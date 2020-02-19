@@ -55,19 +55,19 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
             config.getBulkPrintFileName());
     }
 
-    private void prepareApplicantCoverSheet(CaseDetails caseDetails) {
+     void prepareApplicantCoverSheet(CaseDetails caseDetails) {
         BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder = BulkPrintCoverSheet.builder()
             .ccdNumber(caseDetails.getId().toString())
             .recipientName(join(nullToEmpty(caseDetails.getData().get("applicantFMName")), " ",
                 nullToEmpty(caseDetails.getData().get("applicantLName"))));
 
-        Object respondentAddress = caseDetails.getData().get("applicantAddress");
-        Object solicitorAddress = caseDetails.getData().get("solicitorAddress");
+        Map applicantAddress = (Map) caseDetails.getData().get("applicantAddress");
+        Map solicitorAddress = (Map) caseDetails.getData().get("solicitorAddress");
 
-        if (ObjectUtils.isNotEmpty(solicitorAddress)) {
-            caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) solicitorAddress));
-        } else if (ObjectUtils.isNotEmpty(respondentAddress)) {
-            caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) respondentAddress));
+        if (addressLineOneIsNotEmpty(solicitorAddress)) {
+            caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, solicitorAddress));
+        } else if (addressLineOneIsNotEmpty(applicantAddress)) {
+            caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, applicantAddress));
         }
     }
 
@@ -85,6 +85,10 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
         } else if (ObjectUtils.isNotEmpty(respondentAddress)) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) respondentAddress));
         }
+    }
+
+    private boolean addressLineOneIsNotEmpty(Map address){
+        return ObjectUtils.isNotEmpty(address.get("AddressLine1"));
     }
 
     private BulkPrintCoverSheet getBulkPrintCoverSheet(BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder,
