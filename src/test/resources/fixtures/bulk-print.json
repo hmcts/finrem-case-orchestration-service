@@ -127,15 +127,6 @@
         "Country": "UK",
         "PostTown": "London",
         "PostCode": "SE1"
-      },
-      "respondentAddress": {
-        "AddressLine1": "50 Victoria Street",
-        "AddressLine2": "",
-        "AddressLine3": "",
-        "County": null,
-        "Country": "UK",
-        "PostTown": "London",
-        "PostCode": "SE1"
       }
     }
   }

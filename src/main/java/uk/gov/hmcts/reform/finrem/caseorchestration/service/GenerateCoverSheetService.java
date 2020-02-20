@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -88,7 +89,7 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
     }
 
     private boolean addressLineOnePostCodeIsNotEmpty(Map address) {
-        return ObjectUtils.isNotEmpty(address.get("AddressLine1")) && ObjectUtils.isNotEmpty(address.get("PostCode"));
+        return  ObjectUtils.isNotEmpty(address) && StringUtils.isNotEmpty((String) address.get("AddressLine1")) && StringUtils.isNotEmpty((String) address.get("PostCode"));
     }
 
     private BulkPrintCoverSheet getBulkPrintCoverSheet(BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder,
