@@ -31,10 +31,4 @@
         <vulnerabilityName>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</vulnerabilityName>
     </suppress>
 
-    <suppress>
-        <notes>Not used</notes>
-        <cve>CVE-2019-20444</cve>
-        <cve>CVE-2019-20445</cve>
-    </suppress>
-
 </suppressions>
