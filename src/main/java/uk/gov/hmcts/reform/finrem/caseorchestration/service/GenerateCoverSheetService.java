@@ -89,7 +89,8 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
     }
 
     private boolean addressLineOnePostCodeIsNotEmpty(Map address) {
-        return  ObjectUtils.isNotEmpty(address) && StringUtils.isNotEmpty((String) address.get("AddressLine1")) && StringUtils.isNotEmpty((String) address.get("PostCode"));
+        return  ObjectUtils.isNotEmpty(address) && StringUtils.isNotEmpty((String) address.get("AddressLine1"))
+                && StringUtils.isNotEmpty((String) address.get("PostCode"));
     }
 
     private BulkPrintCoverSheet getBulkPrintCoverSheet(BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder,
