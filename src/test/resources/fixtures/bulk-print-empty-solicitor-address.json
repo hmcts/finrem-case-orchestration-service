@@ -127,6 +127,24 @@
         "Country": "UK",
         "PostTown": "London",
         "PostCode": "SE1"
+      },
+      "rSolicitorAddress": {
+        "AddressLine1": "",
+        "AddressLine2": "",
+        "AddressLine3": "",
+        "County": "",
+        "Country": "",
+        "PostTown": "",
+        "PostCode": ""
+      },
+      "respondentAddress": {
+        "AddressLine1": "51 Victoria Street",
+        "AddressLine2": "",
+        "AddressLine3": "",
+        "County": null,
+        "Country": "UK",
+        "PostTown": "London",
+        "PostCode": "SE1"
       }
     }
   }

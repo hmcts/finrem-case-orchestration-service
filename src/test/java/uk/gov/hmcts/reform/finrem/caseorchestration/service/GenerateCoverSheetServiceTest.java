@@ -66,6 +66,18 @@ public class GenerateCoverSheetServiceTest {
         assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
     }
 
+    @Test
+    public void shouldGenerateRespondentCoverSheetWithEmptySolicitorAddress() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
+        coverSheetService.prepareRespondentCoverSheet(caseDetails);
+
+        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
+
+        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("51 Victoria Street"));
+        assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
+        assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
+    }
+
     private CaseDetails caseDetails() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulk-print.json")) {

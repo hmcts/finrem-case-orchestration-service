@@ -64,14 +64,14 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
         Map applicantAddress = (Map) caseDetails.getData().get("applicantAddress");
         Map solicitorAddress = (Map) caseDetails.getData().get("solicitorAddress");
 
-        if (addressLineOneIsNotEmpty(solicitorAddress)) {
+        if (addressLineOnePostCodeIsNotEmpty(solicitorAddress)) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, solicitorAddress));
-        } else if (addressLineOneIsNotEmpty(applicantAddress)) {
+        } else if (addressLineOnePostCodeIsNotEmpty(applicantAddress)) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, applicantAddress));
         }
     }
 
-    private void prepareRespondentCoverSheet(CaseDetails caseDetails) {
+    void prepareRespondentCoverSheet(CaseDetails caseDetails) {
         BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder = BulkPrintCoverSheet.builder()
             .ccdNumber(caseDetails.getId().toString())
             .recipientName(join(nullToEmpty(caseDetails.getData().get("appRespondentFMName")), " ",
@@ -80,14 +80,14 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
         Map respondentAddress = (Map) caseDetails.getData().get("respondentAddress");
         Map solicitorAddress = (Map) caseDetails.getData().get("rSolicitorAddress");
 
-        if (ObjectUtils.isNotEmpty(solicitorAddress)) {
+        if (addressLineOnePostCodeIsNotEmpty(solicitorAddress)) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, solicitorAddress));
-        } else if (ObjectUtils.isNotEmpty(respondentAddress)) {
+        } else if (addressLineOnePostCodeIsNotEmpty(respondentAddress)) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, respondentAddress));
         }
     }
 
-    private boolean addressLineOneIsNotEmpty(Map address) {
+    private boolean addressLineOnePostCodeIsNotEmpty(Map address) {
         return ObjectUtils.isNotEmpty(address.get("AddressLine1")) && ObjectUtils.isNotEmpty(address.get("PostCode"));
     }
 
