@@ -110,15 +110,6 @@
           }
         }
       ],
-      "solicitorAddress": {
-        "AddressLine1": "",
-        "AddressLine2": "",
-        "AddressLine3": "",
-        "County": "",
-        "Country": "",
-        "PostTown": "",
-        "PostCode": ""
-      },
       "applicantAddress": {
         "AddressLine1": "1 Victoria Street",
         "AddressLine2": "",
