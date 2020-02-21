@@ -78,6 +78,30 @@ public class GenerateCoverSheetServiceTest {
         assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
     }
 
+    @Test
+    public void shouldGenerateApplicantCoverSheetWithApplicantSolicitorAddress() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithSolicitors();
+        coverSheetService.prepareApplicantCoverSheet(caseDetails);
+
+        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
+
+        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("52 Victoria Street"));
+        assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
+        assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
+    }
+
+    @Test
+    public void shouldGenerateRespondentCoverSheetWithRespondentSolicitorAddress() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithSolicitors();
+        coverSheetService.prepareRespondentCoverSheet(caseDetails);
+
+        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
+
+        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("53 Victoria Street"));
+        assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
+        assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
+    }
+
     private CaseDetails caseDetails() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulk-print.json")) {
@@ -88,6 +112,13 @@ public class GenerateCoverSheetServiceTest {
     private CaseDetails caseDetailsWithEmptySolAddress() throws Exception {
         try (InputStream resourceAsStream =
                      getClass().getResourceAsStream("/fixtures/bulk-print-empty-solicitor-address.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
+    }
+
+    private CaseDetails caseDetailsWithSolicitors() throws Exception {
+        try (InputStream resourceAsStream =
+                     getClass().getResourceAsStream("/fixtures/bulk-print-with-solicitors.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }
