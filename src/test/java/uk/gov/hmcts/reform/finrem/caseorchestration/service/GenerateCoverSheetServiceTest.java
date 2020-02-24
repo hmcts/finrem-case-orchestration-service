@@ -55,49 +55,49 @@ public class GenerateCoverSheetServiceTest {
     }
 
     @Test
-    public void shouldGenerateApplicantCoverSheetWithEmptySolicitorAddress() throws Exception {
+    public void shouldGenerateApplicantCoverSheetUsingApplicantAddressWhenApplicantSolicitorAddressIsEmpty() throws Exception {
         CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
         coverSheetService.prepareApplicantCoverSheet(caseDetails);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
 
-        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("50 Victoria Street"));
+        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("50 Applicant Street"));
         assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
         assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
     }
 
     @Test
-    public void shouldGenerateRespondentCoverSheetWithEmptySolicitorAddress() throws Exception {
+    public void shouldGenerateRespondentCoverSheetUsingRespondentAddressWhenRespondentSolicitorAddressIsEmpty() throws Exception {
         CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
         coverSheetService.prepareRespondentCoverSheet(caseDetails);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
 
-        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("51 Victoria Street"));
+        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("51 Respondent Street"));
         assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
         assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
     }
 
     @Test
-    public void shouldGenerateApplicantCoverSheetWithApplicantSolicitorAddress() throws Exception {
+    public void shouldGenerateApplicantCoverSheetUsingApplicantSolicitorAddress() throws Exception {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
         coverSheetService.prepareApplicantCoverSheet(caseDetails);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
 
-        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("52 Victoria Street"));
+        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("123 Applicant Solicitor Street"));
         assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
         assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
     }
 
     @Test
-    public void shouldGenerateRespondentCoverSheetWithRespondentSolicitorAddress() throws Exception {
+    public void shouldGenerateRespondentCoverSheetUsingRespondentSolicitorAddress() throws Exception {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
         coverSheetService.prepareRespondentCoverSheet(caseDetails);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
 
-        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("53 Victoria Street"));
+        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("321 Respondent Solicitor Street"));
         assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
         assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
     }

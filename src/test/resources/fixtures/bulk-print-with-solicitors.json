@@ -111,7 +111,7 @@
         }
       ],
       "solicitorAddress": {
-        "AddressLine1": "52 Victoria Street",
+        "AddressLine1": "123 Applicant Solicitor Street",
         "AddressLine2": "",
         "AddressLine3": "",
         "County": "",
@@ -120,7 +120,7 @@
         "PostCode": "SE1"
       },
       "applicantAddress": {
-        "AddressLine1": "50 Victoria Street",
+        "AddressLine1": "50 Applicant Street",
         "AddressLine2": "",
         "AddressLine3": "",
         "County": null,
@@ -129,7 +129,7 @@
         "PostCode": "SE1"
       },
       "rSolicitorAddress": {
-        "AddressLine1": "53 Victoria Street",
+        "AddressLine1": "321 Respondent Solicitor Street",
         "AddressLine2": "",
         "AddressLine3": "",
         "County": "",
@@ -138,7 +138,7 @@
         "PostCode": "SE1"
       },
       "respondentAddress": {
-        "AddressLine1": "51 Victoria Street",
+        "AddressLine1": "51 Respondent Street",
         "AddressLine2": "",
         "AddressLine3": "",
         "County": null,

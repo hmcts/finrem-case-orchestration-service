@@ -120,7 +120,7 @@
         "PostCode": ""
       },
       "applicantAddress": {
-        "AddressLine1": "50 Victoria Street",
+        "AddressLine1": "50 Applicant Street",
         "AddressLine2": "",
         "AddressLine3": "",
         "County": null,
@@ -138,7 +138,7 @@
         "PostCode": ""
       },
       "respondentAddress": {
-        "AddressLine1": "51 Victoria Street",
+        "AddressLine1": "51 Respondent Street",
         "AddressLine2": "",
         "AddressLine3": "",
         "County": null,
