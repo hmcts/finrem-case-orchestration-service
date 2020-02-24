@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.BulkPrintCoverSheet;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -53,6 +54,54 @@ public class GenerateCoverSheetServiceTest {
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
     }
 
+    @Test
+    public void shouldGenerateApplicantCoverSheetUsingApplicantAddressWhenApplicantSolicitorAddressIsEmpty() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
+        coverSheetService.prepareApplicantCoverSheet(caseDetails);
+
+        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
+
+        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("50 Applicant Street"));
+        assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
+        assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
+    }
+
+    @Test
+    public void shouldGenerateRespondentCoverSheetUsingRespondentAddressWhenRespondentSolicitorAddressIsEmpty() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
+        coverSheetService.prepareRespondentCoverSheet(caseDetails);
+
+        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
+
+        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("51 Respondent Street"));
+        assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
+        assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
+    }
+
+    @Test
+    public void shouldGenerateApplicantCoverSheetUsingApplicantSolicitorAddress() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithSolicitors();
+        coverSheetService.prepareApplicantCoverSheet(caseDetails);
+
+        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
+
+        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("123 Applicant Solicitor Street"));
+        assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
+        assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
+    }
+
+    @Test
+    public void shouldGenerateRespondentCoverSheetUsingRespondentSolicitorAddress() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithSolicitors();
+        coverSheetService.prepareRespondentCoverSheet(caseDetails);
+
+        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
+
+        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("321 Respondent Solicitor Street"));
+        assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
+        assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
+    }
+
     private CaseDetails caseDetails() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulk-print.json")) {
@@ -60,8 +109,21 @@ public class GenerateCoverSheetServiceTest {
         }
     }
 
-    private class TestDocumentClient implements DocumentClient {
+    private CaseDetails caseDetailsWithEmptySolAddress() throws Exception {
+        try (InputStream resourceAsStream =
+                     getClass().getResourceAsStream("/fixtures/bulk-print-empty-solicitor-address.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
+    }
 
+    private CaseDetails caseDetailsWithSolicitors() throws Exception {
+        try (InputStream resourceAsStream =
+                     getClass().getResourceAsStream("/fixtures/bulk-print-with-solicitors.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
+    }
+
+    private class TestDocumentClient implements DocumentClient {
 
         @Override
         public Document generatePdf(DocumentGenerationRequest request, String authorizationToken) {

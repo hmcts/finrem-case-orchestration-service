@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -54,36 +56,41 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
             config.getBulkPrintFileName());
     }
 
-    private void prepareApplicantCoverSheet(CaseDetails caseDetails) {
+    void prepareApplicantCoverSheet(CaseDetails caseDetails) {
         BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder = BulkPrintCoverSheet.builder()
             .ccdNumber(caseDetails.getId().toString())
             .recipientName(join(nullToEmpty(caseDetails.getData().get("applicantFMName")), " ",
                 nullToEmpty(caseDetails.getData().get("applicantLName"))));
 
-        Object respondentAddress = caseDetails.getData().get("applicantAddress");
-        Object solicitorAddress = caseDetails.getData().get("solicitorAddress");
+        Map applicantAddress = (Map) caseDetails.getData().get("applicantAddress");
+        Map solicitorAddress = (Map) caseDetails.getData().get("solicitorAddress");
 
-        if (solicitorAddress != null) {
-            caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) solicitorAddress));
-        } else if (respondentAddress != null) {
-            caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) respondentAddress));
+        if (addressLineOneAndPostCodeAreBothNotEmpty(solicitorAddress)) {
+            caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, solicitorAddress));
+        } else if (addressLineOneAndPostCodeAreBothNotEmpty(applicantAddress)) {
+            caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, applicantAddress));
         }
     }
 
-    private void prepareRespondentCoverSheet(CaseDetails caseDetails) {
+    void prepareRespondentCoverSheet(CaseDetails caseDetails) {
         BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder = BulkPrintCoverSheet.builder()
             .ccdNumber(caseDetails.getId().toString())
             .recipientName(join(nullToEmpty(caseDetails.getData().get("appRespondentFMName")), " ",
                     nullToEmpty(caseDetails.getData().get("appRespondentLName"))));
 
-        Object respondentAddress = caseDetails.getData().get("respondentAddress");
-        Object solicitorAddress = caseDetails.getData().get("rSolicitorAddress");
+        Map respondentAddress = (Map) caseDetails.getData().get("respondentAddress");
+        Map solicitorAddress = (Map) caseDetails.getData().get("rSolicitorAddress");
 
-        if (solicitorAddress != null) {
-            caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) solicitorAddress));
-        } else if (respondentAddress != null) {
-            caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, (Map) respondentAddress));
+        if (addressLineOneAndPostCodeAreBothNotEmpty(solicitorAddress)) {
+            caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, solicitorAddress));
+        } else if (addressLineOneAndPostCodeAreBothNotEmpty(respondentAddress)) {
+            caseDetails.getData().put(BULK_PRINT_COVER_SHEET,  getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, respondentAddress));
         }
+    }
+
+    private boolean addressLineOneAndPostCodeAreBothNotEmpty(Map address) {
+        return  ObjectUtils.isNotEmpty(address) && StringUtils.isNotBlank((String) address.get("AddressLine1"))
+                && StringUtils.isNotBlank((String) address.get("PostCode"));
     }
 
     private BulkPrintCoverSheet getBulkPrintCoverSheet(BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder,

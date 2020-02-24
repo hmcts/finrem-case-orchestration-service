@@ -110,8 +110,35 @@
           }
         }
       ],
+      "solicitorAddress": {
+        "AddressLine1": "123 Applicant Solicitor Street",
+        "AddressLine2": "",
+        "AddressLine3": "",
+        "County": "",
+        "Country": "UK",
+        "PostTown": "London",
+        "PostCode": "SE1"
+      },
       "applicantAddress": {
-        "AddressLine1": "1 Victoria Street",
+        "AddressLine1": "50 Applicant Street",
+        "AddressLine2": "",
+        "AddressLine3": "",
+        "County": null,
+        "Country": "UK",
+        "PostTown": "London",
+        "PostCode": "SE1"
+      },
+      "rSolicitorAddress": {
+        "AddressLine1": "321 Respondent Solicitor Street",
+        "AddressLine2": "",
+        "AddressLine3": "",
+        "County": "",
+        "Country": "UK",
+        "PostTown": "London",
+        "PostCode": "SE1"
+      },
+      "respondentAddress": {
+        "AddressLine1": "51 Respondent Street",
         "AddressLine2": "",
         "AddressLine3": "",
         "County": null,
@@ -122,52 +149,3 @@
     }
   }
 }
-
-{
-  "data": {
-    "applicantRepresented": "Yes",
-    "solicitorName": "JamesJ",
-    "solicitorFirm": "vivek",
-    "solicitorReference": "RG-123456789",
-    "solicitorAddress": {
-      "AddressLine1": "Westminster",
-      "AddressLine2": null,
-      "AddressLine3": null,
-      "PostTown": "LONDON",
-      "County": null,
-      "PostCode": "SW1H 9AJ",
-      "Country": "United Kingdom"
-    },
-    "solicitorPhone": null,
-    "solicitorEmail": "vivred@mailinator.com",
-    "solicitorDXnumber": null,
-    "solicitorAgreeToReceiveEmails": "No",
-    "applicantFMName": "Male",
-    "applicantLName": "vivek",
-    "appRespondentFMName": "QA",
-    "appRespondentLName": "test",
-    "appRespondentRep": "Yes",
-    "rSolicitorName": "4",
-    "rSolicitorFirm": "3",
-    "rSolicitorReference": null,
-    "rSolicitorAddress": {
-      "AddressLine1": "Buckingham Palace",
-      "AddressLine2": "",
-      "AddressLine3": "",
-      "PostTown": "London",
-      "County": "",
-      "PostCode": "SW1A 1AA",
-      "Country": "United Kingdom"
-    },
-    "rSolicitorPhone": null,
-    "rSolicitorEmail": null,
-    "rSolicitorDXnumber": null
-  },
-  "_links": {
-    "self": {
-      "href": "http://ccd-data-store-api-aat.service.core-compute-aat.internal/case-types/FinancialRemedyMVP2/validate?pageId=FR_updateContactDetailsupdateContactDetails"
-    }
-  }
-}
-
-
