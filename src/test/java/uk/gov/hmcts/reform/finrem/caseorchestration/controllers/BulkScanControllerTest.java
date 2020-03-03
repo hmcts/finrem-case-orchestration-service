@@ -10,9 +10,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseCreationDetails;
-import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.SuccessfulTransformationResponse;
-import uk.gov.hmcts.reform.bsp.common.model.update.in.BulkScanCaseUpdateRequest;
 import uk.gov.hmcts.reform.bsp.common.model.update.output.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataValidationRequest;
@@ -22,7 +20,6 @@ import uk.gov.hmcts.reform.bsp.common.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -35,6 +32,7 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.NOT_IMPLEMENTED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus.ERRORS;
@@ -119,22 +117,10 @@ public class BulkScanControllerTest {
 
     @Test
     public void shouldReturnUpdateServiceResults() {
-        ExceptionRecord exceptionRecord = ExceptionRecord.builder().build();
-        Map<String, Object> caseData = singletonMap(TEST_KEY, TEST_VALUE);
-
-        BulkScanCaseUpdateRequest bulkScanCaseUpdateRequest = new BulkScanCaseUpdateRequest(exceptionRecord, singletonMap(TEST_KEY, TEST_VALUE));
-
         ResponseEntity<SuccessfulUpdateResponse> response =
-            bulkScanController.updateCase(TEST_SERVICE_TOKEN, bulkScanCaseUpdateRequest);
+                bulkScanController.updateCase(TEST_SERVICE_TOKEN, new Object());
 
-        assertThat(response.getStatusCode(), is(OK));
-        SuccessfulUpdateResponse updateResponse = response.getBody();
-        assertThat(updateResponse.getWarnings(), is(emptyList()));
-        CaseUpdateDetails caseUpdateDetails = updateResponse.getCaseUpdateDetails();
-        assertThat(caseUpdateDetails.getCaseTypeId(), is(CASE_TYPE_ID_FR));
-        assertThat(caseUpdateDetails.getCaseData(), hasEntry(TEST_KEY, TEST_VALUE));
-
-        verify(authService).assertIsServiceAllowedToUpdate(TEST_SERVICE_TOKEN);
+        assertThat(response.getStatusCode(), is(NOT_IMPLEMENTED));
     }
 
     @Test
