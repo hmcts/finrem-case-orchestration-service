@@ -72,7 +72,7 @@ public class GeneralLetterServiceTest {
         assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
     }
 
-    private class TestDocumentClient implements DocumentClient {
+    private static class TestDocumentClient implements DocumentClient {
 
         private Map<String, Object> value;
 
