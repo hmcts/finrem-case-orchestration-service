@@ -43,13 +43,7 @@ public class FormAValidatorTest {
             new OcrDataField("PetitionerSolicitorAddressPostCode", ""),
             new OcrDataField("PetitionerSolicitorPhone", ""),
             new OcrDataField("PetitionerSolicitorEmail", ""),
-            new OcrDataField("D8PetitionerCorrespondencePostcode", ""),
-
-            new OcrDataField("MIAMExemptionsChecklist", ""),
-            new OcrDataField("MIAMDomesticViolenceChecklist", ""),
-            new OcrDataField("MIAMUrgencyChecklist", ""),
-            new OcrDataField("MIAMPreviousAttendanceChecklist", ""),
-            new OcrDataField("MIAMOtherGroundsChecklist", "")
+            new OcrDataField("D8PetitionerCorrespondencePostcode", "")
         );
 
         listOfAllMandatoryFields.addAll(nonMandatoryFieldsWithEmptyValues);
@@ -60,7 +54,7 @@ public class FormAValidatorTest {
     }
 
     @Test
-    public void shouldPassValidateForValesWeDontSupportYet() {
+    public void shouldPassValidateForValuesWeDontSupportYet() {
         String domesticViolenceValue = "ArrestedRelevantDomesticViolenceOffence, "
             + "invalid, insert random here,"
             + "UndertakingSection46Or63EFamilyLawActOrScotlandNorthernIrelandProtectiveInjunction";
@@ -74,20 +68,6 @@ public class FormAValidatorTest {
             new OcrDataField("MIAMUrgencyChecklist", urgencyValue),
             new OcrDataField("MIAMPreviousAttendanceChecklist", previousAttendanceValue)
         ));
-
-        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(listOfAllMandatoryFields);
-
-        assertThat(validationResult.getStatus(), is(SUCCESS));
-        assertThat(validationResult.getWarnings(), is(emptyList()));
-    }
-
-    @Test
-    public void shouldPassValidateNonMandatoryCommaSeparatedFieldContainingEmptyStringsAndStringsWithSpaces() {
-        String otherGroundsValue = "ApplicantBankruptApplicationForBankruptcyOrder,   ChildProspectivePartiesRule12,   ";
-
-        listOfAllMandatoryFields.add(
-            new OcrDataField("MIAMOtherGroundsChecklist", otherGroundsValue)
-        );
 
         OcrValidationResult validationResult = formAValidator.validateBulkScanForm(listOfAllMandatoryFields);
 
