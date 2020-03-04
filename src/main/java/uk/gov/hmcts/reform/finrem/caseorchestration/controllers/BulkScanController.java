@@ -152,5 +152,3 @@ public class BulkScanController {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     }
 }
-
-// just to kick off build
