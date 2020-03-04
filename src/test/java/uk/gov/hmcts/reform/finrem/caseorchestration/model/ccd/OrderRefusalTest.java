@@ -34,5 +34,4 @@ public class OrderRefusalTest {
         assertThat(order.getOrderRefusalJudgeName(), is("test3"));
         assertThat(order.getOrderRefusalAddComments(), is("comment1"));
     }
-
 }
