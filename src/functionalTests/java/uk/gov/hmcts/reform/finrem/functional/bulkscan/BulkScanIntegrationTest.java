@@ -80,25 +80,14 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
-    public void shouldGetSuccessfulResponsesWhenUsingWhitelistedServiceForUpdateEndPoint()  throws Exception {
-        String token = utils.getS2SToken(bulkScanTransformationAndUpdateMicroService);
-        body = loadValidBody();
-
-        Response forUpdateEndpoint = responseForEndpoint(token, UPDATE_END_POINT);
-
-        assert forUpdateEndpoint.getStatusCode() == 200 : "Service is not authorised to transform OCR data to case"
-            + forUpdateEndpoint.getStatusCode();
-    }
-
-    @Test
-    public void shouldGetServiceDeniedWhenUsingNonWhitelistedServiceForUpdateEndPoint()  throws Exception {
-        String token = utils.getS2SToken(bulkScanValidationMicroService);
-        body = loadValidBody();
-
-        Response forUpdateEndpoint = responseForEndpoint(token, UPDATE_END_POINT);
-
-        assert forUpdateEndpoint.getStatusCode() == 403 : "Not matching with expected error Code "
-           + forUpdateEndpoint.getStatusCode();
+    public void shouldBeNotImplemented() {
+        assert SerenityRest.given()
+            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .header(SERVICE_AUTHORISATION_HEADER, "it doesn't matter")
+            .relaxedHTTPSValidation()
+            .body(body)
+            .post(cosBaseUrl + UPDATE_END_POINT)
+            .getStatusCode() == 501 : "POST /update-case should return not implemented!";
     }
 
     private Response responseForEndpoint(String token, String endpointName) {

@@ -149,9 +149,9 @@ dependencyManagement {
         // CVE-2018-10237
         dependency group: 'com.google.guava', name: 'guava', version: '28.1-jre'
         // CVE-2019-17563
-        dependency group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.30'
-        dependency group: 'org.apache.tomcat.embed', name: 'tomcat-embed-el', version: '9.0.30'
-        dependency group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: '9.0.30'
+        dependency group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.31'
+        dependency group: 'org.apache.tomcat.embed', name: 'tomcat-embed-el', version: '9.0.31'
+        dependency group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: '9.0.31'
     }
 }
 

@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,9 +18,7 @@ import uk.gov.hmcts.reform.bsp.common.config.BulkScanEndpoints;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseCreationDetails;
-import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseUpdateDetails;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.SuccessfulTransformationResponse;
-import uk.gov.hmcts.reform.bsp.common.model.update.in.BulkScanCaseUpdateRequest;
 import uk.gov.hmcts.reform.bsp.common.model.update.output.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataValidationRequest;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResponse;
@@ -29,7 +28,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.event.bulkscan.BulkScanEvent
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 
 import javax.validation.Valid;
-import java.util.Collections;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -134,7 +132,7 @@ public class BulkScanController {
         consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON
     )
-    @ApiOperation(value = "API to update Financial Remedy case data by bulk scan")
+    @ApiOperation(value = "OUT OF SCOPE: API to update Financial Remedy case data by bulk scan")
     @ApiResponses({
         @ApiResponse(code = 200, response = SuccessfulUpdateResponse.class,
             message = "Update of case data has been successful"
@@ -147,21 +145,10 @@ public class BulkScanController {
     })
     public ResponseEntity<SuccessfulUpdateResponse> updateCase(
         @RequestHeader(name = SERVICE_AUTHORISATION_HEADER) String s2sAuthToken,
-        @Valid @RequestBody BulkScanCaseUpdateRequest request
+        @Valid @RequestBody Object request
     ) {
-        log.info("Updates existing case based on exception record");
+        log.warn("Bulk scan /POST update is not implemented for fin-rem cos");
 
-        authService.assertIsServiceAllowedToUpdate(s2sAuthToken);
-
-        SuccessfulUpdateResponse callbackResponse = SuccessfulUpdateResponse.builder()
-            .caseUpdateDetails(
-                CaseUpdateDetails
-                    .builder()
-                    .caseTypeId(CASE_TYPE_ID_FR)
-                    .caseData(request.getCaseData())
-                    .build())
-            .warnings(Collections.emptyList())
-            .build();
-        return ResponseEntity.ok(callbackResponse);
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
     }
 }
