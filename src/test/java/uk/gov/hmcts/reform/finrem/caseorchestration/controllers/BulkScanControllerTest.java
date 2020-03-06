@@ -36,6 +36,7 @@ import static org.springframework.http.HttpStatus.NOT_IMPLEMENTED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus.ERRORS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_FR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BULK_FORM_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BULK_UNSUPPORTED_FORM_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SERVICE_TOKEN;
@@ -107,7 +108,8 @@ public class BulkScanControllerTest {
         SuccessfulTransformationResponse transformationResponse = response.getBody();
         assertThat(transformationResponse.getWarnings(), is(emptyList()));
         CaseCreationDetails caseCreationDetails = transformationResponse.getCaseCreationDetails();
-        assertThat(caseCreationDetails.getCaseTypeId(), is("FINANCIAL_REMEDY"));
+        assertThat(caseCreationDetails.getCaseTypeId(), is(CASE_TYPE_ID_FR));
+        assertThat(caseCreationDetails.getEventId(), is("createCase"));
         assertThat(caseCreationDetails.getCaseData(), hasEntry(TEST_KEY, TEST_VALUE));
 
         verify(authService).assertIsServiceAllowedToUpdate(TEST_SERVICE_TOKEN);
