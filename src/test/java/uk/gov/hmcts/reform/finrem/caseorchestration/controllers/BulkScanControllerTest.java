@@ -109,7 +109,7 @@ public class BulkScanControllerTest {
         assertThat(transformationResponse.getWarnings(), is(emptyList()));
         CaseCreationDetails caseCreationDetails = transformationResponse.getCaseCreationDetails();
         assertThat(caseCreationDetails.getCaseTypeId(), is(CASE_TYPE_ID_FR));
-        assertThat(caseCreationDetails.getEventId(), is("caseCreate"));
+        assertThat(caseCreationDetails.getEventId(), is("createCase"));
         assertThat(caseCreationDetails.getCaseData(), hasEntry(TEST_KEY, TEST_VALUE));
 
         verify(authService).assertIsServiceAllowedToUpdate(TEST_SERVICE_TOKEN);
