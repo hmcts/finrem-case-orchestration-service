@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformations;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
 import org.springframework.stereotype.Component;
 
