@@ -8,11 +8,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
-import uk.gov.hmcts.reform.bsp.common.model.transformation.in.ExceptionRecord;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseCreationDetails;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bsp.common.model.update.output.SuccessfulUpdateResponse;
-import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataValidationRequest;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResponse;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
@@ -98,7 +98,7 @@ public class BulkScanControllerTest {
 
     @Test
     public void shouldReturnTransformerServiceResults() {
-        ExceptionRecord exceptionRecord = ExceptionRecord.builder().build();
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder().formType(TEST_BULK_FORM_TYPE).build();
         when(bulkScanService.transformBulkScanForm(exceptionRecord)).thenReturn(singletonMap(TEST_KEY, TEST_VALUE));
 
         ResponseEntity<SuccessfulTransformationResponse> response =
@@ -125,7 +125,7 @@ public class BulkScanControllerTest {
 
     @Test
     public void shouldReturnErrorForUnsupportedFormType_ForTransformation() {
-        ExceptionRecord exceptionRecord = ExceptionRecord.builder().build();
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder().formType(TEST_BULK_FORM_TYPE).build();
         when(bulkScanService.transformBulkScanForm(exceptionRecord)).thenThrow(UnsupportedFormTypeException.class);
 
         ResponseEntity response = bulkScanController.transformExceptionRecordIntoCase(TEST_SERVICE_TOKEN, exceptionRecord);

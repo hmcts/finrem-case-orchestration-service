@@ -37,7 +37,7 @@ public class BulkScanFormValidatorFactoryTest {
     }
 
     @Test
-    public void shouldReturnValidatorForNewDivorceCaseForm() {
+    public void shouldReturnValidatorForFormA() {
         BulkScanFormValidator validator = classUnderTest.getValidator("formA");
 
         assertThat(validator, is(instanceOf(FormAValidator.class)));
