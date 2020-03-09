@@ -14,6 +14,7 @@ import static java.util.Collections.emptyList;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus.SUCCESS;
+import static uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus.WARNINGS;
 
 public class FormAValidatorTest {
 
@@ -22,7 +23,9 @@ public class FormAValidatorTest {
 
     @Before
     public void setup() {
-        listOfAllMandatoryFields = new ArrayList<>();
+        listOfAllMandatoryFields = new ArrayList<>(asList(
+            new OcrDataField("ApplicantRepresented", "I am not represented by a solicitor in these proceedings")
+        ));
     }
 
     @Test
@@ -35,15 +38,22 @@ public class FormAValidatorTest {
     }
 
     @Test
+    public void shouldFailWhenInvalidValueOfMandatoryField() {
+        OcrValidationResult validationResult = formAValidator
+            .validateBulkScanForm(asList(new OcrDataField("ApplicantRepresented", "It's wrong!")));
+
+        assertThat(validationResult.getStatus(), is(WARNINGS));
+        assertThat(validationResult.getWarnings().size(), is(1));
+        assertThat(validationResult.getErrors(), is(emptyList()));
+    }
+
+    @Test
     public void shouldPassForNonMandatoryEmptyFields() {
         List<OcrDataField> nonMandatoryFieldsWithEmptyValues = asList(
-            new OcrDataField("PetitionerSolicitorName", ""),
-            new OcrDataField("D8SolicitorReference", ""),
-            new OcrDataField("PetitionerSolicitorFirm", ""),
-            new OcrDataField("PetitionerSolicitorAddressPostCode", ""),
-            new OcrDataField("PetitionerSolicitorPhone", ""),
-            new OcrDataField("PetitionerSolicitorEmail", ""),
-            new OcrDataField("D8PetitionerCorrespondencePostcode", "")
+            new OcrDataField("ApplicantSolicitorAddressLine1", ""),
+            new OcrDataField("ApplicantSolicitorAddressTown", ""),
+            new OcrDataField("ApplicantSolicitorAddressCounty", ""),
+            new OcrDataField("ApplicantSolicitorAddressPostcode", "")
         );
 
         listOfAllMandatoryFields.addAll(nonMandatoryFieldsWithEmptyValues);
@@ -60,7 +70,6 @@ public class FormAValidatorTest {
             + "UndertakingSection46Or63EFamilyLawActOrScotlandNorthernIrelandProtectiveInjunction";
 
         String urgencyValue = "RiskLifeLibertyPhysicalSafety";
-
         String previousAttendanceValue = "AnotherDisputeeResolutionn";
 
         listOfAllMandatoryFields.addAll(asList(
