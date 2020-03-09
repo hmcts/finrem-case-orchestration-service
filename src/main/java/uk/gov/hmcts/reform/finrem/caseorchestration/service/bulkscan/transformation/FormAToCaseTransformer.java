@@ -1,7 +1,7 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformations;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataField;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 
@@ -46,11 +46,6 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             ocrDataFields, formSpecificMap);
 
         return formSpecificMap;
-    }
-
-    @Override
-    Map<String, Object> runPostMappingModification(Map<String, Object> transformedCaseData) {
-        return transformedCaseData;
     }
 
     private void mapFullNameToFirstAndLast(String ocrFieldName, String ccdFirstNameFieldName, String ccdLastNameFieldName,

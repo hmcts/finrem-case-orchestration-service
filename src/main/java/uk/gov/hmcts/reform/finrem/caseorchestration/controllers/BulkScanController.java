@@ -16,20 +16,22 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import uk.gov.hmcts.reform.bsp.common.config.BulkScanEndpoints;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
-import uk.gov.hmcts.reform.bsp.common.model.transformation.in.ExceptionRecord;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.CaseCreationDetails;
 import uk.gov.hmcts.reform.bsp.common.model.transformation.output.SuccessfulTransformationResponse;
 import uk.gov.hmcts.reform.bsp.common.model.update.output.SuccessfulUpdateResponse;
 import uk.gov.hmcts.reform.bsp.common.model.validation.in.OcrDataValidationRequest;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResponse;
-import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.event.bulkscan.BulkScanEvents;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Map;
 
+import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_FR;
@@ -62,7 +64,7 @@ public class BulkScanController {
     })
     public ResponseEntity<OcrValidationResponse> validateOcrData(
         @RequestHeader(name = SERVICE_AUTHORISATION_HEADER) String s2sAuthToken,
-        @PathVariable(name = "form-type", required = false) String formType,
+        @PathVariable(name = "form-type") String formType,
         @Valid @RequestBody OcrDataValidationRequest request
     ) {
         log.info("Validating form {} for bulk scanning operation", formType);
@@ -72,9 +74,7 @@ public class BulkScanController {
         ResponseEntity<OcrValidationResponse> response;
 
         try {
-            OcrValidationResult ocrValidationResult = bulkScanService
-                .validateBulkScanForm(formType, request.getOcrDataFields());
-            OcrValidationResponse ocrValidationResponse = new OcrValidationResponse(ocrValidationResult);
+            OcrValidationResponse ocrValidationResponse = validateExceptionRecord(formType, request.getOcrDataFields());
             response = ok().body(ocrValidationResponse);
         } catch (UnsupportedFormTypeException unsupportedFormTypeException) {
             log.error(unsupportedFormTypeException.getMessage(), unsupportedFormTypeException);
@@ -103,7 +103,8 @@ public class BulkScanController {
         @RequestHeader(name = SERVICE_AUTHORISATION_HEADER) String s2sAuthToken,
         @Valid @RequestBody ExceptionRecord exceptionRecord
     ) {
-        log.info("Transforming exception record to case");
+        String exceptionRecordId = exceptionRecord.getId();
+        log.info("Transforming exception record to case. Id: {}", exceptionRecordId);
 
         authService.assertIsServiceAllowedToUpdate(s2sAuthToken);
 
@@ -121,6 +122,7 @@ public class BulkScanController {
 
             controllerResponse = ok(callbackResponse);
         } catch (UnsupportedFormTypeException exception) {
+            log.error(format("Error transforming exception record. Exception record id is %s", exceptionRecordId), exception);
             controllerResponse = ResponseEntity.unprocessableEntity().build();
         }
 
@@ -150,5 +152,9 @@ public class BulkScanController {
         log.warn("Bulk scan /POST update is not implemented for fin-rem cos");
 
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+    }
+
+    private OcrValidationResponse validateExceptionRecord(String formType, List<OcrDataField> ocrDataFields) {
+        return new OcrValidationResponse(bulkScanService.validateBulkScanForm(formType, ocrDataFields));
     }
 }
