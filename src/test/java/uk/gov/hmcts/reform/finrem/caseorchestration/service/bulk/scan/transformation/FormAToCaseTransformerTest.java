@@ -136,6 +136,40 @@ public class FormAToCaseTransformerTest {
         ));
     }
 
+    @Test
+    public void shouldMapPhoneNumber() {
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(Arrays.asList(
+            new OcrDataField("ApplicantRepresented", "I am not represented by a solicitor in these proceedings"),
+            new OcrDataField("ApplicantPhone", "0712345654")
+        ));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertThat(transformedCaseData, allOf(
+            aMapWithSize(3),
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry("applicantRepresentPaper", "I am not represented by a solicitor in these proceedings"),
+            hasEntry("applicantPhone", "0712345654")
+        ));
+    }
+
+    @Test
+    public void shouldMapEmail() {
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(Arrays.asList(
+            new OcrDataField("ApplicantRepresented", "I am not represented by a solicitor in these proceedings"),
+            new OcrDataField("ApplicantSolicitorEmail", "test@example.com")
+        ));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertThat(transformedCaseData, allOf(
+            aMapWithSize(3),
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry("applicantRepresentPaper", "I am not represented by a solicitor in these proceedings"),
+            hasEntry("solicitorEmail", "test@example.com")
+        ));
+    }
+
     private ExceptionRecord createExceptionRecord(List<OcrDataField> ocrDataFields) {
         return ExceptionRecord.builder().id(TEST_CASE_ID).ocrDataFields(ocrDataFields).build();
     }
