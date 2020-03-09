@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
+import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
@@ -34,20 +36,26 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
     @Override
     protected Map<String, Object> runFormSpecificTransformation(List<OcrDataField> ocrDataFields) {
-        Map<String, Object> formSpecificMap = new HashMap<>();
+        Map<String, Object> transformedCaseData = new HashMap<>();
         
         mapFullNameToFirstAndLast(OcrFieldName.APPLICANT_FULL_NAME, "applicantFMName", "applicantLName",
-            ocrDataFields, formSpecificMap);
+            ocrDataFields, transformedCaseData);
         mapFullNameToFirstAndLast(OcrFieldName.RESPONDENT_FULL_NAME, "appRespondentFMname", "appRespondentLName",
-            ocrDataFields, formSpecificMap);
+            ocrDataFields, transformedCaseData);
 
         commaSeparatedEntryTransformer(OcrFieldName.NATURE_OF_APPLICATION, natureOfApplicationChecklistToCcdFieldNames,
-            ocrDataFields, formSpecificMap);
+            ocrDataFields, transformedCaseData);
         commaSeparatedEntryTransformer(OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE,
-            dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames, ocrDataFields, formSpecificMap);
+            dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames, ocrDataFields, transformedCaseData);
 
-        return formSpecificMap;
+        applyMappingsForAddress("applicantSolicitor", "solicitorAddress", ocrDataFields, transformedCaseData);
+        applyMappingsForAddress("applicant", ocrDataFields, transformedCaseData);
+        applyMappingsForAddress("respondent", ocrDataFields, transformedCaseData);
+        applyMappingsForAddress("respondentSolicitor", "rSolicitorAddress", ocrDataFields, transformedCaseData);
+        
+        return transformedCaseData;
     }
+
 
     private void mapFullNameToFirstAndLast(String ocrFieldName, String ccdFirstNameFieldName, String ccdLastNameFieldName,
                                            List<OcrDataField> ocrDataFields, Map<String, Object> formSpecificMap) {
@@ -68,7 +76,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             .map(OcrDataField::getValue)
             .findFirst();
     }
-    
+
     private void commaSeparatedEntryTransformer(String commaSeparatedEntryKey,
                                                 Map<String, String> ocrFieldNamesToCcdFieldNames,
                                                 List<OcrDataField> ocrDataFields,
@@ -89,7 +97,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             }
         }
     }
-    
+
     private static Map<String, String> formAExceptionRecordToCcdMap() {
         Map<String, String> exceptionRecordToCcdFieldsMap = new HashMap<>();
 
@@ -101,6 +109,60 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLYING_FOR_CONSENT_ORDER, "applyingForConsentOrder");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.DIVORCE_STAGE_REACHED, "divorceStageReached");
 
+        exceptionRecordToCcdFieldsMap.put("ApplicantRepresented", "applicantRepresentPaper");
+        exceptionRecordToCcdFieldsMap.put("ApplicantSolicitorName", "solicitorName");
+        exceptionRecordToCcdFieldsMap.put("ApplicantSolicitorFirm", "solicitorFirm");
+        exceptionRecordToCcdFieldsMap.put("ApplicantSolicitorPhone", "solicitorPhone");
+        exceptionRecordToCcdFieldsMap.put("ApplicantSolicitorDXnumber", "solicitorDXnumber");
+        exceptionRecordToCcdFieldsMap.put("ApplicantSolicitorReference", "solicitorReference");
+        exceptionRecordToCcdFieldsMap.put("ApplicantPBANumber", "PBANumber");
+        exceptionRecordToCcdFieldsMap.put("ApplicantSolicitorEmail", "solicitorEmail");
+        exceptionRecordToCcdFieldsMap.put("ApplicantPhone", "applicantPhone");
+        exceptionRecordToCcdFieldsMap.put("ApplicantEmail", "applicantEmail");
+        
         return exceptionRecordToCcdFieldsMap;
+    }
+
+    private void applyMappingsForAddress(
+            String prefix, String unusualField, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
+        String nestedFieldPrefix = StringUtils.capitalize(prefix + "Address");
+        addMappingsTo(
+            unusualField,
+            ImmutableMap.of(
+                nestedFieldPrefix + "Line1", "AddressLine1",
+                nestedFieldPrefix + "County", "County",
+                nestedFieldPrefix + "Postcode", "PostCode",
+                nestedFieldPrefix + "Town", "PostTown",
+                nestedFieldPrefix + "Country", "Country"
+            ),
+            modifiedMap,
+            ocrDataFields
+        );
+    }
+
+    private void applyMappingsForAddress(
+            String prefix, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
+        applyMappingsForAddress(prefix, prefix + "Address", ocrDataFields, modifiedMap);
+    }
+
+    private void addMappingsTo(String parentField, ImmutableMap<String, String> mappings,
+                               Map<String, Object> modifiedMap, List<OcrDataField> ocrDataFields) {
+        HashMap<String, Object> parentFieldObject = new HashMap<>();
+
+        mappings.forEach((srcField, targetField) -> {
+            mapIfSourceExists(srcField, targetField, parentFieldObject, ocrDataFields);
+        });
+
+        if (parentFieldObject.size() > 0) {
+            modifiedMap.put(parentField, parentFieldObject);
+        }
+    }
+
+    private void mapIfSourceExists(String srcField, String targetField, HashMap<String, Object> parentObject,
+                                   List<OcrDataField> ocrDataFields) {
+        getValueFromOcrDataFields(srcField, ocrDataFields)
+            .ifPresent(srcFieldValue -> {
+                parentObject.put(targetField, srcFieldValue);
+            });
     }
 }

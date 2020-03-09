@@ -40,14 +40,15 @@ public class FormAValidatorTest {
     @Before
     public void setup() {
         mandatoryFieldsWithValues = new ArrayList<>(asList(
-                new OcrDataField(DIVORCE_CASE_NUMBER, "1234567890"),
-                new OcrDataField(APPLICANT_FULL_NAME, "Peter Griffin"),
-                new OcrDataField(RESPONDENT_FULL_NAME, "Louis Griffin"),
-                new OcrDataField(PROVISION_MADE_FOR, "in connection with matrimonial or civil partnership proceedings"),
-                new OcrDataField(NATURE_OF_APPLICATION, "Periodical Payment Order, Pension Attachment Order"),
-                new OcrDataField(APPLICANT_INTENDS_TO, "ApplyToCourtFor"),
-                new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "Yes"),
-                new OcrDataField(DIVORCE_STAGE_REACHED, "Decree Nisi")
+            new OcrDataField(DIVORCE_CASE_NUMBER, "1234567890"),
+            new OcrDataField(APPLICANT_FULL_NAME, "Peter Griffin"),
+            new OcrDataField(RESPONDENT_FULL_NAME, "Louis Griffin"),
+            new OcrDataField(PROVISION_MADE_FOR, "in connection with matrimonial or civil partnership proceedings"),
+            new OcrDataField(NATURE_OF_APPLICATION, "Periodical Payment Order, Pension Attachment Order"),
+            new OcrDataField(APPLICANT_INTENDS_TO, "ApplyToCourtFor"),
+            new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "Yes"),
+            new OcrDataField(DIVORCE_STAGE_REACHED, "Decree Nisi"),
+            new OcrDataField("ApplicantRepresented", "I am not represented by a solicitor in these proceedings")
         ));
 
         mandatoryFields = mandatoryFieldsWithValues.stream().map(OcrDataField::getName).collect(Collectors.toList());
@@ -87,7 +88,11 @@ public class FormAValidatorTest {
     @Test
     public void shouldPassForNonMandatoryEmptyFields() {
         List<OcrDataField> nonMandatoryFieldsWithEmptyValues = asList(
-            new OcrDataField(HWF_NUMBER, "")
+            new OcrDataField(HWF_NUMBER, ""),
+            new OcrDataField("ApplicantSolicitorAddressLine1", ""),
+            new OcrDataField("ApplicantSolicitorAddressTown", ""),
+            new OcrDataField("ApplicantSolicitorAddressCounty", ""),
+            new OcrDataField("ApplicantSolicitorAddressPostcode", "")
         );
 
         List<OcrDataField> ocrDataFields = new ArrayList<>(mandatoryFieldsWithValues);
@@ -109,7 +114,8 @@ public class FormAValidatorTest {
             new OcrDataField(APPLICANT_INTENDS_TO, "have breakfast"),
             new OcrDataField(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "house with pool"),
             new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "No"),
-            new OcrDataField(DIVORCE_STAGE_REACHED, "The cree")
+            new OcrDataField(DIVORCE_STAGE_REACHED, "The cree"),
+            new OcrDataField("ApplicantRepresented", "It's wrong!")
         ));
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
@@ -131,7 +137,11 @@ public class FormAValidatorTest {
                 "ApplyToDischargePeriodicalPaymentOrder"),
             containsValueThatIsNotAccepted(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE),
             APPLYING_FOR_CONSENT_ORDER + " only accepts value of \"Yes\"",
-            mustBeOneOf(DIVORCE_STAGE_REACHED, "Decree Nisi", "Decree Absolute")
+            mustBeOneOf(DIVORCE_STAGE_REACHED, "Decree Nisi", "Decree Absolute"),
+            mustBeOneOf("ApplicantRepresented", 
+                "I am not represented by a solicitor in these proceedings",
+                "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
+                "I am represented by a solicitor in these proceedings, who has signed Section 5")
         ));
     }
 

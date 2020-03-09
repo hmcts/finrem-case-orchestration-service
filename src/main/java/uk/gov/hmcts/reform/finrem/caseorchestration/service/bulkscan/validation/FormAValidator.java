@@ -14,6 +14,9 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static uk.gov.hmcts.reform.bsp.common.model.validation.BulkScanValidationPatterns.CCD_EMAIL_REGEX;
+import static uk.gov.hmcts.reform.bsp.common.model.validation.BulkScanValidationPatterns.CCD_PHONE_NUMBER_REGEX;
+import static uk.gov.hmcts.reform.bsp.common.service.PostcodeValidator.validatePostcode;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_INTENDS_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLYING_FOR_CONSENT_ORDER;
@@ -41,7 +44,8 @@ public class FormAValidator extends BulkScanFormValidator {
             NATURE_OF_APPLICATION,
             APPLICANT_INTENDS_TO,
             APPLYING_FOR_CONSENT_ORDER,
-            DIVORCE_STAGE_REACHED
+            DIVORCE_STAGE_REACHED,
+            "ApplicantRepresented"
     );
 
     private static final Map<String, List<String>> ALLOWED_VALUES_PER_FIELD = new HashMap<>();
@@ -63,6 +67,11 @@ public class FormAValidator extends BulkScanFormValidator {
         ));
         ALLOWED_VALUES_PER_FIELD.put(APPLYING_FOR_CONSENT_ORDER, asList("Yes"));
         ALLOWED_VALUES_PER_FIELD.put(DIVORCE_STAGE_REACHED, asList("Decree Nisi", "Decree Absolute"));
+        ALLOWED_VALUES_PER_FIELD.put("ApplicantRepresented", asList(
+            "I am not represented by a solicitor in these proceedings",
+            "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
+            "I am represented by a solicitor in these proceedings, who has signed Section 5"
+        ));
     }
     
     @Override
@@ -79,11 +88,19 @@ public class FormAValidator extends BulkScanFormValidator {
             validateNonMandatoryCommaSeparatedField(fieldsMap,
                 NATURE_OF_APPLICATION, natureOfApplicationChecklistToCcdFieldNames),
             validateNonMandatoryCommaSeparatedField(fieldsMap,
-                DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames)
+                DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames),
+            validateFieldMatchesRegex(fieldsMap, "ApplicantSolicitorPhone", CCD_PHONE_NUMBER_REGEX),
+            validateFieldMatchesRegex(fieldsMap, "ApplicantPhone", CCD_PHONE_NUMBER_REGEX),
+            validateFieldMatchesRegex(fieldsMap, "ApplicantSolicitorEmail", CCD_EMAIL_REGEX),
+            validateFieldMatchesRegex(fieldsMap, "ApplicantEmail", CCD_EMAIL_REGEX),
+            validatePostcode(fieldsMap, "ApplicantSolicitorAddressPostcode"),
+            validatePostcode(fieldsMap, "ApplicantAddressPostcode"),
+            validatePostcode(fieldsMap, "RespondentAddressPostcode"),
+            validatePostcode(fieldsMap, "RespondentSolicitorAddressPostcode")
         )
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
-        
+
         return errorMessages;
     }
 
@@ -126,5 +143,17 @@ public class FormAValidator extends BulkScanFormValidator {
         return hwfNumber != null && !hwfNumber.matches(HWF_NUMBER_6_DIGITS_REGEX)
             ? asList("HWFNumber is usually 6 digits")
             : emptyList();
+    }
+
+    private static List<String> validateFieldMatchesRegex(Map<String, String> fieldsMap, String fieldKey, String validationRegex) {
+        List<String> validationMessages = new ArrayList<>();
+
+        if (fieldsMap.containsKey(fieldKey)) {
+            String valueToValidate = fieldsMap.get(fieldKey);
+            if (!valueToValidate.matches(validationRegex)) {
+                validationMessages.add(fieldKey + " is not in a valid format");
+            }
+        }
+        return validationMessages;
     }
 }
