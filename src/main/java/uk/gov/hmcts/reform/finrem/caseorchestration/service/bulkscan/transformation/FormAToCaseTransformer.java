@@ -41,9 +41,10 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         mapFullNameToFirstAndLast(OcrFieldName.RESPONDENT_FULL_NAME, "appRespondentFMname", "appRespondentLName",
             ocrDataFields, formSpecificMap);
 
-        commaSeparatedEntryTransformer(OcrFieldName.NATURE_OF_APPLICATION, natureOfApplicationChecklistToCcdFieldNames, ocrDataFields, formSpecificMap);
-        commaSeparatedEntryTransformer(OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames,
+        commaSeparatedEntryTransformer(OcrFieldName.NATURE_OF_APPLICATION, natureOfApplicationChecklistToCcdFieldNames,
             ocrDataFields, formSpecificMap);
+        commaSeparatedEntryTransformer(OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE,
+            dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames, ocrDataFields, formSpecificMap);
 
         return formSpecificMap;
     }
@@ -56,8 +57,8 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             .findFirst()
             .ifPresent(fullName -> {
                 List<String> nameElements = asList(fullName.split(" "));
-                formSpecificMap.put(ccdFirstNameFieldName, String.join(" ", nameElements.subList(0, nameElements.size()-1)));
-                formSpecificMap.put(ccdLastNameFieldName, nameElements.get(nameElements.size()-1));
+                formSpecificMap.put(ccdFirstNameFieldName, String.join(" ", nameElements.subList(0, nameElements.size() - 1)));
+                formSpecificMap.put(ccdLastNameFieldName, nameElements.get(nameElements.size() - 1));
             });
     }
 

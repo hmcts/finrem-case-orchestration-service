@@ -146,11 +146,11 @@ public class FormAValidatorTest {
     private String mustBeOneOf(String fieldName, String... values) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(String.format("%s must be \"%s\"", fieldName, values[0]));
-        for (int i=1; i<values.length-1; i++) {
+        for (int i = 1; i < values.length - 1; i++) {
             stringBuilder.append(String.format(", \"%s\"", values[i]));
         }
         if (values.length > 1) {
-            stringBuilder.append(String.format(" or \"%s\"", values[values.length-1]));
+            stringBuilder.append(String.format(" or \"%s\"", values[values.length - 1]));
         }
         return stringBuilder.toString();
     }
