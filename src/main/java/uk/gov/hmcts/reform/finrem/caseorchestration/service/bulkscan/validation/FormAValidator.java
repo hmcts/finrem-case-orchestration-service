@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,7 @@ public class FormAValidator extends BulkScanFormValidator {
                 "ApplyToVary",
                 "ApplyToDischargePeriodicalPaymentOrder"
         ));
-        ALLOWED_VALUES_PER_FIELD.put(APPLYING_FOR_CONSENT_ORDER, Collections.singletonList("Yes"));
+        ALLOWED_VALUES_PER_FIELD.put(APPLYING_FOR_CONSENT_ORDER, asList("Yes"));
         ALLOWED_VALUES_PER_FIELD.put(DIVORCE_STAGE_REACHED, asList("Decree Nisi", "Decree Absolute"));
         ALLOWED_VALUES_PER_FIELD.put(APPLICANT_REPRESENTED, asList(
             "I am not represented by a solicitor in these proceedings",
@@ -108,7 +107,7 @@ public class FormAValidator extends BulkScanFormValidator {
     @Override
     protected List<String> runPostProcessingValidation(Map<String, String> fieldsMap) {
 
-        return Stream.of(
+        List<String> errorMessages = Stream.of(
             validateHwfNumber(fieldsMap, HWF_NUMBER),
             validateHasAtLeastTwoNames(fieldsMap, APPLICANT_FULL_NAME),
             validateHasAtLeastTwoNames(fieldsMap, RESPONDENT_FULL_NAME),
@@ -127,6 +126,8 @@ public class FormAValidator extends BulkScanFormValidator {
         )
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
+
+        return errorMessages;
     }
 
     private static List<String> validateNonMandatoryCommaSeparatedField(Map<String, String> fieldsMap, String commaSeparatedFieldKey,
@@ -166,7 +167,7 @@ public class FormAValidator extends BulkScanFormValidator {
     private static List<String> validateHwfNumber(Map<String, String> fieldsMap, String fieldName) {
         String hwfNumber = fieldsMap.get(fieldName);
         return hwfNumber != null && !hwfNumber.matches(HWF_NUMBER_6_DIGITS_REGEX)
-            ? Collections.singletonList("HWFNumber is usually 6 digits")
+            ? asList("HWFNumber is usually 6 digits")
             : emptyList();
     }
 
