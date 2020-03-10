@@ -70,7 +70,8 @@ public class FormAValidatorTest {
             new OcrDataField("AddressofProperties", "26 Westminster Avenue"),
             new OcrDataField("MortgageDetails", "We paid for the house with our mortgage which we split"),
             new OcrDataField("OrderForChildren", "there is no agreement, but the applicant is applying for payments"),
-            new OcrDataField("OrderForChildrenNoAgreement", "in addition to child support maintenance already paid under a Child Support Agency assessment"),
+            new OcrDataField("OrderForChildrenNoAgreement",
+                "in addition to child support maintenance already paid under a Child Support Agency assessment"),
             new OcrDataField("ChildSupportAgencyCalculationMade", "Yes"),
             new OcrDataField("ChildSupportAgencyCalculationReason", "Various reasons why I'm making this application")
         );
@@ -179,7 +180,8 @@ public class FormAValidatorTest {
                 "in addition to child support maintenance already paid under a Child Support Agency assessment",
                 "to meet expenses arising from a child’s disability",
                 "to meet expenses incurred by a child in being educated or training for work",
-                "when either the child or the person with care of the child or the absent parent of the child is not habitually resident in the United Kingdom"),
+                "when either the child or the person with care of the child "
+                    + "or the absent parent of the child is not habitually resident in the United Kingdom"),
             CHILD_SUPPORT_AGENCY_CALCULATION_MADE + " must be \"Yes\", \"No\" or left blank"
         ));
     }
