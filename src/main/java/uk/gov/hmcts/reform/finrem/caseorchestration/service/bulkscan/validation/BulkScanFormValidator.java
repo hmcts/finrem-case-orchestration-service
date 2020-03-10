@@ -64,6 +64,11 @@ public abstract class BulkScanFormValidator {
         StringBuilder errorMessage = new StringBuilder();
 
         int arraySize = allowedValues.size();
+        
+        if (arraySize == 1) {
+            return String.format("%s only accepts value of \"%s\"", fieldName, allowedValues.get(0));
+        }
+        
         for (int i = 1; i <= arraySize; i++) {
             String allowedValue = allowedValues.get(i - 1);
 
