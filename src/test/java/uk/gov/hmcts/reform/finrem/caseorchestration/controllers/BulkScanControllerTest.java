@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import uk.gov.hmcts.reform.bsp.common.error.InvalidDataException;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
@@ -128,17 +127,6 @@ public class BulkScanControllerTest {
     public void shouldReturnErrorForUnsupportedFormType_ForTransformation() {
         ExceptionRecord exceptionRecord = ExceptionRecord.builder().formType(TEST_BULK_FORM_TYPE).build();
         when(bulkScanService.transformBulkScanForm(exceptionRecord)).thenThrow(UnsupportedFormTypeException.class);
-
-        ResponseEntity response = bulkScanController.transformExceptionRecordIntoCase(TEST_SERVICE_TOKEN, exceptionRecord);
-
-        assertThat(response.getStatusCode(), is(UNPROCESSABLE_ENTITY));
-        verify(authService).assertIsServiceAllowedToUpdate(TEST_SERVICE_TOKEN);
-    }
-
-    @Test
-    public void shouldReturnErrorWhenInvalidDateException_ForTransformation() {
-        ExceptionRecord exceptionRecord = ExceptionRecord.builder().formType(TEST_BULK_FORM_TYPE).build();
-        when(bulkScanService.transformBulkScanForm(exceptionRecord)).thenThrow(InvalidDataException.class);
 
         ResponseEntity response = bulkScanController.transformExceptionRecordIntoCase(TEST_SERVICE_TOKEN, exceptionRecord);
 
