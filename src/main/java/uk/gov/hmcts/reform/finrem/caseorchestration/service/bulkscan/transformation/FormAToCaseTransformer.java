@@ -181,6 +181,22 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             transformedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
         }
 
+        transformedCaseData.replace("natureOfApplication6",
+            "for a stepchild or stepchildren",
+            "Step Child or Step Children");
+
+        transformedCaseData.replace("natureOfApplication6",
+            "in addition to child support maintenance already paid under a Child Support Agency assessment",
+            "In addition to child support");
+
+        transformedCaseData.replace("natureOfApplication6",
+            "to meet expenses arising from a child’s disability", "disability expenses");
+
+        transformedCaseData.replace("natureOfApplication6",
+            "when either the child or the person with care of the child or "
+                + "the absent parent of the child is not habitually resident in the United Kingdom",
+            "When not habitually resident");
+
         return transformedCaseData;
     }
 }
