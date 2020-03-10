@@ -40,7 +40,15 @@ public class FormAToCaseTransformerTest {
             new OcrDataField(OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "a lump sum order, a pension sharing order"),
             new OcrDataField(OcrFieldName.APPLYING_FOR_CONSENT_ORDER, "Yes"),
             new OcrDataField(OcrFieldName.DIVORCE_STAGE_REACHED, "Decree Nisi"),
-            new OcrDataField("ApplicantRepresented", "I am not represented by a solicitor in these proceedings")
+            new OcrDataField(OcrFieldName.APPLICANT_REPRESENTED, "I am not represented by a solicitor in these proceedings"),
+            new OcrDataField(OcrFieldName.ADDRESS_OF_PROPERTIES, "The address of other properties"),
+            new OcrDataField(OcrFieldName.MORTGAGE_DETAILS, "Various details of our mortgage"),
+            new OcrDataField(OcrFieldName.ORDER_FOR_CHILDREN,
+                "there is a written agreement made on or after 5 April 1993 about maintenance for the benefit of children"),
+            new OcrDataField(OcrFieldName.ORDER_FOR_CHILDREN_NO_AGREEMENT,
+                "in addition to child support maintenance already paid under a Child Support Agency assessment"),
+            new OcrDataField(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "Yes"),
+            new OcrDataField(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_REASON, "Random reason that explains calculation")
         ));
 
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(exceptionRecord);
@@ -57,7 +65,16 @@ public class FormAToCaseTransformerTest {
             hasEntry("applicantIntendsTo", "ApplyToCourtFor"),
             hasEntry("applyingForConsentOrder", "Yes"),
             hasEntry("divorceStageReached", "Decree Nisi"),
-            hasEntry("applicantRepresentPaper", "I am not represented by a solicitor in these proceedings")
+            hasEntry("applicantRepresentPaper", "I am not represented by a solicitor in these proceedings"),
+
+            hasEntry("natureOfApplication3a", "The address of other properties"),
+            hasEntry("natureOfApplication3b", "Various details of our mortgage"),
+            hasEntry("natureOfApplication5b",
+                "there is a written agreement made on or after 5 April 1993 about maintenance for the benefit of children"),
+            // TODO: add check for orderForChildrenQuestion1
+            hasEntry("natureOfApplication6", "in addition to child support maintenance already paid under a Child Support Agency assessment"),
+            hasEntry("ChildSupportAgencyCalculationMade", "Yes"),
+            hasEntry("ChildSupportAgencyCalculationReason", "Random reason that explains calculation")
         ));
     }
 
