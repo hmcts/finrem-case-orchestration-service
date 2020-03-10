@@ -17,6 +17,9 @@ import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FormAValidator;
 
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
@@ -38,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RunWith(SpringRunner.class)
 public class TransformationBulkScanTest {
     private static final String TRANSFORMATION_URL = "/transform-exception-record";
+    private static final String FORMA_JSON_PATH = "fixtures/bulkscan.transformation/simple-formA.json";
 
     @Autowired
     private MockMvc mockMvc;
@@ -55,11 +59,7 @@ public class TransformationBulkScanTest {
 
     @Test
     public void shouldReturnErrorResponseForInvalidData() throws Exception {
-        String jsonPayload = "{\"form_type\": \"formA\",\n" +
-                "  \"ocr_data_fields\": [\n" +
-                "    { \"name\": \"ApplicantSolicitorName\", \"value\": \"John\" }\n" +
-                "  ]\n" +
-                "}";
+        String jsonPayload = loadResourceAsString(FORMA_JSON_PATH);
         String warningMsg = "warn!";
 
         when(bulkScanFormValidator.validateBulkScanForm(any()))
@@ -77,5 +77,15 @@ public class TransformationBulkScanTest {
 
     private Matcher<String> hasErrorWithMessageCopiedFromWarning(String warningMsg) {
         return allOf(isJson(), hasJsonPath("$.errors", equalTo(Arrays.asList(warningMsg))));
+    }
+
+    public static String loadResourceAsString(final String filePath) throws Exception {
+        URL url = TransformationBulkScanTest.class.getClassLoader().getResource(filePath);
+
+        if (url == null) {
+            throw new IllegalArgumentException(String.format("Could not find resource in path %s", filePath));
+        }
+
+        return new String(Files.readAllBytes(Paths.get(url.toURI())));
     }
 }

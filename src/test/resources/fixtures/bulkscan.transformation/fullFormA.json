@@ -1,9 +1,0 @@
-{
-  "case_type_id": "financial_remedy",
-  "id": "LV481297",
-  "po_box": "PO 17",
-  "ocr_data_fields": [
-    { "name": "PetitionerFirstName", "value": "Christopher" },
-    { "name": "PetitionerLastName", "value": "O'John" }
-  ]
-}
