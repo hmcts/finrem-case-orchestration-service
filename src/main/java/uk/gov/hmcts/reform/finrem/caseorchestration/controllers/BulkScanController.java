@@ -69,7 +69,7 @@ public class BulkScanController {
     ) {
         log.info("Validating form {} for bulk scanning operation", formType);
 
-        //authService.assertIsServiceAllowedToValidate(s2sAuthToken);
+        authService.assertIsServiceAllowedToValidate(s2sAuthToken);
 
         ResponseEntity<OcrValidationResponse> response;
 
@@ -106,7 +106,7 @@ public class BulkScanController {
         String exceptionRecordId = exceptionRecord.getId();
         log.info("Transforming exception record to case. Id: {}", exceptionRecordId);
 
-        //authService.assertIsServiceAllowedToUpdate(s2sAuthToken);
+        authService.assertIsServiceAllowedToUpdate(s2sAuthToken);
 
         ResponseEntity<SuccessfulTransformationResponse> controllerResponse;
         try {
