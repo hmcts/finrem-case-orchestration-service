@@ -73,7 +73,7 @@ public class FormAToCaseTransformerTest {
             hasEntry("natureOfApplication3b", "Various details of our mortgage"),
             hasEntry("natureOfApplication5b",
                 "there is a written agreement made on or after 5 April 1993 about maintenance for the benefit of children"),
-            // TODO: add check for orderForChildrenQuestion1
+            hasEntry("orderForChildrenQuestion1", "Yes"),
             hasEntry("natureOfApplication6", "In addition to child support"),
             hasEntry("ChildSupportAgencyCalculationMade", "Yes"),
             hasEntry("ChildSupportAgencyCalculationReason", "Random reason that explains calculation")
