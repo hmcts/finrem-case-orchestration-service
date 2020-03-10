@@ -17,8 +17,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.collection.IsMapWithSize.aMapWithSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
@@ -206,6 +208,39 @@ public class FormAToCaseTransformerTest {
             hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
             hasEntry("applicantRepresentPaper", "I am not represented by a solicitor in these proceedings"),
             hasEntry("solicitorEmail", "test@example.com")
+        ));
+    }
+
+    @Test
+    public void shouldSetOrderForChildrenQuestion1ToYesIfOrderForChildrenFieldIsPopulated() {
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
+            new OcrDataField("OrderForChildren",
+                "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children")
+        ));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertThat(transformedCaseData, allOf(
+            aMapWithSize(3),
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry("natureOfApplication5b", "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children"),
+            hasEntry("orderForChildrenQuestion1", "Yes")
+        ));
+    }
+
+    @Test
+    public void shouldNotSetOrderForChildrenQuestion1IfOrderForChildrenFieldIsNotPopulated() {
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
+            new OcrDataField("OrderForChildren", "")
+        ));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertThat(transformedCaseData, allOf(
+            aMapWithSize(2),
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry("natureOfApplication5b", ""),
+            not(hasKey("orderForChildrenQuestion1"))
         ));
     }
 

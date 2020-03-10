@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.getCommaSeparatedValuesFromOcrDataField;
@@ -114,7 +113,6 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.ADDRESS_OF_PROPERTIES, "natureOfApplication3a");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.MORTGAGE_DETAILS, "natureOfApplication3b");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.ORDER_FOR_CHILDREN, "natureOfApplication5b");
-        // TODO: need to map orderForChildrenQuestion1 to yes/no depending on value above
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.ORDER_FOR_CHILDREN_NO_AGREEMENT, "natureOfApplication6");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "ChildSupportAgencyCalculationMade");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_REASON, "ChildSupportAgencyCalculationReason");
@@ -133,8 +131,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         return exceptionRecordToCcdFieldsMap;
     }
 
-    private void applyMappingsForAddress(
-            String prefix, String unusualField, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
+    private void applyMappingsForAddress(String prefix, String unusualField, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
         String nestedFieldPrefix = StringUtils.capitalize(prefix + "Address");
         addMappingsTo(
             unusualField,
@@ -168,11 +165,22 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         }
     }
 
-    private void mapIfSourceExists(String srcField, String targetField, HashMap<String, Object> parentObject,
-                                   List<OcrDataField> ocrDataFields) {
+    private void mapIfSourceExists(String srcField, String targetField, HashMap<String, Object> parentObject, List<OcrDataField> ocrDataFields) {
         getValueFromOcrDataFields(srcField, ocrDataFields)
             .ifPresent(srcFieldValue -> {
                 parentObject.put(targetField, srcFieldValue);
             });
+    }
+
+    @Override
+    protected Map<String, Object> runPostMappingModification(Map<String, Object> transformedCaseData) {
+
+        // If OrderForChildren is populated then set orderForChildrenQuestion1 to Yes
+        if (StringUtils.isNotEmpty((String) transformedCaseData.get("natureOfApplication5b"))) {
+
+            transformedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
+        }
+
+        return transformedCaseData;
     }
 }
