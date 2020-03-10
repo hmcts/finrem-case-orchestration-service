@@ -11,6 +11,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 @RunWith(SerenityRunner.class)
 @Slf4j
 public class BulkScanIntegrationTest extends IntegrationTestBase {
@@ -28,11 +34,13 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
     private static final String VALIDATION_END_POINT = "/forms/formA/validate-ocr";
     private static final String TRANSFORMATION_END_POINT = "/transform-exception-record";
     private static final String UPDATE_END_POINT = "/update-case";
+    
+    public static final String FORM_A_JSON_PATH = "json/bulkscan/formA.json";
 
     private static String body;
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         body = loadValidBody();
     }
 
@@ -47,9 +55,8 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
-    public void shouldGetServiceDeniedWhenUsingNonWhitelistedServiceForValidationEndPoint()  throws Exception {
+    public void shouldGetServiceDeniedWhenUsingNonWhitelistedServiceForValidationEndPoint() {
         String token = utils.getS2SToken(bulkScanTransformationAndUpdateMicroService);
-        body = loadValidBody();
 
         Response forValidationEndpoint = responseForValidationEndpoint(token);
 
@@ -61,17 +68,15 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
     public void shouldGetSuccessfulResponsesWhenUsingWhitelistedServiceForTransformationEndPoint() {
         String token = utils.getS2SToken(bulkScanTransformationAndUpdateMicroService);
 
-        body = loadValidBody();
         Response forTransformationEndpoint = responseForEndpoint(token, TRANSFORMATION_END_POINT);
 
-        assert forTransformationEndpoint.getStatusCode() == 200 : "Service is not authorised to transform OCR data to case"
+        assert forTransformationEndpoint.getStatusCode() == 200 : "Service is not authorised to transform OCR data to case "
             + forTransformationEndpoint.getStatusCode();
     }
 
     @Test
-    public void shouldGetServiceDeniedWhenUsingNonWhitelistedServiceForTransformationEndPoint()  throws Exception {
+    public void shouldGetServiceDeniedWhenUsingNonWhitelistedServiceForTransformationEndPoint() {
         String token = utils.getS2SToken(bulkScanValidationMicroService);
-        body = loadValidBody();
 
         Response forTransformationEndpoint = responseForEndpoint(token, TRANSFORMATION_END_POINT);
 
@@ -108,16 +113,13 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
             .post(cosBaseUrl + VALIDATION_END_POINT);
     }
 
-    private String loadValidBody() {
-        return "{\n"
-            + "  \"case_type_id\": \"FinancialRemedyContested\",\n"
-            + "  \"id\": \"LV481297\",\n"
-            + "  \"po_box\": \"PO 17\",\n"
-            + "  \"form_type\": \"formA\",\n"
-            + "  \"ocr_data_fields\": [\n"
-            + "    { \"name\": \"PetitionerFirstName\", \"value\": \"John\" },\n"
-            + "    { \"name\": \"PetitionerLastName\", \"value\": \"Smith\" }\n"
-            + "  ]\n"
-            + "}";
+    private String loadValidBody() throws URISyntaxException, IOException {
+        URL url = this.getClass().getClassLoader().getResource(FORM_A_JSON_PATH);
+
+        if (url == null) {
+            throw new IllegalArgumentException(String.format("Could not find resource in path %s", FORM_A_JSON_PATH));
+        }
+
+        return new String(Files.readAllBytes(Paths.get(url.toURI())));
     }
 }

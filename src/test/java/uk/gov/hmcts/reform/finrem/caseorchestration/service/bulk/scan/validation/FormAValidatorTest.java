@@ -55,8 +55,17 @@ public class FormAValidatorTest {
     }
 
     @Test
-    public void shouldPassValidation() {
+    public void shouldPassValidationForValidMandatoryAndOptionalFields() {
+        List<OcrDataField> optionalFieldsWithValues = asList(
+            new OcrDataField(HWF_NUMBER, "123456"),
+            new OcrDataField(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "a lump sum order, a pension compensation sharing order"),
+            new OcrDataField("ApplicantSolicitorAddressLine1", "20 Solicitors Road"),
+            new OcrDataField("ApplicantSolicitorAddressTown", "Soltown"),
+            new OcrDataField("ApplicantSolicitorAddressCounty", "East Midlands"),
+            new OcrDataField("ApplicantSolicitorAddressPostcode", "GL51 0EX")
+        );
         List<OcrDataField> ocrDataFields = new ArrayList<>(mandatoryFieldsWithValues);
+        ocrDataFields.addAll(optionalFieldsWithValues);
         OcrValidationResult validationResult = formAValidator.validateBulkScanForm(ocrDataFields);
 
         assertThat(validationResult.getStatus(), is(SUCCESS));
@@ -74,7 +83,7 @@ public class FormAValidatorTest {
     }
 
     @Test
-    public void shouldFailValidationWhenMandatoryFieldIsPresentButEmpty() {
+    public void shouldFailValidationWhenMandatoryFieldsArePresentButEmpty() {
         OcrValidationResult validationResult = formAValidator.validateBulkScanForm(
             mandatoryFields.stream()
                 .map(emptyValueOcrDataField)
@@ -145,6 +154,27 @@ public class FormAValidatorTest {
         ));
     }
 
+    @Test
+    public void shouldPassValidateForValuesWeDontSupportYet() {
+        String domesticViolenceValue = "ArrestedRelevantDomesticViolenceOffence, "
+            + "invalid, insert random here,"
+            + "UndertakingSection46Or63EFamilyLawActOrScotlandNorthernIrelandProtectiveInjunction";
+
+        String urgencyValue = "RiskLifeLibertyPhysicalSafety";
+        String previousAttendanceValue = "AnotherDisputeeResolutionn";
+
+        mandatoryFieldsWithValues.addAll(asList(
+            new OcrDataField("MIAMDomesticViolenceChecklist", domesticViolenceValue),
+            new OcrDataField("MIAMUrgencyChecklist", urgencyValue),
+            new OcrDataField("MIAMPreviousAttendanceChecklist", previousAttendanceValue)
+        ));
+
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(mandatoryFieldsWithValues);
+
+        assertThat(validationResult.getStatus(), is(SUCCESS));
+        assertThat(validationResult.getWarnings(), is(emptyList()));
+    }
+    
     private String containsValueThatIsNotAccepted(String fieldName) {
         return String.format("%s contains a value that is not accepted", fieldName);
     }

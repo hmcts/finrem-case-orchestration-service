@@ -1,0 +1,23 @@
+{
+  "case_type_id": "FinancialRemedyContested",
+  "id": "LV481297",
+  "po_box": "PO 17",
+  "form_type": "formA",
+  "ocr_data_fields": [
+    { "name": "divorceCaseNumber", "value": "1234567890" },
+    { "name": "HWFNumber", "value": "123456" },
+    { "name": "ApplicantFullName", "value": "Peter Griffin" },
+    { "name": "RespondentFullName", "value": "Louis Griffin" },
+    { "name": "ProvisionMadeFor", "value": "in connection with matrimonial or civil partnership proceedings" },
+    { "name": "natureOfApplication", "value": "Periodical Payment Order, Pension Attachment Order" },
+    { "name": "ApplicantIntendsTo", "value": "ApplyToCourtFor" },
+    { "name": "DischargePeriodicalPaymentSubstituteFor", "value": "" },
+    { "name": "ApplyingForConsentOrder", "value": "Yes" },
+    { "name": "divorceStageReached", "value": "Decree Nisi" },
+    { "name": "ApplicantRepresented", "value": "I am not represented by a solicitor in these proceedings" },
+    { "name": "ApplicantSolicitorAddressLine1", "value": "" },
+    { "name": "ApplicantSolicitorAddressTown", "value": "" },
+    { "name": "ApplicantSolicitorAddressCounty", "value": "" },
+    { "name": "ApplicantSolicitorAddressPostcode", "value": "" }
+  ]
+}
