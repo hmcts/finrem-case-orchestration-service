@@ -28,7 +28,6 @@ import static org.springframework.test.util.AssertionErrors.assertTrue;
     })
 public class SidamServiceConsumerTest {
 
-
     @Autowired
     private IdamService idamService;
     private static final String AUTH_TOKEN = "someAuthorizationToken";

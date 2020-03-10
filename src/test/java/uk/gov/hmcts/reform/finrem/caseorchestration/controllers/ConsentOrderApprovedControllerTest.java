@@ -47,7 +47,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     @Test
     public void consentOrderApproved400Error() throws Exception {
-        doEmtpyCaseDataSetUp();
+        doEmptyCaseDataSetUp();
 
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())

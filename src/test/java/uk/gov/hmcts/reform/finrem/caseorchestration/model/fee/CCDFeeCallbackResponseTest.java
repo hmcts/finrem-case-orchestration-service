@@ -12,7 +12,7 @@ import static org.hamcrest.Matchers.is;
 
 public class CCDFeeCallbackResponseTest {
 
-    protected CCDFeeCallbackResponse ccdResponse;
+    private CCDFeeCallbackResponse ccdResponse;
 
     @Before
     public void setUp() throws Exception {

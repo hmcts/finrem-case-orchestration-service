@@ -36,17 +36,21 @@ public class FunctionalTestUtils {
     @Autowired
     private ServiceAuthTokenGenerator tokenGenerator;
 
-    @Value("${user.id.url}")
-    private String userId;
-    @Value("${idam.username}")
-    private String idamUserName;
-    @Value("${idam.userpassword}")
-    private String idamUserPassword;
-    @Value("${idam.s2s-auth.microservice}")
-    private String microservice;
     @Autowired
     private IdamUtils idamUtils;
-    private String token;
+
+    @Value("${user.id.url}")
+    private String userId;
+
+    @Value("${idam.username}")
+    private String idamUserName;
+
+    @Value("${idam.userpassword}")
+    private String idamUserPassword;
+
+    @Value("${idam.s2s-auth.microservice}")
+    private String microservice;
+
     private JsonPath jsonPathEvaluator;
 
     public String getJsonFromFile(String fileName) {
@@ -80,7 +84,6 @@ public class FunctionalTestUtils {
         return Headers.headers(
                 new Header("Authorization", "Bearer "
                         + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
-                //new Header("Authorization", "Bearer " + idamUtils.getClientAuthToken()),
                 new Header("Content-Type", ContentType.JSON.toString()));
     }
 
@@ -129,7 +132,6 @@ public class FunctionalTestUtils {
         } catch (Throwable t) {
             t.printStackTrace();
 
-
             try {
                 if (cosDoc != null) {
                     cosDoc.close();
@@ -140,11 +142,8 @@ public class FunctionalTestUtils {
                 }
             } catch (Exception e1) {
                 e1.printStackTrace();
-
-
             }
             throw new Error(t);
-
         }
 
         return parsedText;

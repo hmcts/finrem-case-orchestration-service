@@ -35,7 +35,6 @@ public class GeneralLetterServiceTest {
     private DocumentClient generatorClient;
     private DocumentConfiguration config;
     private ObjectMapper mapper = new ObjectMapper();
-
     private GeneralLetterService service;
 
     @Before
@@ -93,8 +92,7 @@ public class GeneralLetterServiceTest {
         }
 
         @Override
-        public DocumentValidationResponse checkUploadedFileType(String authorizationToken,
-                                                                String fileUrl) {
+        public DocumentValidationResponse checkUploadedFileType(String authorizationToken, String fileUrl) {
             throw new UnsupportedOperationException();
         }
 

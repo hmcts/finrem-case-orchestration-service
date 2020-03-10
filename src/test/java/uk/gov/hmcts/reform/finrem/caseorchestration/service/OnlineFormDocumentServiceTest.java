@@ -25,9 +25,7 @@ public class OnlineFormDocumentServiceTest {
 
     private DocumentConfiguration config;
     private ObjectMapper mapper = new ObjectMapper();
-
     private OnlineFormDocumentService service;
-
     private OptionIdToValueTranslator translator;
 
     @Before
@@ -42,15 +40,13 @@ public class OnlineFormDocumentServiceTest {
 
     @Test
     public void generateMiniFormA() {
-        service = new OnlineFormDocumentService(new DocumentClientStub(new CountDownLatch(1)),
-                config, translator, mapper);
+        service = new OnlineFormDocumentService(new DocumentClientStub(new CountDownLatch(1)), config, translator, mapper);
         doCaseDocumentAssert(service.generateMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
     }
 
     @Test
     public void generateContestedMiniFormA() {
-        service = new OnlineFormDocumentService(new DocumentClientStub(new CountDownLatch(1)),
-                config, translator, mapper);
+        service = new OnlineFormDocumentService(new DocumentClientStub(new CountDownLatch(1)), config, translator, mapper);
         doCaseDocumentAssert(service.generateContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
     }
 
@@ -59,8 +55,7 @@ public class OnlineFormDocumentServiceTest {
         CountDownLatch latch = new CountDownLatch(2);
         service = new OnlineFormDocumentService(new DocumentClientStub(latch), config, translator, mapper);
 
-        CaseDocument result =
-                service.generateDraftContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().data(caseData()).build());
+        CaseDocument result = service.generateDraftContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().data(caseData()).build());
         latch.await();
 
         doCaseDocumentAssert(result);
@@ -101,8 +96,7 @@ public class OnlineFormDocumentServiceTest {
         }
 
         @Override
-        public DocumentValidationResponse checkUploadedFileType(String authorizationToken,
-                                                                String fileUrl) {
+        public DocumentValidationResponse checkUploadedFileType(String authorizationToken, String fileUrl) {
             return  DocumentValidationResponse.builder().build();
         }
 

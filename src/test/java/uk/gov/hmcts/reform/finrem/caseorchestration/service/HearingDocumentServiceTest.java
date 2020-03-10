@@ -20,6 +20,8 @@ import java.util.concurrent.CompletionException;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
@@ -37,6 +39,9 @@ public class HearingDocumentServiceTest {
     private HearingDocumentService service;
 
     private static final String DATE_OF_HEARING = "2019-01-01";
+    private static final String FORM_C = "formC";
+    private static final String FORM_G = "formG";
+    private static final String FAST_TRACK_DECISION = "fastTrackDecision";
 
     @Before
     public void setUp() {
@@ -61,7 +66,7 @@ public class HearingDocumentServiceTest {
     @Test
     public void generateFastTrackFormC() {
         Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
-        doCaseDocumentAssert((CaseDocument) result.get("formC"));
+        doCaseDocumentAssert((CaseDocument) result.get(FORM_C));
         ((TestDocumentClient) generatorClient).verifyAdditionalFastTrackFields();
     }
 
@@ -69,15 +74,15 @@ public class HearingDocumentServiceTest {
     public void generateJudiciaryBasedFastTrackFormC() {
         Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN,
                 makeItJudiciaryFastTrackDecisionCase());
-        doCaseDocumentAssert((CaseDocument) result.get("formC"));
+        doCaseDocumentAssert((CaseDocument) result.get(FORM_C));
         ((TestDocumentClient) generatorClient).verifyAdditionalFastTrackFields();
     }
 
     @Test
     public void generateNonFastTrackFormCAndFormG() {
         Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
-        doCaseDocumentAssert((CaseDocument) result.get("formC"));
-        doCaseDocumentAssert((CaseDocument) result.get("formG"));
+        doCaseDocumentAssert((CaseDocument) result.get(FORM_C));
+        doCaseDocumentAssert((CaseDocument) result.get(FORM_G));
         ((TestDocumentClient) generatorClient).verifyAdditionalNonFastTrackFields();
     }
 
@@ -88,23 +93,23 @@ public class HearingDocumentServiceTest {
     }
 
     private CaseDetails makeItNonFastTrackDecisionCase() {
-        return caseDetails("No");
+        return caseDetails(NO_VALUE);
     }
 
     private CaseDetails makeItFastTrackDecisionCase() {
-        return caseDetails("Yes");
+        return caseDetails(YES_VALUE);
     }
 
     private CaseDetails makeItJudiciaryFastTrackDecisionCase() {
         Map<String, Object> caseData =
-                ImmutableMap.of("fastTrackDecision", "No",
-                        CASE_ALLOCATED_TO, "Yes", HEARING_DATE, DATE_OF_HEARING);
+                ImmutableMap.of(FAST_TRACK_DECISION, NO_VALUE,
+                        CASE_ALLOCATED_TO, YES_VALUE, HEARING_DATE, DATE_OF_HEARING);
         return CaseDetails.builder().data(caseData).build();
     }
 
     private CaseDetails caseDetails(String isFastTrackDecision) {
         Map<String, Object> caseData =
-                ImmutableMap.of("fastTrackDecision", isFastTrackDecision, HEARING_DATE, DATE_OF_HEARING);
+                ImmutableMap.of(FAST_TRACK_DECISION, isFastTrackDecision, HEARING_DATE, DATE_OF_HEARING);
         return CaseDetails.builder().data(caseData).build();
     }
 
@@ -142,8 +147,7 @@ public class HearingDocumentServiceTest {
         }
 
         @Override
-        public DocumentValidationResponse checkUploadedFileType(String fileUrl,
-                                                                String authorizationToken) {
+        public DocumentValidationResponse checkUploadedFileType(String fileUrl, String authorizationToken) {
             throw new UnsupportedOperationException();
         }
 

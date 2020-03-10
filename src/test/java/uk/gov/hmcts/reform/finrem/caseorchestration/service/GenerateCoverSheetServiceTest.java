@@ -20,6 +20,7 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 public class GenerateCoverSheetServiceTest {
 
@@ -40,7 +41,7 @@ public class GenerateCoverSheetServiceTest {
 
     @Test
     public void shouldGenerateRespondentCoverSheet() throws Exception {
-        CaseDocument caseDocument = coverSheetService.generateRespondentCoverSheet(caseDetails(), "AUTH_TOKEN");
+        CaseDocument caseDocument = coverSheetService.generateRespondentCoverSheet(caseDetails(), AUTH_TOKEN);
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
@@ -48,7 +49,7 @@ public class GenerateCoverSheetServiceTest {
 
     @Test
     public void shouldGenerateApplicantCoverSheet() throws Exception {
-        CaseDocument caseDocument = coverSheetService.generateApplicantCoverSheet(caseDetails(), "AUTH_TOKEN");
+        CaseDocument caseDocument = coverSheetService.generateApplicantCoverSheet(caseDetails(), AUTH_TOKEN);
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
@@ -123,7 +124,7 @@ public class GenerateCoverSheetServiceTest {
         }
     }
 
-    private class TestDocumentClient implements DocumentClient {
+    private static class TestDocumentClient implements DocumentClient {
 
         @Override
         public Document generatePdf(DocumentGenerationRequest request, String authorizationToken) {

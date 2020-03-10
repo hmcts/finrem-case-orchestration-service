@@ -59,7 +59,7 @@ public class FinalOrderControllerTest extends BaseControllerTest {
 
     @Test
     public void finalOrder400Error() throws Exception {
-        doEmtpyCaseDataSetUp();
+        doEmptyCaseDataSetUp();
 
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())

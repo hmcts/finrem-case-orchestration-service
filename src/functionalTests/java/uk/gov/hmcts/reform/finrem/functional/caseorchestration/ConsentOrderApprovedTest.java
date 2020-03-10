@@ -6,7 +6,6 @@ import com.jayway.jsonpath.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import org.json.JSONException;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+
 @RunWith(SerenityRunner.class)
 public class ConsentOrderApprovedTest extends IntegrationTestBase {
 
@@ -29,21 +30,16 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
     @Autowired
     private ServiceUtils serviceUtils;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
-    private final String contestedDir = "/json/contested/";
-    private final String consentedDir = "/json/consented/";
-
-
     @Value("${cos.consentOrder.approved}")
     private String consentOrderApprovedUrl;
 
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     public void verifyConsentOrderApprovedForConsentedCase() {
         CallbackRequest callbackRequest = null;
-        InputStream resourceAsStream = null;
-        resourceAsStream = getClass().getResourceAsStream(consentedDir + "approved-consent-order.json");
+        InputStream resourceAsStream;
+        resourceAsStream = getClass().getResourceAsStream("/json/consented/" + "approved-consent-order.json");
 
         Map<String,String> uploadedDoc = null;
         try {
@@ -60,6 +56,6 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
             e.printStackTrace();
         }
         Response response = functionalTestUtils.getResponseData(consentOrderApprovedUrl,callbackRequest);
-        Assert.assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
+        assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
     }
 }

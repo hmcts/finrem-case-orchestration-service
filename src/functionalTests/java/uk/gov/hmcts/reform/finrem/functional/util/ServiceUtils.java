@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static org.junit.Assert.assertEquals;
+
 @Component
 public class ServiceUtils {
 
@@ -44,7 +46,7 @@ public class ServiceUtils {
                 .multiPart("file", file, fileContentType)
                 .post(evidenceManagementClientBaseUrl.concat("/upload"))
                 .andReturn();
-        org.junit.Assert.assertEquals(HttpStatus.OK.value(), response.statusCode());
+        assertEquals(HttpStatus.OK.value(), response.statusCode());
 
         JSONArray responseJson = new JSONArray(response.body().asString());
 

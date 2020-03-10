@@ -42,7 +42,7 @@ public class ValidateHearingDatesTest extends IntegrationTestBase {
     public void verifyShouldThrowWarningsWhenNotFastTrackDecision() {
 
         assertEquals("Date of the hearing must be between 12 and 16 weeks.",
-                getResponse(validateHearing, "validate-hearing-withoutfastTrackDecision1.json",
+                getResponse(validateHearing, "validate-hearing-without-fastTrackDecision1.json",
                         contestedDir).jsonPath().get("warnings[0]"));
     }
 
