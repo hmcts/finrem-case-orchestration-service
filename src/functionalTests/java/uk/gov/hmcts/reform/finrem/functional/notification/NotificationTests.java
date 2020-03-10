@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.functional.notification;
 
 import net.serenitybdd.junit.runners.SerenityRunner;
-import net.serenitybdd.rest.SerenityRest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +24,6 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.hwf-success.api}")
     private String hwfSuccessfulApiUri;
 
-    private String contestedDir = "/json/contested/";
     private String consentedDir = "/json/consented/";
 
     @Test
@@ -33,34 +31,27 @@ public class NotificationTests extends IntegrationTestBase {
 
         utils.validatePostSuccess(notifyAssignToJudge,
                 "ccd-request-with-solicitor-assignedToJudge1.json", consentedDir);
-
     }
-
 
     @Test
     public void verifyNotifyConsentOrderAvailableTestIsOkay() {
 
         utils.validatePostSuccess(consentOrderAvailable,
                 "ccd-request-with-solicitor-consentOrderAvailable1.json", consentedDir);
-
     }
-
 
     @Test
     public void verifyNotifyConsentOrderMadeTestIsOkay() {
 
         utils.validatePostSuccess(consentOrderMade,
                 "ccd-request-with-solicitor-consentOrderMade1.json", consentedDir);
-
     }
-
 
     @Test
     public void verifyNotifyConsentOrderNotApprovedTestIsOkay() {
 
         utils.validatePostSuccess(consentOrderNotApproved,
                 "ccd-request-with-solicitor-consentOrderNotApproved1.json", consentedDir);
-
     }
 
     @Test
@@ -68,6 +59,5 @@ public class NotificationTests extends IntegrationTestBase {
 
         utils.validatePostSuccess(hwfSuccessfulApiUri,
                 "ccd-request-with-solicitor-hwfSuccessfulEmail1.json", consentedDir);
-
     }
 }

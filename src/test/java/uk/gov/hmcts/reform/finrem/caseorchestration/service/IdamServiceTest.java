@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -12,7 +11,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -20,6 +18,7 @@ import static org.hamcrest.core.Is.is;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -32,7 +31,7 @@ public class IdamServiceTest  {
     @Autowired
     protected RestTemplate restTemplate;
 
-    protected MockRestServiceServer mockServer;
+    private MockRestServiceServer mockServer;
 
     @Before
     public void setUp() {
@@ -46,7 +45,7 @@ public class IdamServiceTest  {
                 .andRespond(withSuccess("{\"roles\": [\"caseworker-divorce-financialremedy-courtadmin\"]}",
             MediaType.APPLICATION_JSON));
 
-        boolean userEmailId = idamService.isUserRoleAdmin("azsssfsdffsafa");
+        boolean userEmailId = idamService.isUserRoleAdmin(AUTH_TOKEN);
         assertThat(userEmailId, is(Boolean.TRUE));
     }
 
@@ -57,7 +56,7 @@ public class IdamServiceTest  {
             .andRespond(withSuccess("{\"roles\": [\"caseworker-divorce-financialremedy-solicitor\"]}",
                 MediaType.APPLICATION_JSON));
 
-        boolean userEmailId = idamService.isUserRoleAdmin("azsssfsdffsafa");
+        boolean userEmailId = idamService.isUserRoleAdmin(AUTH_TOKEN);
         assertThat(userEmailId, is(Boolean.FALSE));
     }
 

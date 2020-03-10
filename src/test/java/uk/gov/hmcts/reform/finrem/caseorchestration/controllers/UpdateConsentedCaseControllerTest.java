@@ -181,7 +181,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
     @Test
     public void shouldDeleteRespondentSolicitorDetailsIfRespondentNotRepresentedBySolicitor() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/updatecase/remove-respondant-solicitor-details.json").toURI()));
+            .getResource("/fixtures/updatecase/remove-respondent-solicitor-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -215,7 +215,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
     @Test
     public void shouldDeleteApplicantSolicitorDetailsIfApplicantNotRepresentedBySolicitor() throws Exception {
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/updatecase/remove-respondant-solicitor-details.json").toURI()));
+            .getResource("/fixtures/updatecase/remove-respondent-solicitor-details.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

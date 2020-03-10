@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -14,7 +13,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 
 import java.io.InputStream;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
@@ -50,7 +48,6 @@ public class BulkPrintServiceTest {
 
     @Test
     public void shouldSendForBulkPrintForApproved() throws Exception {
-        Map<String, Object> caseData = ImmutableMap.of();
 
         when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture()))
             .thenReturn(letterId);
@@ -64,7 +61,6 @@ public class BulkPrintServiceTest {
 
     @Test
     public void shouldSendForBulkPrintForNotApproved() throws Exception {
-        Map<String, Object> caseData = ImmutableMap.of();
 
         when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture()))
             .thenReturn(letterId);
@@ -86,13 +82,6 @@ public class BulkPrintServiceTest {
     private CaseDetails caseDetailsForNonApproved() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulk-print-not-approved.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
-    }
-
-    private CaseDetails caseDetailsWithoutData() throws Exception {
-        try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/hwf.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }

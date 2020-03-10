@@ -5,6 +5,14 @@ public class TestConstants {
     public static final String TEST_SERVICE_TOKEN = "testServiceToken";
     public static final String AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
+    public static final String TEST_DIVORCE_CASE_ID = "LV17D80101";
+    public static final String TEST_SOLICITOR_ACCOUNT_NUMBER = "test.solicitor.account";
+    public static final String TEST_SOLICITOR_FIRM_NAME = "test.solicitor.firm";
+    public static final String TEST_SOLICITOR_COMPANY = "Awesome Solicitors LLP";
+    public static final String TEST_SOLICITOR_REFERENCE = "test.solicitor.reference";
+    public static final String TEST_SOLICITOR_NAME = "Solicitor name";
+    public static final String TEST_SOLICITOR_EMAIL = "testSolicitor@email.com";
+
     public static final String TEST_BULK_FORM_TYPE = "testFormType";
     public static final String TEST_BULK_UNSUPPORTED_FORM_TYPE = "unsupportedFormType";
 }

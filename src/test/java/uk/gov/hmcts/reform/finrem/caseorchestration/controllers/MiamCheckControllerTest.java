@@ -34,7 +34,7 @@ public class MiamCheckControllerTest extends BaseControllerTest {
 
     @Test
     public void badRequest() throws Exception {
-        doEmtpyCaseDataSetUp();
+        doEmptyCaseDataSetUp();
         mvc.perform(post(API_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

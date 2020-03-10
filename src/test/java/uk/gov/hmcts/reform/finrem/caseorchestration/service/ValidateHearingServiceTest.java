@@ -15,6 +15,8 @@ import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
@@ -32,7 +34,7 @@ public class ValidateHearingServiceTest {
     @Test
     public void issueDateEmpty() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(FAST_TRACK_DECISION, "Yes"), pairOf(HEARING_DATE, new Date()));
+                asList(pairOf(FAST_TRACK_DECISION, YES_VALUE), pairOf(HEARING_DATE, new Date()));
 
         List<String> errors = doTestErrors(pairs);
         assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
@@ -50,7 +52,7 @@ public class ValidateHearingServiceTest {
     @Test
     public void hearingDateEmpty() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(ISSUE_DATE, new Date()), pairOf(FAST_TRACK_DECISION, "Yes"));
+                asList(pairOf(ISSUE_DATE, new Date()), pairOf(FAST_TRACK_DECISION, YES_VALUE));
 
         List<String> errors = doTestErrors(pairs);
         assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
@@ -59,7 +61,7 @@ public class ValidateHearingServiceTest {
     @Test
     public void noErrors() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(ISSUE_DATE, new Date()), pairOf(FAST_TRACK_DECISION,"Yes"),
+                asList(pairOf(ISSUE_DATE, new Date()), pairOf(FAST_TRACK_DECISION,YES_VALUE),
                         pairOf(HEARING_DATE, new Date()));
 
         List<String> errors = doTestErrors(pairs);
@@ -71,7 +73,7 @@ public class ValidateHearingServiceTest {
         List<ImmutablePair<String, Object>> pairs =
                 asList(pairOf(ISSUE_DATE, LocalDate.now()),
                         pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)),
-                        pairOf(CASE_ALLOCATED_TO, "Yes"));
+                        pairOf(CASE_ALLOCATED_TO, YES_VALUE));
 
         List<String> errors = doTestWarnings(pairs);
         assertThat(errors, hasItem(DATE_BETWEEN_6_AND_10_WEEKS));
@@ -80,7 +82,7 @@ public class ValidateHearingServiceTest {
     @Test
     public void fastTrackHearingDatesWarningWithoutJudiciaryOutcome() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION,"Yes"),
+                asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION,YES_VALUE),
                         pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)));
 
         List<String> errors = doTestWarnings(pairs);
@@ -90,7 +92,7 @@ public class ValidateHearingServiceTest {
     @Test
     public void fastTrackHearingDatesNoWarning() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION,"Yes"),
+                asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION,YES_VALUE),
                         pairOf(HEARING_DATE, LocalDate.now().plusWeeks(7)));
 
         List<String> errors = doTestWarnings(pairs);
@@ -100,7 +102,7 @@ public class ValidateHearingServiceTest {
     @Test
     public void nonFastTrackHearingDatesWarning() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION,"No"),
+                asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION,NO_VALUE),
                         pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)));
 
         List<String> errors = doTestWarnings(pairs);
@@ -110,7 +112,7 @@ public class ValidateHearingServiceTest {
     @Test
     public void nonFastTrackHearingDatesNoWarning() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION,"No"),
+                asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION,NO_VALUE),
                         pairOf(HEARING_DATE, LocalDate.now().plusWeeks(13)));
 
         List<String> errors = doTestWarnings(pairs);

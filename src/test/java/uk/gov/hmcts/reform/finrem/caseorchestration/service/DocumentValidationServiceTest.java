@@ -25,10 +25,9 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     private static final String PATH = "/fixtures/latestConsentedConsentOrder/";
     private static final String CONSENT_ORDER = "consentOrder";
     private static final String APPLICATION_PDF = "application/pdf";
-    private static final String DRFAT_CONSENT_ORDER_JSON = "draft-consent-order.json";
+    private static final String DRAFT_CONSENT_ORDER_JSON = "draft-consent-order.json";
     private static final String VALIDATE_PENSION_COLLECTION_JSON = "validate-pension-collection.json";
-    private static final String VALIDATE_PENSION_COLLECTION_WITHOUT_DATA_JSON
-        = "validate-pension-collection-without-pension-data.json";
+    private static final String VALIDATE_PENSION_COLLECTION_WITHOUT_DATA_JSON = "validate-pension-collection-without-pension-data.json";
     private static final String RESPOND_TO_ORDER_SOL_JSON = "respond-to-order-solicitor.json";
 
     @Autowired
@@ -36,7 +35,6 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
 
     @MockBean
     private DocumentClient documentClient;
-
 
     private CallbackRequest callbackRequest;
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -50,7 +48,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldSuccessWhenFileTypeValidationForConsentOrderField() throws Exception {
-        setUpCaseDetails(DRFAT_CONSENT_ORDER_JSON);
+        setUpCaseDetails(DRAFT_CONSENT_ORDER_JSON);
         DocumentValidationResponse documentValidationResponse = builder()
                 .mimeType(APPLICATION_PDF)
                 .build();
@@ -64,7 +62,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldThrowErrorWhenFileTypeValidationForConsentOrderField() throws Exception {
-        setUpCaseDetails(DRFAT_CONSENT_ORDER_JSON);
+        setUpCaseDetails(DRAFT_CONSENT_ORDER_JSON);
         DocumentValidationResponse documentValidationResponse = builder()
                 .errors(singletonList("Invalid file type"))
                 .build();
@@ -175,5 +173,4 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
                 "ssss", AUTH_TOKEN);
         assertThat(response.getErrors(), nullValue());
     }
-
 }

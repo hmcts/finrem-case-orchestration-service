@@ -15,4 +15,9 @@ public class OrchestrationConstants {
     public static final String CASE_TYPE_ID_FR = "FINANCIAL_REMEDY";
     public static final String CASE_TYPE_ID_CONSENTED = "FinancialRemedyMVP2";
     public static final String CASE_TYPE_ID_CONTESTED = "FinancialRemedyContested";
+
+    public static final String BINARY_URL_TYPE = "binary";
+
+    public static final String YES_VALUE = "Yes";
+    public static final String NO_VALUE = "No";
 }

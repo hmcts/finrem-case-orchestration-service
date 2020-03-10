@@ -31,11 +31,13 @@ public class DocumentValidationTests extends IntegrationTestBase {
 
     private static final String RESPOND_TO_ORDER_SOLICITOR_JSON = "respond-to-order-solicitor.json";
     private static final String CONSENT_ORDER_JSON = "draft-consent-order.json";
-    @Value("${cos.document.miniform.api}")
-    private String generatorUrl;
-    private String consentedDir = "/json/latestConsentedConsentOrder/";
+    private static final String consentedDir = "/json/latestConsentedConsentOrder/";
     private ObjectMapper objectMapper = new ObjectMapper();
     private CallbackRequest callbackRequest;
+
+    @Value("${cos.document.miniform.api}")
+    private String generatorUrl;
+
     @Value("${cos.consentOrder.document.validation.api}")
     private String consentOrderFileCheckUrl;
 
@@ -66,6 +68,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
         // call fileupload endpoint and assert
         Response response = utils.getResponseData(responseToOrderFileCheckUrl, callbackRequest);
         int statusCode = response.getStatusCode();
+
         assertEquals(statusCode, 200);
         assertNull(response.jsonPath().get("errors"));
     }
@@ -77,6 +80,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
         // call fileupload endpoint and assert
         Response response = utils.getResponseData(pensionDocumentFileCheckUrl, callbackRequest);
         int statusCode = response.getStatusCode();
+
         assertEquals(statusCode, 200);
         assertNull(response.jsonPath().get("errors"));
     }
@@ -88,6 +92,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
         // call fileupload check endpoint
         Response response = utils.getResponseData(consentOrderFileCheckUrl, callbackRequest);
         int statusCode = response.getStatusCode();
+
         assertEquals(statusCode, 200);
         assertNull(response.jsonPath().get("errors"));
     }
@@ -99,17 +104,16 @@ public class DocumentValidationTests extends IntegrationTestBase {
         // call fileupload endpoint and assert
         Response response = utils.getResponseData(amendConsentOrderCollectionCheckUrl, callbackRequest);
         int statusCode = response.getStatusCode();
+
         assertEquals(statusCode, 200);
         assertNull(response.jsonPath().get("errors"));
     }
 
-
-    private CaseDocument generateCaseDocument(String fileName) throws Exception {
+    private CaseDocument generateCaseDocument(String fileName) {
         // generate pdf document to set it as consent order
         JsonPath jsonPathEvaluator = generateDocument(fileName, generatorUrl, consentedDir);
-        CaseDocument caseDocument = getCaseDocument(jsonPathEvaluator);
 
-        return caseDocument;
+        return getCaseDocument(jsonPathEvaluator);
     }
 
     private io.restassured.path.json.JsonPath generateDocument(String jsonFileName, String url, String journeyType) {
@@ -132,19 +136,20 @@ public class DocumentValidationTests extends IntegrationTestBase {
 
     private CaseDocument convertToCaseDocument(Object object) {
         objectMapper = new ObjectMapper();
+
         return objectMapper.convertValue(object, CaseDocument.class);
     }
 
     private List<RespondToOrderData> convertToRespondToOrderDataList(Object object) {
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(object, new TypeReference<List<RespondToOrderData>>() {
-        });
+
+        return objectMapper.convertValue(object, new TypeReference<List<RespondToOrderData>>() {});
     }
 
     private List<PensionCollectionData> convertToPensionCollectionDataList(Object object) {
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(object, new TypeReference<List<PensionCollectionData>>() {
-        });
+
+        return objectMapper.convertValue(object, new TypeReference<List<PensionCollectionData>>() {});
     }
 
     private void setPensionCollectionData() throws Exception {
@@ -186,7 +191,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
 
     private List<AmendedConsentOrderData> convertToAmendedConsentOrderDataList(Object object) {
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(object, new TypeReference<List<AmendedConsentOrderData>>() {
-        });
+
+        return objectMapper.convertValue(object, new TypeReference<List<AmendedConsentOrderData>>() {});
     }
 }

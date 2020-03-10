@@ -8,7 +8,7 @@ import static org.hamcrest.Matchers.is;
 
 public class OrderSummaryTest {
 
-    ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper();
 
     @Test
     public void shouldCreateOrderSummary() throws Exception {

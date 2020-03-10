@@ -21,13 +21,14 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 public class PBAPaymentServiceTest extends BaseServiceTest {
 
     @Autowired
     private PBAPaymentService pbaPaymentService;
 
-    protected CallbackRequest callbackRequest;
+    private CallbackRequest callbackRequest;
 
     @ClassRule
     public static WireMockClassRule paymentService = new WireMockClassRule(9001);
@@ -58,7 +59,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + " ]"
                         + "}");
 
-        PaymentResponse paymentResponse = pbaPaymentService.makePayment("token", "123",
+        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, "123",
                 callbackRequest.getCaseDetails().getData());
 
         assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
@@ -87,7 +88,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + " ]"
                         + "}");
 
-        PaymentResponse paymentResponse = pbaPaymentService.makePayment("token", "123",
+        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, "123",
                 callbackRequest.getCaseDetails().getData());
 
         assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
@@ -119,7 +120,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + " ]"
                         + "}");
 
-        PaymentResponse paymentResponse = pbaPaymentService.makePayment("token", "123",
+        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, "123",
                 callbackRequest.getCaseDetails().getData());
 
         assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
@@ -150,7 +151,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + " ]"
                         + "}");
 
-        PaymentResponse paymentResponse = pbaPaymentService.makePayment("token", "123",
+        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, "123",
                 callbackRequest.getCaseDetails().getData());
 
         assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
@@ -174,7 +175,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + "  \"path\": \"/credit-account-payments\""
                         + "}");
 
-        PaymentResponse paymentResponse = pbaPaymentService.makePayment("token", "123",
+        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, "123",
                 callbackRequest.getCaseDetails().getData());
 
         assertThat(paymentResponse.getReference(), nullValue());

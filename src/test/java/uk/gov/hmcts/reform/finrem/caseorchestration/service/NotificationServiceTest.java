@@ -28,12 +28,9 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_HWF_SUCCESSFUL = "http://localhost:8086/notify/hwf-successful";
     private static final String END_POINT_ASSIGNED_TO_JUDGE = "http://localhost:8086/notify/assign-to-judge";
     private static final String END_POINT_CONSENT_ORDER_MADE = "http://localhost:8086/notify/consent-order-made";
-    private static final String END_POINT_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/"
-            + "consent-order-not-approved";
-    private static final String END_POINT_CONSENT_ORDER_AVAILABLE = "http://localhost:8086/notify/"
-            + "consent-order-available";
-    private static final String END_POINT_CONTESTED_HWF_SUCCESSFUL = "http://localhost:8086/notify/"
-            + "contested/hwf-successful";
+    private static final String END_POINT_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/consent-order-not-approved";
+    private static final String END_POINT_CONSENT_ORDER_AVAILABLE = "http://localhost:8086/notify/consent-order-available";
+    private static final String END_POINT_CONTESTED_HWF_SUCCESSFUL = "http://localhost:8086/notify/contested/hwf-successful";
 
     @Autowired
     private NotificationService notificationService;
@@ -42,7 +39,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Autowired
     protected RestTemplate restTemplate;
 
-    protected MockRestServiceServer mockServer;
+    private MockRestServiceServer mockServer;
 
     @Before
     public void setUp() {

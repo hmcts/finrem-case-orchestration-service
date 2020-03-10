@@ -38,7 +38,5 @@ public class RespondToOrderDataTest {
         assertThat(documentLink.getDocumentUrl(), is("http://doc1"));
         assertThat(documentLink.getDocumentFilename(), is("doc1"));
         assertThat(documentLink.getDocumentBinaryUrl(), is("http://doc1.binary"));
-
-
     }
 }
