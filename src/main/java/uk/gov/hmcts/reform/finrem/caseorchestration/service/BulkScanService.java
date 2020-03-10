@@ -31,13 +31,13 @@ public class BulkScanService {
     }
 
     public Map<String, Object> transformBulkScanForm(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException, InvalidDataException {
-        validate(exceptionRecord);
+        validateForTransformation(exceptionRecord);
 
         BulkScanFormTransformer bulkScanFormTransformer = bulkScanFormTransformerFactory.getTransformer(exceptionRecord.getFormType());
         return bulkScanFormTransformer.transformIntoCaseData(exceptionRecord);
     }
 
-    private void validate(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException {
+    private void validateForTransformation(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException {
         OcrValidationResult validationResult =  validateBulkScanForm(exceptionRecord.getFormType(), exceptionRecord.getOcrDataFields());
 
         if (!validationResult.getStatus().equals(ValidationStatus.SUCCESS)) {
