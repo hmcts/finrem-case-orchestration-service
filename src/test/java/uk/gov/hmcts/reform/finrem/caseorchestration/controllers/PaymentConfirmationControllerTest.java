@@ -63,7 +63,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
-        doEmtpyCaseDataSetUp();
+        doEmptyCaseDataSetUp();
         mvc.perform(post(PBA_CONFIRMATION_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

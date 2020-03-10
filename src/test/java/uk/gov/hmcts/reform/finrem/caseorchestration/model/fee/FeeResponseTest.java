@@ -11,7 +11,7 @@ import static org.hamcrest.Matchers.is;
 
 public class FeeResponseTest {
 
-    FeeResponse feeResponse;
+    private FeeResponse feeResponse;
 
     @Before
     public void setUp() throws Exception {

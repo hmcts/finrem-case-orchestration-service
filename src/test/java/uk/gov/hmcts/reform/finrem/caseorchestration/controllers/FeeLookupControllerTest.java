@@ -46,7 +46,7 @@ public class FeeLookupControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
-        doEmtpyCaseDataSetUp();
+        doEmptyCaseDataSetUp();
         mvc.perform(post(FEE_LOOKUP_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

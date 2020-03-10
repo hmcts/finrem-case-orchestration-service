@@ -37,7 +37,7 @@ public class OptionIdToValueTranslatorTest {
     }
 
     @Test
-    public void nothingToTranslate() throws Exception {
+    public void nothingToTranslate() {
         CaseDetails actual = caseDetailsWithEmptyOptions();
         translator.translateOptionsValues.accept(actual);
 
@@ -54,14 +54,12 @@ public class OptionIdToValueTranslatorTest {
     }
 
     private CaseDetails expectedCaseDetails() throws Exception {
-        File file = new File(getClass()
-                .getResource("/fixtures/contested/expected-contested-case-details.json").toURI());
+        File file = new File(getClass().getResource("/fixtures/contested/expected-contested-case-details.json").toURI());
         return objectMapper.readValue(file, CaseDetails.class);
     }
 
     private CaseDetails caseDetailsWithOptions() throws Exception {
-        File file = new File(getClass()
-                .getResource("/fixtures/contested/contested-case-details-options-list.json").toURI());
+        File file = new File(getClass().getResource("/fixtures/contested/contested-case-details-options-list.json").toURI());
         return objectMapper.readValue(file, CaseDetails.class);
     }
 }

@@ -5,7 +5,6 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,15 +18,16 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(SerenityRunner.class)
 public class RejectedOrderDocumentTest extends IntegrationTestBase {
-
 
     @Autowired
     private FunctionalTestUtils functionalTestUtils;
 
     private ObjectMapper objectMapper = new ObjectMapper();
-
 
     private final String contestedDir = "/json/contested/";
     private final String consentedDir = "/json/consented/";
@@ -38,7 +38,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
     @Value("${cos.consentOrder.not.approved}")
     private String consentOrderNotApprovedEndPoint;
 
-    CallbackRequest callbackRequest = null;
+    private CallbackRequest callbackRequest = null;
 
     @Test
     public void verifyPreviewConsentOrderNotApproved() {
@@ -59,9 +59,9 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
 
         List<Object> orderRefusalPreviewDocuments = JsonPath.parse(response.asString())
             .read("$.data[?(@.orderRefusalPreviewDocument)]");
-        Assert.assertEquals("Request failed " + response.getStatusCode(), 200,
+        assertEquals("Request failed " + response.getStatusCode(), 200,
             response.getStatusCode());
-        Assert.assertTrue("Order Refusal Preview Document not found ",
+        assertTrue("Order Refusal Preview Document not found ",
             orderRefusalPreviewDocuments.size() > 0);
     }
 
@@ -82,10 +82,9 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
 
         List<Object> uploadOrders = JsonPath.parse(response.getBody().asString())
             .read("$.data.uploadOrder[?(@.id)].id");
-        Assert.assertEquals("Request failed " + response.getStatusCode(), 200,
+        assertEquals("Request failed " + response.getStatusCode(), 200,
             response.getStatusCode());
-        Assert.assertEquals("expected uploadOrder size not matching  ",
+        assertEquals("expected uploadOrder size not matching  ",
             uploadOrdersBeforeCount + 1, uploadOrders.size());
     }
-
 }

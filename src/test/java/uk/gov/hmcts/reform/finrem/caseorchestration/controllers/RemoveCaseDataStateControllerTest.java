@@ -24,7 +24,7 @@ public class RemoveCaseDataStateControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
-        doEmtpyCaseDataSetUp();
+        doEmptyCaseDataSetUp();
         mvc.perform(post(REMOVE_CASE_STATE_URI)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

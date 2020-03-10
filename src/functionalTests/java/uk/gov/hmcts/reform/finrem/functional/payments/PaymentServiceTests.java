@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.functional.payments;
 
-import io.restassured.path.json.JsonPath;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -8,7 +7,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
-import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -50,11 +48,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Value("${pba.account.liberata.check.enabled}")
     private boolean pbaAccountLiberataCheckEnabled;
 
-
-    private HashMap<String, String> pbaAccounts = new HashMap<>();
     private String contestedDir = "/json/contested/";
     private String consentedDir = "/json/consented/";
-    private JsonPath jsonPathEvaluator;
     private String dataPath = "data";
     private String feesPath = "data.orderSummary.Fees[0].value";
     private String hwf = "HWF";
@@ -94,15 +89,14 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyPaymentConfirmationMessageForHwfConsented() throws InterruptedException {
+    public void verifyPaymentConfirmationMessageForHwfConsented() {
         validatePaymentConfirmationMessage(pbaConfirmation, "hwfPayment.json", consentedDir, hwf);
     }
 
     @Test
-    public void verifyPaymentConfirmationMessageForPBAPaymentConsented() throws InterruptedException {
+    public void verifyPaymentConfirmationMessageForPBAPaymentConsented() {
         validatePaymentConfirmationMessage(pbaConfirmation, "pba-payment.json", consentedDir, pba);
     }
-
 
     @Test
     public void verifyPBAConfirmationMessageForHwfContested() {
@@ -129,16 +123,16 @@ public class PaymentServiceTests extends IntegrationTestBase {
 
     private void validatePaymentConfirmationMessage(String url, String fileName,
                                                     String journeyType, String paymentType) {
-        if (paymentType == pba) {
-            if (journeyType == consentedDir) {
+        if (paymentType.equals(pba)) {
+            if (journeyType.equals(consentedDir)) {
                 assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
                         .toString().contains("Your application will be issued by Court staff and referred to a Judge"));
             } else {
                 assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
                         .toString().contains("The application will be sent to the Judge for gatekeeping"));
             }
-        } else if (paymentType == hwf) {
-            if (journeyType == consentedDir) {
+        } else if (paymentType.equals(hwf)) {
+            if (journeyType.equals(consentedDir)) {
                 assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
                         .toString().contains("Process the application for help with fees"));
             } else {
@@ -153,7 +147,6 @@ public class PaymentServiceTests extends IntegrationTestBase {
             List<String> errors = utils.getResponseData(url, fileName, journeyType,"").get("errors");
             assertTrue(errors.get(0).contains("Account information could not be found"));
         }
-
     }
 
     private void validatePostSuccessForPBAPayment(String url, String fileName, String journeyType)
@@ -163,7 +156,7 @@ public class PaymentServiceTests extends IntegrationTestBase {
     }
 
     private void validateFeeLookUpPayment(String url, String fileName, String journeyType) {
-        if (journeyType == consentedDir) {
+        if (journeyType.equals(consentedDir)) {
             assertTrue(utils.getResponseData(url, fileName, journeyType,feesPath).get("FeeAmount")
                     .toString().equalsIgnoreCase("5000"));
 

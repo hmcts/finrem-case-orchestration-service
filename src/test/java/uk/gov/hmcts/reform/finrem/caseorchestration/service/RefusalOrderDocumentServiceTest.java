@@ -38,7 +38,6 @@ public class RefusalOrderDocumentServiceTest {
     private DocumentClient generatorClient;
     private DocumentConfiguration config;
     private ObjectMapper mapper = new ObjectMapper();
-
     private RefusalOrderDocumentService service;
 
     @Before
@@ -83,6 +82,7 @@ public class RefusalOrderDocumentServiceTest {
         assertThat(orderRefusalData.size(), is(2));
         assertThat(orderRefusalData.get(0).getId(), Is.is("1"));
         assertThat(orderRefusalData.get(1).getId(), Is.is("1"));
+
         ConsentOrderData consentOrderData = consentOrderData(caseData);
         assertThat(consentOrderData.getId(), is(notNullValue()));
         assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(REJECTED_ORDER_TYPE));
@@ -95,9 +95,7 @@ public class RefusalOrderDocumentServiceTest {
     @Test
     public void previewConsentOrderNotApproved() throws Exception {
         CaseDetails caseDetails = caseDetails("/fixtures/model/case-details.json");
-
         Map<String, Object> caseData = service.previewConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
-
         CaseDocument caseDocument = getCaseDocument(caseData);
 
         doCaseDocumentAssert(caseDocument);
@@ -105,6 +103,7 @@ public class RefusalOrderDocumentServiceTest {
 
     private CaseDocument getCaseDocument(Map<String, Object> caseData) {
         Object orderRefusalPreviewDocument = caseData.get("orderRefusalPreviewDocument");
+
         return mapper.convertValue(orderRefusalPreviewDocument, CaseDocument.class);
     }
 

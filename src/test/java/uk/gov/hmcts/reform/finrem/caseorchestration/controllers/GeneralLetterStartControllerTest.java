@@ -53,7 +53,7 @@ public class GeneralLetterStartControllerTest extends BaseControllerTest {
 
     @Test
     public void initialiseGeneralLetterPropertiesBadRequest() throws Exception {
-        doEmtpyCaseDataSetUp();
+        doEmptyCaseDataSetUp();
 
         mvc.perform(post("/case-orchestration/general-letter-start")
                 .content(requestContent.toString())

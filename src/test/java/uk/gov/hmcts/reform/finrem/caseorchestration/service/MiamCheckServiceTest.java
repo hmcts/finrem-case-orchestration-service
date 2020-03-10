@@ -10,6 +10,8 @@ import java.util.Map;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_ATTENDANCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_EXEMPTION;
 
@@ -18,17 +20,17 @@ public class MiamCheckServiceTest {
     private MiamCheckService service = new MiamCheckService();
 
     @Test
-    public void miamcheckFailError() {
-        Map<String, Object> caseData = ImmutableMap.of(MIAM_ATTENDANCE, "No", MIAM_EXEMPTION, "No");
+    public void miamCheckFailError() {
+        Map<String, Object> caseData = ImmutableMap.of(MIAM_ATTENDANCE, NO_VALUE, MIAM_EXEMPTION, NO_VALUE);
         List<String> errors = service.miamExemptAttendCheck(CaseDetails.builder().data(caseData).build());
         assertThat(errors, hasSize(1));
-        assertThat(errors, hasItems("You cannot make this application unless the applicant has "
-                + "either attended, or is exempt from attending a MIAM"));
+        assertThat(errors,
+            hasItems("You cannot make this application unless the applicant has either attended, or is exempt from attending a MIAM"));
     }
 
     @Test
     public void noError() {
-        Map<String, Object> caseData = ImmutableMap.of(MIAM_ATTENDANCE, "No", MIAM_EXEMPTION, "Yes");
+        Map<String, Object> caseData = ImmutableMap.of(MIAM_ATTENDANCE, NO_VALUE, MIAM_EXEMPTION, YES_VALUE);
         List<String> errors = service.miamExemptAttendCheck(CaseDetails.builder().data(caseData).build());
         assertThat(errors, hasSize(0));
     }

@@ -20,7 +20,6 @@ public abstract class BaseControllerTest extends BaseTest {
     protected WebApplicationContext applicationContext;
 
     protected MockMvc mvc;
-
     protected JsonNode requestContent;
 
     @Before
@@ -28,8 +27,7 @@ public abstract class BaseControllerTest extends BaseTest {
         mvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
     }
 
-
-    void doEmtpyCaseDataSetUp() throws IOException, URISyntaxException {
+    void doEmptyCaseDataSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/empty-casedata.json").toURI()));

@@ -20,16 +20,16 @@ public class BulkPrintDocumentTranslatorTest {
     public void shouldConvertDocument() throws Exception {
         List<BulkPrintDocument> bulkPrintDocuments = BulkPrintDocumentTranslator
             .uploadOrder(caseDetails().getData());
-        assertThat(bulkPrintDocuments.size(), is(1));
 
+        assertThat(bulkPrintDocuments.size(), is(1));
     }
 
     @Test
     public void shouldConvertCollectionDocument() throws Exception {
         List<BulkPrintDocument> bulkPrintDocuments =
             BulkPrintDocumentTranslator.approvedOrderCollection(caseDetails().getData());
-        assertThat(bulkPrintDocuments.size(), is(4));
 
+        assertThat(bulkPrintDocuments.size(), is(4));
     }
 
     private CaseDetails caseDetails() throws Exception {

@@ -23,7 +23,7 @@ public class CurrentDateControllerTest extends BaseControllerTest {
 
     @Test
     public void badRequestWhenGettingCurrentDate() throws Exception {
-        doEmtpyCaseDataSetUp();
+        doEmptyCaseDataSetUp();
         mvc.perform(post(API_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

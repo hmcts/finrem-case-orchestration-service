@@ -26,7 +26,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     private JsonPath jsonPathEvaluator;
     private String contestedDir = "/json/contested/";
     private String consentedDir = "/json/consented/";
-    private String dataPath = "data";
 
     @Test
     public void verifyAmendDivorceDetailsD81Individual() {
@@ -99,7 +98,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         }
     }
 
-
     @Test
     public void verifyAmendRemovePeriodicPaymentOrder() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
@@ -128,9 +126,9 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyAmendRemoveRespondantSolicitorDetails() {
+    public void verifyAmendRemoveRespondentSolicitorDetails() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
-                "remove-respondant-solicitor-details1.json");
+                "remove-respondent-solicitor-details1.json");
 
         if (jsonPathEvaluator.get("rSolicitorFirm") != null
                 || jsonPathEvaluator.get("rSolicitorName") != null
