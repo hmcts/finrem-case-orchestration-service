@@ -93,7 +93,7 @@ public class FormAValidatorTest {
         assertThat(validationResult.getErrors(), is(emptyList()));
         assertThat(validationResult.getWarnings(), warningMessagesForMissingOrEmptyFields());
     }
-    
+
     @Test
     public void shouldPassForNonMandatoryEmptyFields() {
         List<OcrDataField> nonMandatoryFieldsWithEmptyValues = asList(
@@ -147,10 +147,11 @@ public class FormAValidatorTest {
             containsValueThatIsNotAccepted(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE),
             APPLYING_FOR_CONSENT_ORDER + " only accepts value of \"Yes\"",
             mustBeOneOf(DIVORCE_STAGE_REACHED, "Decree Nisi", "Decree Absolute"),
-            mustBeOneOf("ApplicantRepresented", 
+            mustBeOneOf("ApplicantRepresented",
                 "I am not represented by a solicitor in these proceedings",
                 "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
-                "I am represented by a solicitor in these proceedings, who has signed Section 5")
+                "I am represented by a solicitor in these proceedings, who has signed Section 5,"
+                    + " and all documents for my attention should be sent to my solicitor whose details are as follows")
         ));
     }
 
@@ -174,7 +175,7 @@ public class FormAValidatorTest {
         assertThat(validationResult.getStatus(), is(SUCCESS));
         assertThat(validationResult.getWarnings(), is(emptyList()));
     }
-    
+
     private String containsValueThatIsNotAccepted(String fieldName) {
         return String.format("%s contains a value that is not accepted", fieldName);
     }
@@ -182,7 +183,7 @@ public class FormAValidatorTest {
     private String mustHaveAtLeastTwoNames(String fieldName) {
         return String.format("%s must contain a firstname and a lastname", fieldName);
     }
-    
+
     private String mustBeOneOf(String fieldName, String... values) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(String.format("%s must be \"%s\"", fieldName, values[0]));

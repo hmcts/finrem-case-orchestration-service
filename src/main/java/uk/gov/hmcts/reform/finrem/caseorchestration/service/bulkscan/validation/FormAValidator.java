@@ -70,10 +70,11 @@ public class FormAValidator extends BulkScanFormValidator {
         ALLOWED_VALUES_PER_FIELD.put("ApplicantRepresented", asList(
             "I am not represented by a solicitor in these proceedings",
             "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
-            "I am represented by a solicitor in these proceedings, who has signed Section 5"
+            "I am represented by a solicitor in these proceedings, who has signed Section 5,"
+                + " and all documents for my attention should be sent to my solicitor whose details are as follows"
         ));
     }
-    
+
     @Override
     protected Map<String, List<String>> getAllowedValuesPerField() {
         return ALLOWED_VALUES_PER_FIELD;
@@ -128,7 +129,7 @@ public class FormAValidator extends BulkScanFormValidator {
 
         return validationWarningMessages;
     }
-    
+
     private static List<String> validateHasAtLeastTwoNames(Map<String, String> fieldsMap, String fieldName) {
         String fieldValue = fieldsMap.get(fieldName);
         return fieldValue != null && Arrays.stream(fieldValue.split(" "))
