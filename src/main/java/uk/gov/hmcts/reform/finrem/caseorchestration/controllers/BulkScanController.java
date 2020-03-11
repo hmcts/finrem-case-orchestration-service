@@ -48,11 +48,7 @@ public class BulkScanController {
     @Autowired
     private AuthService authService;
 
-    @PostMapping(
-        path = BulkScanEndpoints.VALIDATE,
-        consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @PostMapping(path = BulkScanEndpoints.VALIDATE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Validates OCR form data based on form type")
     @ApiResponses({
         @ApiResponse(

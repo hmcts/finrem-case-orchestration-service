@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_COURT_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ROLES;
 
@@ -32,7 +33,7 @@ public class IdamService {
 
     private static final  Function<String, HttpEntity> buildAuthRequest = authToken -> {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", authToken);
+        headers.add(AUTHORIZATION_HEADER, authToken);
         headers.add("Content-Type", "application/json");
         return new HttpEntity<>(headers);
     };

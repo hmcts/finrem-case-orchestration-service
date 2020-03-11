@@ -10,8 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationS
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -72,7 +72,6 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
                 .andExpect(content().string(is(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
 
-
     @Test
     public void shouldReturnConsentedHWFConfirmationMarkdown() throws Exception {
         doConfirmationSetup(true, true);
@@ -81,7 +80,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.confirmation_header", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.confirmation_body", is("consented_hwf_confirmation_markup")));
         verify(paymentConfirmationService, times(1)).consentedHwfPaymentConfirmation();
     }
@@ -94,11 +93,10 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.confirmation_header", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.confirmation_body", is("consented_pba_confirmation_markup")));
         verify(paymentConfirmationService, times(1)).consentedPbaPaymentConfirmation();
     }
-
 
     @Test
     public void shouldReturnContestedHWFConfirmationMarkdown() throws Exception {
@@ -108,7 +106,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.confirmation_header", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.confirmation_body", is("contested_hwf_confirmation_markup")));
         verify(paymentConfirmationService, times(1)).contestedHwfPaymentConfirmation();
     }
@@ -121,7 +119,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.confirmation_header", isEmptyOrNullString()))
+                .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.confirmation_body", is("contested_pba_confirmation_markup")));
         verify(paymentConfirmationService, times(1)).contestedPbaPaymentConfirmation();
     }

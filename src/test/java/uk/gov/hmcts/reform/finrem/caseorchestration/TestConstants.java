@@ -13,6 +13,9 @@ public class TestConstants {
     public static final String TEST_SOLICITOR_NAME = "Solicitor name";
     public static final String TEST_SOLICITOR_EMAIL = "testSolicitor@email.com";
 
-    public static final String TEST_BULK_FORM_TYPE = "testFormType";
+    public static final String TEST_KEY = "testKey";
+    public static final String TEST_VALUE = "testValue";
+    public static final String TEST_FORM = "testForm";
+    public static final String TEST_FORM_TYPE = "testFormType";
     public static final String TEST_BULK_UNSUPPORTED_FORM_TYPE = "unsupportedFormType";
 }

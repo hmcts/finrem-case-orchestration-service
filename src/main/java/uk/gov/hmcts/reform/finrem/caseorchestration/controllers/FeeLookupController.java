@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONTESTED;
@@ -40,17 +42,16 @@ public class FeeLookupController implements BaseController {
     private final FeeService feeService;
 
     @PostMapping(path = "/fee-lookup", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Handles looking up Case Fees")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeLookup(
-            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
             @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request for FEE lookup. Auth token: {}, Case request : {}", authToken, callbackRequest);
+        log.info("Received request for Fee lookup. Auth token: {}, Case request : {}", authToken, callbackRequest);
 
         validateCaseData(callbackRequest);
 
         Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
-
         ApplicationType applicationType = isConsentedApplication(mapOfCaseData) ? CONSENTED : CONTESTED;
-
         FeeResponse feeResponse = feeService.getApplicationFee(applicationType);
 
         FeeCaseData feeResponseData = FeeCaseData.builder().build();
@@ -60,8 +61,7 @@ public class FeeLookupController implements BaseController {
                 .data(objectMapper.convertValue(feeResponseData, Map.class)).build());
     }
 
-    private void updateCaseWithFee(Map<String, Object> caseRequestData, FeeCaseData feeResponseData,
-                                   FeeResponse feeResponse) {
+    private void updateCaseWithFee(Map<String, Object> caseRequestData, FeeCaseData feeResponseData, FeeResponse feeResponse) {
         FeeItem feeItem = createFeeItem(feeResponse);
         OrderSummary orderSummary = createOrderSummary(caseRequestData, feeItem);
         feeResponseData.setOrderSummary(orderSummary);
@@ -93,5 +93,4 @@ public class FeeLookupController implements BaseController {
                 .feeDescription(feeResponse.getDescription())
                 .build();
     }
-
 }

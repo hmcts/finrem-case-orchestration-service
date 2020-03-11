@@ -11,9 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
@@ -100,8 +100,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
                 .andExpect(jsonPath("$.data.amountToPay", is("1000")))
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), anyString(), any());
     }
 
@@ -114,7 +114,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), anyString(), any());
 
     }
@@ -132,8 +132,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
                 .andExpect(jsonPath("$.data.amountToPay", is("1000")))
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), anyString(), any());
     }
 
@@ -145,8 +145,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(0)).makePayment(anyString(), anyString(), any());
     }
 }

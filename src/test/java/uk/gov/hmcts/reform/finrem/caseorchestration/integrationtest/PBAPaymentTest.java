@@ -32,14 +32,16 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 
 @RunWith(SpringRunner.class)
@@ -54,7 +56,6 @@ public class PBAPaymentTest {
     private static final String PBA_PAYMENT_URL = "/case-orchestration/pba-payment";
     private static final String FEE_LOOKUP_URL = "/payments/fee-lookup\\?application-type=consented";
     private static final String PBA_URL = "/payments/pba-payment";
-    private static final String AUTH_TOKEN = "eeeeeeyyy.eeee";
     private static final String FEE_RESPONSE = "{\n"
             + "  \"code\": \"FEE0600\",\n"
             + "  \"description\": \"Application (without notice)\",\n"
@@ -88,52 +89,48 @@ public class PBAPaymentTest {
     @ClassRule
     public static WireMockClassRule feeLookUpService = new WireMockClassRule(9001);
 
-
     @Test
     public void shouldDoPBAPayment() throws Exception {
         setUpPbaPayment("/fixtures/pba-payment.json");
         stubFeeLookUp();
         stubPayment(PAYMENT_RESPONSE);
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
-                .header("Authorization", AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.PBAPaymentReference", is("REF0001")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0600")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("5000")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription",
-                        is("Application (without notice)")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("1")))
-                .andExpect(jsonPath("$.data.amountToPay", is("5000")))
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.PBAPaymentReference", is("REF0001")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0600")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("5000")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("Application (without notice)")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("1")))
+            .andExpect(jsonPath("$.data.amountToPay", is("5000")))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
 
         verify(getRequestedFor(urlMatching(FEE_LOOKUP_URL)));
         verify(postRequestedFor(urlMatching(PBA_URL)));
     }
-
 
     @Test
     public void shouldNotDoPBAPaymentWhenHWFPayment() throws Exception {
         setUpHwfPayment();
         stubFeeLookUp();
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
-                .header("Authorization", AUTH_TOKEN)
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.state", is(AWAITING_HWF_DECISION.toString())))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0600")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("5000")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription",
-                        is("Application (without notice)")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("1")))
-                .andExpect(jsonPath("$.data.amountToPay", is("5000")))
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.state", is(AWAITING_HWF_DECISION.toString())))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0600")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("5000")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("Application (without notice)")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("1")))
+            .andExpect(jsonPath("$.data.amountToPay", is("5000")))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
@@ -142,41 +139,40 @@ public class PBAPaymentTest {
         stubFeeLookUp();
         stubPayment(PAYMENT_FAILURE_RESPONSE);
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header("Authorization", AUTH_TOKEN)
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(getRequestedFor(urlMatching(FEE_LOOKUP_URL)));
         verify(postRequestedFor(urlMatching(PBA_URL)));
-
     }
 
     @Test
     public void shouldReturnBadRequestError() throws Exception {
         setUpPbaPayment("/fixtures/empty-casedata.json");
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header("Authorization", AUTH_TOKEN)
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
     }
 
     private void stubPayment(String paymentResponse) {
         stubFor(post(PBA_URL)
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(CONTENT_TYPE, javax.ws.rs.core.MediaType.APPLICATION_JSON)
-                        .withBody(paymentResponse)));
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, javax.ws.rs.core.MediaType.APPLICATION_JSON)
+                .withBody(paymentResponse)));
     }
 
     private void stubFeeLookUp() {
         stubFor(get(urlMatching(FEE_LOOKUP_URL))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(CONTENT_TYPE, javax.ws.rs.core.MediaType.APPLICATION_JSON)
-                        .withBody(FEE_RESPONSE)));
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, javax.ws.rs.core.MediaType.APPLICATION_JSON)
+                .withBody(FEE_RESPONSE)));
     }
 
     public void setUpHwfPayment() throws IOException {
@@ -184,8 +180,7 @@ public class PBAPaymentTest {
     }
 
     private void setUpPbaPayment(String name) throws IOException {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(
-                name)) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(name)) {
             request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }

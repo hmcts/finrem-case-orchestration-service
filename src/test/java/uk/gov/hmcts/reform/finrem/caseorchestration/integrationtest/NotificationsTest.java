@@ -39,6 +39,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -50,14 +51,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Category(IntegrationTest.class)
 public class NotificationsTest {
 
-    private static final String AUTH_TOKEN = "axseeerfderersafsfasfaf";
     private static final String HWF_SUCCESSFUL_URL = "/case-orchestration/notify/hwf-successful";
     private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
     private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/consent-order-available";
-    private static final String CONSENT_ORDER_NOT_APPROVED_URL = "/case-orchestration"
-            + "/notify/consent-order-not-approved";
-    private static final String ASSIGNED_TO_JUDGE_URL = "/case-orchestration"
-            + "/notify/assign-to-judge";
+    private static final String CONSENT_ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/consent-order-not-approved";
+    private static final String ASSIGNED_TO_JUDGE_URL = "/case-orchestration/notify/assign-to-judge";
     private static final String NOTIFY_HWF_SUCCESSFUL_CONTEXT_PATH = "/notify/hwf-successful";
     private static final String NOTIFY_CONSENT_ORDER_MADE_CONTEXT_PATH = "/notify/consent-order-made";
     private static final String NOTIFY_CONSENT_ORDER_AVAILABLE_CONTEXT_PATH = "/notify/consent-order-available";
@@ -77,8 +75,7 @@ public class NotificationsTest {
 
     @Before
     public void setUp() throws IOException {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(
-                "/fixtures/ccd-request-with-solicitor-email-consent.json")) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/ccd-request-with-solicitor-email-consent.json")) {
             request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
@@ -87,65 +84,65 @@ public class NotificationsTest {
     public void notifyHwfSuccessful() throws Exception {
         stubForNotification(NOTIFY_HWF_SUCCESSFUL_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(HWF_SUCCESSFUL_URL)
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().json(expectedCaseData()));
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(content().json(expectedCaseData()));
         verify(postRequestedFor(urlEqualTo(NOTIFY_HWF_SUCCESSFUL_CONTEXT_PATH))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON)));
+            .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON)));
     }
 
     @Test
     public void notifyConsentOrderMade() throws Exception {
         stubForNotification(NOTIFY_CONSENT_ORDER_MADE_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_MADE_URL)
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().json(expectedCaseData()));
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(content().json(expectedCaseData()));
         verify(postRequestedFor(urlEqualTo(NOTIFY_CONSENT_ORDER_MADE_CONTEXT_PATH))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON)));
+            .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON)));
     }
 
     @Test
     public void notifyConsentOrderAvailable() throws Exception {
         stubForNotification(NOTIFY_CONSENT_ORDER_AVAILABLE_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_AVAILABLE_URL)
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().json(expectedCaseData()));
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(content().json(expectedCaseData()));
         verify(postRequestedFor(urlEqualTo(NOTIFY_CONSENT_ORDER_AVAILABLE_CONTEXT_PATH))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON)));
+            .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON)));
     }
 
     @Test
     public void notifyConsentOrderNotApproved() throws Exception {
         stubForNotification(NOTIFY_CONSENT_ORDER_NOT_APPROVED_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(CONSENT_ORDER_NOT_APPROVED_URL)
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().json(expectedCaseData()));
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(content().json(expectedCaseData()));
         verify(postRequestedFor(urlEqualTo(NOTIFY_CONSENT_ORDER_NOT_APPROVED_CONTEXT_PATH))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON)));
+            .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON)));
     }
 
     @Test
     public void notifyAssignToJudge() throws Exception {
         stubForNotification(NOTIFY_ASSIGN_TO_JUDGE_CONTEXT_PATH, HttpStatus.OK.value());
         webClient.perform(MockMvcRequestBuilders.post(ASSIGNED_TO_JUDGE_URL)
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content().json(expectedCaseData()));
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(content().json(expectedCaseData()));
         verify(postRequestedFor(urlEqualTo(NOTIFY_ASSIGN_TO_JUDGE_CONTEXT_PATH))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON)));
+            .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON)));
     }
 
     private String expectedCaseData() throws JsonProcessingException {
@@ -158,10 +155,8 @@ public class NotificationsTest {
 
     private void stubForNotification(String url, int value) {
         notificationService.stubFor(post(urlEqualTo(url))
-                .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON))
-                .willReturn(aResponse()
-                        .withStatus(value)));
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON))
+            .willReturn(aResponse().withStatus(value)));
     }
-
 }

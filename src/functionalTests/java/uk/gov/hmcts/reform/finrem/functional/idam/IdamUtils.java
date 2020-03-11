@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Base64;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+
 @Component
 public class IdamUtils implements IdamUserClient {
 
@@ -34,7 +36,7 @@ public class IdamUtils implements IdamUserClient {
         System.out.println("idamCodeUrl() -----> " + idamCodeUrl());
 
         Response response = RestAssured.given()
-            .header("Authorization", authHeader)
+            .header(AUTHORIZATION_HEADER, authHeader)
             .relaxedHTTPSValidation()
             .post(idamCodeUrl());
 

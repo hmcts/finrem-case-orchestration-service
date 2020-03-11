@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocument
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -29,58 +30,51 @@ public class RejectedOrderDocumentController {
     @Autowired
     private RefusalOrderDocumentService service;
 
-    @PostMapping(path = "/documents/consent-order-not-approved", consumes = APPLICATION_JSON_VALUE,
-            produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles Consent order not approved order generation. Serves as a callback from CCD")
+    @PostMapping(path = "/documents/consent-order-not-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Handles Consent Order Not Approved Order Generation. Serves as a callback from CCD")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
-                    + "attached to the case",
-                    response = AboutToStartOrSubmitCallbackResponse.class),
+            @ApiResponse(code = 200,
+                message = "Callback was processed successvully or in case of an error message is attached to the case",
+                response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
         })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateConsentOrderNotApproved(
-            @RequestHeader(value = "Authorization") String authorisationToken,
+            @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @RequestBody @ApiParam("CaseData") CallbackRequest request) {
 
-
-        Map<String, Object> caseData =
-                service.generateConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
+        Map<String, Object> caseData = service.generateConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
 
         return ResponseEntity.ok(
-                AboutToStartOrSubmitCallbackResponse.builder()
-                        .data(caseData)
-                        .errors(ImmutableList.of())
-                        .warnings(ImmutableList.of())
-                        .build()
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseData)
+                .errors(ImmutableList.of())
+                .warnings(ImmutableList.of())
+                .build()
         );
     }
 
-    @PostMapping(path = "/documents/preview-consent-order-not-approved", consumes = APPLICATION_JSON_VALUE,
-            produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles Consent order not approved order generation for pre view."
-            + " Serves as a callback from CCD")
+    @PostMapping(path = "/documents/preview-consent-order-not-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Handles preview Consent Order Not Approved Order Generation. Serves as a callback from CCD")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
-                    + "attached to the case",
-                    response = AboutToStartOrSubmitCallbackResponse.class),
+            @ApiResponse(code = 200,
+                message = "Callback was processed successfully or in case of an error message is attached to the case",
+                response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
         })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> previewConsentOrderNotApproved(
-            @RequestHeader(value = "Authorization") String authorisationToken,
+            @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @RequestBody @ApiParam("CaseData") CallbackRequest request) {
 
-
-        Map<String, Object> caseData =
-                service.previewConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
+        Map<String, Object> caseData = service.previewConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
 
         return ResponseEntity.ok(
-                AboutToStartOrSubmitCallbackResponse.builder()
-                        .data(caseData)
-                        .errors(ImmutableList.of())
-                        .warnings(ImmutableList.of())
-                        .build()
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseData)
+                .errors(ImmutableList.of())
+                .warnings(ImmutableList.of())
+                .build()
         );
     }
 }

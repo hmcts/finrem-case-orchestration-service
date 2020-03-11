@@ -67,7 +67,7 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .getResource("/fixtures/updatecase/amend-divorce-details-decree-absolute.json").toURI()));
         mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE)
             .content(requestContent.toString())
-            .header("Authorization", AUTH_TOKEN)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(print())

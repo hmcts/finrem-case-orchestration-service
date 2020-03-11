@@ -17,13 +17,14 @@ import java.util.Map;
 import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
 
 @RestController
 @Slf4j
 public class NotificationsController implements BaseController {
 
-    private static final String LOG_MESSAGE = "received notification request for case reference :    ";
+    private static final String LOG_MESSAGE = "received notification request for case reference:    ";
 
     @Autowired
     private NotificationService notificationService;
@@ -50,7 +51,7 @@ public class NotificationsController implements BaseController {
     }
 
     @PostMapping(value = "/case-orchestration/notify/assign-to-judge", consumes = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "send e-mail for Case assigned to Judge Successful.")
+    @ApiOperation(value = "send e-mail for case assigned to Judge Successful.")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Case assigned to Judge e-mail sent successfully",
                     response = AboutToStartOrSubmitCallbackResponse.class)})
@@ -113,9 +114,8 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    private boolean isSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData,
-                                                     String solicitorAgreeToReceiveEmails) {
-        return "Yes".equalsIgnoreCase(Objects.toString(mapOfCaseData
+    private boolean isSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData, String solicitorAgreeToReceiveEmails) {
+        return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData
                 .get(solicitorAgreeToReceiveEmails)));
     }
 }

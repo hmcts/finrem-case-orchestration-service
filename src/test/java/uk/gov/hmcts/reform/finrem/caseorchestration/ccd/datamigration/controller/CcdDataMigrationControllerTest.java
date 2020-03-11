@@ -17,8 +17,8 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -48,7 +48,6 @@ public class CcdDataMigrationControllerTest {
         return ccdMigrationRequest;
     }
 
-
     private CallbackRequest ccdAlreadyMigratedRequest() throws IOException {
         final String alreadyMigratedRequestJson = "/fixtures/ccd-already-migrated-request.json";
         try (final InputStream resourceAsStream = getClass().getResourceAsStream(alreadyMigratedRequestJson)) {
@@ -66,14 +65,14 @@ public class CcdDataMigrationControllerTest {
         doMigrateSetup();
 
         mvc.perform(post(MIGRATE_URL)
-                            .content(objectMapper.writeValueAsString(ccdMigrationRequestType()))
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.applicantRepresented", is("Yes")))
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+            .content(objectMapper.writeValueAsString(ccdMigrationRequestType()))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.applicantRepresented", is("Yes")))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
@@ -81,13 +80,13 @@ public class CcdDataMigrationControllerTest {
         doMigrateSetup();
 
         mvc.perform(post(MIGRATE_URL)
-                            .content(objectMapper.writeValueAsString(ccdAlreadyMigratedRequest()))
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+            .content(objectMapper.writeValueAsString(ccdAlreadyMigratedRequest()))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 }

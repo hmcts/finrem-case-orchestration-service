@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.YES;
@@ -34,19 +35,17 @@ public class ConsentOrderController implements BaseController {
     @Autowired
     private IdamService idamService;
 
-    @PostMapping(path = "/update-latest-consent-order", consumes = APPLICATION_JSON_VALUE,
-            produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "CCD Callback to update the latest consent order d    etails")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Callback was processed successFully or"
-            + " in case of an error message is attached to the case",
+    @PostMapping(path = "/update-latest-consent-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "CCD Callback to update the latest consent order details")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateLatestConsentOrderDetails(
-            @RequestHeader(value = "Authorization", required = false) String authToken,
-            @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request for update latest consent order. Auth token: {}, Case request : {}",
-                authToken, callbackRequest);
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("Received request for update latest consent order. Auth token: {}, Case request : {}", authToken, callbackRequest);
 
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
