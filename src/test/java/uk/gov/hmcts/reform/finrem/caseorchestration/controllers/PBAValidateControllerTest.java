@@ -10,9 +10,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -67,8 +67,8 @@ public class PBAValidateControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaValidationService, never()).isValidPBA(anyString(), anyString());
     }
 
@@ -81,7 +81,7 @@ public class PBAValidateControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaValidationService, times(1)).isValidPBA(AUTH_TOKEN, PBA_NUMBER);
     }
 
@@ -93,8 +93,8 @@ public class PBAValidateControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaValidationService, times(1)).isValidPBA(AUTH_TOKEN, PBA_NUMBER);
     }
 }

@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BINARY_URL_TYPE;
 
 @RunWith(SerenityRunner.class)
 public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
@@ -182,7 +183,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_JSON, generatorUrl,
-            "binary", "miniForma", consentedDir);
+            BINARY_URL_TYPE, "miniForma", consentedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
@@ -197,7 +198,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadRejectOrderDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
-            "binary", "generalOrder", consentedDir);
+            BINARY_URL_TYPE, "generalOrder", consentedDir);
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
         assertTrue(documentContent.contains("Approved by:  District Judge test3"));
     }
@@ -206,7 +207,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadContestedDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl,
-            "binary", "miniForma", contestedDir);
+            BINARY_URL_TYPE, "miniForma", contestedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
@@ -218,7 +219,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadContestedFormCDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_C_JSON, generateHearingUrl,
-            "binary", "hearing", contestedDir);
+            BINARY_URL_TYPE, "hearing", contestedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
@@ -231,7 +232,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadContestedFormGDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_G_JSON, generateHearingUrl,
-            "binary", "hearing", contestedDir);
+            BINARY_URL_TYPE, "hearing", contestedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
@@ -261,7 +262,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
                 if (urlType.equals("document")) {
                     url1 = jsonPathEvaluator.get("data.miniFormA.document_url");
-                } else if (urlType.equals("binary")) {
+                } else if (urlType.equals(BINARY_URL_TYPE)) {
                     url1 = jsonPathEvaluator.get("data.miniFormA.document_binary_url");
                 }
                 break;
@@ -269,7 +270,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
                 if (urlType.equals("document")) {
                     url1 = jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentLink.document_url");
-                } else if (urlType.equals("binary")) {
+                } else if (urlType.equals(BINARY_URL_TYPE)) {
                     url1 = jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentLink.document_binary_url");
                 }
                 break;
@@ -277,7 +278,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
                 if (urlType.equals("document")) {
                     url1 = jsonPathEvaluator.get("data.approvedConsentOrderLetter.document_url");
-                } else if (urlType.equals("binary")) {
+                } else if (urlType.equals(BINARY_URL_TYPE)) {
                     url1 = jsonPathEvaluator.get("data.approvedConsentOrderLetter.document_binary_url");
                 }
                 break;
@@ -285,7 +286,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
                 if (urlType.equals("document")) {
                     url1 = jsonPathEvaluator.get("data.formC.document_url");
-                } else if (urlType.equals("binary")) {
+                } else if (urlType.equals(BINARY_URL_TYPE)) {
                     url1 = jsonPathEvaluator.get("data.formC.document_binary_url");
                 }
                 break;
@@ -293,7 +294,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                 jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
                 if (urlType.equals("document")) {
                     url1 = jsonPathEvaluator.get("data.formG.document_url");
-                } else if (urlType.equals("binary")) {
+                } else if (urlType.equals(BINARY_URL_TYPE)) {
                     url1 = jsonPathEvaluator.get("data.formG.document_binary_url");
                 }
                 break;

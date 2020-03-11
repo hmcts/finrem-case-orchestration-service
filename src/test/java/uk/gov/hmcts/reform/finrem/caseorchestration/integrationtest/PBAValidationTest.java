@@ -24,15 +24,17 @@ import java.io.InputStream;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -43,7 +45,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class PBAValidationTest {
 
     private static final String PBA_VALIDATE_URL = "/case-orchestration/pba-validate";
-    private static final String AUTH_TOKEN = "eeeeeeyyy.eeee";
     private static final String PBA_VALID_RESPONSE = "{\"pbaNumberValid\": true }";
     private static final String PBA_INVALID_RESPONSE = "{\"pbaNumberValid\": false }";
 
@@ -68,8 +69,8 @@ public class PBAValidationTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
@@ -83,7 +84,7 @@ public class PBAValidationTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
@@ -94,8 +95,8 @@ public class PBAValidationTest {
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
@@ -120,7 +121,7 @@ public class PBAValidationTest {
         stubFor(get("/payments/pba-validate/PBA123")
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.OK.value())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                         .withBody(response)));
 
     }

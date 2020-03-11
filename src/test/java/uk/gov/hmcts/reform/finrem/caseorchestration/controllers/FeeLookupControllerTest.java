@@ -13,8 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -68,8 +68,8 @@ public class FeeLookupControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
                 .andExpect(jsonPath("$.data.amountToPay", is("1000")))
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
@@ -85,7 +85,7 @@ public class FeeLookupControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
                 .andExpect(jsonPath("$.data.amountToPay", is("25500")))
-                .andExpect(jsonPath("$.errors", isEmptyOrNullString()))
-                .andExpect(jsonPath("$.warnings", isEmptyOrNullString()));
+                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 }
