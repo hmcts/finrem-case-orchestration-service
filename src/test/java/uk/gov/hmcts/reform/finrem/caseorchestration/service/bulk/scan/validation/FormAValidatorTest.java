@@ -217,13 +217,14 @@ public class FormAValidatorTest {
         String urgencyValue = "RiskLifeLibertyPhysicalSafety";
         String previousAttendanceValue = "AnotherDisputeeResolutionn";
 
-        mandatoryFieldsWithValues.addAll(asList(
+        List<OcrDataField> ocrDataFields = new ArrayList<>(mandatoryFieldsWithValues);
+        ocrDataFields.addAll(asList(
             new OcrDataField("MIAMDomesticViolenceChecklist", domesticViolenceValue),
             new OcrDataField("MIAMUrgencyChecklist", urgencyValue),
             new OcrDataField("MIAMPreviousAttendanceChecklist", previousAttendanceValue)
         ));
 
-        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(mandatoryFieldsWithValues);
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(ocrDataFields);
 
         assertThat(validationResult.getStatus(), is(SUCCESS));
         assertThat(validationResult.getWarnings(), is(emptyList()));
