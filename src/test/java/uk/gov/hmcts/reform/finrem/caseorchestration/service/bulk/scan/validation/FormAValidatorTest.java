@@ -215,7 +215,8 @@ public class FormAValidatorTest {
             mustBeOneOf(APPLICANT_REPRESENTED,
                 "I am not represented by a solicitor in these proceedings",
                 "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
-                "I am represented by a solicitor in these proceedings, who has signed Section 5"),
+                "I am represented by a solicitor in these proceedings, who has signed Section 5"
+                    + " and all documents for my attention should be sent to my solicitor whose details are as follows"),
             notInValidFormat(APPLICANT_SOLICITOR_EMAIL),
             notInValidFormat(APPLICANT_EMAIL),
             mustBeOneOf(ORDER_FOR_CHILDREN,
