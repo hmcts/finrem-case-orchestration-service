@@ -37,13 +37,14 @@ public class ConsentOrderController implements BaseController {
 
     @PostMapping(path = "/update-latest-consent-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "CCD Callback to update the latest consent order details")
-    @ApiResponses(value = {@ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateLatestConsentOrderDetails(
-            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-            @RequestBody CallbackRequest callbackRequest) {
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
+        @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request for update latest consent order. Auth token: {}, Case request : {}", authToken, callbackRequest);
 
         validateCaseData(callbackRequest);

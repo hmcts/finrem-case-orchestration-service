@@ -103,12 +103,12 @@ public class ConsentOrderApprovedController implements BaseController {
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(LATEST_CONSENT_ORDER),
             new TypeReference<CaseDocument>() {
-        });
+            });
     }
 
     private List<PensionCollectionData> getPensionDocuments(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION),
             new TypeReference<List<PensionCollectionData>>() {
-        });
+            });
     }
 }
