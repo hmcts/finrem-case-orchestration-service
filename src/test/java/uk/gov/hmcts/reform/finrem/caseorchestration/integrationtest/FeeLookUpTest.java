@@ -71,29 +71,26 @@ public class FeeLookUpTest {
     public void consentedFeeLookup() throws Exception {
         stubFeeLookUp(CONSENTED);
         webClient.perform(MockMvcRequestBuilders.post(FEE_LOOKUP_URL)
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request(CONSENTED))))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content()
-                        .json(expectedBody(CONSENTED)));
-        verify(getRequestedFor(urlMatching(
-                "/payments/fee-lookup\\?application-type=consented")));
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request(CONSENTED))))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(content()
+                .json(expectedBody(CONSENTED)));
+        verify(getRequestedFor(urlMatching("/payments/fee-lookup\\?application-type=consented")));
     }
-
 
     @Test
     public void contestedFeeLookup() throws Exception {
         stubFeeLookUp(CONTESTED);
         webClient.perform(MockMvcRequestBuilders.post(FEE_LOOKUP_URL)
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request(CONTESTED))))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(content()
-                        .json(expectedBody(CONTESTED)));
-        verify(getRequestedFor(urlMatching(
-                "/payments/fee-lookup\\?application-type=contested")));
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request(CONTESTED))))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(content()
+                .json(expectedBody(CONTESTED)));
+        verify(getRequestedFor(urlMatching("/payments/fee-lookup\\?application-type=contested")));
     }
 
     private String expectedBody(ApplicationType applicationType) {
@@ -114,10 +111,10 @@ public class FeeLookUpTest {
 
     private void stubFeeLookUp(ApplicationType applicationType) {
         stubFor(get(urlMatching("/payments/fee-lookup\\?application-type=" + applicationType.toString()))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-                        .withBody(response(applicationType))));
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                .withBody(response(applicationType))));
     }
 
     private String response(ApplicationType applicationType) {

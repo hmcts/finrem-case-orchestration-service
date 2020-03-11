@@ -29,10 +29,10 @@ public class RejectionOrderTest extends AbstractDocumentTest {
     @Override
     protected DocumentGenerationRequest documentRequest() {
         return DocumentGenerationRequest.builder()
-                .template(documentConfiguration.getRejectedOrderTemplate())
-                .fileName(documentConfiguration.getRejectedOrderFileName())
-                .values(Collections.singletonMap("caseDetails", copyOf(request.getCaseDetails())))
-                .build();
+            .template(documentConfiguration.getRejectedOrderTemplate())
+            .fileName(documentConfiguration.getRejectedOrderFileName())
+            .values(Collections.singletonMap("caseDetails", copyOf(request.getCaseDetails())))
+            .build();
     }
 
     @Override
@@ -45,28 +45,25 @@ public class RejectionOrderTest extends AbstractDocumentTest {
         generateDocumentServiceSuccessStub();
 
         webClient.perform(MockMvcRequestBuilders.post(apiUrl())
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.uploadOrder[1].id", is(notNullValue())))
-                .andExpect(jsonPath("$.data.uploadOrder[1].value.DocumentType", is(REJECTED_ORDER_TYPE)))
-                .andExpect(jsonPath("$.data.uploadOrder[1].value.DocumentDateAdded", is(notNullValue())))
-                .andExpect(jsonPath("$.data.uploadOrder[1].value.DocumentLink.document_url", is(DOC_URL)))
-                .andExpect(
-                        jsonPath("$.data.uploadOrder[1].value.DocumentLink.document_filename", is(FILE_NAME)))
-                .andExpect(
-                        jsonPath("$.data.uploadOrder[1].value.DocumentLink.document_binary_url",
-                                is(BINARY_URL)))
-                .andExpect(jsonPath("$.errors", hasSize(0)))
-                .andExpect(jsonPath("$.warnings", hasSize(0)));
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.uploadOrder[1].id", is(notNullValue())))
+            .andExpect(jsonPath("$.data.uploadOrder[1].value.DocumentType", is(REJECTED_ORDER_TYPE)))
+            .andExpect(jsonPath("$.data.uploadOrder[1].value.DocumentDateAdded", is(notNullValue())))
+            .andExpect(jsonPath("$.data.uploadOrder[1].value.DocumentLink.document_url", is(DOC_URL)))
+            .andExpect(jsonPath("$.data.uploadOrder[1].value.DocumentLink.document_filename", is(FILE_NAME)))
+            .andExpect(jsonPath("$.data.uploadOrder[1].value.DocumentLink.document_binary_url", is(BINARY_URL)))
+            .andExpect(jsonPath("$.errors", hasSize(0)))
+            .andExpect(jsonPath("$.warnings", hasSize(0)));
     }
 
     private CaseDetails copyOf(CaseDetails caseDetails) {
         try {
             CaseDetails deepCopy = objectMapper
-                    .readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
+                .readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
             return OrderRefusalTranslator.translateOrderRefusalCollection(deepCopy);
         } catch (IOException e) {
             throw new IllegalStateException();

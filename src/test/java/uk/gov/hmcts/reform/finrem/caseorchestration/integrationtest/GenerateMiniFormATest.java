@@ -38,15 +38,15 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
 
     void generateDocument() throws Exception {
         webClient.perform(MockMvcRequestBuilders.post(apiUrl())
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().json(expectedCaseData()));
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().json(expectedCaseData()));
     }
 
-    String expectedCaseData() throws JsonProcessingException {
+    private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getData().put("miniFormA", caseDocument());
 
@@ -65,16 +65,16 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
     @Override
     protected DocumentGenerationRequest documentRequest() {
         return DocumentGenerationRequest.builder()
-                .template(documentConfiguration.getMiniFormTemplate())
-                .fileName(documentConfiguration.getMiniFormFileName())
-                .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
-                .build();
+            .template(documentConfiguration.getMiniFormTemplate())
+            .fileName(documentConfiguration.getMiniFormFileName())
+            .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+            .build();
     }
 
     protected CaseDetails copyWithOptionValueTranslation(CaseDetails caseDetails) {
         try {
             CaseDetails deepCopy = objectMapper
-                    .readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
+                .readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
 
             optionIdToValueTranslator.translateFixedListOptions(deepCopy);
             return deepCopy;

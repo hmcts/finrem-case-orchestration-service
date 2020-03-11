@@ -52,24 +52,24 @@ public class MiamCheckTest {
     public void miamAttendExemptCheckError() throws Exception {
         setUp("/fixtures/contested/miam-attend-exempt.json");
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors[0]", is(ERROR_MSG)));
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors[0]", is(ERROR_MSG)));
     }
 
     @Test
     public void miamCheckNoError() throws Exception {
         setUp("/fixtures/contested/miam-valid-attend-exempt.json");
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors", hasSize(0)));
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(0)));
     }
 
     private void setUp(String jsonContent) throws IOException {

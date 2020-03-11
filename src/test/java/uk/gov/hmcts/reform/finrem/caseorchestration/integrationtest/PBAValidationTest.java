@@ -65,13 +65,13 @@ public class PBAValidationTest {
         setUpPbaValidationRequest("/fixtures/pba-validate.json");
         stubPBAValidate(PBA_VALID_RESPONSE);
         webClient.perform(post(PBA_VALIDATE_URL)
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
@@ -79,51 +79,48 @@ public class PBAValidationTest {
         setUpPbaValidationRequest("/fixtures/pba-validate.json");
         stubPBAValidate(PBA_INVALID_RESPONSE);
         webClient.perform(post(PBA_VALIDATE_URL)
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
     public void shouldNotDoPBAValidationWhenPaymentIsDoneWithHWF() throws Exception {
         setUpPbaValidationRequest("/fixtures/hwf.json");
         webClient.perform(post(PBA_VALIDATE_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
     public void shouldReturnBadRequestError() throws Exception {
         setUpPbaValidationRequest("/fixtures/empty-casedata.json");
         webClient.perform(post(PBA_VALIDATE_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest());
     }
 
-
     private void setUpPbaValidationRequest(String name) throws IOException {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(
-                name)) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(name)) {
             request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
 
     private void stubPBAValidate(String response) {
         stubFor(get("/payments/pba-validate/PBA123")
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBody(response)));
-
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(response)));
     }
 }

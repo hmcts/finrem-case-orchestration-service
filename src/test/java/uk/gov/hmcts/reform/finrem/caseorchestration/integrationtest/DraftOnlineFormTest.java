@@ -21,11 +21,11 @@ public class DraftOnlineFormTest extends GenerateMiniFormATest {
     @Override
     protected DocumentGenerationRequest documentRequest() {
         return DocumentGenerationRequest.builder()
-                .template(documentConfiguration.getContestedDraftMiniFormTemplate())
-                .fileName(documentConfiguration.getContestedDraftMiniFormFileName())
-                .values(Collections.singletonMap("caseDetails",
-                        copyWithOptionValueTranslation(request.getCaseDetails())))
-                .build();
+            .template(documentConfiguration.getContestedDraftMiniFormTemplate())
+            .fileName(documentConfiguration.getContestedDraftMiniFormFileName())
+            .values(Collections.singletonMap("caseDetails",
+                copyWithOptionValueTranslation(request.getCaseDetails())))
+            .build();
     }
 
     @Test
