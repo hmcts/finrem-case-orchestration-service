@@ -81,8 +81,9 @@ public class PBAPaymentController implements BaseController {
     private ResponseEntity<AboutToStartOrSubmitCallbackResponse> paymentFailure(Map<String, Object> caseData, PaymentResponse paymentResponse) {
         String paymentError = paymentResponse.getPaymentError();
         log.info("Payment by PBA number {} failed, payment error : {} ", caseData.get(PBA_NUMBER), paymentResponse.getPaymentError());
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(ImmutableList.of(paymentError))
-                .build());
+            .errors(ImmutableList.of(paymentError))
+            .build());
     }
 }

@@ -46,7 +46,7 @@ public class FeeLookupController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeLookup(
             @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
             @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request for FEE lookup. Auth token: {}, Case request : {}", authToken, callbackRequest);
+        log.info("Received request for Fee lookup. Auth token: {}, Case request : {}", authToken, callbackRequest);
 
         validateCaseData(callbackRequest);
 
@@ -61,8 +61,7 @@ public class FeeLookupController implements BaseController {
                 .data(objectMapper.convertValue(feeResponseData, Map.class)).build());
     }
 
-    private void updateCaseWithFee(Map<String, Object> caseRequestData, FeeCaseData feeResponseData,
-                                   FeeResponse feeResponse) {
+    private void updateCaseWithFee(Map<String, Object> caseRequestData, FeeCaseData feeResponseData, FeeResponse feeResponse) {
         FeeItem feeItem = createFeeItem(feeResponse);
         OrderSummary orderSummary = createOrderSummary(caseRequestData, feeItem);
         feeResponseData.setOrderSummary(orderSummary);

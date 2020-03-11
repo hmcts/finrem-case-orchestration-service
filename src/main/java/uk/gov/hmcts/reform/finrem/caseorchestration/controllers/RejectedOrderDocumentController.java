@@ -46,11 +46,11 @@ public class RejectedOrderDocumentController {
         Map<String, Object> caseData = service.generateConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
 
         return ResponseEntity.ok(
-                AboutToStartOrSubmitCallbackResponse.builder()
-                        .data(caseData)
-                        .errors(ImmutableList.of())
-                        .warnings(ImmutableList.of())
-                        .build()
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseData)
+                .errors(ImmutableList.of())
+                .warnings(ImmutableList.of())
+                .build()
         );
     }
 
@@ -70,11 +70,11 @@ public class RejectedOrderDocumentController {
         Map<String, Object> caseData = service.previewConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
 
         return ResponseEntity.ok(
-                AboutToStartOrSubmitCallbackResponse.builder()
-                        .data(caseData)
-                        .errors(ImmutableList.of())
-                        .warnings(ImmutableList.of())
-                        .build()
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseData)
+                .errors(ImmutableList.of())
+                .warnings(ImmutableList.of())
+                .build()
         );
     }
 }

@@ -65,7 +65,6 @@ public class CaseDataController implements BaseController {
             @PathVariable("source") final String source,
             @PathVariable("destination") final String destination) {
 
-        log.info("Setting default values for contested journey.");
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (caseData.get(source) != null && (caseData.get(source) instanceof Collection)) {

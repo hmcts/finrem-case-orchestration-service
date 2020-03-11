@@ -40,15 +40,15 @@ public class ValidateHearingController implements BaseController {
         List<String> errors = validateHearingService.validateHearingErrors(callbackRequest.getCaseDetails());
         if (!errors.isEmpty()) {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors(errors)
-                    .build());
+                .errors(errors)
+                .build());
         }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(callbackRequest.getCaseDetails());
         if (!warnings.isEmpty()) {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                    .warnings(warnings)
-                    .build());
+                .warnings(warnings)
+                .build());
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().build());

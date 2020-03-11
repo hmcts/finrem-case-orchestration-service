@@ -40,7 +40,7 @@ public class UpdateConsentedCaseController implements BaseController {
     @PostMapping(path = "/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiOperation(value = "Handles update case details and cleans up the data fields based on the options chosen")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is attached to the case",
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Internal Server Error")})

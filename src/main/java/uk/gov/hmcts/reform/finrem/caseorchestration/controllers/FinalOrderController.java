@@ -26,10 +26,8 @@ import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
@@ -44,12 +42,10 @@ public class FinalOrderController implements BaseController {
     @Autowired
     private ConsentOrderApprovedDocumentService service;
 
-    @PostMapping(path = "/contested/send-order", consumes = APPLICATION_JSON_VALUE,
-            produces = APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
-                                                       + "attached to the case",
+            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
@@ -60,30 +56,28 @@ public class FinalOrderController implements BaseController {
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         validateCaseData(callback);
-        log.info("stampFinalOrder called with case data = {}",
-                callback.getCaseDetails().getData());
+        log.info("stampFinalOrder called with case data = {}", callback.getCaseDetails().getData());
+
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         List<HearingOrderCollectionData> hearingOrderCollectionData = getHearingOrderDocuments(caseData);
         if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
             CaseDocument latestHearingOrder = hearingOrderCollectionData
                                                       .get(hearingOrderCollectionData.size() - 1)
                                                       .getHearingOrderDocuments().getUploadDraftDocument();
-            log.info("FinalOrderController called with latestHearingOrder = {}",
-                    latestHearingOrder);
+            log.info("FinalOrderController called with latestHearingOrder = {}", latestHearingOrder);
 
             stampAndAddToCollection(caseData, latestHearingOrder, authToken);
         }
 
         return ResponseEntity.ok(
-                AboutToStartOrSubmitCallbackResponse.builder()
-                        .data(caseData)
-                        .errors(ImmutableList.of())
-                        .warnings(ImmutableList.of())
-                        .build());
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseData)
+                .errors(ImmutableList.of())
+                .warnings(ImmutableList.of())
+                .build());
     }
 
-    private void stampAndAddToCollection(Map<String, Object> caseData, CaseDocument latestHearingOrder,
-                                         String authToken) {
+    private void stampAndAddToCollection(Map<String, Object> caseData, CaseDocument latestHearingOrder, String authToken) {
         if (!isEmpty(latestHearingOrder)) {
             CaseDocument stampedDocs = service.stampDocument(latestHearingOrder, authToken);
             log.info(" stampedDocs = {}", stampedDocs);
@@ -105,7 +99,6 @@ public class FinalOrderController implements BaseController {
             caseData.put(FINAL_ORDER_COLLECTION, finalOrderCollection);
             log.info("stampFinalOrder end.");
         }
-
     }
 
     private List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
@@ -119,5 +112,4 @@ public class FinalOrderController implements BaseController {
             new TypeReference<List<HearingOrderCollectionData>>() {
             });
     }
-
 }

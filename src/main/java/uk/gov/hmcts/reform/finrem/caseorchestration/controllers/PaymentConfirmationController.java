@@ -44,8 +44,8 @@ public class PaymentConfirmationController implements BaseController {
         log.info("confirmationBody : {}", confirmationBody);
 
         SubmittedCallbackResponse callbackResponse = SubmittedCallbackResponse.builder()
-                .confirmationBody(confirmationBody)
-                .build();
+            .confirmationBody(confirmationBody)
+            .build();
 
         return ResponseEntity.ok(callbackResponse);
     }
