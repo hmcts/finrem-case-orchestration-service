@@ -95,7 +95,7 @@ public class PBAPaymentTest {
         stubFeeLookUp();
         stubPayment(PAYMENT_RESPONSE);
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -142,7 +142,7 @@ public class PBAPaymentTest {
         stubPayment(PAYMENT_FAILURE_RESPONSE);
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
                 .content(objectMapper.writeValueAsString(request))
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
@@ -156,7 +156,7 @@ public class PBAPaymentTest {
         setUpPbaPayment("/fixtures/empty-casedata.json");
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
                 .content(objectMapper.writeValueAsString(request))
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }

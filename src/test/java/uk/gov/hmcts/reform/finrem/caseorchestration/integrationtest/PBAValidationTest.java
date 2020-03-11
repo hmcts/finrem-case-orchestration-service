@@ -34,6 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(SpringRunner.class)
@@ -64,7 +65,7 @@ public class PBAValidationTest {
         setUpPbaValidationRequest("/fixtures/pba-validate.json");
         stubPBAValidate(PBA_VALID_RESPONSE);
         webClient.perform(post(PBA_VALIDATE_URL)
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -78,7 +79,7 @@ public class PBAValidationTest {
         setUpPbaValidationRequest("/fixtures/pba-validate.json");
         stubPBAValidate(PBA_INVALID_RESPONSE);
         webClient.perform(post(PBA_VALIDATE_URL)
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -92,7 +93,7 @@ public class PBAValidationTest {
         setUpPbaValidationRequest("/fixtures/hwf.json");
         webClient.perform(post(PBA_VALIDATE_URL)
                 .content(objectMapper.writeValueAsString(request))
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
@@ -104,7 +105,7 @@ public class PBAValidationTest {
         setUpPbaValidationRequest("/fixtures/empty-casedata.json");
         webClient.perform(post(PBA_VALIDATE_URL)
                 .content(objectMapper.writeValueAsString(request))
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }

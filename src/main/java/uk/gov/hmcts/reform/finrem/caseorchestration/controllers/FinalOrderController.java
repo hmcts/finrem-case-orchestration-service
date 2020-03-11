@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.ObjectUtils.isEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 
@@ -55,7 +56,7 @@ public class FinalOrderController implements BaseController {
         })
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> stampFinalOrder(
-            @RequestHeader(value = "Authorization") String authToken,
+            @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         validateCaseData(callback);
@@ -95,12 +96,12 @@ public class FinalOrderController implements BaseController {
             }
 
             finalOrderCollection.add(HearingOrderCollectionData.builder()
-                                             .hearingOrderDocuments(HearingOrderDocument
-                                                                            .builder()
-                                                                            .uploadDraftDocument(stampedDocs)
-                                                                            .build())
-                                             .build());
-            log.info(" finalOrderCollection = {}", finalOrderCollection);
+                .hearingOrderDocuments(HearingOrderDocument
+                    .builder()
+                    .uploadDraftDocument(stampedDocs)
+                    .build())
+                .build());
+            log.info("finalOrderCollection = {}", finalOrderCollection);
             caseData.put(FINAL_ORDER_COLLECTION, finalOrderCollection);
             log.info("stampFinalOrder end.");
         }
@@ -109,14 +110,14 @@ public class FinalOrderController implements BaseController {
 
     private List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
-                new TypeReference<List<HearingOrderCollectionData>>() {
-                });
+            new TypeReference<List<HearingOrderCollectionData>>() {
+            });
     }
 
     private List<HearingOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION),
-                new TypeReference<List<HearingOrderCollectionData>>() {
-                });
+            new TypeReference<List<HearingOrderCollectionData>>() {
+            });
     }
 
 }

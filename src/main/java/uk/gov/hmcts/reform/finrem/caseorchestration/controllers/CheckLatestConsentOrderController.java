@@ -19,24 +19,23 @@ import java.util.Map;
 
 import static java.util.Objects.isNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
 public class CheckLatestConsentOrderController implements BaseController {
 
-    @PostMapping(path = "/check-latest-consent-order", consumes = APPLICATION_JSON_VALUE,
-        produces = APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/check-latest-consent-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Validation check for latest consent order field in CCD")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
-            + "attached to the case",
+        @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Internal Server Error")
-        })
+    })
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateConsentOrderNotApproved(
-        @RequestHeader(value = "Authorization") String authorisationToken,
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         validateCaseData(callback);

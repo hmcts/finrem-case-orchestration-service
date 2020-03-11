@@ -13,10 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -27,17 +30,15 @@ public class RemoveApplicantDetailsController implements BaseController {
             produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Removes applicant details or applicants solicitor details")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
-                    + "attached to the case",
+            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> removeDetails(
-            @RequestHeader(value = "Authorization") String authorisationToken,
+            @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        log.info("Received request for removing applicant / applicants solicitor details. "
-                        + "Auth token: {}, Case request : {}",
+        log.info("Received request for removing Applicant/Applicants Solicitor details. Auth token: {}, Case request : {}",
                 authorisationToken, callback);
 
         validateCaseData(callback);
@@ -45,7 +46,7 @@ public class RemoveApplicantDetailsController implements BaseController {
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         String applicantRepresented = caseData.get("applicantRepresented").toString();
 
-        if (applicantRepresented.equals("Yes")) {
+        if (applicantRepresented.equals(YES_VALUE)) {
             //remove applicants data as solicitors data has been added
             caseData.remove("applicantAddress");
             caseData.remove("applicantPhone");

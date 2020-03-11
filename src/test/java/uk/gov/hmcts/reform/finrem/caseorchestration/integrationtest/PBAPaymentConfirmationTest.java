@@ -23,6 +23,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -48,7 +49,7 @@ public class PBAPaymentConfirmationTest {
     public void shouldDoPbaConfirmation() throws Exception {
         setRequest("/fixtures/pba-validate.json");
         webClient.perform(MockMvcRequestBuilders.post(PBA_CONFIRMATION_URL)
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -57,18 +58,16 @@ public class PBAPaymentConfirmationTest {
                         containsString("You will now be directed to the case file where you can monitor "
                                 + "the progress of your application via the ‘history’ tab. Next:")))
                 .andExpect(jsonPath("$.confirmation_body",
-                        containsString("* Your application will be issued by Court staff and referred "
-                                + "to a Judge")))
+                        containsString("* Your application will be issued by Court staff and referred to a Judge")))
                 .andExpect(jsonPath("$.confirmation_body",
                         containsString("* The Judge will consider your application and make an order")));
     }
-
 
     @Test
     public void shouldDoHwfConfirmation() throws Exception {
         setRequest("/fixtures/hwf.json");
         webClient.perform(MockMvcRequestBuilders.post(PBA_CONFIRMATION_URL)
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -85,7 +84,7 @@ public class PBAPaymentConfirmationTest {
     public void shouldReturnBadRequestError() throws Exception {
         setRequest("/fixtures/empty-casedata.json");
         webClient.perform(MockMvcRequestBuilders.post(PBA_CONFIRMATION_URL)
-                .header("Authorization", AUTH_TOKEN)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(objectMapper.writeValueAsString(request))
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest());

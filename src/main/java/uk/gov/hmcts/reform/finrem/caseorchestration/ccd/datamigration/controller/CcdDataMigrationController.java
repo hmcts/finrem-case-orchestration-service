@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -15,15 +14,11 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
-import static java.util.Objects.nonNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.JUDGE_ALLOCATED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.YES;
 
 @RestController
@@ -32,28 +27,26 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class CcdDataMigrationController {
 
-
-
     @PostMapping(value = "/migrate", consumes = APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
-                                                       + "attached to the case", response = CallbackResponse.class)})
+            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+                response = CallbackResponse.class)})
     public CallbackResponse migrate(
-            @RequestHeader(value = "Authorization") final String authorisationToken,
+            @RequestHeader(value = AUTHORIZATION_HEADER) final String authorisationToken,
             @RequestBody @ApiParam("CaseData") final CallbackRequest ccdRequest) {
-        log.info("FRMig: ccdMigrationRequest >>> authorisationToken {}, ccdRequest {}",
-                authorisationToken, ccdRequest);
+
+        log.info("FRMig: ccdMigrationRequest >>> authorisationToken {}, ccdRequest {}", authorisationToken, ccdRequest);
         final Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
         boolean migrationRequired = false;
         final Object caseId = ccdRequest.getCaseDetails().getId();
         final boolean applicantRepresentedExist = caseData.containsKey(APPLICANT_REPRESENTED);
         log.info("FR Migration: {} ,applicantRepresentedExist : {}", caseId, applicantRepresentedExist);
+
         if (!applicantRepresentedExist) {
             caseData.put(APPLICANT_REPRESENTED, YES);
             log.info("FR Migration: {} setting applicantRepresented to Yes.", caseId);
             migrationRequired = true;
         }
-
 
         if (migrationRequired) {
             log.info("FR Migration: {} End of case migration {} ", caseId, caseData);
@@ -63,7 +56,4 @@ public class CcdDataMigrationController {
             return AboutToStartOrSubmitCallbackResponse.builder().build();
         }
     }
-
-
-
 }

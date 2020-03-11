@@ -22,6 +22,9 @@ import java.util.Map;
 
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
 @RestController
@@ -39,22 +42,20 @@ public class UpdateContestedCaseController implements BaseController {
     @Autowired
     private OnlineFormDocumentService onlineFormDocumentService;
 
-
     @PostMapping(path = "/update-contested-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Handles update Contested Case details and cleans up the data fields"
-        + " based on the options choosen")
+    @ApiOperation(value = "Handles update Contested Case details and cleans up the data fields based on the options chosen")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
-            + "attached to the case",
+        @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateContestedCase(
-        @RequestHeader(value = "Authorization", required = false) String authToken,
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest ccdRequest) {
 
         log.info("Received request for contested - updateCase ");
         validateCaseData(ccdRequest);
+
         Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
         updateDivorceDetailsForContestedCase(caseData);
         updateContestedRespondentDetails(caseData);
@@ -65,20 +66,20 @@ public class UpdateContestedCaseController implements BaseController {
         isApplicantsHomeCourt(caseData);
         updateContestedMiamDetails(caseData);
         cleanupAdditionalDocuments(caseData);
-        CaseDocument document = onlineFormDocumentService.generateDraftContestedMiniFormA(authToken,
-            ccdRequest.getCaseDetails());
+
+        CaseDocument document = onlineFormDocumentService.generateDraftContestedMiniFormA(authToken, ccdRequest.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     private void cleanupAdditionalDocuments(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("promptForAnyDocument"), "No")) {
+        if (equalsTo((String) caseData.get("promptForAnyDocument"), NO_VALUE)) {
             caseData.put("uploadAdditionalDocument", null);
         }
     }
 
     private void updateContestedFastTrackProcedureDetail(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("fastTrackDecision"), "No")) {
+        if (equalsTo((String) caseData.get("fastTrackDecision"), NO_VALUE)) {
             caseData.put("fastTrackDecisionReason", null);
         }
     }
@@ -92,7 +93,7 @@ public class UpdateContestedCaseController implements BaseController {
     }
 
     private void updateComplexityDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("otherReasonForComplexity"), "No")) {
+        if (equalsTo((String) caseData.get("otherReasonForComplexity"), NO_VALUE)) {
             caseData.put("otherReasonForComplexityText", null);
         }
     }
@@ -107,13 +108,13 @@ public class UpdateContestedCaseController implements BaseController {
     }
 
     private void isApplicantsHomeCourt(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("isApplicantsHomeCourt"), "No")) {
+        if (equalsTo((String) caseData.get("isApplicantsHomeCourt"), NO_VALUE)) {
             caseData.put("reasonForLocalCourt", null);
         }
     }
 
     private void updateContestedMiamDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("applicantAttendedMIAM"), "Yes")) {
+        if (equalsTo((String) caseData.get("applicantAttendedMIAM"), YES_VALUE)) {
             removeAllMiamExceptionDetails(caseData);
             removeMiamCertificationDetailsForApplicantAttendedMiam(caseData);
         } else {
@@ -123,7 +124,7 @@ public class UpdateContestedCaseController implements BaseController {
     }
 
     private void updateWhenClaimingExemptionMiam(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("claimingExemptionMIAM"), "No")) {
+        if (equalsTo((String) caseData.get("claimingExemptionMIAM"), NO_VALUE)) {
             caseData.put("familyMediatorMIAM", null);
             removeMiamExceptionDetails(caseData);
         } else {
@@ -199,10 +200,10 @@ public class UpdateContestedCaseController implements BaseController {
     }
 
     private void updateContestedPeriodicPaymentDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("paymentForChildrenDecision"), "No")) {
+        if (equalsTo((String) caseData.get("paymentForChildrenDecision"), NO_VALUE)) {
             removeBenefitsDetails(caseData);
         } else {
-            if (equalsTo((String) caseData.get("benefitForChildrenDecision"), "Yes")) {
+            if (equalsTo((String) caseData.get("benefitForChildrenDecision"), YES_VALUE)) {
                 caseData.put("benefitPaymentChecklist", null);
             }
         }
@@ -228,7 +229,7 @@ public class UpdateContestedCaseController implements BaseController {
     }
 
     private void updatePropertyAdjustmentOrderDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("additionalPropertyOrderDecision"), "No")) {
+        if (equalsTo((String) caseData.get("additionalPropertyOrderDecision"), NO_VALUE)) {
             caseData.put("propertyAdjutmentOrderDetail", null);
         }
     }
@@ -238,7 +239,6 @@ public class UpdateContestedCaseController implements BaseController {
         caseData.put("mortgageDetail", null);
         caseData.put("propertyAdjutmentOrderDetail", null);
     }
-
 
     private void updateDivorceDetailsForContestedCase(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get(DIVORCE_STAGE_REACHED), "Decree Nisi")) {
@@ -261,7 +261,6 @@ public class UpdateContestedCaseController implements BaseController {
         }
     }
 
-
     private void removeRespondentSolicitorAddress(Map<String, Object> caseData) {
         caseData.put("rSolicitorName", null);
         caseData.put("rSolicitorFirm", null);
@@ -272,9 +271,8 @@ public class UpdateContestedCaseController implements BaseController {
         caseData.put("rSolicitorDXnumber", null);
     }
 
-
     private void updateContestedRespondentDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("respondentRepresented"), "No")) {
+        if (equalsTo((String) caseData.get("respondentRepresented"), NO_VALUE)) {
             removeRespondentSolicitorAddress(caseData);
         } else {
             removeContestedRespondentAddress(caseData);
@@ -287,7 +285,6 @@ public class UpdateContestedCaseController implements BaseController {
         caseData.put("respondentEmail", null);
     }
 
-
     private boolean equalsTo(String fieldData, String value) {
         return nonNull(fieldData) && value.equalsIgnoreCase(fieldData.trim());
     }
@@ -295,5 +292,4 @@ public class UpdateContestedCaseController implements BaseController {
     private boolean hasNotSelected(List<String> list, String option) {
         return nonNull(list) && !list.contains(option);
     }
-
 }

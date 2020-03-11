@@ -20,6 +20,7 @@ import java.util.Arrays;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 import static org.springframework.test.util.AssertionErrors.assertTrue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
 @ExtendWith(PactConsumerTestExt.class)
 @PactTestFor(providerName = "SIDAM_Provider", port = "8889")
@@ -41,7 +42,7 @@ public class SidamServiceConsumerTest {
             .uponReceiving("GET request for isAdmin ")
             .path("/details")
             .method("GET")
-            .headers("Authorization",AUTH_TOKEN, CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .headers(AUTHORIZATION_HEADER,AUTH_TOKEN, CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .willRespondWith()
             .status(200)
             .body(idamUserDetailsResponse())

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @RestController
@@ -25,8 +27,9 @@ public class RemoveCaseDataStateController implements BaseController {
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/remove-case-data-state", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Remove state from a given case")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> removeCaseDataState(
-            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
             @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request for Removing State. Auth token: {}, Case request : {}", authToken, callbackRequest);
 
@@ -35,5 +38,4 @@ public class RemoveCaseDataStateController implements BaseController {
         caseData.remove(STATE);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
-
 }

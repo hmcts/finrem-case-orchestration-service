@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.google.common.collect.ImmutableList;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
 
 @RestController
@@ -30,8 +32,9 @@ public class PBAValidateController implements BaseController {
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-validate", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Validates if PBA Number provided is valid")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaValidate(
-            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
             @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request for PBA validate. Auth token: {}, Case request : {}", authToken, callbackRequest);
 

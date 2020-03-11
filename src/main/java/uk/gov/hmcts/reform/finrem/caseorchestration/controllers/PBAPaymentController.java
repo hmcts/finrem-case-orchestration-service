@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.google.common.collect.ImmutableList;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMOUNT_TO_PAY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_SUMMARY;
@@ -40,11 +42,11 @@ public class PBAPaymentController implements BaseController {
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Handles PBA Payments for Consented Journey")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPayment(
-            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
-        log.info("Received request for PBA payment for consented . Auth token: {}, Case request : {}", authToken,
-                callbackRequest);
+        log.info("Received request for PBA payment for consented . Auth token: {}, Case request : {}", authToken, callbackRequest);
 
         validateCaseData(callbackRequest);
 
@@ -68,7 +70,7 @@ public class PBAPaymentController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
     }
 
-    private void feeLookup(@RequestHeader(value = "Authorization", required = false) String authToken,
+    private void feeLookup(@RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
                            @RequestBody CallbackRequest callbackRequest, Map<String, Object> caseData) {
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeResponse = new FeeLookupController(feeService)
                 .feeLookup(authToken, callbackRequest);
@@ -76,14 +78,11 @@ public class PBAPaymentController implements BaseController {
         caseData.put(AMOUNT_TO_PAY, feeResponse.getBody().getData().get(AMOUNT_TO_PAY));
     }
 
-    private ResponseEntity<AboutToStartOrSubmitCallbackResponse> paymentFailure(Map<String, Object> caseData,
-                                                                                PaymentResponse paymentResponse) {
+    private ResponseEntity<AboutToStartOrSubmitCallbackResponse> paymentFailure(Map<String, Object> caseData, PaymentResponse paymentResponse) {
         String paymentError = paymentResponse.getPaymentError();
-        log.info("Payment by PBA number {} failed, payment error : {} ", caseData.get(PBA_NUMBER),
-                paymentResponse.getPaymentError());
+        log.info("Payment by PBA number {} failed, payment error : {} ", caseData.get(PBA_NUMBER), paymentResponse.getPaymentError());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(ImmutableList.of(paymentError))
                 .build());
     }
-
 }

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
 
 @RestController
@@ -28,11 +30,11 @@ public class PaymentConfirmationController implements BaseController {
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Handles PBA Payments Confirmation")
     public ResponseEntity<SubmittedCallbackResponse> paymentConfirmation(
-            @RequestHeader(value = "Authorization", required = false) String authToken,
+            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
             @RequestBody CallbackRequest callbackRequest) throws IOException {
-        log.info("Received request for PBA confirmation. Auth token: {}, Case request : {}", authToken,
-            callbackRequest);
+        log.info("Received request for PBA confirmation. Auth token: {}, Case request : {}", authToken, callbackRequest);
 
         validateCaseData(callbackRequest);
 
@@ -64,5 +66,4 @@ public class PaymentConfirmationController implements BaseController {
         }
         return confirmationBody;
     }
-
 }
