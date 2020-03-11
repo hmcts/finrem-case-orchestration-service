@@ -17,8 +17,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.collection.IsMapWithSize.aMapWithSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
@@ -40,7 +42,15 @@ public class FormAToCaseTransformerTest {
             new OcrDataField(OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "a lump sum order, a pension sharing order"),
             new OcrDataField(OcrFieldName.APPLYING_FOR_CONSENT_ORDER, "Yes"),
             new OcrDataField(OcrFieldName.DIVORCE_STAGE_REACHED, "Decree Nisi"),
-            new OcrDataField("ApplicantRepresented", "I am not represented by a solicitor in these proceedings")
+            new OcrDataField(OcrFieldName.APPLICANT_REPRESENTED, "I am not represented by a solicitor in these proceedings"),
+            new OcrDataField(OcrFieldName.ADDRESS_OF_PROPERTIES, "The address of other properties"),
+            new OcrDataField(OcrFieldName.MORTGAGE_DETAILS, "Various details of our mortgage"),
+            new OcrDataField(OcrFieldName.ORDER_FOR_CHILDREN,
+                "there is a written agreement made on or after 5 April 1993 about maintenance for the benefit of children"),
+            new OcrDataField(OcrFieldName.ORDER_FOR_CHILDREN_NO_AGREEMENT,
+                "in addition to child support maintenance already paid under a Child Support Agency assessment"),
+            new OcrDataField(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "Yes"),
+            new OcrDataField(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_REASON, "Random reason that explains calculation")
         ));
 
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(exceptionRecord);
@@ -57,7 +67,16 @@ public class FormAToCaseTransformerTest {
             hasEntry("applicantIntendsTo", "ApplyToCourtFor"),
             hasEntry("applyingForConsentOrder", "Yes"),
             hasEntry("divorceStageReached", "Decree Nisi"),
-            hasEntry("applicantRepresentPaper", "I am not represented by a solicitor in these proceedings")
+            hasEntry("applicantRepresentPaper", "I am not represented by a solicitor in these proceedings"),
+
+            hasEntry("natureOfApplication3a", "The address of other properties"),
+            hasEntry("natureOfApplication3b", "Various details of our mortgage"),
+            hasEntry("natureOfApplication5b",
+                "there is a written agreement made on or after 5 April 1993 about maintenance for the benefit of children"),
+            hasEntry("orderForChildrenQuestion1", "Yes"),
+            hasEntry("natureOfApplication6", "In addition to child support"),
+            hasEntry("ChildSupportAgencyCalculationMade", "Yes"),
+            hasEntry("ChildSupportAgencyCalculationReason", "Random reason that explains calculation")
         ));
     }
 
@@ -190,6 +209,82 @@ public class FormAToCaseTransformerTest {
             hasEntry("applicantRepresentPaper", "I am not represented by a solicitor in these proceedings"),
             hasEntry("solicitorEmail", "test@example.com")
         ));
+    }
+
+    @Test
+    public void shouldSetOrderForChildrenQuestion1ToYesIfOrderForChildrenFieldIsPopulated() {
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
+            new OcrDataField("OrderForChildren",
+                "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children")
+        ));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertThat(transformedCaseData, allOf(
+            aMapWithSize(3),
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry("natureOfApplication5b", "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children"),
+            hasEntry("orderForChildrenQuestion1", "Yes")
+        ));
+    }
+
+    @Test
+    public void shouldNotSetOrderForChildrenQuestion1IfOrderForChildrenFieldIsNotPopulated() {
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
+            new OcrDataField("OrderForChildren", "")
+        ));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertThat(transformedCaseData, allOf(
+            aMapWithSize(2),
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry("natureOfApplication5b", ""),
+            not(hasKey("orderForChildrenQuestion1"))
+        ));
+    }
+
+    @Test
+    public void shouldTranslateNatureOfApplication6Fields() {
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
+            new OcrDataField("OrderForChildren", "")
+        ));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertThat(transformedCaseData, allOf(
+            aMapWithSize(2),
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry("natureOfApplication5b", ""),
+            not(hasKey("orderForChildrenQuestion1"))
+        ));
+    }
+
+    @Test
+    public void shouldReplaceOrderForChildrenNoAgreementReasons() {
+
+        assertForOrderForChildrenNoAgreementValueIsTransformed(
+            "for a stepchild or stepchildren",
+            "Step Child or Step Children");
+        assertForOrderForChildrenNoAgreementValueIsTransformed(
+            "in addition to child support maintenance already paid under a Child Support Agency assessment",
+            "In addition to child support");
+        assertForOrderForChildrenNoAgreementValueIsTransformed(
+            "to meet expenses arising from a child’s disability",
+            "disability expenses");
+        assertForOrderForChildrenNoAgreementValueIsTransformed(
+            "when either the child or the person with care of the child or the "
+                + "absent parent of the child is not habitually resident in the United Kingdom",
+            "When not habitually resident");
+    }
+
+    private void assertForOrderForChildrenNoAgreementValueIsTransformed(String inputValue, String expectedNewValue) {
+        ExceptionRecord exceptionRecord =
+            createExceptionRecord(singletonList(new OcrDataField("OrderForChildrenNoAgreement", inputValue)));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(exceptionRecord);
+
+        assertThat(transformedCaseData.get("natureOfApplication6"), is(expectedNewValue));
     }
 
     private ExceptionRecord createExceptionRecord(List<OcrDataField> ocrDataFields) {

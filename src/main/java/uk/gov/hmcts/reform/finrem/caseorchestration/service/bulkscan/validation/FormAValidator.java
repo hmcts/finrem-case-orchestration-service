@@ -19,12 +19,16 @@ import static uk.gov.hmcts.reform.bsp.common.model.validation.BulkScanValidation
 import static uk.gov.hmcts.reform.bsp.common.service.PostcodeValidator.validatePostcode;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_INTENDS_TO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLYING_FOR_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_STAGE_REACHED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.HWF_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.NATURE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ORDER_FOR_CHILDREN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ORDER_FOR_CHILDREN_NO_AGREEMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.PROVISION_MADE_FOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_FULL_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
@@ -36,23 +40,25 @@ public class FormAValidator extends BulkScanFormValidator {
 
     private static final String HWF_NUMBER_6_DIGITS_REGEX = "\\d{6}";
 
-    private static final List<String> MANDATORY_FIELDS = asList(
-            DIVORCE_CASE_NUMBER,
-            APPLICANT_FULL_NAME,
-            RESPONDENT_FULL_NAME,
-            PROVISION_MADE_FOR,
-            NATURE_OF_APPLICATION,
-            APPLICANT_INTENDS_TO,
-            APPLYING_FOR_CONSENT_ORDER,
-            DIVORCE_STAGE_REACHED,
-            "ApplicantRepresented"
-    );
+    private static final String EMPTY_STRING = "";
 
-    private static final Map<String, List<String>> ALLOWED_VALUES_PER_FIELD = new HashMap<>();
+    private static final List<String> MANDATORY_FIELDS = asList(
+        DIVORCE_CASE_NUMBER,
+        APPLICANT_FULL_NAME,
+        RESPONDENT_FULL_NAME,
+        PROVISION_MADE_FOR,
+        NATURE_OF_APPLICATION,
+        APPLICANT_INTENDS_TO,
+        APPLYING_FOR_CONSENT_ORDER,
+        DIVORCE_STAGE_REACHED,
+        APPLICANT_REPRESENTED
+    );
 
     public List<String> getMandatoryFields() {
         return MANDATORY_FIELDS;
     }
+
+    private static final Map<String, List<String>> ALLOWED_VALUES_PER_FIELD = new HashMap<>();
 
     static {
         ALLOWED_VALUES_PER_FIELD.put(PROVISION_MADE_FOR, asList(
@@ -67,13 +73,32 @@ public class FormAValidator extends BulkScanFormValidator {
         ));
         ALLOWED_VALUES_PER_FIELD.put(APPLYING_FOR_CONSENT_ORDER, asList("Yes"));
         ALLOWED_VALUES_PER_FIELD.put(DIVORCE_STAGE_REACHED, asList("Decree Nisi", "Decree Absolute"));
-        ALLOWED_VALUES_PER_FIELD.put("ApplicantRepresented", asList(
+        ALLOWED_VALUES_PER_FIELD.put(APPLICANT_REPRESENTED, asList(
             "I am not represented by a solicitor in these proceedings",
             "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
             "I am represented by a solicitor in these proceedings, who has signed Section 5"
         ));
+
+        ALLOWED_VALUES_PER_FIELD.put(ORDER_FOR_CHILDREN, asList(
+            "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children",
+            "there is a written agreement made on or after 5 April 1993 about maintenance for the benefit of children",
+            "there is no agreement, but the applicant is applying for payments"
+        ));
+        ALLOWED_VALUES_PER_FIELD.put(ORDER_FOR_CHILDREN_NO_AGREEMENT, asList(
+            "for a stepchild or stepchildren",
+            "in addition to child support maintenance already paid under a Child Support Agency assessment",
+            "to meet expenses arising from a child’s disability",
+            "to meet expenses incurred by a child in being educated or training for work",
+            "when either the child or the person with care of the child or"
+                + " the absent parent of the child is not habitually resident in the United Kingdom"
+        ));
+        ALLOWED_VALUES_PER_FIELD.put(CHILD_SUPPORT_AGENCY_CALCULATION_MADE, asList(
+            "Yes",
+            "No",
+            EMPTY_STRING
+        ));
     }
-    
+
     @Override
     protected Map<String, List<String>> getAllowedValuesPerField() {
         return ALLOWED_VALUES_PER_FIELD;
@@ -81,6 +106,7 @@ public class FormAValidator extends BulkScanFormValidator {
 
     @Override
     protected List<String> runPostProcessingValidation(Map<String, String> fieldsMap) {
+
         List<String> errorMessages = Stream.of(
             validateHwfNumber(fieldsMap, HWF_NUMBER),
             validateHasAtLeastTwoNames(fieldsMap, APPLICANT_FULL_NAME),
@@ -128,7 +154,7 @@ public class FormAValidator extends BulkScanFormValidator {
 
         return validationWarningMessages;
     }
-    
+
     private static List<String> validateHasAtLeastTwoNames(Map<String, String> fieldsMap, String fieldName) {
         String fieldValue = fieldsMap.get(fieldName);
         return fieldValue != null && Arrays.stream(fieldValue.split(" "))

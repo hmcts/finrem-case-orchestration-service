@@ -22,12 +22,16 @@ import static uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStat
 import static uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus.WARNINGS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_INTENDS_TO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLYING_FOR_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_STAGE_REACHED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.HWF_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.NATURE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ORDER_FOR_CHILDREN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ORDER_FOR_CHILDREN_NO_AGREEMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.PROVISION_MADE_FOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_FULL_NAME;
 
@@ -48,7 +52,7 @@ public class FormAValidatorTest {
             new OcrDataField(APPLICANT_INTENDS_TO, "ApplyToCourtFor"),
             new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "Yes"),
             new OcrDataField(DIVORCE_STAGE_REACHED, "Decree Nisi"),
-            new OcrDataField("ApplicantRepresented", "I am not represented by a solicitor in these proceedings")
+            new OcrDataField(APPLICANT_REPRESENTED, "I am not represented by a solicitor in these proceedings")
         ));
 
         mandatoryFields = mandatoryFieldsWithValues.stream().map(OcrDataField::getName).collect(Collectors.toList());
@@ -62,7 +66,14 @@ public class FormAValidatorTest {
             new OcrDataField("ApplicantSolicitorAddressLine1", "20 Solicitors Road"),
             new OcrDataField("ApplicantSolicitorAddressTown", "Soltown"),
             new OcrDataField("ApplicantSolicitorAddressCounty", "East Midlands"),
-            new OcrDataField("ApplicantSolicitorAddressPostcode", "GL51 0EX")
+            new OcrDataField("ApplicantSolicitorAddressPostcode", "GL51 0EX"),
+            new OcrDataField("AddressofProperties", "26 Westminster Avenue"),
+            new OcrDataField("MortgageDetails", "We paid for the house with our mortgage which we split"),
+            new OcrDataField("OrderForChildren", "there is no agreement, but the applicant is applying for payments"),
+            new OcrDataField("OrderForChildrenNoAgreement",
+                "in addition to child support maintenance already paid under a Child Support Agency assessment"),
+            new OcrDataField("ChildSupportAgencyCalculationMade", "Yes"),
+            new OcrDataField("ChildSupportAgencyCalculationReason", "Various reasons why I'm making this application")
         );
         List<OcrDataField> ocrDataFields = new ArrayList<>(mandatoryFieldsWithValues);
         ocrDataFields.addAll(optionalFieldsWithValues);
@@ -93,7 +104,7 @@ public class FormAValidatorTest {
         assertThat(validationResult.getErrors(), is(emptyList()));
         assertThat(validationResult.getWarnings(), warningMessagesForMissingOrEmptyFields());
     }
-    
+
     @Test
     public void shouldPassForNonMandatoryEmptyFields() {
         List<OcrDataField> nonMandatoryFieldsWithEmptyValues = asList(
@@ -101,7 +112,13 @@ public class FormAValidatorTest {
             new OcrDataField("ApplicantSolicitorAddressLine1", ""),
             new OcrDataField("ApplicantSolicitorAddressTown", ""),
             new OcrDataField("ApplicantSolicitorAddressCounty", ""),
-            new OcrDataField("ApplicantSolicitorAddressPostcode", "")
+            new OcrDataField("ApplicantSolicitorAddressPostcode", ""),
+            new OcrDataField("AddressofProperties", ""),
+            new OcrDataField("MortgageDetails", ""),
+            new OcrDataField("OrderForChildren", ""),
+            new OcrDataField("OrderForChildrenNoAgreement", ""),
+            new OcrDataField("ChildSupportAgencyCalculationMade", ""),
+            new OcrDataField("ChildSupportAgencyCalculationReason", "")
         );
 
         List<OcrDataField> ocrDataFields = new ArrayList<>(mandatoryFieldsWithValues);
@@ -124,7 +141,10 @@ public class FormAValidatorTest {
             new OcrDataField(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "house with pool"),
             new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "No"),
             new OcrDataField(DIVORCE_STAGE_REACHED, "The cree"),
-            new OcrDataField("ApplicantRepresented", "It's wrong!")
+            new OcrDataField(APPLICANT_REPRESENTED, "It's wrong!"),
+            new OcrDataField(ORDER_FOR_CHILDREN, "Not a valid order for children"),
+            new OcrDataField(ORDER_FOR_CHILDREN_NO_AGREEMENT, "Not a valid reason for no agreement"),
+            new OcrDataField(CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "Decision not yet made")
         ));
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
@@ -147,10 +167,22 @@ public class FormAValidatorTest {
             containsValueThatIsNotAccepted(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE),
             APPLYING_FOR_CONSENT_ORDER + " only accepts value of \"Yes\"",
             mustBeOneOf(DIVORCE_STAGE_REACHED, "Decree Nisi", "Decree Absolute"),
-            mustBeOneOf("ApplicantRepresented", 
+            mustBeOneOf(APPLICANT_REPRESENTED,
                 "I am not represented by a solicitor in these proceedings",
                 "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
-                "I am represented by a solicitor in these proceedings, who has signed Section 5")
+                "I am represented by a solicitor in these proceedings, who has signed Section 5"),
+            mustBeOneOf(ORDER_FOR_CHILDREN,
+                "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children",
+                "there is a written agreement made on or after 5 April 1993 about maintenance for the benefit of children",
+                "there is no agreement, but the applicant is applying for payments"),
+            mustBeOneOf(ORDER_FOR_CHILDREN_NO_AGREEMENT,
+                "for a stepchild or stepchildren",
+                "in addition to child support maintenance already paid under a Child Support Agency assessment",
+                "to meet expenses arising from a child’s disability",
+                "to meet expenses incurred by a child in being educated or training for work",
+                "when either the child or the person with care of the child "
+                    + "or the absent parent of the child is not habitually resident in the United Kingdom"),
+            CHILD_SUPPORT_AGENCY_CALCULATION_MADE + " must be \"Yes\", \"No\" or left blank"
         ));
     }
 
@@ -174,7 +206,7 @@ public class FormAValidatorTest {
         assertThat(validationResult.getStatus(), is(SUCCESS));
         assertThat(validationResult.getWarnings(), is(emptyList()));
     }
-    
+
     private String containsValueThatIsNotAccepted(String fieldName) {
         return String.format("%s contains a value that is not accepted", fieldName);
     }
@@ -182,7 +214,7 @@ public class FormAValidatorTest {
     private String mustHaveAtLeastTwoNames(String fieldName) {
         return String.format("%s must contain a firstname and a lastname", fieldName);
     }
-    
+
     private String mustBeOneOf(String fieldName, String... values) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(String.format("%s must be \"%s\"", fieldName, values[0]));
