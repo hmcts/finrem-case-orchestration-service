@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.natureOfApplicationChecklistToCcdFieldNames;
@@ -37,7 +38,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
     @Override
     protected Map<String, Object> runFormSpecificTransformation(List<OcrDataField> ocrDataFields) {
         Map<String, Object> transformedCaseData = new HashMap<>();
-        
+
         mapFullNameToFirstAndLast(OcrFieldName.APPLICANT_FULL_NAME, "applicantFMName", "applicantLName",
             ocrDataFields, transformedCaseData);
         mapFullNameToFirstAndLast(OcrFieldName.RESPONDENT_FULL_NAME, "appRespondentFMname", "appRespondentLName",
@@ -52,10 +53,9 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         applyMappingsForAddress("applicant", ocrDataFields, transformedCaseData);
         applyMappingsForAddress("respondent", ocrDataFields, transformedCaseData);
         applyMappingsForAddress("respondentSolicitor", "rSolicitorAddress", ocrDataFields, transformedCaseData);
-        
+
         return transformedCaseData;
     }
-
 
     private void mapFullNameToFirstAndLast(String ocrFieldName, String ccdFirstNameFieldName, String ccdLastNameFieldName,
                                            List<OcrDataField> ocrDataFields, Map<String, Object> formSpecificMap) {
@@ -110,6 +110,14 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLYING_FOR_CONSENT_ORDER, "applyingForConsentOrder");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.DIVORCE_STAGE_REACHED, "divorceStageReached");
 
+        // Section 1 - further details of application
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.ADDRESS_OF_PROPERTIES, "natureOfApplication3a");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.MORTGAGE_DETAILS, "natureOfApplication3b");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.ORDER_FOR_CHILDREN, "natureOfApplication5b");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.ORDER_FOR_CHILDREN_NO_AGREEMENT, "natureOfApplication6");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "ChildSupportAgencyCalculationMade");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_REASON, "ChildSupportAgencyCalculationReason");
+
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_REPRESENTED, "applicantRepresentPaper");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_NAME, "solicitorName");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_FIRM, "solicitorFirm");
@@ -120,7 +128,6 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_EMAIL, "solicitorEmail");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_PHONE, "applicantPhone");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_EMAIL, "applicantEmail");
-        
         return exceptionRecordToCcdFieldsMap;
     }
 
@@ -158,11 +165,38 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         }
     }
 
-    private void mapIfSourceExists(String srcField, String targetField, HashMap<String, Object> parentObject,
-                                   List<OcrDataField> ocrDataFields) {
+    private void mapIfSourceExists(String srcField, String targetField, HashMap<String, Object> parentObject, List<OcrDataField> ocrDataFields) {
         getValueFromOcrDataFields(srcField, ocrDataFields)
             .ifPresent(srcFieldValue -> {
                 parentObject.put(targetField, srcFieldValue);
             });
+    }
+
+    @Override
+    protected Map<String, Object> runPostMappingModification(Map<String, Object> transformedCaseData) {
+
+        // If OrderForChildren is populated then set orderForChildrenQuestion1 to Yes
+        if (StringUtils.isNotEmpty((String) transformedCaseData.get("natureOfApplication5b"))) {
+
+            transformedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
+        }
+
+        transformedCaseData.replace("natureOfApplication6",
+            "for a stepchild or stepchildren",
+            "Step Child or Step Children");
+
+        transformedCaseData.replace("natureOfApplication6",
+            "in addition to child support maintenance already paid under a Child Support Agency assessment",
+            "In addition to child support");
+
+        transformedCaseData.replace("natureOfApplication6",
+            "to meet expenses arising from a child’s disability", "disability expenses");
+
+        transformedCaseData.replace("natureOfApplication6",
+            "when either the child or the person with care of the child or "
+                + "the absent parent of the child is not habitually resident in the United Kingdom",
+            "When not habitually resident");
+
+        return transformedCaseData;
     }
 }

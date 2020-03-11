@@ -43,7 +43,12 @@
     { "name": "RespondentSolicitorAddressTown", "value": "Leeds" },
     { "name": "RespondentSolicitorAddressCounty", "value": "Where" },
     { "name": "RespondentSolicitorAddressPostcode", "value": "SW9 USB" },
-    { "name": "RespondentSolicitorAddressCountry", "value": "Scotland" }
+    { "name": "RespondentSolicitorAddressCountry", "value": "Scotland" },
+    { "name": "AddressofProperties", "value": "255 Westminster Avenue" },
+    { "name": "MortgageDetails", "value": "We split the mortgage for our house" },
+    { "name": "OrderForChildren", "value": "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children" },
+    { "name": "OrderForChildrenNoAgreement", "value": "to meet expenses incurred by a child in being educated or training for work" },
+    { "name": "ChildSupportAgencyCalculationMade", "value": "Yes" },
+    { "name": "ChildSupportAgencyCalculationReason", "value": "Decided based on some random calculations we made" }
   ]
 }
-
