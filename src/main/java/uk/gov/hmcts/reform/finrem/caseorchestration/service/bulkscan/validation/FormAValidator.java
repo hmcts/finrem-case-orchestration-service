@@ -17,9 +17,15 @@ import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.BulkScanValidationPatterns.CCD_EMAIL_REGEX;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.BulkScanValidationPatterns.CCD_PHONE_NUMBER_REGEX;
 import static uk.gov.hmcts.reform.bsp.common.service.PostcodeValidator.validatePostcode;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_POSTCODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_INTENDS_TO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_POSTCODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLYING_FOR_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
@@ -30,7 +36,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ORDER_FOR_CHILDREN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ORDER_FOR_CHILDREN_NO_AGREEMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.PROVISION_MADE_FOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_ADDRESS_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_FULL_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.natureOfApplicationChecklistToCcdFieldNames;
@@ -62,14 +70,14 @@ public class FormAValidator extends BulkScanFormValidator {
 
     static {
         ALLOWED_VALUES_PER_FIELD.put(PROVISION_MADE_FOR, asList(
-                "in connection with matrimonial or civil partnership proceedings",
-                "under paragraphs 1 or 2 of Schedule 1 to the Children Act 1989"
+            "in connection with matrimonial or civil partnership proceedings",
+            "under paragraphs 1 or 2 of Schedule 1 to the Children Act 1989"
         ));
         ALLOWED_VALUES_PER_FIELD.put(APPLICANT_INTENDS_TO, asList(
-                "ApplyToCourtFor",
-                "ProceedWithApplication",
-                "ApplyToVary",
-                "ApplyToDischargePeriodicalPaymentOrder"
+            "ApplyToCourtFor",
+            "ProceedWithApplication",
+            "ApplyToVary",
+            "ApplyToDischargePeriodicalPaymentOrder"
         ));
         ALLOWED_VALUES_PER_FIELD.put(APPLYING_FOR_CONSENT_ORDER, asList("Yes"));
         ALLOWED_VALUES_PER_FIELD.put(DIVORCE_STAGE_REACHED, asList("Decree Nisi", "Decree Absolute"));
@@ -116,14 +124,14 @@ public class FormAValidator extends BulkScanFormValidator {
                 NATURE_OF_APPLICATION, natureOfApplicationChecklistToCcdFieldNames),
             validateNonMandatoryCommaSeparatedField(fieldsMap,
                 DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames),
-            validateFieldMatchesRegex(fieldsMap, "ApplicantSolicitorPhone", CCD_PHONE_NUMBER_REGEX),
-            validateFieldMatchesRegex(fieldsMap, "ApplicantPhone", CCD_PHONE_NUMBER_REGEX),
-            validateFieldMatchesRegex(fieldsMap, "ApplicantSolicitorEmail", CCD_EMAIL_REGEX),
-            validateFieldMatchesRegex(fieldsMap, "ApplicantEmail", CCD_EMAIL_REGEX),
-            validatePostcode(fieldsMap, "ApplicantSolicitorAddressPostcode"),
-            validatePostcode(fieldsMap, "ApplicantAddressPostcode"),
-            validatePostcode(fieldsMap, "RespondentAddressPostcode"),
-            validatePostcode(fieldsMap, "RespondentSolicitorAddressPostcode")
+            validateFieldMatchesRegex(fieldsMap, APPLICANT_SOLICITOR_PHONE, CCD_PHONE_NUMBER_REGEX),
+            validateFieldMatchesRegex(fieldsMap, APPLICANT_PHONE, CCD_PHONE_NUMBER_REGEX),
+            validateFieldMatchesRegex(fieldsMap, APPLICANT_SOLICITOR_EMAIL, CCD_EMAIL_REGEX),
+            validateFieldMatchesRegex(fieldsMap, APPLICANT_EMAIL, CCD_EMAIL_REGEX),
+            validatePostcode(fieldsMap, APPLICANT_SOLICITOR_ADDRESS_POSTCODE),
+            validatePostcode(fieldsMap, APPLICANT_ADDRESS_POSTCODE),
+            validatePostcode(fieldsMap, RESPONDENT_ADDRESS_POSTCODE),
+            validatePostcode(fieldsMap, RESPONDENT_SOLICITOR_ADDRESS_POSTCODE)
         )
             .flatMap(Collection::stream)
             .collect(Collectors.toList());

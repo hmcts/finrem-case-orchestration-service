@@ -44,9 +44,9 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         mapFullNameToFirstAndLast(OcrFieldName.RESPONDENT_FULL_NAME, "appRespondentFMname", "appRespondentLName",
             ocrDataFields, transformedCaseData);
 
-        commaSeparatedEntryTransformer(OcrFieldName.NATURE_OF_APPLICATION, natureOfApplicationChecklistToCcdFieldNames,
+        commaSeparatedEntryTransformer(OcrFieldName.NATURE_OF_APPLICATION, "natureOfApplication2", natureOfApplicationChecklistToCcdFieldNames,
             ocrDataFields, transformedCaseData);
-        commaSeparatedEntryTransformer(OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE,
+        commaSeparatedEntryTransformer(OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "dischargePeriodicalPaymentSubstituteFor",
             dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames, ocrDataFields, transformedCaseData);
 
         applyMappingsForAddress("applicantSolicitor", "solicitorAddress", ocrDataFields, transformedCaseData);
@@ -77,23 +77,24 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             .findFirst();
     }
 
-    private void commaSeparatedEntryTransformer(String commaSeparatedEntryKey,
-                                                Map<String, String> ocrFieldNamesToCcdFieldNames,
+    private void commaSeparatedEntryTransformer(String ocrNameWithCommaSeparatedValues,
+                                                String ccdName,
+                                                Map<String, String> ocrValuesToCcdValues,
                                                 List<OcrDataField> ocrDataFields,
-                                                Map<String, Object> modifiedMap) {
+                                                Map<String, Object> transformedCaseData) {
 
-        Optional<String> commaSeparatedEntryValue = getValueFromOcrDataFields(commaSeparatedEntryKey, ocrDataFields);
+        Optional<String> commaSeparatedOcrValue = getValueFromOcrDataFields(ocrNameWithCommaSeparatedValues, ocrDataFields);
 
-        if (commaSeparatedEntryValue.isPresent()) {
+        if (commaSeparatedOcrValue.isPresent()) {
             List<String> transformedCommaSeparatedValue =
-                getCommaSeparatedValuesFromOcrDataField(commaSeparatedEntryValue.get())
+                getCommaSeparatedValuesFromOcrDataField(commaSeparatedOcrValue.get())
                     .stream()
-                    .map(ocrFieldNamesToCcdFieldNames::get)
+                    .map(ocrValuesToCcdValues::get)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             if (!transformedCommaSeparatedValue.isEmpty()) {
-                modifiedMap.put(commaSeparatedEntryKey, transformedCommaSeparatedValue);
+                transformedCaseData.put(ccdName, transformedCommaSeparatedValue);
             }
         }
     }
@@ -117,24 +118,23 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "ChildSupportAgencyCalculationMade");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_REASON, "ChildSupportAgencyCalculationReason");
 
-        exceptionRecordToCcdFieldsMap.put("ApplicantRepresented", "applicantRepresentPaper");
-        exceptionRecordToCcdFieldsMap.put("ApplicantSolicitorName", "solicitorName");
-        exceptionRecordToCcdFieldsMap.put("ApplicantSolicitorFirm", "solicitorFirm");
-        exceptionRecordToCcdFieldsMap.put("ApplicantSolicitorPhone", "solicitorPhone");
-        exceptionRecordToCcdFieldsMap.put("ApplicantSolicitorDXnumber", "solicitorDXnumber");
-        exceptionRecordToCcdFieldsMap.put("ApplicantSolicitorReference", "solicitorReference");
-        exceptionRecordToCcdFieldsMap.put("ApplicantPBANumber", "PBANumber");
-        exceptionRecordToCcdFieldsMap.put("ApplicantSolicitorEmail", "solicitorEmail");
-        exceptionRecordToCcdFieldsMap.put("ApplicantPhone", "applicantPhone");
-        exceptionRecordToCcdFieldsMap.put("ApplicantEmail", "applicantEmail");
-
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_REPRESENTED, "applicantRepresentPaper");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_NAME, "solicitorName");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_FIRM, "solicitorFirm");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_PHONE, "solicitorPhone");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_DX_NUMBER, "solicitorDXnumber");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_REFERENCE, "solicitorReference");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_PBA_NUMBER, "PBANumber");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_EMAIL, "solicitorEmail");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_PHONE, "applicantPhone");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_EMAIL, "applicantEmail");
         return exceptionRecordToCcdFieldsMap;
     }
 
-    private void applyMappingsForAddress(String prefix, String unusualField, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
+    private void applyMappingsForAddress(String prefix, String parentField, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
         String nestedFieldPrefix = StringUtils.capitalize(prefix + "Address");
         addMappingsTo(
-            unusualField,
+            parentField,
             ImmutableMap.of(
                 nestedFieldPrefix + "Line1", "AddressLine1",
                 nestedFieldPrefix + "County", "County",
