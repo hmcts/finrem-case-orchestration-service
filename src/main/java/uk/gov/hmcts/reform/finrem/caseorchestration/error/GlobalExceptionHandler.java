@@ -8,7 +8,13 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
+import uk.gov.hmcts.reform.bsp.common.error.InvalidDataException;
+import uk.gov.hmcts.reform.bsp.common.model.shared.out.BspErrorResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApiError;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -49,5 +55,25 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ApiError> handleInvalidTokenException(InvalidTokenException exc) {
         log.warn(exc.getMessage(), exc);
         return status(UNAUTHORIZED).body(new ApiError(exc.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidDataException.class)
+    ResponseEntity<Object> handleInvalidDataException(InvalidDataException exception) {
+        log.warn(exception.getMessage(), exception);
+
+        return ResponseEntity
+            .status(HttpStatus.UNPROCESSABLE_ENTITY)
+            .body(
+                BspErrorResponse.builder()
+                    .errors(mergeLists(exception.getWarnings(), exception.getErrors()))
+                    .build()
+            );
+    }
+
+    private List<String> mergeLists(List<String> warn, List<String> errors) {
+        warn = Optional.ofNullable(warn).orElse(new ArrayList<>());
+        warn.addAll(errors);
+
+        return warn;
     }
 }

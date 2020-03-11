@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.bsp.common.error.InvalidDataException;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
@@ -17,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformat
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanFormValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanFormValidatorFactory;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +29,8 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BULK_UNSUPPORTED_FORM_TYPE;
@@ -107,5 +111,22 @@ public class BulkScanServiceTest {
         when(bulkScanFormValidatorFactory.getValidator(TEST_BULK_UNSUPPORTED_FORM_TYPE)).thenThrow(UnsupportedFormTypeException.class);
 
         bulkScanService.transformBulkScanForm(exceptionRecord);
+    }
+
+    @Test(expected = InvalidDataException.class)
+    public void shouldThrowInvalidDataExceptionForTransformer() {
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder()
+                .formType(TEST_FORM_TYPE)
+                .ocrDataFields(singletonList(new OcrDataField(TEST_KEY, TEST_VALUE)))
+                .build();
+
+        OcrValidationResult validatedWithWarn = OcrValidationResult.builder().addWarning("warning").build();
+        when(bulkScanFormValidatorFactory.getValidator(TEST_FORM_TYPE)).thenReturn(bulkScanFormValidator);
+        when(bulkScanFormValidator.validateBulkScanForm(any())).thenReturn(validatedWithWarn);
+
+        bulkScanService.transformBulkScanForm(exceptionRecord);
+
+        verify(bulkScanFormTransformerFactory, never()).getTransformer(TEST_FORM_TYPE);
+        verify(bulkScanFormTransformer, never()).transformIntoCaseData(exceptionRecord);
     }
 }

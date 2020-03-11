@@ -1,0 +1,12 @@
+{
+  "case_type_id": "FinancialRemedyContested",
+  "id": "LV481297",
+  "po_box": "PO 17",
+  "form_type": "formA",
+  "ocr_data_fields": [
+    {
+      "name": "divorceCaseNumber",
+      "value": "1234567890"
+    }
+  ]
+}
