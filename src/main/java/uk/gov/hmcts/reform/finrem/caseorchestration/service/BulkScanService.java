@@ -9,8 +9,8 @@ import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus;
 import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.BulkScanFormTransformer;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.BulkScanFormTransformerFactory;
+import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FinRemBulkScanFormTransformerFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FinRemBulkScanFormValidatorFactory;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class BulkScanService {
     private FinRemBulkScanFormValidatorFactory finRemBulkScanFormValidatorFactory;
 
     @Autowired
-    private BulkScanFormTransformerFactory bulkScanFormTransformerFactory;
+    private FinRemBulkScanFormTransformerFactory finRemBulkScanFormTransformerFactory;
 
     public OcrValidationResult validateBulkScanForm(String formType, List<OcrDataField> ocrDataFields) throws UnsupportedFormTypeException {
         BulkScanFormValidator formValidator = finRemBulkScanFormValidatorFactory.getValidator(formType);
@@ -33,7 +33,7 @@ public class BulkScanService {
     public Map<String, Object> transformBulkScanForm(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException, InvalidDataException {
         validateForTransformation(exceptionRecord);
 
-        BulkScanFormTransformer bulkScanFormTransformer = bulkScanFormTransformerFactory.getTransformer(exceptionRecord.getFormType());
+        BulkScanFormTransformer bulkScanFormTransformer = finRemBulkScanFormTransformerFactory.getTransformer(exceptionRecord.getFormType());
         return bulkScanFormTransformer.transformIntoCaseData(exceptionRecord);
     }
 

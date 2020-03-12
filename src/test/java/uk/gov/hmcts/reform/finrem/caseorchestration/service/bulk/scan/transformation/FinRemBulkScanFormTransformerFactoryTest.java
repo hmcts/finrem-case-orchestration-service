@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.BulkScanFormTransformerFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FinRemBulkScanFormTransformerFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FormAToCaseTransformer;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -19,7 +19,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BU
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.BulkScanForms.FORM_A;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BulkScanFormTransformerFactoryTest {
+public class FinRemBulkScanFormTransformerFactoryTest {
 
     @Rule
     public ExpectedException expectedException = none();
@@ -28,16 +28,16 @@ public class BulkScanFormTransformerFactoryTest {
     private FormAToCaseTransformer formAToCaseTransformer;
 
     @InjectMocks
-    private BulkScanFormTransformerFactory bulkScanFormTransformerFactory;
+    private FinRemBulkScanFormTransformerFactory finRemBulkScanFormTransformerFactory;
 
     @Before
     public void setUp() {
-        bulkScanFormTransformerFactory.init();
+        finRemBulkScanFormTransformerFactory.init();
     }
 
     @Test
     public void shouldReturnRightTransformationStrategy() {
-        assertThat(bulkScanFormTransformerFactory.getTransformer(FORM_A), is(formAToCaseTransformer));
+        assertThat(finRemBulkScanFormTransformerFactory.getTransformer(FORM_A), is(formAToCaseTransformer));
     }
 
     @Test
@@ -45,6 +45,6 @@ public class BulkScanFormTransformerFactoryTest {
         expectedException.expect(UnsupportedFormTypeException.class);
         expectedException.expectMessage("Form type \"unsupportedFormType\" is not supported.");
 
-        bulkScanFormTransformerFactory.getTransformer(TEST_BULK_UNSUPPORTED_FORM_TYPE);
+        finRemBulkScanFormTransformerFactory.getTransformer(TEST_BULK_UNSUPPORTED_FORM_TYPE);
     }
 }

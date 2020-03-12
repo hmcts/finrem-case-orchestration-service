@@ -17,9 +17,6 @@ import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FormAValidator;
 
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
@@ -32,6 +29,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.bsp.common.utils.ResourceLoader.loadResourceAsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
@@ -77,15 +75,5 @@ public class TransformationBulkScanTest {
 
     private Matcher<String> hasErrorWithMessageCopiedFromWarning(String warningMsg) {
         return allOf(isJson(), hasJsonPath("$.errors", equalTo(Arrays.asList(warningMsg))));
-    }
-
-    public static String loadResourceAsString(final String filePath) throws Exception {
-        URL url = TransformationBulkScanTest.class.getClassLoader().getResource(filePath);
-
-        if (url == null) {
-            throw new IllegalArgumentException(String.format("Could not find resource in path %s", filePath));
-        }
-
-        return new String(Files.readAllBytes(Paths.get(url.toURI())));
     }
 }
