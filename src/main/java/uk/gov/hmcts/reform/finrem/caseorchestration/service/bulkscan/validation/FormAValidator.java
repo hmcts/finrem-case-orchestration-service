@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,8 @@ import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.BulkScanValidationPatterns.CCD_EMAIL_REGEX;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.BulkScanValidationPatterns.CCD_PHONE_NUMBER_REGEX;
 import static uk.gov.hmcts.reform.bsp.common.service.PostcodeValidator.validatePostcode;
+import static uk.gov.hmcts.reform.bsp.common.service.RegExpValidator.validateField;
+import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
@@ -40,7 +43,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_FULL_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.natureOfApplicationChecklistToCcdFieldNames;
 
 @Component
@@ -124,10 +126,10 @@ public class FormAValidator extends BulkScanFormValidator {
                 NATURE_OF_APPLICATION, natureOfApplicationChecklistToCcdFieldNames),
             validateNonMandatoryCommaSeparatedField(fieldsMap,
                 DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames),
-            validateFieldMatchesRegex(fieldsMap, APPLICANT_SOLICITOR_PHONE, CCD_PHONE_NUMBER_REGEX),
-            validateFieldMatchesRegex(fieldsMap, APPLICANT_PHONE, CCD_PHONE_NUMBER_REGEX),
-            validateFieldMatchesRegex(fieldsMap, APPLICANT_SOLICITOR_EMAIL, CCD_EMAIL_REGEX),
-            validateFieldMatchesRegex(fieldsMap, APPLICANT_EMAIL, CCD_EMAIL_REGEX),
+            validateField(fieldsMap, APPLICANT_SOLICITOR_PHONE, CCD_PHONE_NUMBER_REGEX),
+            validateField(fieldsMap, APPLICANT_PHONE, CCD_PHONE_NUMBER_REGEX),
+            validateField(fieldsMap, APPLICANT_SOLICITOR_EMAIL, CCD_EMAIL_REGEX),
+            validateField(fieldsMap, APPLICANT_EMAIL, CCD_EMAIL_REGEX),
             validatePostcode(fieldsMap, APPLICANT_SOLICITOR_ADDRESS_POSTCODE),
             validatePostcode(fieldsMap, APPLICANT_ADDRESS_POSTCODE),
             validatePostcode(fieldsMap, RESPONDENT_ADDRESS_POSTCODE),
@@ -178,17 +180,5 @@ public class FormAValidator extends BulkScanFormValidator {
         return hwfNumber != null && !hwfNumber.matches(HWF_NUMBER_6_DIGITS_REGEX)
             ? asList("HWFNumber is usually 6 digits")
             : emptyList();
-    }
-
-    private static List<String> validateFieldMatchesRegex(Map<String, String> fieldsMap, String fieldKey, String validationRegex) {
-        List<String> validationMessages = new ArrayList<>();
-
-        if (fieldsMap.containsKey(fieldKey)) {
-            String valueToValidate = fieldsMap.get(fieldKey);
-            if (!valueToValidate.matches(validationRegex)) {
-                validationMessages.add(fieldKey + " is not in a valid format");
-            }
-        }
-        return validationMessages;
     }
 }

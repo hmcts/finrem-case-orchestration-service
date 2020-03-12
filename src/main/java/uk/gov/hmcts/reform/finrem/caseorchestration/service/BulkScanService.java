@@ -8,10 +8,10 @@ import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus;
+import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.BulkScanFormTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.BulkScanFormTransformerFactory;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanFormValidator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanFormValidatorFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FinRemBulkScanFormValidatorFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -20,13 +20,13 @@ import java.util.Map;
 public class BulkScanService {
 
     @Autowired
-    private BulkScanFormValidatorFactory bulkScanFormValidatorFactory;
+    private FinRemBulkScanFormValidatorFactory finRemBulkScanFormValidatorFactory;
 
     @Autowired
     private BulkScanFormTransformerFactory bulkScanFormTransformerFactory;
 
     public OcrValidationResult validateBulkScanForm(String formType, List<OcrDataField> ocrDataFields) throws UnsupportedFormTypeException {
-        BulkScanFormValidator formValidator = bulkScanFormValidatorFactory.getValidator(formType);
+        BulkScanFormValidator formValidator = finRemBulkScanFormValidatorFactory.getValidator(formType);
         return formValidator.validateBulkScanForm(ocrDataFields);
     }
 

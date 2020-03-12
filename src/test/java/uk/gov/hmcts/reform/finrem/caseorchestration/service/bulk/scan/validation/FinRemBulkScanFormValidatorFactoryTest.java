@@ -9,8 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanFormValidator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanFormValidatorFactory;
+import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FinRemBulkScanFormValidatorFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FormAValidator;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -20,7 +20,7 @@ import static org.junit.rules.ExpectedException.none;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BULK_UNSUPPORTED_FORM_TYPE;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BulkScanFormValidatorFactoryTest {
+public class FinRemBulkScanFormValidatorFactoryTest {
 
     @Rule
     public ExpectedException expectedException = none();
@@ -29,7 +29,7 @@ public class BulkScanFormValidatorFactoryTest {
     private FormAValidator formAValidator;
 
     @InjectMocks
-    private BulkScanFormValidatorFactory classUnderTest;
+    private FinRemBulkScanFormValidatorFactory classUnderTest;
 
     @Before
     public void setUp() {
