@@ -12,13 +12,12 @@ import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
+import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.BulkScanFormTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.BulkScanFormTransformerFactory;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanFormValidator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.BulkScanFormValidatorFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FinRemBulkScanFormValidatorFactory;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +29,6 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.rules.ExpectedException.none;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BULK_UNSUPPORTED_FORM_TYPE;
@@ -56,7 +54,7 @@ public class BulkScanServiceTest {
     private BulkScanFormValidator bulkScanFormValidator;
 
     @Mock
-    private BulkScanFormValidatorFactory bulkScanFormValidatorFactory;
+    private FinRemBulkScanFormValidatorFactory finRemBulkScanFormValidatorFactory;
 
     @InjectMocks
     private BulkScanService bulkScanService;
@@ -65,7 +63,7 @@ public class BulkScanServiceTest {
     public void shouldCallReturnedValidator() throws UnsupportedFormTypeException {
         OcrValidationResult resultFromValidator = OcrValidationResult.builder().build();
         List<OcrDataField> ocrDataFields = singletonList(new OcrDataField(TEST_KEY, TEST_VALUE));
-        when(bulkScanFormValidatorFactory.getValidator(TEST_FORM)).thenReturn(bulkScanFormValidator);
+        when(finRemBulkScanFormValidatorFactory.getValidator(TEST_FORM)).thenReturn(bulkScanFormValidator);
         when(bulkScanFormValidator.validateBulkScanForm(ocrDataFields)).thenReturn(resultFromValidator);
 
         OcrValidationResult returnedResult = bulkScanService.validateBulkScanForm(TEST_FORM, ocrDataFields);
@@ -78,7 +76,7 @@ public class BulkScanServiceTest {
     public void shouldRethrowUnsupportedFormTypeExceptionFromFactory() {
         expectedException.expect(UnsupportedFormTypeException.class);
         List<OcrDataField> ocrDataFields = singletonList(new OcrDataField(TEST_KEY, TEST_VALUE));
-        when(bulkScanFormValidatorFactory.getValidator(TEST_BULK_UNSUPPORTED_FORM_TYPE)).thenThrow(UnsupportedFormTypeException.class);
+        when(finRemBulkScanFormValidatorFactory.getValidator(TEST_BULK_UNSUPPORTED_FORM_TYPE)).thenThrow(UnsupportedFormTypeException.class);
 
         bulkScanService.validateBulkScanForm(TEST_BULK_UNSUPPORTED_FORM_TYPE, ocrDataFields);
     }
@@ -91,7 +89,7 @@ public class BulkScanServiceTest {
             .build();
 
         OcrValidationResult resultFromValidator = OcrValidationResult.builder().build();
-        when(bulkScanFormValidatorFactory.getValidator(TEST_FORM_TYPE)).thenReturn(bulkScanFormValidator);
+        when(finRemBulkScanFormValidatorFactory.getValidator(TEST_FORM_TYPE)).thenReturn(bulkScanFormValidator);
         when(bulkScanFormValidator.validateBulkScanForm(any())).thenReturn(resultFromValidator);
         when(bulkScanFormTransformerFactory.getTransformer(TEST_FORM_TYPE)).thenReturn(bulkScanFormTransformer);
         when(bulkScanFormTransformer.transformIntoCaseData(exceptionRecord)).thenReturn(singletonMap(TEST_KEY, TEST_VALUE));
@@ -108,7 +106,7 @@ public class BulkScanServiceTest {
         expectedException.expect(UnsupportedFormTypeException.class);
 
         ExceptionRecord exceptionRecord = ExceptionRecord.builder().formType(TEST_BULK_UNSUPPORTED_FORM_TYPE).build();
-        when(bulkScanFormValidatorFactory.getValidator(TEST_BULK_UNSUPPORTED_FORM_TYPE)).thenThrow(UnsupportedFormTypeException.class);
+        when(finRemBulkScanFormValidatorFactory.getValidator(TEST_BULK_UNSUPPORTED_FORM_TYPE)).thenThrow(UnsupportedFormTypeException.class);
 
         bulkScanService.transformBulkScanForm(exceptionRecord);
     }
@@ -121,7 +119,7 @@ public class BulkScanServiceTest {
                 .build();
 
         OcrValidationResult validatedWithWarn = OcrValidationResult.builder().addWarning("warning").build();
-        when(bulkScanFormValidatorFactory.getValidator(TEST_FORM_TYPE)).thenReturn(bulkScanFormValidator);
+        when(finRemBulkScanFormValidatorFactory.getValidator(TEST_FORM_TYPE)).thenReturn(bulkScanFormValidator);
         when(bulkScanFormValidator.validateBulkScanForm(any())).thenReturn(validatedWithWarn);
 
         bulkScanService.transformBulkScanForm(exceptionRecord);

@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
@@ -15,9 +15,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.natureOfApplicationChecklistToCcdFieldNames;
 
 
@@ -49,10 +49,10 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         commaSeparatedEntryTransformer(OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "dischargePeriodicalPaymentSubstituteFor",
             dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames, ocrDataFields, transformedCaseData);
 
-        applyMappingsForAddress("applicantSolicitor", "solicitorAddress", ocrDataFields, transformedCaseData);
+        AddressMapper.applyMappings("applicantSolicitor", "solicitorAddress", ocrDataFields, transformedCaseData);
         applyMappingsForAddress("applicant", ocrDataFields, transformedCaseData);
         applyMappingsForAddress("respondent", ocrDataFields, transformedCaseData);
-        applyMappingsForAddress("respondentSolicitor", "rSolicitorAddress", ocrDataFields, transformedCaseData);
+        AddressMapper.applyMappings("respondentSolicitor", "rSolicitorAddress", ocrDataFields, transformedCaseData);
 
         return transformedCaseData;
     }
@@ -131,45 +131,9 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         return exceptionRecordToCcdFieldsMap;
     }
 
-    private void applyMappingsForAddress(String prefix, String parentField, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
-        String nestedFieldPrefix = StringUtils.capitalize(prefix + "Address");
-        addMappingsTo(
-            parentField,
-            ImmutableMap.of(
-                nestedFieldPrefix + "Line1", "AddressLine1",
-                nestedFieldPrefix + "County", "County",
-                nestedFieldPrefix + "Postcode", "PostCode",
-                nestedFieldPrefix + "Town", "PostTown",
-                nestedFieldPrefix + "Country", "Country"
-            ),
-            modifiedMap,
-            ocrDataFields
-        );
-    }
-
     private void applyMappingsForAddress(
-            String prefix, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
-        applyMappingsForAddress(prefix, prefix + "Address", ocrDataFields, modifiedMap);
-    }
-
-    private void addMappingsTo(String parentField, ImmutableMap<String, String> mappings,
-                               Map<String, Object> modifiedMap, List<OcrDataField> ocrDataFields) {
-        HashMap<String, Object> parentFieldObject = new HashMap<>();
-
-        mappings.forEach((srcField, targetField) -> {
-            mapIfSourceExists(srcField, targetField, parentFieldObject, ocrDataFields);
-        });
-
-        if (parentFieldObject.size() > 0) {
-            modifiedMap.put(parentField, parentFieldObject);
-        }
-    }
-
-    private void mapIfSourceExists(String srcField, String targetField, HashMap<String, Object> parentObject, List<OcrDataField> ocrDataFields) {
-        getValueFromOcrDataFields(srcField, ocrDataFields)
-            .ifPresent(srcFieldValue -> {
-                parentObject.put(targetField, srcFieldValue);
-            });
+        String prefix, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
+        AddressMapper.applyMappings(prefix, prefix + "Address", ocrDataFields, modifiedMap);
     }
 
     @Override

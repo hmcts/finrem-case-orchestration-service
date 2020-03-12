@@ -2,33 +2,23 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
+import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidatorFactory;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
-import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.BulkScanForms.FORM_A;
 
 @Component
-public class BulkScanFormValidatorFactory {
+public class FinRemBulkScanFormValidatorFactory extends BulkScanFormValidatorFactory {
 
     @Autowired
     private FormAValidator formAValidator;
 
-    private static Map<String, BulkScanFormValidator> validators;
-
+    @Override
     @PostConstruct
     public void initBean() {
         validators = new HashMap<>();
         validators.put(FORM_A, formAValidator);
-    }
-
-    public BulkScanFormValidator getValidator(final String formType) throws UnsupportedFormTypeException {
-        if (!validators.containsKey(formType)) {
-            throw new UnsupportedFormTypeException(formType);
-        }
-
-        return validators.get(formType);
     }
 }
