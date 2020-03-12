@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
+import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 
@@ -19,7 +20,6 @@ import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getComma
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.natureOfApplicationChecklistToCcdFieldNames;
-
 
 @Component
 public class FormAToCaseTransformer extends BulkScanFormTransformer {

@@ -13,9 +13,9 @@ import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
+import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.BulkScanFormTransformer;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.BulkScanFormTransformerFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FinRemBulkScanFormTransformerFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FinRemBulkScanFormValidatorFactory;
 
 import java.util.List;
@@ -44,7 +44,7 @@ public class BulkScanServiceTest {
     public ExpectedException expectedException = none();
 
     @Mock
-    private BulkScanFormTransformerFactory bulkScanFormTransformerFactory;
+    private FinRemBulkScanFormTransformerFactory finRemBulkScanFormTransformerFactory;
 
     @Mock
     private BulkScanFormTransformer bulkScanFormTransformer;
@@ -90,12 +90,12 @@ public class BulkScanServiceTest {
         OcrValidationResult resultFromValidator = OcrValidationResult.builder().build();
         when(finRemBulkScanFormValidatorFactory.getValidator(TEST_FORM_TYPE)).thenReturn(bulkScanFormValidator);
         when(bulkScanFormValidator.validateBulkScanForm(any())).thenReturn(resultFromValidator);
-        when(bulkScanFormTransformerFactory.getTransformer(TEST_FORM_TYPE)).thenReturn(bulkScanFormTransformer);
+        when(finRemBulkScanFormTransformerFactory.getTransformer(TEST_FORM_TYPE)).thenReturn(bulkScanFormTransformer);
         when(bulkScanFormTransformer.transformIntoCaseData(exceptionRecord)).thenReturn(singletonMap(TEST_KEY, TEST_VALUE));
 
         Map<String, Object> returnedResult = bulkScanService.transformBulkScanForm(exceptionRecord);
 
-        verify(bulkScanFormTransformerFactory).getTransformer(TEST_FORM_TYPE);
+        verify(finRemBulkScanFormTransformerFactory).getTransformer(TEST_FORM_TYPE);
         verify(bulkScanFormTransformer).transformIntoCaseData(exceptionRecord);
         assertThat(returnedResult, hasEntry(TEST_KEY, TEST_VALUE));
     }
@@ -123,7 +123,7 @@ public class BulkScanServiceTest {
 
         bulkScanService.transformBulkScanForm(exceptionRecord);
 
-        verify(bulkScanFormTransformerFactory, never()).getTransformer(TEST_FORM_TYPE);
+        verify(finRemBulkScanFormTransformerFactory, never()).getTransformer(TEST_FORM_TYPE);
         verify(bulkScanFormTransformer, never()).transformIntoCaseData(exceptionRecord);
     }
 }
