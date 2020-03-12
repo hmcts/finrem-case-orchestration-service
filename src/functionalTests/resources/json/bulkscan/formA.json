@@ -49,6 +49,13 @@
     { "name": "OrderForChildren", "value": "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children" },
     { "name": "OrderForChildrenNoAgreement", "value": "to meet expenses incurred by a child in being educated or training for work" },
     { "name": "ChildSupportAgencyCalculationMade", "value": "Yes" },
-    { "name": "ChildSupportAgencyCalculationReason", "value": "Decided based on some random calculations we made" }
+    { "name": "ChildSupportAgencyCalculationReason", "value": "Decided based on some random calculations we made" },
+    { "name": "AuthorisationName", "value": "Saul B. Kol" },
+    { "name": "AuthorisationFirm", "value": "Better Divorce Ltd" },
+    { "name": "AuthorisationSolicitorAddress", "value": "1 Single Lane, Liverpool, LE5 AV2" },
+    { "name": "AuthorisationSigned", "value": "Yes" },
+    { "name": "AuthorisationSignedBy", "value": "Applicant's solicitor" },
+    { "name": "AuthorisationDate", "value": "12/03/2020" },
+    { "name": "AuthorisationSolicitorPosition", "value": "I'm the CEO" }
   ]
 }

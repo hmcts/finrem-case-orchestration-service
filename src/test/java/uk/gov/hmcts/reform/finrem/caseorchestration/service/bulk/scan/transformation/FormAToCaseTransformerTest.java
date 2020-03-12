@@ -59,7 +59,14 @@ public class FormAToCaseTransformerTest {
             new OcrDataField(OcrFieldName.ORDER_FOR_CHILDREN_NO_AGREEMENT,
                 "in addition to child support maintenance already paid under a Child Support Agency assessment"),
             new OcrDataField(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "Yes"),
-            new OcrDataField(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_REASON, "Random reason that explains calculation")
+            new OcrDataField(OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_REASON, "Random reason that explains calculation"),
+            new OcrDataField(OcrFieldName.AUTHORISATION_NAME, "Saul B. Kol"),
+            new OcrDataField(OcrFieldName.AUTHORISATION_FIRM, "Better Divorce Ltd"),
+            new OcrDataField(OcrFieldName.AUTHORISATION_SOLICITOR_ADDRESS, "1 Single Lane, Liverpool, LE5 AV2"),
+            new OcrDataField(OcrFieldName.AUTHORISATION_SIGNED, "Yes"),
+            new OcrDataField(OcrFieldName.AUTHORISATION_SIGNED_BY, "Applicant's solicitor"),
+            new OcrDataField(OcrFieldName.AUTHORISATION_DATE, "12/03/2020"),
+            new OcrDataField(OcrFieldName.AUTHORISATION_SOLICITOR_POSITION, "I'm the CEO")
         ));
 
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(exceptionRecord);
@@ -94,7 +101,14 @@ public class FormAToCaseTransformerTest {
             hasEntry("orderForChildrenQuestion1", "Yes"),
             hasEntry("natureOfApplication6", "In addition to child support"),
             hasEntry("ChildSupportAgencyCalculationMade", "Yes"),
-            hasEntry("ChildSupportAgencyCalculationReason", "Random reason that explains calculation")
+            hasEntry("ChildSupportAgencyCalculationReason", "Random reason that explains calculation"),
+            hasEntry("authorisationName", "Saul B. Kol"),
+            hasEntry("authorisationFirm", "Better Divorce Ltd"),
+            hasEntry("authorisationSolicitorAddress", "1 Single Lane, Liverpool, LE5 AV2"),
+            hasEntry("authorisationSigned", "Yes"),
+            hasEntry("authorisationSignedBy", "Applicant's solicitor"),
+            hasEntry("authorisation3", "12/03/2020"),
+            hasEntry("authorisation2b", "I'm the CEO")
         ));
         
         assertThat(transformedCaseData.get("natureOfApplication2"), is(asList("Periodical Payment Order", "Pension Attachment Order")));
@@ -259,6 +273,31 @@ public class FormAToCaseTransformerTest {
             "when either the child or the person with care of the child or the "
                 + "absent parent of the child is not habitually resident in the United Kingdom",
             "When not habitually resident");
+    }
+    
+    @Test
+    public void shouldTransformEmptyAuthorisationSignedToNo() {
+        assertOnSingleFieldTransformationResult(
+            OcrFieldName.AUTHORISATION_SIGNED, "",
+            "authorisationSigned", "No");
+    }
+
+    @Test
+    public void shouldTransformAnyAuthorisationSignedToYes() {
+        assertOnSingleFieldTransformationResult(
+            OcrFieldName.AUTHORISATION_SIGNED, "Any non-empty value should become yes",
+            "authorisationSigned", "Yes");
+    }
+
+    private void assertOnSingleFieldTransformationResult(String ocrFieldName, String ocrFieldValue, String ccdFieldName, String ccdFieldValue) {
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(
+            createExceptionRecord(asList(new OcrDataField(ocrFieldName, ocrFieldValue))));
+
+        assertThat(transformedCaseData, allOf(
+            aMapWithSize(2),
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry(ccdFieldName, ccdFieldValue)
+        ));
     }
 
     private void assertForOrderForChildrenNoAgreementValueIsTransformed(String inputValue, String expectedNewValue) {

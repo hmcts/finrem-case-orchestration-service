@@ -30,6 +30,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLYING_FOR_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SIGNED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SIGNED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_CASE_NUMBER;
@@ -61,7 +64,10 @@ public class FormAValidator extends BulkScanFormValidator {
         APPLICANT_INTENDS_TO,
         APPLYING_FOR_CONSENT_ORDER,
         DIVORCE_STAGE_REACHED,
-        APPLICANT_REPRESENTED
+        APPLICANT_REPRESENTED,
+        AUTHORISATION_SIGNED,
+        AUTHORISATION_SIGNED_BY,
+        AUTHORISATION_DATE
     );
 
     public List<String> getMandatoryFields() {
@@ -107,6 +113,11 @@ public class FormAValidator extends BulkScanFormValidator {
             "Yes",
             "No",
             EMPTY_STRING
+        ));
+        ALLOWED_VALUES_PER_FIELD.put(AUTHORISATION_SIGNED_BY, asList(
+            "Applicant",
+            "Litigation Friend",
+            "Applicant's solicitor"
         ));
     }
 
