@@ -32,14 +32,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_BULK_UNSUPPORTED_FORM_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_FORM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_FORM_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_VALUE;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BulkScanServiceTest {
-
-    private static final String TEST_FORM = "testForm";
-    private static final String TEST_FORM_TYPE = "testFormType";
-    private static final String TEST_KEY = "testKey";
-    private static final String TEST_VALUE = "testValue";
 
     @Rule
     public ExpectedException expectedException = none();

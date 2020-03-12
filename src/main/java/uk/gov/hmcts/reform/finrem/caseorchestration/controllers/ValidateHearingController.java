@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingServi
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,26 +29,26 @@ public class ValidateHearingController implements BaseController {
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/validate-hearing", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @ApiOperation(value = "Validates a Hearing")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> validateHearing(
-        @RequestHeader(value = "Authorization", required = false) String authToken,
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request for validating a hearing. Auth token: {}, Case request : {}", authToken,
-            callbackRequest);
+        log.info("Received request for validating a hearing. Auth token: {}, Case request : {}", authToken, callbackRequest);
 
         validateCaseData(callbackRequest);
 
         List<String> errors = validateHearingService.validateHearingErrors(callbackRequest.getCaseDetails());
         if (!errors.isEmpty()) {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors(errors)
-                    .build());
+                .errors(errors)
+                .build());
         }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(callbackRequest.getCaseDetails());
         if (!warnings.isEmpty()) {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                    .warnings(warnings)
-                    .build());
+                .warnings(warnings)
+                .build());
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().build());

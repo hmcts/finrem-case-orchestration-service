@@ -25,6 +25,7 @@ import java.util.Map;
 import static java.util.Objects.nonNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse.builder;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -34,27 +35,24 @@ public class DocumentValidationController implements BaseController {
     @Autowired
     private DocumentValidationService service;
 
-    @PostMapping(path = "/field/{field}/file-upload-check", consumes = APPLICATION_JSON_VALUE,
-            produces = APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/field/{field}/file-upload-check", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Checks the file type and returns error.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully.",
+            @ApiResponse(code = 200, message = "Callback was processed successfully.",
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> checkUploadedFileType(
-            @RequestHeader(value = "Authorization") String authorisationToken,
+            @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest,
             @PathVariable("field") String field) {
 
-        log.info("Received request for checkUploadedFileType. Auth token: {}, Case request : {}",
-                authorisationToken, callbackRequest);
+        log.info("Received request for checkUploadedFileType. Auth token: {}, Case request : {}", authorisationToken, callbackRequest);
         validateCaseData(callbackRequest);
         return ResponseEntity.ok(response(callbackRequest, field, authorisationToken));
     }
 
-    private AboutToStartOrSubmitCallbackResponse response(CallbackRequest callbackRequest, String field,
-                                                          String authorisationToken) {
+    private AboutToStartOrSubmitCallbackResponse response(CallbackRequest callbackRequest, String field, String authorisationToken) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         AboutToStartOrSubmitCallbackResponseBuilder builder = builder();
         if (nonNull(caseData.get(field))) {

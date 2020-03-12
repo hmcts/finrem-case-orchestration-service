@@ -31,6 +31,7 @@ import static java.util.Arrays.asList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.ObjectUtils.isEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
@@ -44,19 +45,17 @@ public class ConsentOrderApprovedController implements BaseController {
     @Autowired
     private ConsentOrderApprovedDocumentService service;
 
-    @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE,
-            produces = APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
-                    + "attached to the case",
+            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
         })
 
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentOrderApproved(
-            @RequestHeader(value = "Authorization") String authToken,
+            @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         validateCaseData(callback);
@@ -64,13 +63,10 @@ public class ConsentOrderApprovedController implements BaseController {
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
         List<PensionCollectionData> pensionDocs = getPensionDocuments(caseData);
 
-
-        log.info("ConsentOrderApprovedController called with latestConsentOrder = {}, pensionDocs = {}",
-                latestConsentOrder, pensionDocs);
+        log.info("ConsentOrderApprovedController called with latestConsentOrder = {}, pensionDocs = {}", latestConsentOrder, pensionDocs);
 
         if (!isEmpty(latestConsentOrder)) {
-            CaseDocument letter = service.generateApprovedConsentOrderLetter(
-                    callback.getCaseDetails(), authToken);
+            CaseDocument letter = service.generateApprovedConsentOrderLetter(callback.getCaseDetails(), authToken);
             CaseDocument consentOrderAnnexStamped = service.annexStampDocument(latestConsentOrder, authToken);
 
             log.info("letter= {}, consentOrderAnnexStamped = {}", letter, consentOrderAnnexStamped);
@@ -103,17 +99,15 @@ public class ConsentOrderApprovedController implements BaseController {
                         .build());
     }
 
-
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(LATEST_CONSENT_ORDER),
-                new TypeReference<CaseDocument>() {
-                });
+            new TypeReference<CaseDocument>() {
+            });
     }
 
     private List<PensionCollectionData> getPensionDocuments(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION),
-                new TypeReference<List<PensionCollectionData>>() {
-                });
+            new TypeReference<List<PensionCollectionData>>() {
+            });
     }
-
 }

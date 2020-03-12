@@ -21,6 +21,7 @@ import java.util.Map;
 
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -33,20 +34,18 @@ public class UpdateConsentedCaseController implements BaseController {
     private static final String DIVORCE_UPLOAD_EVIDENCE_1 = "divorceUploadEvidence1";
     private static final String DIVORCE_DECREE_NISI_DATE = "divorceDecreeNisiDate";
 
-
     @Autowired
     private ConsentOrderService consentOrderService;
 
     @PostMapping(path = "/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Handles update Case details and cleans up the data fields based on the options choosen")
+    @ApiOperation(value = "Handles update case details and cleans up the data fields based on the options chosen")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successFully or in case of an error message is "
-            + "attached to the case",
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateCase(
-        @RequestHeader(value = "Authorization", required = false) String authToken,
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest ccdRequest) {
 
         log.info("Received request for updateCase ");
@@ -163,7 +162,6 @@ public class UpdateConsentedCaseController implements BaseController {
         caseData.put("applicantAddress", null);
         caseData.put("applicantPhone", null);
         caseData.put("applicantEmail", null);
-
     }
 
     private boolean equalsTo(String fieldData, String value) {
@@ -173,5 +171,4 @@ public class UpdateConsentedCaseController implements BaseController {
     private boolean hasNotSelected(List<String> list, String option) {
         return nonNull(list) && !list.contains(option);
     }
-
 }

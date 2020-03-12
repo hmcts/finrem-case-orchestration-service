@@ -97,39 +97,39 @@ public abstract class AbstractDocumentTest {
         generateDocumentServiceErrorStub();
 
         webClient.perform(MockMvcRequestBuilders.post(apiUrl())
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError());
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isInternalServerError());
     }
 
     void generateDocumentServiceSuccessStub() throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-                .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest()), true, true))
-                .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
-                .withHeader(CONTENT_TYPE, equalTo("application/json"))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
-                        .withBody(objectMapper.writeValueAsString(document()))));
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest()), true, true))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                .withBody(objectMapper.writeValueAsString(document()))));
     }
 
     void deleteDocumentServiceStubWith(HttpStatus status) {
         documentGeneratorService.stubFor(
-                delete(urlMatching(DELETE_DOCUMENT_CONTEXT_PATH.concat("\\?fileUrl=").concat(TEMP_URL)))
-                        .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
-                        .willReturn(aResponse().withStatus(status.value())));
+            delete(urlMatching(DELETE_DOCUMENT_CONTEXT_PATH.concat("\\?fileUrl=").concat(TEMP_URL)))
+                .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+                .willReturn(aResponse().withStatus(status.value())));
     }
 
     private void generateDocumentServiceErrorStub() throws JsonProcessingException {
         documentGeneratorService.stubFor(post(urlPathEqualTo(GENERATE_DOCUMENT_CONTEXT_PATH))
-                .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest()), true, true))
-                .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
-                .withHeader(CONTENT_TYPE, equalTo("application/json"))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)));
+            .withRequestBody(equalToJson(objectMapper.writeValueAsString(documentRequest()), true, true))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo("application/json"))
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)));
     }
 
     void idamServiceStub() throws JsonProcessingException {

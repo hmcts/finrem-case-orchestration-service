@@ -27,6 +27,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 
 import static org.junit.Assert.assertEquals;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
 @ContextConfiguration(classes = TestContextConfiguration.class)
 @Component
@@ -75,14 +77,14 @@ public class FunctionalTestUtils {
 
     public Headers getHeadersWithUserId() {
         return Headers.headers(
-                new Header("ServiceAuthorization", tokenGenerator.generate()),
+                new Header(SERVICE_AUTHORISATION_HEADER, tokenGenerator.generate()),
                 new Header("user-roles", "caseworker-divorce"),
                 new Header("user-id", userId));
     }
 
     public Headers getHeaders() {
         return Headers.headers(
-                new Header("Authorization", "Bearer "
+                new Header(AUTHORIZATION_HEADER, "Bearer "
                         + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
                 new Header("Content-Type", ContentType.JSON.toString()));
     }
@@ -97,7 +99,7 @@ public class FunctionalTestUtils {
 
     public Headers getHeader() {
         return Headers.headers(
-                new Header("Authorization", "Bearer "
+                new Header(AUTHORIZATION_HEADER, "Bearer "
                         + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)));
     }
 

@@ -25,10 +25,10 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
     @Override
     protected DocumentGenerationRequest documentRequest() {
         return DocumentGenerationRequest.builder()
-                .template(documentConfiguration.getFormCFastTrackTemplate())
-                .fileName(documentConfiguration.getFormCFileName())
-                .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
-                .build();
+            .template(documentConfiguration.getFormCFastTrackTemplate())
+            .fileName(documentConfiguration.getFormCFileName())
+            .values(Collections.singletonMap("caseDetails", request.getCaseDetails()))
+            .build();
     }
 
     @Override
@@ -46,12 +46,12 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
         generateDocumentServiceSuccessStub();
 
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().json(expectedCaseData()));
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().json(expectedCaseData()));
     }
 
     private String expectedCaseData() throws JsonProcessingException {
@@ -59,9 +59,9 @@ public class HearingFastTrackDocumentTest extends AbstractDocumentTest {
         caseDetails.getData().put("formC", caseDocument());
 
         return objectMapper.writeValueAsString(
-                AboutToStartOrSubmitCallbackResponse.builder()
-                        .data(caseDetails.getData())
-                        .warnings(ImmutableList.of(DATE_BETWEEN_6_AND_10_WEEKS))
-                        .build());
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDetails.getData())
+                .warnings(ImmutableList.of(DATE_BETWEEN_6_AND_10_WEEKS))
+                .build());
     }
 }
