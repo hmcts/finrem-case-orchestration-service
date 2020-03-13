@@ -59,10 +59,8 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
     private void mapFullNameToFirstAndLast(String ocrFieldName, String ccdFirstNameFieldName, String ccdLastNameFieldName,
                                            List<OcrDataField> ocrDataFields, Map<String, Object> formSpecificMap) {
-        ocrDataFields.stream()
-            .filter(ocrDataField -> ocrDataField.getName().equals(ocrFieldName))
-            .map(OcrDataField::getValue)
-            .findFirst()
+
+        getValueFromOcrDataFields(ocrFieldName, ocrDataFields)
             .ifPresent(fullName -> {
                 List<String> nameElements = asList(fullName.split(" "));
                 formSpecificMap.put(ccdFirstNameFieldName, String.join(" ", nameElements.subList(0, nameElements.size() - 1)));
@@ -74,6 +72,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         return ocrDataFields.stream()
             .filter(f -> f.getName().equals(fieldName))
             .map(OcrDataField::getValue)
+            .filter(Objects::nonNull)
             .findFirst();
     }
 
