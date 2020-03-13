@@ -107,7 +107,7 @@ public class FormAToCaseTransformerTest {
             hasEntry("authorisationSolicitorAddress", "1 Single Lane, Liverpool, LE5 AV2"),
             hasEntry("authorisationSigned", "Yes"),
             hasEntry("authorisationSignedBy", "Applicant's solicitor"),
-            hasEntry("authorisation3", "12/03/2020"),
+            hasEntry("authorisation3", "2020-03-12"),
             hasEntry("authorisation2b", "I'm the CEO")
         ));
         

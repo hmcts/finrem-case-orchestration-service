@@ -205,7 +205,7 @@ public class FormAValidatorTest {
             new OcrDataField(ORDER_FOR_CHILDREN_NO_AGREEMENT, "Not a valid reason for no agreement"),
             new OcrDataField(CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "Decision not yet made"),
             new OcrDataField(AUTHORISATION_SIGNED_BY, "My cat"),
-            new OcrDataField(AUTHORISATION_DATE, "Moon lit date")
+            new OcrDataField(AUTHORISATION_DATE, "Date in the moonlight")
         ));
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
