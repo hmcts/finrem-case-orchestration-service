@@ -8,9 +8,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FormAToCaseTransformer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 import static java.util.Arrays.asList;
@@ -18,12 +21,15 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.collection.IsMapWithSize.aMapWithSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
 
 public class FormAToCaseTransformerTest {
 
@@ -34,7 +40,7 @@ public class FormAToCaseTransformerTest {
         ExceptionRecord exceptionRecord = createExceptionRecord(asList(
             new OcrDataField(OcrFieldName.DIVORCE_CASE_NUMBER, "1234567890"),
             new OcrDataField(OcrFieldName.HWF_NUMBER, "123456"),
-            new OcrDataField(OcrFieldName.APPLICANT_FULL_NAME, "Peter Griffin"),
+            new OcrDataField(APPLICANT_FULL_NAME, "Peter Griffin"),
             new OcrDataField(OcrFieldName.RESPONDENT_FULL_NAME, "Louis Griffin"),
             new OcrDataField(OcrFieldName.PROVISION_MADE_FOR, "in connection with matrimonial or civil partnership proceedings"),
             new OcrDataField(OcrFieldName.NATURE_OF_APPLICATION, "Periodical Payment Order, Pension Attachment Order"),
@@ -96,7 +102,7 @@ public class FormAToCaseTransformerTest {
             hasEntry("ChildSupportAgencyCalculationMade", "Yes"),
             hasEntry("ChildSupportAgencyCalculationReason", "Random reason that explains calculation")
         ));
-        
+
         assertThat(transformedCaseData.get("natureOfApplication2"), is(asList("Periodical Payment Order", "Pension Attachment Order")));
         assertThat(transformedCaseData.get("dischargePeriodicalPaymentSubstituteFor"), is(asList("Lump Sum Order", "Pension Sharing Order")));
     }
@@ -105,6 +111,21 @@ public class FormAToCaseTransformerTest {
     public void shouldNotReturnUnexpectedField() {
         ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
             new OcrDataField("UnexpectedName", "UnexpectedValue")
+        ));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertThat(transformedCaseData, allOf(
+            aMapWithSize(1),
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID)
+        ));
+    }
+
+    @Test
+    public void shouldNotReturnExpectedFieldsWithNullValue() {
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(asList(
+            new OcrDataField(APPLICANT_FULL_NAME, null),
+            new OcrDataField(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, null)
         ));
 
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
@@ -151,18 +172,18 @@ public class FormAToCaseTransformerTest {
         ));
 
         assertAddressIsTransformed(
-            (Map)transformedCaseData.get("solicitorAddress"),
+            (Map) transformedCaseData.get("solicitorAddress"),
             ImmutableMap.of(
-            "AddressLine1", "Street",
-            "AddressTown", "London",
-            "AddressPostcode", "SW989SD",
-            "AddressCounty", "Great London",
-            "AddressCountry", "UK"
+                "AddressLine1", "Street",
+                "AddressTown", "London",
+                "AddressPostcode", "SW989SD",
+                "AddressCounty", "Great London",
+                "AddressCountry", "UK"
             )
         );
 
         assertAddressIsTransformed(
-            (Map)transformedCaseData.get("applicantAddress"),
+            (Map) transformedCaseData.get("applicantAddress"),
             ImmutableMap.of(
                 "AddressLine1", "Road",
                 "AddressTown", "Manchester",
@@ -173,7 +194,7 @@ public class FormAToCaseTransformerTest {
         );
 
         assertAddressIsTransformed(
-            (Map)transformedCaseData.get("respondentAddress"),
+            (Map) transformedCaseData.get("respondentAddress"),
             ImmutableMap.of(
                 "AddressLine1", "Avenue",
                 "AddressTown", "Bristol",
@@ -184,7 +205,7 @@ public class FormAToCaseTransformerTest {
         );
 
         assertAddressIsTransformed(
-            (Map)transformedCaseData.get("rSolicitorAddress"),
+            (Map) transformedCaseData.get("rSolicitorAddress"),
             ImmutableMap.of(
                 "AddressLine1", "Drive",
                 "AddressTown", "Leeds",
@@ -292,4 +313,5 @@ public class FormAToCaseTransformerTest {
         sourceSuffixToTargetMap
             .forEach((key, value) -> assertThat(address.get(value), is(getValueForSuffix.apply(sourceFieldAndValueMap, key))));
     }
+
 }
