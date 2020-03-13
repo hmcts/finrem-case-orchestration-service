@@ -8,12 +8,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FormAToCaseTransformer;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.function.BiFunction;
 
 import static java.util.Arrays.asList;
@@ -21,7 +18,6 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
@@ -40,7 +36,7 @@ public class FormAToCaseTransformerTest {
         ExceptionRecord exceptionRecord = createExceptionRecord(asList(
             new OcrDataField(OcrFieldName.DIVORCE_CASE_NUMBER, "1234567890"),
             new OcrDataField(OcrFieldName.HWF_NUMBER, "123456"),
-            new OcrDataField(APPLICANT_FULL_NAME, "Peter Griffin"),
+            new OcrDataField(OcrFieldName.APPLICANT_FULL_NAME, "Peter Griffin"),
             new OcrDataField(OcrFieldName.RESPONDENT_FULL_NAME, "Louis Griffin"),
             new OcrDataField(OcrFieldName.PROVISION_MADE_FOR, "in connection with matrimonial or civil partnership proceedings"),
             new OcrDataField(OcrFieldName.NATURE_OF_APPLICATION, "Periodical Payment Order, Pension Attachment Order"),
