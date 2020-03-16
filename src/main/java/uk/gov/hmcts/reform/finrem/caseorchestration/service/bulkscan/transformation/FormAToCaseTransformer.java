@@ -19,6 +19,7 @@ import static java.util.Arrays.asList;
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.applyMappings;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.transformFormDateIntoCcdDate;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.natureOfApplicationChecklistToCcdFieldNames;
@@ -78,7 +79,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             .map(OcrDataField::getValue)
             .findFirst()
             .ifPresent(ocrValue -> {
-                String ccdValue = ocrValue.trim().isEmpty() ? "No" : "Yes";
+                String ccdValue = ocrValue.trim().isEmpty() ? NO_VALUE : YES_VALUE;
                 formSpecificMap.put(ccdFieldName, ccdValue);
             });
     }

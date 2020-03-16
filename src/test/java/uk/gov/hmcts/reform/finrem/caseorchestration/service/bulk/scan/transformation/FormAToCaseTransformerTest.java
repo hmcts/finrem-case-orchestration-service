@@ -23,6 +23,8 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.collection.IsMapWithSize.aMapWithSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
 
 public class FormAToCaseTransformerTest {
@@ -279,14 +281,14 @@ public class FormAToCaseTransformerTest {
     public void shouldTransformEmptyAuthorisationSignedToNo() {
         assertOnSingleFieldTransformationResult(
             OcrFieldName.AUTHORISATION_SIGNED, "",
-            "authorisationSigned", "No");
+            "authorisationSigned", NO_VALUE);
     }
 
     @Test
     public void shouldTransformAnyAuthorisationSignedToYes() {
         assertOnSingleFieldTransformationResult(
             OcrFieldName.AUTHORISATION_SIGNED, "Any non-empty value should become yes",
-            "authorisationSigned", "Yes");
+            "authorisationSigned", YES_VALUE);
     }
 
     private void assertOnSingleFieldTransformationResult(String ocrFieldName, String ocrFieldValue, String ccdFieldName, String ccdFieldValue) {

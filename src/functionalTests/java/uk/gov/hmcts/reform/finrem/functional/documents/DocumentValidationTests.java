@@ -68,9 +68,9 @@ public class DocumentValidationTests extends IntegrationTestBase {
         callbackRequest.setCaseDetails(caseDetails);
         // call fileupload endpoint and assert
         Response response = utils.getResponseData(responseToOrderFileCheckUrl, callbackRequest);
-        int statusCode = response.getStatusCode();
+        HttpStatus responseHttpStatus = HttpStatus.valueOf(response.getStatusCode());
 
-        assertEquals(HttpStatus.OK.value(), statusCode);
+        assertEquals(HttpStatus.OK, responseHttpStatus);
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -80,9 +80,9 @@ public class DocumentValidationTests extends IntegrationTestBase {
         setPensionCollectionData();
         // call fileupload endpoint and assert
         Response response = utils.getResponseData(pensionDocumentFileCheckUrl, callbackRequest);
-        int statusCode = response.getStatusCode();
+        HttpStatus responseHttpStatus = HttpStatus.valueOf(response.getStatusCode());
 
-        assertEquals(HttpStatus.OK.value(), statusCode);
+        assertEquals(HttpStatus.OK, responseHttpStatus);
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -92,9 +92,9 @@ public class DocumentValidationTests extends IntegrationTestBase {
         setResponseToOrderDocument();
         // call fileupload check endpoint
         Response response = utils.getResponseData(consentOrderFileCheckUrl, callbackRequest);
-        int statusCode = response.getStatusCode();
+        HttpStatus responseHttpStatus = HttpStatus.valueOf(response.getStatusCode());
 
-        assertEquals(HttpStatus.OK.value(), statusCode);
+        assertEquals(HttpStatus.OK, responseHttpStatus);
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -104,9 +104,9 @@ public class DocumentValidationTests extends IntegrationTestBase {
         setAmendConsentOrderCollectionData();
         // call fileupload endpoint and assert
         Response response = utils.getResponseData(amendConsentOrderCollectionCheckUrl, callbackRequest);
-        int statusCode = response.getStatusCode();
+        HttpStatus responseHttpStatus = HttpStatus.valueOf(response.getStatusCode());
 
-        assertEquals(HttpStatus.OK.value(), statusCode);
+        assertEquals(HttpStatus.OK, responseHttpStatus);
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -124,8 +124,8 @@ public class DocumentValidationTests extends IntegrationTestBase {
                 .body(utils.getJsonFromFile(jsonFileName, journeyType))
                 .when().post(url).andReturn();
 
-        int statusCode = jsonResponse.getStatusCode();
-        assertEquals(HttpStatus.OK.value(), statusCode);
+        HttpStatus responseHttpStatus = HttpStatus.valueOf(jsonResponse.getStatusCode());
+        assertEquals(HttpStatus.OK, responseHttpStatus);
 
         return jsonResponse.jsonPath();
     }
