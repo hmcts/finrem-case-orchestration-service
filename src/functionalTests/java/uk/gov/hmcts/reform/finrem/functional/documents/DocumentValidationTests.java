@@ -70,7 +70,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
         Response response = utils.getResponseData(responseToOrderFileCheckUrl, callbackRequest);
         int statusCode = response.getStatusCode();
 
-        assertEquals(HttpStatus.OK, statusCode);
+        assertEquals(HttpStatus.OK.value(), statusCode);
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -82,7 +82,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
         Response response = utils.getResponseData(pensionDocumentFileCheckUrl, callbackRequest);
         int statusCode = response.getStatusCode();
 
-        assertEquals(HttpStatus.OK, statusCode);
+        assertEquals(HttpStatus.OK.value(), statusCode);
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -94,7 +94,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
         Response response = utils.getResponseData(consentOrderFileCheckUrl, callbackRequest);
         int statusCode = response.getStatusCode();
 
-        assertEquals(HttpStatus.OK, statusCode);
+        assertEquals(HttpStatus.OK.value(), statusCode);
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -106,7 +106,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
         Response response = utils.getResponseData(amendConsentOrderCollectionCheckUrl, callbackRequest);
         int statusCode = response.getStatusCode();
 
-        assertEquals(HttpStatus.OK, statusCode);
+        assertEquals(HttpStatus.OK.value(), statusCode);
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -125,7 +125,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
                 .when().post(url).andReturn();
 
         int statusCode = jsonResponse.getStatusCode();
-        assertEquals(HttpStatus.OK, statusCode);
+        assertEquals(HttpStatus.OK.value(), statusCode);
 
         return jsonResponse.jsonPath();
     }
