@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrder;
@@ -67,9 +68,9 @@ public class DocumentValidationTests extends IntegrationTestBase {
         callbackRequest.setCaseDetails(caseDetails);
         // call fileupload endpoint and assert
         Response response = utils.getResponseData(responseToOrderFileCheckUrl, callbackRequest);
-        int statusCode = response.getStatusCode();
+        HttpStatus responseHttpStatus = HttpStatus.valueOf(response.getStatusCode());
 
-        assertEquals(statusCode, 200);
+        assertEquals(HttpStatus.OK, responseHttpStatus);
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -79,9 +80,9 @@ public class DocumentValidationTests extends IntegrationTestBase {
         setPensionCollectionData();
         // call fileupload endpoint and assert
         Response response = utils.getResponseData(pensionDocumentFileCheckUrl, callbackRequest);
-        int statusCode = response.getStatusCode();
+        HttpStatus responseHttpStatus = HttpStatus.valueOf(response.getStatusCode());
 
-        assertEquals(statusCode, 200);
+        assertEquals(HttpStatus.OK, responseHttpStatus);
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -91,9 +92,9 @@ public class DocumentValidationTests extends IntegrationTestBase {
         setResponseToOrderDocument();
         // call fileupload check endpoint
         Response response = utils.getResponseData(consentOrderFileCheckUrl, callbackRequest);
-        int statusCode = response.getStatusCode();
+        HttpStatus responseHttpStatus = HttpStatus.valueOf(response.getStatusCode());
 
-        assertEquals(statusCode, 200);
+        assertEquals(HttpStatus.OK, responseHttpStatus);
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -103,9 +104,9 @@ public class DocumentValidationTests extends IntegrationTestBase {
         setAmendConsentOrderCollectionData();
         // call fileupload endpoint and assert
         Response response = utils.getResponseData(amendConsentOrderCollectionCheckUrl, callbackRequest);
-        int statusCode = response.getStatusCode();
+        HttpStatus responseHttpStatus = HttpStatus.valueOf(response.getStatusCode());
 
-        assertEquals(statusCode, 200);
+        assertEquals(HttpStatus.OK, responseHttpStatus);
         assertNull(response.jsonPath().get("errors"));
     }
 
@@ -123,8 +124,8 @@ public class DocumentValidationTests extends IntegrationTestBase {
                 .body(utils.getJsonFromFile(jsonFileName, journeyType))
                 .when().post(url).andReturn();
 
-        int statusCode = jsonResponse.getStatusCode();
-        assertEquals(statusCode, 200);
+        HttpStatus responseHttpStatus = HttpStatus.valueOf(jsonResponse.getStatusCode());
+        assertEquals(HttpStatus.OK, responseHttpStatus);
 
         return jsonResponse.jsonPath();
     }

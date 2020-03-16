@@ -43,6 +43,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLYING_FOR_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SIGNED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SIGNED_BY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SOLICITOR_POSITION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_CASE_NUMBER;
@@ -81,7 +88,11 @@ public class FormAValidatorTest {
             new OcrDataField(APPLICANT_INTENDS_TO, "ApplyToCourtFor"),
             new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "Yes"),
             new OcrDataField(DIVORCE_STAGE_REACHED, "Decree Nisi"),
-            new OcrDataField(APPLICANT_REPRESENTED, "I am not represented by a solicitor in these proceedings")
+            new OcrDataField(APPLICANT_REPRESENTED, "I am not represented by a solicitor in these proceedings"),
+            new OcrDataField(AUTHORISATION_NAME, "Saul B. Kol"),
+            new OcrDataField(AUTHORISATION_SIGNED, "Yes"),
+            new OcrDataField(AUTHORISATION_SIGNED_BY, "Applicant's solicitor"),
+            new OcrDataField(AUTHORISATION_DATE, "12/03/2020")
         );
         
         optionalFieldsWithValues = asList(
@@ -122,7 +133,10 @@ public class FormAValidatorTest {
             new OcrDataField("OrderForChildrenNoAgreement",
                 "in addition to child support maintenance already paid under a Child Support Agency assessment"),
             new OcrDataField("ChildSupportAgencyCalculationMade", "Yes"),
-            new OcrDataField("ChildSupportAgencyCalculationReason", "Various reasons why I'm making this application")
+            new OcrDataField("ChildSupportAgencyCalculationReason", "Various reasons why I'm making this application"),
+            new OcrDataField(AUTHORISATION_FIRM, "Better Divorce Ltd"),
+            new OcrDataField(AUTHORISATION_SOLICITOR_ADDRESS, "1 Single Lane, Liverpool, LE5 AV2"),
+            new OcrDataField(AUTHORISATION_SOLICITOR_POSITION, "I'm the CEO")
         );
     }
 
@@ -189,7 +203,9 @@ public class FormAValidatorTest {
             new OcrDataField(APPLICANT_EMAIL, "peter@com"),
             new OcrDataField(ORDER_FOR_CHILDREN, "Not a valid order for children"),
             new OcrDataField(ORDER_FOR_CHILDREN_NO_AGREEMENT, "Not a valid reason for no agreement"),
-            new OcrDataField(CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "Decision not yet made")
+            new OcrDataField(CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "Decision not yet made"),
+            new OcrDataField(AUTHORISATION_SIGNED_BY, "My cat"),
+            new OcrDataField(AUTHORISATION_DATE, "Date in the moonlight")
         ));
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
@@ -230,7 +246,12 @@ public class FormAValidatorTest {
                 "to meet expenses incurred by a child in being educated or training for work",
                 "when either the child or the person with care of the child "
                     + "or the absent parent of the child is not habitually resident in the United Kingdom"),
-            CHILD_SUPPORT_AGENCY_CALCULATION_MADE + " must be \"Yes\", \"No\" or left blank"
+            CHILD_SUPPORT_AGENCY_CALCULATION_MADE + " must be \"Yes\", \"No\" or left blank",
+            mustBeOneOf(AUTHORISATION_SIGNED_BY,
+                "Applicant",
+                "Litigation Friend",
+                "Applicant's solicitor"),
+            AUTHORISATION_DATE + " must be a valid date"
         ));
     }
 

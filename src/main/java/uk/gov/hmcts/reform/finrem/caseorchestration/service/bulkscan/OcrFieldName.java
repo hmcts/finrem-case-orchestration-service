@@ -47,4 +47,11 @@ public class OcrFieldName {
     public static final String ORDER_FOR_CHILDREN_NO_AGREEMENT = "OrderForChildrenNoAgreement";
     public static final String CHILD_SUPPORT_AGENCY_CALCULATION_MADE = "ChildSupportAgencyCalculationMade";
     public static final String CHILD_SUPPORT_AGENCY_CALCULATION_REASON = "ChildSupportAgencyCalculationReason";
+    public static final String AUTHORISATION_NAME = "AuthorisationName";
+    public static final String AUTHORISATION_FIRM = "AuthorisationFirm";
+    public static final String AUTHORISATION_SOLICITOR_ADDRESS = "AuthorisationSolicitorAddress";
+    public static final String AUTHORISATION_SIGNED = "AuthorisationSigned";
+    public static final String AUTHORISATION_SIGNED_BY = "AuthorisationSignedBy";
+    public static final String AUTHORISATION_DATE = "AuthorisationDate";
+    public static final String AUTHORISATION_SOLICITOR_POSITION = "AuthorisationSolicitorPosition";
 }
