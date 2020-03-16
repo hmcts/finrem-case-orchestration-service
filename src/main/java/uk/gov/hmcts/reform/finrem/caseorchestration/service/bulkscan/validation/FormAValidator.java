@@ -20,6 +20,7 @@ import static uk.gov.hmcts.reform.bsp.common.model.validation.BulkScanValidation
 import static uk.gov.hmcts.reform.bsp.common.service.validation.PostcodeValidator.validatePostcode;
 import static uk.gov.hmcts.reform.bsp.common.service.validation.RegExpValidator.validateField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
+import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.validateFormDate;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
@@ -30,6 +31,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLYING_FOR_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SIGNED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SIGNED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_CASE_NUMBER;
@@ -61,9 +66,13 @@ public class FormAValidator extends BulkScanFormValidator {
         APPLICANT_INTENDS_TO,
         APPLYING_FOR_CONSENT_ORDER,
         DIVORCE_STAGE_REACHED,
-        APPLICANT_REPRESENTED
+        APPLICANT_REPRESENTED,
+        AUTHORISATION_NAME,
+        AUTHORISATION_SIGNED,
+        AUTHORISATION_SIGNED_BY,
+        AUTHORISATION_DATE
     );
-
+    
     public List<String> getMandatoryFields() {
         return MANDATORY_FIELDS;
     }
@@ -108,6 +117,11 @@ public class FormAValidator extends BulkScanFormValidator {
             "No",
             EMPTY_STRING
         ));
+        ALLOWED_VALUES_PER_FIELD.put(AUTHORISATION_SIGNED_BY, asList(
+            "Applicant",
+            "Litigation Friend",
+            "Applicant's solicitor"
+        ));
     }
 
     @Override
@@ -138,6 +152,8 @@ public class FormAValidator extends BulkScanFormValidator {
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
+        validateFormDate(fieldsMap, AUTHORISATION_DATE).ifPresent(errorMessages::add);
+        
         return errorMessages;
     }
 

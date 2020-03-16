@@ -2,11 +2,6 @@ buildscript {
     ext {
         springBootVersion = '2.2.4.RELEASE'
     }
-    repositories {
-        mavenCentral()
-        maven { url "https://repo1.maven.org/maven2/" }
-        maven { url "https://plugins.gradle.org/m2/" }
-    }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath("net.serenity-bdd:serenity-gradle-plugin:2.0.42")
@@ -117,7 +112,7 @@ configurations {
 }
 
 def versions = [
-        bspCommonLib            : '0.0.22',
+        bspCommonLib            : '0.0.23',
         ccdClient               : '4.6.4',
         commonsBeanUtils        : '1.9.4',
         commonsIo               : '2.5',
