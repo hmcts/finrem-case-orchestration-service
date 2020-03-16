@@ -35,7 +35,7 @@ import java.util.Map;
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
 @Slf4j
@@ -112,7 +112,7 @@ public class BulkScanController {
             SuccessfulTransformationResponse callbackResponse = SuccessfulTransformationResponse.builder()
                 .caseCreationDetails(
                     new CaseCreationDetails(
-                        CASE_TYPE_ID_CONTESTED,
+                        CASE_TYPE_ID_CONSENTED,
                         BulkScanEvents.CREATE.getEventName(),
                         transformedCaseData))
                 .build();
