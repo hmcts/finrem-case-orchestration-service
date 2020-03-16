@@ -27,9 +27,10 @@ import uk.gov.hmcts.reform.bsp.common.service.AuthService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.event.bulkscan.BulkScanEvents;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 
+import javax.validation.Valid;
+
 import java.util.List;
 import java.util.Map;
-import javax.validation.Valid;
 
 import static java.lang.String.format;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
