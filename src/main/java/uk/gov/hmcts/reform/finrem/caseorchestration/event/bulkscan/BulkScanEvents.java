@@ -2,7 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.event.bulkscan;
 
 public enum BulkScanEvents {
 
-    CREATE("createCase");
+    CREATE("FR_newPaperCase");
 
     private String value;
 
