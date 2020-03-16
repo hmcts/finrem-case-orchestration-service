@@ -108,7 +108,7 @@ public class BulkScanControllerTest {
         assertThat(transformationResponse.getWarnings(), is(emptyList()));
         CaseCreationDetails caseCreationDetails = transformationResponse.getCaseCreationDetails();
         assertThat(caseCreationDetails.getCaseTypeId(), is(CASE_TYPE_ID_CONTESTED));
-        assertThat(caseCreationDetails.getEventId(), is("createCase"));
+        assertThat(caseCreationDetails.getEventId(), is("FR_newPaperCase"));
         assertThat(caseCreationDetails.getCaseData(), hasEntry(TEST_KEY, TEST_VALUE));
 
         verify(authService).assertIsServiceAllowedToUpdate(TEST_SERVICE_TOKEN);
