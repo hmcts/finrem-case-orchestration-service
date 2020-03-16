@@ -138,6 +138,8 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
     @Override
     protected Map<String, Object> runPostMappingModification(Map<String, Object> transformedCaseData) {
 
+        transformedCaseData.put("paperApplication", YES_VALUE);
+
         // If OrderForChildren is populated then set orderForChildrenQuestion1 to Yes
         if (StringUtils.isNotEmpty((String) transformedCaseData.get("natureOfApplication5b"))) {
 

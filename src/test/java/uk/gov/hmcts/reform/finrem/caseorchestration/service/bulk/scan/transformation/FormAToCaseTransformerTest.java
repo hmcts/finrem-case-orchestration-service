@@ -23,11 +23,14 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.collection.IsMapWithSize.aMapWithSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
 
 public class FormAToCaseTransformerTest {
+
+    public static final String PAPER_APPLICATION = "paperApplication";
 
     private final FormAToCaseTransformer formAToCaseTransformer = new FormAToCaseTransformer();
 
@@ -68,6 +71,7 @@ public class FormAToCaseTransformerTest {
 
         assertThat(transformedCaseData, allOf(
             hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry(PAPER_APPLICATION, YES_VALUE),
             hasEntry(CCDConfigConstant.DIVORCE_CASE_NUMBER, "1234567890"),
             hasEntry("HWFNumber", "123456"),
             hasEntry("applicantFMName", "Peter"),
@@ -112,8 +116,9 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-            aMapWithSize(1),
-            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID)
+            aMapWithSize(2),
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry(PAPER_APPLICATION, YES_VALUE)
         ));
     }
 
@@ -127,8 +132,9 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-            aMapWithSize(1),
-            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID)
+            aMapWithSize(2),
+            hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry(PAPER_APPLICATION, YES_VALUE)
         ));
     }
 
@@ -163,7 +169,7 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-            aMapWithSize(5),    // 5 = BULK_SCAN_CASE_REFERENCE + 4 address fields
+            aMapWithSize(6),    // 5 = BULK_SCAN_CASE_REFERENCE, paperApplication + 4 address fields
             hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID)
         ));
 
@@ -222,8 +228,9 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-            aMapWithSize(3),
+            aMapWithSize(4),
             hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry(PAPER_APPLICATION, YES_VALUE),
             hasEntry("natureOfApplication5b", "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children"),
             hasEntry("orderForChildrenQuestion1", "Yes")
         ));
@@ -238,8 +245,9 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-            aMapWithSize(2),
+            aMapWithSize(3),
             hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry(PAPER_APPLICATION, YES_VALUE),
             hasEntry("natureOfApplication5b", ""),
             not(hasKey("orderForChildrenQuestion1"))
         ));
@@ -254,8 +262,9 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-            aMapWithSize(2),
+            aMapWithSize(3),
             hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+            hasEntry(PAPER_APPLICATION, YES_VALUE),
             hasEntry("natureOfApplication5b", ""),
             not(hasKey("orderForChildrenQuestion1"))
         ));
@@ -309,5 +318,4 @@ public class FormAToCaseTransformerTest {
         sourceSuffixToTargetMap
             .forEach((key, value) -> assertThat(address.get(value), is(getValueForSuffix.apply(sourceFieldAndValueMap, key))));
     }
-
 }
