@@ -12,7 +12,6 @@ public class OrchestrationConstants {
 
     // Bulk Scan & Printing
     public static final String BULK_SCAN_CASE_REFERENCE = "bulkScanCaseReference";
-    public static final String CASE_TYPE_ID_FR = "FINANCIAL_REMEDY";
     public static final String CASE_TYPE_ID_CONSENTED = "FinancialRemedyMVP2";
     public static final String CASE_TYPE_ID_CONTESTED = "FinancialRemedyContested";
 

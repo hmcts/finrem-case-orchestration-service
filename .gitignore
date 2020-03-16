@@ -21,7 +21,6 @@ functional-output/
 *.iml
 *.ipr
 /out/
-.editorconfig
 
 ### NetBeans ###
 /nbproject/private/
