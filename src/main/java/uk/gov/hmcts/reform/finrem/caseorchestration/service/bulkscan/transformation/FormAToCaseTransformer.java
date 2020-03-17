@@ -58,9 +58,9 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         AddressMapper.applyMappings("respondentSolicitor", "rSolicitorAddress", ocrDataFields, transformedCaseData);
 
         mapAuthorisationSignedToYesOrNo(OcrFieldName.AUTHORISATION_SIGNED, "authorisationSigned", ocrDataFields, transformedCaseData);
-        
+
         mapFormDateToCcdDate(OcrFieldName.AUTHORISATION_DATE, "authorisation3", ocrDataFields, transformedCaseData);
-        
+
         return transformedCaseData;
     }
 
@@ -71,7 +71,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             formSpecificMap.put(ccdFieldName, ccdAuthorisationDate);
         });
     }
-    
+
     private void mapAuthorisationSignedToYesOrNo(String ocrFieldName, String ccdFieldName,
                                                  List<OcrDataField> ocrDataFields, Map<String, Object> formSpecificMap) {
         ocrDataFields.stream()
@@ -169,6 +169,8 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
     @Override
     protected Map<String, Object> runPostMappingModification(Map<String, Object> transformedCaseData) {
+
+        transformedCaseData.put("paperApplication", YES_VALUE);
 
         // If OrderForChildren is populated then set orderForChildrenQuestion1 to Yes
         if (StringUtils.isNotEmpty((String) transformedCaseData.get("natureOfApplication5b"))) {
