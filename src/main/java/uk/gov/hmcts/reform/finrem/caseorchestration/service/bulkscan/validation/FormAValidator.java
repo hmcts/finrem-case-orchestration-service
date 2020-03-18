@@ -54,26 +54,27 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.help
 public class FormAValidator extends BulkScanFormValidator {
 
     private static final String HWF_NUMBER_6_DIGITS_REGEX = "\\d{6}";
+    private static final String DIVORCE_CASE_NUMBER_REGEX = "^([A-Z|a-z][A-Z|a-z])\\d{2}[D|d]\\d{5}$";
 
     private static final String EMPTY_STRING = "";
 
     private static final List<String> MANDATORY_FIELDS = asList(
-        DIVORCE_CASE_NUMBER,
-        APPLICANT_FULL_NAME,
-        RESPONDENT_FULL_NAME,
-        PROVISION_MADE_FOR,
-        NATURE_OF_APPLICATION,
-        APPLICANT_INTENDS_TO,
-        APPLYING_FOR_CONSENT_ORDER,
-        DIVORCE_STAGE_REACHED,
-        APPLICANT_REPRESENTED,
-        AUTHORISATION_NAME,
-        AUTHORISATION_SIGNED,
-        AUTHORISATION_SIGNED_BY,
-        AUTHORISATION_DATE
+            DIVORCE_CASE_NUMBER,
+            APPLICANT_FULL_NAME,
+            RESPONDENT_FULL_NAME,
+            PROVISION_MADE_FOR,
+            NATURE_OF_APPLICATION,
+            APPLICANT_INTENDS_TO,
+            APPLYING_FOR_CONSENT_ORDER,
+            DIVORCE_STAGE_REACHED,
+            APPLICANT_REPRESENTED,
+            AUTHORISATION_NAME,
+            AUTHORISATION_SIGNED,
+            AUTHORISATION_SIGNED_BY,
+            AUTHORISATION_DATE
     );
-    
-    public List<String> getMandatoryFields() {
+
+    protected List<String> getMandatoryFields() {
         return MANDATORY_FIELDS;
     }
 
@@ -81,46 +82,46 @@ public class FormAValidator extends BulkScanFormValidator {
 
     static {
         ALLOWED_VALUES_PER_FIELD.put(PROVISION_MADE_FOR, asList(
-            "in connection with matrimonial or civil partnership proceedings",
-            "under paragraphs 1 or 2 of Schedule 1 to the Children Act 1989"
+                "in connection with matrimonial or civil partnership proceedings",
+                "under paragraphs 1 or 2 of Schedule 1 to the Children Act 1989"
         ));
         ALLOWED_VALUES_PER_FIELD.put(APPLICANT_INTENDS_TO, asList(
-            "ApplyToCourtFor",
-            "ProceedWithApplication",
-            "ApplyToVary",
-            "ApplyToDischargePeriodicalPaymentOrder"
+                "ApplyToCourtFor",
+                "ProceedWithApplication",
+                "ApplyToVary",
+                "ApplyToDischargePeriodicalPaymentOrder"
         ));
         ALLOWED_VALUES_PER_FIELD.put(APPLYING_FOR_CONSENT_ORDER, asList("Yes"));
         ALLOWED_VALUES_PER_FIELD.put(DIVORCE_STAGE_REACHED, asList("Decree Nisi", "Decree Absolute"));
         ALLOWED_VALUES_PER_FIELD.put(APPLICANT_REPRESENTED, asList(
-            "I am not represented by a solicitor in these proceedings",
-            "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
-            "I am represented by a solicitor in these proceedings, who has signed Section 5"
-                + " and all documents for my attention should be sent to my solicitor whose details are as follows")
+                "I am not represented by a solicitor in these proceedings",
+                "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
+                "I am represented by a solicitor in these proceedings, who has signed Section 5"
+                        + " and all documents for my attention should be sent to my solicitor whose details are as follows")
         );
 
         ALLOWED_VALUES_PER_FIELD.put(ORDER_FOR_CHILDREN, asList(
-            "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children",
-            "there is a written agreement made on or after 5 April 1993 about maintenance for the benefit of children",
-            "there is no agreement, but the applicant is applying for payments"
+                "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children",
+                "there is a written agreement made on or after 5 April 1993 about maintenance for the benefit of children",
+                "there is no agreement, but the applicant is applying for payments"
         ));
         ALLOWED_VALUES_PER_FIELD.put(ORDER_FOR_CHILDREN_NO_AGREEMENT, asList(
-            "for a stepchild or stepchildren",
-            "in addition to child support maintenance already paid under a Child Support Agency assessment",
-            "to meet expenses arising from a child’s disability",
-            "to meet expenses incurred by a child in being educated or training for work",
-            "when either the child or the person with care of the child or"
-                + " the absent parent of the child is not habitually resident in the United Kingdom"
+                "for a stepchild or stepchildren",
+                "in addition to child support maintenance already paid under a Child Support Agency assessment",
+                "to meet expenses arising from a child’s disability",
+                "to meet expenses incurred by a child in being educated or training for work",
+                "when either the child or the person with care of the child or"
+                        + " the absent parent of the child is not habitually resident in the United Kingdom"
         ));
         ALLOWED_VALUES_PER_FIELD.put(CHILD_SUPPORT_AGENCY_CALCULATION_MADE, asList(
-            "Yes",
-            "No",
-            EMPTY_STRING
+                "Yes",
+                "No",
+                EMPTY_STRING
         ));
         ALLOWED_VALUES_PER_FIELD.put(AUTHORISATION_SIGNED_BY, asList(
-            "Applicant",
-            "Litigation Friend",
-            "Applicant's solicitor"
+                "Applicant",
+                "Litigation Friend",
+                "Applicant's solicitor"
         ));
     }
 
@@ -133,27 +134,28 @@ public class FormAValidator extends BulkScanFormValidator {
     protected List<String> runPostProcessingValidation(Map<String, String> fieldsMap) {
 
         List<String> errorMessages = Stream.of(
-            validateHwfNumber(fieldsMap, HWF_NUMBER),
-            validateHasAtLeastTwoNames(fieldsMap, APPLICANT_FULL_NAME),
-            validateHasAtLeastTwoNames(fieldsMap, RESPONDENT_FULL_NAME),
-            validateNonMandatoryCommaSeparatedField(fieldsMap,
-                NATURE_OF_APPLICATION, natureOfApplicationChecklistToCcdFieldNames),
-            validateNonMandatoryCommaSeparatedField(fieldsMap,
-                DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames),
-            validateField(fieldsMap, APPLICANT_SOLICITOR_PHONE, CCD_PHONE_NUMBER_REGEX),
-            validateField(fieldsMap, APPLICANT_PHONE, CCD_PHONE_NUMBER_REGEX),
-            validateField(fieldsMap, APPLICANT_SOLICITOR_EMAIL, CCD_EMAIL_REGEX),
-            validateField(fieldsMap, APPLICANT_EMAIL, CCD_EMAIL_REGEX),
-            validatePostcode(fieldsMap, APPLICANT_SOLICITOR_ADDRESS_POSTCODE),
-            validatePostcode(fieldsMap, APPLICANT_ADDRESS_POSTCODE),
-            validatePostcode(fieldsMap, RESPONDENT_ADDRESS_POSTCODE),
-            validatePostcode(fieldsMap, RESPONDENT_SOLICITOR_ADDRESS_POSTCODE)
+                validateHwfNumber(fieldsMap, HWF_NUMBER),
+                validateHasAtLeastTwoNames(fieldsMap, APPLICANT_FULL_NAME),
+                validateHasAtLeastTwoNames(fieldsMap, RESPONDENT_FULL_NAME),
+                validateNonMandatoryCommaSeparatedField(fieldsMap,
+                        NATURE_OF_APPLICATION, natureOfApplicationChecklistToCcdFieldNames),
+                validateNonMandatoryCommaSeparatedField(fieldsMap,
+                        DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames),
+                validateField(fieldsMap, APPLICANT_SOLICITOR_PHONE, CCD_PHONE_NUMBER_REGEX),
+                validateField(fieldsMap, APPLICANT_PHONE, CCD_PHONE_NUMBER_REGEX),
+                validateField(fieldsMap, APPLICANT_SOLICITOR_EMAIL, CCD_EMAIL_REGEX),
+                validateField(fieldsMap, APPLICANT_EMAIL, CCD_EMAIL_REGEX),
+                validatePostcode(fieldsMap, APPLICANT_SOLICITOR_ADDRESS_POSTCODE),
+                validatePostcode(fieldsMap, APPLICANT_ADDRESS_POSTCODE),
+                validatePostcode(fieldsMap, RESPONDENT_ADDRESS_POSTCODE),
+                validatePostcode(fieldsMap, RESPONDENT_SOLICITOR_ADDRESS_POSTCODE),
+                validateField(fieldsMap, DIVORCE_CASE_NUMBER, DIVORCE_CASE_NUMBER_REGEX)
         )
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList());
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
 
         validateFormDate(fieldsMap, AUTHORISATION_DATE).ifPresent(errorMessages::add);
-        
+
         return errorMessages;
     }
 
@@ -168,14 +170,14 @@ public class FormAValidator extends BulkScanFormValidator {
         }
 
         boolean allOcrFieldsCanBeMapped = getCommaSeparatedValuesFromOcrDataField(commaSeparatedFieldValue)
-            .stream()
-            .map(validOcrFieldNamesToCcdFieldNames::containsKey)
-            .reduce(Boolean::logicalAnd)
-            .orElse(false);
+                .stream()
+                .map(validOcrFieldNamesToCcdFieldNames::containsKey)
+                .reduce(Boolean::logicalAnd)
+                .orElse(false);
 
         if (!allOcrFieldsCanBeMapped) {
             validationWarningMessages.add(
-                String.format("%s contains a value that is not accepted", commaSeparatedFieldKey)
+                    String.format("%s contains a value that is not accepted", commaSeparatedFieldKey)
             );
         }
 
@@ -185,16 +187,16 @@ public class FormAValidator extends BulkScanFormValidator {
     private static List<String> validateHasAtLeastTwoNames(Map<String, String> fieldsMap, String fieldName) {
         String fieldValue = fieldsMap.get(fieldName);
         return fieldValue != null && Arrays.stream(fieldValue.split(" "))
-            .filter(StringUtils::isNotBlank)
-            .count() < 2
-            ? asList(String.format("%s must contain a firstname and a lastname", fieldName))
-            : emptyList();
+                .filter(StringUtils::isNotBlank)
+                .count() < 2
+                ? asList(String.format("%s must contain a firstname and a lastname", fieldName))
+                : emptyList();
     }
 
     private static List<String> validateHwfNumber(Map<String, String> fieldsMap, String fieldName) {
         String hwfNumber = fieldsMap.get(fieldName);
         return hwfNumber != null && !hwfNumber.matches(HWF_NUMBER_6_DIGITS_REGEX)
-            ? asList("HWFNumber is usually 6 digits")
-            : emptyList();
+                ? asList("HWFNumber is usually 6 digits")
+                : emptyList();
     }
 }
