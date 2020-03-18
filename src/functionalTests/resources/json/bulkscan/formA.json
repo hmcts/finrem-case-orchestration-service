@@ -4,7 +4,7 @@
   "po_box": "PO 17",
   "form_type": "formA",
   "ocr_data_fields": [
-    { "name": "divorceCaseNumber", "value": "1234567890" },
+    { "name": "divorceCaseNumber", "value": "DD12D12345" },
     { "name": "HWFNumber", "value": "123456" },
     { "name": "ApplicantFullName", "value": "Peter Griffin" },
     { "name": "RespondentFullName", "value": "Louis Griffin" },
