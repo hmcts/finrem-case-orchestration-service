@@ -53,9 +53,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SOLICITOR_POSITION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DATE_OF_BIRTH_CHILD_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DATE_OF_BIRTH_CHILD_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_STAGE_REACHED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.GENDER_CHILD_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.GENDER_CHILD_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.HWF_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.NATURE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ORDER_FOR_CHILDREN;
@@ -207,11 +211,16 @@ public class FormAValidatorTest {
                 new OcrDataField(ORDER_FOR_CHILDREN_NO_AGREEMENT, "Not a valid reason for no agreement"),
                 new OcrDataField(CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "Decision not yet made"),
                 new OcrDataField(AUTHORISATION_SIGNED_BY, "My cat"),
-                new OcrDataField(AUTHORISATION_DATE, "Date in the moonlight")
+                new OcrDataField(AUTHORISATION_DATE, "Date in the moonlight"),
+                new OcrDataField(DATE_OF_BIRTH_CHILD_1, "20 may 2010"),
+                new OcrDataField(DATE_OF_BIRTH_CHILD_2, "yesterday"),
+                new OcrDataField(GENDER_CHILD_1, "book"),
+                new OcrDataField(GENDER_CHILD_2, "pokemon")
         ));
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
         assertThat(validationResult.getErrors(), is(emptyList()));
+        assertThat(validationResult.getWarnings().size(), is(24));
         assertThat(validationResult.getWarnings(), hasItems(
                 mandatoryFieldIsMissing.apply(DIVORCE_CASE_NUMBER),
                 "HWFNumber is usually 6 digits",
@@ -253,7 +262,11 @@ public class FormAValidatorTest {
                         "Applicant",
                         "Litigation Friend",
                         "Applicant's solicitor"),
-                AUTHORISATION_DATE + " must be a valid date"
+                AUTHORISATION_DATE + " must be a valid date",
+                DATE_OF_BIRTH_CHILD_1 + " must be a valid date",
+                DATE_OF_BIRTH_CHILD_2 + " must be a valid date",
+                GENDER_CHILD_1 + " is not in a valid format",
+                GENDER_CHILD_1 + " is not in a valid format"
         ));
     }
 

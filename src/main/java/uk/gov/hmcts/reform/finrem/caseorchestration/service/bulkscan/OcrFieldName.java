@@ -54,4 +54,8 @@ public class OcrFieldName {
     public static final String AUTHORISATION_SIGNED_BY = "AuthorisationSignedBy";
     public static final String AUTHORISATION_DATE = "AuthorisationDate";
     public static final String AUTHORISATION_SOLICITOR_POSITION = "AuthorisationSolicitorPosition";
+    public static final String DATE_OF_BIRTH_CHILD_1 = "DateOfBirthChild1";
+    public static final String DATE_OF_BIRTH_CHILD_2 = "DateOfBirthChild2";
+    public static final String GENDER_CHILD_1 = "GenderChild1";
+    public static final String GENDER_CHILD_2 = "GenderChild2";
 }
