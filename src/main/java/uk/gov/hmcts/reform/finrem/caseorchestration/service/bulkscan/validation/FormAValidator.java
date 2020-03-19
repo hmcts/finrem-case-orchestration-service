@@ -60,7 +60,6 @@ public class FormAValidator extends BulkScanFormValidator {
 
     private static final String HWF_NUMBER_6_DIGITS_REGEX = "\\d{6}";
     private static final String DIVORCE_CASE_NUMBER_REGEX = "^([A-Z|a-z][A-Z|a-z])\\d{2}[D|d]\\d{5}$";
-    private static final String GENDER_REGEX = "^(male|female|notGiven)$";
 
     private static final List<String> MANDATORY_FIELDS = asList(
             DIVORCE_CASE_NUMBER,
@@ -127,6 +126,9 @@ public class FormAValidator extends BulkScanFormValidator {
                 "Litigation Friend",
                 "Applicant's solicitor"
         ));
+        final List<String> genderEnum = asList("male", "female", "notGiven");
+        ALLOWED_VALUES_PER_FIELD.put(GENDER_CHILD_1, genderEnum);
+        ALLOWED_VALUES_PER_FIELD.put(GENDER_CHILD_2, genderEnum);
     }
 
     @Override
@@ -155,9 +157,7 @@ public class FormAValidator extends BulkScanFormValidator {
                 validatePostcode(fieldsMap, APPLICANT_ADDRESS_POSTCODE),
                 validatePostcode(fieldsMap, RESPONDENT_ADDRESS_POSTCODE),
                 validatePostcode(fieldsMap, RESPONDENT_SOLICITOR_ADDRESS_POSTCODE),
-                validateField(fieldsMap, DIVORCE_CASE_NUMBER, DIVORCE_CASE_NUMBER_REGEX),
-                validateField(fieldsMap, GENDER_CHILD_1, GENDER_REGEX),
-                validateField(fieldsMap, GENDER_CHILD_2, GENDER_REGEX)
+                validateField(fieldsMap, DIVORCE_CASE_NUMBER, DIVORCE_CASE_NUMBER_REGEX)
         )
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
