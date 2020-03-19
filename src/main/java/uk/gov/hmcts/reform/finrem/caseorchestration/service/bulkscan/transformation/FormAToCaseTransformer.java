@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper;
@@ -60,6 +61,8 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         applyMappingsForAddress("applicant", ocrDataFields, transformedCaseData);
         applyMappingsForAddress("respondent", ocrDataFields, transformedCaseData);
         AddressMapper.applyMappings("respondentSolicitor", "rSolicitorAddress", ocrDataFields, transformedCaseData);
+
+        addMappingsToChildren(ocrDataFields, transformedCaseData);
 
         mapAuthorisationSignedToYesOrNo(OcrFieldName.AUTHORISATION_SIGNED, "authorisationSigned", ocrDataFields, transformedCaseData);
 
@@ -178,12 +181,57 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.AUTHORISATION_SOLICITOR_ADDRESS, "authorisationSolicitorAddress");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.AUTHORISATION_SIGNED_BY, "authorisationSignedBy");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.AUTHORISATION_SOLICITOR_POSITION, "authorisation2b");
+
         return exceptionRecordToCcdFieldsMap;
     }
 
     private void applyMappingsForAddress(
             String prefix, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
         applyMappings(prefix, prefix + "Address", ocrDataFields, modifiedMap);
+    }
+
+    private void addMappingsToChildren(List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
+
+        addMappingToChild(1, ocrDataFields, modifiedMap);
+        addMappingToChild(2, ocrDataFields, modifiedMap);
+    }
+
+    private void addMappingToChild(int index, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
+        Map<String, String> childInfo = new HashMap<>();
+        childInfo.put("NameOfChild" + index, "name");
+        childInfo.put("DateOfBirthChild" + index, "dateOfBirth");
+        childInfo.put("GenderChild" + index, "gender");
+        childInfo.put("RelationshipToApplicantChild" + index, "relationshipToApplicant");
+        childInfo.put("RelationshipToRespondentChild" + index, "relationshipToRespondent");
+        childInfo.put("CountryOfResidenceChild" + index, "countryOfResidence");
+
+        addMappingsTo(
+                "childInfo" + index,
+                ImmutableMap.copyOf(childInfo),
+                modifiedMap,
+                ocrDataFields
+        );
+    }
+
+    private void addMappingsTo(String parentField, ImmutableMap<String, String> mappings,
+                               Map<String, Object> modifiedMap, List<OcrDataField> ocrDataFields) {
+        HashMap<String, Object> parentFieldObject = new HashMap<>();
+
+        mappings.forEach((srcField, targetField) -> {
+            mapIfSourceExists(srcField, targetField, parentFieldObject, ocrDataFields);
+        });
+
+        if (parentFieldObject.size() > 0) {
+            modifiedMap.put(parentField, parentFieldObject);
+        }
+    }
+
+    private void mapIfSourceExists(
+            String srcField, String targetField, HashMap<String, Object> parent, List<OcrDataField> ocrDataFields) {
+        getValueFromOcrDataFields(srcField, ocrDataFields)
+                .ifPresent(srcFieldValue -> {
+                    parent.put(targetField, srcFieldValue);
+                });
     }
 
     @Override
@@ -197,7 +245,25 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             modifiedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
         }
 
+        reformatChildrenDateOfBirths(modifiedCaseData);
+
         return modifiedCaseData;
     }
 
+    private void reformatChildrenDateOfBirths(Map<String, Object> caseData) {
+        reformatChildDoB(1, caseData);
+        reformatChildDoB(2, caseData);
+    }
+
+    private void reformatChildDoB(int index, Map<String, Object> caseData) {
+        Optional.ofNullable(caseData.get("childInfo" + index)).map(child -> {
+            String dob = (String) ((Map) child).getOrDefault("dateOfBirth", "");
+            ((Map) child).replace(
+                    "dateOfBirth",
+                    transformFormDateIntoCcdDate("childInfo" + index + ".dateOfBirth", dob)
+            );
+
+            return child;
+        });
+    }
 }
