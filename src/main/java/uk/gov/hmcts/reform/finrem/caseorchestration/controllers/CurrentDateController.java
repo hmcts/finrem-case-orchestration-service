@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -39,9 +40,15 @@ public class CurrentDateController implements BaseController {
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback,
             @PathVariable("field") String field) {
 
+        CaseDetails caseDetails = callback.getCaseDetails();
+
+        log.info("Received request to generate current date for '{}' in the URL path : {}",
+                field,
+                caseDetails.getId());
+
         validateCaseData(callback);
 
-        Map<String, Object> caseData = callback.getCaseDetails().getData();
+        Map<String, Object> caseData = caseDetails.getData();
         caseData.put(field, LocalDate.now());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());

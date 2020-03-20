@@ -35,33 +35,31 @@ public class FinalOrderControllerTest extends BaseControllerTest {
     @MockBean
     private ConsentOrderApprovedDocumentService service;
 
-    public String endpoint() {
-        return "/case-orchestration/contested/send-order";
-    }
+    private static final String SEND_ORDER_ENDPOINT = "/case-orchestration/contested/send-order";
 
-    void doCaseDataSetUp() throws IOException, URISyntaxException {
+    private void doCaseDataSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/final-order-for-stamping.json").toURI()));
     }
 
-    void doCaseDataSetUpWithoutANyHearingOrder() throws IOException, URISyntaxException {
+    private void doCaseDataSetUpWithoutAnyHearingOrder() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
               .getResource("/fixtures/final-order-for-stamping-without-hearing-order.json").toURI()));
     }
 
-    void doCaseDataSetUpWithoutAnyFinalOrder() throws IOException, URISyntaxException {
+    private void doCaseDataSetUpWithoutAnyFinalOrder() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                  .getResource("/fixtures/final-order-for-stamping-without-exsisting-order.json").toURI()));
+                  .getResource("/fixtures/final-order-for-stamping-without-existing-order.json").toURI()));
     }
 
     @Test
     public void finalOrder400Error() throws Exception {
         doEmptyCaseDataSetUp();
 
-        mvc.perform(post(endpoint())
+        mvc.perform(post(SEND_ORDER_ENDPOINT)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -73,7 +71,7 @@ public class FinalOrderControllerTest extends BaseControllerTest {
         doCaseDataSetUp();
         whenStampingDocument().thenReturn(caseDocument());
 
-        ResultActions result = mvc.perform(post(endpoint())
+        ResultActions result = mvc.perform(post(SEND_ORDER_ENDPOINT)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON));
@@ -89,10 +87,10 @@ public class FinalOrderControllerTest extends BaseControllerTest {
 
     @Test
     public void finalOrderSuccessWithoutAnyHearingOrder() throws Exception {
-        doCaseDataSetUpWithoutANyHearingOrder();
+        doCaseDataSetUpWithoutAnyHearingOrder();
         whenStampingDocument().thenReturn(caseDocument());
 
-        ResultActions result = mvc.perform(post(endpoint())
+        ResultActions result = mvc.perform(post(SEND_ORDER_ENDPOINT)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON));
@@ -106,7 +104,7 @@ public class FinalOrderControllerTest extends BaseControllerTest {
         doCaseDataSetUpWithoutAnyFinalOrder();
         whenStampingDocument().thenReturn(caseDocument());
 
-        ResultActions result = mvc.perform(post(endpoint())
+        ResultActions result = mvc.perform(post(SEND_ORDER_ENDPOINT)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON));

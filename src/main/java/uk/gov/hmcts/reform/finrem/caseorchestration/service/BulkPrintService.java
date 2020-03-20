@@ -22,7 +22,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocu
 @Slf4j
 public class BulkPrintService extends AbstractDocumentService {
 
-
     @Autowired
     public BulkPrintService(
         DocumentClient documentClient, DocumentConfiguration config, ObjectMapper objectMapper) {
@@ -40,14 +39,15 @@ public class BulkPrintService extends AbstractDocumentService {
         List<BulkPrintDocument> uploadOrder = uploadOrder(caseDetails.getData());
 
         if (approvedOrderCollection.size() > 0) {
+            log.info("Sending Approved Order Collections for Bulk Print.");
             bulkPrintDocuments.addAll(approvedOrderCollection);
         } else if (uploadOrder.size() > 0) {
+            log.info("Sending Upload Order Collections for Bulk Print.");
             bulkPrintDocuments.addAll(uploadOrder);
         }
 
+        log.info("{} Order documents including cover sheet have been sent bulk print.", bulkPrintDocuments.size());
 
-        log.info(
-            " {} Order documents including cover sheet are sent bulk print.", bulkPrintDocuments.size());
         return bulkPrint(
             BulkPrintRequest.builder()
                 .caseId(caseDetails.getId().toString())
@@ -55,6 +55,4 @@ public class BulkPrintService extends AbstractDocumentService {
                 .bulkPrintDocuments(bulkPrintDocuments)
                 .build());
     }
-
-
 }

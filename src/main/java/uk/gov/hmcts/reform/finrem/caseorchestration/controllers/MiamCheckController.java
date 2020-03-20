@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.MiamCheckService;
 
 import javax.validation.constraints.NotNull;
@@ -41,7 +42,9 @@ public class MiamCheckController implements BaseController {
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        log.info("Received request for validating MIAM exemption. Auth token: {}, Case request : {}", authorisationToken, callback);
+        CaseDetails caseDetails = callback.getCaseDetails();
+        long caseId = caseDetails.getId();
+        log.info("Received request for validating MIAM exemption for Case ID: {}", caseId);
 
         validateCaseData(callback);
         return ResponseEntity.ok(response(callback));

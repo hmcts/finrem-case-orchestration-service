@@ -56,10 +56,11 @@ public class FinalOrderController implements BaseController {
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         validateCaseData(callback);
-        log.info("stampFinalOrder called with case data = {}", callback.getCaseDetails().getData());
+        log.info("Received request to stampFinalOrder called with Case ID = {}", callback.getCaseDetails().getId());
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         List<HearingOrderCollectionData> hearingOrderCollectionData = getHearingOrderDocuments(caseData);
+
         if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
             CaseDocument latestHearingOrder = hearingOrderCollectionData
                                                       .get(hearingOrderCollectionData.size() - 1)
@@ -80,10 +81,10 @@ public class FinalOrderController implements BaseController {
     private void stampAndAddToCollection(Map<String, Object> caseData, CaseDocument latestHearingOrder, String authToken) {
         if (!isEmpty(latestHearingOrder)) {
             CaseDocument stampedDocs = service.stampDocument(latestHearingOrder, authToken);
-            log.info(" stampedDocs = {}", stampedDocs);
+            log.info("Stamped Documents = {}", stampedDocs);
 
             List<HearingOrderCollectionData> finalOrderCollection = getFinalOrderDocuments(caseData);
-            log.info(" existing = {}", finalOrderCollection);
+            log.info("Existing final order collection = {}", finalOrderCollection);
 
             if (finalOrderCollection == null) {
                 finalOrderCollection = new ArrayList<>();
@@ -95,9 +96,9 @@ public class FinalOrderController implements BaseController {
                     .uploadDraftDocument(stampedDocs)
                     .build())
                 .build());
-            log.info("finalOrderCollection = {}", finalOrderCollection);
+            log.info("Newly built final order collection = {}", finalOrderCollection);
             caseData.put(FINAL_ORDER_COLLECTION, finalOrderCollection);
-            log.info("stampFinalOrder end.");
+            log.info("Finished stamping final order.");
         }
     }
 

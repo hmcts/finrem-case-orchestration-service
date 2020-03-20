@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
@@ -44,21 +45,23 @@ public class HearingDocumentController implements BaseController {
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        log.info("Received request for validating a hearing. Auth token: {}, Case request : {}", authorisationToken, callback);
+        CaseDetails caseDetails = callback.getCaseDetails();
+        long caseId = caseDetails.getId();
+        log.info("Received request for validating a hearing for Case ID: {}", caseId);
 
         validateCaseData(callback);
 
-        List<String> errors = validateHearingService.validateHearingErrors(callback.getCaseDetails());
+        List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
         if (!errors.isEmpty()) {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errors)
                     .build());
         }
 
-        Map<String, Object> caseData = callback.getCaseDetails().getData();
-        caseData.putAll(service.generateHearingDocuments(authorisationToken, callback.getCaseDetails()));
+        Map<String, Object> caseData = caseDetails.getData();
+        caseData.putAll(service.generateHearingDocuments(authorisationToken, caseDetails));
 
-        List<String> warnings = validateHearingService.validateHearingWarnings(callback.getCaseDetails());
+        List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
         return ResponseEntity.ok(
                 AboutToStartOrSubmitCallbackResponse.builder().data(caseData).warnings(warnings).build());
     }

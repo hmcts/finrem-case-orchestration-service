@@ -46,7 +46,9 @@ public class FeeLookupController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeLookup(
             @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
             @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request for Fee lookup. Auth token: {}, Case request : {}", authToken, callbackRequest);
+
+        long caseId = callbackRequest.getCaseDetails().getId();
+        log.info("Received request for Fee lookup for Case ID {}",caseId );
 
         validateCaseData(callbackRequest);
 

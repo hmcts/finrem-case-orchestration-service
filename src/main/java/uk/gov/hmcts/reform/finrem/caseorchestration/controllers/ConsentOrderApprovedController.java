@@ -78,17 +78,19 @@ public class ConsentOrderApprovedController implements BaseController {
 
             if (!isEmpty(pensionDocs)) {
                 List<PensionCollectionData> stampedPensionDocs = service.stampPensionDocuments(pensionDocs, authToken);
-                log.info(" stampedPensionDocs = {}", stampedPensionDocs);
+                log.info("Generated StampedPensionDocs = {}", stampedPensionDocs);
                 approvedOrder.setPensionDocuments(stampedPensionDocs);
             }
 
             ApprovedOrderData approvedOrderData = ApprovedOrderData.builder()
                     .approvedOrder(approvedOrder)
                     .build();
-            log.info("approvedOrderData = {}", approvedOrderData);
+            log.info("Generated ApprovedOrderData = {}", approvedOrderData);
 
             List<ApprovedOrderData> approvedOrders = asList(approvedOrderData);
             caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
+
+            log.info("Successfully generated documents for Consent order approved");
         }
 
         return ResponseEntity.ok(

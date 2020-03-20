@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import javax.validation.constraints.NotNull;
@@ -42,11 +43,13 @@ public class GeneralLetterStartController implements BaseController {
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        log.info("Received request to clear general letter fields. Auth token: {}, Case request : {}", authorisationToken, callback);
+        CaseDetails caseDetails = callback.getCaseDetails();
+        long caseId = caseDetails.getId();
+        log.info("Received request to clear general letter fields for Case ID: {}", caseId);
 
         validateCaseData(callback);
 
-        Map<String, Object> caseData = callback.getCaseDetails().getData();
+        Map<String, Object> caseData = caseDetails.getData();
         caseData.put("generalLetterAddressTo", null);
         caseData.put("generalLetterRecipient", null);
         caseData.put("generalLetterRecipientAddress", null);
