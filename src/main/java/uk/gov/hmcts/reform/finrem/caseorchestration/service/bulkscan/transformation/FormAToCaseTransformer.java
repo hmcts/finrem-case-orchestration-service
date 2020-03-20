@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.applyMappings;
+import static uk.gov.hmcts.reform.bsp.common.mapper.GenericMapper.addMappingsTo;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.transformFormDateIntoCcdDate;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -87,6 +88,22 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
                 .ifPresent(value -> transformedCaseData.put("applicantRepresentPaper", value));
 
         return transformedCaseData;
+    }
+
+    @Override
+    protected Map<String, Object> runPostMappingModification(final Map<String, Object> transformedCaseData) {
+        Map<String, Object> modifiedCaseData = new HashMap<>(transformedCaseData);
+
+        modifiedCaseData.put("paperApplication", YES_VALUE);
+
+        // If OrderForChildren is populated then set orderForChildrenQuestion1 to Yes
+        if (StringUtils.isNotEmpty((String) modifiedCaseData.get("natureOfApplication5b"))) {
+            modifiedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
+        }
+
+        reformatChildrenDateOfBirths(modifiedCaseData);
+
+        return modifiedCaseData;
     }
 
     private void mapFormDateToCcdDate(String ocrFieldName, String ccdFieldName,
@@ -191,7 +208,6 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
     }
 
     private void addMappingsToChildren(List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
-
         addMappingToChild(1, ocrDataFields, modifiedMap);
         addMappingToChild(2, ocrDataFields, modifiedMap);
     }
@@ -213,57 +229,18 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         );
     }
 
-    private void addMappingsTo(String parentField, ImmutableMap<String, String> mappings,
-                               Map<String, Object> modifiedMap, List<OcrDataField> ocrDataFields) {
-        HashMap<String, Object> parentFieldObject = new HashMap<>();
-
-        mappings.forEach((srcField, targetField) -> {
-            mapIfSourceExists(srcField, targetField, parentFieldObject, ocrDataFields);
-        });
-
-        if (parentFieldObject.size() > 0) {
-            modifiedMap.put(parentField, parentFieldObject);
-        }
-    }
-
-    private void mapIfSourceExists(
-            String srcField, String targetField, HashMap<String, Object> parent, List<OcrDataField> ocrDataFields) {
-        getValueFromOcrDataFields(srcField, ocrDataFields)
-                .ifPresent(srcFieldValue -> {
-                    parent.put(targetField, srcFieldValue);
-                });
-    }
-
-    @Override
-    protected Map<String, Object> runPostMappingModification(final Map<String, Object> transformedCaseData) {
-        Map<String, Object> modifiedCaseData = new HashMap<>(transformedCaseData);
-
-        modifiedCaseData.put("paperApplication", YES_VALUE);
-
-        // If OrderForChildren is populated then set orderForChildrenQuestion1 to Yes
-        if (StringUtils.isNotEmpty((String) modifiedCaseData.get("natureOfApplication5b"))) {
-            modifiedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
-        }
-
-        reformatChildrenDateOfBirths(modifiedCaseData);
-
-        return modifiedCaseData;
-    }
-
     private void reformatChildrenDateOfBirths(Map<String, Object> caseData) {
         reformatChildDoB(1, caseData);
         reformatChildDoB(2, caseData);
     }
 
     private void reformatChildDoB(int index, Map<String, Object> caseData) {
-        Optional.ofNullable(caseData.get("childInfo" + index)).map(child -> {
+        Optional.ofNullable(caseData.get("childInfo" + index)).ifPresent(child -> {
             String dob = (String) ((Map) child).getOrDefault("dateOfBirth", "");
             ((Map) child).replace(
                     "dateOfBirth",
                     transformFormDateIntoCcdDate("childInfo" + index + ".dateOfBirth", dob)
             );
-
-            return child;
         });
     }
 }
