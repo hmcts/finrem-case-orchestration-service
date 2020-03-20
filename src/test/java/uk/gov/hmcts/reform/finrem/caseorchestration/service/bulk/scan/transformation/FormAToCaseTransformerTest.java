@@ -73,7 +73,19 @@ public class FormAToCaseTransformerTest {
                 new OcrDataField(OcrFieldName.AUTHORISATION_SIGNED, "Yes"),
                 new OcrDataField(OcrFieldName.AUTHORISATION_SIGNED_BY, "Applicant's solicitor"),
                 new OcrDataField(OcrFieldName.AUTHORISATION_DATE, "12/03/2020"),
-                new OcrDataField(OcrFieldName.AUTHORISATION_SOLICITOR_POSITION, "I'm the CEO")
+                new OcrDataField(OcrFieldName.AUTHORISATION_SOLICITOR_POSITION, "I'm the CEO"),
+                new OcrDataField(OcrFieldName.NAME_CHILD_1, "Johny Bravo"),
+                new OcrDataField(OcrFieldName.GENDER_CHILD_1, "male"),
+                new OcrDataField(OcrFieldName.DATE_OF_BIRTH_CHILD_1, "12/03/2000"),
+                new OcrDataField(OcrFieldName.RELATIONSHIP_TO_APPLICANT_CHILD_1, "son"),
+                new OcrDataField(OcrFieldName.RELATIONSHIP_TO_RESPONDENT_CHILD_1, "SON"),
+                new OcrDataField(OcrFieldName.COUNTRY_CHILD_1, "New Zeeland"),
+                new OcrDataField(OcrFieldName.NAME_CHILD_2, "Anne Shirley"),
+                new OcrDataField(OcrFieldName.GENDER_CHILD_2, "female"),
+                new OcrDataField(OcrFieldName.DATE_OF_BIRTH_CHILD_2, "12/03/1895"),
+                new OcrDataField(OcrFieldName.RELATIONSHIP_TO_APPLICANT_CHILD_2, "daughter"),
+                new OcrDataField(OcrFieldName.RELATIONSHIP_TO_RESPONDENT_CHILD_2, "Daughter"),
+                new OcrDataField(OcrFieldName.COUNTRY_CHILD_2, "Canada")
         ));
 
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(exceptionRecord);
@@ -117,6 +129,8 @@ public class FormAToCaseTransformerTest {
                 hasEntry("authorisation3", "2020-03-12"),
                 hasEntry("authorisation2b", "I'm the CEO")
         ));
+
+        assertChildrenInfo(transformedCaseData);
 
         assertThat(transformedCaseData.get("natureOfApplication2"), is(asList("Periodical Payment Order", "Pension Attachment Order")));
         assertThat(transformedCaseData.get("dischargePeriodicalPaymentSubstituteFor"), is(asList("Lump Sum Order", "Pension Sharing Order")));
@@ -389,4 +403,21 @@ public class FormAToCaseTransformerTest {
                 .forEach((key, value) -> assertThat(address.get(value), is(getValueForSuffix.apply(sourceFieldAndValueMap, key))));
     }
 
+    private void assertChildrenInfo(Map<String, Object> transformedCaseData) {
+        assertChild((Map)(transformedCaseData.get("childInfo1")),
+                asList("Johny Bravo", "2000-03-12", "male", "son", "SON","New Zeeland"));
+        assertChild((Map)(transformedCaseData.get("childInfo2")),
+                asList("Anne Shirley", "1895-03-12", "female", "daughter", "Daughter","Canada"));
+    }
+
+    private void assertChild(Map<String, Object> child, List<String> values) {
+        assertThat(child, allOf(
+                hasEntry("name", values.get(0)),
+                hasEntry("dateOfBirth", values.get(1)),
+                hasEntry("gender", values.get(2)),
+                hasEntry("relationshipToApplicant", values.get(3)),
+                hasEntry("relationshipToRespondent", values.get(4)),
+                hasEntry("countryOfResidence", values.get(5))
+        ));
+    }
 }
