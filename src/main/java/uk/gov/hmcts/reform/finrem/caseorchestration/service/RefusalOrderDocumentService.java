@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.copyToOrderRefusalCollection;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.translateOrderRefusalCollection;
 
@@ -32,8 +33,7 @@ public class RefusalOrderDocumentService extends AbstractDocumentService {
     private Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
 
     @Autowired
-    public RefusalOrderDocumentService(DocumentClient documentClient,
-                                       DocumentConfiguration config, ObjectMapper objectMapper) {
+    public RefusalOrderDocumentService(DocumentClient documentClient, DocumentConfiguration config, ObjectMapper objectMapper) {
         super(documentClient, config, objectMapper);
     }
 
@@ -45,11 +45,12 @@ public class RefusalOrderDocumentService extends AbstractDocumentService {
                 .andThen(createConsentOrderData)
                 .andThen(consentOrderData -> populateConsentOrderData(consentOrderData, caseDetails))
                 .apply(Pair.of(copyOf(caseDetails), authorisationToken));
+
         return copyToOrderRefusalCollection(caseDetails);
     }
 
-    public Map<String, Object> previewConsentOrderNotApproved(
-            String authorisationToken, final CaseDetails caseDetails) {
+    public Map<String, Object> previewConsentOrderNotApproved(String authorisationToken, final CaseDetails caseDetails) {
+
         return translateOrderRefusalCollection
                 .andThen(generateDocument)
                 .andThen(caseDocument -> populateConsentOrderNotApproved(caseDocument, caseDetails))
@@ -59,18 +60,18 @@ public class RefusalOrderDocumentService extends AbstractDocumentService {
     private Map<String, Object> populateConsentOrderNotApproved(CaseDocument caseDocument, CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put("orderRefusalPreviewDocument", caseDocument);
+
         return caseData;
     }
-
 
     private Map<String, Object> populateConsentOrderData(ConsentOrderData consentOrderData, CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        List<ConsentOrderData> uploadOrder = Optional.ofNullable(caseData.get("uploadOrder"))
+        List<ConsentOrderData> uploadOrder = Optional.ofNullable(caseData.get(UPLOAD_ORDER))
                 .map(this::convertToUploadOrderList)
                 .orElse(new ArrayList<>());
         uploadOrder.add(consentOrderData);
-        caseData.put("uploadOrder", uploadOrder);
+        caseData.put(UPLOAD_ORDER, uploadOrder);
         return caseData;
     }
 

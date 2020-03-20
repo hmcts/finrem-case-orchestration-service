@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.fee;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_FEE_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONTESTED;
 
@@ -63,7 +64,7 @@ public class FeeLookupControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
+                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is(TEST_FEE_CODE)))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("1000")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
@@ -80,7 +81,7 @@ public class FeeLookupControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
+                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is(TEST_FEE_CODE)))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("25500")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))

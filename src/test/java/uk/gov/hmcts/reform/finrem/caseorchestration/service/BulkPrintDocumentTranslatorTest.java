@@ -26,8 +26,8 @@ public class BulkPrintDocumentTranslatorTest {
 
     @Test
     public void shouldConvertCollectionDocument() throws Exception {
-        List<BulkPrintDocument> bulkPrintDocuments =
-            BulkPrintDocumentTranslator.approvedOrderCollection(caseDetails().getData());
+        List<BulkPrintDocument> bulkPrintDocuments = BulkPrintDocumentTranslator
+                .approvedOrderCollection(caseDetails().getData());
 
         assertThat(bulkPrintDocuments.size(), is(4));
     }

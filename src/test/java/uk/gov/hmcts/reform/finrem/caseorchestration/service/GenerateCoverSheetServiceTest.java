@@ -19,38 +19,38 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
 
 public class GenerateCoverSheetServiceTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
-    private DocumentClient generatorClient;
-    private DocumentConfiguration config;
     private GenerateCoverSheetService coverSheetService;
 
     @Before
     public void setUp() {
-        config = new DocumentConfiguration();
+        DocumentConfiguration config = new DocumentConfiguration();
         config.setBulkPrintFileName("test_file");
         config.setBulkPrintTemplate("test_template");
 
-        generatorClient = new TestDocumentClient();
+        DocumentClient generatorClient = new TestDocumentClient();
         coverSheetService = new GenerateCoverSheetService(generatorClient, config, mapper);
     }
 
     @Test
-    public void shouldGenerateRespondentCoverSheet() throws Exception {
-        CaseDocument caseDocument = coverSheetService.generateRespondentCoverSheet(caseDetails(), AUTH_TOKEN);
+    public void shouldGenerateApplicantCoverSheet() throws Exception {
+        CaseDocument caseDocument = coverSheetService.generateApplicantCoverSheet(caseDetails(), AUTH_TOKEN);
+
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
     }
 
     @Test
-    public void shouldGenerateApplicantCoverSheet() throws Exception {
-        CaseDocument caseDocument = coverSheetService.generateApplicantCoverSheet(caseDetails(), AUTH_TOKEN);
+    public void shouldGenerateRespondentCoverSheet() throws Exception {
+        CaseDocument caseDocument = coverSheetService.generateRespondentCoverSheet(caseDetails(), AUTH_TOKEN);
+
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
@@ -61,7 +61,7 @@ public class GenerateCoverSheetServiceTest {
         CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
         coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
-        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
+        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
 
         assertThat(bulkPrintCoverSheet.getAddressLine1(), is("50 Applicant Street"));
         assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
@@ -73,7 +73,7 @@ public class GenerateCoverSheetServiceTest {
         CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
         coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
 
-        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
+        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
 
         assertThat(bulkPrintCoverSheet.getAddressLine1(), is("51 Respondent Street"));
         assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
@@ -85,7 +85,7 @@ public class GenerateCoverSheetServiceTest {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
         coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
-        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
+        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
 
         assertThat(bulkPrintCoverSheet.getAddressLine1(), is("123 Applicant Solicitor Street"));
         assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
@@ -97,7 +97,7 @@ public class GenerateCoverSheetServiceTest {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
         coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
 
-        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
+        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
 
         assertThat(bulkPrintCoverSheet.getAddressLine1(), is("321 Respondent Solicitor Street"));
         assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));

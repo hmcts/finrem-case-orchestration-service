@@ -28,8 +28,10 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_FEE_CODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
 public class SetUpUtils {
 
@@ -65,7 +67,7 @@ public class SetUpUtils {
 
     public static FeeResponse fee(ApplicationType applicationType) {
         FeeResponse feeResponse = new FeeResponse();
-        feeResponse.setCode("FEE0640");
+        feeResponse.setCode(TEST_FEE_CODE);
         feeResponse.setDescription("finrem");
         feeResponse.setFeeAmount(applicationType == CONSENTED ? BigDecimal.valueOf(10) : BigDecimal.valueOf(255));
         feeResponse.setVersion("v1");
@@ -74,7 +76,7 @@ public class SetUpUtils {
 
     public static Map<String, Object> caseDataWithUploadOrder(String uploadOrderId) {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("uploadOrder", ImmutableList.of(consentOrderData(uploadOrderId)));
+        caseData.put(UPLOAD_ORDER, ImmutableList.of(consentOrderData(uploadOrderId)));
         return caseData;
     }
 

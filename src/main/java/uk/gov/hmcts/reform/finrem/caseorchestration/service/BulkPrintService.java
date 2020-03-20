@@ -39,13 +39,16 @@ public class BulkPrintService extends AbstractDocumentService {
         List<BulkPrintDocument> approvedOrderCollection = approvedOrderCollection(caseDetails.getData());
         List<BulkPrintDocument> uploadOrder = uploadOrder(caseDetails.getData());
 
+        // TODO: Confirm this is expected behaviour? - Why do we not also add upload orders?
         if (approvedOrderCollection.size() > 0) {
+            log.info("Sending Approved Order Collections for Bulk Print.");
             bulkPrintDocuments.addAll(approvedOrderCollection);
         } else if (uploadOrder.size() > 0) {
+            log.info("Sending Upload Order Collections for Bulk Print.");
             bulkPrintDocuments.addAll(uploadOrder);
         }
 
-        log.info(" {} Order documents including cover sheet are sent bulk print.", bulkPrintDocuments.size());
+        log.info("{} Order documents including cover sheet have been sent bulk print.", bulkPrintDocuments.size());
 
         return bulkPrint(
             BulkPrintRequest.builder()

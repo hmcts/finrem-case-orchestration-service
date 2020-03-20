@@ -13,6 +13,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DOCUMENT_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getLastMapValue;
 
@@ -21,7 +22,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 public final class BulkPrintDocumentTranslator {
 
     public static List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
-        log.info("Extracting {} from case data  for bulk print. ", "approvedOrderCollection");
+        log.info("Extracting 'approvedOrderCollection' from case data for bulk print.");
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         List<Map> documentList = ofNullable(data.get("approvedOrderCollection"))
             .map(i -> (List<Map>) i)
@@ -31,17 +32,16 @@ public final class BulkPrintDocumentTranslator {
             Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get(VALUE));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "orderLetter"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrder"));
-            bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "pensionDocuments",
-                "uploadedDocument"));
+            bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "pensionDocuments", "uploadedDocument"));
         }
 
         return bulkPrintDocuments;
     }
 
     public static List<BulkPrintDocument> uploadOrder(Map<String, Object> data) {
-        log.info("Extracting {} from case data  for bulk print. ", "uploadOrder");
+        log.info("Extracting 'uploadOrder' from case data for bulk print.");
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        List<Map> documentList = ofNullable(data.get("uploadOrder"))
+        List<Map> documentList = ofNullable(data.get(UPLOAD_ORDER))
             .map(i -> (List<Map>) i)
             .orElse(new ArrayList<>());
         if (documentList.size() > 0) {
@@ -52,7 +52,7 @@ public final class BulkPrintDocumentTranslator {
     }
 
     private static List<BulkPrintDocument> convertBulkPrintDocument(Map<String, Object> data, String documentName) {
-        log.info("Extracting {} from case data  for bulk print. ", documentName);
+        log.info("Extracting '{}' document from case data for bulk print.", documentName);
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
 
@@ -63,14 +63,14 @@ public final class BulkPrintDocumentTranslator {
             bulkPrintDocuments.add(BulkPrintDocument.builder()
                 .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
                 .build());
-            log.info("{} for bulk print {}", documentName, documentLink.get(DOCUMENT_FILENAME));
+            log.info("Sending {} ({}) for bulk print.", documentName, documentLink.get(DOCUMENT_FILENAME));
         }
         return bulkPrintDocuments;
     }
 
     private static List<BulkPrintDocument> convertBulkPrintDocument(Map<String, Object> data, String collectionName,
                                                                     String documentName) {
-        log.info("Extracting {} from case data  for bulk print. ", collectionName);
+        log.info("Extracting '{}' collection from case data for bulk print.", collectionName);
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
 
         List<Map> documentList = ofNullable(data.get(collectionName))
@@ -87,7 +87,7 @@ public final class BulkPrintDocumentTranslator {
                 bulkPrintDocuments.add(BulkPrintDocument.builder()
                     .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
                     .build());
-                log.info("{} file for bulk print {}", collectionName, documentLink.get(DOCUMENT_FILENAME));
+                log.info("Sending {} ({}) for bulk print.", collectionName, documentLink.get(DOCUMENT_FILENAME));
             }
         }
         return bulkPrintDocuments;
