@@ -10,16 +10,15 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DOCUMENT_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getLastMapValue;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BulkPrintDocumentTranslator {
-
-    public static final String DOCUMENT_FILENAME = "document_filename";
-    private static final String DOCUMENT_URL = "document_binary_url";
-    private static final String VALUE = "value";
 
     public static List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
         log.info("Extracting {} from case data  for bulk print. ", "approvedOrderCollection");
@@ -29,7 +28,7 @@ public final class BulkPrintDocumentTranslator {
             .orElse(new ArrayList<>());
 
         if (documentList.size() > 0) {
-            Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get("value"));
+            Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get(VALUE));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "orderLetter"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrder"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "pensionDocuments",
@@ -46,7 +45,7 @@ public final class BulkPrintDocumentTranslator {
             .map(i -> (List<Map>) i)
             .orElse(new ArrayList<>());
         if (documentList.size() > 0) {
-            Map<String, Object> value = ((Map) getLastMapValue.apply(documentList).get("value"));
+            Map value = ((Map) getLastMapValue.apply(documentList).get(VALUE));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "DocumentLink"));
         }
         return bulkPrintDocuments;
@@ -60,7 +59,7 @@ public final class BulkPrintDocumentTranslator {
         Object documentLinkObj = data.get(documentName);
 
         if (documentLinkObj != null) {
-            Map<String, Object> documentLink = (Map) documentLinkObj;
+            Map documentLink = (Map) documentLinkObj;
             bulkPrintDocuments.add(BulkPrintDocument.builder()
                 .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
                 .build());
@@ -78,13 +77,13 @@ public final class BulkPrintDocumentTranslator {
             .map(i -> (List<Map>) i)
             .orElse(new ArrayList<>());
 
-        for (Map<String, Object> document : documentList) {
-            Map<String, Object> value = ((Map) document.get(VALUE));
+        for (Map document : documentList) {
+            Map value = ((Map) document.get(VALUE));
 
             Object documentLinkObj = value.get(documentName);
 
             if (documentLinkObj != null) {
-                Map<String, Object> documentLink = (Map) documentLinkObj;
+                Map documentLink = (Map) documentLinkObj;
                 bulkPrintDocuments.add(BulkPrintDocument.builder()
                     .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
                     .build());

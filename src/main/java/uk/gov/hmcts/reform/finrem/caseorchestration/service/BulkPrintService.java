@@ -15,13 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.FINANCIAL_REMEDY_PACK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentTranslator.approvedOrderCollection;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentTranslator.uploadOrder;
 
 @Service
 @Slf4j
 public class BulkPrintService extends AbstractDocumentService {
-
 
     @Autowired
     public BulkPrintService(
@@ -45,16 +45,13 @@ public class BulkPrintService extends AbstractDocumentService {
             bulkPrintDocuments.addAll(uploadOrder);
         }
 
+        log.info(" {} Order documents including cover sheet are sent bulk print.", bulkPrintDocuments.size());
 
-        log.info(
-            " {} Order documents including cover sheet are sent bulk print.", bulkPrintDocuments.size());
         return bulkPrint(
             BulkPrintRequest.builder()
                 .caseId(caseDetails.getId().toString())
-                .letterType("FINANCIAL_REMEDY_PACK")
+                .letterType(FINANCIAL_REMEDY_PACK)
                 .bulkPrintDocuments(bulkPrintDocuments)
                 .build());
     }
-
-
 }

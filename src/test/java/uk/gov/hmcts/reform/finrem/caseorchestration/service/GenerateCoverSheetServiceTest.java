@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
@@ -58,7 +59,7 @@ public class GenerateCoverSheetServiceTest {
     @Test
     public void shouldGenerateApplicantCoverSheetUsingApplicantAddressWhenApplicantSolicitorAddressIsEmpty() throws Exception {
         CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
-        coverSheetService.prepareApplicantCoverSheet(caseDetails);
+        coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
 
@@ -70,7 +71,7 @@ public class GenerateCoverSheetServiceTest {
     @Test
     public void shouldGenerateRespondentCoverSheetUsingRespondentAddressWhenRespondentSolicitorAddressIsEmpty() throws Exception {
         CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
-        coverSheetService.prepareRespondentCoverSheet(caseDetails);
+        coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
 
@@ -82,7 +83,7 @@ public class GenerateCoverSheetServiceTest {
     @Test
     public void shouldGenerateApplicantCoverSheetUsingApplicantSolicitorAddress() throws Exception {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
-        coverSheetService.prepareApplicantCoverSheet(caseDetails);
+        coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
 
@@ -94,7 +95,7 @@ public class GenerateCoverSheetServiceTest {
     @Test
     public void shouldGenerateRespondentCoverSheetUsingRespondentSolicitorAddress() throws Exception {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
-        coverSheetService.prepareRespondentCoverSheet(caseDetails);
+        coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get("bulkPrintCoverSheet");
 
