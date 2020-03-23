@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -58,15 +59,17 @@ public class ConsentOrderApprovedController implements BaseController {
             @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
+        CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("ConsentOrderApprovedController called  for Case ID: {}", caseDetails.getId());
+
         validateCaseData(callback);
-        Map<String, Object> caseData = callback.getCaseDetails().getData();
+
+        Map<String, Object> caseData = caseDetails.getData();
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
         List<PensionCollectionData> pensionDocs = getPensionDocuments(caseData);
 
-        log.info("ConsentOrderApprovedController called with latestConsentOrder = {}, pensionDocs = {}", latestConsentOrder, pensionDocs);
-
         if (!isEmpty(latestConsentOrder)) {
-            CaseDocument letter = service.generateApprovedConsentOrderLetter(callback.getCaseDetails(), authToken);
+            CaseDocument letter = service.generateApprovedConsentOrderLetter(caseDetails, authToken);
             CaseDocument consentOrderAnnexStamped = service.annexStampDocument(latestConsentOrder, authToken);
 
             log.info("letter= {}, consentOrderAnnexStamped = {}", letter, consentOrderAnnexStamped);
@@ -74,6 +77,7 @@ public class ConsentOrderApprovedController implements BaseController {
             ApprovedOrder approvedOrder = ApprovedOrder.builder()
                     .orderLetter(letter)
                     .consentOrder(consentOrderAnnexStamped)
+                    .consentOrderApprovedLetter(consentOrderAnnexStamped)
                     .build();
 
             if (!isEmpty(pensionDocs)) {
@@ -90,7 +94,7 @@ public class ConsentOrderApprovedController implements BaseController {
             List<ApprovedOrderData> approvedOrders = asList(approvedOrderData);
             caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
-            log.info("Successfully generated documents for Consent order approved");
+            log.info("Successfully generated documents for 'Consent Order approved'");
         }
 
         return ResponseEntity.ok(
