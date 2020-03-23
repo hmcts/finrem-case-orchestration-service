@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
@@ -43,7 +44,7 @@ public class UpdateContestedCaseController implements BaseController {
     private OnlineFormDocumentService onlineFormDocumentService;
 
     @PostMapping(path = "/update-contested-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Handles update Contested Case details and cleans up the data fields based on the options chosen")
+    @ApiOperation(value = "Handles update Contested Case details and cleans up the data fields based on the options chosen for Contested Cases")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
@@ -53,10 +54,12 @@ public class UpdateContestedCaseController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest ccdRequest) {
 
-        log.info("Received request for contested - updateCase ");
+        CaseDetails caseDetails = ccdRequest.getCaseDetails();
+        log.info("Received request to update Contested case with Case ID: {}", caseDetails.getId());
+
         validateCaseData(ccdRequest);
 
-        Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
+        Map<String, Object> caseData = caseDetails.getData();
         updateDivorceDetailsForContestedCase(caseData);
         updateContestedRespondentDetails(caseData);
         updateContestedPeriodicPaymentOrder(caseData);

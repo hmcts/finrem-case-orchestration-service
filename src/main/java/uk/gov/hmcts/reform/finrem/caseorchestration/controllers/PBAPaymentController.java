@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.Map;
 import java.util.Objects;
 
@@ -46,12 +48,15 @@ public class PBAPaymentController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPayment(
             @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
-        log.info("Received request for PBA payment for consented . Auth token: {}, Case request : {}", authToken, callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Received request for PBA payment for consented for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callbackRequest);
 
-        final Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
+        final Map<String, Object> mapOfCaseData = caseDetails.getData();
         feeLookup(authToken, callbackRequest, mapOfCaseData);
+
         if (isPBAPayment(mapOfCaseData)) {
             if (isPBAPaymentReferenceDoesNotExists(mapOfCaseData)) {
                 String ccdCaseId = Objects.toString(callbackRequest.getCaseDetails().getId());
@@ -60,11 +65,12 @@ public class PBAPaymentController implements BaseController {
                     return paymentFailure(mapOfCaseData, paymentResponse);
                 }
                 mapOfCaseData.put(PBA_PAYMENT_REFERENCE, paymentResponse.getReference());
-                log.info("Payment succeeded.");
+                log.info("Consented Payment Succeeded.");
             } else {
-                log.info("PBA Payment Reference already exists.");
+                log.info("PBA Payment Reference for Consented case already exists.");
             }
         } else {
+            log.info("Not PBA Payment - Moving state to Awaiting HWF Decision");
             mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());

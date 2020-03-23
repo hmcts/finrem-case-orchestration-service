@@ -17,12 +17,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -56,9 +58,10 @@ public class FinalOrderController implements BaseController {
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         validateCaseData(callback);
-        log.info("Received request to stampFinalOrder called with Case ID = {}", callback.getCaseDetails().getId());
+        CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("Received request to stampFinalOrder called with Case ID = {}", caseDetails.getId());
 
-        Map<String, Object> caseData = callback.getCaseDetails().getData();
+        Map<String, Object> caseData = caseDetails.getData();
         List<HearingOrderCollectionData> hearingOrderCollectionData = getHearingOrderDocuments(caseData);
 
         if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {

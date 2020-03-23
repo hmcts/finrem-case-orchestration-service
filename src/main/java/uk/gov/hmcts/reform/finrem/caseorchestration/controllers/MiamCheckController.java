@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.MiamCheckService;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -43,8 +44,7 @@ public class MiamCheckController implements BaseController {
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        long caseId = caseDetails.getId();
-        log.info("Received request for validating MIAM exemption for Case ID: {}", caseId);
+        log.info("Received request for validating MIAM exemption for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callback);
         return ResponseEntity.ok(response(callback));

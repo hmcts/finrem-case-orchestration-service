@@ -13,13 +13,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -38,13 +41,13 @@ public class RemoveApplicantDetailsController implements BaseController {
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        log.info("Received request for removing Applicant/Applicants Solicitor details. Auth token: {}, Case request : {}",
-                authorisationToken, callback);
+        CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("Received request for removing Applicant/Applicants Solicitor details for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callback);
 
-        Map<String, Object> caseData = callback.getCaseDetails().getData();
-        String applicantRepresented = caseData.get("applicantRepresented").toString();
+        Map<String, Object> caseData = caseDetails.getData();
+        String applicantRepresented = caseData.get(APPLICANT_REPRESENTED).toString();
 
         if (applicantRepresented.equals(YES_VALUE)) {
             //remove applicants data as solicitors data has been added
