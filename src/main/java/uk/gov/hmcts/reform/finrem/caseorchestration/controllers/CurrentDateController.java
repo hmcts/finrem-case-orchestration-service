@@ -41,10 +41,7 @@ public class CurrentDateController implements BaseController {
             @PathVariable("field") String field) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-
-        log.info("Received request to generate current date for '{}' in the URL path : {}",
-                field,
-                caseDetails.getId());
+        log.info("Received request to generate current date for '{}' in the URL path : {}", field, caseDetails.getId());
 
         validateCaseData(callback);
 

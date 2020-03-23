@@ -58,7 +58,7 @@ public class BulkPrintController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authorisationToken,
         @NotNull @RequestBody @ApiParam("Callback") CallbackRequest callback) {
 
-        Long caseId = callback.getCaseDetails().getId();
+        long caseId = callback.getCaseDetails().getId();
         log.info("Received request for bulk print for Case ID : {}", caseId);
 
         validateCaseData(callback);
