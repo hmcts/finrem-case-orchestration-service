@@ -19,8 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -58,7 +58,7 @@ public class BulkPrintController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authorisationToken,
         @NotNull @RequestBody @ApiParam("Callback") CallbackRequest callback) {
 
-        Optional<Long> caseId = Optional.ofNullable(callback.getCaseDetails().getId());
+        Long caseId = callback.getCaseDetails().getId();
         log.info("Received request for bulk print for Case ID : {}", caseId);
 
         validateCaseData(callback);

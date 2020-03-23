@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import java.util.List;
@@ -34,13 +33,11 @@ public class ValidateHearingController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> validateHearing(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest callbackRequest) {
-
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
+        log.info("Received request for validating a hearing for Case ID: {}", callbackRequest.getCaseDetails().getId());
 
         validateCaseData(callbackRequest);
 
-        List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
+        List<String> errors = validateHearingService.validateHearingErrors(callbackRequest.getCaseDetails());
         if (!errors.isEmpty()) {
             log.info("Errors were found when validating case");
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
@@ -48,7 +45,7 @@ public class ValidateHearingController implements BaseController {
                 .build());
         }
 
-        List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
+        List<String> warnings = validateHearingService.validateHearingWarnings(callbackRequest.getCaseDetails());
         if (!warnings.isEmpty()) {
             log.info("Warnings were found when validating case");
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()

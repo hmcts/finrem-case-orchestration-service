@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;

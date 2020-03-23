@@ -18,8 +18,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.Map;
-import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -44,7 +44,7 @@ public class GeneralLetterController implements BaseController {
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request for generating general letter with Case ID: {}", Optional.ofNullable(caseDetails.getId()));
+        log.info("Received request for generating general letter with Case ID: {}", caseDetails.getId());
 
         validateCaseData(callback);
 
