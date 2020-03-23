@@ -45,7 +45,8 @@ public class ConsentOrderController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateLatestConsentOrderDetails(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request for update latest consent order. Auth token: {}, Case request : {}", authToken, callbackRequest);
+
+        log.info("Received request to update latest consent order with Case ID : {}", callbackRequest.getCaseDetails().getId());
 
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();

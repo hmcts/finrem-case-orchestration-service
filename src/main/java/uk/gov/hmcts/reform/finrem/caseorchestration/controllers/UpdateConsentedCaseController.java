@@ -38,7 +38,7 @@ public class UpdateConsentedCaseController implements BaseController {
     private ConsentOrderService consentOrderService;
 
     @PostMapping(path = "/update-case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @ApiOperation(value = "Handles update case details and cleans up the data fields based on the options chosen")
+    @ApiOperation(value = "Handles update case details and cleans up the data fields based on the options chosen for Consented Cases")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
@@ -48,9 +48,12 @@ public class UpdateConsentedCaseController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest ccdRequest) {
 
-        log.info("Received request for updateCase ");
+        CaseDetails caseDetails = ccdRequest.getCaseDetails();
+        log.info("Received request to update consented case with Case ID: {}", caseDetails.getId());
+
         validateCaseData(ccdRequest);
-        Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
+        Map<String, Object> caseData = caseDetails.getData();
+
         updateDivorceDetails(caseData);
         updatePeriodicPaymentData(caseData);
         updatePropertyDetails(caseData);
@@ -58,12 +61,12 @@ public class UpdateConsentedCaseController implements BaseController {
         updateD81Details(caseData);
         updateApplicantOrSolicitorContactDetails(caseData);
         updateLatestConsentOrder(ccdRequest);
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     private void updateLatestConsentOrder(CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseData.put("latestConsentOrder", consentOrderService.getLatestConsentOrderData(callbackRequest));
     }
 
@@ -141,13 +144,13 @@ public class UpdateConsentedCaseController implements BaseController {
 
     private void updateApplicantOrSolicitorContactDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("applicantRepresented"), "No")) {
-            removeApplicanttSolicitorAddress(caseData);
+            removeApplicantSolicitorAddress(caseData);
         } else {
             removeApplicantAddress(caseData);
         }
     }
 
-    private void removeApplicanttSolicitorAddress(Map<String, Object> caseData) {
+    private void removeApplicantSolicitorAddress(Map<String, Object> caseData) {
         caseData.put("solicitorName", null);
         caseData.put("solicitorFirm", null);
         caseData.put("solicitorReference", null);

@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +22,7 @@ import static java.util.Objects.isNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
+@Slf4j
 @RestController
 @RequestMapping(value = "/case-orchestration")
 public class CheckLatestConsentOrderController implements BaseController {
@@ -41,16 +43,17 @@ public class CheckLatestConsentOrderController implements BaseController {
         validateCaseData(callback);
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
+        long caseId = callback.getCaseDetails().getId();
 
         if (isNull(caseData.get("latestConsentOrder"))) {
+            log.info("Failed validation for {} as latest Consent Order field was null", caseId);
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(Arrays.asList("Latest Consent Order Field is empty. "
                         + "Please use the Upload Consent Order Event instead of Send Order"))
                 .build());
         }
 
-        return ResponseEntity.ok(
-            AboutToStartOrSubmitCallbackResponse.builder()
-                .build());
+        log.info("Successfully validated {} as latest Consent Order field was present", caseId);
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().build());
     }
 }

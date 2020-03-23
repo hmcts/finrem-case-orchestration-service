@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -24,6 +25,7 @@ import java.util.function.UnaryOperator;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 
 @Service
+@Slf4j
 public class GeneralLetterService extends AbstractDocumentService {
 
     private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
@@ -31,12 +33,13 @@ public class GeneralLetterService extends AbstractDocumentService {
     private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
 
     @Autowired
-    public GeneralLetterService(DocumentClient documentClient,
-                                DocumentConfiguration config, ObjectMapper objectMapper) {
+    public GeneralLetterService(DocumentClient documentClient, DocumentConfiguration config, ObjectMapper objectMapper) {
         super(documentClient, config, objectMapper);
     }
 
     public Map<String, Object> createGeneralLetter(String authorisationToken, CaseDetails caseDetails) {
+
+        log.info("Generating General letter for Case ID: {}", caseDetails.getId());
         return generateDocument
                 .andThen(createGeneralLetterData)
                 .andThen(data -> populateGeneralLetterData(data, caseDetails))
@@ -67,8 +70,7 @@ public class GeneralLetterService extends AbstractDocumentService {
         return caseDetails;
     }
 
-    private Map<String, Object> populateGeneralLetterData(GeneralLetterData generalLetterData,
-                                                          CaseDetails caseDetails) {
+    private Map<String, Object> populateGeneralLetterData(GeneralLetterData generalLetterData, CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
         List<GeneralLetterData> generalLetterDataList = Optional.ofNullable(caseData.get(GENERAL_LETTER))

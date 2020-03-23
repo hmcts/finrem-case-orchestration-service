@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.Map;
 
@@ -31,10 +32,12 @@ public class RemoveCaseDataStateController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> removeCaseDataState(
             @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
             @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request for Removing State. Auth token: {}, Case request : {}", authToken, callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Received request for removing case state for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callbackRequest);
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> caseData = caseDetails.getData();
         caseData.remove(STATE);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

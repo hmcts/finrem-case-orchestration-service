@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -39,7 +40,7 @@ public class DraftOnlineDocumentController {
     private  IdamService idamService;
 
     @PostMapping(path = "/documents/draft-contested-mini-form-a", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles Mini Form A generation. Serves as a callback from CCD")
+    @ApiOperation(value = "Handles draft Contested Mini Form A generation. Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
@@ -48,6 +49,9 @@ public class DraftOnlineDocumentController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateContestedMiniFormA(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+
+        log.info("Received request to generate draft Contested Mini Form A for Case ID : {}",
+                callback.getCaseDetails().getId());
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, callback.getCaseDetails());

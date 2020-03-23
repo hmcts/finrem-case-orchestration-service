@@ -33,7 +33,7 @@ public class ContestedDocumentController implements BaseController {
     private OnlineFormDocumentService service;
 
     @PostMapping(path = "/documents/generate-contested-mini-form-a", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles Mini Form A generation. Serves as a callback from CCD")
+    @ApiOperation(value = "Handles Contested Mini Form A generation. Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
@@ -42,6 +42,8 @@ public class ContestedDocumentController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateContestedMiniFormA(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+
+        log.info("Received request to generate Contested Mini Form A for Case ID : {}", callback.getCaseDetails().getId());
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         CaseDocument document = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());

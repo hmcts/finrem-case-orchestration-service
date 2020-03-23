@@ -42,7 +42,7 @@ public class RejectedOrderDocumentController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateConsentOrderNotApproved(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @RequestBody @ApiParam("CaseData") CallbackRequest request) {
-
+        log.info("Received request to generate 'Consent Order Not Approved' for Case ID: {}", request.getCaseDetails().getId());
         Map<String, Object> caseData = service.generateConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
 
         return ResponseEntity.ok(
@@ -66,7 +66,7 @@ public class RejectedOrderDocumentController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> previewConsentOrderNotApproved(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @RequestBody @ApiParam("CaseData") CallbackRequest request) {
-
+        log.info("Received request to preview generated 'Consent Order Not Approved' for Case ID: {}", request.getCaseDetails().getId());
         Map<String, Object> caseData = service.previewConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
 
         return ResponseEntity.ok(

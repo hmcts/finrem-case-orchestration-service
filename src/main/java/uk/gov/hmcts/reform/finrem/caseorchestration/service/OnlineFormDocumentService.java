@@ -31,18 +31,24 @@ public class OnlineFormDocumentService extends AbstractDocumentService {
     }
 
     public CaseDocument generateMiniFormA(String authorisationToken, CaseDetails caseDetails) {
+
+        log.info("Generating Mini Form A for Case ID : {}", caseDetails.getId());
         return generateDocument(authorisationToken, caseDetails,
                 config.getMiniFormTemplate(),
                 config.getMiniFormFileName());
     }
 
     public CaseDocument generateContestedMiniFormA(String authorisationToken, CaseDetails caseDetails) {
+
+        log.info("Generating Mini Form A for Case ID : {}", caseDetails.getId());
         return generateDocument(authorisationToken, translateOptions(caseDetails),
                 config.getContestedMiniFormTemplate(),
                 config.getContestedMiniFormFileName());
     }
 
     public CaseDocument generateDraftContestedMiniFormA(String authorisationToken, CaseDetails caseDetails) {
+
+        log.info("Generating Draft Contested Mini Form A for Case ID : {}", caseDetails.getId());
         CaseDocument caseDocument = generateDocument(authorisationToken, translateOptions(caseDetails),
                 config.getContestedDraftMiniFormTemplate(),
                 config.getContestedDraftMiniFormFileName());
