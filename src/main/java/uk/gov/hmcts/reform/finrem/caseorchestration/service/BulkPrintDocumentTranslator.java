@@ -30,6 +30,7 @@ public final class BulkPrintDocumentTranslator {
 
         if (documentList.size() > 0) {
             Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get(VALUE));
+            bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrderApprovedLetter"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "orderLetter"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrder"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "pensionDocuments", "uploadedDocument"));

@@ -26,6 +26,11 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         super(documentClient, config, objectMapper);
     }
 
+    public CaseDocument generateApprovedConsentOrderNotificationLetter(CaseDetails caseDetails, String authToken) {
+        return generateDocument(authToken, caseDetails,
+                config.getApprovedConsentOrderNotificationTemplate(),
+                config.getApprovedConsentOrderNotificationFileName());
+    }
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         return generateDocument(authToken, caseDetails,

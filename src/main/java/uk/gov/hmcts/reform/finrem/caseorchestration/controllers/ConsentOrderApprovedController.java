@@ -69,15 +69,17 @@ public class ConsentOrderApprovedController implements BaseController {
         List<PensionCollectionData> pensionDocs = getPensionDocuments(caseData);
 
         if (!isEmpty(latestConsentOrder)) {
-            CaseDocument letter = service.generateApprovedConsentOrderLetter(caseDetails, authToken);
+            CaseDocument approvedConsentOrderNotificationLetter = service.generateApprovedConsentOrderNotificationLetter(caseDetails, authToken);
+            CaseDocument approvedConsentOrderLetter = service.generateApprovedConsentOrderLetter(caseDetails, authToken);
             CaseDocument consentOrderAnnexStamped = service.annexStampDocument(latestConsentOrder, authToken);
 
-            log.info("letter= {}, consentOrderAnnexStamped = {}", letter, consentOrderAnnexStamped);
+            log.info("consentNotificationLetter= {}, letter= {}, consentOrderAnnexStamped = {}",
+                    approvedConsentOrderNotificationLetter, approvedConsentOrderLetter, consentOrderAnnexStamped);
 
             ApprovedOrder approvedOrder = ApprovedOrder.builder()
-                    .orderLetter(letter)
+                    .orderLetter(approvedConsentOrderLetter)
                     .consentOrder(consentOrderAnnexStamped)
-                    .consentOrderApprovedLetter(consentOrderAnnexStamped)
+                    .consentOrderApprovedLetter(approvedConsentOrderNotificationLetter)
                     .build();
 
             if (!isEmpty(pensionDocs)) {
