@@ -33,12 +33,13 @@ public class ValidateHearingController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> validateHearing(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request for validating a hearing. Auth token: {}, Case request : {}", authToken, callbackRequest);
+        log.info("Received request for validating a hearing for Case ID: {}", callbackRequest.getCaseDetails().getId());
 
         validateCaseData(callbackRequest);
 
         List<String> errors = validateHearingService.validateHearingErrors(callbackRequest.getCaseDetails());
         if (!errors.isEmpty()) {
+            log.info("Errors were found when validating case");
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errors)
                 .build());
@@ -46,6 +47,7 @@ public class ValidateHearingController implements BaseController {
 
         List<String> warnings = validateHearingService.validateHearingWarnings(callbackRequest.getCaseDetails());
         if (!warnings.isEmpty()) {
+            log.info("Warnings were found when validating case");
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
                 .warnings(warnings)
                 .build());

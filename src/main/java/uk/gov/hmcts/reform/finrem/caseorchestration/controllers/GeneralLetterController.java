@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -41,13 +43,14 @@ public class GeneralLetterController implements BaseController {
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        log.info("Received request for generating general letter. Auth token: {}, Case request : {}", authorisationToken, callback);
+        CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("Received request for generating general letter with Case ID: {}", caseDetails.getId());
 
         validateCaseData(callback);
 
-        Map<String, Object> generalLetters = service.createGeneralLetter(authorisationToken, callback.getCaseDetails());
+        Map<String, Object> generalLetters = service.createGeneralLetter(authorisationToken, caseDetails);
 
-        Map<String, Object> caseData = callback.getCaseDetails().getData();
+        Map<String, Object> caseData = caseDetails.getData();
         caseData.putAll(generalLetters);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
