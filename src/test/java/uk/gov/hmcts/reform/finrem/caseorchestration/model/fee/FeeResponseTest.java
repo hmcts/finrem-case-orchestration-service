@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_FEE_CODE;
 
 public class FeeResponseTest {
 
@@ -24,7 +23,7 @@ public class FeeResponseTest {
 
     @Test
     public void shouldCreateFeeResponseFromJson() {
-        assertThat(feeResponse.getCode(), is(TEST_FEE_CODE));
+        assertThat(feeResponse.getCode(), is("FEE0640"));
         assertThat(feeResponse.getDescription(), is("finrem"));
         assertThat(feeResponse.getVersion(), is("v1"));
         assertThat(feeResponse.getFeeAmount(), is(BigDecimal.valueOf(50)));

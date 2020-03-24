@@ -32,7 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.REJECTED_ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
 public class RefusalOrderDocumentServiceTest {
 
@@ -110,7 +109,7 @@ public class RefusalOrderDocumentServiceTest {
 
     private ConsentOrderData consentOrderData(Map<String, Object> caseData) {
         List<ConsentOrderData> list =
-                mapper.convertValue(caseData.get(UPLOAD_ORDER), new TypeReference<List<ConsentOrderData>>() {
+                mapper.convertValue(caseData.get("uploadOrder"), new TypeReference<List<ConsentOrderData>>() {
                 });
 
         return list

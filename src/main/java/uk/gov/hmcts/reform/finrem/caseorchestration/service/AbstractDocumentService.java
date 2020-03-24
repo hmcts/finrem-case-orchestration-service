@@ -50,7 +50,7 @@ public abstract class AbstractDocumentService {
         return documentClient.bulkPrint(bulkPrintRequest);
     }
 
-    void deleteDocument(String documentUrl, String authorisationToken) {
+    public void deleteDocument(String documentUrl, String authorisationToken) {
         documentClient.deleteDocument(documentUrl, authorisationToken);
     }
 
@@ -73,7 +73,7 @@ public abstract class AbstractDocumentService {
         return caseDocument;
     }
 
-    private Document toDocument(CaseDocument caseDocument) {
+    protected Document toDocument(CaseDocument caseDocument) {
         Document document = new Document();
         document.setBinaryUrl(caseDocument.getDocumentBinaryUrl());
         document.setFileName(caseDocument.getDocumentFilename());

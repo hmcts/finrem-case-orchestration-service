@@ -22,9 +22,6 @@ public class OrchestrationConstants {
     public static final String APPLICANT = "Applicant";
     public static final String RESPONDENT = "Respondent";
 
-    // Letter Types
-    public static final String FINANCIAL_REMEDY_PACK = "FINANCIAL_REMEDY_PACK";
-
     // CCD Fields
     public static final String APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD = "applicantFMName";
     public static final String APP_LAST_NAME_CCD_FIELD = "applicantLName";

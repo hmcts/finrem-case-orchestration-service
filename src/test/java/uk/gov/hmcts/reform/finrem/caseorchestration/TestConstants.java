@@ -18,6 +18,4 @@ public class TestConstants {
     public static final String TEST_FORM = "testForm";
     public static final String TEST_FORM_TYPE = "testFormType";
     public static final String TEST_BULK_UNSUPPORTED_FORM_TYPE = "unsupportedFormType";
-
-    public static final String TEST_FEE_CODE = "FEE0640";
 }

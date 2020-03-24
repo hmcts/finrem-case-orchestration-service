@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.FINANCIAL_REMEDY_PACK;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentTranslator.approvedOrderCollection;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocumentTranslator.uploadOrder;
 
@@ -39,7 +38,6 @@ public class BulkPrintService extends AbstractDocumentService {
         List<BulkPrintDocument> approvedOrderCollection = approvedOrderCollection(caseDetails.getData());
         List<BulkPrintDocument> uploadOrder = uploadOrder(caseDetails.getData());
 
-        // TODO: Confirm this is expected behaviour? - Why do we not also add upload orders?
         if (approvedOrderCollection.size() > 0) {
             log.info("Sending Approved Order Collections for Bulk Print.");
             bulkPrintDocuments.addAll(approvedOrderCollection);
@@ -53,7 +51,7 @@ public class BulkPrintService extends AbstractDocumentService {
         return bulkPrint(
             BulkPrintRequest.builder()
                 .caseId(caseDetails.getId().toString())
-                .letterType(FINANCIAL_REMEDY_PACK)
+                .letterType("FINANCIAL_REMEDY_PACK")
                 .bulkPrintDocuments(bulkPrintDocuments)
                 .build());
     }

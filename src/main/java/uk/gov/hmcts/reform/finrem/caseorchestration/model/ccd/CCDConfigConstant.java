@@ -5,7 +5,6 @@ public class CCDConfigConstant {
     //Case related
     public static final String STATE = "state";
     public static final String DIVORCE_CASE_NUMBER = "divorceCaseNumber";
-
     //Solicitor related
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
     public static final String SOLICITOR_NAME = "solicitorName";
@@ -13,10 +12,8 @@ public class CCDConfigConstant {
     public static final String CONTESTED_SOLICITOR_EMAIL = "applicantSolicitorEmail";
     public static final String CONTESTED_SOLICITOR_NAME = "applicantSolicitorName";
     public static final String SOLICITOR_FIRM = "solicitorFirm";
-
     //Application Type related
     public static final String D81_QUESTION = "d81Question";
-
     //Document related
     public static final String MINI_FORM_A = "miniFormA";
     public static final String PENSION_DOCS_COLLECTION = "pensionCollection";
@@ -26,15 +23,6 @@ public class CCDConfigConstant {
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
-    public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
-    public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
-    public static final String BULK_PRINT_LETTER_ID = "bulkPrintLetterId";
-    public static final String BULK_PRINT_LETTER_ID_APP = "bulkPrintLetterIdApp";
-    public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
-    public static final String BULK_PRINT_COVER_SHEET = "bulkPrintCoverSheet";
-    public static final String UPLOAD_ORDER = "uploadOrder";
-
-
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
     public static final String FEES = "Fees";
@@ -47,7 +35,6 @@ public class CCDConfigConstant {
     public static final String PBA_REFERENCE = "PBAreference";
     public static final String PBA_PAYMENT_REFERENCE = "PBAPaymentReference";
     public static final String AMOUNT_TO_PAY = "amountToPay";
-
     public static final String ISSUE_DATE = "issueDate";
     public static final String FAST_TRACK_DECISION = "fastTrackDecision";
     public static final String HEARING_DATE = "hearingDate";
@@ -61,5 +48,12 @@ public class CCDConfigConstant {
     public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
     public static final String ROLES = "roles";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
+    public static final String BULK_PRINT_COVER_SHEET = "bulkPrintCoverSheet";
+    public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
+    public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
+    public static final String BULK_PRINT_LETTER_ID = "bulkPrintLetterId";
+    public static final String BULK_PRINT_LETTER_ID_APP = "bulkPrintLetterIdApp";
+    public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
+    public static final String UPLOAD_ORDER = "uploadOrder";
     public static final String JUDGE_ALLOCATED = "judgeAllocated";
 }
