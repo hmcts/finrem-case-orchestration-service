@@ -62,6 +62,12 @@ public class ConsentOrderApprovedDocumentServiceTest {
         verify(documentClientMock, times(1)).generatePdf(any(), anyString());
     }
 
+
+    /*
+    Add unit tests
+     */
+
+
     @Test
     public void shouldAnnexAndStampDocument() {
         CaseDocument caseDocument = caseDocument();

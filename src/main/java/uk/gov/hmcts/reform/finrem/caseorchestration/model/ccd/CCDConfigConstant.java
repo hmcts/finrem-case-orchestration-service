@@ -54,6 +54,7 @@ public class CCDConfigConstant {
     public static final String BULK_PRINT_LETTER_ID = "bulkPrintLetterId";
     public static final String BULK_PRINT_LETTER_ID_APP = "bulkPrintLetterIdApp";
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
+    public static final String CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER = "consentOrderApprovedNotificationLetter";
     public static final String UPLOAD_ORDER = "uploadOrder";
     public static final String JUDGE_ALLOCATED = "judgeAllocated";
 }
