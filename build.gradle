@@ -273,7 +273,7 @@ def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/*
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/error/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/controllers/BulkScanController']
+                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/controllers/BulkScanController.java']
 
 sonarqube {
     properties {
