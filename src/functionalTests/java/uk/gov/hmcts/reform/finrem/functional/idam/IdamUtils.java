@@ -99,12 +99,14 @@ public class IdamUtils {
     public UserDetails createCaseworkerUser() {
         String username = String.format("%s-%s@%s", CASEWORKER_USERNAME_PREFIX, UUID.randomUUID(), TESTUSER_MAIL_DOMAIN);
         String password = "GNU-TP-chapter13";
-
-        createUser(username, password, "caseworker",
+        String[] roles = new String[] {
             "caseworker-divorce",
             "caseworker-divorce-financialremedy",
             "caseworker-divorce-financialremedy-courtadmin",
-            "caseworker-divorce-bulkscan");
+            "caseworker-divorce-bulkscan"
+        };
+
+        createUser(username, password, "caseworker", roles);
 
         String authToken = generateUserTokenWithNoRoles(username, password);
         String userId = getUserId(authToken);
@@ -130,8 +132,8 @@ public class IdamUtils {
         RegisterUserRequest registerUserRequest =
                 RegisterUserRequest.builder()
                         .email(username)
-                        .forename("Terry")
-                        .surname("Pratchett")
+                        .forename("Esme")
+                        .surname("Weatherwax")
                         .password(password)
                         .roles(rolesList.toArray(rolesArray))
                         .userGroup(UserGroup.builder().code(userGroup).build())

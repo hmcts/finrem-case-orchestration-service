@@ -22,10 +22,7 @@ import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 import uk.gov.hmcts.reform.finrem.functional.model.UserDetails;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -41,6 +38,7 @@ public class CcdBulkScanIntegrationTest {
     public static final String DIVORCE_JURISDICTION_ID = "DIVORCE";
     public static final String FR_CONSENTED_CASE_TYPE = "FinancialRemedyMVP2";
     public static final String FR_NEW_PAPER_CASE_EVENT_ID = "FR_newPaperCase";
+    public static final String DIVORCE_SERVICE_AUTHORISED_WITH_CCD = "divorce_ccd_submission";
 
     @Autowired
     private IdamUtils idamUtils;
@@ -62,9 +60,7 @@ public class CcdBulkScanIntegrationTest {
 
         try {
             UserDetails userDetails = idamUtils.createCaseworkerUser();
-            CaseDetails caseDetails = submitCase(caseData, userDetails);
-//            CaseDetails retrievedCase = retrieveCase(userDetails);
-            System.out.println("created case: " + caseDetails);
+            submitCase(caseData, userDetails);
         } finally {
             idamUtils.deleteTestUsers();
         }
@@ -86,7 +82,7 @@ public class CcdBulkScanIntegrationTest {
     }
 
     private CaseDetails submitCase(Object caseData, UserDetails userDetails) throws JsonProcessingException {
-        String serviceToken = idamUtils.generateServiceTokenWithValidMicroservice("FR_integration_test");
+        String serviceToken = idamUtils.generateServiceTokenWithValidMicroservice(DIVORCE_SERVICE_AUTHORISED_WITH_CCD);
 
         StartEventResponse startEventResponse = coreCaseDataApi.startForCaseworker(
             userDetails.getAuthToken(),
@@ -109,33 +105,16 @@ public class CcdBulkScanIntegrationTest {
             .build();
 
         CaseDetails caseDetails = coreCaseDataApi.submitForCaseworker(
-                userDetails.getAuthToken(),
-                serviceToken,
-                userDetails.getId(),
-                DIVORCE_JURISDICTION_ID,
-                FR_CONSENTED_CASE_TYPE,
-                true,
-                caseDataContent);
-
-        log.info("Created case ID {}", caseDetails.getId());
-
-        return caseDetails;
-    }
-
-    private CaseDetails retrieveCase(UserDetails userDetails) {
-        String serviceToken = idamUtils.generateServiceTokenWithValidMicroservice("divorce_ccd_submission");
-
-        List<CaseDetails> caseDetailsList = Optional.ofNullable(coreCaseDataApi.searchForCaseworker(
             userDetails.getAuthToken(),
             serviceToken,
             userDetails.getId(),
             DIVORCE_JURISDICTION_ID,
             FR_CONSENTED_CASE_TYPE,
-            Collections.emptyMap()
-        )).orElse(Collections.EMPTY_LIST);
+            true,
+            caseDataContent);
 
-//        assertThat(caseDetailsList.size(), is(1));
+        log.info("Created case ID {}", caseDetails.getId());
 
-        return caseDetailsList.get(0);
+        return caseDetails;
     }
 }
