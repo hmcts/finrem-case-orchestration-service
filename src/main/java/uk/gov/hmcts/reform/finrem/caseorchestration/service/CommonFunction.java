@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -15,11 +16,16 @@ public class CommonFunction {
         return o == null ? StringUtils.EMPTY : o.toString();
     }
 
-    public static final Function<List<Map>, Map>
+    static final Function<List<Map>, Map>
         getLastMapValue = (listMap) ->
         listMap.stream().reduce((first, second) -> second).get();
 
-    public static final Function<List<Map>, Map>
+    static final Function<List<Map>, Map>
         getFirstMapValue = (listMap) ->
         listMap.stream().findFirst().get();
+
+    static boolean addressLineOneAndPostCodeAreBothNotEmpty(Map address) {
+        return  ObjectUtils.isNotEmpty(address) && StringUtils.isNotBlank((String) address.get("AddressLine1"))
+                && StringUtils.isNotBlank((String) address.get("PostCode"));
+    }
 }

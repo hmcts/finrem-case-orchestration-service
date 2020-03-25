@@ -9,11 +9,27 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ConsentOrderApprovedNotificationLetter;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.join;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APP_ADDRESS_CCD_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APP_LAST_NAME_CCD_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APP_RESP_LAST_NAME_CCD_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APP_SOLICITOR_ADDRESS_CCD_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
 @Slf4j
@@ -28,44 +44,41 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
 
     public CaseDocument generateApprovedConsentOrderNotificationLetter(CaseDetails caseDetails, String authToken) {
 
-        return generateDocument(authToken, caseDetails,
-                config.getApprovedConsentOrderTemplate(),
-                config.getApprovedConsentOrderFileName());
-    }
-    /* Need to properly set case data for what to send to Docmosis template
-            Map<String, Object> caseData = caseDetails.getData();
-            Map addressToSendTo;
+        Map<String, Object> caseData = caseDetails.getData();
+        Map addressToSendTo;
 
-            String ccdNumber = String.valueOf(caseDetails.getId());
-            String recipientReference = "reeeeference";
-            String recipientName = "";
-            String applicantName = join(nullToEmpty(caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
-                    nullToEmpty(caseDetails.getData().get(APP_RESP_LAST_NAME_CCD_FIELD)));
-            String respondentName = join(nullToEmpty(caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
-                    nullToEmpty(caseDetails.getData().get(APP_RESP_LAST_NAME_CCD_FIELD)));
+        String ccdNumber = String.valueOf(caseDetails.getId());
+        String recipientReference = "reeeeference";
+        String recipientName = "";
+        String applicantName = join(nullToEmpty(caseData.get(APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
+                nullToEmpty(caseDetails.getData().get(APP_LAST_NAME_CCD_FIELD)));
+        String respondentName = join(nullToEmpty(caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
+                nullToEmpty(caseDetails.getData().get(APP_RESP_LAST_NAME_CCD_FIELD)));
 
-            String applicantRepresented = caseData.get(APPLICANT_REPRESENTED).toString();
+        String applicantRepresented = caseData.get(APPLICANT_REPRESENTED).toString();
 
-            if (applicantRepresented.equals(NO_VALUE)){
-                recipientName = applicantName;
-                addressToSendTo = (Map) caseData.get(APP_ADDRESS_CCD_FIELD);
+        if (applicantRepresented.equals(NO_VALUE)) {
+            recipientName = applicantName;
+            addressToSendTo = (Map) caseData.get(APP_ADDRESS_CCD_FIELD);
 
-            } else {
-                recipientName = nullToEmpty(caseData.get(SOLICITOR_NAME));
-                addressToSendTo = (Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
-            }
+        } else {
+            recipientName = nullToEmpty(caseData.get(SOLICITOR_NAME));
+            addressToSendTo = (Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
+        }
 
-        ConsentOrderApprovedNotificationLetterBuilder consentOrderApprovedNotificationLetterBuilder = builder()
+        ConsentOrderApprovedNotificationLetter.ConsentOrderApprovedNotificationLetterBuilder consentOrderApprovedNotificationLetterBuilder =
+                ConsentOrderApprovedNotificationLetter.builder()
                 .ccdNumber(ccdNumber)
                 .recipientRef(recipientReference)  // change this - confirm with Jeremy what it should be
                 .recipientName(recipientName)
                 .letterCreatedDate(String.valueOf(LocalDate.now()))
                 .applicantName(applicantName)
                 .respondentName(respondentName);
+        // Need to properly set case data for what to send to Docmosis template
 
         if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
             caseData.put(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER,
-                    getConsentOrderApprovedNotificationLetterBuilder(consentOrderApprovedNotificationLetterBuilder, addressToSendTo));
+                    getConsentOrderApprovedNotificationLetter(consentOrderApprovedNotificationLetterBuilder, addressToSendTo));
         }
 
         return generateDocument(authToken, caseDetails,
@@ -73,14 +86,10 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                 config.getApprovedConsentOrderNotificationFileName());
     }
 
-    private boolean addressLineOneAndPostCodeAreBothNotEmpty(Map address) {
-        return  ObjectUtils.isNotEmpty(address) && StringUtils.isNotBlank((String) address.get("AddressLine1"))
-                && StringUtils.isNotBlank((String) address.get("PostCode"));
-    }
+    private ConsentOrderApprovedNotificationLetter getConsentOrderApprovedNotificationLetter(
+            ConsentOrderApprovedNotificationLetter.ConsentOrderApprovedNotificationLetterBuilder consentOrderApprovedNotificationLetterBuilder,
+            Map<String, Object> address) {
 
-    private ConsentOrderApprovedNotificationLetter getConsentOrderApprovedNotificationLetterBuilder
-            (ConsentOrderApprovedNotificationLetterBuilder consentOrderApprovedNotificationLetterBuilder,
-             Map<String, Object> address) {
         return consentOrderApprovedNotificationLetterBuilder
                 .addressLine1(nullToEmpty(address.get("AddressLine1")))
                 .addressLine2(nullToEmpty(address.get("AddressLine2")))
@@ -91,7 +100,6 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                 .postCode(nullToEmpty(address.get("PostCode")))
                 .build();
     }
-    */
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         return generateDocument(authToken, caseDetails,
