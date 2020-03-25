@@ -5,6 +5,7 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FormAToCaseTransformer;
 
@@ -404,20 +405,21 @@ public class FormAToCaseTransformerTest {
     }
 
     private void assertChildrenInfo(Map<String, Object> transformedCaseData) {
-        List<Map<String, Object>> children = (List)(transformedCaseData.get("childrenInfo"));
+        List<Map<String, ChildInfo>> children = (List) (transformedCaseData.get("childrenInfo"));
 
-        assertChild((Map)(children.get(0)).get("value"), asList("Johny Bravo", "2000-03-12", "male", "son", "SON","New Zeeland"));
-        assertChild((Map)(children.get(1)).get("value"), asList("Anne Shirley", "1895-03-12", "female", "daughter", "Daughter","Canada"));
+        ChildInfo child1 = children.get(0).get("value");
+        ChildInfo child2 = children.get(1).get("value");
+
+        assertChild(child1, asList("Johny Bravo", "2000-03-12", "male", "son", "SON", "New Zeeland"));
+        assertChild(child2, asList("Anne Shirley", "1895-03-12", "female", "daughter", "Daughter", "Canada"));
     }
 
-    private void assertChild(Map<String, Object> child, List<String> values) {
-        assertThat(child, allOf(
-                hasEntry("name", values.get(0)),
-                hasEntry("dateOfBirth", values.get(1)),
-                hasEntry("gender", values.get(2)),
-                hasEntry("relationshipToApplicant", values.get(3)),
-                hasEntry("relationshipToRespondent", values.get(4)),
-                hasEntry("countryOfResidence", values.get(5))
-        ));
+    private void assertChild(ChildInfo child, List<String> values) {
+        assertThat(child.getName(), is(values.get(0)));
+        assertThat(child.getDateOfBirth(), is(values.get(1)));
+        assertThat(child.getGender(), is(values.get(2)));
+        assertThat(child.getRelationshipToApplicant(), is(values.get(3)));
+        assertThat(child.getRelationshipToRespondent(), is(values.get(4)));
+        assertThat(child.getCountryOfResidence(), is(values.get(5)));
     }
 }
