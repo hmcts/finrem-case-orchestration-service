@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
@@ -43,6 +44,11 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
     }
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
+        log.info(
+                "Generating Approved Consent Order Letter {} from {} for bulk print for case id: {} ",
+                config.getApprovedConsentOrderFileName(),
+                config.getApprovedConsentOrderTemplate(),
+                caseDetails.getId().toString());
         return generateDocument(authToken, caseDetails,
                 config.getApprovedConsentOrderTemplate(),
                 config.getApprovedConsentOrderFileName());
@@ -54,8 +60,8 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         Map addressToSendTo;
 
         String ccdNumber = String.valueOf(caseDetails.getId());
-        String recipientReference = "reeeeference";
-        String recipientName = "";
+        String recipientReference;
+        String recipientName;
         String applicantName = join(nullToEmpty(caseData.get(APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
                 nullToEmpty(caseDetails.getData().get(APP_LAST_NAME_CCD_FIELD)));
         String respondentName = join(nullToEmpty(caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
@@ -64,10 +70,12 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         String applicantRepresented = caseData.get(APPLICANT_REPRESENTED).toString();
 
         if (applicantRepresented.equals(NO_VALUE)) {
+            recipientReference = ""; // Confirm with Jeremy what this should be
             recipientName = applicantName;
             addressToSendTo = (Map) caseData.get(APP_ADDRESS_CCD_FIELD);
 
         } else {
+            recipientReference = nullToEmpty(caseData.get(SOLICITOR_REFERENCE));
             recipientName = nullToEmpty(caseData.get(SOLICITOR_NAME));
             addressToSendTo = (Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
         }
@@ -75,17 +83,22 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         ConsentOrderApprovedNotificationLetter.ConsentOrderApprovedNotificationLetterBuilder consentOrderApprovedNotificationLetterBuilder =
                 ConsentOrderApprovedNotificationLetter.builder()
                 .ccdNumber(ccdNumber)
-                .recipientRef(recipientReference)  // change this - confirm with Jeremy what it should be
+                .recipientRef(recipientReference)
                 .recipientName(recipientName)
                 .letterCreatedDate(String.valueOf(LocalDate.now()))
                 .applicantName(applicantName)
                 .respondentName(respondentName);
-        // Need to properly set case data for what to send to Docmosis template
 
         if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
             caseData.put(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER,
                     getConsentOrderApprovedNotificationLetter(consentOrderApprovedNotificationLetterBuilder, addressToSendTo));
         }
+
+        log.info(
+                "Generating Approved Consent Order Notification Letter {} from {} for bulk print for case id: {} ",
+                config.getApprovedConsentOrderFileName(),
+                config.getApprovedConsentOrderTemplate(),
+                caseDetails.getId().toString());
 
         return generateDocument(authToken, caseDetails,
                 config.getApprovedConsentOrderNotificationTemplate(),
