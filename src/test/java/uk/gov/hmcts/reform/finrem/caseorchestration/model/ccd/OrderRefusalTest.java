@@ -46,8 +46,8 @@ public class OrderRefusalTest {
             dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
             return dateFormat.parse(stringDate);
-        } catch (ParseException exeption) {
-            throw new IllegalArgumentException("Invalid date or format of date!", exeption);
+        } catch (ParseException exception) {
+            throw new IllegalArgumentException("Invalid date or format of date!", exception);
         }
     }
 }
