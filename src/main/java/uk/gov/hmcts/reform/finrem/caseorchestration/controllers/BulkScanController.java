@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -105,10 +104,7 @@ public class BulkScanController {
         String exceptionRecordId = exceptionRecord.getId();
         log.info("Transforming exception record to case. Id: {}", exceptionRecordId);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            log.info("Exception record [ID {}]. Body is: {}", exceptionRecordId, objectMapper.writeValueAsString(exceptionRecord));
-        } catch (JsonProcessingException ignored) { }
+        log.info("Exception record [ID {}]. Body is: {}", exceptionRecordId, getString(exceptionRecord));
 
         authService.assertIsServiceAllowedToUpdate(s2sAuthToken);
 
@@ -124,10 +120,7 @@ public class BulkScanController {
                         transformedCaseData))
                 .build();
 
-            try {
-                log.info("Returning successfully transformed response for exception record [id {}]",
-                        objectMapper.writeValueAsString(callbackResponse));
-            } catch (JsonProcessingException ignored) { }
+            log.info("Returning successfully transformed response for exception record [id {}]", getString(callbackResponse));
 
             controllerResponse = ok(callbackResponse);
         } catch (UnsupportedFormTypeException exception) {
@@ -165,5 +158,13 @@ public class BulkScanController {
 
     private OcrValidationResponse validateExceptionRecord(String formType, List<OcrDataField> ocrDataFields) {
         return new OcrValidationResponse(bulkScanService.validateBulkScanForm(formType, ocrDataFields));
+    }
+
+    private String getString(Object o) {
+        try {
+            return new ObjectMapper().writeValueAsString(o);
+        } catch (Exception e) {
+            return "";
+        }
     }
 }
