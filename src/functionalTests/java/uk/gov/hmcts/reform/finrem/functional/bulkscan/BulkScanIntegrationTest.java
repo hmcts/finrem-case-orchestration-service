@@ -9,13 +9,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.bsp.common.utils.ResourceLoader;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 @RunWith(SerenityRunner.class)
 @Slf4j
@@ -25,7 +20,7 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
     private String bulkScanValidationMicroService;
 
     @Value("${auth.provider.bulkscan.update.microservice}")
-    private String bulkScanTransformationAndUpdateMicroService;
+    private String bulkScanTransformationAndUpdateMicroservice;
 
     @Value("${case.orchestration.api-bsp}")
     private String cosBaseUrl;
@@ -37,11 +32,11 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
     
     public static final String FORM_A_JSON_PATH = "json/bulkscan/formA.json";
 
-    private static String body;
+    private String body;
 
     @Before
     public void setup() throws Exception {
-        body = loadValidBody();
+        body = ResourceLoader.loadResourceAsString(FORM_A_JSON_PATH);
     }
 
     @Test
@@ -56,7 +51,7 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
 
     @Test
     public void shouldGetServiceDeniedWhenUsingNonWhitelistedServiceForValidationEndPoint() {
-        String token = utils.getS2SToken(bulkScanTransformationAndUpdateMicroService);
+        String token = utils.getS2SToken(bulkScanTransformationAndUpdateMicroservice);
 
         Response forValidationEndpoint = responseForValidationEndpoint(token);
 
@@ -66,7 +61,7 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
 
     @Test
     public void shouldGetSuccessfulResponsesWhenUsingWhitelistedServiceForTransformationEndPoint() {
-        String token = utils.getS2SToken(bulkScanTransformationAndUpdateMicroService);
+        String token = utils.getS2SToken(bulkScanTransformationAndUpdateMicroservice);
 
         Response forTransformationEndpoint = responseForEndpoint(token, TRANSFORMATION_END_POINT);
 
@@ -111,15 +106,5 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
             .relaxedHTTPSValidation()
             .body(body)
             .post(cosBaseUrl + VALIDATION_END_POINT);
-    }
-
-    private String loadValidBody() throws URISyntaxException, IOException {
-        URL url = this.getClass().getClassLoader().getResource(FORM_A_JSON_PATH);
-
-        if (url == null) {
-            throw new IllegalArgumentException(String.format("Could not find resource in path %s", FORM_A_JSON_PATH));
-        }
-
-        return new String(Files.readAllBytes(Paths.get(url.toURI())));
     }
 }
