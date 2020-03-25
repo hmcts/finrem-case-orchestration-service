@@ -56,6 +56,18 @@
     { "name": "AuthorisationSigned", "value": "Yes" },
     { "name": "AuthorisationSignedBy", "value": "Applicant's solicitor" },
     { "name": "AuthorisationDate", "value": "12/03/2020" },
-    { "name": "AuthorisationSolicitorPosition", "value": "I'm the CEO" }
+    { "name": "AuthorisationSolicitorPosition", "value": "I'm the CEO" },
+    { "name": "NameOfChild1", "value": "Bob" },
+    { "name": "RelationshipToApplicantChild1", "value": "Father" },
+    { "name": "RelationshipToRespondentChild1", "value": "Mother" },
+    { "name": "CountryOfResidenceChild1", "value": "UK" },
+    { "name": "DateOfBirthChild1", "value": "03/06/2011" },
+    { "name": "GenderChild1", "value": "male" },
+    { "name": "NameOfChild2", "value": "Tommy" },
+    { "name": "RelationshipToApplicantChild2", "value": "Mother" },
+    { "name": "RelationshipToRespondentChild2", "value": "" },
+    { "name": "CountryOfResidenceChild2", "value": "FR" },
+    { "name": "DateOfBirthChild2", "value": "04/06/2010" },
+    { "name": "GenderChild2", "value": "female" }
   ]
 }

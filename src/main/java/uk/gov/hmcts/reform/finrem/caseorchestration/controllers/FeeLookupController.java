@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeCaseData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeItem;
@@ -46,11 +47,13 @@ public class FeeLookupController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeLookup(
             @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
             @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request for Fee lookup. Auth token: {}, Case request : {}", authToken, callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Received request for Fee lookup for Case ID {}", caseDetails.getId());
 
         validateCaseData(callbackRequest);
 
-        Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> mapOfCaseData = caseDetails.getData();
         ApplicationType applicationType = isConsentedApplication(mapOfCaseData) ? CONSENTED : CONTESTED;
         FeeResponse feeResponse = feeService.getApplicationFee(applicationType);
 

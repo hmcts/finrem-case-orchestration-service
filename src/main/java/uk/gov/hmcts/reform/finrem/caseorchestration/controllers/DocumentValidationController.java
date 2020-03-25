@@ -20,7 +20,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValid
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.DocumentValidationService;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Objects.nonNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -47,7 +49,9 @@ public class DocumentValidationController implements BaseController {
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest,
             @PathVariable("field") String field) {
 
-        log.info("Received request for checkUploadedFileType. Auth token: {}, Case request : {}", authorisationToken, callbackRequest);
+        Optional<Long> caseId = Optional.ofNullable(callbackRequest.getCaseDetails().getId());
+        log.info("Received request for checkUploadedFileType for Case ID: {}", caseId);
+
         validateCaseData(callbackRequest);
         return ResponseEntity.ok(response(callbackRequest, field, authorisationToken));
     }

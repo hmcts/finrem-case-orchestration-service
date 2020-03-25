@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.BulkScanValidationPatterns.CCD_EMAIL_REGEX;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.BulkScanValidationPatterns.CCD_PHONE_NUMBER_REGEX;
 import static uk.gov.hmcts.reform.bsp.common.service.validation.PostcodeValidator.validatePostcode;
@@ -36,9 +37,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SIGNED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SIGNED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DATE_OF_BIRTH_CHILD_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DATE_OF_BIRTH_CHILD_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DIVORCE_STAGE_REACHED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.GENDER_CHILD_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.GENDER_CHILD_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.HWF_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.NATURE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ORDER_FOR_CHILDREN;
@@ -55,8 +60,6 @@ public class FormAValidator extends BulkScanFormValidator {
 
     private static final String HWF_NUMBER_6_DIGITS_REGEX = "\\d{6}";
     private static final String DIVORCE_CASE_NUMBER_REGEX = "^([A-Z|a-z][A-Z|a-z])\\d{2}[D|d]\\d{5}$";
-
-    private static final String EMPTY_STRING = "";
 
     private static final List<String> MANDATORY_FIELDS = asList(
             DIVORCE_CASE_NUMBER,
@@ -116,13 +119,16 @@ public class FormAValidator extends BulkScanFormValidator {
         ALLOWED_VALUES_PER_FIELD.put(CHILD_SUPPORT_AGENCY_CALCULATION_MADE, asList(
                 "Yes",
                 "No",
-                EMPTY_STRING
+                EMPTY
         ));
         ALLOWED_VALUES_PER_FIELD.put(AUTHORISATION_SIGNED_BY, asList(
                 "Applicant",
                 "Litigation Friend",
                 "Applicant's solicitor"
         ));
+        final List<String> genderEnum = asList("male", "female", "notGiven");
+        ALLOWED_VALUES_PER_FIELD.put(GENDER_CHILD_1, genderEnum);
+        ALLOWED_VALUES_PER_FIELD.put(GENDER_CHILD_2, genderEnum);
     }
 
     @Override
@@ -132,15 +138,17 @@ public class FormAValidator extends BulkScanFormValidator {
 
     @Override
     protected List<String> runPostProcessingValidation(Map<String, String> fieldsMap) {
-
         List<String> errorMessages = Stream.of(
                 validateHwfNumber(fieldsMap, HWF_NUMBER),
                 validateHasAtLeastTwoNames(fieldsMap, APPLICANT_FULL_NAME),
                 validateHasAtLeastTwoNames(fieldsMap, RESPONDENT_FULL_NAME),
                 validateNonMandatoryCommaSeparatedField(fieldsMap,
                         NATURE_OF_APPLICATION, natureOfApplicationChecklistToCcdFieldNames),
-                validateNonMandatoryCommaSeparatedField(fieldsMap,
-                        DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames),
+                validateNonMandatoryCommaSeparatedField(
+                        fieldsMap,
+                        DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE,
+                        dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames
+                ),
                 validateField(fieldsMap, APPLICANT_SOLICITOR_PHONE, CCD_PHONE_NUMBER_REGEX),
                 validateField(fieldsMap, APPLICANT_PHONE, CCD_PHONE_NUMBER_REGEX),
                 validateField(fieldsMap, APPLICANT_SOLICITOR_EMAIL, CCD_EMAIL_REGEX),
@@ -155,6 +163,8 @@ public class FormAValidator extends BulkScanFormValidator {
                 .collect(Collectors.toList());
 
         validateFormDate(fieldsMap, AUTHORISATION_DATE).ifPresent(errorMessages::add);
+        validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_1).ifPresent(errorMessages::add);
+        validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_2).ifPresent(errorMessages::add);
 
         return errorMessages;
     }

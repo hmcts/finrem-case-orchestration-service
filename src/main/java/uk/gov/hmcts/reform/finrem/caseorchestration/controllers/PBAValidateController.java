@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService;
 
 import java.util.Map;
@@ -36,16 +37,18 @@ public class PBAValidateController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaValidate(
             @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
             @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request for PBA validate. Auth token: {}, Case request : {}", authToken, callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Received request to validate PBA number for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callbackRequest);
 
-        Map<String,Object> caseData = callbackRequest.getCaseDetails().getData();
+        Map<String,Object> caseData = caseDetails.getData();
         if (isPBAPayment(caseData)) {
             String pbaNumber = Objects.toString(caseData.get(PBA_NUMBER));
-            log.info("Validate PBA Number :  {}", pbaNumber);
+            log.info("Validating PBA Number: {}", pbaNumber);
             if (!pbaValidationService.isValidPBA(authToken, pbaNumber)) {
-                log.info("PBA number is invalid.");
+                log.info("PBA number for is invalid for Case ID: {}", caseDetails.getId());
                 return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(ImmutableList.of("PBA Account Number is not valid, please enter a valid one."))
                     .build());

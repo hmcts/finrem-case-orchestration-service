@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -33,7 +34,7 @@ public class DocumentController implements BaseController {
     private OnlineFormDocumentService service;
 
     @PostMapping(path = "/documents/generate-mini-form-a", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles Mini Form A generation. Serves as a callback from CCD")
+    @ApiOperation(value = "Handles Consented Mini Form A generation. Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
@@ -42,6 +43,8 @@ public class DocumentController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateMiniFormA(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+
+        log.info("Received request to generate Consented Mini Form A for Case ID : {}", callback.getCaseDetails().getId());
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         CaseDocument document = service.generateMiniFormA(authorisationToken, callback.getCaseDetails());

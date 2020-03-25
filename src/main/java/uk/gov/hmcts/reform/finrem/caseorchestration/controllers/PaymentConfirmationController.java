@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
 
@@ -34,17 +35,15 @@ public class PaymentConfirmationController implements BaseController {
     public ResponseEntity<SubmittedCallbackResponse> paymentConfirmation(
             @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
             @RequestBody CallbackRequest callbackRequest) throws IOException {
-        log.info("Received request for PBA confirmation. Auth token: {}, Case request : {}", authToken, callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Received request for PBA confirmation for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callbackRequest);
-
-        Map<String,Object> caseData = callbackRequest.getCaseDetails().getData();
-
-        String confirmationBody = confirmationBody(caseData);
-        log.info("confirmationBody : {}", confirmationBody);
+        Map<String,Object> caseData = caseDetails.getData();
 
         SubmittedCallbackResponse callbackResponse = SubmittedCallbackResponse.builder()
-            .confirmationBody(confirmationBody)
+            .confirmationBody(confirmationBody(caseData))
             .build();
 
         return ResponseEntity.ok(callbackResponse);
