@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -11,26 +9,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ConsentOrderApprovedNotificationLetter;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.StringUtils.join;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APP_ADDRESS_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APP_RESP_LAST_NAME_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APP_SOLICITOR_ADDRESS_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ConsentOrderApprovedNotificationLetter.ConsentOrderApprovedNotificationLetterBuilder;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ConsentOrderApprovedNotificationLetter.builder;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
 @Slf4j
@@ -45,6 +28,11 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
 
     public CaseDocument generateApprovedConsentOrderNotificationLetter(CaseDetails caseDetails, String authToken) {
 
+        return generateDocument(authToken, caseDetails,
+                config.getApprovedConsentOrderTemplate(),
+                config.getApprovedConsentOrderFileName());
+    }
+    /* Need to properly set case data for what to send to Docmosis template
             Map<String, Object> caseData = caseDetails.getData();
             Map addressToSendTo;
 
@@ -103,6 +91,7 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                 .postCode(nullToEmpty(address.get("PostCode")))
                 .build();
     }
+    */
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         return generateDocument(authToken, caseDetails,
