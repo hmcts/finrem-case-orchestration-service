@@ -15,7 +15,7 @@ public class ChildrenListTest {
 
     @Test
     public void shouldBeAnEmptyList() {
-        assertThat(new ChildrenList(), is(0));
+        assertThat(new ChildrenList().size(), is(0));
     }
 
     @Test
