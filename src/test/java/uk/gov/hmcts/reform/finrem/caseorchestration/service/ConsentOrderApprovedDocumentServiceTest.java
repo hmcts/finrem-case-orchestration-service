@@ -38,6 +38,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocu
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
@@ -89,8 +91,8 @@ public class ConsentOrderApprovedDocumentServiceTest {
         caseData.put(APP_LAST_NAME_CCD_FIELD, "Joyce");
         caseData.put(APP_ADDRESS_CCD_FIELD, applicantAddress);
         caseData.put(APPLICANT_REPRESENTED, "No");
-        caseData.put(SOLICITOR_NAME, "Saul Goodman");
-        caseData.put(SOLICITOR_REFERENCE, "RG-123456789");
+        caseData.put(SOLICITOR_NAME, TEST_SOLICITOR_NAME);
+        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
         caseData.put(APP_SOLICITOR_ADDRESS_CCD_FIELD, solicitorAddress);
         caseData.put(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD, "Jane");
         caseData.put(APP_RESP_LAST_NAME_CCD_FIELD, "Doe");
@@ -143,7 +145,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
     public void shouldGenerateApprovedConsentOrderNotificationLetterForApplicantSolicitor() {
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
-        caseDetails.getData().replace("applicantRepresented", YES_VALUE);
+        caseDetails.getData().replace(APPLICANT_REPRESENTED, YES_VALUE);
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
                 service.generateApprovedConsentOrderNotificationLetter(caseDetails, AUTH_TOKEN);

@@ -9,8 +9,8 @@ public class TestConstants {
     public static final String TEST_SOLICITOR_ACCOUNT_NUMBER = "test.solicitor.account";
     public static final String TEST_SOLICITOR_FIRM_NAME = "test.solicitor.firm";
     public static final String TEST_SOLICITOR_COMPANY = "Awesome Solicitors LLP";
-    public static final String TEST_SOLICITOR_REFERENCE = "test.solicitor.reference";
-    public static final String TEST_SOLICITOR_NAME = "Solicitor name";
+    public static final String TEST_SOLICITOR_REFERENCE = "RG-123456789";
+    public static final String TEST_SOLICITOR_NAME = "Saul Goodman";
     public static final String TEST_SOLICITOR_EMAIL = "testSolicitor@email.com";
 
     public static final String TEST_KEY = "testKey";
