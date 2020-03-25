@@ -102,8 +102,6 @@ public class ConsentOrderApprovedDocumentServiceTest {
 
         doCaseDocumentAssert(generatedApprovedConsentOrderNotificationLetter);
         verify(documentClientMock, times(1)).generatePdf(any(), anyString());
-
-        // Add assertions for specific data like CCD number etc
     }
 
     @Test
