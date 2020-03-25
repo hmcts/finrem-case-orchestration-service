@@ -2,7 +2,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -60,20 +59,16 @@ public class ConsentOrderApprovedDocumentServiceTest {
         }
     }
 
+    private CaseDetails caseDetailsSolicitorRepresented() throws Exception {
+        try (InputStream resourceAsStream =
+                     getClass().getResourceAsStream("/fixtures/bulk-print-with-solicitors.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
+    }
+
     @Test
     public void shouldGenerateApprovedConsentOrderLetter() throws Exception {
         Map<String, Object> caseData = caseDetails().getData();
-
-        /*
-        String ccdNumber = String.valueOf(caseDetails.getId());
-        String recipientReference = "reeeeference";
-        String recipientName = "";
-        String applicantName = join(nullToEmpty(caseData.get(APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
-                nullToEmpty(caseDetails.getData().get(APP_LAST_NAME_CCD_FIELD)));
-        String respondentName = join(nullToEmpty(caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
-                nullToEmpty(caseDetails.getData().get(APP_RESP_LAST_NAME_CCD_FIELD)));
-        String applicantRepresented = caseData.get(APPLICANT_REPRESENTED).toString();
-         */
 
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
@@ -84,47 +79,21 @@ public class ConsentOrderApprovedDocumentServiceTest {
         verify(documentClientMock, times(1)).generatePdf(any(), anyString());
     }
 
-    /*
-    Add unit tests for both Applicant & Applicant Solicitor
-     */
     @Test
     public void shouldGenerateApprovedConsentOrderNotificationLetterForApplicant() throws Exception {
         Map<String, Object> caseData = caseDetails().getData();
 
-        /*
-        String ccdNumber = String.valueOf(caseDetails.getId());
-        String recipientReference = "reeeeference";
-        String recipientName = "";
-        String applicantName = join(nullToEmpty(caseData.get(APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
-                nullToEmpty(caseDetails.getData().get(APP_LAST_NAME_CCD_FIELD)));
-        String respondentName = join(nullToEmpty(caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
-                nullToEmpty(caseDetails.getData().get(APP_RESP_LAST_NAME_CCD_FIELD)));
-        String applicantRepresented = caseData.get(APPLICANT_REPRESENTED).toString();
-         */
-
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter = service.generateApprovedConsentOrderNotificationLetter(
                 CaseDetails.builder().data(caseData).build(), AUTH_TOKEN);
 
         doCaseDocumentAssert(generatedApprovedConsentOrderNotificationLetter);
-        verify(documentClientMock, times(1)).generatePdf(any(), anyString());
     }
 
     @Test
     public void shouldGenerateApprovedConsentOrderNotificationLetterForApplicantSolicitor() throws Exception {
-        Map<String, Object> caseData = caseDetails().getData();
-
-        /*
-        String ccdNumber = String.valueOf(caseDetails.getId());
-        String recipientReference = "reeeeference";
-        String recipientName = "";
-        String applicantName = join(nullToEmpty(caseData.get(APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
-                nullToEmpty(caseDetails.getData().get(APP_LAST_NAME_CCD_FIELD)));
-        String respondentName = join(nullToEmpty(caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
-                nullToEmpty(caseDetails.getData().get(APP_RESP_LAST_NAME_CCD_FIELD)));
-        String applicantRepresented = caseData.get(APPLICANT_REPRESENTED).toString();
-         */
+        Map<String, Object> caseData = caseDetailsSolicitorRepresented().getData();
 
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
@@ -133,6 +102,8 @@ public class ConsentOrderApprovedDocumentServiceTest {
 
         doCaseDocumentAssert(generatedApprovedConsentOrderNotificationLetter);
         verify(documentClientMock, times(1)).generatePdf(any(), anyString());
+
+        // Add assertions for specific data like CCD number etc
     }
 
     @Test
@@ -152,8 +123,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
     public void shouldStampDocument() {
         CaseDocument caseDocument = caseDocument();
 
-        when(documentClientMock.stampDocument(any(), anyString()))
-                .thenReturn(document());
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
 
         CaseDocument stampDocument = service.stampDocument(caseDocument, AUTH_TOKEN);
 
@@ -165,8 +135,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
     public void shouldStampPensionDocuments() {
         List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
 
-        when(documentClientMock.stampDocument(any(), anyString()))
-                .thenReturn(document());
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
 
         List<PensionCollectionData> stampPensionDocuments = service.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
 

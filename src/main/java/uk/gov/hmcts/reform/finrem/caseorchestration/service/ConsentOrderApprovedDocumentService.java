@@ -42,6 +42,12 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         super(documentClient, config, objectMapper);
     }
 
+    public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
+        return generateDocument(authToken, caseDetails,
+                config.getApprovedConsentOrderTemplate(),
+                config.getApprovedConsentOrderFileName());
+    }
+
     public CaseDocument generateApprovedConsentOrderNotificationLetter(CaseDetails caseDetails, String authToken) {
 
         Map<String, Object> caseData = caseDetails.getData();
@@ -101,12 +107,6 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                 .build();
     }
 
-    public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
-        return generateDocument(authToken, caseDetails,
-                config.getApprovedConsentOrderTemplate(),
-                config.getApprovedConsentOrderFileName());
-    }
-
     public CaseDocument annexStampDocument(CaseDocument document, String authToken) {
         return super.annexStampDocument(document, authToken);
     }
@@ -133,5 +133,4 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
             throw new IllegalStateException();
         }
     }
-
 }
