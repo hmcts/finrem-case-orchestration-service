@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper;
@@ -11,7 +10,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -204,7 +202,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         ChildrenList children = new ChildrenList();
         int i = 1;
         while (isChildInfoPopulated(i, ocrDataFields)) {
-            children.addValue(mapChild(i, ocrDataFields));
+            children.addChild(mapChild(i, ocrDataFields));
             i++;
         }
 

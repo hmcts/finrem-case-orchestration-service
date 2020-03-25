@@ -22,8 +22,20 @@ public class ChildrenList extends ArrayList<ImmutableMap<String, ChildInfo>> {
      * */
     public static final String COMPLEX_TYPE_KEY = "value";
 
-    public boolean addValue(ChildInfo childInfo) {
+    public boolean addChild(ChildInfo childInfo) {
         return this.add(createElement(childInfo));
+    }
+
+    public ChildInfo getChild(int index) {
+        if (index < 0) {
+            throw new IllegalArgumentException("Index must not be less than 0");
+        }
+
+        if (index > size()) {
+            throw new IllegalArgumentException("Index must not be greater than size of array");
+        }
+
+        return this.get(index).get(COMPLEX_TYPE_KEY);
     }
 
     private ImmutableMap<String, ChildInfo> createElement(ChildInfo childInfo) {
