@@ -60,7 +60,7 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         Map addressToSendTo;
 
         String ccdNumber = String.valueOf(caseDetails.getId());
-        String recipientReference;
+        String recipientReference = "";
         String recipientName;
         String applicantName = join(nullToEmpty(caseData.get(APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
                 nullToEmpty(caseDetails.getData().get(APP_LAST_NAME_CCD_FIELD)));
@@ -74,7 +74,6 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
             recipientName = nullToEmpty(caseData.get(SOLICITOR_NAME));
             addressToSendTo = (Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
         } else {
-            recipientReference = ""; // Confirm with Jeremy what this should be
             recipientName = applicantName;
             addressToSendTo = (Map) caseData.get(APP_ADDRESS_CCD_FIELD);
         }
