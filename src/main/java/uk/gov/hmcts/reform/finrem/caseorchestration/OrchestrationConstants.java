@@ -22,17 +22,6 @@ public class OrchestrationConstants {
     public static final String APPLICANT = "Applicant";
     public static final String RESPONDENT = "Respondent";
 
-    // CCD Fields
-    public static final String APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD = "applicantFMName";
-    public static final String APP_LAST_NAME_CCD_FIELD = "applicantLName";
-    public static final String APP_ADDRESS_CCD_FIELD = "applicantAddress";
-    public static final String APP_SOLICITOR_ADDRESS_CCD_FIELD = "solicitorAddress";
-
-    public static final String APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD = "appRespondentFMName";
-    public static final String APP_RESP_LAST_NAME_CCD_FIELD = "appRespondentLName";
-    public static final String RESP_ADDRESS_CCD_FIELD = "respondentAddress";
-    public static final String RESP_SOLICITOR_ADDRESS_CCD_FIELD = "rSolicitorAddress";
-
     // Document Generation
     public static final String DOCUMENT_FILENAME = "document_filename";
     public static final String DOCUMENT_URL = "document_binary_url";

@@ -5,6 +5,15 @@ public class CCDConfigConstant {
     //Case related
     public static final String STATE = "state";
     public static final String DIVORCE_CASE_NUMBER = "divorceCaseNumber";
+
+    public static final String APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD = "applicantFMName";
+    public static final String APP_LAST_NAME_CCD_FIELD = "applicantLName";
+    public static final String APP_ADDRESS_CCD_FIELD = "applicantAddress";
+
+    public static final String APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD = "appRespondentFMName";
+    public static final String APP_RESP_LAST_NAME_CCD_FIELD = "appRespondentLName";
+    public static final String RESP_ADDRESS_CCD_FIELD = "respondentAddress";
+
     //Solicitor related
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
     public static final String SOLICITOR_NAME = "solicitorName";
@@ -12,8 +21,13 @@ public class CCDConfigConstant {
     public static final String CONTESTED_SOLICITOR_EMAIL = "applicantSolicitorEmail";
     public static final String CONTESTED_SOLICITOR_NAME = "applicantSolicitorName";
     public static final String SOLICITOR_FIRM = "solicitorFirm";
+    public static final String APP_SOLICITOR_ADDRESS_CCD_FIELD = "solicitorAddress";
+    public static final String RESP_SOLICITOR_ADDRESS_CCD_FIELD = "rSolicitorAddress";
+    public static final String APPLICANT_REPRESENTED = "applicantRepresented";
+
     //Application Type related
     public static final String D81_QUESTION = "d81Question";
+
     //Document related
     public static final String MINI_FORM_A = "miniFormA";
     public static final String PENSION_DOCS_COLLECTION = "pensionCollection";
@@ -23,6 +37,7 @@ public class CCDConfigConstant {
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
+
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
     public static final String FEES = "Fees";
@@ -42,12 +57,15 @@ public class CCDConfigConstant {
     public static final String MIAM_ATTENDANCE = "applicantAttendedMIAM";
     public static final String MIAM_EXEMPTION = "claimingExemptionMIAM";
     public static final String IS_ADMIN = "isAdmin";
-    public static final String APPLICANT_REPRESENTED = "applicantRepresented";
+
     public static final String YES = "Yes";
     public static final String NO = "No";
     public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
     public static final String ROLES = "roles";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
+    public static final String JUDGE_ALLOCATED = "judgeAllocated";
+
+    // Bulk Print
     public static final String BULK_PRINT_COVER_SHEET = "bulkPrintCoverSheet";
     public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
     public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
@@ -56,5 +74,4 @@ public class CCDConfigConstant {
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
     public static final String CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER = "consentOrderApprovedNotificationLetter";
     public static final String UPLOAD_ORDER = "uploadOrder";
-    public static final String JUDGE_ALLOCATED = "judgeAllocated";
 }

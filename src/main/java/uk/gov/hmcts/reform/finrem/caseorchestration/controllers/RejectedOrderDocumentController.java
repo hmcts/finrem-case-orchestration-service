@@ -38,7 +38,7 @@ public class RejectedOrderDocumentController {
                 response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
-        })
+    })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateConsentOrderNotApproved(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @RequestBody @ApiParam("CaseData") CallbackRequest request) {
