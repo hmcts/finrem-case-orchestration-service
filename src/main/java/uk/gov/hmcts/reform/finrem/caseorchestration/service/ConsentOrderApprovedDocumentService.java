@@ -24,7 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APP_RESP_LAST_NAME_CCD_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.APP_SOLICITOR_ADDRESS_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
@@ -67,17 +67,16 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         String respondentName = join(nullToEmpty(caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
                 nullToEmpty(caseDetails.getData().get(APP_RESP_LAST_NAME_CCD_FIELD)));
 
-        String applicantRepresented = caseData.get(APPLICANT_REPRESENTED).toString();
+        String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED).toString());
 
-        if (applicantRepresented.equals(NO_VALUE)) {
-            recipientReference = ""; // Confirm with Jeremy what this should be
-            recipientName = applicantName;
-            addressToSendTo = (Map) caseData.get(APP_ADDRESS_CCD_FIELD);
-
-        } else {
+        if (applicantRepresented.equals(YES_VALUE)) {
             recipientReference = nullToEmpty(caseData.get(SOLICITOR_REFERENCE));
             recipientName = nullToEmpty(caseData.get(SOLICITOR_NAME));
             addressToSendTo = (Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
+        } else {
+            recipientReference = ""; // Confirm with Jeremy what this should be
+            recipientName = applicantName;
+            addressToSendTo = (Map) caseData.get(APP_ADDRESS_CCD_FIELD);
         }
 
         ConsentOrderApprovedNotificationLetter.ConsentOrderApprovedNotificationLetterBuilder consentOrderApprovedNotificationLetterBuilder =
