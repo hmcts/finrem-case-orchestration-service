@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * This model is added to make working with complex type FR_ChildrenInfo
  * (that is a Collection of complex types FR_ChildInfo) a bit let confusing.
  * */
-public class ChildrenList extends ArrayList<ImmutableMap<String, ChildInfo>> {
+public class ChildrenInfo extends ArrayList<ImmutableMap<String, ChildInfo>> {
 
     /**
      * CCD requires collections of complex types to have quite specific structure.

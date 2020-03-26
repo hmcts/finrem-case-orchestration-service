@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 
 import java.util.HashMap;
@@ -199,7 +199,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
     }
 
     private void addMappingsToChildren(List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
-        ChildrenList children = new ChildrenList();
+        ChildrenInfo children = new ChildrenInfo();
         int i = 1;
         while (isChildInfoPopulated(i, ocrDataFields)) {
             children.addChild(mapChild(i, ocrDataFields));

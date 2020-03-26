@@ -6,7 +6,7 @@ import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FormAToCaseTransformer;
 
@@ -406,7 +406,7 @@ public class FormAToCaseTransformerTest {
     }
 
     private void assertChildrenInfo(Map<String, Object> transformedCaseData) {
-        ChildrenList children = (ChildrenList) transformedCaseData.get("childrenInfo");
+        ChildrenInfo children = (ChildrenInfo) transformedCaseData.get("childrenInfo");
 
         ChildInfo child1 = children.getChild(0);
         ChildInfo child2 = children.getChild(1);

@@ -8,19 +8,19 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.rules.ExpectedException.none;
 
-public class ChildrenListTest {
+public class ChildrenInfoTest {
 
     @Rule
     public ExpectedException expectedException = none();
 
     @Test
     public void shouldBeAnEmptyList() {
-        assertThat(new ChildrenList().size(), is(0));
+        assertThat(new ChildrenInfo().size(), is(0));
     }
 
     @Test
     public void addChildShouldGetAValidObject() {
-        ChildrenList list = new ChildrenList();
+        ChildrenInfo list = new ChildrenInfo();
         list.addChild(ChildInfo.builder().name("John").build());
 
         assertThat(list.size(), is(1));
@@ -29,7 +29,7 @@ public class ChildrenListTest {
 
     @Test
     public void addChildCanAddTheSameObjectManyTimes() {
-        ChildrenList list = new ChildrenList();
+        ChildrenInfo list = new ChildrenInfo();
         ChildInfo child = ChildInfo.builder().name("Adam").build();
 
         list.addChild(child);
@@ -43,7 +43,7 @@ public class ChildrenListTest {
 
     @Test
     public void addChildAddsObjectsInOrder() {
-        ChildrenList list = new ChildrenList();
+        ChildrenInfo list = new ChildrenInfo();
 
         list.addChild(ChildInfo.builder().name("Steven").build());
         list.addChild(ChildInfo.builder().name("George").build());
@@ -60,7 +60,7 @@ public class ChildrenListTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("Index must not be less than 0");
 
-        new ChildrenList().getChild(-10);
+        new ChildrenInfo().getChild(-10);
     }
 
     @Test
@@ -68,6 +68,6 @@ public class ChildrenListTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("Index must not be greater than size of array");
 
-        new ChildrenList().getChild(1);
+        new ChildrenInfo().getChild(1);
     }
 }
