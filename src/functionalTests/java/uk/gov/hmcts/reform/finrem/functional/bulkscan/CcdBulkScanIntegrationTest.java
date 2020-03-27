@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.functional.bulkscan;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
@@ -35,16 +36,19 @@ public class CcdBulkScanIntegrationTest {
 
     private static final String FORM_A_JSON = "json/bulkscan/formA.json";
     private static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorization";
-    public static final String DIVORCE_JURISDICTION_ID = "DIVORCE";
-    public static final String FR_CONSENTED_CASE_TYPE = "FinancialRemedyMVP2";
-    public static final String FR_NEW_PAPER_CASE_EVENT_ID = "FR_newPaperCase";
-    public static final String DIVORCE_SERVICE_AUTHORISED_WITH_CCD = "divorce_ccd_submission";
+    private static final String DIVORCE_JURISDICTION_ID = "DIVORCE";
+    private static final String FR_CONSENTED_CASE_TYPE = "FinancialRemedyMVP2";
+    private static final String FR_NEW_PAPER_CASE_EVENT_ID = "FR_newPaperCase";
+    private static final String DIVORCE_SERVICE_AUTHORISED_WITH_CCD = "divorce_ccd_submission";
 
     @Autowired
     private IdamUtils idamUtils;
 
     @Autowired
     private CoreCaseDataApi coreCaseDataApi;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Value("${case.orchestration.api-bsp}")
     private String cosBaseUrl;
@@ -103,6 +107,8 @@ public class CcdBulkScanIntegrationTest {
                 .build())
             .eventToken(startEventResponse.getToken())
             .build();
+
+        log.info("submit: " + objectMapper.writeValueAsString(caseDataContent));
 
         CaseDetails caseDetails = coreCaseDataApi.submitForCaseworker(
             userDetails.getAuthToken(),
