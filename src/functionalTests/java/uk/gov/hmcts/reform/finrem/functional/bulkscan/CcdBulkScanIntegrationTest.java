@@ -108,6 +108,7 @@ public class CcdBulkScanIntegrationTest {
             .eventToken(startEventResponse.getToken())
             .build();
 
+        log.info("Jackson: " + com.fasterxml.jackson.databind.cfg.PackageVersion.VERSION);
         log.info("submit: " + objectMapper.writeValueAsString(caseDataContent));
 
         CaseDetails caseDetails = coreCaseDataApi.submitForCaseworker(
