@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.Map;
@@ -27,6 +29,9 @@ public class NotificationsController implements BaseController {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private BulkPrintService bulkPrintService;
+
     @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for HWF Successful.")
     @ApiResponses(value = {
@@ -39,8 +44,13 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (isConsentedApplication(caseData)) {
             if (isSolicitorAgreedToReceiveEmails(caseData, "solicitorAgreeToReceiveEmails")) {
-                log.info("Sending Consented HWF Successful email notification to Solicitor");
-                notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest);
+                if (isPaperApplication(caseData)) {
+                    log.info("Sending Consented HWF Successful letter to bulk print");
+                    bulkPrintService.sendForBulkPrint(caseDocumentForHwfSuccess(), callbackRequest.getCaseDetails());
+                } else {
+                    log.info("Sending Consented HWF Successful email notification to Solicitor");
+                    notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest);
+                }
             }
         } else if (isSolicitorAgreedToReceiveEmails(caseData,
                 "applicantSolicitorConsentForEmails")) {
@@ -121,5 +131,13 @@ public class NotificationsController implements BaseController {
     private boolean isSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData, String solicitorAgreeToReceiveEmails) {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData
                 .get(solicitorAgreeToReceiveEmails)));
+    }
+
+    private boolean isPaperApplication(Map<String, Object> mapOfCaseData) {
+        return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData.get("paperApplication")));
+    }
+
+    private CaseDocument caseDocumentForHwfSuccess() {
+        return new CaseDocument();
     }
 }
