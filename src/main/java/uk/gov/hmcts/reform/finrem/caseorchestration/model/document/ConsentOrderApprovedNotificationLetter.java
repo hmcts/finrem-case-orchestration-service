@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
 public class ConsentOrderApprovedNotificationLetter {
 
     @JsonProperty("addressee")
-    private String addressee;
+    private Addressee addressee;
 
     @JsonProperty("reference")
     private String reference;
@@ -26,9 +26,6 @@ public class ConsentOrderApprovedNotificationLetter {
 
     @JsonProperty("letterDate")
     private String letterDate;
-
-    @JsonProperty("formattedAddress")
-    private String formattedAddress;
 
     @JsonProperty("caseNumber")
     private String caseNumber;

@@ -124,12 +124,12 @@ public class ConsentOrderApprovedDocumentServiceTest {
         ConsentOrderApprovedNotificationLetter consentOrderApprovedNotificationLetter
                 = (ConsentOrderApprovedNotificationLetter) caseDetails.getData().get(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER);
 
-        assertThat(consentOrderApprovedNotificationLetter.getAddressee(), is("James Joyce"));
+        assertThat(consentOrderApprovedNotificationLetter.getAddressee().getName(), is("James Joyce"));
         assertThat(consentOrderApprovedNotificationLetter.getReference(), is(""));
         assertThat(consentOrderApprovedNotificationLetter.getApplicantName(), is("James Joyce"));
         assertThat(consentOrderApprovedNotificationLetter.getRespondentName(), is("Jane Doe"));
         assertThat(consentOrderApprovedNotificationLetter.getLetterDate(), is(String.valueOf(LocalDate.now())));
-        assertThat(consentOrderApprovedNotificationLetter.getFormattedAddress(), is(
+        assertThat(consentOrderApprovedNotificationLetter.getAddressee().getFormattedAddress(), is(
                 "50 Applicant Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSW1"));
         assertThat(consentOrderApprovedNotificationLetter.getCaseNumber(), is("123456789"));
     }
@@ -149,15 +149,13 @@ public class ConsentOrderApprovedDocumentServiceTest {
         ConsentOrderApprovedNotificationLetter consentOrderApprovedNotificationLetter
                 = (ConsentOrderApprovedNotificationLetter) caseDetails.getData().get(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER);
 
-        assertThat(consentOrderApprovedNotificationLetter.getAddressee(), is("Saul Goodman"));
+        assertThat(consentOrderApprovedNotificationLetter.getAddressee().getName(), is("Saul Goodman"));
         assertThat(consentOrderApprovedNotificationLetter.getReference(), is("RG-123456789"));
         assertThat(consentOrderApprovedNotificationLetter.getApplicantName(), is("James Joyce"));
         assertThat(consentOrderApprovedNotificationLetter.getRespondentName(), is("Jane Doe"));
         assertThat(consentOrderApprovedNotificationLetter.getLetterDate(), is(String.valueOf(LocalDate.now())));
-        /* fix me :(
-        assertThat(consentOrderApprovedNotificationLetter.getFormattedAddress(), is(
+        assertThat(consentOrderApprovedNotificationLetter.getAddressee().getFormattedAddress(), is(
                 "123 Applicant Solicitor Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSE1"));
-         */
         assertThat(consentOrderApprovedNotificationLetter.getCaseNumber(), is("123456789"));
     }
 
