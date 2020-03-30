@@ -1,15 +1,15 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.applyMappings;
-import static uk.gov.hmcts.reform.bsp.common.mapper.GenericMapper.addMappingsTo;
+import static uk.gov.hmcts.reform.bsp.common.mapper.GenericMapper.getValueFromOcrDataFields;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.transformFormDateIntoCcdDate;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -136,14 +136,6 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
                 });
     }
 
-    private Optional<String> getValueFromOcrDataFields(String fieldName, List<OcrDataField> ocrDataFields) {
-        return ocrDataFields.stream()
-                .filter(f -> f.getName().equals(fieldName))
-                .map(OcrDataField::getValue)
-                .filter(Objects::nonNull)
-                .findFirst();
-    }
-
     private void commaSeparatedEntryTransformer(String ocrNameWithCommaSeparatedValues,
                                                 String ccdName,
                                                 Map<String, String> ocrValuesToCcdValues,
@@ -207,14 +199,11 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
     }
 
     private void addMappingsToChildren(List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
-        List<ImmutableMap<String, Object>> children = new ArrayList<>();
-        for (int i = 1; ; i++) {
-            if (isChildInfoPopulated(i, ocrDataFields)) {
-                children.add(mapChild(i, ocrDataFields));
-            } else {
-                // there is no child with given index, stop mapping
-                break;
-            }
+        ChildrenInfo children = new ChildrenInfo();
+        int i = 1;
+        while (isChildInfoPopulated(i, ocrDataFields)) {
+            children.addChild(mapChild(i, ocrDataFields));
+            i++;
         }
 
         if (children.size() > 0) {
@@ -226,31 +215,25 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         return ocrDataFields.stream().anyMatch(item -> item.getName().equalsIgnoreCase("NameOfChild" + i));
     }
 
-    private ImmutableMap<String, Object> mapChild(int index, List<OcrDataField> ocrDataFields) {
-        Map<String, String> childInfo = new HashMap<>();
-        childInfo.put("NameOfChild" + index, "name");
-        childInfo.put("DateOfBirthChild" + index, "dateOfBirth");
-        childInfo.put("GenderChild" + index, "gender");
-        childInfo.put("RelationshipToApplicantChild" + index, "relationshipToApplicant");
-        childInfo.put("RelationshipToRespondentChild" + index, "relationshipToRespondent");
-        childInfo.put("CountryOfResidenceChild" + index, "countryOfResidence");
-
-        Map<String, Object> result = new HashMap<>();
-
-        addMappingsTo(
-            "childInfo" + index,
-            ImmutableMap.copyOf(childInfo),
-            result,
-            ocrDataFields
+    private ChildInfo mapChild(int index, List<OcrDataField> ocrDataFields) {
+        String dob = transformFormDateIntoCcdDate(
+                "childInfo" + index + ".dateOfBirth",
+                getValueOrEmptyString(index, ocrDataFields, "DateOfBirthChild")
         );
 
-        return reformatChildDoB((Map)result.get("childInfo" + index));
+        ChildInfo child = ChildInfo.builder()
+                .name(getValueOrEmptyString(index, ocrDataFields, "NameOfChild"))
+                .dateOfBirth(dob)
+                .gender(getValueFromOcrDataFields("GenderChild" + index, ocrDataFields).orElse("notGiven"))
+                .relationshipToApplicant(getValueOrEmptyString(index, ocrDataFields, "RelationshipToApplicantChild"))
+                .relationshipToRespondent(getValueOrEmptyString(index, ocrDataFields, "RelationshipToRespondentChild"))
+                .countryOfResidence(getValueOrEmptyString(index, ocrDataFields, "CountryOfResidenceChild"))
+                .build();
+
+        return child;
     }
 
-    private ImmutableMap<String, Object> reformatChildDoB(Map<String, Object> child) {
-        String dob = (String) child.getOrDefault("dateOfBirth", "");
-        child.replace("dateOfBirth", transformFormDateIntoCcdDate("childInfo.dateOfBirth", dob));
-
-        return ImmutableMap.copyOf(child);
+    private String getValueOrEmptyString(int index, List<OcrDataField> ocrDataFields, String fieldPrefix) {
+        return getValueFromOcrDataFields(fieldPrefix + index, ocrDataFields).orElse(StringUtils.EMPTY);
     }
 }
