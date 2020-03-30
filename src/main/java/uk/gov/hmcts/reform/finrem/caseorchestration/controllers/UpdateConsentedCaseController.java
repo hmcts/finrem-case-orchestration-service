@@ -22,6 +22,19 @@ import java.util.Map;
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_ADDRESS_CCD_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_DX_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -141,9 +154,8 @@ public class UpdateConsentedCaseController implements BaseController {
         caseData.put("natureOfApplication3b", null);
     }
 
-
     private void updateApplicantOrSolicitorContactDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("applicantRepresented"), "No")) {
+        if (equalsTo((String) caseData.get(APPLICANT_REPRESENTED), NO_VALUE)) {
             removeApplicantSolicitorAddress(caseData);
         } else {
             removeApplicantAddress(caseData);
@@ -151,20 +163,20 @@ public class UpdateConsentedCaseController implements BaseController {
     }
 
     private void removeApplicantSolicitorAddress(Map<String, Object> caseData) {
-        caseData.put("solicitorName", null);
-        caseData.put("solicitorFirm", null);
-        caseData.put("solicitorReference", null);
-        caseData.put("solicitorAddress", null);
-        caseData.put("solicitorPhone", null);
-        caseData.put("solicitorEmail", null);
-        caseData.put("solicitorDXnumber", null);
-        caseData.put("solicitorAgreeToReceiveEmails", null);
+        caseData.put(SOLICITOR_NAME, null);
+        caseData.put(SOLICITOR_FIRM, null);
+        caseData.put(SOLICITOR_REFERENCE, null);
+        caseData.put(APP_SOLICITOR_ADDRESS_CCD_FIELD, null);
+        caseData.put(SOLICITOR_PHONE, null);
+        caseData.put(SOLICITOR_EMAIL, null);
+        caseData.put(SOLICITOR_DX_NUMBER, null);
+        caseData.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, null);
     }
 
     private void removeApplicantAddress(Map<String, Object> caseData) {
-        caseData.put("applicantAddress", null);
-        caseData.put("applicantPhone", null);
-        caseData.put("applicantEmail", null);
+        caseData.put(APP_ADDRESS_CCD_FIELD, null);
+        caseData.put(APPLICANT_PHONE, null);
+        caseData.put(APPLICANT_EMAIL, null);
     }
 
     private boolean equalsTo(String fieldData, String value) {

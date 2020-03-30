@@ -18,12 +18,17 @@ public class CCDConfigConstant {
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
     public static final String SOLICITOR_NAME = "solicitorName";
     public static final String SOLICITOR_EMAIL = "solicitorEmail";
+    public static final String SOLICITOR_PHONE = "solicitorPhone";
+    public static final String SOLICITOR_DX_NUMBER = "solicitorDXnumber";
     public static final String CONTESTED_SOLICITOR_EMAIL = "applicantSolicitorEmail";
     public static final String CONTESTED_SOLICITOR_NAME = "applicantSolicitorName";
     public static final String SOLICITOR_FIRM = "solicitorFirm";
     public static final String APP_SOLICITOR_ADDRESS_CCD_FIELD = "solicitorAddress";
     public static final String RESP_SOLICITOR_ADDRESS_CCD_FIELD = "rSolicitorAddress";
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";
+    public static final String APPLICANT_EMAIL = "applicantEmail";
+    public static final String APPLICANT_PHONE = "applicantPhone";
+    public static final String SOLICITOR_AGREE_TO_RECEIVE_EMAILS = "solicitorAgreeToReceiveEmails";
 
     //Application Type related
     public static final String D81_QUESTION = "d81Question";
