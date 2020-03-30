@@ -45,7 +45,7 @@ public class BulkPrintController implements BaseController {
     @Autowired
     private GenerateCoverSheetService coverSheetService;
 
-    private static CaseDetails caseDetails;
+    private CaseDetails caseDetails;
 
     @PostMapping(path = "/bulk-print", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles bulk print")

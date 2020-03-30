@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 
 import javax.ws.rs.core.MediaType;
-
 import java.io.File;
 import java.util.UUID;
 
@@ -17,7 +16,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -142,7 +141,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
-        verifyNoInteractions(bulkPrintService);
+        verifyZeroInteractions(bulkPrintService);
         verify(coverSheetService).generateRespondentCoverSheet(any(), any());
     }
 

@@ -110,11 +110,21 @@
           }
         }
       ],
+      "applicantFMName": "Vivek",
+      "applicantLName": "Reddy",
+      "applicantRepresented": "Yes",
+      "solicitorName": "Mr J Solicitor",
+      "solicitorFirm": "Solicitor & Co",
+      "solicitorPhone": null,
+      "solicitorEmail": "vivred@mailinator.com",
+      "solicitorDXnumber": null,
+      "solicitorAgreeToReceiveEmails": "No",
+      "solicitorReference": "RG-123456789",
       "solicitorAddress": {
         "AddressLine1": "123 Applicant Solicitor Street",
-        "AddressLine2": "",
-        "AddressLine3": "",
-        "County": "",
+        "AddressLine2": "Second Address Line",
+        "AddressLine3": "Third Address Line",
+        "County": "London",
         "Country": "UK",
         "PostTown": "London",
         "PostCode": "SE1"
@@ -128,20 +138,29 @@
         "PostTown": "London",
         "PostCode": "SE1"
       },
-      "rSolicitorAddress": {
-        "AddressLine1": "321 Respondent Solicitor Street",
-        "AddressLine2": "",
-        "AddressLine3": "",
-        "County": "",
-        "Country": "UK",
-        "PostTown": "London",
-        "PostCode": "SE1"
-      },
+      "appRespondentFMName": "QA",
+      "appRespondentLName": "test",
+      "appRespondentRep": "Yes",
       "respondentAddress": {
         "AddressLine1": "51 Respondent Street",
         "AddressLine2": "",
         "AddressLine3": "",
         "County": null,
+        "Country": "UK",
+        "PostTown": "London",
+        "PostCode": "SE1"
+      },
+      "rSolicitorName": "4",
+      "rSolicitorFirm": "3",
+      "rSolicitorReference": null,
+      "rSolicitorPhone": null,
+      "rSolicitorEmail": null,
+      "rSolicitorDXnumber": null,
+      "rSolicitorAddress": {
+        "AddressLine1": "321 Respondent Solicitor Street",
+        "AddressLine2": "",
+        "AddressLine3": "",
+        "County": "",
         "Country": "UK",
         "PostTown": "London",
         "PostCode": "SE1"

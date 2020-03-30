@@ -112,62 +112,50 @@
       ],
       "applicantAddress": {
         "AddressLine1": "1 Victoria Street",
-        "AddressLine2": "",
+        "AddressLine2": "Westminster",
         "AddressLine3": "",
-        "County": null,
+        "County": "Greater London",
         "Country": "UK",
         "PostTown": "London",
         "PostCode": "SE1"
-      }
+      },
+      "applicantRepresented": "No",
+      "solicitorName": "JamesJ",
+      "solicitorFirm": "vivek",
+      "solicitorReference": "RG-123456789",
+      "solicitorAddress": {
+        "AddressLine1": "Westminster",
+        "AddressLine2": null,
+        "AddressLine3": null,
+        "PostTown": "LONDON",
+        "County": null,
+        "PostCode": "SW1H 9AJ",
+        "Country": "United Kingdom"
+      },
+      "solicitorPhone": null,
+      "solicitorEmail": "vivred@mailinator.com",
+      "solicitorDXnumber": null,
+      "solicitorAgreeToReceiveEmails": "No",
+      "applicantFMName": "Male",
+      "applicantLName": "vivek",
+      "appRespondentFMName": "QA",
+      "appRespondentLName": "test",
+      "appRespondentRep": "Yes",
+      "rSolicitorName": "4",
+      "rSolicitorFirm": "3",
+      "rSolicitorReference": null,
+      "rSolicitorAddress": {
+        "AddressLine1": "Buckingham Palace",
+        "AddressLine2": "",
+        "AddressLine3": "",
+        "PostTown": "London",
+        "County": "",
+        "PostCode": "SW1A 1AA",
+        "Country": "United Kingdom"
+      },
+      "rSolicitorPhone": null,
+      "rSolicitorEmail": null,
+      "rSolicitorDXnumber": null
     }
   }
 }
-
-{
-  "data": {
-    "applicantRepresented": "Yes",
-    "solicitorName": "JamesJ",
-    "solicitorFirm": "vivek",
-    "solicitorReference": "RG-123456789",
-    "solicitorAddress": {
-      "AddressLine1": "Westminster",
-      "AddressLine2": null,
-      "AddressLine3": null,
-      "PostTown": "LONDON",
-      "County": null,
-      "PostCode": "SW1H 9AJ",
-      "Country": "United Kingdom"
-    },
-    "solicitorPhone": null,
-    "solicitorEmail": "vivred@mailinator.com",
-    "solicitorDXnumber": null,
-    "solicitorAgreeToReceiveEmails": "No",
-    "applicantFMName": "Male",
-    "applicantLName": "vivek",
-    "appRespondentFMName": "QA",
-    "appRespondentLName": "test",
-    "appRespondentRep": "Yes",
-    "rSolicitorName": "4",
-    "rSolicitorFirm": "3",
-    "rSolicitorReference": null,
-    "rSolicitorAddress": {
-      "AddressLine1": "Buckingham Palace",
-      "AddressLine2": "",
-      "AddressLine3": "",
-      "PostTown": "London",
-      "County": "",
-      "PostCode": "SW1A 1AA",
-      "Country": "United Kingdom"
-    },
-    "rSolicitorPhone": null,
-    "rSolicitorEmail": null,
-    "rSolicitorDXnumber": null
-  },
-  "_links": {
-    "self": {
-      "href": "http://ccd-data-store-api-aat.service.core-compute-aat.internal/case-types/FinancialRemedyMVP2/validate?pageId=FR_updateContactDetailsupdateContactDetails"
-    }
-  }
-}
-
-

@@ -59,11 +59,10 @@ public class ConsentOrderApprovedController implements BaseController {
             @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("ConsentOrderApprovedController called  for Case ID: {}", caseDetails.getId());
+        log.info("ConsentOrderApprovedController called");
 
         validateCaseData(callback);
-
+        CaseDetails caseDetails = callback.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
         List<PensionCollectionData> pensionDocs = getPensionDocuments(caseData);

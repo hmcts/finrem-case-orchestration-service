@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DOCUMENT_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getLastMapValue;
@@ -20,6 +17,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class BulkPrintDocumentTranslator {
+
+    public static final String DOCUMENT_FILENAME = "document_filename";
+    private static final String DOCUMENT_URL = "document_binary_url";
+    private static final String VALUE = "value";
 
     public static List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
         log.info("Extracting 'approvedOrderCollection' from case data for bulk print.");
@@ -29,7 +30,7 @@ public final class BulkPrintDocumentTranslator {
             .orElse(new ArrayList<>());
 
         if (documentList.size() > 0) {
-            Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get(VALUE));
+            Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get("value"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrderApprovedLetter"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "orderLetter"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrder"));
