@@ -34,13 +34,19 @@
             "document_filename": "file1",
             "document_binary_url": "http://file1.binary"
          },
-         "solicitorFirm": "FirmA",
-         "solicitorName": "Solictor",
-         "applicantLName": "Guy",
          "authorisation3": "2010-01-01",
-         "solicitorEmail": "test@admin.com",
-         "solicitorPhone": "1234",
          "applicantFMName": "Poor",
+         "applicantLName": "Guy",
+         "applicantAddress": {
+          "County": "essex",
+          "Country": "UK",
+          "PostCode": "b1 1ab",
+          "PostTown": "london",
+          "AddressLine1": "line1",
+          "AddressLine2": "line2",
+          "AddressLine3": "line3"
+        },
+         "applicantRepresented": "no",
          "authorisation2b": "test",
          "otherCollection": [
             {
@@ -62,15 +68,6 @@
             "document_url": "http://file1",
             "document_filename": "file1",
             "document_binary_url": "http://file1.binary"
-         },
-         "solicitorAddress": {
-            "County": "essex",
-            "Country": "UK",
-            "PostCode": "b1 1ab",
-            "PostTown": "london",
-            "AddressLine1": "line1",
-            "AddressLine2": "line2",
-            "AddressLine3": "line3"
          },
          "authorisationFirm": "test",
          "authorisationName": "test",
@@ -97,9 +94,7 @@
             "AddressLine2": "line2",
             "AddressLine3": "line3"
          },
-         "solicitorDXnumber": "dx1",
          "appRespondentLName": "smith",
-         "solicitorReference": "LL01",
          "appRespondentFMName": "john",
          "divorceStageReached": "Decree Nisi",
          "helpWithFeesQuestion": "No",
@@ -128,7 +123,7 @@
          },
          "divorceDecreeAbsoluteDate": "2010-01-01",
          "orderForChildrenQuestion1": "Yes",
-         "solicitorAgreeToReceiveEmails": "Yes",
+         "solicitorAgreeToReceiveEmails": "No",
          "orderDirection": "test",
          "orderDirectionOpt1": {
             "document_url": "http://file1",

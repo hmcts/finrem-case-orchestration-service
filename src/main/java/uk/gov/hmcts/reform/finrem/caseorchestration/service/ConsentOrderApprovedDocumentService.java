@@ -78,6 +78,7 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         String respondentName = join(nullToEmpty(caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
                 nullToEmpty(caseDetails.getData().get(APP_RESP_LAST_NAME_CCD_FIELD)));
 
+        // ADD OPTIONAL TO THIS SO IT DOESN"T THROW NULL POINTER if no applicantRepresented provided in case data
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED).toString());
 
         if (applicantRepresented.equals(YES_VALUE)) {
