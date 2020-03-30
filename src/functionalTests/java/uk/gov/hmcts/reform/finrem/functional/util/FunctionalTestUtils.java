@@ -5,6 +5,7 @@ import io.restassured.http.Header;
 import io.restassured.http.Headers;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
 import org.pdfbox.cos.COSDocument;
@@ -13,6 +14,7 @@ import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.util.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
@@ -33,13 +35,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @ContextConfiguration(classes = TestContextConfiguration.class)
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class FunctionalTestUtils {
 
-    @Autowired
-    private ServiceAuthTokenGenerator tokenGenerator;
-
-    @Autowired
-    private IdamUtils idamUtils;
+    private final ServiceAuthTokenGenerator tokenGenerator;
+    private final IdamUtils idamUtils;
 
     @Value("${user.id.url}")
     private String userId;
@@ -49,21 +49,6 @@ public class FunctionalTestUtils {
 
     @Value("${idam.userpassword}")
     private String idamUserPassword;
-
-    @Value("${idam.s2s-auth.microservice}")
-    private String microservice;
-
-    private JsonPath jsonPathEvaluator;
-
-    public String getJsonFromFile(String fileName) {
-        try {
-            File file = ResourceUtils.getFile(this.getClass().getResource("/json/" + fileName));
-            return new String(Files.readAllBytes(file.toPath()));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     public String getJsonFromFile(String fileName, String directory) {
         try {
@@ -89,23 +74,14 @@ public class FunctionalTestUtils {
                 new Header("Content-Type", ContentType.JSON.toString()));
     }
 
-    public String getAuthoToken() {
-        return idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword);
-    }
-
     public String getS2SToken(String callerMicroservice) {
-        return idamUtils.generateUserTokenWithValidMicroService(callerMicroservice);
+        return idamUtils.generateServiceTokenWithValidMicroservice(callerMicroservice);
     }
 
     public Headers getHeader() {
         return Headers.headers(
                 new Header(AUTHORIZATION_HEADER, "Bearer "
                         + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)));
-    }
-
-    public Headers getNewHeaders() {
-        return Headers.headers(
-                new Header("Content-Type", "application/json"));
     }
 
     public String downloadPdfAndParseToString(String documentUrl) {
@@ -153,7 +129,7 @@ public class FunctionalTestUtils {
 
     public void validatePostSuccess(String url, String filename, String journeyType) {
         int statusCode = getResponse(url, filename, journeyType).getStatusCode();
-        assertEquals(200, statusCode);
+        assertEquals(HttpStatus.OK, HttpStatus.valueOf(statusCode));
     }
 
     public JsonPath getResponseData(String url, String jsonBody, String dataPath) {
@@ -165,10 +141,10 @@ public class FunctionalTestUtils {
             .when().post(url)
             .andReturn();
 
-        jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
-        int statusCode = response.getStatusCode();
-        assertEquals(200, statusCode);
-        return jsonPathEvaluator;
+        assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatusCode()));
+
+        JsonPath jsonPath = response.jsonPath().setRoot(dataPath);
+        return jsonPath;
     }
 
     public JsonPath getResponseData(String url, String filename, String journeyType, String dataPath) {
@@ -180,10 +156,10 @@ public class FunctionalTestUtils {
                 .when().post(url)
                 .andReturn();
 
-        jsonPathEvaluator = response.jsonPath().setRoot(dataPath);
-        int statusCode = response.getStatusCode();
-        assertEquals(200, statusCode);
-        return jsonPathEvaluator;
+        assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatusCode()));
+
+        JsonPath jsonPath = response.jsonPath().setRoot(dataPath);
+        return jsonPath;
     }
 
     public Response getResponseData(String url, CallbackRequest callbackRequest) {
