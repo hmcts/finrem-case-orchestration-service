@@ -10,32 +10,24 @@ public class ConsentOrderApprovedNotificationLetterTest {
     public void checkAllStatusValues() {
         ConsentOrderApprovedNotificationLetter consentOrderApprovedNotificationLetter =
             ConsentOrderApprovedNotificationLetter.builder()
-                .ccdNumber("ccdNumber")
-                .recipientName("appRespondentFMName")
-                .recipientRef("recipientRef")
+                .caseNumber("ccdNumber")
+                .addressee("appRespondentFMName")
+                .reference("recipientRef")
                 .applicantName("applicantName")
                 .respondentName("respondentName")
-                .letterCreatedDate("letterCreatedDate")
-                .addressLine1("AddressLine1")
-                .addressLine2("AddressLine2")
-                .addressLine3("AddressLine3")
-                .county("County")
-                .country("Country")
-                .postTown("PostTown")
-                .postCode("PostCode")
+                .letterDate("letterCreatedDate")
+                .formattedAddress("1 Victoria Street" + "\n" + "Westminster" + "\n" + "" + "\n" + "Greater London"
+                        + "\n" + "UK" + "\n" + "London" + "\n" + "SE1")
                 .build();
-        assertEquals("ccdNumber", consentOrderApprovedNotificationLetter.getCcdNumber());
-        assertEquals("appRespondentFMName", consentOrderApprovedNotificationLetter.getRecipientName());
-        assertEquals("recipientRef", consentOrderApprovedNotificationLetter.getRecipientRef());
+
+        assertEquals("ccdNumber", consentOrderApprovedNotificationLetter.getCaseNumber());
+        assertEquals("appRespondentFMName", consentOrderApprovedNotificationLetter.getAddressee());
+        assertEquals("recipientRef", consentOrderApprovedNotificationLetter.getReference());
         assertEquals("applicantName", consentOrderApprovedNotificationLetter.getApplicantName());
         assertEquals("respondentName", consentOrderApprovedNotificationLetter.getRespondentName());
-        assertEquals("letterCreatedDate", consentOrderApprovedNotificationLetter.getLetterCreatedDate());
-        assertEquals("AddressLine1", consentOrderApprovedNotificationLetter.getAddressLine1());
-        assertEquals("AddressLine2", consentOrderApprovedNotificationLetter.getAddressLine2());
-        assertEquals("AddressLine3", consentOrderApprovedNotificationLetter.getAddressLine3());
-        assertEquals("County", consentOrderApprovedNotificationLetter.getCounty());
-        assertEquals("Country", consentOrderApprovedNotificationLetter.getCountry());
-        assertEquals("PostTown", consentOrderApprovedNotificationLetter.getPostTown());
-        assertEquals("PostCode", consentOrderApprovedNotificationLetter.getPostCode());
+        assertEquals("letterCreatedDate", consentOrderApprovedNotificationLetter.getLetterDate());
+        assertEquals("1 Victoria Street" + "\n" + "Westminster" + "\n" + "" + "\n"
+                + "Greater London" + "\n" + "UK" + "\n" + "London" + "\n"
+                + "SE1", consentOrderApprovedNotificationLetter.getFormattedAddress());
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.LetterAddressHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ConsentOrderApprovedNotificationLetter;
@@ -36,11 +37,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 public class ConsentOrderApprovedDocumentService extends AbstractDocumentService {
 
+    private LetterAddressHelper letterAddressHelper;
+
     @Autowired
     public ConsentOrderApprovedDocumentService(DocumentClient documentClient,
                                                DocumentConfiguration config,
-                                               ObjectMapper objectMapper) {
+                                               ObjectMapper objectMapper,
+                                               LetterAddressHelper letterAddressHelper) {
         super(documentClient, config, objectMapper);
+        this.letterAddressHelper = letterAddressHelper;
     }
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
@@ -60,8 +65,8 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         Map addressToSendTo;
 
         String ccdNumber = String.valueOf(caseDetails.getId());
-        String recipientReference = "";
-        String recipientName;
+        String reference = "";
+        String addressee;
         String applicantName = join(nullToEmpty(caseData.get(APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
                 nullToEmpty(caseDetails.getData().get(APP_LAST_NAME_CCD_FIELD)));
         String respondentName = join(nullToEmpty(caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
@@ -70,20 +75,20 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED).toString());
 
         if (applicantRepresented.equals(YES_VALUE)) {
-            recipientReference = nullToEmpty(caseData.get(SOLICITOR_REFERENCE));
-            recipientName = nullToEmpty(caseData.get(SOLICITOR_NAME));
+            reference = nullToEmpty(caseData.get(SOLICITOR_REFERENCE));
+            addressee = nullToEmpty(caseData.get(SOLICITOR_NAME));
             addressToSendTo = (Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
         } else {
-            recipientName = applicantName;
+            addressee = applicantName;
             addressToSendTo = (Map) caseData.get(APP_ADDRESS_CCD_FIELD);
         }
 
         ConsentOrderApprovedNotificationLetter.ConsentOrderApprovedNotificationLetterBuilder consentOrderApprovedNotificationLetterBuilder =
-                ConsentOrderApprovedNotificationLetter.builder()
-                .ccdNumber(ccdNumber)
-                .recipientRef(recipientReference)
-                .recipientName(recipientName)
-                .letterCreatedDate(String.valueOf(LocalDate.now()))
+            ConsentOrderApprovedNotificationLetter.builder()
+                .caseNumber(ccdNumber)
+                .reference(reference)
+                .addressee(addressee)
+                .letterDate(String.valueOf(LocalDate.now()))
                 .applicantName(applicantName)
                 .respondentName(respondentName);
 
@@ -108,13 +113,7 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
             Map<String, Object> address) {
 
         return consentOrderApprovedNotificationLetterBuilder
-                .addressLine1(nullToEmpty(address.get("AddressLine1")))
-                .addressLine2(nullToEmpty(address.get("AddressLine2")))
-                .addressLine3(nullToEmpty(address.get("AddressLine3")))
-                .county(nullToEmpty(address.get("County")))
-                .country(nullToEmpty(address.get("Country")))
-                .postTown(nullToEmpty(address.get("PostTown")))
-                .postCode(nullToEmpty(address.get("PostCode")))
+                .formattedAddress(letterAddressHelper.formatAddressForLetterPrinting(address))
                 .build();
     }
 

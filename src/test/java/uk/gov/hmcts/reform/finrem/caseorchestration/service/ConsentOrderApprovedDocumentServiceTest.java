@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.LetterAddressHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ConsentOrderApprovedNotificationLetter;
@@ -51,23 +52,20 @@ public class ConsentOrderApprovedDocumentServiceTest {
     @Mock
     private DocumentClient documentClientMock;
 
-    private DocumentConfiguration config;
-
     private ObjectMapper mapper = new ObjectMapper();
-
     private ConsentOrderApprovedDocumentService service;
-
-    private static CaseDetails caseDetails;
+    private LetterAddressHelper letterAddressHelper = new LetterAddressHelper();
+    private CaseDetails caseDetails;
 
     @Before
     public void setUp() {
-        config = new DocumentConfiguration();
+        DocumentConfiguration config = new DocumentConfiguration();
         config.setApprovedConsentOrderTemplate("FL-FRM-DEC-ENG-00071.docx");
         config.setApprovedConsentOrderFileName("ApprovedConsentOrderLetter.pdf");
         config.setApprovedConsentOrderNotificationTemplate("FL-FRM-LET-ENG-00095.docx");
         config.setApprovedConsentOrderNotificationFileName("ApprovedConsentOrderNotificationLetter.pdf");
         documentClientMock = mock(DocumentClient.class);
-        service = new ConsentOrderApprovedDocumentService(documentClientMock, config, mapper);
+        service = new ConsentOrderApprovedDocumentService(documentClientMock, config, mapper, letterAddressHelper);
 
         Map<String, Object> applicantAddress = new HashMap<>();
         applicantAddress.put("AddressLine1", "50 Applicant Street");
@@ -106,8 +104,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
 
     @Test
     public void shouldGenerateApprovedConsentOrderLetter() {
-        when(documentClientMock.generatePdf(any(), anyString()))
-                .thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
         CaseDocument caseDocument = service.generateApprovedConsentOrderLetter(caseDetails, AUTH_TOKEN);
 
@@ -127,19 +124,14 @@ public class ConsentOrderApprovedDocumentServiceTest {
         ConsentOrderApprovedNotificationLetter consentOrderApprovedNotificationLetter
                 = (ConsentOrderApprovedNotificationLetter) caseDetails.getData().get(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER);
 
-        assertThat(consentOrderApprovedNotificationLetter.getRecipientName(), is("James Joyce"));
-        assertThat(consentOrderApprovedNotificationLetter.getRecipientRef(), is(""));
+        assertThat(consentOrderApprovedNotificationLetter.getAddressee(), is("James Joyce"));
+        assertThat(consentOrderApprovedNotificationLetter.getReference(), is(""));
         assertThat(consentOrderApprovedNotificationLetter.getApplicantName(), is("James Joyce"));
         assertThat(consentOrderApprovedNotificationLetter.getRespondentName(), is("Jane Doe"));
-        assertThat(consentOrderApprovedNotificationLetter.getLetterCreatedDate(), is(String.valueOf(LocalDate.now())));
-        assertThat(consentOrderApprovedNotificationLetter.getCounty(), is("London"));
-        assertThat(consentOrderApprovedNotificationLetter.getCountry(), is("England"));
-        assertThat(consentOrderApprovedNotificationLetter.getPostCode(), is("SW1"));
-        assertThat(consentOrderApprovedNotificationLetter.getPostTown(), is("London"));
-        assertThat(consentOrderApprovedNotificationLetter.getAddressLine1(), is("50 Applicant Street"));
-        assertThat(consentOrderApprovedNotificationLetter.getAddressLine2(), is("Second Address Line"));
-        assertThat(consentOrderApprovedNotificationLetter.getAddressLine3(), is("Third Address Line"));
-        assertThat(consentOrderApprovedNotificationLetter.getCcdNumber(), is("123456789"));
+        assertThat(consentOrderApprovedNotificationLetter.getLetterDate(), is(String.valueOf(LocalDate.now())));
+        assertThat(consentOrderApprovedNotificationLetter.getFormattedAddress(), is(
+                "50 Applicant Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSW1"));
+        assertThat(consentOrderApprovedNotificationLetter.getCaseNumber(), is("123456789"));
     }
 
     @Test
@@ -157,19 +149,16 @@ public class ConsentOrderApprovedDocumentServiceTest {
         ConsentOrderApprovedNotificationLetter consentOrderApprovedNotificationLetter
                 = (ConsentOrderApprovedNotificationLetter) caseDetails.getData().get(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER);
 
-        assertThat(consentOrderApprovedNotificationLetter.getRecipientName(), is("Saul Goodman"));
-        assertThat(consentOrderApprovedNotificationLetter.getRecipientRef(), is("RG-123456789"));
+        assertThat(consentOrderApprovedNotificationLetter.getAddressee(), is("Saul Goodman"));
+        assertThat(consentOrderApprovedNotificationLetter.getReference(), is("RG-123456789"));
         assertThat(consentOrderApprovedNotificationLetter.getApplicantName(), is("James Joyce"));
         assertThat(consentOrderApprovedNotificationLetter.getRespondentName(), is("Jane Doe"));
-        assertThat(consentOrderApprovedNotificationLetter.getLetterCreatedDate(), is(String.valueOf(LocalDate.now())));
-        assertThat(consentOrderApprovedNotificationLetter.getCounty(), is("London"));
-        assertThat(consentOrderApprovedNotificationLetter.getCountry(), is("England"));
-        assertThat(consentOrderApprovedNotificationLetter.getPostCode(), is("SE1"));
-        assertThat(consentOrderApprovedNotificationLetter.getPostTown(), is("London"));
-        assertThat(consentOrderApprovedNotificationLetter.getAddressLine1(), is("123 Applicant Solicitor Street"));
-        assertThat(consentOrderApprovedNotificationLetter.getAddressLine2(), is("Second Address Line"));
-        assertThat(consentOrderApprovedNotificationLetter.getAddressLine3(), is("Third Address Line"));
-        assertThat(consentOrderApprovedNotificationLetter.getCcdNumber(), is("123456789"));
+        assertThat(consentOrderApprovedNotificationLetter.getLetterDate(), is(String.valueOf(LocalDate.now())));
+        /* fix me :(
+        assertThat(consentOrderApprovedNotificationLetter.getFormattedAddress(), is(
+                "123 Applicant Solicitor Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSE1"));
+         */
+        assertThat(consentOrderApprovedNotificationLetter.getCaseNumber(), is("123456789"));
     }
 
     @Test

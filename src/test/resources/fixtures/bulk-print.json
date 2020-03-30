@@ -112,9 +112,9 @@
       ],
       "applicantAddress": {
         "AddressLine1": "1 Victoria Street",
-        "AddressLine2": "",
+        "AddressLine2": "Westminster",
         "AddressLine3": "",
-        "County": null,
+        "County": "Greater London",
         "Country": "UK",
         "PostTown": "London",
         "PostCode": "SE1"
