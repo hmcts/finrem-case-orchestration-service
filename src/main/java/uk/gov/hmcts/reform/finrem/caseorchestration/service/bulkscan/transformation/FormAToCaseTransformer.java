@@ -200,10 +200,8 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
     private void addMappingsToChildren(List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
         ChildrenInfo children = new ChildrenInfo();
-        int i = 1;
-        while (isChildInfoPopulated(i, ocrDataFields)) {
+        for (int i = 1; isChildInfoPopulated(i, ocrDataFields); i++) {
             children.addChild(mapChild(i, ocrDataFields));
-            i++;
         }
 
         if (children.size() > 0) {

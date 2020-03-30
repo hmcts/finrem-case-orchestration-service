@@ -139,6 +139,30 @@ To run all mutation tests execute the following command:
     ./gradlew pitest
 ```
 
+### Running functional tests locally against AAT
+
+Functional tests run in PR and AAT environments against AAT services usually. It might be beneficial to run these tests
+locally though but still against AAT environment. Two things are needed, environment variables and proxy across VPN
+to talk to AAT environment.
+
+Following environment variables are required:
+* ENVIRONMENT_NAME = aat (to load `application-aat.properties` file on test startup)
+* TEST_URL = `https://finrem-cos-aat.service.core-compute-aat.internal` (or it could be PR URL)
+* OAUTH2_CLIENT_FINREM: in Azure go to "Key vaults" > `finrem-aat` vault > Secrets > `idam-secret` value
+
+One way of setting up proxy is adding in `uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration`:
+```
+    @PostConstruct
+    public void setupProxy() {
+        System.setProperty("http.proxyHost", "proxyout.reform.hmcts.net");
+        System.setProperty("http.proxyPort", "8080");
+        System.setProperty("https.proxyHost", "proxyout.reform.hmcts.net");
+        System.setProperty("https.proxyPort", "8080");
+    }
+```  
+
+After starting F5 VPN and setting up environment variables tests can be run eg. from IntelliJ or otherwise locally.
+
 ## Versioning
 
 We use [SemVer](http://semver.org/) for versioning.

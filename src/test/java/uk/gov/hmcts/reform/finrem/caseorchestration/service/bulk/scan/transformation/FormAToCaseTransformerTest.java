@@ -408,11 +408,8 @@ public class FormAToCaseTransformerTest {
     private void assertChildrenInfo(Map<String, Object> transformedCaseData) {
         ChildrenInfo children = (ChildrenInfo) transformedCaseData.get("childrenInfo");
 
-        ChildInfo child1 = children.getChild(0);
-        ChildInfo child2 = children.getChild(1);
-
-        assertChild(child1, asList("Johny Bravo", "2000-03-12", "male", "son", "SON", "New Zeeland"));
-        assertChild(child2, asList("Anne Shirley", "1895-03-12", "female", "daughter", "Daughter", "Canada"));
+        assertChild(children.getChild(0), asList("Johny Bravo", "2000-03-12", "male", "son", "SON", "New Zeeland"));
+        assertChild(children.getChild(1), asList("Anne Shirley", "1895-03-12", "female", "daughter", "Daughter", "Canada"));
     }
 
     private void assertChild(ChildInfo child, List<String> values) {
