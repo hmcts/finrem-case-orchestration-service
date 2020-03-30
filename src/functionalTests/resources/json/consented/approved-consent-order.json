@@ -6,7 +6,6 @@
       "jurisdiction": "divorce",
       "state": "referredToJudge",
       "case_data": {
-
       "latestConsentOrder": {
          "document_url": "http://dm-store:8080/documents/ff08dbe1-dd16-4ec5-8b72-4c5379e0455f",
          "document_filename": "sample.pdf",

@@ -62,6 +62,11 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
 
     public CaseDocument generateApprovedConsentOrderNotificationLetter(CaseDetails caseDetails, String authToken) {
 
+        log.info("Generating Approved Consent Order Notification Letter {} from {} for bulk print for case id: {} ",
+                config.getApprovedConsentOrderFileName(),
+                config.getApprovedConsentOrderTemplate(),
+                caseDetails.getId().toString());
+
         Map<String, Object> caseData = caseDetails.getData();
         Map addressToSendTo;
 
@@ -76,10 +81,12 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED).toString());
 
         if (applicantRepresented.equals(YES_VALUE)) {
+            log.info("Applicant is represented by a solicitor");
             reference = nullToEmpty(caseData.get(SOLICITOR_REFERENCE));
             addresseeName = nullToEmpty(caseData.get(SOLICITOR_NAME));
             addressToSendTo = (Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
         } else {
+            log.info("Applicant is not represented by a solicitor");
             addresseeName = applicantName;
             addressToSendTo = (Map) caseData.get(APP_ADDRESS_CCD_FIELD);
         }
@@ -93,19 +100,14 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
             ConsentOrderApprovedNotificationLetter consentOrderApprovedNotificationLetter =
                     ConsentOrderApprovedNotificationLetter.builder()
                             .caseNumber(ccdNumber)
-                        .reference(reference)
-                        .addressee(addressee)
-                        .letterDate(String.valueOf(LocalDate.now()))
-                        .applicantName(applicantName)
-                        .respondentName(respondentName)
-                        .build();
+                            .reference(reference)
+                            .addressee(addressee)
+                            .letterDate(String.valueOf(LocalDate.now()))
+                            .applicantName(applicantName)
+                            .respondentName(respondentName)
+                            .build();
 
             caseData.put(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER, consentOrderApprovedNotificationLetter);
-
-            log.info("Generating Approved Consent Order Notification Letter {} from {} for bulk print for case id: {} ",
-                    config.getApprovedConsentOrderFileName(),
-                    config.getApprovedConsentOrderTemplate(),
-                    caseDetails.getId().toString());
         } else {
             log.info("Failed to generate Approved Consent Order Notification Letter as not all required address details were present");
             throw new IllegalArgumentException("Mandatory data missing from address when trying to generate letter");
