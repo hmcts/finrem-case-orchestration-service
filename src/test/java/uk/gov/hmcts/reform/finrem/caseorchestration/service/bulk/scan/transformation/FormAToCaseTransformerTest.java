@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.stream.IntStream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -404,10 +405,15 @@ public class FormAToCaseTransformerTest {
     }
 
     private void assertChildrenInfo(Map<String, Object> transformedCaseData) {
-        List<Map<String, Object>> children = (List)(transformedCaseData.get("childrenInfo"));
+        List<Map<String, Map<String, Object>>> children = (List)(transformedCaseData.get("childrenInfo"));
 
-        assertChild(children.get(0), asList("Johny Bravo", "2000-03-12", "male", "son", "SON","New Zeeland"));
-        assertChild(children.get(1), asList("Anne Shirley", "1895-03-12", "female", "daughter", "Daughter","Canada"));
+        IntStream.of(0, 1).forEach(i -> assertThat(children.get(i), hasKey("value")));
+        ImmutableMap.of(
+            0, asList("Johny Bravo", "2000-03-12", "male", "son", "SON","New Zeeland"),
+            1, asList("Anne Shirley", "1895-03-12", "female", "daughter", "Daughter","Canada")
+        ).entrySet()
+            .stream()
+            .forEach(entry -> assertChild(children.get(entry.getKey()).get("value"), entry.getValue()));
     }
 
     private void assertChild(Map<String, Object> child, List<String> values) {

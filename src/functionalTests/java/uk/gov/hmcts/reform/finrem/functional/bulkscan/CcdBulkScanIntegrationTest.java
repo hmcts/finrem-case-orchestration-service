@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.functional.bulkscan;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
@@ -46,9 +45,6 @@ public class CcdBulkScanIntegrationTest {
 
     @Autowired
     private CoreCaseDataApi coreCaseDataApi;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Value("${case.orchestration.api-bsp}")
     private String cosBaseUrl;
@@ -107,9 +103,6 @@ public class CcdBulkScanIntegrationTest {
                 .build())
             .eventToken(startEventResponse.getToken())
             .build();
-
-        log.info("Jackson: " + com.fasterxml.jackson.databind.cfg.PackageVersion.VERSION);
-        log.info("submit: " + objectMapper.writeValueAsString(caseDataContent));
 
         CaseDetails caseDetails = coreCaseDataApi.submitForCaseworker(
             userDetails.getAuthToken(),
