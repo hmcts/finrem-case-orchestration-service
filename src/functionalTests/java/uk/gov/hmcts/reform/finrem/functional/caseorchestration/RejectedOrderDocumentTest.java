@@ -57,12 +57,12 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
 
         Response response = functionalTestUtils.getResponseData(previewConsentOrderNotApprovedEndPoint,callbackRequest);
 
-        /*List<Object> orderRefusalPreviewDocuments = JsonPath.parse(response.asString())
-            .read("$.data[?(@.orderRefusalPreviewDocument)]");*/
+        List<Object> orderRefusalPreviewDocuments = JsonPath.parse(response.asString())
+            .read("$.data[?(@.orderRefusalPreviewDocument)]");
         assertEquals("Request failed " + response.getStatusCode(), 200,
             response.getStatusCode());
-        /*assertTrue("Order Refusal Preview Document not found ",
-            orderRefusalPreviewDocuments.size() > 0);*/
+        assertTrue("Order Refusal Preview Document not found ",
+            orderRefusalPreviewDocuments.size() > 0);
     }
 
     @Test
@@ -80,11 +80,11 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
 
         Response response = functionalTestUtils.getResponseData(consentOrderNotApprovedEndPoint,callbackRequest);
 
-        /*List<Object> uploadOrders = JsonPath.parse(response.getBody().asString())
-            .read("$.data.uploadOrder[?(@.id)].id"); */
+        List<Object> uploadOrders = JsonPath.parse(response.getBody().asString())
+            .read("$.data.uploadOrder[?(@.id)].id");
         assertEquals("Request failed " + response.getStatusCode(), 200,
             response.getStatusCode());
-        /*assertEquals("expected uploadOrder size not matching  ",
-            uploadOrdersBeforeCount + 1, uploadOrders.size()); */
+        assertEquals("expected uploadOrder size not matching  ",
+            uploadOrdersBeforeCount + 1, uploadOrders.size());
     }
 }
