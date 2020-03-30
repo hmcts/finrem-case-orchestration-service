@@ -6,6 +6,7 @@
     "jurisdiction": "divorce",
     "state": "referredToJudge",
     "case_data": {
+
       "latestConsentOrder": {
         "document_url": "http://dm-store:8080/documents/ff08dbe1-dd16-4ec5-8b72-4c5379e0455f",
         "document_filename": "sample.pdf",
@@ -34,19 +35,13 @@
         "document_filename": "file1",
         "document_binary_url": "http://file1.binary"
       },
-      "authorisation3": "2010-01-01",
-      "applicantFMName": "Poor",
+      "solicitorFirm": "FirmA",
+      "solicitorName": "Solictor",
       "applicantLName": "Guy",
-      "applicantAddress": {
-        "AddressLine1": "1 Victoria Street",
-        "AddressLine2": "Westminster",
-        "AddressLine3": "",
-        "County": "Greater London",
-        "Country": "England",
-        "PostTown": "London",
-        "PostCode": "SE1"
-      },
-      "applicantRepresented": "No",
+      "authorisation3": "2010-01-01",
+      "solicitorEmail": "test@admin.com",
+      "solicitorPhone": "1234",
+      "applicantFMName": "Poor",
       "authorisation2b": "test",
       "otherCollection": [
         {
@@ -69,6 +64,17 @@
         "document_filename": "file1",
         "document_binary_url": "http://file1.binary"
       },
+      "solicitorAddress": {
+        "County": "essex",
+        "Country": "UK",
+        "PostCode": "b1 1ab",
+        "PostTown": "london",
+        "AddressLine1": "line1",
+        "AddressLine2": "line2",
+        "AddressLine3": "line3"
+      },
+      "authorisationFirm": "test",
+      "authorisationName": "test",
       "divorceCaseNumber": "DD12D12345",
       "pensionCollection": [
         {
@@ -92,8 +98,10 @@
         "AddressLine2": "line2",
         "AddressLine3": "line3"
       },
-      "appRespondentFMName": "john",
+      "solicitorDXnumber": "dx1",
       "appRespondentLName": "smith",
+      "solicitorReference": "LL01",
+      "appRespondentFMName": "john",
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
       "natureOfApplication2": [
@@ -121,7 +129,7 @@
       },
       "divorceDecreeAbsoluteDate": "2010-01-01",
       "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "No",
+      "solicitorAgreeToReceiveEmails": "Yes",
       "orderDirection": "test",
       "orderDirectionOpt1": {
         "document_url": "http://file1",
