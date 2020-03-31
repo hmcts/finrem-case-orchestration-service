@@ -35,7 +35,7 @@ public class ConsentOrderController implements BaseController {
     private final IdamService idamService;
 
     @PostMapping(path = "/update-latest-consent-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "CCD Callback to update the latest consent order details")
+    @ApiOperation(value = "CCD Callback to update the latest Consent Order details")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
@@ -45,7 +45,7 @@ public class ConsentOrderController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("Received request to update latest consent order with Case ID : {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to update latest Consent Order with Case ID : {}", callbackRequest.getCaseDetails().getId());
 
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();

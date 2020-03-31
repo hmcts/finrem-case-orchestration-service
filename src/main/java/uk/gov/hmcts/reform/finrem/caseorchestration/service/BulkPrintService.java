@@ -23,8 +23,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintDocu
 public class BulkPrintService extends AbstractDocumentService {
 
     @Autowired
-    public BulkPrintService(
-        DocumentClient documentClient, DocumentConfiguration config, ObjectMapper objectMapper) {
+    public BulkPrintService(DocumentClient documentClient,
+                            DocumentConfiguration config,
+                            ObjectMapper objectMapper) {
         super(documentClient, config, objectMapper);
     }
 

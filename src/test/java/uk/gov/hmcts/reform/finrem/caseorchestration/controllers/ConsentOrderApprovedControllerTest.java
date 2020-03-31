@@ -10,10 +10,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
-import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -52,7 +52,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
@@ -64,7 +64,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
     }
 
@@ -79,7 +79,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         ResultActions result = mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON));
+                .contentType(APPLICATION_JSON));
 
         result.andExpect(status().isOk());
         result.andExpect(jsonPath("$.data", not(hasKey(LATEST_CONSENT_ORDER))));
@@ -96,7 +96,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         ResultActions result = mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON));
+                .contentType(APPLICATION_JSON));
 
         result.andExpect(status().isOk());
         assertLetter(result);

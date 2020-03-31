@@ -25,8 +25,6 @@ public class BulkPrintServiceTest {
     @Mock
     private DocumentClient documentClientMock;
 
-    private DocumentConfiguration config;
-
     private ObjectMapper mapper = new ObjectMapper();
 
     private BulkPrintService service;
@@ -39,7 +37,7 @@ public class BulkPrintServiceTest {
     public void setUp() {
         letterId = UUID.randomUUID();
         bulkPrintRequestArgumentCaptor = ArgumentCaptor.forClass(BulkPrintRequest.class);
-        config = new DocumentConfiguration();
+        DocumentConfiguration config = new DocumentConfiguration();
         config.setApprovedConsentOrderTemplate("test_template");
         config.setApprovedConsentOrderFileName("test_file");
         documentClientMock = mock(DocumentClient.class);
@@ -49,8 +47,7 @@ public class BulkPrintServiceTest {
     @Test
     public void shouldSendForBulkPrintForApproved() throws Exception {
 
-        when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture()))
-            .thenReturn(letterId);
+        when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID bulkPrintLetterId = service.sendForBulkPrint(
             new CaseDocument(), caseDetails());
@@ -62,8 +59,7 @@ public class BulkPrintServiceTest {
     @Test
     public void shouldSendForBulkPrintForNotApproved() throws Exception {
 
-        when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture()))
-            .thenReturn(letterId);
+        when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID bulkPrintLetterId = service.sendForBulkPrint(
             new CaseDocument(), caseDetailsForNonApproved());

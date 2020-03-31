@@ -33,13 +33,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class GeneralLetterServiceTest {
 
     private DocumentClient generatorClient;
-    private DocumentConfiguration config;
     private ObjectMapper mapper = new ObjectMapper();
     private GeneralLetterService service;
 
     @Before
     public void setUp() {
-        config = new DocumentConfiguration();
+        DocumentConfiguration config = new DocumentConfiguration();
         config.setGeneralLetterTemplate("test_template");
         config.setGeneralLetterFileName("test_file");
 
