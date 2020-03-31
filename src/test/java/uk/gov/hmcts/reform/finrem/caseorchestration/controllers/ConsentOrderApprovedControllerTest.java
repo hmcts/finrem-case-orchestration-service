@@ -10,10 +10,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
-import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -52,7 +52,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
@@ -64,7 +64,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
     }
 
@@ -72,6 +72,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     public void latestConsentOrderIsMissing() throws Exception {
         doMissingLatestConsentOrder();
         whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
@@ -79,7 +80,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         ResultActions result = mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON));
+                .contentType(APPLICATION_JSON));
 
         result.andExpect(status().isOk());
         result.andExpect(jsonPath("$.data", not(hasKey(LATEST_CONSENT_ORDER))));
@@ -89,6 +90,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     public void consentOrderApprovedSuccess() throws Exception {
         doValidCaseDataSetUp();
         whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
@@ -96,16 +98,21 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         ResultActions result = mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON));
+                .contentType(APPLICATION_JSON));
 
         result.andExpect(status().isOk());
         assertLetter(result);
         assertConsentOrder(result);
+        assertConsentOrderNotificationLetter(result);
         assertPensionDocs(result);
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
         return when(service.generateApprovedConsentOrderLetter(isA(CaseDetails.class), anyString()));
+    }
+
+    private OngoingStubbing<CaseDocument> whenServiceGeneratesNotificationLetter() {
+        return when(service.generateApprovedConsentOrderNotificationLetter(isA(CaseDetails.class), anyString()));
     }
 
     private OngoingStubbing<CaseDocument> whenAnnexStampingDocument() {
@@ -122,6 +129,13 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     private void assertLetter(ResultActions result) throws Exception {
         String path = "$.data.approvedOrderCollection[0].value.orderLetter.";
+        result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
+                .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
+                .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
+    }
+
+    private void assertConsentOrderNotificationLetter(ResultActions result) throws Exception {
+        String path = "$.data.approvedOrderCollection[0].value.consentOrderApprovedNotificationLetter.";
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
                 .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
                 .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));

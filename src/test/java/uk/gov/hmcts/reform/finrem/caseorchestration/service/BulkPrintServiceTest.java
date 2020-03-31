@@ -49,14 +49,13 @@ public class BulkPrintServiceTest {
     @Test
     public void shouldSendForBulkPrintForApproved() throws Exception {
 
-        when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture()))
-            .thenReturn(letterId);
+        when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID bulkPrintLetterId = service.sendForBulkPrint(
             new CaseDocument(), caseDetails());
 
         assertThat(letterId, is(bulkPrintLetterId));
-        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().size(), is(5));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().size(), is(6));
     }
 
     @Test

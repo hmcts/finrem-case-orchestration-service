@@ -76,4 +76,16 @@ public class DocumentHelperTest {
         assertThat(caseDocument.getDocumentUrl(), is("http://file1"));
         assertThat(caseDocument.getDocumentFilename(), is("file1"));
     }
+
+    @Test
+    public void shouldGetApprovedConsentOrderNotificationLetter() throws Exception {
+        setUpCaseData("consent-order-approved.json");
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> data = caseDetails.getData();
+        CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.get("consentOrderApprovedNotificationLetter"));
+
+        assertThat(caseDocument.getDocumentBinaryUrl(), is("http://file2.binary"));
+        assertThat(caseDocument.getDocumentUrl(), is("http://file2"));
+        assertThat(caseDocument.getDocumentFilename(), is("file2"));
+    }
 }

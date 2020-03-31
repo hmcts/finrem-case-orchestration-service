@@ -35,8 +35,6 @@ public final class BulkPrintDocumentTranslator {
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrder"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "pensionDocuments",
                 "uploadedDocument"));
-
-            List<BulkPrintDocument> ree = bulkPrintDocuments;
         }
 
         return bulkPrintDocuments;
