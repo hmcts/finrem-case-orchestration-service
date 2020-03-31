@@ -32,7 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
 @Slf4j
@@ -73,18 +72,18 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         String ccdNumber = String.valueOf(caseDetails.getId());
         String reference = "";
         String addresseeName;
-        String applicantName = join(nullToEmpty(caseData.get(APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
-                nullToEmpty(caseDetails.getData().get(APP_LAST_NAME_CCD_FIELD)));
-        String respondentName = join(nullToEmpty(caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD)), " ",
-                nullToEmpty(caseDetails.getData().get(APP_RESP_LAST_NAME_CCD_FIELD)));
+        String applicantName = join(String.valueOf((caseData.get(APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD))), " ",
+                String.valueOf((caseDetails.getData().get(APP_LAST_NAME_CCD_FIELD))));
+        String respondentName = join(String.valueOf((caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD))), " ",
+                String.valueOf((caseDetails.getData().get(APP_RESP_LAST_NAME_CCD_FIELD))));
 
         // ADD OPTIONAL TO THIS SO IT DOESN"T THROW NULL POINTER if no applicantRepresented provided in case data
-        String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED).toString());
+        String applicantRepresented =  String.valueOf(caseData.get(APPLICANT_REPRESENTED).toString());
 
-        if (applicantRepresented.equals(YES_VALUE)) {
+        if (applicantRepresented.equalsIgnoreCase(YES_VALUE)) {
             log.info("Applicant is represented by a solicitor");
-            reference = nullToEmpty(caseData.get(SOLICITOR_REFERENCE));
-            addresseeName = nullToEmpty(caseData.get(SOLICITOR_NAME));
+            reference = String.valueOf((caseData.get(SOLICITOR_REFERENCE)));
+            addresseeName = String.valueOf((caseData.get(SOLICITOR_NAME)));
             addressToSendTo = (Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
         } else {
             log.info("Applicant is not represented by a solicitor");

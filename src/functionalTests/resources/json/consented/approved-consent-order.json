@@ -46,7 +46,7 @@
           "AddressLine2": "line2",
           "AddressLine3": "line3"
         },
-         "applicantRepresented": "no",
+         "applicantRepresented": "No",
          "authorisation2b": "test",
          "otherCollection": [
             {
