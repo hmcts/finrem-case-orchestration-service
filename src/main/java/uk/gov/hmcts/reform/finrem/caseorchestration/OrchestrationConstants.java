@@ -20,12 +20,4 @@ public class OrchestrationConstants {
 
     public static final String YES_VALUE = "Yes";
     public static final String NO_VALUE = "No";
-
-    public static final String APPLICANT = "Applicant";
-    public static final String RESPONDENT = "Respondent";
-
-    // Document Generation
-    public static final String DOCUMENT_FILENAME = "document_filename";
-    public static final String DOCUMENT_URL = "document_binary_url";
-    public static final String VALUE = "value";
 }

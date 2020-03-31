@@ -77,7 +77,7 @@ public class ConsentOrderApprovedController implements BaseController {
 
             ApprovedOrder approvedOrder = ApprovedOrder.builder()
                     .orderLetter(approvedConsentOrderLetter)
-                    .consentOrderApprovedLetter(approvedConsentOrderNotificationLetter)
+                    .consentOrderApprovedNotificationLetter(approvedConsentOrderNotificationLetter)
                     .consentOrder(consentOrderAnnexStamped)
                     .build();
 

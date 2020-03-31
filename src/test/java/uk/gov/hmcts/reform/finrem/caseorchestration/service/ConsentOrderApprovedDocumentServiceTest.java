@@ -76,23 +76,11 @@ public class ConsentOrderApprovedDocumentServiceTest {
         applicantAddress.put("PostTown", "London");
         applicantAddress.put("PostCode", "SW1");
 
-        Map<String, Object> solicitorAddress = new HashMap<>();
-        solicitorAddress.put("AddressLine1", "123 Applicant Solicitor Street");
-        solicitorAddress.put("AddressLine2", "Second Address Line");
-        solicitorAddress.put("AddressLine3", "Third Address Line");
-        solicitorAddress.put("County", "London");
-        solicitorAddress.put("Country", "England");
-        solicitorAddress.put("PostTown", "London");
-        solicitorAddress.put("PostCode", "SE1");
-
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD, "James");
         caseData.put(APP_LAST_NAME_CCD_FIELD, "Joyce");
         caseData.put(APP_ADDRESS_CCD_FIELD, applicantAddress);
-        caseData.put(APPLICANT_REPRESENTED, NO_VALUE);
-        caseData.put(SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(APP_SOLICITOR_ADDRESS_CCD_FIELD, solicitorAddress);
+        caseData.put(APPLICANT_REPRESENTED, null);
         caseData.put(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD, "Jane");
         caseData.put(APP_RESP_LAST_NAME_CCD_FIELD, "Doe");
 
@@ -116,6 +104,8 @@ public class ConsentOrderApprovedDocumentServiceTest {
     public void shouldGenerateApprovedConsentOrderNotificationLetterForApplicant() {
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
+        caseDetails.getData().put(APPLICANT_REPRESENTED, NO_VALUE);
+
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
                 service.generateApprovedConsentOrderNotificationLetter(caseDetails, AUTH_TOKEN);
 
@@ -138,7 +128,20 @@ public class ConsentOrderApprovedDocumentServiceTest {
     public void shouldGenerateApprovedConsentOrderNotificationLetterForApplicantSolicitor() {
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
-        caseDetails.getData().replace(APPLICANT_REPRESENTED, YES_VALUE);
+        Map<String, Object> solicitorAddress = new HashMap<>();
+        solicitorAddress.put("AddressLine1", "123 Applicant Solicitor Street");
+        solicitorAddress.put("AddressLine2", "Second Address Line");
+        solicitorAddress.put("AddressLine3", "Third Address Line");
+        solicitorAddress.put("County", "London");
+        solicitorAddress.put("Country", "England");
+        solicitorAddress.put("PostTown", "London");
+        solicitorAddress.put("PostCode", "SE1");
+
+        Map<String, Object> caseData = caseDetails.getData();
+        caseData.replace(APPLICANT_REPRESENTED, YES_VALUE);
+        caseData.put(SOLICITOR_NAME, TEST_SOLICITOR_NAME);
+        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
+        caseData.put(APP_SOLICITOR_ADDRESS_CCD_FIELD, solicitorAddress);
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
                 service.generateApprovedConsentOrderNotificationLetter(caseDetails, AUTH_TOKEN);
@@ -163,8 +166,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
     public void shouldAnnexAndStampDocument() {
         CaseDocument caseDocument = caseDocument();
 
-        when(documentClientMock.annexStampDocument(any(), anyString()))
-                .thenReturn(document());
+        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
 
         CaseDocument annexStampDocument = service.annexStampDocument(caseDocument, AUTH_TOKEN);
 
@@ -176,8 +178,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
     public void shouldStampDocument() {
         CaseDocument caseDocument = caseDocument();
 
-        when(documentClientMock.stampDocument(any(), anyString()))
-                .thenReturn(document());
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
 
         CaseDocument stampDocument = service.stampDocument(caseDocument, AUTH_TOKEN);
 
@@ -189,8 +190,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
     public void shouldStampPensionDocuments() {
         List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
 
-        when(documentClientMock.stampDocument(any(), anyString()))
-                .thenReturn(document());
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
 
         List<PensionCollectionData> stampPensionDocuments = service.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
 

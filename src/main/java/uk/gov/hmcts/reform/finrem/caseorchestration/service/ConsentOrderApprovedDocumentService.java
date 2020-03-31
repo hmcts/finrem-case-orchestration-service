@@ -32,6 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
 @Slf4j
@@ -40,10 +41,8 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
     private LetterAddressHelper letterAddressHelper;
 
     @Autowired
-    public ConsentOrderApprovedDocumentService(DocumentClient documentClient,
-                                               DocumentConfiguration config,
-                                               ObjectMapper objectMapper,
-                                               LetterAddressHelper letterAddressHelper) {
+    public ConsentOrderApprovedDocumentService(DocumentClient documentClient, DocumentConfiguration config,
+                                               ObjectMapper objectMapper, LetterAddressHelper letterAddressHelper) {
         super(documentClient, config, objectMapper);
         this.letterAddressHelper = letterAddressHelper;
     }
@@ -69,21 +68,19 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         Map<String, Object> caseData = caseDetails.getData();
         Map addressToSendTo;
 
-        String ccdNumber = String.valueOf(caseDetails.getId());
+        String ccdNumber = nullToEmpty((caseDetails.getId()));
         String reference = "";
         String addresseeName;
-        String applicantName = join(String.valueOf((caseData.get(APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD))), " ",
-                String.valueOf((caseDetails.getData().get(APP_LAST_NAME_CCD_FIELD))));
-        String respondentName = join(String.valueOf((caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD))), " ",
-                String.valueOf((caseDetails.getData().get(APP_RESP_LAST_NAME_CCD_FIELD))));
-
-        // ADD OPTIONAL TO THIS SO IT DOESN"T THROW NULL POINTER if no applicantRepresented provided in case data
-        String applicantRepresented =  String.valueOf(caseData.get(APPLICANT_REPRESENTED).toString());
+        String applicantName = join(nullToEmpty((caseData.get(APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD))), " ",
+                nullToEmpty((caseDetails.getData().get(APP_LAST_NAME_CCD_FIELD))));
+        String respondentName = join(nullToEmpty((caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD))), " ",
+                nullToEmpty((caseDetails.getData().get(APP_RESP_LAST_NAME_CCD_FIELD))));
+        String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
 
         if (applicantRepresented.equalsIgnoreCase(YES_VALUE)) {
             log.info("Applicant is represented by a solicitor");
-            reference = String.valueOf((caseData.get(SOLICITOR_REFERENCE)));
-            addresseeName = String.valueOf((caseData.get(SOLICITOR_NAME)));
+            reference = nullToEmpty((caseData.get(SOLICITOR_REFERENCE)));
+            addresseeName = nullToEmpty((caseData.get(SOLICITOR_NAME)));
             addressToSendTo = (Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
         } else {
             log.info("Applicant is not represented by a solicitor");
@@ -110,7 +107,8 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
             caseData.put(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER, consentOrderApprovedNotificationLetter);
         } else {
             log.info("Failed to generate Approved Consent Order Notification Letter as not all required address details were present");
-            throw new IllegalArgumentException("Mandatory data missing from address when trying to generate letter");
+            throw new IllegalArgumentException(
+                    "Mandatory data missing from address when trying to generate Approved Consent Order Notification Letter");
         }
 
         return generateDocument(authToken, caseDetails,
@@ -122,8 +120,7 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         return super.annexStampDocument(document, authToken);
     }
 
-    public List<PensionCollectionData> stampPensionDocuments(List<PensionCollectionData> pensionList,
-                                                             String authToken) {
+    public List<PensionCollectionData> stampPensionDocuments(List<PensionCollectionData> pensionList, String authToken) {
         return pensionList.stream()
                 .map(data -> stampPensionDocuments(data, authToken)).collect(toList());
     }

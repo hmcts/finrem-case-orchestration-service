@@ -21,6 +21,6 @@ public class ApprovedOrder {
     private CaseDocument consentOrder;
     @JsonProperty("pensionDocuments")
     private List<PensionCollectionData> pensionDocuments;
-    @JsonProperty("consentOrderApprovedLetter")
-    private CaseDocument consentOrderApprovedLetter;
+    @JsonProperty("consentOrderApprovedNotificationLetter")
+    private CaseDocument consentOrderApprovedNotificationLetter;
 }

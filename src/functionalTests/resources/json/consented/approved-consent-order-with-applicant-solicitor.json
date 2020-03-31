@@ -6,78 +6,77 @@
       "jurisdiction": "divorce",
       "state": "referredToJudge",
       "case_data": {
-
-      "latestConsentOrder": {
+        "latestConsentOrder": {
          "document_url": "http://dm-store:8080/documents/ff08dbe1-dd16-4ec5-8b72-4c5379e0455f",
          "document_filename": "sample.pdf",
          "document_binary_url": "http://dm-store:8080/documents/ff08dbe1-dd16-4ec5-8b72-4c5379e0455f/binary"
       },
-         "PBANumber": "PBA123456",
-         "d81Question": "No",
-         "PBAreference": "ABCD",
-         "consentOrder": {
-            "document_url": "http://file1",
-            "document_filename": "file1",
-            "document_binary_url": "http://file1.binary"
-         },
-         "d81Joint": {
-            "document_url": "http://file1",
-            "document_filename": "file1",
-            "document_binary_url": "http://file1.binary"
-         },
-         "d81Applicant": {
-            "document_url": "http://file1",
-            "document_filename": "file1",
-            "document_binary_url": "http://file1.binary"
-         },
-         "d81Respondent": {
-            "document_url": "http://file1",
-            "document_filename": "file1",
-            "document_binary_url": "http://file1.binary"
-         },
-         "solicitorFirm": "FirmA",
-         "solicitorName": "Solictor",
-         "applicantLName": "Guy",
-         "authorisation3": "2010-01-01",
-         "solicitorEmail": "test@admin.com",
-         "solicitorPhone": "1234",
-         "applicantFMName": "Poor",
-         "authorisation2b": "test",
-         "otherCollection": [
-            {
-               "id": "1",
-               "value": {
-                  "typeOfDocument": "pdf",
-                  "uploadedDocument": {
-                     "document_url": "http://file1",
-                     "document_filename": "file1",
-                     "document_binary_url": "http://file1.binary"
-                  }
-               }
-            }
-         ],
-         "respondentEmail": "test@test.com",
-         "respondentPhone": "9963472494",
-         "appRespondentRep": "No",
-         "consentOrderText": {
-            "document_url": "http://file1",
-            "document_filename": "file1",
-            "document_binary_url": "http://file1.binary"
-         },
-        "applicantRepresented": "yes",
-         "solicitorAddress": {
-            "County": "essex",
-            "Country": "UK",
-            "PostCode": "b1 1ab",
-            "PostTown": "london",
-            "AddressLine1": "line1",
-            "AddressLine2": "line2",
-            "AddressLine3": "line3"
-         },
-         "authorisationFirm": "test",
-         "authorisationName": "test",
-         "divorceCaseNumber": "DD12D12345",
-         "pensionCollection": [
+        "PBANumber": "PBA123456",
+        "d81Question": "No",
+        "PBAreference": "ABCD",
+        "consentOrder": {
+          "document_url": "http://file1",
+          "document_filename": "file1",
+          "document_binary_url": "http://file1.binary"
+       },
+        "d81Joint": {
+          "document_url": "http://file1",
+          "document_filename": "file1",
+          "document_binary_url": "http://file1.binary"
+       },
+        "d81Applicant": {
+          "document_url": "http://file1",
+          "document_filename": "file1",
+          "document_binary_url": "http://file1.binary"
+       },
+        "d81Respondent": {
+          "document_url": "http://file1",
+          "document_filename": "file1",
+          "document_binary_url": "http://file1.binary"
+       },
+        "applicantFMName": "Poor",
+        "applicantLName": "Guy",
+        "applicantRepresented": "Yes",
+        "solicitorFirm": "FirmA",
+        "solicitorName": "Solicitor",
+        "solicitorAddress": {
+          "County": "essex",
+          "Country": "UK",
+          "PostCode": "b1 1ab",
+          "PostTown": "london",
+          "AddressLine1": "line1",
+          "AddressLine2": "line2",
+          "AddressLine3": "line3"
+        },
+        "authorisation2b": "test",
+        "authorisation3": "2010-01-01",
+        "solicitorEmail": "test@admin.com",
+        "solicitorPhone": "1234",
+        "solicitorDXnumber": "dx1",
+        "solicitorReference": "LL01",
+        "solicitorAgreeToReceiveEmails": "No",
+        "otherCollection": [
+          {
+             "id": "1",
+             "value": {
+                "typeOfDocument": "pdf",
+                "uploadedDocument": {
+                   "document_url": "http://file1",
+                   "document_filename": "file1",
+                   "document_binary_url": "http://file1.binary"
+                }
+             }
+          }
+       ],
+        "consentOrderText": {
+          "document_url": "http://file1",
+          "document_filename": "file1",
+          "document_binary_url": "http://file1.binary"
+       },
+        "authorisationFirm": "test",
+        "authorisationName": "test",
+        "divorceCaseNumber": "DD12D12345",
+        "pensionCollection": [
             {
                "id": "1",
                "value": {
@@ -90,83 +89,83 @@
                }
             }
          ],
-         "respondentAddress": {
-            "County": "essex",
-            "Country": "UK",
-            "PostCode": "b1 1ab",
-            "PostTown": "london",
-            "AddressLine1": "line1",
-            "AddressLine2": "line2",
-            "AddressLine3": "line3"
-         },
-         "solicitorDXnumber": "dx1",
-         "appRespondentLName": "smith",
-         "solicitorReference": "LL01",
-         "appRespondentFMName": "john",
-         "divorceStageReached": "Decree Nisi",
-         "helpWithFeesQuestion": "No",
-         "natureOfApplication2": [
+        "appRespondentFMName": "john",
+        "appRespondentLName": "smith",
+        "appRespondentRep": "No",
+        "respondentEmail": "test@test.com",
+        "respondentPhone": "9963472494",
+        "respondentAddress": {
+          "County": "essex",
+          "Country": "UK",
+          "PostCode": "b1 1ab",
+          "PostTown": "london",
+          "AddressLine1": "line1",
+          "AddressLine2": "line2",
+          "AddressLine3": "line3"
+        },
+        "divorceStageReached": "Decree Nisi",
+        "helpWithFeesQuestion": "No",
+        "natureOfApplication2": [
             "item1",
             "item2"
          ],
-         "natureOfApplication5": "No",
-         "natureOfApplication6": [
+        "natureOfApplication3a": "test",
+        "natureOfApplication3b": "test",
+        "natureOfApplication5": "No",
+        "natureOfApplication6": [
             "item1",
             "item2"
          ],
-         "natureOfApplication7": "test",
-         "natureOfApplication3a": "test",
-         "natureOfApplication3b": "test",
-         "divorceUploadEvidence1": {
+        "natureOfApplication7": "test",
+        "divorceUploadEvidence1": {
             "document_url": "http://file1",
             "document_filename": "file1",
             "document_binary_url": "http://file1.binary"
          },
-         "divorceDecreeNisiDate": "2010-01-01",
-         "divorceUploadEvidence2": {
+        "divorceDecreeNisiDate": "2010-01-01",
+        "divorceUploadEvidence2": {
             "document_url": "http://file2",
             "document_filename": "file2",
             "document_binary_url": "http://file2.binary"
          },
-         "divorceDecreeAbsoluteDate": "2010-01-01",
-         "orderForChildrenQuestion1": "Yes",
-         "solicitorAgreeToReceiveEmails": "Yes",
-         "orderDirection": "test",
-         "orderDirectionOpt1": {
+        "divorceDecreeAbsoluteDate": "2010-01-01",
+        "orderForChildrenQuestion1": "Yes",
+        "orderDirection": "test",
+        "orderDirectionOpt1": {
             "document_url": "http://file1",
             "document_filename": "file1",
             "document_binary_url": "http://file1.binary"
          },
-         "approvedConsentOrderLetter": {
+        "approvedConsentOrderLetter": {
             "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d9e63738-f2ff-4cca-adbe-e2a983cdbd8b/binary",
             "document_filename": "ApprovedConsentOrderLetter.pdf",
             "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d9e63738-f2ff-4cca-adbe-e2a983cdbd8b"
          },
-         "orderDirectionAbsolute": "test",
-         "orderDirectionJudge": "test",
-         "orderDirectionJudgeName": "test",
-         "orderDirectionDate": "2010-01-01",
-         "dueDate": "2010-01-01",
-         "issueDate": "2010-01-01",
-         "orderDirectionAddComments": "test",
-         "orderDirectionOpt2": "test",
-         "assignedToJudgeReason": "test",
-         "assignedToJudge": "judge1",
-         "referToJudgeDate": "2010-01-01",
-         "referToJudgeText": "test",
-         "referToJudgeDateFromAwaitingResponse": "2010-01-01",
-         "referToJudgeTextFromAwaitingResponse": "test",
-         "referToJudgeDateFromOrderMade": "2010-01-01",
-         "referToJudgeTextFromOrderMade": "test",
-         "referToJudgeDateFromConsOrdApproved": "2010-01-01",
-         "referToJudgeTextFromConsOrdApproved": "test",
-         "referToJudgeDateFromConsOrdMade": "2010-01-01",
-         "referToJudgeTextFromConsOrdMade": "test",
-         "referToJudgeDateFromClose": "2010-01-01",
-         "referToJudgeTextFromClose": "test",
-         "referToJudgeDateFromRespondToOrder": "2010-01-01",
-         "referToJudgeTextFromRespondToOrder": "test",
-         "orderRefusalCollection": [
+        "orderDirectionAbsolute": "test",
+        "orderDirectionJudge": "test",
+        "orderDirectionJudgeName": "test",
+        "orderDirectionDate": "2010-01-01",
+        "dueDate": "2010-01-01",
+        "issueDate": "2010-01-01",
+        "orderDirectionAddComments": "test",
+        "orderDirectionOpt2": "test",
+        "assignedToJudgeReason": "test",
+        "assignedToJudge": "judge1",
+        "referToJudgeDate": "2010-01-01",
+        "referToJudgeText": "test",
+        "referToJudgeDateFromAwaitingResponse": "2010-01-01",
+        "referToJudgeTextFromAwaitingResponse": "test",
+        "referToJudgeDateFromOrderMade": "2010-01-01",
+        "referToJudgeTextFromOrderMade": "test",
+        "referToJudgeDateFromConsOrdApproved": "2010-01-01",
+        "referToJudgeTextFromConsOrdApproved": "test",
+        "referToJudgeDateFromConsOrdMade": "2010-01-01",
+        "referToJudgeTextFromConsOrdMade": "test",
+        "referToJudgeDateFromClose": "2010-01-01",
+        "referToJudgeTextFromClose": "test",
+        "referToJudgeDateFromRespondToOrder": "2010-01-01",
+        "referToJudgeTextFromRespondToOrder": "test",
+        "orderRefusalCollection": [
             {
                "id": "1",
                "value": {
@@ -194,7 +193,7 @@
                }
             }
          ],
-         "uploadConsentOrderDocuments": [
+        "uploadConsentOrderDocuments": [
             {
                "id": "1",
                "value": {
@@ -211,7 +210,7 @@
                }
             }
          ],
-         "uploadOrder": [
+        "uploadOrder": [
             {
                "id": "1",
                "value": {
@@ -228,7 +227,7 @@
                }
             }
          ],
-         "uploadDocuments": [
+        "uploadDocuments": [
             {
                "id": "1",
                "value": {
@@ -245,7 +244,7 @@
                }
             }
          ],
-         "generalOrderCollection": [
+        "generalOrderCollection": [
             {
                "id": "1",
                "value": {
@@ -262,7 +261,7 @@
                }
             }
          ],
-         "respondToOrderDocuments": [
+        "respondToOrderDocuments": [
             {
                "id": "1",
                "value": {

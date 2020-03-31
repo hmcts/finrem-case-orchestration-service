@@ -42,7 +42,7 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
         InputStream resourceAsStream;
         resourceAsStream = getClass().getResourceAsStream("/json/consented/approved-consent-order.json");
 
-        Map<String,String> uploadedDoc = null;
+        Map<String,String> uploadedDoc;
         try {
             uploadedDoc = serviceUtils.uploadFileToEmStore("fileTypes/sample.pdf","application/pdf");
         } catch (JSONException e) {
@@ -63,6 +63,25 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
     @Ignore
     @Test
     public void verifyConsentOrderApprovedForConsentedCaseWhenApplicantRepresentedBySolicitor() {
+        CallbackRequest callbackRequest = null;
+        InputStream resourceAsStream;
+        resourceAsStream = getClass().getResourceAsStream("/json/consented/approved-consent-order-with-applicant-solicitor.json");
 
+        Map<String,String> uploadedDoc;
+        try {
+            uploadedDoc = serviceUtils.uploadFileToEmStore("fileTypes/sample.pdf","application/pdf");
+        } catch (JSONException e) {
+            throw new RuntimeException("Exception uploading file to evidence store ",e);
+        }
+
+        DocumentContext documentContext = JsonPath.parse(resourceAsStream).set("$..latestConsentOrder",uploadedDoc);
+        documentContext.set("$..pensionCollection[0].value.uploadedDocument",uploadedDoc);
+        try {
+            callbackRequest = objectMapper.readValue(documentContext.jsonString(), CallbackRequest.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Response response = functionalTestUtils.getResponseData(consentOrderApprovedUrl,callbackRequest);
+        assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
     }
 }
