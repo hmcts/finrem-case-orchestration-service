@@ -17,6 +17,8 @@ import java.util.List;
 public class ApprovedOrder {
     @JsonProperty("orderLetter")
     private CaseDocument orderLetter;
+    @JsonProperty("orderLetterB")
+    private CaseDocument orderLetterB;
     @JsonProperty("consentOrder")
     private CaseDocument consentOrder;
     @JsonProperty("pensionDocuments")

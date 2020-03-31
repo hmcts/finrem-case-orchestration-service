@@ -33,6 +33,12 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                 config.getApprovedConsentOrderFileName());
     }
 
+    public CaseDocument generateApprovedConsentOrderLetterB(CaseDetails caseDetails, String authToken) {
+        return generateDocument(authToken, caseDetails,
+                config.getApprovedConsentOrderTemplateB(),
+                config.getApprovedConsentOrderFileNameB());
+    }
+
     public CaseDocument annexStampDocument(CaseDocument document, String authToken) {
         return super.annexStampDocument(document, authToken);
     }

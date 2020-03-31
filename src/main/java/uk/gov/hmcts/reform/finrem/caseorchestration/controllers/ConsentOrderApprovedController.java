@@ -67,12 +67,14 @@ public class ConsentOrderApprovedController implements BaseController {
 
         if (!isEmpty(latestConsentOrder)) {
             CaseDocument letter = service.generateApprovedConsentOrderLetter(callback.getCaseDetails(), authToken);
+            CaseDocument letterB = service.generateApprovedConsentOrderLetterB(callback.getCaseDetails(), authToken);
             CaseDocument consentOrderAnnexStamped = service.annexStampDocument(latestConsentOrder, authToken);
 
-            log.info("letter= {}, consentOrderAnnexStamped = {}", letter, consentOrderAnnexStamped);
+            log.info("letter= {}, letterB= {}, consentOrderAnnexStamped = {}", letter, letterB, consentOrderAnnexStamped);
 
             ApprovedOrder approvedOrder = ApprovedOrder.builder()
                     .orderLetter(letter)
+                    .orderLetterB(letterB)
                     .consentOrder(consentOrderAnnexStamped)
                     .build();
 

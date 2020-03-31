@@ -60,6 +60,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     public void consentOrderApproved500Error() throws Exception {
         doValidCaseDataSetUp();
         whenServiceGeneratesDocument().thenThrow(feignError());
+        whenServiceGeneratesDocumentB().thenThrow(feignError());
 
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
@@ -72,6 +73,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     public void latestConsentOrderIsMissing() throws Exception {
         doMissingLatestConsentOrder();
         whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesDocumentB().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
@@ -89,6 +91,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     public void consentOrderApprovedSuccess() throws Exception {
         doValidCaseDataSetUp();
         whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesDocumentB().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
@@ -100,12 +103,17 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
         result.andExpect(status().isOk());
         assertLetter(result);
+        assertLetterB(result);
         assertConsentOrder(result);
         assertPensionDocs(result);
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
         return when(service.generateApprovedConsentOrderLetter(isA(CaseDetails.class), anyString()));
+    }
+
+    private OngoingStubbing<CaseDocument> whenServiceGeneratesDocumentB() {
+        return when(service.generateApprovedConsentOrderLetterB(isA(CaseDetails.class), anyString()));
     }
 
     private OngoingStubbing<CaseDocument> whenAnnexStampingDocument() {
@@ -122,6 +130,13 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     private void assertLetter(ResultActions result) throws Exception {
         String path = "$.data.approvedOrderCollection[0].value.orderLetter.";
+        result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
+                .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
+                .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
+    }
+
+    private void assertLetterB(ResultActions result) throws Exception {
+        String path = "$.data.approvedOrderCollection[0].value.orderLetterB.";
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
                 .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
                 .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));

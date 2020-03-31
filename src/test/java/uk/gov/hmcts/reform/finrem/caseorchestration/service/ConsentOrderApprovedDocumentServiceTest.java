@@ -44,6 +44,9 @@ public class ConsentOrderApprovedDocumentServiceTest {
         config = new DocumentConfiguration();
         config.setApprovedConsentOrderTemplate("test_template");
         config.setApprovedConsentOrderFileName("test_file");
+
+        config.setApprovedConsentOrderTemplateB("test_template2");
+        config.setApprovedConsentOrderFileNameB("test_file2");
         documentClientMock = mock(DocumentClient.class);
         service = new ConsentOrderApprovedDocumentService(documentClientMock, config, mapper);
     }
@@ -56,6 +59,20 @@ public class ConsentOrderApprovedDocumentServiceTest {
                 .thenReturn(document());
 
         CaseDocument caseDocument = service.generateApprovedConsentOrderLetter(
+                CaseDetails.builder().data(caseData).build(), AUTH_TOKEN);
+
+        doCaseDocumentAssert(caseDocument);
+        verify(documentClientMock, times(1)).generatePdf(any(), anyString());
+    }
+
+    @Test
+    public void shouldGenerateApprovedConsentOrderLetterB() {
+        Map<String, Object> caseData = ImmutableMap.of();
+
+        when(documentClientMock.generatePdf(any(), anyString()))
+                .thenReturn(document());
+
+        CaseDocument caseDocument = service.generateApprovedConsentOrderLetterB(
                 CaseDetails.builder().data(caseData).build(), AUTH_TOKEN);
 
         doCaseDocumentAssert(caseDocument);
