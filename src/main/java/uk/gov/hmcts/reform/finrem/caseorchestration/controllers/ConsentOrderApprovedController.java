@@ -46,7 +46,7 @@ public class ConsentOrderApprovedController implements BaseController {
     private ConsentOrderApprovedDocumentService service;
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
+    @ApiOperation(value = "Handles 'Consent Order Approved' generation. Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
@@ -90,7 +90,7 @@ public class ConsentOrderApprovedController implements BaseController {
             List<ApprovedOrderData> approvedOrders = asList(approvedOrderData);
             caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
-            log.info("Successfully generated documents for Consent order approved");
+            log.info("Successfully generated documents for 'Consent Order approved'");
         }
 
         return ResponseEntity.ok(

@@ -33,15 +33,13 @@ public class ConsentOrderApprovedDocumentServiceTest {
     @Mock
     private DocumentClient documentClientMock;
 
-    private DocumentConfiguration config;
-
     private ObjectMapper mapper = new ObjectMapper();
 
     private ConsentOrderApprovedDocumentService service;
 
     @Before
     public void setUp() {
-        config = new DocumentConfiguration();
+        DocumentConfiguration config = new DocumentConfiguration();
         config.setApprovedConsentOrderTemplate("test_template");
         config.setApprovedConsentOrderFileName("test_file");
         documentClientMock = mock(DocumentClient.class);
@@ -52,8 +50,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
     public void shouldGenerateApprovedConsentOrderLetter() {
         Map<String, Object> caseData = ImmutableMap.of();
 
-        when(documentClientMock.generatePdf(any(), anyString()))
-                .thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
         CaseDocument caseDocument = service.generateApprovedConsentOrderLetter(
                 CaseDetails.builder().data(caseData).build(), AUTH_TOKEN);
@@ -66,8 +63,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
     public void shouldAnnexAndStampDocument() {
         CaseDocument caseDocument = caseDocument();
 
-        when(documentClientMock.annexStampDocument(any(), anyString()))
-                .thenReturn(document());
+        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
 
         CaseDocument annexStampDocument = service.annexStampDocument(caseDocument, AUTH_TOKEN);
 
@@ -79,8 +75,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
     public void shouldStampDocument() {
         CaseDocument caseDocument = caseDocument();
 
-        when(documentClientMock.stampDocument(any(), anyString()))
-                .thenReturn(document());
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
 
         CaseDocument stampDocument = service.stampDocument(caseDocument, AUTH_TOKEN);
 
@@ -92,8 +87,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
     public void shouldStampPensionDocuments() {
         List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
 
-        when(documentClientMock.stampDocument(any(), anyString()))
-                .thenReturn(document());
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
 
         List<PensionCollectionData> stampPensionDocuments = service.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
 

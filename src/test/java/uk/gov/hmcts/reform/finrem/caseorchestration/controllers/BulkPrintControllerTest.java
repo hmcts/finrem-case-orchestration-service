@@ -8,15 +8,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 
-import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.util.UUID;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -62,7 +62,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 post(BULK_PRINT_URI)
                         .content(requestContent.toString())
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes").exists())
@@ -91,7 +91,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 post(BULK_PRINT_URI)
                         .content(requestContent.toString())
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes").exists())
@@ -119,7 +119,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 post(BULK_PRINT_URI)
                         .content(requestContent.toString())
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes").exists())
@@ -139,9 +139,9 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 post(BULK_PRINT_URI)
                         .content(requestContent.toString())
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
-        verifyZeroInteractions(bulkPrintService);
+        verifyNoInteractions(bulkPrintService);
         verify(coverSheetService).generateRespondentCoverSheet(any(), any());
     }
 
@@ -156,7 +156,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 post(BULK_PRINT_URI)
                         .content(requestContent.toString())
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
         verify(coverSheetService).generateRespondentCoverSheet(any(), any());
         verify(bulkPrintService).sendForBulkPrint(any(), any());

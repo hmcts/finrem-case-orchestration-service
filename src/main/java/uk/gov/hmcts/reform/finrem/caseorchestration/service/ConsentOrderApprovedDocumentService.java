@@ -28,6 +28,10 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
 
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
+        log.info("Generating Approved Consent Order Letter {} from {} for bulk print",
+                config.getApprovedConsentOrderFileName(),
+                config.getApprovedConsentOrderTemplate());
+
         return generateDocument(authToken, caseDetails,
                 config.getApprovedConsentOrderTemplate(),
                 config.getApprovedConsentOrderFileName());
@@ -37,8 +41,7 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         return super.annexStampDocument(document, authToken);
     }
 
-    public List<PensionCollectionData> stampPensionDocuments(List<PensionCollectionData> pensionList,
-                                                             String authToken) {
+    public List<PensionCollectionData> stampPensionDocuments(List<PensionCollectionData> pensionList, String authToken) {
         return pensionList.stream()
                 .map(data -> stampPensionDocuments(data, authToken)).collect(toList());
     }
@@ -59,5 +62,4 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
             throw new IllegalStateException();
         }
     }
-
 }
