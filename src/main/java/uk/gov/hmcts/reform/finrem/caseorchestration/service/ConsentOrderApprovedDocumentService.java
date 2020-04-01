@@ -11,13 +11,28 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.LetterAddressHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ConsentOrderApprovedNotificationLetter;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.String.join;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
 @Slf4j
@@ -43,13 +58,21 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
     }
 
     public CaseDocument generateApprovedConsentOrderNotificationLetter(CaseDetails caseDetails, String authToken) {
-
         log.info("Generating Approved Consent Order Notification Letter {} from {} for bulk print",
                 config.getApprovedConsentOrderFileName(),
                 config.getApprovedConsentOrderTemplate());
 
-        // temp fix to get data passed into document
+        prepareApprovedConsentOrderNotificationLetter(caseDetails);
 
+        return generateDocument(authToken, caseDetails,
+                config.getApprovedConsentOrderNotificationTemplate(),
+                config.getApprovedConsentOrderNotificationFileName());
+    }
+
+    private void prepareApprovedConsentOrderNotificationLetter(CaseDetails caseDetails) {
+
+        // Replace me once everything works
+        // temp fix to get data passed into document
         String addresseeName = "test name pls";
         String addressToSendTo = "test address";
 
@@ -59,11 +82,10 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                 .build();
 
         caseDetails.getData().put("addressee",  addressee);
+    }
 
-        return generateDocument(authToken, caseDetails,
-                config.getApprovedConsentOrderNotificationTemplate(),
-                config.getApprovedConsentOrderNotificationFileName());
-        /*
+    /*
+    private void prepareApprovedConsentOrderNotificationLetter2 (CaseDetails caseDetails) {
 
         Map<String, Object> caseData = caseDetails.getData();
         Map addressToSendTo;
@@ -104,15 +126,15 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                             .respondentName(respondentName)
                             .build();
 
+            // caseDetails.getData().put(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER,  addressee);
             caseData.put(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER, consentOrderApprovedNotificationLetter);
         } else {
             log.info("Failed to generate Approved Consent Order Notification Letter as not all required address details were present");
             throw new IllegalArgumentException(
                     "Mandatory data missing from address when trying to generate Approved Consent Order Notification Letter");
         }
-        */
     }
-
+     */
 
     public CaseDocument annexStampDocument(CaseDocument document, String authToken) {
         return super.annexStampDocument(document, authToken);
