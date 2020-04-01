@@ -61,7 +61,7 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
             config.getBulkPrintFileName());
     }
 
-    void prepareApplicantCoverSheet(CaseDetails caseDetails) {
+    private void prepareApplicantCoverSheet(CaseDetails caseDetails) {
         BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder = BulkPrintCoverSheet.builder()
             .ccdNumber(caseDetails.getId().toString())
             .recipientName(join(nullToEmpty(caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME)), " ",
@@ -77,7 +77,7 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
         }
     }
 
-    void prepareRespondentCoverSheet(CaseDetails caseDetails) {
+    private void prepareRespondentCoverSheet(CaseDetails caseDetails) {
         BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder = BulkPrintCoverSheet.builder()
             .ccdNumber(caseDetails.getId().toString())
             .recipientName(join(nullToEmpty(caseDetails.getData().get(APP_RESPONDENT_FIRST_MIDDLE_NAME)), " ",

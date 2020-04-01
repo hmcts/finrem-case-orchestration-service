@@ -29,7 +29,7 @@ public class BulkPrintDocumentTranslatorTest {
         List<BulkPrintDocument> bulkPrintDocuments =
             BulkPrintDocumentTranslator.approvedOrderCollection(caseDetails().getData());
 
-        assertThat(bulkPrintDocuments.size(), is(4));
+        assertThat(bulkPrintDocuments.size(), is(5));
     }
 
     private CaseDetails caseDetails() throws Exception {

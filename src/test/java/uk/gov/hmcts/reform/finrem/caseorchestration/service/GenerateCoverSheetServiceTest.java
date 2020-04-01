@@ -39,16 +39,18 @@ public class GenerateCoverSheetServiceTest {
     }
 
     @Test
-    public void shouldGenerateRespondentCoverSheet() throws Exception {
-        CaseDocument caseDocument = coverSheetService.generateRespondentCoverSheet(caseDetails(), AUTH_TOKEN);
+    public void shouldGenerateApplicantCoverSheet() throws Exception {
+        CaseDocument caseDocument = coverSheetService.generateApplicantCoverSheet(caseDetails(), AUTH_TOKEN);
+
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
     }
 
     @Test
-    public void shouldGenerateApplicantCoverSheet() throws Exception {
-        CaseDocument caseDocument = coverSheetService.generateApplicantCoverSheet(caseDetails(), AUTH_TOKEN);
+    public void shouldGenerateRespondentCoverSheet() throws Exception {
+        CaseDocument caseDocument = coverSheetService.generateRespondentCoverSheet(caseDetails(), AUTH_TOKEN);
+
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
@@ -57,7 +59,7 @@ public class GenerateCoverSheetServiceTest {
     @Test
     public void shouldGenerateApplicantCoverSheetUsingApplicantAddressWhenApplicantSolicitorAddressIsEmpty() throws Exception {
         CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
-        coverSheetService.prepareApplicantCoverSheet(caseDetails);
+        coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
 
@@ -69,7 +71,7 @@ public class GenerateCoverSheetServiceTest {
     @Test
     public void shouldGenerateRespondentCoverSheetUsingRespondentAddressWhenRespondentSolicitorAddressIsEmpty() throws Exception {
         CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
-        coverSheetService.prepareRespondentCoverSheet(caseDetails);
+        coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
 
@@ -81,7 +83,7 @@ public class GenerateCoverSheetServiceTest {
     @Test
     public void shouldGenerateApplicantCoverSheetUsingApplicantSolicitorAddress() throws Exception {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
-        coverSheetService.prepareApplicantCoverSheet(caseDetails);
+        coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
 
@@ -93,7 +95,7 @@ public class GenerateCoverSheetServiceTest {
     @Test
     public void shouldGenerateRespondentCoverSheetUsingRespondentSolicitorAddress() throws Exception {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
-        coverSheetService.prepareRespondentCoverSheet(caseDetails);
+        coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
 

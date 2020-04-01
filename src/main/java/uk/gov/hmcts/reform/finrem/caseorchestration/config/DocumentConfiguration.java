@@ -30,4 +30,6 @@ public class DocumentConfiguration {
     private String generalLetterFileName;
     private String approvedConsentOrderTemplate;
     private String approvedConsentOrderFileName;
+    private String approvedConsentOrderNotificationTemplate;
+    private String approvedConsentOrderNotificationFileName;
 }

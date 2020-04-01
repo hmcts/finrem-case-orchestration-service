@@ -53,7 +53,7 @@ public class BulkPrintServiceTest {
             new CaseDocument(), caseDetails());
 
         assertThat(letterId, is(bulkPrintLetterId));
-        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().size(), is(5));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().size(), is(6));
     }
 
     @Test

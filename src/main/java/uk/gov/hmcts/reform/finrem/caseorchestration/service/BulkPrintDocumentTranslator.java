@@ -22,7 +22,7 @@ public final class BulkPrintDocumentTranslator {
     private static final String VALUE = "value";
 
     public static List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
-        log.info("Extracting {} from case data  for bulk print. ", "approvedOrderCollection");
+        log.info("Extracting 'approvedOrderCollection' from case data for bulk print.");
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         List<Map> documentList = ofNullable(data.get("approvedOrderCollection"))
             .map(i -> (List<Map>) i)
@@ -30,6 +30,7 @@ public final class BulkPrintDocumentTranslator {
 
         if (documentList.size() > 0) {
             Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get("value"));
+            bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrderApprovedNotificationLetter"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "orderLetter"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrder"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "pensionDocuments",
@@ -40,7 +41,7 @@ public final class BulkPrintDocumentTranslator {
     }
 
     public static List<BulkPrintDocument> uploadOrder(Map<String, Object> data) {
-        log.info("Extracting {} from case data  for bulk print. ", "uploadOrder");
+        log.info("Extracting 'uploadOrder' from case data for bulk print.");
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         List<Map> documentList = ofNullable(data.get("uploadOrder"))
             .map(i -> (List<Map>) i)
@@ -53,8 +54,7 @@ public final class BulkPrintDocumentTranslator {
     }
 
     private static List<BulkPrintDocument> convertBulkPrintDocument(Map<String, Object> data, String documentName) {
-        log.info("Extracting {} from case data  for bulk print. ", documentName);
-
+        log.info("Extracting '{}' document from case data for bulk print.", documentName);
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
 
         Object documentLinkObj = data.get(documentName);
@@ -64,14 +64,14 @@ public final class BulkPrintDocumentTranslator {
             bulkPrintDocuments.add(BulkPrintDocument.builder()
                 .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
                 .build());
-            log.info("{} for bulk print {}", documentName, documentLink.get(DOCUMENT_FILENAME));
+            log.info("Sending {} ({}) for bulk print.", documentName, documentLink.get(DOCUMENT_FILENAME));
         }
         return bulkPrintDocuments;
     }
 
     private static List<BulkPrintDocument> convertBulkPrintDocument(Map<String, Object> data, String collectionName,
                                                                     String documentName) {
-        log.info("Extracting {} from case data  for bulk print. ", collectionName);
+        log.info("Extracting '{}' collection from case data for bulk print.", collectionName);
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
 
         List<Map> documentList = ofNullable(data.get(collectionName))
@@ -88,7 +88,7 @@ public final class BulkPrintDocumentTranslator {
                 bulkPrintDocuments.add(BulkPrintDocument.builder()
                     .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
                     .build());
-                log.info("{} file for bulk print {}", collectionName, documentLink.get(DOCUMENT_FILENAME));
+                log.info("Sending {} ({}) for bulk print.", collectionName, documentLink.get(DOCUMENT_FILENAME));
             }
         }
         return bulkPrintDocuments;

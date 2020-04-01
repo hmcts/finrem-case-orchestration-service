@@ -24,6 +24,8 @@ public class CCDConfigConstant {
     public static final String CONTESTED_SOLICITOR_EMAIL = "applicantSolicitorEmail";
     public static final String CONTESTED_SOLICITOR_NAME = "applicantSolicitorName";
     public static final String SOLICITOR_FIRM = "solicitorFirm";
+    public static final String APP_SOLICITOR_ADDRESS_CCD_FIELD = "solicitorAddress";
+    public static final String RESP_SOLICITOR_ADDRESS_CCD_FIELD = "rSolicitorAddress";
     public static final String SOLICITOR_AGREE_TO_RECEIVE_EMAILS = "solicitorAgreeToReceiveEmails";
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";
 
@@ -68,10 +70,12 @@ public class CCDConfigConstant {
     public static final String JUDGE_ALLOCATED = "judgeAllocated";
 
     // Bulk Printing
-    public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
-    public static final String BULK_PRINT_LETTER_ID_APP = "bulkPrintLetterIdApp";
-    public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
-    public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
-    public static final String BULK_PRINT_LETTER_ID = "bulkPrintLetterId";
     public static final String BULK_PRINT_COVER_SHEET = "bulkPrintCoverSheet";
+    public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
+    public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
+    public static final String BULK_PRINT_LETTER_ID = "bulkPrintLetterId";
+    public static final String BULK_PRINT_LETTER_ID_APP = "bulkPrintLetterIdApp";
+    public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
+    public static final String UPLOAD_ORDER = "uploadOrder";
+    public static final String CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER = "consentOrderApprovedNotificationLetter";
 }
