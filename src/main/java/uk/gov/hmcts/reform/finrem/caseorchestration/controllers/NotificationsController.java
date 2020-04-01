@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -139,9 +138,5 @@ public class NotificationsController implements BaseController {
 
     private boolean isPaperApplication(Map<String, Object> mapOfCaseData) {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData.get(PAPER_APPLICATION)));
-    }
-
-    private CaseDocument caseDocumentForHwfSuccess() {
-        return new CaseDocument();
     }
 }
