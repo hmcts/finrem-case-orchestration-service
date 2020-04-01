@@ -10,29 +10,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.LetterAddressHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ConsentOrderApprovedNotificationLetter;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.StringUtils.join;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
 @Slf4j
@@ -59,11 +41,11 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
 
     public CaseDocument generateApprovedConsentOrderNotificationLetter(CaseDetails caseDetails, String authToken) {
 
-        log.info("Generating Approved Consent Order Notification Letter {} from {} for bulk print for case id: {} ",
+        log.info("Generating Approved Consent Order Notification Letter {} from {} for bulk print",
                 config.getApprovedConsentOrderFileName(),
-                config.getApprovedConsentOrderTemplate(),
-                caseDetails.getId().toString());
+                config.getApprovedConsentOrderTemplate());
 
+        /*
         Map<String, Object> caseData = caseDetails.getData();
         Map addressToSendTo;
 
@@ -109,6 +91,7 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
             throw new IllegalArgumentException(
                     "Mandatory data missing from address when trying to generate Approved Consent Order Notification Letter");
         }
+        */
 
         return generateDocument(authToken, caseDetails,
                 config.getApprovedConsentOrderNotificationTemplate(),

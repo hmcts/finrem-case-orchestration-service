@@ -55,7 +55,6 @@ public final class BulkPrintDocumentTranslator {
 
     private static List<BulkPrintDocument> convertBulkPrintDocument(Map<String, Object> data, String documentName) {
         log.info("Extracting '{}' document from case data for bulk print.", documentName);
-
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
 
         Object documentLinkObj = data.get(documentName);

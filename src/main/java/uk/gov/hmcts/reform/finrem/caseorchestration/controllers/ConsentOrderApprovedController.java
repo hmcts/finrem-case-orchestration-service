@@ -75,8 +75,16 @@ public class ConsentOrderApprovedController implements BaseController {
             log.info("consentNotificationLetter= {}, letter= {}, consentOrderAnnexStamped = {}",
                     approvedConsentOrderNotificationLetter, approvedConsentOrderLetter, consentOrderAnnexStamped);
 
+            /*
             ApprovedOrder approvedOrder = ApprovedOrder.builder()
                     .consentOrderApprovedNotificationLetter(approvedConsentOrderNotificationLetter)
+                    .orderLetter(approvedConsentOrderLetter)
+                    .consentOrder(consentOrderAnnexStamped)
+                    .build();
+             */
+            // Attempt to infer where issue is occurring
+            ApprovedOrder approvedOrder = ApprovedOrder.builder()
+                    .consentOrderApprovedNotificationLetter(approvedConsentOrderLetter)
                     .orderLetter(approvedConsentOrderLetter)
                     .consentOrder(consentOrderAnnexStamped)
                     .build();

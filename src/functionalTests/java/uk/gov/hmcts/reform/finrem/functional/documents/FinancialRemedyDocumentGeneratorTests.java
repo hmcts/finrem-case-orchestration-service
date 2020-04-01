@@ -282,14 +282,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
                     url1 = jsonPathEvaluator.get("data.approvedConsentOrderLetter.document_binary_url");
                 }
                 break;
-            case "consentOrderApprovedNotificationLetter":
-                jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
-                if (urlType.equals("document")) {
-                    url1 = jsonPathEvaluator.get("data.consentOrderApprovedNotificationLetter.document_url");
-                } else if (urlType.equals(BINARY_URL_TYPE)) {
-                    url1 = jsonPathEvaluator.get("data.consentOrderApprovedNotificationLetter.document_binary_url");
-                }
-                break;
             case "hearing":
                 jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
                 if (urlType.equals("document")) {
