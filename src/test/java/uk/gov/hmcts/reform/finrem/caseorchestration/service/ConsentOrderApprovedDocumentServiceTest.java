@@ -32,7 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
 
 public class ConsentOrderApprovedDocumentServiceTest {
 
@@ -111,7 +110,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
                 .formattedAddress(addressToSendTo)
                 .build();
 
-        assertEquals(caseData.get(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER), addressee);
+        assertEquals(caseData.get("addressee"), addressee);
     }
 
     /*

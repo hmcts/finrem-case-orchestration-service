@@ -58,7 +58,11 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                 .formattedAddress(addressToSendTo)
                 .build();
 
-        caseDetails.getData().put(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER,  addressee);
+        caseDetails.getData().put("addressee",  addressee);
+
+        return generateDocument(authToken, caseDetails,
+                config.getApprovedConsentOrderNotificationTemplate(),
+                config.getApprovedConsentOrderNotificationFileName());
         /*
 
         Map<String, Object> caseData = caseDetails.getData();
@@ -107,10 +111,6 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                     "Mandatory data missing from address when trying to generate Approved Consent Order Notification Letter");
         }
         */
-
-        return generateDocument(authToken, caseDetails,
-                config.getApprovedConsentOrderNotificationTemplate(),
-                config.getApprovedConsentOrderNotificationFileName());
     }
 
 
