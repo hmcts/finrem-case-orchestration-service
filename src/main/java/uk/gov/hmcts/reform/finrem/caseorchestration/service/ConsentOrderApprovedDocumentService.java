@@ -11,14 +11,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.LetterAddressHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.ConsentOrderApprovedNotificationLetter;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.String.join;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
@@ -28,7 +26,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
@@ -99,26 +96,12 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                     .formattedAddress(letterAddressHelper.formatAddressForLetterPrinting(addressToSendTo))
                     .build();
 
-            ConsentOrderApprovedNotificationLetter consentOrderApprovedNotificationLetter =
-                    ConsentOrderApprovedNotificationLetter.builder()
-                            .caseNumber(ccdNumber)
-                            .reference(reference)
-                            .addressee(addressee)
-                            .letterDate(String.valueOf(LocalDate.now()))
-                            .applicantName(applicantName)
-                            .respondentName(respondentName)
-                            .build();
-
+            caseData.put("caseNumber", ccdNumber);
+            caseData.put("reference", reference);
             caseData.put("addressee",  addressee);
-            // need to update template to use this below:
-            caseData.put(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER, consentOrderApprovedNotificationLetter);
-
-            //temp - delete me!!!
-            caseData.put("caseNumber", "1231231231231");
-            caseData.put("applicantName", "john bai");
-            caseData.put("respondentName", "respy boi");
-            caseData.put("reference", "heckin chonky boi");
-            caseData.put("letterDate", "1993-02-12");
+            caseData.put("letterDate", String.valueOf(LocalDate.now()));
+            caseData.put("applicantName", applicantName);
+            caseData.put("respondentName", respondentName);
 
         } else {
             log.info("Failed to generate Approved Consent Order Notification Letter as not all required address details were present");

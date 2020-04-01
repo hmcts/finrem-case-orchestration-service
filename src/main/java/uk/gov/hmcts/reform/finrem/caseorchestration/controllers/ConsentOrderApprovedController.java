@@ -25,6 +25,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionD
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
 import javax.validation.constraints.NotNull;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -100,19 +102,9 @@ public class ConsentOrderApprovedController implements BaseController {
             List<ApprovedOrderData> approvedOrders = asList(approvedOrderData);
             caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
-            // Must remove any added case data as CCD will complain
-            caseData.remove("addressee");
-            caseData.remove(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER);
+            cleanupCaseDataBeforeSubmittingToCcd(caseDetails);
 
-
-            //temp - delete me!!!
-            caseData.remove("caseNumber", "1231231231231");
-            caseData.remove("applicantName", "john bai");
-            caseData.remove("respondentName", "respy boi");
-            caseData.remove("reference", "heckin chonky boi");
-            caseData.remove("letterDate", "1993-02-12");
-
-            log.info("Successfully generated documents for 'Consent Order approved'");
+            log.info("Successfully generated documents for 'Consent Order Approved'");
         }
 
         return ResponseEntity.ok(
@@ -121,6 +113,16 @@ public class ConsentOrderApprovedController implements BaseController {
                         .errors(ImmutableList.of())
                         .warnings(ImmutableList.of())
                         .build());
+    }
+
+    private void cleanupCaseDataBeforeSubmittingToCcd(CaseDetails caseDetails) {
+        // Must remove any added case data as CCD will return an error
+        caseDetails.getData().remove("caseNumber");
+        caseDetails.getData().remove("reference");
+        caseDetails.getData().remove("addressee");
+        caseDetails.getData().remove("letterDate");
+        caseDetails.getData().remove("applicantName");
+        caseDetails.getData().remove("respondentName");
     }
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {
