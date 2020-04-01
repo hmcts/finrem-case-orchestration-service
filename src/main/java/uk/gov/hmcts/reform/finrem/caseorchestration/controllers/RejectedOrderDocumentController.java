@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,7 +34,7 @@ public class RejectedOrderDocumentController {
     @ApiOperation(value = "Handles Consent Order Not Approved Order Generation. Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200,
-                message = "Callback was processed successvully or in case of an error message is attached to the case",
+                message = "Callback was processed successfully or in case of an error message is attached to the case",
                 response = AboutToStartOrSubmitCallbackResponse.class),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")

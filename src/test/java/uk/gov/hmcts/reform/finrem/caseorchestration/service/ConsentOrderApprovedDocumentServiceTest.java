@@ -36,12 +36,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDoc
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_ADDRESS_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_LAST_NAME_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESP_LAST_NAME_CCD_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
@@ -77,12 +77,12 @@ public class ConsentOrderApprovedDocumentServiceTest {
         applicantAddress.put("PostCode", "SW1");
 
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put(APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD, "James");
-        caseData.put(APP_LAST_NAME_CCD_FIELD, "Joyce");
-        caseData.put(APP_ADDRESS_CCD_FIELD, applicantAddress);
+        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "James");
+        caseData.put(APPLICANT_LAST_NAME, "Joyce");
+        caseData.put(APPLICANT_ADDRESS, applicantAddress);
         caseData.put(APPLICANT_REPRESENTED, null);
-        caseData.put(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD, "Jane");
-        caseData.put(APP_RESP_LAST_NAME_CCD_FIELD, "Doe");
+        caseData.put(APP_RESPONDENT_FIRST_MIDDLE_NAME, "Jane");
+        caseData.put(APP_RESPONDENT_LAST_NAME, "Doe");
 
         caseDetails = CaseDetails.builder()
                 .id(123456789L)

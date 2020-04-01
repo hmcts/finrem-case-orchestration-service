@@ -27,11 +27,13 @@ import java.util.UUID;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @RestController
@@ -61,8 +63,7 @@ public class BulkPrintController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @NotNull @RequestBody @ApiParam("Callback") CallbackRequest callback) {
 
-        long caseId = callback.getCaseDetails().getId();
-        log.info("Received request for bulk print for Case ID : {}", caseId);
+        log.info("Received request for Bulk Print for Case ID");
 
         validateCaseData(callback);
 
@@ -108,11 +109,11 @@ public class BulkPrintController implements BaseController {
 
     private boolean applicantIsNotRepresentedByASolicitor(Map<String, Object> caseData) {
 
-        return NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get("applicantRepresented")));
+        return NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APPLICANT_REPRESENTED)));
     }
 
     private boolean solicitorDidNotAgreeToReceiveEmails(Map<String, Object> caseData) {
 
-        return NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get("solicitorAgreeToReceiveEmails")));
+        return NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(SOLICITOR_AGREE_TO_RECEIVE_EMAILS)));
     }
 }

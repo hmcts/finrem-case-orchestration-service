@@ -13,7 +13,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.join;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
@@ -28,25 +36,24 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
     }
 
     public CaseDocument generateApplicantCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
-        log.info(
-            "Generating Applicant cover sheet {} from {} for bulk print for case id {} ",
-            config.getBulkPrintFileName(),
-            config.getBulkPrintTemplate(),
-            caseDetails.getId().toString());
+        log.info("Generating Applicant cover sheet {} from {} for bulk print",
+                config.getBulkPrintFileName(),
+                config.getBulkPrintTemplate());
         prepareApplicantCoverSheet(caseDetails);
+
         return generateDocument(
-            authorisationToken,
-            caseDetails,
-            config.getBulkPrintTemplate(),
-            config.getBulkPrintFileName());
+                authorisationToken,
+                caseDetails,
+                config.getBulkPrintTemplate(),
+                config.getBulkPrintFileName());
     }
 
     public CaseDocument generateRespondentCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
-        log.info("Generating Respondent cover sheet {} from {} for bulk print for case id {} ",
+        log.info("Generating Respondent cover sheet {} from {} for bulk print",
             config.getBulkPrintFileName(),
-            config.getBulkPrintTemplate(),
-            caseDetails.getId().toString());
+            config.getBulkPrintTemplate());
         prepareRespondentCoverSheet(caseDetails);
+
         return generateDocument(
             authorisationToken,
             caseDetails,
@@ -57,11 +64,11 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
     private void prepareApplicantCoverSheet(CaseDetails caseDetails) {
         BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder = BulkPrintCoverSheet.builder()
             .ccdNumber(caseDetails.getId().toString())
-            .recipientName(join(nullToEmpty(caseDetails.getData().get("applicantFMName")), " ",
-                nullToEmpty(caseDetails.getData().get("applicantLName"))));
+            .recipientName(join(nullToEmpty(caseDetails.getData().get(APPLICANT_FIRST_MIDDLE_NAME)), " ",
+                nullToEmpty(caseDetails.getData().get(APPLICANT_LAST_NAME))));
 
-        Map applicantAddress = (Map) caseDetails.getData().get("applicantAddress");
-        Map solicitorAddress = (Map) caseDetails.getData().get("solicitorAddress");
+        Map applicantAddress = (Map) caseDetails.getData().get(APPLICANT_ADDRESS);
+        Map solicitorAddress = (Map) caseDetails.getData().get(SOLICITOR_ADDRESS);
 
         if (addressLineOneAndPostCodeAreBothNotEmpty(solicitorAddress)) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, solicitorAddress));
@@ -73,11 +80,11 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
     private void prepareRespondentCoverSheet(CaseDetails caseDetails) {
         BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder = BulkPrintCoverSheet.builder()
             .ccdNumber(caseDetails.getId().toString())
-            .recipientName(join(nullToEmpty(caseDetails.getData().get("appRespondentFMName")), " ",
-                    nullToEmpty(caseDetails.getData().get("appRespondentLName"))));
+            .recipientName(join(nullToEmpty(caseDetails.getData().get(APP_RESPONDENT_FIRST_MIDDLE_NAME)), " ",
+                    nullToEmpty(caseDetails.getData().get(APP_RESPONDENT_LAST_NAME))));
 
-        Map respondentAddress = (Map) caseDetails.getData().get("respondentAddress");
-        Map solicitorAddress = (Map) caseDetails.getData().get("rSolicitorAddress");
+        Map respondentAddress = (Map) caseDetails.getData().get(RESPONDENT_ADDRESS);
+        Map solicitorAddress = (Map) caseDetails.getData().get(RESP_SOLICITOR_ADDRESS);
 
         if (addressLineOneAndPostCodeAreBothNotEmpty(solicitorAddress)) {
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET, getBulkPrintCoverSheet(bulkPrintCoverSheetBuilder, solicitorAddress));

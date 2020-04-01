@@ -21,12 +21,12 @@ import java.util.Map;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.join;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_ADDRESS_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_LAST_NAME_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESP_LAST_NAME_CCD_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
@@ -48,11 +48,10 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
     }
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
-        log.info(
-                "Generating Approved Consent Order Letter {} from {} for bulk print for case id: {} ",
+        log.info("Generating Approved Consent Order Letter {} from {} for bulk print",
                 config.getApprovedConsentOrderFileName(),
-                config.getApprovedConsentOrderTemplate(),
-                caseDetails.getId().toString());
+                config.getApprovedConsentOrderTemplate());
+
         return generateDocument(authToken, caseDetails,
                 config.getApprovedConsentOrderTemplate(),
                 config.getApprovedConsentOrderFileName());
@@ -71,10 +70,10 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         String ccdNumber = nullToEmpty((caseDetails.getId()));
         String reference = "";
         String addresseeName;
-        String applicantName = join(nullToEmpty((caseData.get(APP_FIRST_AND_MIDDLE_NAME_CCD_FIELD))), " ",
-                nullToEmpty((caseDetails.getData().get(APP_LAST_NAME_CCD_FIELD))));
-        String respondentName = join(nullToEmpty((caseData.get(APP_RESP_FIRST_AND_MIDDLE_NAME_CCD_FIELD))), " ",
-                nullToEmpty((caseDetails.getData().get(APP_RESP_LAST_NAME_CCD_FIELD))));
+        String applicantName = join(nullToEmpty((caseData.get(APPLICANT_FIRST_MIDDLE_NAME))), " ",
+                nullToEmpty((caseDetails.getData().get(APPLICANT_LAST_NAME))));
+        String respondentName = join(nullToEmpty((caseData.get(APP_RESPONDENT_FIRST_MIDDLE_NAME))), " ",
+                nullToEmpty((caseDetails.getData().get(APP_RESPONDENT_LAST_NAME))));
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
 
         if (applicantRepresented.equalsIgnoreCase(YES_VALUE)) {
@@ -85,7 +84,7 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         } else {
             log.info("Applicant is not represented by a solicitor");
             addresseeName = applicantName;
-            addressToSendTo = (Map) caseData.get(APP_ADDRESS_CCD_FIELD);
+            addressToSendTo = (Map) caseData.get(APPLICANT_ADDRESS);
         }
 
         if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
