@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +19,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAValidationService
 import java.util.Map;
 import java.util.Objects;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
 
@@ -32,7 +32,7 @@ public class PBAValidateController implements BaseController {
     private final PBAValidationService pbaValidationService;
 
     @SuppressWarnings("unchecked")
-    @PostMapping(path = "/pba-validate", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/pba-validate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Validates if PBA Number provided is valid")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaValidate(
             @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,

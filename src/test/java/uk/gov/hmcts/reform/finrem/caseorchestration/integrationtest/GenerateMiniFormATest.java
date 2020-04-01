@@ -40,8 +40,8 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
         webClient.perform(MockMvcRequestBuilders.post(apiUrl())
             .content(objectMapper.writeValueAsString(request))
             .header(AUTHORIZATION, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON)
-            .accept(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .accept(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().json(expectedCaseData()));
     }

@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -30,7 +31,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -71,7 +71,7 @@ public class FeeLookUpTest {
     public void consentedFeeLookup() throws Exception {
         stubFeeLookUp(CONSENTED);
         webClient.perform(MockMvcRequestBuilders.post(FEE_LOOKUP_URL)
-            .contentType(APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request(CONSENTED))))
             .andExpect(status().isOk())
             .andDo(print())
@@ -84,7 +84,7 @@ public class FeeLookUpTest {
     public void contestedFeeLookup() throws Exception {
         stubFeeLookUp(CONTESTED);
         webClient.perform(MockMvcRequestBuilders.post(FEE_LOOKUP_URL)
-            .contentType(APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request(CONTESTED))))
             .andExpect(status().isOk())
             .andDo(print())
@@ -113,7 +113,7 @@ public class FeeLookUpTest {
         stubFor(get(urlMatching("/payments/fee-lookup\\?application-type=" + applicationType.toString()))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(response(applicationType))));
     }
 

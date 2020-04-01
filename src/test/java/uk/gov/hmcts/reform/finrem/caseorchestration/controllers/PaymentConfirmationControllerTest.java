@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
 
-import javax.ws.rs.core.MediaType;
 import java.io.File;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
@@ -67,7 +67,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
         mvc.perform(post(PBA_CONFIRMATION_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(is(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
@@ -78,7 +78,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
         mvc.perform(post(PBA_CONFIRMATION_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.confirmation_body", is("consented_hwf_confirmation_markup")));
@@ -91,7 +91,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
         mvc.perform(post(PBA_CONFIRMATION_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.confirmation_body", is("consented_pba_confirmation_markup")));
@@ -104,7 +104,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
         mvc.perform(post(PBA_CONFIRMATION_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.confirmation_body", is("contested_hwf_confirmation_markup")));
@@ -117,7 +117,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
         mvc.perform(post(PBA_CONFIRMATION_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.confirmation_body", is("contested_pba_confirmation_markup")));

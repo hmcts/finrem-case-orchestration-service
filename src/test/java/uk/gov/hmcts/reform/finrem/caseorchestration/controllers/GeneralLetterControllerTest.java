@@ -4,10 +4,10 @@ import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService;
 
-import javax.ws.rs.core.MediaType;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
@@ -44,7 +44,7 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.generalLetterCollection[0].id", is(notNullValue())))
                 .andExpect(
@@ -65,7 +65,7 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest());
     }
 
@@ -77,7 +77,7 @@ public class GeneralLetterControllerTest extends BaseControllerTest {
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isInternalServerError());
     }
 

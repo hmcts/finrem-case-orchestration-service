@@ -43,7 +43,7 @@ public class IdamServiceTest  {
         mockServer.expect(requestTo(toUri()))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withSuccess("{\"roles\": [\"caseworker-divorce-financialremedy-courtadmin\"]}",
-            MediaType.APPLICATION_JSON));
+            MediaType.APPLICATION_JSON_VALUE));
 
         boolean userEmailId = idamService.isUserRoleAdmin(AUTH_TOKEN);
         assertThat(userEmailId, is(Boolean.TRUE));
@@ -54,7 +54,7 @@ public class IdamServiceTest  {
         mockServer.expect(requestTo(toUri()))
             .andExpect(method(HttpMethod.GET))
             .andRespond(withSuccess("{\"roles\": [\"caseworker-divorce-financialremedy-solicitor\"]}",
-                MediaType.APPLICATION_JSON));
+                MediaType.APPLICATION_JSON_VALUE));
 
         boolean userEmailId = idamService.isUserRoleAdmin(AUTH_TOKEN);
         assertThat(userEmailId, is(Boolean.FALSE));

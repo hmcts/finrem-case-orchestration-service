@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 
-import javax.ws.rs.core.MediaType;
 import java.io.File;
 
 import static org.hamcrest.Matchers.is;
@@ -31,7 +31,7 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
         mvc.perform(post(REMOVE_DETAILS_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.data.applicantRepresented", is(NO)))
                 .andExpect(jsonPath("$.data.applicantAddress", is(notNullValue())))
                 .andExpect(jsonPath("$.data.applicantPhone", is("89897876765")))
@@ -57,7 +57,7 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
         mvc.perform(post(REMOVE_DETAILS_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.data.applicantRepresented", is(YES)))
                 .andExpect(jsonPath("$.data.applicantAddress").doesNotExist())
                 .andExpect(jsonPath("$.data.applicantPhone").doesNotExist())
