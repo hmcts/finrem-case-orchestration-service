@@ -82,8 +82,8 @@ public class BulkScanController {
 
     @PostMapping(
         path = BulkScanEndpoints.TRANSFORM,
-        consumes = APPLICATION_JSON,
-        produces = APPLICATION_JSON
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
     )
     @ApiOperation(value = "Transform exception record into CCD case data")
     @ApiResponses({
@@ -127,8 +127,8 @@ public class BulkScanController {
 
     @PostMapping(
         path = BulkScanEndpoints.UPDATE,
-        consumes = APPLICATION_JSON,
-        produces = APPLICATION_JSON
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
     )
     @ApiOperation(value = "OUT OF SCOPE: API to update Financial Remedy case data by bulk scan")
     @ApiResponses({

@@ -65,7 +65,7 @@ public class TestContextConfiguration {
     public Decoder feignDecoder() {
         MappingJackson2HttpMessageConverter jacksonConverter =
                 new MappingJackson2HttpMessageConverter(objectMapper());
-        jacksonConverter.setSupportedMediaTypes(ImmutableList.of(MediaType.APPLICATION_JSON_VALUE));
+        jacksonConverter.setSupportedMediaTypes(ImmutableList.of(MediaType.APPLICATION_JSON));
 
         ObjectFactory<HttpMessageConverters> objectFactory = () -> new HttpMessageConverters(jacksonConverter);
         return new ResponseEntityDecoder(new SpringDecoder(objectFactory));
