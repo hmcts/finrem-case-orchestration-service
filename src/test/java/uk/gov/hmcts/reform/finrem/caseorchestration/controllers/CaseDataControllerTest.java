@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
-import javax.ws.rs.core.MediaType;
 import java.io.File;
 
 import static org.hamcrest.Matchers.is;
@@ -44,7 +44,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/uploadHearingOrderRO")
                             .content(requestContent.toString())
                             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.uploadHearingOrderRO[0]").exists())
@@ -64,7 +64,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/uploadHearingOrderNew")
                             .content(requestContent.toString())
                             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.uploadHearingOrderNew[0]").exists())
@@ -82,7 +82,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         mvc.perform(post("/case-orchestration/move-collection/someString/to/uploadHearingOrder")
                             .content(requestContent.toString())
                             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
@@ -99,7 +99,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/someString")
                             .content(requestContent.toString())
                             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
@@ -116,7 +116,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         mvc.perform(post("/case-orchestration/move-collection/empty/to/uploadHearingOrder")
                             .content(requestContent.toString())
                             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
@@ -132,7 +132,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         mvc.perform(post("/case-orchestration/consented/set-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(YES)));
@@ -147,7 +147,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         mvc.perform(post("/case-orchestration/consented/set-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(NO)))
@@ -163,7 +163,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         mvc.perform(post("/case-orchestration/contested/set-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(YES)));
@@ -178,7 +178,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         mvc.perform(post("/case-orchestration/contested/set-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(NO)))

@@ -2,9 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
-
-import javax.ws.rs.core.MediaType;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -27,7 +26,7 @@ public class CurrentDateControllerTest extends BaseControllerTest {
         mvc.perform(post(API_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(is(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
@@ -39,7 +38,7 @@ public class CurrentDateControllerTest extends BaseControllerTest {
         mvc.perform(post(API_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.authorisation3", is(notNullValue())));

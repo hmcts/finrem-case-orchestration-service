@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -13,7 +14,6 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -67,7 +67,7 @@ public class CcdDataMigrationControllerTest {
         mvc.perform(post(MIGRATE_URL)
             .content(objectMapper.writeValueAsString(ccdMigrationRequestType()))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.applicantRepresented", is("Yes")))
@@ -82,7 +82,7 @@ public class CcdDataMigrationControllerTest {
         mvc.perform(post(MIGRATE_URL)
             .content(objectMapper.writeValueAsString(ccdAlreadyMigratedRequest()))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data", is(emptyOrNullString())))

@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 
-import javax.ws.rs.core.MediaType;
 import java.io.File;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
@@ -59,7 +59,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(is(SERVER_ERROR_MSG)));
     }
@@ -92,7 +92,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.state", is(AWAITING_HWF_DECISION.toString())))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
@@ -111,7 +111,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
                 .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
@@ -125,7 +125,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
                 .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("1000")))
@@ -143,7 +143,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         mvc.perform(post(PBA_PAYMENT_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));

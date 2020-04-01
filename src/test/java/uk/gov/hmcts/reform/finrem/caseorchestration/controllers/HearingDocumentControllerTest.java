@@ -7,11 +7,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
-import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -66,7 +66,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         mvc.perform(post(GEN_DOC_URL)
                 .content("kwuilebge")
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest());
     }
 
@@ -78,7 +78,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         mvc.perform(post(GEN_DOC_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.formC.document_url", is(DOC_URL)))
                 .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
@@ -93,7 +93,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         mvc.perform(post(GEN_DOC_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isInternalServerError());
     }
 }

@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
@@ -83,8 +82,8 @@ public class BulkScanController {
 
     @PostMapping(
         path = BulkScanEndpoints.TRANSFORM,
-        consumes = APPLICATION_JSON,
-        produces = APPLICATION_JSON
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
     )
     @ApiOperation(value = "Transform exception record into CCD case data")
     @ApiResponses({
@@ -128,8 +127,8 @@ public class BulkScanController {
 
     @PostMapping(
         path = BulkScanEndpoints.UPDATE,
-        consumes = APPLICATION_JSON,
-        produces = APPLICATION_JSON
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
     )
     @ApiOperation(value = "OUT OF SCOPE: API to update Financial Remedy case data by bulk scan")
     @ApiResponses({

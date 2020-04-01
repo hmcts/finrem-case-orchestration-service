@@ -5,10 +5,10 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
-import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -42,7 +42,7 @@ public class GeneralLetterStartControllerTest extends BaseControllerTest {
         mvc.perform(post("/case-orchestration/general-letter-start")
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.generalLetterAddressTo", is(nullValue())))
                 .andExpect(jsonPath("$.data.generalLetterRecipient", is(nullValue())))
@@ -58,7 +58,7 @@ public class GeneralLetterStartControllerTest extends BaseControllerTest {
         mvc.perform(post("/case-orchestration/general-letter-start")
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest());
     }
 
@@ -71,7 +71,7 @@ public class GeneralLetterStartControllerTest extends BaseControllerTest {
         mvc.perform(post("/case-orchestration/general-letter-start")
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isInternalServerError());
     }
 

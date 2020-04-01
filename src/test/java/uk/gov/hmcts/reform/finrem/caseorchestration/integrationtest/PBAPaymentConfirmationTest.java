@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -19,7 +20,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication
 import java.io.InputStream;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,7 +51,7 @@ public class PBAPaymentConfirmationTest {
         webClient.perform(MockMvcRequestBuilders.post(PBA_CONFIRMATION_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .content(objectMapper.writeValueAsString(request))
-            .contentType(APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.confirmation_body",
@@ -69,7 +69,7 @@ public class PBAPaymentConfirmationTest {
         webClient.perform(MockMvcRequestBuilders.post(PBA_CONFIRMATION_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .content(objectMapper.writeValueAsString(request))
-            .contentType(APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.confirmation_body",
@@ -86,7 +86,7 @@ public class PBAPaymentConfirmationTest {
         webClient.perform(MockMvcRequestBuilders.post(PBA_CONFIRMATION_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .content(objectMapper.writeValueAsString(request))
-            .contentType(APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 

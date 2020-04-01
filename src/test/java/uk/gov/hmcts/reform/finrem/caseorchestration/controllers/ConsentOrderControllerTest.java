@@ -5,11 +5,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
-import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -54,7 +54,7 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
         mvc.perform(post(UPDATE_LATEST_CONSENT_ORDER_JSON)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.latestConsentOrder").exists())
@@ -69,7 +69,7 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
         mvc.perform(post(UPDATE_LATEST_CONSENT_ORDER_JSON)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.data.latestConsentOrder").exists())
@@ -82,7 +82,7 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
         mvc.perform(post(UPDATE_LATEST_CONSENT_ORDER_JSON)
                 .content("kwuilebge")
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest());
     }
 

@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -15,7 +16,6 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
-import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -57,7 +57,7 @@ public class NotificationsControllerTest {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
         mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -69,7 +69,7 @@ public class NotificationsControllerTest {
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
@@ -80,7 +80,7 @@ public class NotificationsControllerTest {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
         mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -92,7 +92,7 @@ public class NotificationsControllerTest {
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
@@ -103,7 +103,7 @@ public class NotificationsControllerTest {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
         mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -115,7 +115,7 @@ public class NotificationsControllerTest {
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
@@ -126,7 +126,7 @@ public class NotificationsControllerTest {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
         mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -138,7 +138,7 @@ public class NotificationsControllerTest {
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
@@ -149,7 +149,7 @@ public class NotificationsControllerTest {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
         mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -161,7 +161,7 @@ public class NotificationsControllerTest {
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
@@ -172,7 +172,7 @@ public class NotificationsControllerTest {
         buildCcdRequest("/fixtures/contested/hwf.json");
         mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -184,7 +184,7 @@ public class NotificationsControllerTest {
         buildCcdRequest("/fixtures/contested/contested-hwf-without-solicitor-consent.json");
         mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);

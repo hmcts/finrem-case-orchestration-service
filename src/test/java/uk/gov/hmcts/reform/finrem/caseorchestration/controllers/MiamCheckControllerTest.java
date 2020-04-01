@@ -5,11 +5,10 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.MiamCheckService;
-
-import javax.ws.rs.core.MediaType;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.isA;
@@ -38,7 +37,7 @@ public class MiamCheckControllerTest extends BaseControllerTest {
         mvc.perform(post(API_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(is(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
@@ -51,7 +50,7 @@ public class MiamCheckControllerTest extends BaseControllerTest {
         mvc.perform(post(API_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.errors[0]",
@@ -66,7 +65,7 @@ public class MiamCheckControllerTest extends BaseControllerTest {
         mvc.perform(post(API_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.errors[0]").doesNotExist());
