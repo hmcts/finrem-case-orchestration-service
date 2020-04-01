@@ -79,7 +79,7 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                 + " " + nullToEmpty((caseData.get(APP_RESPONDENT_LAST_NAME)));
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
 
-        if (applicantRepresented.equalsIgnoreCase(YES_VALUE)) {
+        if (YES_VALUE.equalsIgnoreCase(applicantRepresented)) {
             log.info("Applicant is represented by a solicitor");
             reference = nullToEmpty((caseData.get(SOLICITOR_REFERENCE)));
             addresseeName = nullToEmpty((caseData.get(SOLICITOR_NAME)));

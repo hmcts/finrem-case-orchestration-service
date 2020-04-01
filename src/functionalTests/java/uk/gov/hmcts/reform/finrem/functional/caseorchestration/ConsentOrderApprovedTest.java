@@ -38,8 +38,8 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
     @Test
     public void verifyConsentOrderApprovedForConsentedCaseForApplicant() {
         CallbackRequest callbackRequest = null;
-        InputStream resourceAsStream;
-        resourceAsStream = getClass().getResourceAsStream("/json/consented/approved-consent-order.json");
+        InputStream resourceAsStream = getClass().getResourceAsStream(
+                "/json/consented/approved-consent-order.json");
 
         Map<String,String> uploadedDoc;
         try {
@@ -62,8 +62,8 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
     @Test
     public void verifyConsentOrderApprovedForConsentedCaseWhenApplicantRepresentedBySolicitor() {
         CallbackRequest callbackRequest = null;
-        InputStream resourceAsStream;
-        resourceAsStream = getClass().getResourceAsStream("/json/consented/approved-consent-order-with-applicant-solicitor.json");
+        InputStream resourceAsStream = getClass().getResourceAsStream(
+                "/json/consented/approved-consent-order-with-applicant-solicitor.json");
 
         Map<String,String> uploadedDoc;
         try {
