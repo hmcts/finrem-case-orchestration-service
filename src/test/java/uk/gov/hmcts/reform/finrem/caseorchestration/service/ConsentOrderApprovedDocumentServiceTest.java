@@ -26,12 +26,23 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 public class ConsentOrderApprovedDocumentServiceTest {
 
@@ -63,14 +74,12 @@ public class ConsentOrderApprovedDocumentServiceTest {
         applicantAddress.put("PostCode", "SW1");
 
         Map<String, Object> caseData = new HashMap<>();
-        /*
         caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "James");
         caseData.put(APPLICANT_LAST_NAME, "Joyce");
         caseData.put(APPLICANT_ADDRESS, applicantAddress);
         caseData.put(APPLICANT_REPRESENTED, null);
         caseData.put(APP_RESPONDENT_FIRST_MIDDLE_NAME, "Jane");
         caseData.put(APP_RESPONDENT_LAST_NAME, "Doe");
-        */
 
         caseDetails = CaseDetails.builder()
                 .id(123456789L)
@@ -99,43 +108,11 @@ public class ConsentOrderApprovedDocumentServiceTest {
 
         doCaseDocumentAssert(generatedApprovedConsentOrderNotificationLetter);
 
-        Map<String, Object> caseData = caseDetails.getData();
-
-
-        String addresseeName = "test name pls";
-        String addressToSendTo = "test address";
-
         Addressee addressee = Addressee.builder()
-                .name(addresseeName)
-                .formattedAddress(addressToSendTo)
+                .name("James Joyce")
+                .formattedAddress("50 Applicant Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSW1")
                 .build();
-
-        assertEquals(caseData.get("addressee"), addressee);
-    }
-
-    /*
-    @Test
-    public void shouldGenerateApprovedConsentOrderNotificationLetterForApplicant() {
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
-
-        caseDetails.getData().put(APPLICANT_REPRESENTED, NO_VALUE);
-
-        CaseDocument generatedApprovedConsentOrderNotificationLetter =
-                service.generateApprovedConsentOrderNotificationLetter(caseDetails, AUTH_TOKEN);
-
-        doCaseDocumentAssert(generatedApprovedConsentOrderNotificationLetter);
-
-        ConsentOrderApprovedNotificationLetter consentOrderApprovedNotificationLetter
-                = (ConsentOrderApprovedNotificationLetter) caseDetails.getData().get(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER);
-
-        assertThat(consentOrderApprovedNotificationLetter.getAddressee().getName(), is("James Joyce"));
-        assertThat(consentOrderApprovedNotificationLetter.getReference(), is(""));
-        assertThat(consentOrderApprovedNotificationLetter.getApplicantName(), is("James Joyce"));
-        assertThat(consentOrderApprovedNotificationLetter.getRespondentName(), is("Jane Doe"));
-        assertThat(consentOrderApprovedNotificationLetter.getLetterDate(), is(String.valueOf(LocalDate.now())));
-        assertThat(consentOrderApprovedNotificationLetter.getAddressee().getFormattedAddress(), is(
-                "50 Applicant Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSW1"));
-        assertThat(consentOrderApprovedNotificationLetter.getCaseNumber(), is("123456789"));
+        assertEquals(caseDetails.getData().get("addressee"), addressee);
     }
 
     @Test
@@ -163,19 +140,12 @@ public class ConsentOrderApprovedDocumentServiceTest {
         doCaseDocumentAssert(generatedApprovedConsentOrderNotificationLetter);
         verify(documentClientMock, times(1)).generatePdf(any(), anyString());
 
-        ConsentOrderApprovedNotificationLetter consentOrderApprovedNotificationLetter
-                = (ConsentOrderApprovedNotificationLetter) caseDetails.getData().get(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER);
-
-        assertThat(consentOrderApprovedNotificationLetter.getAddressee().getName(), is("Saul Goodman"));
-        assertThat(consentOrderApprovedNotificationLetter.getReference(), is("RG-123456789"));
-        assertThat(consentOrderApprovedNotificationLetter.getApplicantName(), is("James Joyce"));
-        assertThat(consentOrderApprovedNotificationLetter.getRespondentName(), is("Jane Doe"));
-        assertThat(consentOrderApprovedNotificationLetter.getLetterDate(), is(String.valueOf(LocalDate.now())));
-        assertThat(consentOrderApprovedNotificationLetter.getAddressee().getFormattedAddress(), is(
-                "123 Applicant Solicitor Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSE1"));
-        assertThat(consentOrderApprovedNotificationLetter.getCaseNumber(), is("123456789"));
+        Addressee addressee = Addressee.builder()
+                .name("Saul Goodman")
+                .formattedAddress("123 Applicant Solicitor Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSE1")
+                .build();
+        assertEquals(caseDetails.getData().get("addressee"), addressee);
     }
- */
 
     @Test
     public void shouldAnnexAndStampDocument() {

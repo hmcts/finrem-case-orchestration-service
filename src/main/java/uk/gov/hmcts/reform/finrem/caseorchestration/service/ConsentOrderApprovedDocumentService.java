@@ -70,33 +70,16 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
     }
 
     private void prepareApprovedConsentOrderNotificationLetter(CaseDetails caseDetails) {
-
-        // Replace me once everything works
-        // temp fix to get data passed into document
-        String addresseeName = "test name pls";
-        String addressToSendTo = "test address";
-
-        Addressee addressee = Addressee.builder()
-                .name(addresseeName)
-                .formattedAddress(addressToSendTo)
-                .build();
-
-        caseDetails.getData().put("addressee",  addressee);
-    }
-
-    /*
-    private void prepareApprovedConsentOrderNotificationLetter2 (CaseDetails caseDetails) {
-
         Map<String, Object> caseData = caseDetails.getData();
         Map addressToSendTo;
 
         String ccdNumber = nullToEmpty((caseDetails.getId()));
         String reference = "";
         String addresseeName;
-        String applicantName = join(nullToEmpty((caseData.get(APPLICANT_FIRST_MIDDLE_NAME))), " ",
-                nullToEmpty((caseDetails.getData().get(APPLICANT_LAST_NAME))));
-        String respondentName = join(nullToEmpty((caseData.get(APP_RESPONDENT_FIRST_MIDDLE_NAME))), " ",
-                nullToEmpty((caseDetails.getData().get(APP_RESPONDENT_LAST_NAME))));
+        String applicantName = nullToEmpty((caseData.get(APPLICANT_FIRST_MIDDLE_NAME)))
+                + " " + nullToEmpty((caseData.get(APPLICANT_LAST_NAME)));
+        String respondentName = nullToEmpty((caseData.get(APP_RESPONDENT_FIRST_MIDDLE_NAME)))
+                + " " + nullToEmpty((caseData.get(APP_RESPONDENT_LAST_NAME)));
         String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
 
         if (applicantRepresented.equalsIgnoreCase(YES_VALUE)) {
@@ -126,15 +109,24 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                             .respondentName(respondentName)
                             .build();
 
-            // caseDetails.getData().put(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER,  addressee);
+            caseData.put("addressee",  addressee);
+            // need to update template to use this below:
             caseData.put(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER, consentOrderApprovedNotificationLetter);
+
+            //temp - delete me!!!
+            caseData.put("caseNumber", "1231231231231");
+            caseData.put("applicantName", "john bai");
+            caseData.put("respondentName", "respy boi");
+            caseData.put("reference", "heckin chonky boi");
+            caseData.put("letterDate", "1993-02-12");
+
         } else {
             log.info("Failed to generate Approved Consent Order Notification Letter as not all required address details were present");
             throw new IllegalArgumentException(
                     "Mandatory data missing from address when trying to generate Approved Consent Order Notification Letter");
         }
     }
-     */
+
 
     public CaseDocument annexStampDocument(CaseDocument document, String authToken) {
         return super.annexStampDocument(document, authToken);
