@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.LetterAddressHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
 
 public class ConsentOrderApprovedDocumentServiceTest {
 
@@ -99,9 +101,17 @@ public class ConsentOrderApprovedDocumentServiceTest {
         doCaseDocumentAssert(generatedApprovedConsentOrderNotificationLetter);
 
         Map<String, Object> caseData = caseDetails.getData();
-        assertEquals(caseData.get("caseNumber"),"12312312312312");
-        assertEquals(caseData.get("applicantName"),"applicant name test");
-        assertEquals(caseData.get("respondentName"),"respondent name test");
+
+
+        String addresseeName = "test name pls";
+        String addressToSendTo = "test address";
+
+        Addressee addressee = Addressee.builder()
+                .name(addresseeName)
+                .formattedAddress(addressToSendTo)
+                .build();
+
+        assertEquals(caseData.get(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER), addressee);
     }
 
     /*

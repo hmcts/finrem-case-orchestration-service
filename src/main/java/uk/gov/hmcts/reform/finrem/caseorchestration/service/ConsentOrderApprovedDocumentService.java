@@ -10,12 +10,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.LetterAddressHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
 
 @Service
 @Slf4j
@@ -47,12 +49,18 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                 config.getApprovedConsentOrderTemplate());
 
         // temp fix to get data passed into document
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.put("caseNumber", "12312312312312");
-        caseData.put("applicantName", "applicant name test");
-        caseData.put("respondentName", "respondent name test");
 
+        String addresseeName = "test name pls";
+        String addressToSendTo = "test address";
+
+        Addressee addressee = Addressee.builder()
+                .name(addresseeName)
+                .formattedAddress(addressToSendTo)
+                .build();
+
+        caseDetails.getData().put(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER,  addressee);
         /*
+
         Map<String, Object> caseData = caseDetails.getData();
         Map addressToSendTo;
 
@@ -104,6 +112,7 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                 config.getApprovedConsentOrderNotificationTemplate(),
                 config.getApprovedConsentOrderNotificationFileName());
     }
+
 
     public CaseDocument annexStampDocument(CaseDocument document, String authToken) {
         return super.annexStampDocument(document, authToken);

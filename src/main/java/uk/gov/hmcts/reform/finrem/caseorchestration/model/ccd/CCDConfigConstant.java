@@ -69,6 +69,9 @@ public class CCDConfigConstant {
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
     public static final String JUDGE_ALLOCATED = "judgeAllocated";
 
+    // Consent Order
+    public static final String CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER = "consentOrderApprovedNotificationLetter";
+
     // Bulk Printing
     public static final String BULK_PRINT_COVER_SHEET = "bulkPrintCoverSheet";
     public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
