@@ -58,7 +58,8 @@ public class CaseDataController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(path = "/move-collection/{source}/to/{destination}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/move-collection/{source}/to/{destination}", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> moveValues(
             @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
             @RequestBody final CallbackRequest callbackRequest,
