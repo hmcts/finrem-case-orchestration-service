@@ -84,17 +84,6 @@ public class ConsentOrderApprovedController implements BaseController {
             Builder works fine - issue must be in service?
              */
 
-            // WORKS UP TO HERE - ISSUE MUST BE IN SERVICE
-            // THIS WORKS FINE
-            /*
-            ApprovedOrder approvedOrder = ApprovedOrder.builder()
-                    .consentOrderApprovedNotificationLetter(approvedConsentOrderLetter)
-                    .orderLetter(approvedConsentOrderLetter)
-                    .consentOrder(consentOrderAnnexStamped)
-                    .build();
-
-             */
-
             if (!isEmpty(pensionDocs)) {
                 List<PensionCollectionData> stampedPensionDocs = service.stampPensionDocuments(pensionDocs, authToken);
                 log.info("Generated StampedPensionDocs = {}", stampedPensionDocs);

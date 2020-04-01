@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionD
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
@@ -44,6 +45,21 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         log.info("Generating Approved Consent Order Notification Letter {} from {} for bulk print",
                 config.getApprovedConsentOrderFileName(),
                 config.getApprovedConsentOrderTemplate());
+
+        // temp fix to get data passed into document
+        Map<String, Object> caseData = caseDetails.getData();
+
+        caseData.put("caseNumber", "12312312312312");
+        caseData.put("applicantName", "applicant name test");
+        caseData.put("respondentName", "respondent name test");
+        caseData.put("letterCreatedDate", "2020-03-25");
+        caseData.put("county", "london");
+        caseData.put("country", "UK");
+        caseData.put("postCode", "bt9 5bg");
+        caseData.put("postTown", "London");
+        caseData.put("addressLine1", "reee address 1");
+        caseData.put("addressLine2", "reee address 2");
+        caseData.put("addressLine3", "reee address 3");
 
         /*
         Map<String, Object> caseData = caseDetails.getData();
