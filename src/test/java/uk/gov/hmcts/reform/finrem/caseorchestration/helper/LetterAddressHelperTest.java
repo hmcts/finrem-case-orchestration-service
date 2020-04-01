@@ -7,7 +7,6 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.LINE_SEPARATOR;
 
 public class LetterAddressHelperTest {
 
@@ -27,12 +26,12 @@ public class LetterAddressHelperTest {
 
         String formattedAddress = letterAddressHelper.formatAddressForLetterPrinting(testAddressMap);
 
-        String expectedAddress = "50 Applicant Street" + LINE_SEPARATOR
-                + "Second Address Line" + LINE_SEPARATOR
-                + "Third Address Line" + LINE_SEPARATOR
-                + "Greater London" + LINE_SEPARATOR
-                + "England" + LINE_SEPARATOR
-                + "London" + LINE_SEPARATOR
+        String expectedAddress = "50 Applicant Street" + "\n"
+                + "Second Address Line" + "\n"
+                + "Third Address Line" + "\n"
+                + "Greater London" + "\n"
+                + "England" + "\n"
+                + "London" + "\n"
                 + "SW1";
 
         assertThat(formattedAddress, is(expectedAddress));
@@ -51,11 +50,10 @@ public class LetterAddressHelperTest {
         testAddressMap.put("PostCode", "SW1");
 
         String formattedAddress = letterAddressHelper.formatAddressForLetterPrinting(testAddressMap);
-        String expectedAddress = "50 Applicant Street" + LINE_SEPARATOR + "England" + LINE_SEPARATOR + "SW1";
+        String expectedAddress = "50 Applicant Street" + "\n" + "England" + "\n" + "SW1";
 
         assertThat(formattedAddress, is(expectedAddress));
     }
-
 
     @Test
     public void testAddressWithMissingFieldsAndEmptyValuesIsCorrectlyFormatterForLetterPrinting() {
