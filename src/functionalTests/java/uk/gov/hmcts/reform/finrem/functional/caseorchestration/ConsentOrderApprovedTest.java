@@ -60,7 +60,6 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
         assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
     }
 
-    @Ignore
     @Test
     public void verifyConsentOrderApprovedForConsentedCaseWhenApplicantRepresentedBySolicitor() {
         CallbackRequest callbackRequest = null;
