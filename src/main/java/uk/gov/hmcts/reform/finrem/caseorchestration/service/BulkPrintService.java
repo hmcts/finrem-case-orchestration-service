@@ -99,16 +99,16 @@ public class BulkPrintService extends AbstractDocumentService {
         );
     }
 
+    public static boolean shouldBeSentToApplicant(ImmutableMap<String, Object> caseData) {
+        return applicantIsNotRepresentedBySolicitor(caseData) || solicitorDidNotAgreeToReceiveEmails(caseData);
+    }
+
     private static boolean applicantIsNotRepresentedBySolicitor(Map<String, Object> caseData) {
         return NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APPLICANT_REPRESENTED)));
     }
 
     private static boolean solicitorDidNotAgreeToReceiveEmails(Map<String, Object> caseData) {
         return NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(SOLICITOR_AGREE_TO_RECEIVE_EMAILS)));
-    }
-
-    public static boolean shouldBeSentToApplicant(ImmutableMap<String, Object> caseData) {
-        return applicantIsNotRepresentedBySolicitor(caseData) || solicitorDidNotAgreeToReceiveEmails(caseData);
     }
 
     private static void logInfo(String party, CaseDocument caseDocument, UUID letterId) {
