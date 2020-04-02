@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationS
 import java.io.IOException;
 import java.util.Map;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
 
@@ -30,7 +30,7 @@ public class PaymentConfirmationController implements BaseController {
     private final PaymentConfirmationService paymentConfirmationService;
 
     @SuppressWarnings("unchecked")
-    @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/payment-confirmation", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles PBA Payments Confirmation")
     public ResponseEntity<SubmittedCallbackResponse> paymentConfirmation(
             @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,

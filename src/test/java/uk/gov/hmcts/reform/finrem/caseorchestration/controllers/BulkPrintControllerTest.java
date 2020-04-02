@@ -11,13 +11,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 
 import java.util.UUID;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,7 +29,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
     private static final String BULK_PRINT_URI = "/case-orchestration/bulk-print";
     private static final String BULK_PRINT_TO_APPLICANT_AND_RESPONDENT
-        = "fixtures/contested/bulk_print_consent_order_not_approved.json";
+            = "fixtures/contested/bulk_print_consent_order_not_approved.json";
     private static final String BULK_PRINT_TO__RESPONDENT_ONLY
             = "fixtures/contested/bulk-print-to-respondent-only.json";
 
@@ -44,12 +44,12 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 .thenReturn(BulkPrintMetadata.builder().coverSheet(new CaseDocument()).letterId(UUID.randomUUID()).build());
 
         mvc.perform(
-            post(BULK_PRINT_URI)
-                    .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                    .content(ResourceLoader.loadResourceAsString(BULK_PRINT_TO_APPLICANT_AND_RESPONDENT))
-                    .contentType(APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andDo(print());
+                post(BULK_PRINT_URI)
+                        .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                        .content(ResourceLoader.loadResourceAsString(BULK_PRINT_TO_APPLICANT_AND_RESPONDENT))
+                        .contentType(APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andDo(print());
 
         verify(bulkPrintService, times(1)).sendLetterToApplicant(eq(AUTH_TOKEN), any(CaseDetails.class));
         verify(bulkPrintService, times(1)).sendLetterToRespondent(eq(AUTH_TOKEN), any(CaseDetails.class));
@@ -65,7 +65,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 post(BULK_PRINT_URI)
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                         .content(ResourceLoader.loadResourceAsString(BULK_PRINT_TO__RESPONDENT_ONLY))
-                        .contentType(APPLICATION_JSON))
+                        .contentType(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andDo(print());
 

@@ -7,9 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.LINE_SEPARATOR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
-
 @Component
 public class LetterAddressHelper {
 
@@ -27,6 +24,6 @@ public class LetterAddressHelper {
 
         addressLines.removeAll(Arrays.asList("", null, "null"));
 
-        return String.join(LINE_SEPARATOR, addressLines);
+        return String.join("\n", addressLines);
     }
 }

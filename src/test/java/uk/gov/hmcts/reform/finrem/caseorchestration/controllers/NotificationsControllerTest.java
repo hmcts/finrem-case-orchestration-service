@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -16,8 +17,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-
-import javax.ws.rs.core.MediaType;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,7 +69,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_HEADER)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -96,7 +95,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_HEADER)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(bulkPrintService, times(1))
@@ -110,7 +109,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_HEADER)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -123,7 +122,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_HEADER)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
@@ -135,7 +134,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_HEADER)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -148,7 +147,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_HEADER)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
@@ -160,7 +159,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_HEADER)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -173,7 +172,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_HEADER)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
@@ -184,7 +183,7 @@ public class NotificationsControllerTest {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
         mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -197,7 +196,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_HEADER)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
@@ -209,7 +208,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_HEADER)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -222,7 +221,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_HEADER)
                 .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);

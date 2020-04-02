@@ -32,7 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 public class NotificationService {
 
-    private static final String NOTIFICATION_SERVICE_URL = "notification service url ";
     private static final String MESSAGE = "Failed to send notification email for case id : ";
     private static final String MSG_SOLICITOR_EMAIL = " for solicitor email";
     private static final String EXCEPTION = "exception :";
@@ -97,7 +96,6 @@ public class NotificationService {
         }
 
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders());
-        log.info(NOTIFICATION_SERVICE_URL, uri.toString());
         try {
             restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
         } catch (Exception ex) {

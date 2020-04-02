@@ -156,7 +156,6 @@ dependencies {
     implementation group: 'info.solidsoft.gradle.pitest', name: 'gradle-pitest-plugin', version: versions.gradlePitest
     implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
     implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
-    implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
     implementation group: 'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
     implementation group: 'org.pitest', name: 'pitest', version: versions.pitest
@@ -193,7 +192,6 @@ dependencies {
 
     functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
     functionalImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
-    functionalImplementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber

@@ -6,7 +6,6 @@ import com.jayway.jsonpath.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import org.json.JSONException;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +38,8 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
     @Test
     public void verifyConsentOrderApprovedForConsentedCaseForApplicant() {
         CallbackRequest callbackRequest = null;
-        InputStream resourceAsStream;
-        resourceAsStream = getClass().getResourceAsStream("/json/consented/approved-consent-order.json");
+        InputStream resourceAsStream = getClass().getResourceAsStream(
+                "/json/consented/approved-consent-order.json");
 
         Map<String,String> uploadedDoc;
         try {
@@ -60,12 +59,11 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
         assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
     }
 
-    @Ignore
     @Test
     public void verifyConsentOrderApprovedForConsentedCaseWhenApplicantRepresentedBySolicitor() {
         CallbackRequest callbackRequest = null;
-        InputStream resourceAsStream;
-        resourceAsStream = getClass().getResourceAsStream("/json/consented/approved-consent-order-with-applicant-solicitor.json");
+        InputStream resourceAsStream = getClass().getResourceAsStream(
+                "/json/consented/approved-consent-order-with-applicant-solicitor.json");
 
         Map<String,String> uploadedDoc;
         try {

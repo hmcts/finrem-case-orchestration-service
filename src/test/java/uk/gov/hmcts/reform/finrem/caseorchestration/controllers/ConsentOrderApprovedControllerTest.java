@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -13,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApproved
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -52,7 +52,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest());
     }
 
@@ -64,7 +64,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isInternalServerError());
     }
 
@@ -80,7 +80,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         ResultActions result = mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON));
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
         result.andExpect(jsonPath("$.data", not(hasKey(LATEST_CONSENT_ORDER))));
@@ -98,7 +98,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         ResultActions result = mvc.perform(post(endpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON));
+                .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
         assertLetter(result);

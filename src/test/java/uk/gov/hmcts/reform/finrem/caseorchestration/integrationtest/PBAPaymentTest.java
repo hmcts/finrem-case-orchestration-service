@@ -36,7 +36,6 @@ import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -96,7 +95,7 @@ public class PBAPaymentTest {
         stubPayment(PAYMENT_RESPONSE);
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
@@ -119,7 +118,7 @@ public class PBAPaymentTest {
         stubFeeLookUp();
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON)
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
             .andDo(print())
@@ -141,7 +140,7 @@ public class PBAPaymentTest {
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
             .content(objectMapper.writeValueAsString(request))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
@@ -155,7 +154,7 @@ public class PBAPaymentTest {
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
             .content(objectMapper.writeValueAsString(request))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -163,7 +162,7 @@ public class PBAPaymentTest {
         stubFor(post(PBA_URL)
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, javax.ws.rs.core.MediaType.APPLICATION_JSON)
+                .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(paymentResponse)));
     }
 
@@ -171,7 +170,7 @@ public class PBAPaymentTest {
         stubFor(get(urlMatching(FEE_LOOKUP_URL))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, javax.ws.rs.core.MediaType.APPLICATION_JSON)
+                .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .withBody(FEE_RESPONSE)));
     }
 

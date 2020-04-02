@@ -29,7 +29,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse.builder;
 
-
 @RunWith(SpringRunner.class)
 @WebMvcTest(DocumentValidationController.class)
 public class DocumentValidationControllerTest extends BaseControllerTest {
@@ -52,10 +51,10 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
                 .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
                 .post("/case-orchestration/field/consentOrder/file-upload-check")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(javax.ws.rs.core.MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors").doesNotExist());
@@ -72,10 +71,10 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
                 .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
                 .post("/case-orchestration/field/consentOrder/file-upload-check")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(javax.ws.rs.core.MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors").exists());
@@ -91,10 +90,10 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
                 .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
                 .post("/case-orchestration/field/yyyyy/file-upload-check")
-                .contentType(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(javax.ws.rs.core.MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors").doesNotExist());

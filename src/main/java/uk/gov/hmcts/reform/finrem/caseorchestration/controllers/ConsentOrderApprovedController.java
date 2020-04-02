@@ -25,8 +25,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionD
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 
 import javax.validation.constraints.NotNull;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -34,6 +37,10 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 
@@ -80,20 +87,6 @@ public class ConsentOrderApprovedController implements BaseController {
                     .orderLetter(approvedConsentOrderLetter)
                     .consentOrder(consentOrderAnnexStamped)
                     .build();
-            /*
-            Builder works fine - issue must be in service?
-             */
-
-            // WORKS UP TO HERE - ISSUE MUST BE IN SERVICE
-            // THIS WORKS FINE
-            /*
-            ApprovedOrder approvedOrder = ApprovedOrder.builder()
-                    .consentOrderApprovedNotificationLetter(approvedConsentOrderLetter)
-                    .orderLetter(approvedConsentOrderLetter)
-                    .consentOrder(consentOrderAnnexStamped)
-                    .build();
-
-             */
 
             if (!isEmpty(pensionDocs)) {
                 List<PensionCollectionData> stampedPensionDocs = service.stampPensionDocuments(pensionDocs, authToken);
@@ -109,7 +102,9 @@ public class ConsentOrderApprovedController implements BaseController {
             List<ApprovedOrderData> approvedOrders = asList(approvedOrderData);
             caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
-            log.info("Successfully generated documents for 'Consent Order approved'");
+            cleanupCaseDataBeforeSubmittingToCcd(caseDetails);
+
+            log.info("Successfully generated documents for 'Consent Order Approved'");
         }
 
         return ResponseEntity.ok(
@@ -118,6 +113,16 @@ public class ConsentOrderApprovedController implements BaseController {
                         .errors(ImmutableList.of())
                         .warnings(ImmutableList.of())
                         .build());
+    }
+
+    private void cleanupCaseDataBeforeSubmittingToCcd(CaseDetails caseDetails) {
+        // Must remove any added case data as CCD will return an error
+        caseDetails.getData().remove("caseNumber");
+        caseDetails.getData().remove("reference");
+        caseDetails.getData().remove("addressee");
+        caseDetails.getData().remove("letterDate");
+        caseDetails.getData().remove("applicantName");
+        caseDetails.getData().remove("respondentName");
     }
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {

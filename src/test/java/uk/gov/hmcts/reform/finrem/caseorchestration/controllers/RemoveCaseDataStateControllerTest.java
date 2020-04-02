@@ -2,9 +2,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
-
-import javax.ws.rs.core.MediaType;
 
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
@@ -28,7 +27,7 @@ public class RemoveCaseDataStateControllerTest extends BaseControllerTest {
         mvc.perform(post(REMOVE_CASE_STATE_URI)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(is(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
@@ -39,7 +38,7 @@ public class RemoveCaseDataStateControllerTest extends BaseControllerTest {
         mvc.perform(post(REMOVE_CASE_STATE_URI)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data", not(hasKey(STATE))));
     }

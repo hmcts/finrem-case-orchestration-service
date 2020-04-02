@@ -6,8 +6,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class OrchestrationConstants {
 
-    public static final String LINE_SEPARATOR = System.lineSeparator();
-
     // Authentication
     public static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorization";
     public static final String AUTHORIZATION_HEADER = "Authorization";
