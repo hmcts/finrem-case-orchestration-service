@@ -80,14 +80,6 @@ public class BulkPrintServiceTest {
     }
 
     @Test
-    public void sendLetterToApplicantSolicitorReturnsExpectedResult() {
-        service.sendLetterToApplicantSolicitor(AUTH_TOKEN, caseDetails);
-
-        // this is just for a moment. Logic to implement
-        verifyNoInteractions(generateCoverSheetServiceMock);
-    }
-
-    @Test
     public void sendLetterToRespondentReturnsExpectedResult() {
         String party = "respondent";
         prepareDataForTest(party);

@@ -44,10 +44,6 @@ public class BulkPrintService extends AbstractDocumentService {
         this.generateCoverSheetService = generateCoverSheetService;
     }
 
-    public void sendLetterToApplicantSolicitor(String authToken, CaseDetails caseDetails) {
-        logInfo("Applicant Solicitor", new CaseDocument(), UUID.randomUUID());
-    }
-
     public BulkPrintMetadata sendLetterToApplicant(String authToken, CaseDetails caseDetails) {
         CaseDocument applicantCoverSheet = generateCoverSheetService.generateApplicantCoverSheet(caseDetails, authToken);
         UUID applicantLetterId = sendForBulkPrint(applicantCoverSheet, caseDetails);
