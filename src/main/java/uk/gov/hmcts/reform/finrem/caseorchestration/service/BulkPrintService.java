@@ -1,12 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.print.BulkPrintMetadata;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
@@ -46,35 +48,28 @@ public class BulkPrintService extends AbstractDocumentService {
         logInfo("Applicant Solicitor", new CaseDocument(), UUID.randomUUID());
     }
 
-    public UUID sendLetterToApplicant(String authToken, CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
+    public BulkPrintMetadata sendLetterToApplicant(String authToken, CaseDetails caseDetails) {
+        CaseDocument applicantCoverSheet = generateCoverSheetService.generateApplicantCoverSheet(caseDetails, authToken);
+        UUID applicantLetterId = sendForBulkPrint(applicantCoverSheet, caseDetails);
 
-        if (letterShouldBeSentDirectlyToApplicant(caseData)) {
-            CaseDocument applicantCoverSheet = generateCoverSheetService.generateApplicantCoverSheet(caseDetails, authToken);
-            UUID applicantLetterId = sendForBulkPrint(applicantCoverSheet, caseDetails);
+        logInfo("Applicant", applicantCoverSheet, applicantLetterId);
 
-            caseData.put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
-            caseData.put(BULK_PRINT_LETTER_ID_APP, applicantLetterId);
-
-            logInfo("Applicant", applicantCoverSheet, applicantLetterId);
-
-            return applicantLetterId;
-        }
-
-        return UUID.fromString("");
+        return BulkPrintMetadata.builder()
+                .letterId(applicantLetterId)
+                .coverSheet(applicantCoverSheet)
+                .build();
     }
 
-    public UUID sendLetterToRespondent(String authToken, CaseDetails caseDetails) {
+    public BulkPrintMetadata sendLetterToRespondent(String authToken, CaseDetails caseDetails) {
         CaseDocument respondentCoverSheet = generateCoverSheetService.generateRespondentCoverSheet(caseDetails, authToken);
         UUID respondentLetterId = sendForBulkPrint(respondentCoverSheet, caseDetails);
 
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
-        caseData.put(BULK_PRINT_LETTER_ID_RES, respondentLetterId);
-
         logInfo("Respondent", respondentCoverSheet, respondentLetterId);
 
-        return respondentLetterId;
+        return BulkPrintMetadata.builder()
+            .letterId(respondentLetterId)
+            .coverSheet(respondentCoverSheet)
+            .build();
     }
 
     private UUID sendForBulkPrint(CaseDocument coverSheet, CaseDetails caseDetails) {
@@ -104,19 +99,19 @@ public class BulkPrintService extends AbstractDocumentService {
         );
     }
 
-    private boolean applicantIsNotRepresentedBySolicitor(Map<String, Object> caseData) {
+    private static boolean applicantIsNotRepresentedBySolicitor(Map<String, Object> caseData) {
         return NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APPLICANT_REPRESENTED)));
     }
 
-    private boolean solicitorDidNotAgreeToReceiveEmails(Map<String, Object> caseData) {
+    private static boolean solicitorDidNotAgreeToReceiveEmails(Map<String, Object> caseData) {
         return NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(SOLICITOR_AGREE_TO_RECEIVE_EMAILS)));
     }
 
-    private boolean letterShouldBeSentDirectlyToApplicant(Map<String, Object> caseData) {
+    public static boolean shouldBeSentToApplicant(ImmutableMap<String, Object> caseData) {
         return applicantIsNotRepresentedBySolicitor(caseData) || solicitorDidNotAgreeToReceiveEmails(caseData);
     }
 
-    private void logInfo(String party, CaseDocument caseDocument, UUID letterId) {
+    private static void logInfo(String party, CaseDocument caseDocument, UUID letterId) {
         log.info(
                 "Generated {} CoverSheet for bulk print. coversheet: {}, letterId : {}",
                 party,

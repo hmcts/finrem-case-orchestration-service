@@ -5,7 +5,8 @@
     "jurisdiction": "DIVORCE",
     "state": "orderMade",
     "case_data": {
-      "applicantRepresented": "No",
+      "applicantRepresented": "Yes",
+      "solicitorAgreeToReceiveEmails": "Yes",
       "uploadOrder":[
         {
           "id":"92d30d00-1cd6-4ab1-aca9-cd361d21634e",
