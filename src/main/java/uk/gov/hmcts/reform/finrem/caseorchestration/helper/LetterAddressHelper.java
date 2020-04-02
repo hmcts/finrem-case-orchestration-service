@@ -7,6 +7,10 @@ import java.util.Map;
 
 public class LetterAddressHelper {
 
+    private LetterAddressHelper() {
+        // don't
+    }
+
     public static String formatAddressForLetterPrinting(Map<String, Object> address) {
         List<String> addressLines = new ArrayList<>();
 
