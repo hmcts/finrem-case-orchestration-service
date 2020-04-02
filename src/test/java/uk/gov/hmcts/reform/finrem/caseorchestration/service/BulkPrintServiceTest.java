@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -76,6 +77,14 @@ public class BulkPrintServiceTest {
         BulkPrintMetadata result = service.sendLetterToApplicant(AUTH_TOKEN, caseDetails);
 
         assertOutput(result, party);
+    }
+
+    @Test
+    public void sendLetterToApplicantSolicitorReturnsExpectedResult() {
+        service.sendLetterToApplicantSolicitor(AUTH_TOKEN, caseDetails);
+
+        // this is just for a moment. Logic to implement
+        verifyNoInteractions(generateCoverSheetServiceMock);
     }
 
     @Test
