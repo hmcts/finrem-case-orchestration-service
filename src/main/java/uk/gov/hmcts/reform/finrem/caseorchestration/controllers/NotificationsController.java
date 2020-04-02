@@ -47,7 +47,7 @@ public class NotificationsController implements BaseController {
         if (isConsentedApplication(caseData)) {
             if (isSolicitorAgreedToReceiveEmails(caseData, "solicitorAgreeToReceiveEmails")) {
                 if (isPaperApplication(caseData)) {
-                    log.info("Sending Consented HWF Successful email notification to Solicitor");
+                    log.info("Sending Consented HWF Successful notification bulk print letter");
                     helpWithFeesBulkPrintService.sendLetter(authorisationToken, callbackRequest.getCaseDetails());
                 } else {
                     log.info("Sending Consented HWF Successful email notification to Solicitor");
