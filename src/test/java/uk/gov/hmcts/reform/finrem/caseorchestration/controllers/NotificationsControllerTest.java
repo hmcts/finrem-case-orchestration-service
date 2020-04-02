@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -52,9 +51,6 @@ public class NotificationsControllerTest {
     @MockBean
     private NotificationService notificationService;
 
-    @MockBean
-    private BulkPrintService bulkPrintService;
-
     private MockMvc mockMvc;
     private JsonNode requestContent;
 
@@ -74,7 +70,6 @@ public class NotificationsControllerTest {
 
         verify(notificationService, times(1))
                 .sendHWFSuccessfulConfirmationEmail(any(CallbackRequest.class));
-        verifyNoMoreInteractions(bulkPrintService);
     }
 
     @Test
@@ -98,8 +93,6 @@ public class NotificationsControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verify(bulkPrintService, times(1))
-                .sendLetterToApplicantSolicitor(anyString(), any(CaseDetails.class));
         verifyNoMoreInteractions(notificationService);
     }
 

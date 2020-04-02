@@ -103,35 +103,31 @@ public class BulkPrintServiceTest {
     public void shouldBeSentToApplicantReturnsTrueWhenApplicantRepresentedIsNoSolicitorAgreeToReceiveEmailsDoesntMatter() {
         ImmutableMap<String, Object> caseData = ImmutableMap.of(APPLICANT_REPRESENTED, NO_VALUE);
 
-        Stream.of("", YES_VALUE, "this should be 'yes' or 'no'").forEach(value -> {
-            assertThat(
-                shouldBeSentToApplicant(
-                    ImmutableMap.of(
-                        APPLICANT_REPRESENTED, NO_VALUE,
-                        SOLICITOR_AGREE_TO_RECEIVE_EMAILS, value
-                    )
-                ), is(true));
-        });
+        Stream.of("", YES_VALUE, "this should be 'yes' or 'no'").forEach(value -> assertThat(
+            shouldBeSentToApplicant(
+                ImmutableMap.of(
+                    APPLICANT_REPRESENTED, NO_VALUE,
+                    SOLICITOR_AGREE_TO_RECEIVE_EMAILS, value
+                )
+            ), is(true)));
     }
 
     @Test
     public void shouldBeSentToApplicantReturnsFalseWhenApplicantRepresentedIsAProvidedValue() {
         Stream.of("", YES_VALUE, "this should be 'yes' or 'no'").forEach(value -> {
-            assertThat(shouldBeSentToApplicant( ImmutableMap.of(APPLICANT_REPRESENTED, value)), is(false));
+            assertThat(shouldBeSentToApplicant(ImmutableMap.of(APPLICANT_REPRESENTED, value)), is(false));
         });
     }
 
     @Test
     public void shouldBeSentToApplicantReturnsTrueWhenSolicitorAgreeToReceiveEmailsIsNo() {
-        Stream.of("", YES_VALUE, "this should be 'yes' or 'no'").forEach(value -> {
-            assertThat(
-                shouldBeSentToApplicant(
-                    ImmutableMap.of(
-                        APPLICANT_REPRESENTED, value,
-                        SOLICITOR_AGREE_TO_RECEIVE_EMAILS, NO_VALUE
-                    )
-                ), is(true));
-        });
+        Stream.of("", YES_VALUE, "this should be 'yes' or 'no'").forEach(value -> assertThat(
+            shouldBeSentToApplicant(
+                ImmutableMap.of(
+                    APPLICANT_REPRESENTED, value,
+                    SOLICITOR_AGREE_TO_RECEIVE_EMAILS, NO_VALUE
+                )
+            ), is(true)));
     }
 
     private void assertOutput(BulkPrintMetadata result, String party) {

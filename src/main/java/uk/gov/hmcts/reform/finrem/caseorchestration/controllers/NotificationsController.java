@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.google.common.collect.ImmutableMap;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -33,9 +34,6 @@ public class NotificationsController implements BaseController {
     @Autowired
     private NotificationService notificationService;
 
-    @Autowired
-    private BulkPrintService bulkPrintService;
-
     @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for HWF Successful.")
     @ApiResponses(value = {
@@ -51,7 +49,7 @@ public class NotificationsController implements BaseController {
             if (isSolicitorAgreedToReceiveEmails(caseData, SOLICITOR_AGREE_TO_RECEIVE_EMAILS)) {
                 if (isPaperApplication(caseData)) {
                     log.info("Sending Consented HWF Successful letter to bulk print");
-                    bulkPrintService.sendLetterToApplicantSolicitor(authToken, callbackRequest.getCaseDetails());
+
                 } else {
                     log.info("Sending Consented HWF Successful email notification to Solicitor");
                     notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest);
