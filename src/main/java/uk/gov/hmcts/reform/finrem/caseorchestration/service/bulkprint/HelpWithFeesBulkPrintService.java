@@ -46,7 +46,7 @@ public class HelpWithFeesBulkPrintService extends AbstractDocumentService {
 
         log.info("HWF success bulk print letter - generated {}", successHwFLetter);
 
-        caseDetails.getData().put("aaa", successHwFLetter);
+        caseDetails.getData().put("hwfSuccessNotificationLetter", successHwFLetter);
 
         return caseDetails;
     }
@@ -73,7 +73,9 @@ public class HelpWithFeesBulkPrintService extends AbstractDocumentService {
         Addressee.AddresseeBuilder addresseeBuilder = Addressee.builder();
         String applicantName = buildFullName(caseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
 
-        hwfBuilder.caseNumber(nullToEmpty((caseDetails.getId())));
+        hwfBuilder
+                .caseNumber(nullToEmpty((caseDetails.getId())))
+                .reference("");
 
         if (isApplicantRepresented(caseData)) {
             log.info("Applicant is represented by a solicitor");
@@ -88,6 +90,8 @@ public class HelpWithFeesBulkPrintService extends AbstractDocumentService {
             addresseeBuilder
                     .name(applicantName)
                     .formattedAddress(formatAddressForLetterPrinting((Map) caseData.get(APPLICANT_ADDRESS)));
+            hwfBuilder
+                    .applicantName(applicantName);
         }
 
         return hwfBuilder

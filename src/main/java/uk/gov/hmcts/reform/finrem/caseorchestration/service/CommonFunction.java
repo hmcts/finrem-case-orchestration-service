@@ -28,7 +28,8 @@ public class CommonFunction {
         listMap.stream().findFirst().get();
 
     public static boolean addressLineOneAndPostCodeAreBothNotEmpty(Map address) {
-        return  ObjectUtils.isNotEmpty(address) && StringUtils.isNotBlank((String) address.get("AddressLine1"))
+        return  ObjectUtils.isNotEmpty(address)
+                && StringUtils.isNotBlank((String) address.get("AddressLine1"))
                 && StringUtils.isNotBlank((String) address.get("PostCode"));
     }
 
@@ -37,7 +38,10 @@ public class CommonFunction {
     }
 
     public static String buildFullName(Map<String, Object> caseData, String applicantFirstMiddleName, String applicantLastName) {
-        return nullToEmpty((caseData.get(applicantFirstMiddleName)))
-                + " " + nullToEmpty((caseData.get(applicantLastName)));
+        return (
+                nullToEmpty((caseData.get(applicantFirstMiddleName))).trim()
+                + " "
+                + nullToEmpty((caseData.get(applicantLastName))).trim()
+        ).trim();
     }
 }

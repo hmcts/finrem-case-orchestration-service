@@ -63,27 +63,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
         documentClientMock = mock(DocumentClient.class);
         service = new ConsentOrderApprovedDocumentService(documentClientMock, config, mapper);
 
-        Map<String, Object> applicantAddress = new HashMap<>();
-        applicantAddress.put("AddressLine1", "50 Applicant Street");
-        applicantAddress.put("AddressLine2", "Second Address Line");
-        applicantAddress.put("AddressLine3", "Third Address Line");
-        applicantAddress.put("County", "London");
-        applicantAddress.put("Country", "England");
-        applicantAddress.put("PostTown", "London");
-        applicantAddress.put("PostCode", "SW1");
-
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "James");
-        caseData.put(APPLICANT_LAST_NAME, "Joyce");
-        caseData.put(APPLICANT_ADDRESS, applicantAddress);
-        caseData.put(APPLICANT_REPRESENTED, null);
-        caseData.put(APP_RESPONDENT_FIRST_MIDDLE_NAME, "Jane");
-        caseData.put(APP_RESPONDENT_LAST_NAME, "Doe");
-
-        caseDetails = CaseDetails.builder()
-                .id(123456789L)
-                .data(caseData)
-                .build();
+        caseDetails = buildCaseDetails();
     }
 
     @Test
@@ -180,5 +160,29 @@ public class ConsentOrderApprovedDocumentServiceTest {
 
         stampPensionDocuments.forEach(data -> doCaseDocumentAssert(data.getPensionDocumentData().getPensionDocument()));
         verify(documentClientMock, times(2)).stampDocument(any(), anyString());
+    }
+
+    public static CaseDetails buildCaseDetails() {
+        Map<String, Object> applicantAddress = new HashMap<>();
+        applicantAddress.put("AddressLine1", "50 Applicant Street");
+        applicantAddress.put("AddressLine2", "Second Address Line");
+        applicantAddress.put("AddressLine3", "Third Address Line");
+        applicantAddress.put("County", "London");
+        applicantAddress.put("Country", "England");
+        applicantAddress.put("PostTown", "London");
+        applicantAddress.put("PostCode", "SW1");
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "James");
+        caseData.put(APPLICANT_LAST_NAME, "Joyce");
+        caseData.put(APPLICANT_ADDRESS, applicantAddress);
+        caseData.put(APPLICANT_REPRESENTED, null);
+        caseData.put(APP_RESPONDENT_FIRST_MIDDLE_NAME, "Jane");
+        caseData.put(APP_RESPONDENT_LAST_NAME, "Doe");
+
+        return CaseDetails.builder()
+                .id(123456789L)
+                .data(caseData)
+                .build();
     }
 }

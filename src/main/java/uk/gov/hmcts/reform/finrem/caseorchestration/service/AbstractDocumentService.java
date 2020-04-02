@@ -18,6 +18,7 @@ import java.util.UUID;
 
 public abstract class AbstractDocumentService {
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
+    private static final String DOCUMENT_CASE_DATA_JSON_KEY = "caseData";
 
     protected final DocumentConfiguration config;
     private final DocumentClient documentClient;
@@ -49,7 +50,11 @@ public abstract class AbstractDocumentService {
     }
 
     protected CaseDocument generateDocument(String authToken, DataForTemplate data, TemplateDetails templateDetails) {
-        Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, data);
+        Map<String, Object> caseDetailsMap = Collections.singletonMap(
+                DOCUMENT_CASE_DETAILS_JSON_KEY, Collections.singletonMap(
+                        DOCUMENT_CASE_DATA_JSON_KEY, data
+                )
+        );
 
         Document miniFormA =
             documentClient.generatePdf(

@@ -8,15 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.HelpWithFeesBulkPrintService;
 
 import java.util.Map;
 import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
 
@@ -27,13 +30,17 @@ public class NotificationsController implements BaseController {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private HelpWithFeesBulkPrintService helpWithFeesBulkPrintService;
+
     @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for HWF Successful.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "HWFSuccessful e-mail sent successfully",
                     response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendHwfSuccessfulConfirmationEmail(
-            @RequestBody CallbackRequest callbackRequest) {
+            @RequestBody CallbackRequest callbackRequest,
+            @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken) {
         log.info("Received request to send email for HWF Successful for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
@@ -41,6 +48,7 @@ public class NotificationsController implements BaseController {
             if (isSolicitorAgreedToReceiveEmails(caseData, "solicitorAgreeToReceiveEmails")) {
                 if (isPaperApplication(caseData)) {
                     log.info("Sending Consented HWF Successful email notification to Solicitor");
+                    helpWithFeesBulkPrintService.sendLetter(authorisationToken, callbackRequest.getCaseDetails());
                 } else {
                     log.info("Sending Consented HWF Successful email notification to Solicitor");
                     notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest);
