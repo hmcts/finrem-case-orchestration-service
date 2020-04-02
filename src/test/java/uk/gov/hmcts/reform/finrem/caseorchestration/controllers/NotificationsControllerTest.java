@@ -85,18 +85,6 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void sendHwfSuccessfulConfirmationBulkPrintLetter() throws Exception {
-        buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
-        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
-                .header(AUTHORIZATION_HEADER, AUTH_HEADER)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
-
-        verifyNoMoreInteractions(notificationService);
-    }
-
-    @Test
     public void sendAssignToJudgeConfirmationEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
         mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
