@@ -39,8 +39,12 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (isConsentedApplication(caseData)) {
             if (isSolicitorAgreedToReceiveEmails(caseData, "solicitorAgreeToReceiveEmails")) {
-                log.info("Sending Consented HWF Successful email notification to Solicitor");
-                notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest);
+                if (isPaperApplication(caseData)) {
+                    log.info("Sending Consented HWF Successful email notification to Solicitor");
+                } else {
+                    log.info("Sending Consented HWF Successful email notification to Solicitor");
+                    notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest);
+                }
             }
         } else if (isSolicitorAgreedToReceiveEmails(caseData,
                 "applicantSolicitorConsentForEmails")) {
@@ -119,7 +123,10 @@ public class NotificationsController implements BaseController {
     }
 
     private boolean isSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData, String solicitorAgreeToReceiveEmails) {
-        return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData
-                .get(solicitorAgreeToReceiveEmails)));
+        return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData.get(solicitorAgreeToReceiveEmails)));
+    }
+
+    private boolean isPaperApplication(Map<String, Object> mapOfCaseData) {
+        return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData.get("paperApplication")));
     }
 }

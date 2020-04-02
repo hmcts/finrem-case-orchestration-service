@@ -18,30 +18,26 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresented;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
 @Slf4j
 public class ConsentOrderApprovedDocumentService extends AbstractDocumentService {
 
-    private LetterAddressHelper letterAddressHelper;
-
     @Autowired
     public ConsentOrderApprovedDocumentService(DocumentClient documentClient, DocumentConfiguration config,
-                                               ObjectMapper objectMapper, LetterAddressHelper letterAddressHelper) {
+                                               ObjectMapper objectMapper) {
         super(documentClient, config, objectMapper);
-        this.letterAddressHelper = letterAddressHelper;
     }
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
@@ -77,9 +73,8 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                 + " " + nullToEmpty((caseData.get(APPLICANT_LAST_NAME)));
         String respondentName = nullToEmpty((caseData.get(APP_RESPONDENT_FIRST_MIDDLE_NAME)))
                 + " " + nullToEmpty((caseData.get(APP_RESPONDENT_LAST_NAME)));
-        String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
 
-        if (YES_VALUE.equalsIgnoreCase(applicantRepresented)) {
+        if (isApplicantRepresented(caseData)) {
             log.info("Applicant is represented by a solicitor");
             reference = nullToEmpty((caseData.get(SOLICITOR_REFERENCE)));
             addresseeName = nullToEmpty((caseData.get(SOLICITOR_NAME)));
@@ -93,7 +88,7 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
             Addressee addressee = Addressee.builder()
                     .name(addresseeName)
-                    .formattedAddress(letterAddressHelper.formatAddressForLetterPrinting(addressToSendTo))
+                    .formattedAddress(LetterAddressHelper.formatAddressForLetterPrinting(addressToSendTo))
                     .build();
 
             caseData.put("caseNumber", ccdNumber);
@@ -109,7 +104,6 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                     "Mandatory data missing from address when trying to generate Approved Consent Order Notification Letter");
         }
     }
-
 
     public CaseDocument annexStampDocument(CaseDocument document, String authToken) {
         return super.annexStampDocument(document, authToken);

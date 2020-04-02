@@ -1,0 +1,15 @@
+{
+  "token": "test_token",
+  "event_id": "event1",
+  "case_details": {
+    "id" : "12345678",
+    "jurisdiction": "divorce",
+    "state": "created",
+    "case_data": {
+      "d81Question": "No",
+      "helpWithFeesQuestion": "No",
+      "paperApplication": "Yes",
+      "solicitorAgreeToReceiveEmails": "Yes"
+    }
+  }
+}

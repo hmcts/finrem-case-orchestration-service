@@ -6,8 +6,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DataForTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.TemplateDetails;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -29,7 +31,7 @@ public abstract class AbstractDocumentService {
         this.objectMapper = objectMapper;
     }
 
-    CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
+    protected CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
                                           String template, String fileName) {
 
         Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails);
@@ -42,6 +44,22 @@ public abstract class AbstractDocumentService {
                                 .values(caseDetailsMap)
                                 .build(),
                         authorisationToken);
+
+        return caseDocument(miniFormA);
+    }
+
+    protected CaseDocument generateDocument(String authToken, DataForTemplate data, TemplateDetails templateDetails) {
+        Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, data);
+
+        Document miniFormA =
+            documentClient.generatePdf(
+                DocumentGenerationRequest.builder()
+                    .template(templateDetails.getTemplate())
+                    .fileName(templateDetails.getFileName())
+                    .values(caseDetailsMap)
+                    .build(),
+                authToken
+            );
 
         return caseDocument(miniFormA);
     }

@@ -51,7 +51,6 @@ public class ConsentOrderApprovedDocumentServiceTest {
 
     private ObjectMapper mapper = new ObjectMapper();
     private ConsentOrderApprovedDocumentService service;
-    private LetterAddressHelper letterAddressHelper = new LetterAddressHelper();
     private CaseDetails caseDetails;
 
     @Before
@@ -62,7 +61,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
         config.setApprovedConsentOrderNotificationTemplate("FL-FRM-LET-ENG-00095.docx");
         config.setApprovedConsentOrderNotificationFileName("ApprovedConsentOrderNotificationLetter.pdf");
         documentClientMock = mock(DocumentClient.class);
-        service = new ConsentOrderApprovedDocumentService(documentClientMock, config, mapper, letterAddressHelper);
+        service = new ConsentOrderApprovedDocumentService(documentClientMock, config, mapper);
 
         Map<String, Object> applicantAddress = new HashMap<>();
         applicantAddress.put("AddressLine1", "50 Applicant Street");
