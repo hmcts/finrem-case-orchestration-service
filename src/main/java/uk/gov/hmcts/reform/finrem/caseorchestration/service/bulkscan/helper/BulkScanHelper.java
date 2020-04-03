@@ -27,10 +27,10 @@ public class BulkScanHelper {
 
     public static final Map<String, String> dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames =
             new ImmutableMap.Builder<String, String>()
-                    .put("a lump sum order", "Lump Sum Order")
-                    .put("a property adjustment order", "Property Adjustment Order")
-                    .put("a pension sharing order", "Pension Sharing Order")
-                    .put("a pension compensation sharing order", "Pension Compensation Sharing Order")
+                    .put("a lump sum order", "lumpSumOrder")
+                    .put("a property adjustment order", "propertyAdjustmentOrder")
+                    .put("a pension sharing order", "pensionSharingOrder")
+                    .put("a pension compensation sharing order", "pensionCompensationSharingOrder")
                     .build();
 
     public static final Map<String, String> orderForChildrenToCcdFieldNames =
