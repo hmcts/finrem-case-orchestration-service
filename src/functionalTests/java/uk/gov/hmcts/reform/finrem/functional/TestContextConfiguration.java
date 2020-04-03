@@ -30,22 +30,12 @@ import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 
-import javax.annotation.PostConstruct;
-
 @Configuration
 @ComponentScan("uk.gov.hmcts.reform.finrem.functional")
 @EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
 @PropertySource(value = {"classpath:application.properties"})
 @PropertySource(value = {"classpath:application-${env}.properties"})
 public class TestContextConfiguration {
-
-    @PostConstruct
-    public void setupProxy() {
-        System.setProperty("http.proxyHost", "proxyout.reform.hmcts.net");
-        System.setProperty("http.proxyPort", "8080");
-        System.setProperty("https.proxyHost", "proxyout.reform.hmcts.net");
-        System.setProperty("https.proxyPort", "8080");
-    }
 
     @Bean
     public ServiceAuthTokenGenerator serviceAuthTokenGenerator(@Value("${idam.s2s-auth.url}")
