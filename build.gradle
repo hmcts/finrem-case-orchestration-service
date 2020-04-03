@@ -112,7 +112,7 @@ configurations {
 }
 
 def versions = [
-        bspCommonLib            : '0.0.27',
+        bspCommonLib            : '0.0.28',
         ccdClient               : '4.6.4',
         commonsBeanUtils        : '1.9.4',
         commonsIo               : '2.5',

@@ -135,7 +135,7 @@ public class FormAToCaseTransformerTest {
         assertChildrenInfo(transformedCaseData);
 
         assertThat(transformedCaseData.get("natureOfApplication2"), is(asList("Periodical Payment Order", "Pension Attachment Order")));
-        assertThat(transformedCaseData.get("dischargePeriodicalPaymentSubstituteFor"), is(asList("Lump Sum Order", "Pension Sharing Order")));
+        assertThat(transformedCaseData.get("dischargePeriodicalPaymentSubstituteFor"), is(asList("lumpSumOrder", "pensionSharingOrder")));
         assertThat(transformedCaseData.get("natureOfApplication6"), is(singletonList("In addition to child support")));
     }
 
