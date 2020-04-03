@@ -11,7 +11,7 @@
     { "name": "ProvisionMadeFor", "value": "in connection with matrimonial or civil partnership proceedings" },
     { "name": "natureOfApplication", "value": "Periodical Payment Order, Pension Attachment Order" },
     { "name": "ApplicantIntendsTo", "value": "ApplyToCourtFor" },
-    { "name": "DischargePeriodicalPaymentSubstituteFor", "value": "" },
+    { "name": "DischargePeriodicalPaymentSubstituteFor", "value": "a lump sum order,a pension sharing order" },
     { "name": "ApplyingForConsentOrder", "value": "Yes" },
     { "name": "divorceStageReached", "value": "Decree Nisi" },
     { "name": "ApplicantRepresented", "value": "I am not represented by a solicitor in these proceedings" },

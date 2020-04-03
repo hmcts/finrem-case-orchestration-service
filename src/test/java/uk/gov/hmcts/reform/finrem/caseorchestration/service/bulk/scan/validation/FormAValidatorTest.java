@@ -103,7 +103,7 @@ public class FormAValidatorTest {
 
         optionalFieldsWithValues = asList(
                 new OcrDataField(HWF_NUMBER, "123456"),
-                new OcrDataField(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "a lump sum order, a pension compensation sharing order"),
+                new OcrDataField(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "a lump sum order,a pension compensation sharing order"),
                 new OcrDataField(APPLICANT_SOLICITOR_NAME, "Saul Call"),
                 new OcrDataField(APPLICANT_SOLICITOR_FIRM, "Better Divorce Ltd"),
                 new OcrDataField(APPLICANT_SOLICITOR_ADDRESS_LINE_1, "20 Solicitors Road"),
