@@ -29,9 +29,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_FIRM;
@@ -306,6 +310,68 @@ public class FormAToCaseTransformerTest {
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry("natureOfApplication5b", ""),
                 not(hasKey("orderForChildrenQuestion1"))
+        ));
+    }
+
+    @Test
+    public void shouldSetSolicitorAgreeToReceiveEmailsIfSolicitorEmailIsPopulated() {
+        Map<String, Object> convertedCcdData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
+                singletonList(new OcrDataField("ApplicantSolicitorEmail", TEST_SOLICITOR_EMAIL))));
+
+        assertThat(convertedCcdData, allOf(
+                aMapWithSize(4),
+                hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+                hasEntry(PAPER_APPLICATION, YES_VALUE),
+                hasEntry(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL),
+                hasEntry(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, YES_VALUE)
+        ));
+    }
+
+    @Test
+    public void shouldNotSetSolicitorAgreeToReceiveEmailsIfSolicitorEmailIsNotPopulated() {
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
+                new OcrDataField("ApplicantSolicitorEmail", "")
+        ));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertThat(transformedCaseData, allOf(
+                aMapWithSize(3),
+                hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+                hasEntry(PAPER_APPLICATION, YES_VALUE),
+                hasEntry(SOLICITOR_EMAIL, ""),
+                not(hasKey(SOLICITOR_AGREE_TO_RECEIVE_EMAILS))
+        ));
+    }
+
+    @Test
+    public void shouldSetRespondentRepresentedIfRespSolicitorNameIsPopulated() {
+        Map<String, Object> convertedCcdData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
+                singletonList(new OcrDataField("RespondentSolicitorName", TEST_SOLICITOR_NAME))));
+
+        assertThat(convertedCcdData, allOf(
+                aMapWithSize(4),
+                hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+                hasEntry(PAPER_APPLICATION, YES_VALUE),
+                hasEntry(RESP_SOLICITOR_NAME, TEST_SOLICITOR_NAME),
+                hasEntry(RESPONDENT_REPRESENTED, YES_VALUE)
+        ));
+    }
+
+    @Test
+    public void shouldNotSetRespondentRepresentedIfRespSolicitorNameIsNotPopulated() {
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
+                new OcrDataField("RespondentSolicitorName", "")
+        ));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertThat(transformedCaseData, allOf(
+                aMapWithSize(3),
+                hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+                hasEntry(PAPER_APPLICATION, YES_VALUE),
+                hasEntry(RESP_SOLICITOR_NAME, ""),
+                not(hasKey(RESPONDENT_REPRESENTED))
         ));
     }
 

@@ -25,6 +25,8 @@ import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.transfor
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.applicantRepresentPaperToCcdFieldNames;
@@ -105,9 +107,12 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             modifiedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
         }
 
-        // If SolicitorEmail is populated then set SOLICITOR_AGREE_TO_RECEIVE_EMAILS to Yes
         if (StringUtils.isNotEmpty((String) modifiedCaseData.get(SOLICITOR_EMAIL))) {
             modifiedCaseData.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, YES_VALUE);
+        }
+
+        if (StringUtils.isNotEmpty((String) modifiedCaseData.get(RESP_SOLICITOR_NAME))) {
+            modifiedCaseData.put(RESPONDENT_REPRESENTED, YES_VALUE);
         }
 
         return modifiedCaseData;
@@ -197,6 +202,8 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.AUTHORISATION_SOLICITOR_ADDRESS, "authorisationSolicitorAddress");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.AUTHORISATION_SIGNED_BY, "authorisationSignedBy");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.AUTHORISATION_SOLICITOR_POSITION, "authorisation2b");
+
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.RESPONDENT_SOLICITOR_NAME, "rSolicitorName");
 
         return exceptionRecordToCcdFieldsMap;
     }
