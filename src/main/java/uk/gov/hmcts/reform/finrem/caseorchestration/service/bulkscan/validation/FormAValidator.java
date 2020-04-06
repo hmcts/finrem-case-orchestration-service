@@ -33,7 +33,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLYING_FOR_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SIGNED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SIGNED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE;
@@ -71,7 +70,6 @@ public class FormAValidator extends BulkScanFormValidator {
             APPLYING_FOR_CONSENT_ORDER,
             DIVORCE_STAGE_REACHED,
             APPLICANT_REPRESENTED,
-            AUTHORISATION_NAME,
             AUTHORISATION_SIGNED,
             AUTHORISATION_SIGNED_BY,
             AUTHORISATION_DATE
@@ -95,7 +93,7 @@ public class FormAValidator extends BulkScanFormValidator {
                 "ApplyToDischargePeriodicalPaymentOrder"
         ));
         ALLOWED_VALUES_PER_FIELD.put(APPLYING_FOR_CONSENT_ORDER, asList("Yes"));
-        ALLOWED_VALUES_PER_FIELD.put(DIVORCE_STAGE_REACHED, asList("Decree Nisi", "Decree Absolute"));
+        ALLOWED_VALUES_PER_FIELD.put(DIVORCE_STAGE_REACHED, asList("Decree Nisi", "Decree Absolute", "Petition Issued"));
         ALLOWED_VALUES_PER_FIELD.put(APPLICANT_REPRESENTED, asList(
                 "I am not represented by a solicitor in these proceedings",
                 "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
@@ -169,8 +167,9 @@ public class FormAValidator extends BulkScanFormValidator {
         return errorMessages;
     }
 
-    private static List<String> validateNonMandatoryCommaSeparatedField(Map<String, String> fieldsMap, String commaSeparatedFieldKey,
-                                                                        Map<String, String> validOcrFieldNamesToCcdFieldNames) {
+    private static List<String> validateNonMandatoryCommaSeparatedField(
+            Map<String, String> fieldsMap, String commaSeparatedFieldKey,
+            Map<String, String> validOcrFieldNamesToCcdFieldNames) {
         List<String> validationWarningMessages = new ArrayList<>();
 
         String commaSeparatedFieldValue = fieldsMap.getOrDefault(commaSeparatedFieldKey, "");

@@ -41,6 +41,8 @@ public class OcrFieldName {
     public static final String RESPONDENT_SOLICITOR_ADDRESS_COUNTY = "RespondentSolicitorAddressCounty";
     public static final String RESPONDENT_SOLICITOR_ADDRESS_POSTCODE = "RespondentSolicitorAddressPostcode";
     public static final String RESPONDENT_SOLICITOR_ADDRESS_COUNTRY = "RespondentSolicitorAddressCountry";
+    public static final String RESPONDENT_SOLICITOR_FIRM = "RespondentSolicitorFirm";
+    public static final String RESPONDENT_SOLICITOR_NAME = "RespondentSolicitorName";
     public static final String ADDRESS_OF_PROPERTIES = "AddressofProperties";
     public static final String MORTGAGE_DETAILS = "MortgageDetails";
     public static final String ORDER_FOR_CHILDREN = "OrderForChildren";

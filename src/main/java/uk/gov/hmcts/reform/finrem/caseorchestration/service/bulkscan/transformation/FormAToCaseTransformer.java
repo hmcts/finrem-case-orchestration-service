@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
-import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.applyMappings;
+import static uk.gov.hmcts.reform.bsp.common.mapper.GenericMapper.addMappingsTo;
 import static uk.gov.hmcts.reform.bsp.common.mapper.GenericMapper.getValueFromOcrDataFields;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.transformFormDateIntoCcdDate;
@@ -59,10 +59,10 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         commaSeparatedEntryTransformer(OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "dischargePeriodicalPaymentSubstituteFor",
                 dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames, ocrDataFields, transformedCaseData);
 
-        AddressMapper.applyMappings("applicantSolicitor", "solicitorAddress", ocrDataFields, transformedCaseData);
-        applyMappingsForAddress("applicant", ocrDataFields, transformedCaseData);
-        applyMappingsForAddress("respondent", ocrDataFields, transformedCaseData);
-        AddressMapper.applyMappings("respondentSolicitor", "rSolicitorAddress", ocrDataFields, transformedCaseData);
+        applyMappingsForAddressExtended("applicantSolicitor", "solicitorAddress", ocrDataFields, transformedCaseData);
+        applyMappingsForAddressExtended("applicant","applicantAddress", ocrDataFields, transformedCaseData);
+        applyMappingsForAddressExtended("respondent", "respondentAddress", ocrDataFields, transformedCaseData);
+        applyMappingsForAddressExtended("respondentSolicitor", "rSolicitorAddress", ocrDataFields, transformedCaseData);
 
         addMappingsToChildren(ocrDataFields, transformedCaseData);
 
@@ -190,12 +190,35 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.AUTHORISATION_SIGNED_BY, "authorisationSignedBy");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.AUTHORISATION_SOLICITOR_POSITION, "authorisation2b");
 
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.RESPONDENT_SOLICITOR_FIRM, "rSolicitorFirm");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.RESPONDENT_SOLICITOR_NAME, "rSolicitorName");
+
         return exceptionRecordToCcdFieldsMap;
     }
 
-    private void applyMappingsForAddress(
-            String prefix, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
-        applyMappings(prefix, prefix + "Address", ocrDataFields, modifiedMap);
+    private void applyMappingsForAddressExtended(
+            String prefix, String parentField, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
+        String nestedFieldPrefix = StringUtils.capitalize(prefix + "Address");
+
+        addMappingsTo(
+            parentField,
+            extendedAddress(nestedFieldPrefix),
+            modifiedMap,
+            ocrDataFields
+        );
+    }
+
+    private static ImmutableMap<String, String> extendedAddress(String prefix) {
+        Map<String, String> address = new HashMap<>();
+
+        address.put(prefix + "Line1", "AddressLine1");
+        address.put(prefix + "Line2", "AddressLine2");
+        address.put(prefix + "County", "County");
+        address.put(prefix + "Postcode", "PostCode");
+        address.put(prefix + "Town", "PostTown");
+        address.put(prefix + "Country", "Country");
+
+        return ImmutableMap.copyOf(address);
     }
 
     private void addMappingsToChildren(List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
