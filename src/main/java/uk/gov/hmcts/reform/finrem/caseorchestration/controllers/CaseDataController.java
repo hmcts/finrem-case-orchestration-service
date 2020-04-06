@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_ADMIN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.YES;
 
 @RestController
 @RequiredArgsConstructor
@@ -86,11 +86,11 @@ public class CaseDataController implements BaseController {
     private void setData(final String authToken, final Map<String, Object> caseData) {
         if (idamService.isUserRoleAdmin(authToken)) {
             log.info("Admin users.");
-            caseData.put(IS_ADMIN, YES);
+            caseData.put(IS_ADMIN, YES_VALUE);
         } else {
             log.info("other users.");
-            caseData.put(IS_ADMIN, NO);
-            caseData.put(APPLICANT_REPRESENTED, YES);
+            caseData.put(IS_ADMIN, NO_VALUE);
+            caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
         }
     }
 }

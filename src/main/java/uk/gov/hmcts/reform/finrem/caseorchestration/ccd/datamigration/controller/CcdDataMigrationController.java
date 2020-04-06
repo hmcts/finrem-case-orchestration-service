@@ -18,8 +18,8 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.YES;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,7 +43,7 @@ public class CcdDataMigrationController {
         log.info("FR Migration: {} ,applicantRepresentedExist : {}", caseId, applicantRepresentedExist);
 
         if (!applicantRepresentedExist) {
-            caseData.put(APPLICANT_REPRESENTED, YES);
+            caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
             log.info("FR Migration: {} setting applicantRepresented to Yes.", caseId);
             migrationRequired = true;
         }

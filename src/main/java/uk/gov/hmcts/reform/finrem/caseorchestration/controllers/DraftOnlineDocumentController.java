@@ -24,9 +24,9 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.YES;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -58,7 +58,7 @@ public class DraftOnlineDocumentController {
         caseData.put(MINI_FORM_A, document);
         if (!idamService.isUserRoleAdmin(authorisationToken)) {
             log.info("other users.");
-            caseData.put(APPLICANT_REPRESENTED, YES);
+            caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());

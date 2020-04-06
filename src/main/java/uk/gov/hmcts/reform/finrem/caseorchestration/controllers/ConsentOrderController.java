@@ -21,9 +21,9 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.YES;
 
 @Slf4j
 @RestController
@@ -53,7 +53,7 @@ public class ConsentOrderController implements BaseController {
         caseData.put(LATEST_CONSENT_ORDER, caseDocument);
 
         if (!idamService.isUserRoleAdmin(authToken)) {
-            caseData.put(APPLICANT_REPRESENTED, YES);
+            caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
