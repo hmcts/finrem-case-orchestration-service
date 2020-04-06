@@ -1,9 +1,14 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper;
 
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.StringUtils;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 
+import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
+import static uk.gov.hmcts.reform.bsp.common.mapper.GenericMapper.getValueFromOcrDataFields;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.ApplicantRepresentPaper.FR_APPLICANT_REPRESENTED_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.ApplicantRepresentPaper.FR_APPLICANT_REPRESENTED_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.ApplicantRepresentPaper.FR_APPLICANT_REPRESENTED_3;
@@ -69,4 +74,18 @@ public class BulkScanHelper {
                             FR_APPLICANT_REPRESENTED_3)
                     .build();
 
+    public static void mapFullNameToFirstAndLast(String ocrFieldName, String ccdFirstNameFieldName, String ccdLastNameFieldName,
+                                                 List<OcrDataField> ocrDataFields, Map<String, Object> formSpecificMap) {
+
+        getValueFromOcrDataFields(ocrFieldName, ocrDataFields)
+                .ifPresent(fullName -> {
+                    List<String> nameElements = asList(fullName.split(" "));
+                    formSpecificMap.put(ccdFirstNameFieldName, String.join(" ", nameElements.subList(0, nameElements.size() - 1)));
+                    formSpecificMap.put(ccdLastNameFieldName, nameElements.get(nameElements.size() - 1));
+                });
+    }
+
+    public static String getValueOrEmptyString(int index, List<OcrDataField> ocrDataFields, String fieldPrefix) {
+        return getValueFromOcrDataFields(fieldPrefix + index, ocrDataFields).orElse(StringUtils.EMPTY);
+    }
 }

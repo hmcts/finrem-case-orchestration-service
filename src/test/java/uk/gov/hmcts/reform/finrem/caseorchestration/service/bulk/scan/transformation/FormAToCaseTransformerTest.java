@@ -32,6 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CA
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
@@ -118,6 +119,7 @@ public class FormAToCaseTransformerTest {
                 hasEntry(SOLICITOR_REFERENCE, "SOL-RED"),
                 hasEntry(PBA_NUMBER, "PBA123456"),
                 hasEntry(SOLICITOR_EMAIL, "test@example.com"),
+                hasEntry(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, "Yes"),
                 hasEntry("applicantPhone", "0712345654"),
                 hasEntry("applicantEmail", "applicant@divorcity.com"),
 
