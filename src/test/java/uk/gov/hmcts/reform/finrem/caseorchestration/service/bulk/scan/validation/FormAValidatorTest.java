@@ -151,7 +151,7 @@ public class FormAValidatorTest {
         ocrDataFields.addAll(optionalFieldsWithValues);
         OcrValidationResult validationResult = formAValidator.validateBulkScanForm(ocrDataFields);
 
-//        assertThat(validationResult.getStatus(), is(SUCCESS));
+        assertThat(validationResult.getStatus(), is(SUCCESS));
         assertThat(validationResult.getWarnings(), is(emptyList()));
         assertThat(validationResult.getErrors(), is(emptyList()));
     }
