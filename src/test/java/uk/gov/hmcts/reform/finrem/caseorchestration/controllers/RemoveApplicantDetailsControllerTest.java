@@ -3,18 +3,18 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
 
 import java.io.File;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.YES;
 
 @WebMvcTest(RemoveApplicantDetailsController.class)
 public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
@@ -31,8 +31,8 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
         mvc.perform(post(REMOVE_DETAILS_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.data.applicantRepresented", is(NO)))
+                .contentType(APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.data.applicantRepresented", is(NO_VALUE)))
                 .andExpect(jsonPath("$.data.applicantAddress", is(notNullValue())))
                 .andExpect(jsonPath("$.data.applicantPhone", is("89897876765")))
                 .andExpect(jsonPath("$.data.applicantEmail", is("email01@email.com")))
@@ -57,8 +57,8 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
         mvc.perform(post(REMOVE_DETAILS_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.data.applicantRepresented", is(YES)))
+                .contentType(APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)))
                 .andExpect(jsonPath("$.data.applicantAddress").doesNotExist())
                 .andExpect(jsonPath("$.data.applicantPhone").doesNotExist())
                 .andExpect(jsonPath("$.data.applicantEmail").doesNotExist())

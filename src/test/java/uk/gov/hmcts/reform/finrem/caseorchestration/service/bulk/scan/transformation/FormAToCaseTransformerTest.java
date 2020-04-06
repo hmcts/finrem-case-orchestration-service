@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
@@ -27,14 +26,20 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.collection.IsMapWithSize.aMapWithSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
 
 public class FormAToCaseTransformerTest {
-
-    public static final String PAPER_APPLICATION = "paperApplication";
 
     private final FormAToCaseTransformer formAToCaseTransformer = new FormAToCaseTransformer();
 
@@ -95,7 +100,7 @@ public class FormAToCaseTransformerTest {
         assertThat(transformedCaseData, allOf(
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
-                hasEntry(CCDConfigConstant.DIVORCE_CASE_NUMBER, "1234567890"),
+                hasEntry(DIVORCE_CASE_NUMBER, "1234567890"),
                 hasEntry("HWFNumber", "123456"),
                 hasEntry("applicantFMName", "Peter"),
                 hasEntry("applicantLName", "Griffin"),
@@ -106,13 +111,13 @@ public class FormAToCaseTransformerTest {
                 hasEntry("applyingForConsentOrder", "Yes"),
                 hasEntry("divorceStageReached", "Decree Nisi"),
                 hasEntry("applicantRepresentPaper", "FR_applicant_represented_1"),
-                hasEntry(CCDConfigConstant.SOLICITOR_NAME, "Saul Call"),
-                hasEntry(CCDConfigConstant.SOLICITOR_FIRM, "Better Divorce Ltd"),
+                hasEntry(SOLICITOR_NAME, "Saul Call"),
+                hasEntry(SOLICITOR_FIRM, "Better Divorce Ltd"),
                 hasEntry("solicitorPhone", "0712456543"),
                 hasEntry("solicitorDXnumber", "DX123"),
-                hasEntry("solicitorReference", "SOL-RED"),
-                hasEntry(CCDConfigConstant.PBA_NUMBER, "PBA123456"),
-                hasEntry(CCDConfigConstant.SOLICITOR_EMAIL, "test@example.com"),
+                hasEntry(SOLICITOR_REFERENCE, "SOL-RED"),
+                hasEntry(PBA_NUMBER, "PBA123456"),
+                hasEntry(SOLICITOR_EMAIL, "test@example.com"),
                 hasEntry("applicantPhone", "0712345654"),
                 hasEntry("applicantEmail", "applicant@divorcity.com"),
 
@@ -239,7 +244,7 @@ public class FormAToCaseTransformerTest {
         );
 
         assertAddressIsTransformed(
-                (Map) transformedCaseData.get("rSolicitorAddress"),
+                (Map) transformedCaseData.get(RESP_SOLICITOR_ADDRESS),
                 ImmutableMap.of(
                         "AddressLine1", "Drive",
                         "AddressTown", "Leeds",
