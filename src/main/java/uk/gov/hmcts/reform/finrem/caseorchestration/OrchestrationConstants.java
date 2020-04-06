@@ -13,6 +13,7 @@ public class OrchestrationConstants {
     // Bulk Scan & Printing
     public static final String BULK_SCAN_CASE_REFERENCE = "bulkScanCaseReference";
     public static final String CASE_TYPE_ID_CONSENTED = "FinancialRemedyMVP2";
+    public static final String PAPER_APPLICATION = "paperApplication";
 
     public static final String BINARY_URL_TYPE = "binary";
 

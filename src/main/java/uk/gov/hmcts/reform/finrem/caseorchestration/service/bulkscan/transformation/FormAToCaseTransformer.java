@@ -23,6 +23,7 @@ import static uk.gov.hmcts.reform.bsp.common.mapper.GenericMapper.getValueFromOc
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.transformFormDateIntoCcdDate;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.applicantRepresentPaperToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
@@ -95,7 +96,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
     protected Map<String, Object> runPostMappingModification(final Map<String, Object> transformedCaseData) {
         Map<String, Object> modifiedCaseData = new HashMap<>(transformedCaseData);
 
-        modifiedCaseData.put("paperApplication", YES_VALUE);
+        modifiedCaseData.put(PAPER_APPLICATION, YES_VALUE);
 
         // If OrderForChildren is populated then set orderForChildrenQuestion1 to Yes
         if (StringUtils.isNotEmpty((String) modifiedCaseData.get("natureOfApplication5b"))) {
