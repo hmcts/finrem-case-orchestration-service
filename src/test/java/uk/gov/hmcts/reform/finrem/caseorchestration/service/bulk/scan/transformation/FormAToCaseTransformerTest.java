@@ -278,7 +278,7 @@ public class FormAToCaseTransformerTest {
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry("natureOfApplication5b", "FR_nature_of_application_2"),
-                hasEntry("orderForChildrenQuestion1", "Yes")
+                hasEntry("orderForChildrenQuestion1", YES_VALUE)
         ));
 
         Map<String, Object> optionThreeTransformedData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
@@ -288,7 +288,7 @@ public class FormAToCaseTransformerTest {
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry("natureOfApplication5b", "FR_nature_of_application_3"),
-                hasEntry("orderForChildrenQuestion1", "Yes")
+                hasEntry("orderForChildrenQuestion1", YES_VALUE)
         ));
     }
 
