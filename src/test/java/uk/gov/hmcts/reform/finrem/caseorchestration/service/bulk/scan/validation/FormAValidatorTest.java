@@ -237,7 +237,7 @@ public class FormAValidatorTest {
                         "ApplyToDischargePeriodicalPaymentOrder"),
                 containsValueThatIsNotAccepted(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE),
                 APPLYING_FOR_CONSENT_ORDER + " only accepts value of \"Yes\"",
-                mustBeOneOf(DIVORCE_STAGE_REACHED, "Decree Nisi", "Decree Absolute"),
+                mustBeOneOf(DIVORCE_STAGE_REACHED, "Decree Nisi", "Decree Absolute", "Petition Issued"),
                 mustBeOneOf(APPLICANT_REPRESENTED,
                         "I am not represented by a solicitor in these proceedings",
                         "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
