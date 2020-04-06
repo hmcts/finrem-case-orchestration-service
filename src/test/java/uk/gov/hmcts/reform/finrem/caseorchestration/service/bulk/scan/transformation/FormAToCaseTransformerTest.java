@@ -159,7 +159,6 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-                aMapWithSize(2),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE)
         ));
@@ -175,7 +174,6 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-                aMapWithSize(2),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE)
         ));
@@ -212,7 +210,6 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-                aMapWithSize(6),    // 5 = BULK_SCAN_CASE_REFERENCE, paperApplication + 4 address fields
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID)
         ));
 
@@ -267,7 +264,6 @@ public class FormAToCaseTransformerTest {
                 singletonList(new OcrDataField("OrderForChildren",
                         "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children"))));
         assertThat(optionOneTransformedData, allOf(
-                aMapWithSize(4),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry("natureOfApplication5b", "FR_nature_of_application_1"),
@@ -278,7 +274,6 @@ public class FormAToCaseTransformerTest {
                 singletonList(new OcrDataField("OrderForChildren",
                         "there is a written agreement made on or after 5 April 1993 about maintenance for the benefit of children"))));
         assertThat(optionTwoTransformedData, allOf(
-                aMapWithSize(4),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry("natureOfApplication5b", "FR_nature_of_application_2"),
@@ -288,7 +283,6 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> optionThreeTransformedData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
                 singletonList(new OcrDataField("OrderForChildren", "there is no agreement, but the applicant is applying for payments"))));
         assertThat(optionThreeTransformedData, allOf(
-                aMapWithSize(4),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry("natureOfApplication5b", "FR_nature_of_application_3"),
@@ -305,7 +299,6 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-                aMapWithSize(3),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry("natureOfApplication5b", ""),
@@ -314,12 +307,11 @@ public class FormAToCaseTransformerTest {
     }
 
     @Test
-    public void shouldSetSolicitorAgreeToReceiveEmailsIfSolicitorEmailIsPopulated() {
+    public void shouldSetSolicitorAgreeToReceiveEmailsToYesIfSolicitorEmailIsPopulated() {
         Map<String, Object> convertedCcdData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
                 singletonList(new OcrDataField("ApplicantSolicitorEmail", TEST_SOLICITOR_EMAIL))));
 
         assertThat(convertedCcdData, allOf(
-                aMapWithSize(4),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL),
@@ -328,7 +320,7 @@ public class FormAToCaseTransformerTest {
     }
 
     @Test
-    public void shouldNotSetSolicitorAgreeToReceiveEmailsIfSolicitorEmailIsNotPopulated() {
+    public void shouldSetSolicitorAgreeToReceiveEmailsToNoIfSolicitorEmailIsNotPopulated() {
         ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
                 new OcrDataField("ApplicantSolicitorEmail", "")
         ));
@@ -336,21 +328,19 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-                aMapWithSize(3),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry(SOLICITOR_EMAIL, ""),
-                not(hasKey(SOLICITOR_AGREE_TO_RECEIVE_EMAILS))
+                hasEntry(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, NO_VALUE)
         ));
     }
 
     @Test
-    public void shouldSetRespondentRepresentedIfRespSolicitorNameIsPopulated() {
+    public void shouldSetRespondentRepresentedToYesIfRespSolicitorNameIsPopulated() {
         Map<String, Object> convertedCcdData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
                 singletonList(new OcrDataField("RespondentSolicitorName", TEST_SOLICITOR_NAME))));
 
         assertThat(convertedCcdData, allOf(
-                aMapWithSize(4),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry(RESP_SOLICITOR_NAME, TEST_SOLICITOR_NAME),
@@ -359,7 +349,7 @@ public class FormAToCaseTransformerTest {
     }
 
     @Test
-    public void shouldNotSetRespondentRepresentedIfRespSolicitorNameIsNotPopulated() {
+    public void shouldSetRespondentRepresentedToNoIfRespSolicitorNameIsNotPopulated() {
         ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
                 new OcrDataField("RespondentSolicitorName", "")
         ));
@@ -367,11 +357,10 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-                aMapWithSize(3),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry(RESP_SOLICITOR_NAME, ""),
-                not(hasKey(RESPONDENT_REPRESENTED))
+                hasEntry(RESPONDENT_REPRESENTED, NO_VALUE)
         ));
     }
 
@@ -448,7 +437,6 @@ public class FormAToCaseTransformerTest {
                 createExceptionRecord(asList(new OcrDataField(ocrFieldName, ocrFieldValue))));
 
         assertThat(transformedCaseData, allOf(
-                aMapWithSize(3),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry(ccdFieldName, ccdFieldValue)

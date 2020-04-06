@@ -109,10 +109,14 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
         if (StringUtils.isNotEmpty((String) modifiedCaseData.get(SOLICITOR_EMAIL))) {
             modifiedCaseData.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, YES_VALUE);
+        } else {
+            modifiedCaseData.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, NO_VALUE);
         }
 
         if (StringUtils.isNotEmpty((String) modifiedCaseData.get(RESP_SOLICITOR_NAME))) {
             modifiedCaseData.put(RESPONDENT_REPRESENTED, YES_VALUE);
+        } else {
+            modifiedCaseData.put(RESPONDENT_REPRESENTED, NO_VALUE);
         }
 
         return modifiedCaseData;
