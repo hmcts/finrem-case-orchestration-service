@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
-import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.applyMappings;
 import static uk.gov.hmcts.reform.bsp.common.mapper.GenericMapper.getValueFromOcrDataFields;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.transformFormDateIntoCcdDate;
@@ -65,8 +64,8 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
                 dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames, ocrDataFields, transformedCaseData);
 
         AddressMapper.applyMappings("applicantSolicitor", "solicitorAddress", ocrDataFields, transformedCaseData);
-        applyMappingsForAddress("applicant", ocrDataFields, transformedCaseData);
-        applyMappingsForAddress("respondent", ocrDataFields, transformedCaseData);
+        AddressMapper.applyMappings("applicant", "applicantAddress", ocrDataFields, transformedCaseData);
+        AddressMapper.applyMappings("respondent", "respondentAddress", ocrDataFields, transformedCaseData);
         AddressMapper.applyMappings("respondentSolicitor", "rSolicitorAddress", ocrDataFields, transformedCaseData);
 
         addMappingsToChildren(ocrDataFields, transformedCaseData);
@@ -207,14 +206,10 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.AUTHORISATION_SIGNED_BY, "authorisationSignedBy");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.AUTHORISATION_SOLICITOR_POSITION, "authorisation2b");
 
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.RESPONDENT_SOLICITOR_FIRM, "rSolicitorFirm");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.RESPONDENT_SOLICITOR_NAME, "rSolicitorName");
 
         return exceptionRecordToCcdFieldsMap;
-    }
-
-    private void applyMappingsForAddress(
-            String prefix, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
-        applyMappings(prefix, prefix + "Address", ocrDataFields, modifiedMap);
     }
 
     private void addMappingsToChildren(List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
