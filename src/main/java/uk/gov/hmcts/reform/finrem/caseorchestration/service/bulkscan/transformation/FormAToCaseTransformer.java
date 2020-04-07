@@ -61,7 +61,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
                 dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames, ocrDataFields, transformedCaseData);
 
         applyMappingsForAddressExtended("applicantSolicitor", "solicitorAddress", ocrDataFields, transformedCaseData);
-        applyMappingsForAddressExtended("applicant","applicantAddress", ocrDataFields, transformedCaseData);
+        applyMappingsForAddressExtended("applicant", "applicantAddress", ocrDataFields, transformedCaseData);
         applyMappingsForAddressExtended("respondent", "respondentAddress", ocrDataFields, transformedCaseData);
         applyMappingsForAddressExtended("respondentSolicitor", "rSolicitorAddress", ocrDataFields, transformedCaseData);
 
