@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
@@ -27,14 +26,25 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.collection.IsMapWithSize.aMapWithSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
 
 public class FormAToCaseTransformerTest {
-
-    public static final String PAPER_APPLICATION = "paperApplication";
 
     private final FormAToCaseTransformer formAToCaseTransformer = new FormAToCaseTransformer();
 
@@ -95,7 +105,7 @@ public class FormAToCaseTransformerTest {
         assertThat(transformedCaseData, allOf(
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
-                hasEntry(CCDConfigConstant.DIVORCE_CASE_NUMBER, "1234567890"),
+                hasEntry(DIVORCE_CASE_NUMBER, "1234567890"),
                 hasEntry("HWFNumber", "123456"),
                 hasEntry("applicantFMName", "Peter"),
                 hasEntry("applicantLName", "Griffin"),
@@ -106,13 +116,14 @@ public class FormAToCaseTransformerTest {
                 hasEntry("applyingForConsentOrder", "Yes"),
                 hasEntry("divorceStageReached", "Decree Nisi"),
                 hasEntry("applicantRepresentPaper", "FR_applicant_represented_1"),
-                hasEntry(CCDConfigConstant.SOLICITOR_NAME, "Saul Call"),
-                hasEntry(CCDConfigConstant.SOLICITOR_FIRM, "Better Divorce Ltd"),
+                hasEntry(SOLICITOR_NAME, "Saul Call"),
+                hasEntry(SOLICITOR_FIRM, "Better Divorce Ltd"),
                 hasEntry("solicitorPhone", "0712456543"),
                 hasEntry("solicitorDXnumber", "DX123"),
-                hasEntry("solicitorReference", "SOL-RED"),
-                hasEntry(CCDConfigConstant.PBA_NUMBER, "PBA123456"),
-                hasEntry(CCDConfigConstant.SOLICITOR_EMAIL, "test@example.com"),
+                hasEntry(SOLICITOR_REFERENCE, "SOL-RED"),
+                hasEntry(PBA_NUMBER, "PBA123456"),
+                hasEntry(SOLICITOR_EMAIL, "test@example.com"),
+                hasEntry(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, "Yes"),
                 hasEntry("applicantPhone", "0712345654"),
                 hasEntry("applicantEmail", "applicant@divorcity.com"),
 
@@ -135,7 +146,7 @@ public class FormAToCaseTransformerTest {
         assertChildrenInfo(transformedCaseData);
 
         assertThat(transformedCaseData.get("natureOfApplication2"), is(asList("Periodical Payment Order", "Pension Attachment Order")));
-        assertThat(transformedCaseData.get("dischargePeriodicalPaymentSubstituteFor"), is(asList("Lump Sum Order", "Pension Sharing Order")));
+        assertThat(transformedCaseData.get("dischargePeriodicalPaymentSubstituteFor"), is(asList("lumpSumOrder", "pensionSharingOrder")));
         assertThat(transformedCaseData.get("natureOfApplication6"), is(singletonList("In addition to child support")));
     }
 
@@ -148,7 +159,6 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-                aMapWithSize(2),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE)
         ));
@@ -164,7 +174,6 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-                aMapWithSize(2),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE)
         ));
@@ -201,7 +210,6 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-                aMapWithSize(6),    // 5 = BULK_SCAN_CASE_REFERENCE, paperApplication + 4 address fields
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID)
         ));
 
@@ -239,7 +247,7 @@ public class FormAToCaseTransformerTest {
         );
 
         assertAddressIsTransformed(
-                (Map) transformedCaseData.get("rSolicitorAddress"),
+                (Map) transformedCaseData.get(RESP_SOLICITOR_ADDRESS),
                 ImmutableMap.of(
                         "AddressLine1", "Drive",
                         "AddressTown", "Leeds",
@@ -256,7 +264,6 @@ public class FormAToCaseTransformerTest {
                 singletonList(new OcrDataField("OrderForChildren",
                         "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children"))));
         assertThat(optionOneTransformedData, allOf(
-                aMapWithSize(4),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry("natureOfApplication5b", "FR_nature_of_application_1"),
@@ -267,21 +274,19 @@ public class FormAToCaseTransformerTest {
                 singletonList(new OcrDataField("OrderForChildren",
                         "there is a written agreement made on or after 5 April 1993 about maintenance for the benefit of children"))));
         assertThat(optionTwoTransformedData, allOf(
-                aMapWithSize(4),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry("natureOfApplication5b", "FR_nature_of_application_2"),
-                hasEntry("orderForChildrenQuestion1", "Yes")
+                hasEntry("orderForChildrenQuestion1", YES_VALUE)
         ));
 
         Map<String, Object> optionThreeTransformedData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
                 singletonList(new OcrDataField("OrderForChildren", "there is no agreement, but the applicant is applying for payments"))));
         assertThat(optionThreeTransformedData, allOf(
-                aMapWithSize(4),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry("natureOfApplication5b", "FR_nature_of_application_3"),
-                hasEntry("orderForChildrenQuestion1", "Yes")
+                hasEntry("orderForChildrenQuestion1", YES_VALUE)
         ));
     }
 
@@ -294,11 +299,68 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertThat(transformedCaseData, allOf(
-                aMapWithSize(3),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry("natureOfApplication5b", ""),
                 not(hasKey("orderForChildrenQuestion1"))
+        ));
+    }
+
+    @Test
+    public void shouldSetSolicitorAgreeToReceiveEmailsToYesIfSolicitorEmailIsPopulated() {
+        Map<String, Object> convertedCcdData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
+                singletonList(new OcrDataField("ApplicantSolicitorEmail", TEST_SOLICITOR_EMAIL))));
+
+        assertThat(convertedCcdData, allOf(
+                hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+                hasEntry(PAPER_APPLICATION, YES_VALUE),
+                hasEntry(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL),
+                hasEntry(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, YES_VALUE)
+        ));
+    }
+
+    @Test
+    public void shouldSetSolicitorAgreeToReceiveEmailsToNoIfSolicitorEmailIsNotPopulated() {
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
+                new OcrDataField("ApplicantSolicitorEmail", "")
+        ));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertThat(transformedCaseData, allOf(
+                hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+                hasEntry(PAPER_APPLICATION, YES_VALUE),
+                hasEntry(SOLICITOR_EMAIL, ""),
+                hasEntry(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, NO_VALUE)
+        ));
+    }
+
+    @Test
+    public void shouldSetRespondentRepresentedToYesIfRespSolicitorNameIsPopulated() {
+        Map<String, Object> convertedCcdData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
+                singletonList(new OcrDataField("RespondentSolicitorName", TEST_SOLICITOR_NAME))));
+
+        assertThat(convertedCcdData, allOf(
+                hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+                hasEntry(PAPER_APPLICATION, YES_VALUE),
+                hasEntry(RESP_SOLICITOR_NAME, TEST_SOLICITOR_NAME),
+                hasEntry(RESPONDENT_REPRESENTED, YES_VALUE)
+        ));
+    }
+
+    @Test
+    public void shouldSetRespondentRepresentedToNoIfRespSolicitorNameIsNotPopulated() {
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(singletonList(
+                new OcrDataField("RespondentSolicitorName", "")
+        ));
+
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertThat(transformedCaseData, allOf(
+                hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
+                hasEntry(PAPER_APPLICATION, YES_VALUE),
+                hasEntry(RESP_SOLICITOR_NAME, ""),
+                hasEntry(RESPONDENT_REPRESENTED, NO_VALUE)
         ));
     }
 
@@ -375,7 +437,6 @@ public class FormAToCaseTransformerTest {
                 createExceptionRecord(asList(new OcrDataField(ocrFieldName, ocrFieldValue))));
 
         assertThat(transformedCaseData, allOf(
-                aMapWithSize(3),
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
                 hasEntry(ccdFieldName, ccdFieldValue)

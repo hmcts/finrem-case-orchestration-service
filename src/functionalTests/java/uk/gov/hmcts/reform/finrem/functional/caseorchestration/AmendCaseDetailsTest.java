@@ -54,8 +54,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 "amend-divorce-details-decree-absolute1.json");
 
         if (jsonPathEvaluator.get("divorceDecreeNisiDate") != null) {
-            Assert.fail("The divorceDecreeNisiDate is still showing in the result even after"
-                    + " selecting decree Absolute.");
+            Assert.fail("The divorceDecreeNisiDate is still showing in the result even after selecting decree Absolute.");
         }
     }
 
@@ -149,9 +148,8 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         if (jsonPathEvaluator.get("divorceUploadEvidence2") != null
                 || jsonPathEvaluator.get("divorceDecreeAbsoluteDate") != null) {
 
-            Assert.fail("The decree nissi file is still showing in the result.");
+            Assert.fail("The decree nisi file is still showing in the result.");
         }
-
     }
 
     @Test
@@ -164,7 +162,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
             Assert.fail("The decree Absolute file is still showing in the result.");
         }
-
     }
 
     @Test
@@ -180,7 +177,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
             Assert.fail("The property details are still showing in the result.");
         }
     }
-
 
     @Test
     public void verifyRemoveAdditionalPropertyDetailsForContested() {
@@ -206,7 +202,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
             Assert.fail("The periodic payment details are still showing in the result.");
         }
-
     }
 
     @Test
@@ -220,7 +215,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
             Assert.fail("The periodic payment details are still showing even after payment for children is unchecked for"
                 + " contested in the result.");
         }
-
     }
 
     @Test
@@ -247,7 +241,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 || jsonPathEvaluator.get("rSolicitorDXnumber") != null) {
             Assert.fail("The respondent solicitor details are still showing in the result.");
         }
-
     }
 
     @Test
@@ -332,7 +325,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
             Assert.fail("The Miam exception details when applicant attended Miam for contested are still showing "
                     + "in the result.");
         }
-
     }
 
     @Test
@@ -429,7 +421,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         }
     }
 
-
     @Test
     public void verifyShouldNotRemoveMiamCheckListForContested() {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
@@ -445,7 +436,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyShouldUpdateCaseDataWithLatestConsentOrder() throws Exception {
+    public void verifyShouldUpdateCaseDataWithLatestConsentOrder() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "amend-consent-order-by-solicitor.json");
 
@@ -455,7 +446,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyShouldSetLatestDraftConsentOrderWhenACaseIsCreated() throws Exception {
+    public void verifyShouldSetLatestDraftConsentOrderWhenACaseIsCreated() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "draft-consent-order.json");
         assertThat(jsonPathEvaluator.get("latestConsentOrder.document_binary_url"), is("http://file1.binary"));
@@ -464,7 +455,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void verifyshouldUpdateLatestDraftConsentOrderWhenACaseIsAmended() throws Exception {
+    public void verifyShouldUpdateLatestDraftConsentOrderWhenACaseIsAmended() {
 
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "amend-consent-order-by-solicitor.json");
@@ -475,7 +466,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void shouldReturnLatestAmendedConsentOrderWhenACaseIsAmendedByCaseWorker() throws Exception {
+    public void shouldReturnLatestAmendedConsentOrderWhenACaseIsAmendedByCaseWorker() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "amend-consent-order-by-caseworker.json");
         assertThat(jsonPathEvaluator.get("latestConsentOrder.document_binary_url"),
@@ -487,7 +478,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void shouldReturnLatestAmendedConsentOrderWhenACaseIsRespondedBySolictor() throws Exception {
+    public void shouldReturnLatestAmendedConsentOrderWhenACaseIsRespondedBySolictor() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "respond-to-order-solicitor.json");
         assertThat(jsonPathEvaluator.get("latestConsentOrder.document_binary_url"), is("http://doc1/binary"));

@@ -18,12 +18,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
-import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.applyMappings;
 import static uk.gov.hmcts.reform.bsp.common.mapper.GenericMapper.getValueFromOcrDataFields;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.transformFormDateIntoCcdDate;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.applicantRepresentPaperToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.natureOfApplicationChecklistToCcdFieldNames;
@@ -60,8 +64,8 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
                 dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames, ocrDataFields, transformedCaseData);
 
         AddressMapper.applyMappings("applicantSolicitor", "solicitorAddress", ocrDataFields, transformedCaseData);
-        applyMappingsForAddress("applicant", ocrDataFields, transformedCaseData);
-        applyMappingsForAddress("respondent", ocrDataFields, transformedCaseData);
+        AddressMapper.applyMappings("applicant", "applicantAddress", ocrDataFields, transformedCaseData);
+        AddressMapper.applyMappings("respondent", "respondentAddress", ocrDataFields, transformedCaseData);
         AddressMapper.applyMappings("respondentSolicitor", "rSolicitorAddress", ocrDataFields, transformedCaseData);
 
         addMappingsToChildren(ocrDataFields, transformedCaseData);
@@ -95,11 +99,23 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
     protected Map<String, Object> runPostMappingModification(final Map<String, Object> transformedCaseData) {
         Map<String, Object> modifiedCaseData = new HashMap<>(transformedCaseData);
 
-        modifiedCaseData.put("paperApplication", YES_VALUE);
+        modifiedCaseData.put(PAPER_APPLICATION, YES_VALUE);
 
         // If OrderForChildren is populated then set orderForChildrenQuestion1 to Yes
         if (StringUtils.isNotEmpty((String) modifiedCaseData.get("natureOfApplication5b"))) {
             modifiedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
+        }
+
+        if (StringUtils.isNotEmpty((String) modifiedCaseData.get(SOLICITOR_EMAIL))) {
+            modifiedCaseData.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, YES_VALUE);
+        } else {
+            modifiedCaseData.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, NO_VALUE);
+        }
+
+        if (StringUtils.isNotEmpty((String) modifiedCaseData.get(RESP_SOLICITOR_NAME))) {
+            modifiedCaseData.put(RESPONDENT_REPRESENTED, YES_VALUE);
+        } else {
+            modifiedCaseData.put(RESPONDENT_REPRESENTED, NO_VALUE);
         }
 
         return modifiedCaseData;
@@ -190,12 +206,10 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.AUTHORISATION_SIGNED_BY, "authorisationSignedBy");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.AUTHORISATION_SOLICITOR_POSITION, "authorisation2b");
 
-        return exceptionRecordToCcdFieldsMap;
-    }
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.RESPONDENT_SOLICITOR_FIRM, "rSolicitorFirm");
+        exceptionRecordToCcdFieldsMap.put(OcrFieldName.RESPONDENT_SOLICITOR_NAME, "rSolicitorName");
 
-    private void applyMappingsForAddress(
-            String prefix, List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
-        applyMappings(prefix, prefix + "Address", ocrDataFields, modifiedMap);
+        return exceptionRecordToCcdFieldsMap;
     }
 
     private void addMappingsToChildren(List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {

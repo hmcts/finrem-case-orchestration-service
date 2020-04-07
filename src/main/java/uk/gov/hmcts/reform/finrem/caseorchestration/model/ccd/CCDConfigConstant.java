@@ -14,9 +14,8 @@ public class CCDConfigConstant {
     public static final String APP_RESPONDENT_FIRST_MIDDLE_NAME = "appRespondentFMName";
     public static final String APP_RESPONDENT_LAST_NAME = "appRespondentLName";
     public static final String RESPONDENT_ADDRESS = "respondentAddress";
-    public static final String RESP_SOLICITOR_ADDRESS = "rSolicitorAddress";
 
-    //Solicitor related
+    //Applicant Solicitor related
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
     public static final String SOLICITOR_NAME = "solicitorName";
     public static final String SOLICITOR_EMAIL = "solicitorEmail";
@@ -25,9 +24,13 @@ public class CCDConfigConstant {
     public static final String CONTESTED_SOLICITOR_NAME = "applicantSolicitorName";
     public static final String SOLICITOR_FIRM = "solicitorFirm";
     public static final String APP_SOLICITOR_ADDRESS_CCD_FIELD = "solicitorAddress";
-    public static final String RESP_SOLICITOR_ADDRESS_CCD_FIELD = "rSolicitorAddress";
     public static final String SOLICITOR_AGREE_TO_RECEIVE_EMAILS = "solicitorAgreeToReceiveEmails";
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";
+
+    //Respondent Solicitor Related
+    public static final String RESPONDENT_REPRESENTED = "appRespondentRep";
+    public static final String RESP_SOLICITOR_NAME = "rSolicitorName";
+    public static final String RESP_SOLICITOR_ADDRESS = "rSolicitorAddress";
 
     //Application Type related
     public static final String D81_QUESTION = "d81Question";
@@ -62,8 +65,6 @@ public class CCDConfigConstant {
     public static final String MIAM_ATTENDANCE = "applicantAttendedMIAM";
     public static final String MIAM_EXEMPTION = "claimingExemptionMIAM";
     public static final String IS_ADMIN = "isAdmin";
-    public static final String YES = "Yes";
-    public static final String NO = "No";
     public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
     public static final String ROLES = "roles";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";

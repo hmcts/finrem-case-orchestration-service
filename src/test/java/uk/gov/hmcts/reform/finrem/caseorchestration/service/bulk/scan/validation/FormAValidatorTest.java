@@ -95,7 +95,6 @@ public class FormAValidatorTest {
                 new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "Yes"),
                 new OcrDataField(DIVORCE_STAGE_REACHED, "Decree Nisi"),
                 new OcrDataField(APPLICANT_REPRESENTED, "I am not represented by a solicitor in these proceedings"),
-                new OcrDataField(AUTHORISATION_NAME, "Saul B. Kol"),
                 new OcrDataField(AUTHORISATION_SIGNED, "Yes"),
                 new OcrDataField(AUTHORISATION_SIGNED_BY, "Applicant's solicitor"),
                 new OcrDataField(AUTHORISATION_DATE, "12/03/2020")
@@ -103,7 +102,7 @@ public class FormAValidatorTest {
 
         optionalFieldsWithValues = asList(
                 new OcrDataField(HWF_NUMBER, "123456"),
-                new OcrDataField(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "a lump sum order, a pension compensation sharing order"),
+                new OcrDataField(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "a lump sum order,a pension compensation sharing order"),
                 new OcrDataField(APPLICANT_SOLICITOR_NAME, "Saul Call"),
                 new OcrDataField(APPLICANT_SOLICITOR_FIRM, "Better Divorce Ltd"),
                 new OcrDataField(APPLICANT_SOLICITOR_ADDRESS_LINE_1, "20 Solicitors Road"),
@@ -220,7 +219,7 @@ public class FormAValidatorTest {
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
         assertThat(validationResult.getErrors(), is(emptyList()));
-        assertThat(validationResult.getWarnings().size(), is(24));
+        assertThat(validationResult.getWarnings().size(), is(23));
         assertThat(validationResult.getWarnings(), hasItems(
                 mandatoryFieldIsMissing.apply(DIVORCE_CASE_NUMBER),
                 "HWFNumber is usually 6 digits",
@@ -238,7 +237,7 @@ public class FormAValidatorTest {
                         "ApplyToDischargePeriodicalPaymentOrder"),
                 containsValueThatIsNotAccepted(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE),
                 APPLYING_FOR_CONSENT_ORDER + " only accepts value of \"Yes\"",
-                mustBeOneOf(DIVORCE_STAGE_REACHED, "Decree Nisi", "Decree Absolute"),
+                mustBeOneOf(DIVORCE_STAGE_REACHED, "Decree Nisi", "Decree Absolute", "Petition Issued"),
                 mustBeOneOf(APPLICANT_REPRESENTED,
                         "I am not represented by a solicitor in these proceedings",
                         "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
