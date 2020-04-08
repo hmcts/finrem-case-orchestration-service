@@ -8,10 +8,9 @@ public class FormA {
         public static final String FR_NATURE_OF_APPLICATION_3 = "FR_nature_of_application_3";
     }
 
-    public class ApplicantRepresentPaper {
+    public class ApplicantRepresentedPaper {
         public static final String FR_APPLICANT_REPRESENTED_1 = "FR_applicant_represented_1";
         public static final String FR_APPLICANT_REPRESENTED_2 = "FR_applicant_represented_2";
         public static final String FR_APPLICANT_REPRESENTED_3 = "FR_applicant_represented_3";
     }
-
 }

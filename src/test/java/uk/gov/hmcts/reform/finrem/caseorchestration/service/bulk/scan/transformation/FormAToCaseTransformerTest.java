@@ -115,7 +115,7 @@ public class FormAToCaseTransformerTest {
                 hasEntry("applicantIntendsTo", "ApplyToCourtFor"),
                 hasEntry("applyingForConsentOrder", "Yes"),
                 hasEntry("divorceStageReached", "Decree Nisi"),
-                hasEntry("applicantRepresentPaper", "FR_applicant_represented_1"),
+                hasEntry("applicantRepresentedPaper", "FR_applicant_represented_1"),
                 hasEntry(SOLICITOR_NAME, "Saul Call"),
                 hasEntry(SOLICITOR_FIRM, "Better Divorce Ltd"),
                 hasEntry("solicitorPhone", "0712456543"),
@@ -400,22 +400,22 @@ public class FormAToCaseTransformerTest {
     }
 
     @Test
-    public void shouldTransform_ApplicantRepresentPaper() {
+    public void shouldTransform_ApplicantRepresentedPaper() {
         Map<String, Object> transformedCaseDataOptionOne = formAToCaseTransformer.transformIntoCaseData(
                 createExceptionRecord(singletonList(new OcrDataField(OcrFieldName.APPLICANT_REPRESENTED,
                         "I am not represented by a solicitor in these proceedings"))));
-        assertThat(transformedCaseDataOptionOne.get("applicantRepresentPaper"), is("FR_applicant_represented_1"));
+        assertThat(transformedCaseDataOptionOne.get("applicantRepresentedPaper"), is("FR_applicant_represented_1"));
 
         Map<String, Object> transformedCaseDataOptionTwo = formAToCaseTransformer.transformIntoCaseData(
                 createExceptionRecord(singletonList(new OcrDataField(OcrFieldName.APPLICANT_REPRESENTED,
                         "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor"))));
-        assertThat(transformedCaseDataOptionTwo.get("applicantRepresentPaper"), is("FR_applicant_represented_2"));
+        assertThat(transformedCaseDataOptionTwo.get("applicantRepresentedPaper"), is("FR_applicant_represented_2"));
 
         Map<String, Object> transformedCaseDataOptionThree = formAToCaseTransformer.transformIntoCaseData(
                 createExceptionRecord(singletonList(new OcrDataField(OcrFieldName.APPLICANT_REPRESENTED,
                         "I am represented by a solicitor in these proceedings, who has signed Section 5, and all "
                                 + "documents for my attention should be sent to my solicitor whose details are as follows"))));
-        assertThat(transformedCaseDataOptionThree.get("applicantRepresentPaper"), is("FR_applicant_represented_3"));
+        assertThat(transformedCaseDataOptionThree.get("applicantRepresentedPaper"), is("FR_applicant_represented_3"));
     }
 
     @Test
