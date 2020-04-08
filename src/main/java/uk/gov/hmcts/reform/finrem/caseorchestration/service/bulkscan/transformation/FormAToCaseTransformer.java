@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
@@ -18,7 +19,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.bsp.common.mapper.GenericMapper.getValueFromOcrDataFields;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.transformFormDateIntoCcdDate;
@@ -107,17 +107,17 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         modifiedCaseData.put(PAPER_APPLICATION, YES_VALUE);
 
         // If OrderForChildren is populated then set orderForChildrenQuestion1 to Yes
-        if (isNotEmpty((String) modifiedCaseData.get("natureOfApplication5b"))) {
+        if (StringUtils.isNotEmpty((String) modifiedCaseData.get("natureOfApplication5b"))) {
             modifiedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
         }
 
-        if (isNotEmpty((String) modifiedCaseData.get(SOLICITOR_EMAIL))) {
+        if (StringUtils.isNotEmpty((String) modifiedCaseData.get(SOLICITOR_EMAIL))) {
             modifiedCaseData.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, YES_VALUE);
         } else {
             modifiedCaseData.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, NO_VALUE);
         }
 
-        // If FR_APPLICANT_REPRESENTED_1 was chosen then set APPLICANT_REPRESENTED to Yes
+        // If FR_APPLICANT_REPRESENTED_3 was chosen then set APPLICANT_REPRESENTED to Yes
         String applicantRepresentedPaperValue = nullToEmpty(modifiedCaseData.get(APPLICANT_REPRESENTED_PAPER));
         if (applicantRepresentedPaperValue.equalsIgnoreCase(FR_APPLICANT_REPRESENTED_3)) {
             modifiedCaseData.put(APPLICANT_REPRESENTED, YES_VALUE);
@@ -125,7 +125,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             modifiedCaseData.put(APPLICANT_REPRESENTED, NO_VALUE);
         }
 
-        if (isNotEmpty((String) modifiedCaseData.get(RESP_SOLICITOR_NAME))) {
+        if (StringUtils.isNotEmpty((String) modifiedCaseData.get(RESP_SOLICITOR_NAME))) {
             modifiedCaseData.put(RESPONDENT_REPRESENTED, YES_VALUE);
         } else {
             modifiedCaseData.put(RESPONDENT_REPRESENTED, NO_VALUE);
