@@ -64,7 +64,7 @@ public class BulkScanHelper {
                     .put("I am not represented by a solicitor in these proceedings", FR_APPLICANT_REPRESENTED_1)
                     .put("I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
                             FR_APPLICANT_REPRESENTED_2)
-                    .put("I am represented by a solicitor in these proceedings, who has signed Section 5, and all "
+                    .put("I am represented by a solicitor in these proceedings, who has signed Section 5 and all "
                                     + "documents for my attention should be sent to my solicitor whose details are as follows",
                             FR_APPLICANT_REPRESENTED_3)
                     .build();

@@ -416,7 +416,7 @@ public class FormAToCaseTransformerTest {
 
         Map<String, Object> transformedCaseDataOptionThree = formAToCaseTransformer.transformIntoCaseData(
                 createExceptionRecord(singletonList(new OcrDataField(OcrFieldName.APPLICANT_REPRESENTED,
-                        "I am represented by a solicitor in these proceedings, who has signed Section 5, and all "
+                        "I am represented by a solicitor in these proceedings, who has signed Section 5 and all "
                                 + "documents for my attention should be sent to my solicitor whose details are as follows"))));
         assertThat(transformedCaseDataOptionThree.get(APPLICANT_REPRESENTED_PAPER), is("FR_applicant_represented_3"));
         assertThat(transformedCaseDataOptionThree.get(APPLICANT_REPRESENTED), is(YES_VALUE));
