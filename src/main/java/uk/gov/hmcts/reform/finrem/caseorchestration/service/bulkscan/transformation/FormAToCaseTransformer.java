@@ -105,33 +105,42 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         Map<String, Object> modifiedCaseData = new HashMap<>(transformedCaseData);
 
         modifiedCaseData.put(PAPER_APPLICATION, YES_VALUE);
+        modifiedCaseData.put(APPLICANT_REPRESENTED, getValueForIsRepresented(modifiedCaseData));
+        modifiedCaseData.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, getSolicitorAgreeToReceiveEmailsField(modifiedCaseData));
+        modifiedCaseData.put(RESPONDENT_REPRESENTED, getRespondentRepresentedField(modifiedCaseData));
 
         // If OrderForChildren is populated then set orderForChildrenQuestion1 to Yes
         if (StringUtils.isNotEmpty((String) modifiedCaseData.get("natureOfApplication5b"))) {
             modifiedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
         }
 
-        if (StringUtils.isNotEmpty((String) modifiedCaseData.get(SOLICITOR_EMAIL))) {
-            modifiedCaseData.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, YES_VALUE);
-        } else {
-            modifiedCaseData.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, NO_VALUE);
-        }
+        return modifiedCaseData;
+    }
 
+    private String getValueForIsRepresented(Map<String, Object> modifiedCaseData) {
         // If FR_APPLICANT_REPRESENTED_3 was chosen then set APPLICANT_REPRESENTED to Yes
         String applicantRepresentedPaperValue = nullToEmpty(modifiedCaseData.get(APPLICANT_REPRESENTED_PAPER));
         if (applicantRepresentedPaperValue.equalsIgnoreCase(FR_APPLICANT_REPRESENTED_3)) {
-            modifiedCaseData.put(APPLICANT_REPRESENTED, YES_VALUE);
+            return YES_VALUE;
         } else {
-            modifiedCaseData.put(APPLICANT_REPRESENTED, NO_VALUE);
+            return NO_VALUE;
         }
+    }
 
+    private String getSolicitorAgreeToReceiveEmailsField(Map<String, Object> modifiedCaseData) {
+        if (StringUtils.isNotEmpty((String) modifiedCaseData.get(SOLICITOR_EMAIL))) {
+            return YES_VALUE;
+        } else {
+            return NO_VALUE;
+        }
+    }
+
+    private String getRespondentRepresentedField(Map<String, Object> modifiedCaseData) {
         if (StringUtils.isNotEmpty((String) modifiedCaseData.get(RESP_SOLICITOR_NAME))) {
-            modifiedCaseData.put(RESPONDENT_REPRESENTED, YES_VALUE);
+            return YES_VALUE;
         } else {
-            modifiedCaseData.put(RESPONDENT_REPRESENTED, NO_VALUE);
+            return NO_VALUE;
         }
-
-        return modifiedCaseData;
     }
 
     private void mapFormDateToCcdDate(String ocrFieldName, String ccdFieldName,

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.functional.bulkscan;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
@@ -9,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.bsp.common.utils.ResourceLoader;
@@ -27,6 +25,9 @@ import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
 @Slf4j
 @RunWith(SpringRunner.class)
@@ -34,9 +35,7 @@ import static org.junit.Assert.assertThat;
 public class CcdBulkScanIntegrationTest {
 
     private static final String FORM_A_JSON = "json/bulkscan/formA.json";
-    private static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorization";
     private static final String DIVORCE_JURISDICTION_ID = "DIVORCE";
-    private static final String FR_CONSENTED_CASE_TYPE = "FinancialRemedyMVP2";
     private static final String FR_NEW_PAPER_CASE_EVENT_ID = "FR_newPaperCase";
     private static final String DIVORCE_SERVICE_AUTHORISED_WITH_CCD = "divorce_ccd_submission";
 
@@ -70,7 +69,7 @@ public class CcdBulkScanIntegrationTest {
         String token = idamUtils.generateServiceTokenWithValidMicroservice(bulkScanTransformationAndUpdateMicroservice);
         String body = ResourceLoader.loadResourceAsString(path);
         Response response = SerenityRest.given()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .header("Content-Type", APPLICATION_JSON_VALUE)
                 .header(SERVICE_AUTHORISATION_HEADER, token)
                 .relaxedHTTPSValidation()
                 .body(body)
@@ -81,7 +80,7 @@ public class CcdBulkScanIntegrationTest {
         return response.body().asString();
     }
 
-    private CaseDetails submitCase(Object caseData, UserDetails userDetails) throws JsonProcessingException {
+    private void submitCase(Object caseData, UserDetails userDetails) {
         String serviceToken = idamUtils.generateServiceTokenWithValidMicroservice(DIVORCE_SERVICE_AUTHORISED_WITH_CCD);
 
         StartEventResponse startEventResponse = coreCaseDataApi.startForCaseworker(
@@ -89,7 +88,7 @@ public class CcdBulkScanIntegrationTest {
             serviceToken,
             userDetails.getId(),
                 DIVORCE_JURISDICTION_ID,
-                FR_CONSENTED_CASE_TYPE,
+                CASE_TYPE_ID_CONSENTED,
                 FR_NEW_PAPER_CASE_EVENT_ID
         );
 
@@ -109,12 +108,10 @@ public class CcdBulkScanIntegrationTest {
             serviceToken,
             userDetails.getId(),
             DIVORCE_JURISDICTION_ID,
-            FR_CONSENTED_CASE_TYPE,
+            CASE_TYPE_ID_CONSENTED,
             true,
             caseDataContent);
 
         log.info("Created case ID {}", caseDetails.getId());
-
-        return caseDetails;
     }
 }
