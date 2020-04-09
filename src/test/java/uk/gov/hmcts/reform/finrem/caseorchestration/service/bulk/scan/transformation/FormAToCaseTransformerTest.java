@@ -110,7 +110,7 @@ public class FormAToCaseTransformerTest {
                 hasEntry("HWFNumber", "123456"),
                 hasEntry("applicantFMName", "Peter"),
                 hasEntry("applicantLName", "Griffin"),
-                hasEntry("appRespondentFMname", "Louis"),
+                hasEntry("appRespondentFMName", "Louis"),
                 hasEntry("appRespondentLName", "Griffin"),
                 hasEntry("provisionMadeFor", "matrimonialOrCivilPartnershipProceedings"),
                 hasEntry("applicantIntendsTo", "ApplyToCourtFor"),
