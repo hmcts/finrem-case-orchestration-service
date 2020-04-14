@@ -26,6 +26,7 @@ public class CCDConfigConstant {
     public static final String APP_SOLICITOR_ADDRESS_CCD_FIELD = "solicitorAddress";
     public static final String SOLICITOR_AGREE_TO_RECEIVE_EMAILS = "solicitorAgreeToReceiveEmails";
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";
+    public static final String APPLICANT_REPRESENTED_PAPER = "applicantRepresentedPaper";
 
     //Respondent Solicitor Related
     public static final String RESPONDENT_REPRESENTED = "appRespondentRep";

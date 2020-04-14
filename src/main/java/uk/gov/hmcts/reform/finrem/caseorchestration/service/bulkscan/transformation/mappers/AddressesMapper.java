@@ -20,16 +20,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
  */
 public class AddressesMapper {
     public static void applyAddressesMappings(List<OcrDataField> ocrDataFields, Map<String, Object> transformedCaseData) {
-        if (isApplicantRepresented(transformedCaseData)) {
-            applyMappings("applicantSolicitor", APPLICANT_ADDRESS, ocrDataFields, transformedCaseData);
-        } else {
-            applyMappings("applicant", APPLICANT_ADDRESS, ocrDataFields, transformedCaseData);
-        }
+        String applicantAddress = isApplicantRepresented(transformedCaseData) ? "applicantSolicitor" : "applicant";
+        applyMappings(applicantAddress, APPLICANT_ADDRESS, ocrDataFields, transformedCaseData);
 
-        if (isRespondentRepresented(transformedCaseData)) {
-            applyMappings("respondentSolicitor", RESPONDENT_ADDRESS, ocrDataFields, transformedCaseData);
-        } else {
-            applyMappings("respondent", RESPONDENT_ADDRESS, ocrDataFields, transformedCaseData);
-        }
+        String respondentAddress = isRespondentRepresented(transformedCaseData) ? "respondentSolicitor" : "respondent";
+        applyMappings(respondentAddress, RESPONDENT_ADDRESS, ocrDataFields, transformedCaseData);
     }
 }

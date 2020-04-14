@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.ApplicantRepresentPaper.FR_APPLICANT_REPRESENTED_1;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.ApplicantRepresentPaper.FR_APPLICANT_REPRESENTED_2;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.ApplicantRepresentPaper.FR_APPLICANT_REPRESENTED_3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.ApplicantRepresentedPaper.FR_APPLICANT_REPRESENTED_1;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.ApplicantRepresentedPaper.FR_APPLICANT_REPRESENTED_2;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.ApplicantRepresentedPaper.FR_APPLICANT_REPRESENTED_3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.NatureOfApplication5b.FR_NATURE_OF_APPLICATION_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.NatureOfApplication5b.FR_NATURE_OF_APPLICATION_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.NatureOfApplication5b.FR_NATURE_OF_APPLICATION_3;
@@ -59,12 +59,12 @@ public class BulkScanHelper {
                     .put("under paragraphs 1 or 2 of Schedule 1 to the Children Act 1989", "childrenAct1989")
                     .build();
 
-    public static final Map<String, String> applicantRepresentPaperToCcdFieldNames =
+    public static final Map<String, String> applicantRepresentedPaperToCcdFieldNames =
             new ImmutableMap.Builder<String, String>()
                     .put("I am not represented by a solicitor in these proceedings", FR_APPLICANT_REPRESENTED_1)
                     .put("I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
                             FR_APPLICANT_REPRESENTED_2)
-                    .put("I am represented by a solicitor in these proceedings, who has signed Section 5, and all "
+                    .put("I am represented by a solicitor in these proceedings, who has signed Section 5 and all "
                                     + "documents for my attention should be sent to my solicitor whose details are as follows",
                             FR_APPLICANT_REPRESENTED_3)
                     .build();
