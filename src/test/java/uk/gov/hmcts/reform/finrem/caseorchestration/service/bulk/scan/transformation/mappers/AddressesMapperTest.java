@@ -18,6 +18,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AddressesMapperTest {
 
+    public static final String LINE_1 = "AddressLine1";
+    public static final String LINE_2 = "AddressLine2";
+    public static final String TOWN = "AddressTown";
+    public static final String POSTCODE = "AddressPostcode";
+    public static final String COUNTY = "AddressCounty";
+    public static final String COUNTRY = "AddressCountry";
+
     @Test
     public void applyAddressesMappingsShouldMapAllAddresses() {
         List<OcrDataField> ocrFields = getOcrFieldsForAddresses();
@@ -26,50 +33,50 @@ public class AddressesMapperTest {
         AddressesMapper.applyAddressesMappings(ocrFields, data);
 
         assertAddressIsTransformed(
-                (Map) data.get("applicantAddress"),
+                (Map) data.get(AddressesMapper.CcdFields.APPLICANT),
                 buildImmutableMap(
-                        "AddressLine1", "Road",
-                        "AddressLine2", "House",
-                        "AddressTown", "Manchester",
-                        "AddressPostcode", "SW9 9SD",
-                        "AddressCounty", "There",
-                        "AddressCountry", "Germany"
+                        LINE_1, "Road",
+                        LINE_2, "House",
+                        TOWN, "Manchester",
+                        POSTCODE, "SW9 9SD",
+                        COUNTY, "There",
+                        COUNTRY, "Germany"
                 )
         );
 
         assertAddressIsTransformed(
-                (Map) data.get("applicantSolicitorAddress"),
+                (Map) data.get(AddressesMapper.TempCcdFields.APPLICANT_SOLICITOR),
                 buildImmutableMap(
-                        "AddressLine1", "Street",
-                        "AddressLine2", "The building",
-                        "AddressTown", "London",
-                        "AddressPostcode", "SW989SD",
-                        "AddressCounty", "Great London",
-                        "AddressCountry", "UK"
+                        LINE_1, "Street",
+                        LINE_2, "The building",
+                        TOWN, "London",
+                        POSTCODE, "SW989SD",
+                        COUNTY, "Great London",
+                        COUNTRY, "UK"
                 )
         );
 
         assertAddressIsTransformed(
-                (Map) data.get("respondentAddress"),
+                (Map) data.get(AddressesMapper.CcdFields.RESPONDENT),
                 buildImmutableMap(
-                        "AddressLine1", "Avenue",
-                        "AddressLine2", "Bungalow",
-                        "AddressTown", "Bristol",
-                        "AddressPostcode", "SW1 9SD",
-                        "AddressCounty", "Here",
-                        "AddressCountry", "France"
+                        LINE_1, "Avenue",
+                        LINE_2, "Bungalow",
+                        TOWN, "Bristol",
+                        POSTCODE, "SW1 9SD",
+                        COUNTY, "Here",
+                        COUNTRY, "France"
                 )
         );
 
         assertAddressIsTransformed(
-                (Map) data.get("rSolicitorAddress"),
+                (Map) data.get(AddressesMapper.TempCcdFields.RESPONDENT_SOLICITOR),
                 buildImmutableMap(
-                        "AddressLine1", "Drive",
-                        "AddressLine2", "Block of flats",
-                        "AddressTown", "Leeds",
-                        "AddressPostcode", "SW9 USB",
-                        "AddressCounty", "Where",
-                        "AddressCountry", "Scotland"
+                        LINE_1, "Drive",
+                        LINE_2, "Block of flats",
+                        TOWN, "Leeds",
+                        POSTCODE, "SW9 USB",
+                        COUNTY, "Where",
+                        COUNTRY, "Scotland"
                 )
         );
     }
@@ -127,12 +134,12 @@ public class AddressesMapperTest {
 
     public static void assertAddressIsTransformed(Map<String, Object> address, Map<String, String> sourceFieldAndValueMap) {
         Map<String, String> sourceSuffixToTargetMap = buildImmutableMap(
-                "AddressLine1", "AddressLine1",
-                "AddressLine2", "AddressLine2",
-                "Town", "PostTown",
-                "PostCode", "PostCode",
-                "County", "County",
-                "Country", "Country"
+                LINE_1, "AddressLine1",
+                LINE_2, "AddressLine2",
+                TOWN, "PostTown",
+                POSTCODE, "PostCode",
+                COUNTY, "County",
+                COUNTRY, "Country"
         );
 
         BiFunction<Map<String, String>, String, String> getValueForSuffix = (map, suffix) -> map.entrySet().stream()
