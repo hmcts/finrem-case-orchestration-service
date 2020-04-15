@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Ignore;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
@@ -10,6 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FormAToCaseTransformer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +24,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
+import static org.junit.Assert.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
@@ -31,13 +32,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.ApplicantRepresentedPaper.FR_APPLICANT_REPRESENTED_3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED_PAPER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
@@ -184,22 +183,14 @@ public class FormAToCaseTransformerTest {
 
     @Test
     public void shouldTransformAddressesWhenCitizensRepresented() {
-        ExceptionRecord incomingExceptionRecord = createExceptionRecord(Arrays.asList(
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_LINE_1, "Street"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_TOWN, "London"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_COUNTY, "Great London"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_POSTCODE, "SW989SD"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_COUNTRY, "UK"),
+        List<OcrDataField> ocrFields = getOcrFieldsForAddresses();
+        ocrFields.add(new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_NAME, "Mr John Solicitor"));
+        ocrFields.add(
+                new OcrDataField(OcrFieldName.APPLICANT_REPRESENTED,
+                        "I am represented by a solicitor in these proceedings, who has signed Section 5 and all "
+                                + "documents for my attention should be sent to my solicitor whose details are as follows"));
 
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_LINE_1, "Drive"),
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_TOWN, "Leeds"),
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_COUNTY, "Where"),
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_POSTCODE, "SW9 USB"),
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_COUNTRY, "Scotland"),
-
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_NAME, "Mr John Solicitor"),
-                new OcrDataField(OcrFieldName.APPLICANT_REPRESENTED, FR_APPLICANT_REPRESENTED_3)
-        ));
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(ocrFields);
 
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
@@ -224,23 +215,14 @@ public class FormAToCaseTransformerTest {
                         "AddressCountry", "Scotland"
                 )
         );
+
+        assertNull(transformedCaseData.get("rSolicitorAddress"));
+        assertNull(transformedCaseData.get("applicantSolicitorAddress"));
     }
 
     @Test
     public void shouldTransformAddressesWhenCitizensNotRepresented() {
-        ExceptionRecord incomingExceptionRecord = createExceptionRecord(Arrays.asList(
-                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_LINE_1, "Road"),
-                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_TOWN, "Manchester"),
-                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_COUNTY, "There"),
-                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_POSTCODE, "SW9 9SD"),
-                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_COUNTRY, "Germany"),
-
-                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_LINE_1, "Avenue"),
-                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_TOWN, "Bristol"),
-                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_COUNTY, "Here"),
-                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_POSTCODE, "SW1 9SD"),
-                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_COUNTRY, "France")
-        ));
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(getOcrFieldsForAddresses());
 
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
@@ -265,6 +247,34 @@ public class FormAToCaseTransformerTest {
                         "AddressCountry", "France"
                 )
         );
+    }
+
+    private static List<OcrDataField> getOcrFieldsForAddresses() {
+        return new ArrayList<>(Arrays.asList(
+                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_LINE_1, "Road"),
+                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_TOWN, "Manchester"),
+                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_COUNTY, "There"),
+                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_POSTCODE, "SW9 9SD"),
+                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_COUNTRY, "Germany"),
+
+                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_LINE_1, "Avenue"),
+                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_TOWN, "Bristol"),
+                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_COUNTY, "Here"),
+                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_POSTCODE, "SW1 9SD"),
+                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_COUNTRY, "France"),
+
+                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_LINE_1, "Street"),
+                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_TOWN, "London"),
+                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_COUNTY, "Great London"),
+                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_POSTCODE, "SW989SD"),
+                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_COUNTRY, "UK"),
+
+                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_LINE_1, "Drive"),
+                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_TOWN, "Leeds"),
+                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_COUNTY, "Where"),
+                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_POSTCODE, "SW9 USB"),
+                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_COUNTRY, "Scotland")
+        ));
     }
 
     @Test
@@ -455,7 +465,7 @@ public class FormAToCaseTransformerTest {
         ));
     }
 
-    private ExceptionRecord createExceptionRecord(List<OcrDataField> ocrDataFields) {
+    private static ExceptionRecord createExceptionRecord(List<OcrDataField> ocrDataFields) {
         return ExceptionRecord.builder().id(TEST_CASE_ID).ocrDataFields(ocrDataFields).build();
     }
 

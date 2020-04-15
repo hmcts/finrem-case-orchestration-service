@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
@@ -23,12 +24,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.isNotEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.isRespondentRepresented;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.ApplicantRepresentedPaper.FR_APPLICANT_REPRESENTED_3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED_PAPER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
@@ -67,6 +68,8 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         commaSeparatedEntryTransformer(OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "dischargePeriodicalPaymentSubstituteFor",
                 dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames, ocrDataFields, transformedCaseData);
 
+        AddressesMapper.applyAddressesMappings(ocrDataFields, transformedCaseData);
+
         ChildrenInfoMapper.applyMappings(ocrDataFields, transformedCaseData);
 
         mapAuthorisationSignedToYesOrNo(OcrFieldName.AUTHORISATION_SIGNED, "authorisationSigned", ocrDataFields, transformedCaseData);
@@ -86,14 +89,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
         getValueFromOcrDataFields(OcrFieldName.APPLICANT_REPRESENTED, ocrDataFields)
                 .map(applicantRepresentedPaperToCcdFieldNames::get)
-                .ifPresent(value -> {
-                    transformedCaseData.put(APPLICANT_REPRESENTED_PAPER, value);
-                    transformedCaseData.put(APPLICANT_REPRESENTED, getValueForIsRepresented(value));
-                });
-
-        transformedCaseData.put(RESPONDENT_REPRESENTED, getRespondentRepresentedField(transformedCaseData));
-
-        AddressesMapper.applyAddressesMappings(ocrDataFields, transformedCaseData);
+                .ifPresent(value -> transformedCaseData.put(APPLICANT_REPRESENTED_PAPER, value));
 
         return transformedCaseData;
     }
@@ -103,17 +99,23 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         Map<String, Object> modifiedCaseData = new HashMap<>(transformedCaseData);
 
         modifiedCaseData.put(PAPER_APPLICATION, YES_VALUE);
+        modifiedCaseData.put(APPLICANT_REPRESENTED, getValueForIsRepresented(modifiedCaseData));
         modifiedCaseData.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, getSolicitorAgreeToReceiveEmailsField(modifiedCaseData));
+        modifiedCaseData.put(RESPONDENT_REPRESENTED, getRespondentRepresentedField(modifiedCaseData));
 
         // If OrderForChildren is populated then set orderForChildrenQuestion1 to Yes
         if (isNotEmpty("natureOfApplication5b", modifiedCaseData)) {
             modifiedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
         }
 
+        AddressesMapper.setupAddressesForApplicantAndRespondent(modifiedCaseData);
+
         return modifiedCaseData;
     }
 
-    private String getValueForIsRepresented(String applicantRepresentedPaperValue) {
+    private String getValueForIsRepresented(Map<String, Object> modifiedCaseData) {
+        String applicantRepresentedPaperValue = nullToEmpty(modifiedCaseData.get(APPLICANT_REPRESENTED_PAPER));
+
         return applicantRepresentedPaperValue.equalsIgnoreCase(FR_APPLICANT_REPRESENTED_3) ?  YES_VALUE : NO_VALUE;
     }
 
@@ -122,7 +124,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
     }
 
     private String getRespondentRepresentedField(Map<String, Object> modifiedCaseData) {
-        return isRespondentRepresented(modifiedCaseData) ? YES_VALUE : NO_VALUE;
+        return isNotEmpty(RESP_SOLICITOR_NAME, modifiedCaseData) ? YES_VALUE : NO_VALUE;
     }
 
     private void mapFormDateToCcdDate(String ocrFieldName, String ccdFieldName,
