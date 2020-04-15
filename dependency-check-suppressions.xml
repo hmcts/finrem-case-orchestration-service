@@ -18,6 +18,7 @@
         <cve>CVE-2014-3488</cve>
         <cve>CVE-2015-2156</cve>
         <cve>CVE-2019-16869</cve>
+        <cve>CVE-2020-11612</cve>
     </suppress>
 
     <suppress>
