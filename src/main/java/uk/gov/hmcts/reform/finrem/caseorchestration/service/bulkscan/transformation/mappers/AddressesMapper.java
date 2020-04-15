@@ -19,11 +19,23 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
  * of citizen (if not represented) or their solicitor (if represented).
  */
 public class AddressesMapper {
+
+    /**
+     * There should be only 2 fields with address:
+     * 1. `applicantAddress` where all data about applicant or their solicitor is stored
+     * 2. `respondentAddress` where all data about respondent or their solicitor is stored
+     *
+     * <p>We don't need to stored data about applicant's/respondent's address when they are represented.
+     * */
     public static void setupAddressesForApplicantAndRespondent(Map<String, Object> transformedCaseData) {
         addressesForApplicant(transformedCaseData);
         addressesForRespondent(transformedCaseData);
     }
 
+    /**
+     * It doesn't return anything, but updates `transformedCaseData`. It adds new keys with maps where all data related
+     * top addresses are stored.
+     * */
     public static void applyAddressesMappings(List<OcrDataField> ocrDataFields, Map<String, Object> transformedCaseData) {
         applyMappings("applicant", APPLICANT_ADDRESS, ocrDataFields, transformedCaseData);
         applyMappings("applicantSolicitor", "applicantSolicitorAddress", ocrDataFields, transformedCaseData);

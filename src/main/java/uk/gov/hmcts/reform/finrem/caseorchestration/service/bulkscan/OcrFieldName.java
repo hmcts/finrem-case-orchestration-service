@@ -15,6 +15,7 @@ public class OcrFieldName {
     public static final String APPLICANT_SOLICITOR_NAME = "ApplicantSolicitorName";
     public static final String APPLICANT_SOLICITOR_FIRM = "ApplicantSolicitorFirm";
     public static final String APPLICANT_SOLICITOR_ADDRESS_LINE_1 = "ApplicantSolicitorAddressLine1";
+    public static final String APPLICANT_SOLICITOR_ADDRESS_LINE_2 = "ApplicantSolicitorAddressLine2";
     public static final String APPLICANT_SOLICITOR_ADDRESS_TOWN = "ApplicantSolicitorAddressTown";
     public static final String APPLICANT_SOLICITOR_ADDRESS_COUNTY = "ApplicantSolicitorAddressCounty";
     public static final String APPLICANT_SOLICITOR_ADDRESS_POSTCODE = "ApplicantSolicitorAddressPostcode";
@@ -25,6 +26,7 @@ public class OcrFieldName {
     public static final String APPLICANT_PBA_NUMBER = "ApplicantPBANumber";
     public static final String APPLICANT_SOLICITOR_EMAIL = "ApplicantSolicitorEmail";
     public static final String APPLICANT_ADDRESS_LINE_1 = "ApplicantAddressLine1";
+    public static final String APPLICANT_ADDRESS_LINE_2 = "ApplicantAddressLine2";
     public static final String APPLICANT_ADDRESS_TOWN = "ApplicantAddressTown";
     public static final String APPLICANT_ADDRESS_COUNTY = "ApplicantAddressCounty";
     public static final String APPLICANT_ADDRESS_POSTCODE = "ApplicantAddressPostcode";
@@ -33,6 +35,7 @@ public class OcrFieldName {
     public static final String APPLICANT_EMAIL = "ApplicantEmail";
 
     public static final String RESPONDENT_ADDRESS_LINE_1 = "RespondentAddressLine1";
+    public static final String RESPONDENT_ADDRESS_LINE_2 = "RespondentAddressLine2";
     public static final String RESPONDENT_ADDRESS_TOWN = "RespondentAddressTown";
     public static final String RESPONDENT_ADDRESS_COUNTY = "RespondentAddressCounty";
     public static final String RESPONDENT_ADDRESS_POSTCODE = "RespondentAddressPostcode";
@@ -41,6 +44,7 @@ public class OcrFieldName {
     public static final String RESPONDENT_SOLICITOR_FIRM = "RespondentSolicitorFirm";
     public static final String RESPONDENT_SOLICITOR_EMAIL = "RespondentSolicitorEmail";
     public static final String RESPONDENT_SOLICITOR_ADDRESS_LINE_1 = "RespondentSolicitorAddressLine1";
+    public static final String RESPONDENT_SOLICITOR_ADDRESS_LINE_2 = "RespondentSolicitorAddressLine2";
     public static final String RESPONDENT_SOLICITOR_ADDRESS_TOWN = "RespondentSolicitorAddressTown";
     public static final String RESPONDENT_SOLICITOR_ADDRESS_COUNTY = "RespondentSolicitorAddressCounty";
     public static final String RESPONDENT_SOLICITOR_ADDRESS_POSTCODE = "RespondentSolicitorAddressPostcode";

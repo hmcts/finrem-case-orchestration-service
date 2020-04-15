@@ -9,11 +9,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FormAToCaseTransformer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -43,6 +40,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.AddressesMapperTest.assertAddressIsTransformed;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.AddressesMapperTest.buildImmutableMap;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.AddressesMapperTest.getOcrFieldsForAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
 
@@ -196,8 +196,9 @@ public class FormAToCaseTransformerTest {
 
         assertAddressIsTransformed(
                 (Map) transformedCaseData.get("applicantAddress"),
-                ImmutableMap.of(
+                buildImmutableMap(
                         "AddressLine1", "Street",
+                        "AddressLine2", "The building",
                         "AddressTown", "London",
                         "AddressPostcode", "SW989SD",
                         "AddressCounty", "Great London",
@@ -207,8 +208,9 @@ public class FormAToCaseTransformerTest {
 
         assertAddressIsTransformed(
                 (Map) transformedCaseData.get("respondentAddress"),
-                ImmutableMap.of(
+                buildImmutableMap(
                         "AddressLine1", "Drive",
+                        "AddressLine2", "Block of flats",
                         "AddressTown", "Leeds",
                         "AddressPostcode", "SW9 USB",
                         "AddressCounty", "Where",
@@ -228,8 +230,9 @@ public class FormAToCaseTransformerTest {
 
         assertAddressIsTransformed(
                 (Map) transformedCaseData.get("applicantAddress"),
-                ImmutableMap.of(
+                buildImmutableMap(
                         "AddressLine1", "Road",
+                        "AddressLine2", "House",
                         "AddressTown", "Manchester",
                         "AddressPostcode", "SW9 9SD",
                         "AddressCounty", "There",
@@ -239,42 +242,15 @@ public class FormAToCaseTransformerTest {
 
         assertAddressIsTransformed(
                 (Map) transformedCaseData.get("respondentAddress"),
-                ImmutableMap.of(
+                buildImmutableMap(
                         "AddressLine1", "Avenue",
+                        "AddressLine2", "Bungalow",
                         "AddressTown", "Bristol",
                         "AddressPostcode", "SW1 9SD",
                         "AddressCounty", "Here",
                         "AddressCountry", "France"
                 )
         );
-    }
-
-    private static List<OcrDataField> getOcrFieldsForAddresses() {
-        return new ArrayList<>(Arrays.asList(
-                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_LINE_1, "Road"),
-                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_TOWN, "Manchester"),
-                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_COUNTY, "There"),
-                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_POSTCODE, "SW9 9SD"),
-                new OcrDataField(OcrFieldName.APPLICANT_ADDRESS_COUNTRY, "Germany"),
-
-                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_LINE_1, "Avenue"),
-                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_TOWN, "Bristol"),
-                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_COUNTY, "Here"),
-                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_POSTCODE, "SW1 9SD"),
-                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_COUNTRY, "France"),
-
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_LINE_1, "Street"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_TOWN, "London"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_COUNTY, "Great London"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_POSTCODE, "SW989SD"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_COUNTRY, "UK"),
-
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_LINE_1, "Drive"),
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_TOWN, "Leeds"),
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_COUNTY, "Where"),
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_POSTCODE, "SW9 USB"),
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_COUNTRY, "Scotland")
-        ));
     }
 
     @Test
@@ -467,25 +443,6 @@ public class FormAToCaseTransformerTest {
 
     private static ExceptionRecord createExceptionRecord(List<OcrDataField> ocrDataFields) {
         return ExceptionRecord.builder().id(TEST_CASE_ID).ocrDataFields(ocrDataFields).build();
-    }
-
-    private void assertAddressIsTransformed(Map<String, Object> address, Map<String, String> sourceFieldAndValueMap) {
-        Map<String, String> sourceSuffixToTargetMap = ImmutableMap.of(
-                "AddressLine1", "AddressLine1",
-                "Town", "PostTown",
-                "PostCode", "PostCode",
-                "County", "County",
-                "Country", "Country"
-        );
-
-        BiFunction<Map<String, String>, String, String> getValueForSuffix = (map, suffix) -> map.entrySet().stream()
-                .filter(entry -> entry.getKey().toLowerCase().endsWith(suffix.toLowerCase()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Expected to find key with suffix %s in map", suffix)))
-                .getValue();
-
-        sourceSuffixToTargetMap
-                .forEach((key, value) -> assertThat(address.get(value), is(getValueForSuffix.apply(sourceFieldAndValueMap, key))));
     }
 
     private void assertChildrenInfo(Map<String, Object> transformedCaseData) {
