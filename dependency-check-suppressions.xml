@@ -21,6 +21,7 @@
     </suppress>
 
     <suppress>
+        <cve>CVE-2020-11612</cve>
         <cve>CVE-2020-7009</cve>
     </suppress>
 
