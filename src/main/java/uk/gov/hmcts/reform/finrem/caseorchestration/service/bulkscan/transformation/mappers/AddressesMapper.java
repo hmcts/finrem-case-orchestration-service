@@ -8,6 +8,9 @@ import java.util.Map;
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.applyMappings;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.isApplicantRepresented;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.isRespondentRepresented;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 
 /**
  * Mapping fields related to addresses (applicant, respondent and applicant solicitor, respondent solicitor).
@@ -19,13 +22,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditio
 public class AddressesMapper {
 
     public static class CcdFields {
-        public static final String APPLICANT = "applicantAddress";
-        public static final String RESPONDENT = "respondentAddress";
+        public static final String APPLICANT = APPLICANT_ADDRESS;
+        public static final String RESPONDENT = RESPONDENT_ADDRESS;
     }
 
+    /**
+     * For BSP (scanning) process these fields are not meant to be persisted in CCD. This is way they are "temp"
+     */
     public static class TempCcdFields {
         public static final String APPLICANT_SOLICITOR = "applicantSolicitorAddress";
-        public static final String RESPONDENT_SOLICITOR = "rSolicitorAddress";
+        public static final String RESPONDENT_SOLICITOR = RESP_SOLICITOR_ADDRESS;
     }
 
     /**
