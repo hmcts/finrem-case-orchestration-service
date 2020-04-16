@@ -21,6 +21,10 @@
     </suppress>
 
     <suppress>
+        <cve>CVE-2020-7009</cve>
+    </suppress>
+
+    <suppress>
         <notes>Vulnerability applies Eclipse Jetty. Default unhandled Error response content does not escape Exception messages in stacktraces included in error output.</notes>
         <cve>CVE-2019-17632</cve>
     </suppress>
