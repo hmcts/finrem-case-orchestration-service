@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers;
 
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 
 import java.util.List;
 import java.util.Map;
@@ -8,42 +9,29 @@ import java.util.Map;
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.applyMappings;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.isApplicantRepresented;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.isRespondentRepresented;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 
-/**
- * Mapping fields related to addresses (applicant, respondent and applicant solicitor, respondent solicitor).
- *
- * <p>We need it because we want to map to fields CCDConfigConstant.APPLICANT_ADDRESS
- * and CCDConfigConstant.RESPONDENT_ADDRESS different set of values. it may be either address details
- * of citizen (if not represented) or their solicitor (if represented).
- */
 public class AddressesMapper {
 
     public static class CcdFields {
-        public static final String APPLICANT = APPLICANT_ADDRESS;
-        public static final String RESPONDENT = RESPONDENT_ADDRESS;
+        public static final String APPLICANT = CCDConfigConstant.APPLICANT_ADDRESS;
+        public static final String APPLICANT_SOLICITOR = CCDConfigConstant.SOLICITOR_ADDRESS;
+        public static final String APPLICANT_PHONE = CCDConfigConstant.APPLICANT_PHONE;
+        public static final String APPLICANT_EMAIL = CCDConfigConstant.APPLICANT_EMAIL;
+        public static final String APPLICANT_SOLICITOR_EMAIL = CCDConfigConstant.SOLICITOR_EMAIL;
+        public static final String APPLICANT_SOLICITOR_PHONE = CCDConfigConstant.SOLICITOR_PHONE;
+
+        public static final String RESPONDENT = CCDConfigConstant.RESPONDENT_ADDRESS;
+        public static final String RESPONDENT_SOLICITOR = CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
     }
 
     /**
-     * For BSP (scanning) process these fields are not meant to be persisted in CCD. This is way they are "temp"
-     */
-    public static class TempCcdFields {
-        public static final String APPLICANT_SOLICITOR = "applicantSolicitorAddress";
-        public static final String RESPONDENT_SOLICITOR = RESP_SOLICITOR_ADDRESS;
-    }
-
-    /**
-     * There should be only 2 fields with address:
-     * 1. `applicantAddress` where all data about applicant or their solicitor is stored
-     * 2. `respondentAddress` where all data about respondent or their solicitor is stored
+     * We only store contact details to citizens or theirs solicitors (if they are represented). Never both.
      *
-     * <p>We don't need to stored data about applicant's/respondent's address when they are represented.
+     * <p>We don't need to stored data about applicant's/respondent's contact details when they are represented.
      */
-    public static void setupAddressesForApplicantAndRespondent(Map<String, Object> transformedCaseData) {
-        addressesForApplicant(transformedCaseData);
-        addressesForRespondent(transformedCaseData);
+    public static void setupContactDetailsForApplicantAndRespondent(Map<String, Object> transformedCaseData) {
+        setupContactDetailsForApplicant(transformedCaseData);
+        setupAddressForRespondent(transformedCaseData);
     }
 
     /**
@@ -52,22 +40,26 @@ public class AddressesMapper {
      */
     public static void applyAddressesMappings(List<OcrDataField> ocrDataFields, Map<String, Object> transformedCaseData) {
         applyMappings("applicant", CcdFields.APPLICANT, ocrDataFields, transformedCaseData);
-        applyMappings("applicantSolicitor", TempCcdFields.APPLICANT_SOLICITOR, ocrDataFields, transformedCaseData);
         applyMappings("respondent", CcdFields.RESPONDENT, ocrDataFields, transformedCaseData);
-        applyMappings("respondentSolicitor", TempCcdFields.RESPONDENT_SOLICITOR, ocrDataFields, transformedCaseData);
     }
 
-    private static void addressesForApplicant(Map<String, Object> transformedCaseData) {
-        String applicantKey = isApplicantRepresented(transformedCaseData) ? TempCcdFields.APPLICANT_SOLICITOR : CcdFields.APPLICANT;
+    private static void setupContactDetailsForApplicant(Map<String, Object> transformedCaseData) {
+        if (isApplicantRepresented(transformedCaseData)) {
+            transformedCaseData.put(CcdFields.APPLICANT_SOLICITOR, transformedCaseData.get(CcdFields.APPLICANT));
+            transformedCaseData.remove(CcdFields.APPLICANT);
 
-        transformedCaseData.put(CcdFields.APPLICANT, transformedCaseData.get(applicantKey));
-        transformedCaseData.remove(TempCcdFields.APPLICANT_SOLICITOR);
+            transformedCaseData.put(CcdFields.APPLICANT_SOLICITOR_PHONE, transformedCaseData.get(CcdFields.APPLICANT_PHONE));
+            transformedCaseData.put(CcdFields.APPLICANT_SOLICITOR_EMAIL, transformedCaseData.get(CcdFields.APPLICANT_EMAIL));
+
+            transformedCaseData.remove(CcdFields.APPLICANT_PHONE);
+            transformedCaseData.remove(CcdFields.APPLICANT_EMAIL);
+        }
     }
 
-    private static void addressesForRespondent(Map<String, Object> transformedCaseData) {
-        String applicantKey = isRespondentRepresented(transformedCaseData) ? TempCcdFields.RESPONDENT_SOLICITOR : CcdFields.RESPONDENT;
-
-        transformedCaseData.put(CcdFields.RESPONDENT, transformedCaseData.get(applicantKey));
-        transformedCaseData.remove(TempCcdFields.RESPONDENT_SOLICITOR);
+    private static void setupAddressForRespondent(Map<String, Object> transformedCaseData) {
+        if (isRespondentRepresented(transformedCaseData)) {
+            transformedCaseData.put(CcdFields.RESPONDENT_SOLICITOR, transformedCaseData.get(CcdFields.RESPONDENT));
+            transformedCaseData.remove(CcdFields.RESPONDENT);
+        }
     }
 }

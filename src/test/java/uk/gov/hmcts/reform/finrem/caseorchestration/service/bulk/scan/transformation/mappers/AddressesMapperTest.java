@@ -45,18 +45,6 @@ public class AddressesMapperTest {
         );
 
         assertAddressIsTransformed(
-                (Map) data.get(AddressesMapper.TempCcdFields.APPLICANT_SOLICITOR),
-                buildImmutableMap(
-                        LINE_1, "Street",
-                        LINE_2, "The building",
-                        TOWN, "London",
-                        POSTCODE, "SW989SD",
-                        COUNTY, "Great London",
-                        COUNTRY, "UK"
-                )
-        );
-
-        assertAddressIsTransformed(
                 (Map) data.get(AddressesMapper.CcdFields.RESPONDENT),
                 buildImmutableMap(
                         LINE_1, "Avenue",
@@ -65,18 +53,6 @@ public class AddressesMapperTest {
                         POSTCODE, "SW1 9SD",
                         COUNTY, "Here",
                         COUNTRY, "France"
-                )
-        );
-
-        assertAddressIsTransformed(
-                (Map) data.get(AddressesMapper.TempCcdFields.RESPONDENT_SOLICITOR),
-                buildImmutableMap(
-                        LINE_1, "Drive",
-                        LINE_2, "Block of flats",
-                        TOWN, "Leeds",
-                        POSTCODE, "SW9 USB",
-                        COUNTY, "Where",
-                        COUNTRY, "Scotland"
                 )
         );
     }
@@ -114,21 +90,7 @@ public class AddressesMapperTest {
                 new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_TOWN, "Bristol"),
                 new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_COUNTY, "Here"),
                 new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_POSTCODE, "SW1 9SD"),
-                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_COUNTRY, "France"),
-
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_LINE_1, "Street"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_LINE_2, "The building"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_TOWN, "London"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_COUNTY, "Great London"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_POSTCODE, "SW989SD"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_COUNTRY, "UK"),
-
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_LINE_1, "Drive"),
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_LINE_2, "Block of flats"),
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_TOWN, "Leeds"),
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_COUNTY, "Where"),
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_POSTCODE, "SW9 USB"),
-                new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_COUNTRY, "Scotland")
+                new OcrDataField(OcrFieldName.RESPONDENT_ADDRESS_COUNTRY, "France")
         ));
     }
 

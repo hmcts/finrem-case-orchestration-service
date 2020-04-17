@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
@@ -8,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FormAToCaseTransformer;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.AddressesMapper;
 
 import java.util.List;
 import java.util.Map;
@@ -66,11 +66,9 @@ public class FormAToCaseTransformerTest {
                 new OcrDataField(OcrFieldName.APPLICANT_REPRESENTED, "I am not represented by a solicitor in these proceedings"),
                 new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_NAME, "Saul Call"),
                 new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_FIRM, "Better Divorce Ltd"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_PHONE, "0712456543"),
                 new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_DX_NUMBER, "DX123"),
                 new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_REFERENCE, "SOL-RED"),
                 new OcrDataField(OcrFieldName.APPLICANT_PBA_NUMBER, "PBA123456"),
-                new OcrDataField(OcrFieldName.APPLICANT_SOLICITOR_EMAIL, "test@example.com"),
                 new OcrDataField(OcrFieldName.APPLICANT_PHONE, "0712345654"),
                 new OcrDataField(OcrFieldName.APPLICANT_EMAIL, "applicant@divorcity.com"),
                 new OcrDataField(OcrFieldName.ADDRESS_OF_PROPERTIES, "The address of other properties"),
@@ -120,12 +118,9 @@ public class FormAToCaseTransformerTest {
                 hasEntry(APPLICANT_REPRESENTED_PAPER, "FR_applicant_represented_1"),
                 hasEntry(SOLICITOR_NAME, "Saul Call"),
                 hasEntry(SOLICITOR_FIRM, "Better Divorce Ltd"),
-                hasEntry("solicitorPhone", "0712456543"),
                 hasEntry("solicitorDXnumber", "DX123"),
                 hasEntry(SOLICITOR_REFERENCE, "SOL-RED"),
                 hasEntry(PBA_NUMBER, "PBA123456"),
-                hasEntry(SOLICITOR_EMAIL, "test@example.com"),
-                hasEntry(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, "Yes"),
                 hasEntry("applicantPhone", "0712345654"),
                 hasEntry("applicantEmail", "applicant@divorcity.com"),
 
@@ -185,71 +180,29 @@ public class FormAToCaseTransformerTest {
     public void shouldTransformAddressesWhenCitizensRepresented() {
         List<OcrDataField> ocrFields = getOcrFieldsForAddresses();
         ocrFields.add(new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_NAME, "Mr John Solicitor"));
-        ocrFields.add(
-                new OcrDataField(OcrFieldName.APPLICANT_REPRESENTED,
-                        "I am represented by a solicitor in these proceedings, who has signed Section 5 and all "
-                                + "documents for my attention should be sent to my solicitor whose details are as follows"));
+        ocrFields.add(ocrDataFieldIndicatingApplicantIsRepresented());
 
         ExceptionRecord incomingExceptionRecord = createExceptionRecord(ocrFields);
 
-        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
-
-        assertAddressIsTransformed(
-                (Map) transformedCaseData.get("applicantAddress"),
-                buildImmutableMap(
-                        "AddressLine1", "Street",
-                        "AddressLine2", "The building",
-                        "AddressTown", "London",
-                        "AddressPostcode", "SW989SD",
-                        "AddressCounty", "Great London",
-                        "AddressCountry", "UK"
-                )
+        assertTransformationForAddressIsValid(
+                incomingExceptionRecord,
+                AddressesMapper.CcdFields.APPLICANT_SOLICITOR,
+                AddressesMapper.CcdFields.RESPONDENT_SOLICITOR,
+                AddressesMapper.CcdFields.APPLICANT,
+                AddressesMapper.CcdFields.RESPONDENT
         );
-
-        assertAddressIsTransformed(
-                (Map) transformedCaseData.get("respondentAddress"),
-                buildImmutableMap(
-                        "AddressLine1", "Drive",
-                        "AddressLine2", "Block of flats",
-                        "AddressTown", "Leeds",
-                        "AddressPostcode", "SW9 USB",
-                        "AddressCounty", "Where",
-                        "AddressCountry", "Scotland"
-                )
-        );
-
-        assertNull(transformedCaseData.get("rSolicitorAddress"));
-        assertNull(transformedCaseData.get("applicantSolicitorAddress"));
     }
 
     @Test
     public void shouldTransformAddressesWhenCitizensNotRepresented() {
         ExceptionRecord incomingExceptionRecord = createExceptionRecord(getOcrFieldsForAddresses());
 
-        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
-
-        assertAddressIsTransformed(
-                (Map) transformedCaseData.get("applicantAddress"),
-                buildImmutableMap(
-                        "AddressLine1", "Road",
-                        "AddressLine2", "House",
-                        "AddressTown", "Manchester",
-                        "AddressPostcode", "SW9 9SD",
-                        "AddressCounty", "There",
-                        "AddressCountry", "Germany"
-                )
-        );
-
-        assertAddressIsTransformed(
-                (Map) transformedCaseData.get("respondentAddress"),
-                buildImmutableMap(
-                        "AddressLine1", "Avenue",
-                        "AddressLine2", "Bungalow",
-                        "AddressTown", "Bristol",
-                        "AddressPostcode", "SW1 9SD",
-                        "AddressCounty", "Here",
-                        "AddressCountry", "France"
-                )
+        assertTransformationForAddressIsValid(
+                incomingExceptionRecord,
+                AddressesMapper.CcdFields.APPLICANT,
+                AddressesMapper.CcdFields.RESPONDENT,
+                AddressesMapper.CcdFields.APPLICANT_SOLICITOR,
+                AddressesMapper.CcdFields.RESPONDENT_SOLICITOR
         );
     }
 
@@ -304,7 +257,11 @@ public class FormAToCaseTransformerTest {
     @Test
     public void shouldSetSolicitorAgreeToReceiveEmailsToYesIfSolicitorEmailIsPopulated() {
         Map<String, Object> convertedCcdData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
-                singletonList(new OcrDataField("ApplicantSolicitorEmail", TEST_SOLICITOR_EMAIL))));
+                asList(
+                        new OcrDataField("ApplicantEmail", TEST_SOLICITOR_EMAIL),
+                        ocrDataFieldIndicatingApplicantIsRepresented()
+                )
+        ));
 
         assertThat(convertedCcdData, allOf(
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
@@ -325,7 +282,6 @@ public class FormAToCaseTransformerTest {
         assertThat(transformedCaseData, allOf(
                 hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
                 hasEntry(PAPER_APPLICATION, YES_VALUE),
-                hasEntry(SOLICITOR_EMAIL, ""),
                 hasEntry(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, NO_VALUE)
         ));
     }
@@ -459,5 +415,47 @@ public class FormAToCaseTransformerTest {
         assertThat(child.getRelationshipToApplicant(), is(values.get(3)));
         assertThat(child.getRelationshipToRespondent(), is(values.get(4)));
         assertThat(child.getCountryOfResidence(), is(values.get(5)));
+    }
+
+    private void assertTransformationForAddressIsValid(
+            ExceptionRecord incomingExceptionRecord,
+            String expectedApplicantPopulatedField,
+            String expectedRespondentPopulatedField,
+            String expectedApplicantEmptyField,
+            String expectedRespondentEmptyField)  {
+        Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
+
+        assertAddressIsTransformed(
+                (Map) transformedCaseData.get(expectedApplicantPopulatedField),
+                buildImmutableMap(
+                        "AddressLine1", "Road",
+                        "AddressLine2",  "House",
+                        "AddressTown", "Manchester",
+                        "AddressPostcode", "SW9 9SD",
+                        "AddressCounty",  "There",
+                        "AddressCountry", "Germany"
+                )
+        );
+
+        assertAddressIsTransformed(
+                (Map) transformedCaseData.get(expectedRespondentPopulatedField),
+                buildImmutableMap(
+                        "AddressLine1", "Avenue",
+                        "AddressLine2", "Bungalow",
+                        "AddressTown", "Bristol",
+                        "AddressPostcode", "SW1 9SD",
+                        "AddressCounty", "Here",
+                        "AddressCountry", "France"
+                )
+        );
+
+        assertNull(transformedCaseData.get(expectedApplicantEmptyField));
+        assertNull(transformedCaseData.get(expectedRespondentEmptyField));
+    }
+
+    private static OcrDataField ocrDataFieldIndicatingApplicantIsRepresented() {
+        return new OcrDataField(OcrFieldName.APPLICANT_REPRESENTED,
+                "I am represented by a solicitor in these proceedings, who has signed Section 5 and all "
+                        + "documents for my attention should be sent to my solicitor whose details are as follows");
     }
 }

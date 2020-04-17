@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
@@ -25,6 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.isNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.ApplicantRepresentedPaper.FR_APPLICANT_REPRESENTED_3;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED_PAPER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
@@ -69,7 +69,6 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
                 dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames, ocrDataFields, transformedCaseData);
 
         AddressesMapper.applyAddressesMappings(ocrDataFields, transformedCaseData);
-
         ChildrenInfoMapper.applyMappings(ocrDataFields, transformedCaseData);
 
         mapAuthorisationSignedToYesOrNo(OcrFieldName.AUTHORISATION_SIGNED, "authorisationSigned", ocrDataFields, transformedCaseData);
@@ -108,7 +107,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             modifiedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
         }
 
-        AddressesMapper.setupAddressesForApplicantAndRespondent(modifiedCaseData);
+        AddressesMapper.setupContactDetailsForApplicantAndRespondent(modifiedCaseData);
 
         return modifiedCaseData;
     }
@@ -119,8 +118,15 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         return applicantRepresentedPaperValue.equalsIgnoreCase(FR_APPLICANT_REPRESENTED_3) ?  YES_VALUE : NO_VALUE;
     }
 
+    /**
+     * It's correct to check if APPLICANT_EMAIL is not empty, as this method is called when email is stored only
+     * in this field. In next step this may be migrated to solicitorEmail field, if applicant is represented.
+     * For new version of FormA we don't store both values, but either applicant or solicitor email and only 1 value
+     * is provided in list of OCR fields.
+     */
     private String getSolicitorAgreeToReceiveEmailsField(Map<String, Object> modifiedCaseData) {
-        return isNotEmpty(SOLICITOR_EMAIL, modifiedCaseData) ? YES_VALUE : NO_VALUE;
+        return (YES_VALUE.equalsIgnoreCase(nullToEmpty(modifiedCaseData.get(APPLICANT_REPRESENTED)))
+                && isNotEmpty(APPLICANT_EMAIL, modifiedCaseData)) ? YES_VALUE : NO_VALUE;
     }
 
     private String getRespondentRepresentedField(Map<String, Object> modifiedCaseData) {
@@ -199,11 +205,9 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_NAME, "solicitorName");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_FIRM, "solicitorFirm");
-        exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_PHONE, "solicitorPhone");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_DX_NUMBER, "solicitorDXnumber");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_REFERENCE, "solicitorReference");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_PBA_NUMBER, "PBANumber");
-        exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_SOLICITOR_EMAIL, "solicitorEmail");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_PHONE, "applicantPhone");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.APPLICANT_EMAIL, "applicantEmail");
         exceptionRecordToCcdFieldsMap.put(OcrFieldName.AUTHORISATION_NAME, "authorisationName");
