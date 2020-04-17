@@ -11,6 +11,7 @@ import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import feign.codec.Decoder;
 import feign.jackson.JacksonEncoder;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,12 +31,24 @@ import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 
+import javax.annotation.PostConstruct;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.URL;
+
+import static org.assertj.core.util.Strings.isNullOrEmpty;
+
 @Configuration
 @ComponentScan("uk.gov.hmcts.reform.finrem.functional")
 @EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
 @PropertySource(value = {"classpath:application.properties"})
 @PropertySource(value = {"classpath:application-${env}.properties"})
+@Slf4j
 public class TestContextConfiguration {
+
+    @Value("${http.proxy:#{null}}")
+    private String httpProxy;
 
     @Bean
     public ServiceAuthTokenGenerator serviceAuthTokenGenerator(@Value("${idam.s2s-auth.url}")
@@ -45,20 +58,20 @@ public class TestContextConfiguration {
                                                                @Value("${idam.s2s-auth.microservice}")
                                                                        String microservice) {
         ServiceAuthorisationApi serviceAuthorisationApi = Feign.builder()
-            .encoder(new JacksonEncoder())
-            .contract(new SpringMvcContract())
-            .target(ServiceAuthorisationApi.class, s2sUrl);
+                .encoder(new JacksonEncoder())
+                .contract(new SpringMvcContract())
+                .target(ServiceAuthorisationApi.class, s2sUrl);
         return new ServiceAuthTokenGenerator(secret, microservice, serviceAuthorisationApi);
     }
 
     @Bean
     public CoreCaseDataApi getCoreCaseDataApi(@Value("${core_case_data.api.url}") String coreCaseDataApiUrl) {
         return Feign.builder()
-            .requestInterceptor(requestInterceptor())
-            .encoder(new JacksonEncoder())
-            .decoder(feignDecoder())
-            .contract(new SpringMvcContract())
-            .target(CoreCaseDataApi.class, coreCaseDataApiUrl);
+                .requestInterceptor(requestInterceptor())
+                .encoder(new JacksonEncoder())
+                .decoder(feignDecoder())
+                .contract(new SpringMvcContract())
+                .target(CoreCaseDataApi.class, coreCaseDataApiUrl);
     }
 
     @Bean
@@ -89,5 +102,24 @@ public class TestContextConfiguration {
                 template.header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
             }
         };
+    }
+
+    @PostConstruct
+    public void configureProxy() {
+        if (!isNullOrEmpty(httpProxy)) {
+            try {
+                URL proxy = new URL(httpProxy);
+                if (!InetAddress.getByName(proxy.getHost()).isReachable(2000)) {
+                    throw new IOException("Proxy host is not reachable");
+                }
+                System.setProperty("http.proxyHost", proxy.getHost());
+                System.setProperty("http.proxyPort", Integer.toString(proxy.getPort()));
+                System.setProperty("https.proxyHost", proxy.getHost());
+                System.setProperty("https.proxyPort", Integer.toString(proxy.getPort()));
+            } catch (IOException e) {
+                log.error("Error setting up proxy - are you connected to the VPN?", e);
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

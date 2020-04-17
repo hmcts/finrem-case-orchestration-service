@@ -46,12 +46,12 @@ public class IdamUtils {
 
     public String generateUserTokenWithNoRoles(String username, String password) {
         String userLoginDetails = String.join(":", username, password);
-        final String authHeader = "Basic " + new String(Base64.getEncoder().encode((userLoginDetails).getBytes()));
+        final String authHeader = "Basic " + new String(Base64.getEncoder().encode(userLoginDetails.getBytes()));
 
         Response response = RestAssured.given()
-            .header(AUTHORIZATION_HEADER, authHeader)
-            .relaxedHTTPSValidation()
-            .post(idamCodeUrl());
+                .header(AUTHORIZATION_HEADER, authHeader)
+                .relaxedHTTPSValidation()
+                .post(idamCodeUrl());
 
         assert response.getStatusCode() < 300
                 : String.format("Code generation failed with code: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
@@ -59,9 +59,9 @@ public class IdamUtils {
         String code = response.getBody().path("code");
 
         response = RestAssured.given()
-            .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .relaxedHTTPSValidation()
-            .post(idamTokenUrl(code));
+                .header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .relaxedHTTPSValidation()
+                .post(idamTokenUrl(code));
 
         String token = response.getBody().path("access_token");
 
@@ -81,7 +81,7 @@ public class IdamUtils {
         assert response.getStatusCode() < 300
                 : String.format("Token generation failed with code: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
 
-        assert HttpStatus.valueOf(response.getStatusCode()) == HttpStatus.OK
+        assert response.getStatusCode() == HttpStatus.OK.value()
                 : "Error generating code from IDAM: " + response.getStatusCode();
 
         return "Bearer " + response.getBody().asString();
@@ -99,11 +99,11 @@ public class IdamUtils {
     public UserDetails createCaseworkerUser() {
         String username = String.format("%s-%s@%s", CASEWORKER_USERNAME_PREFIX, UUID.randomUUID(), TESTUSER_MAIL_DOMAIN);
         String password = "GNU-TP-chapter13";
-        String[] roles = new String[] {
-            "caseworker-divorce",
-            "caseworker-divorce-financialremedy",
-            "caseworker-divorce-financialremedy-courtadmin",
-            "caseworker-divorce-bulkscan"
+        String[] roles = new String[]{
+                "caseworker-divorce",
+                "caseworker-divorce-financialremedy",
+                "caseworker-divorce-financialremedy-courtadmin",
+                "caseworker-divorce-bulkscan"
         };
 
         createUser(username, password, "caseworker", roles);
@@ -175,20 +175,20 @@ public class IdamUtils {
 
     private String idamCodeUrl() {
         String myUrl = idamUserBaseUrl + "/oauth2/authorize"
-            + "?response_type=code"
-            + "&client_id=finrem"
-            + "&redirect_uri=" + idamRedirectUri;
+                + "?response_type=code"
+                + "&client_id=finrem"
+                + "&redirect_uri=" + idamRedirectUri;
 
         return myUrl;
     }
 
     private String idamTokenUrl(String code) {
         String myUrl = idamUserBaseUrl + "/oauth2/token"
-            + "?code=" + code
-            + "&client_id=finrem"
-            + "&client_secret=" + idamSecret
-            + "&redirect_uri=" + idamRedirectUri
-            + "&grant_type=authorization_code";
+                + "?code=" + code
+                + "&client_id=finrem"
+                + "&client_secret=" + idamSecret
+                + "&redirect_uri=" + idamRedirectUri
+                + "&grant_type=authorization_code";
 
         return myUrl;
     }
