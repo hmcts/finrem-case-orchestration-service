@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transform
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapper;
 
@@ -15,6 +16,10 @@ import java.util.function.BiFunction;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 public class ContactDetailsMapperTest {
 
@@ -24,6 +29,8 @@ public class ContactDetailsMapperTest {
     public static final String POSTCODE = "AddressPostcode";
     public static final String COUNTY = "AddressCounty";
     public static final String COUNTRY = "AddressCountry";
+    public static final String TEST_EMAIL = "solicitor@mail.com";
+    public static final String TEST_PHONE = "077654567";
 
     @Test
     public void applyAddressesMappingsShouldMapAllAddresses() {
@@ -32,29 +39,84 @@ public class ContactDetailsMapperTest {
 
         ContactDetailsMapper.applyAddressesMappings(ocrFields, data);
 
-        assertAddressIsTransformed(
-                (Map) data.get(ContactDetailsMapper.CcdFields.APPLICANT),
-                buildImmutableMap(
-                        LINE_1, "Road",
-                        LINE_2, "House",
-                        TOWN, "Manchester",
-                        POSTCODE, "SW9 9SD",
-                        COUNTY, "There",
-                        COUNTRY, "Germany"
-                )
+        assertTransformationForAddressIsValid(
+                data,
+                ContactDetailsMapper.CcdFields.APPLICANT,
+                ContactDetailsMapper.CcdFields.RESPONDENT,
+                ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR,
+                ContactDetailsMapper.CcdFields.RESPONDENT_SOLICITOR
+        );
+    }
+
+    @Test
+    public void setupContactDetailsForApplicantAndRespondentForRepresentedBothCitizens() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(ContactDetailsMapper.CcdFields.APPLICANT, buildMappedAddress1());
+        data.put(ContactDetailsMapper.CcdFields.RESPONDENT, buildMappedAddress2());
+        data.put(ContactDetailsMapper.CcdFields.APPLICANT_EMAIL, TEST_EMAIL);
+        data.put(ContactDetailsMapper.CcdFields.APPLICANT_PHONE, TEST_PHONE);
+        data.put(CCDConfigConstant.APPLICANT_REPRESENTED, YES_VALUE);
+        data.put(CCDConfigConstant.RESP_SOLICITOR_NAME, "I represent respondent");
+
+        ContactDetailsMapper.setupContactDetailsForApplicantAndRespondent(data);
+
+        assertTransformationForAddressIsValid(
+                data,
+                ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR,
+                ContactDetailsMapper.CcdFields.RESPONDENT_SOLICITOR,
+                ContactDetailsMapper.CcdFields.APPLICANT,
+                ContactDetailsMapper.CcdFields.RESPONDENT
         );
 
-        assertAddressIsTransformed(
-                (Map) data.get(ContactDetailsMapper.CcdFields.RESPONDENT),
-                buildImmutableMap(
-                        LINE_1, "Avenue",
-                        LINE_2, "Bungalow",
-                        TOWN, "Bristol",
-                        POSTCODE, "SW1 9SD",
-                        COUNTY, "Here",
-                        COUNTRY, "France"
-                )
+        assertThat(nullToEmpty(data.get(ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR_EMAIL)), is(TEST_EMAIL));
+        assertThat(nullToEmpty(data.get(ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR_PHONE)), is(TEST_PHONE));
+    }
+
+    @Test
+    public void setupContactDetailsForApplicantAndRespondentForOnlyApplicantRepresented() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(ContactDetailsMapper.CcdFields.APPLICANT, buildMappedAddress1());
+        data.put(ContactDetailsMapper.CcdFields.RESPONDENT, buildMappedAddress2());
+        data.put(ContactDetailsMapper.CcdFields.APPLICANT_EMAIL, "solicitor@mail.com");
+        data.put(ContactDetailsMapper.CcdFields.APPLICANT_PHONE, "077654567");
+        data.put(CCDConfigConstant.APPLICANT_REPRESENTED, YES_VALUE);
+
+        ContactDetailsMapper.setupContactDetailsForApplicantAndRespondent(data);
+
+        assertTransformationForAddressIsValid(
+                data,
+                ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR,
+                ContactDetailsMapper.CcdFields.RESPONDENT,
+                ContactDetailsMapper.CcdFields.APPLICANT,
+                ContactDetailsMapper.CcdFields.RESPONDENT_SOLICITOR
         );
+
+        assertThat(nullToEmpty(data.get(ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR_EMAIL)), is(TEST_EMAIL));
+        assertThat(nullToEmpty(data.get(ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR_PHONE)), is(TEST_PHONE));
+    }
+
+    @Test
+    public void setupContactDetailsForApplicantAndRespondentForOnlyRespondentRepresented() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(ContactDetailsMapper.CcdFields.APPLICANT, buildMappedAddress1());
+        data.put(ContactDetailsMapper.CcdFields.RESPONDENT, buildMappedAddress2());
+        data.put(ContactDetailsMapper.CcdFields.APPLICANT_EMAIL, "solicitor@mail.com");
+        data.put(ContactDetailsMapper.CcdFields.APPLICANT_PHONE, "077654567");
+        data.put(CCDConfigConstant.APPLICANT_REPRESENTED, NO_VALUE);
+        data.put(CCDConfigConstant.RESP_SOLICITOR_NAME, "I represent respondent");
+
+        ContactDetailsMapper.setupContactDetailsForApplicantAndRespondent(data);
+
+        assertTransformationForAddressIsValid(
+                data,
+                ContactDetailsMapper.CcdFields.APPLICANT,
+                ContactDetailsMapper.CcdFields.RESPONDENT_SOLICITOR,
+                ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR,
+                ContactDetailsMapper.CcdFields.RESPONDENT
+        );
+
+        assertNull(data.get(ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR_EMAIL));
+        assertNull(data.get(ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR_PHONE));
     }
 
     public static ImmutableMap<String, String> buildImmutableMap(
@@ -112,5 +174,77 @@ public class ContactDetailsMapperTest {
 
         sourceSuffixToTargetMap
                 .forEach((key, value) -> assertThat(address.get(value), is(getValueForSuffix.apply(sourceFieldAndValueMap, key))));
+    }
+
+    public static void assertTransformationForAddressIsValid(
+            Map<String, Object> transformedCaseData,
+            String expectedApplicantPopulatedField,
+            String expectedRespondentPopulatedField,
+            String expectedApplicantEmptyField,
+            String expectedRespondentEmptyField) {
+
+        assertAddressIsTransformed(
+                (Map) transformedCaseData.get(expectedApplicantPopulatedField),
+                buildAddress1()
+        );
+
+        assertAddressIsTransformed(
+                (Map) transformedCaseData.get(expectedRespondentPopulatedField),
+                buildAddress2()
+
+        );
+
+        assertNull(transformedCaseData.get(expectedApplicantEmptyField));
+        assertNull(transformedCaseData.get(expectedRespondentEmptyField));
+    }
+
+    public static OcrDataField ocrDataFieldIndicatingApplicantIsRepresented() {
+        return new OcrDataField(OcrFieldName.APPLICANT_REPRESENTED,
+                "I am represented by a solicitor in these proceedings, who has signed Section 5 and all "
+                        + "documents for my attention should be sent to my solicitor whose details are as follows");
+    }
+
+    private static ImmutableMap<String, String> buildAddress1() {
+        return buildImmutableMap(
+                "AddressLine1", "Road",
+                "AddressLine2", "House",
+                "AddressTown", "Manchester",
+                "AddressPostcode", "SW9 9SD",
+                "AddressCounty", "There",
+                "AddressCountry", "Germany"
+        );
+    }
+
+    private static ImmutableMap<String, String> buildAddress2() {
+        return buildImmutableMap(
+                "AddressLine1", "Avenue",
+                "AddressLine2", "Bungalow",
+                "AddressTown", "Bristol",
+                "AddressPostcode", "SW1 9SD",
+                "AddressCounty", "Here",
+                "AddressCountry", "France"
+        );
+    }
+
+    private static ImmutableMap<String, String> buildMappedAddress1() {
+        return buildImmutableMap(
+                "AddressLine1", "Road",
+                "AddressLine2", "House",
+                "PostTown", "Manchester",
+                "PostCode", "SW9 9SD",
+                "County", "There",
+                "Country", "Germany"
+        );
+    }
+
+    private static ImmutableMap<String, String> buildMappedAddress2() {
+        return buildImmutableMap(
+                "AddressLine1", "Avenue",
+                "AddressLine2", "Bungalow",
+                "PostTown", "Bristol",
+                "PostCode", "SW1 9SD",
+                "County", "Here",
+                "Country", "France"
+        );
     }
 }
