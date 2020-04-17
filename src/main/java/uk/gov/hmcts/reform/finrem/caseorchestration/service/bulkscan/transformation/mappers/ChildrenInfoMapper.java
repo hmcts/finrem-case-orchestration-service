@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
@@ -17,8 +19,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.tran
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper.Fields.RELATION_TO_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper.Fields.RELATION_TO_RESPONDENT;
 
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ChildrenInfoMapper {
 
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class Fields {
         public static final String NAME = "NameOfChild";
         public static final String GENDER = "GenderChild";
@@ -28,23 +32,19 @@ public class ChildrenInfoMapper {
         public static final String COUNTRY = "CountryOfResidenceChild";
     }
 
-    private ChildrenInfoMapper() {
-        // don't
-    }
-
     public static void applyMappings(List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
         ChildrenInfo children = new ChildrenInfo();
         for (int i = 1; isChildInfoPopulated(i, ocrDataFields); i++) {
             children.addChild(mapChild(i, ocrDataFields));
         }
 
-        if (children.size() > 0) {
+        if (!children.isEmpty()) {
             modifiedMap.put("childrenInfo", children);
         }
     }
 
     private static boolean isChildInfoPopulated(int i, List<OcrDataField> ocrDataFields) {
-        return ocrDataFields.stream().anyMatch(item -> item.getName().equalsIgnoreCase("NameOfChild" + i));
+        return ocrDataFields.stream().anyMatch(item -> item.getName().equalsIgnoreCase(NAME + i));
     }
 
     private static ChildInfo mapChild(int index, List<OcrDataField> ocrDataFields) {

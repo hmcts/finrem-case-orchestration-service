@@ -1,5 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class CCDConfigConstant {
 
     //Case related

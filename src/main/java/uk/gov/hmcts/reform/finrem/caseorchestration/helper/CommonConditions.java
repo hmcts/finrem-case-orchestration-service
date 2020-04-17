@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 
@@ -11,6 +13,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommonConditions {
     public static boolean isApplicantRepresented(Map<String, Object> caseData) {
         return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APPLICANT_REPRESENTED)));

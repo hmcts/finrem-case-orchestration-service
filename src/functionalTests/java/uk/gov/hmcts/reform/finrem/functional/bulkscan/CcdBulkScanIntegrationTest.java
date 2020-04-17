@@ -59,7 +59,6 @@ public class CcdBulkScanIntegrationTest {
 
         try {
             UserDetails userDetails = idamUtils.createCaseworkerUser();
-            log.info("case data = {}, user details = {}", caseData, userDetails);
             submitCase(caseData, userDetails);
         } finally {
             idamUtils.deleteTestUsers();
