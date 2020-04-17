@@ -24,8 +24,8 @@ public class CommonFunction {
         getFirstMapValue = (listMap) ->
         listMap.stream().findFirst().get();
 
-    static boolean addressLineOneAndPostCodeAreBothNotEmpty(Map address) {
-        return  ObjectUtils.isNotEmpty(address) && StringUtils.isNotBlank((String) address.get("AddressLine1"))
-                && StringUtils.isNotBlank((String) address.get("PostCode"));
+    public static boolean addressLineOneAndPostCodeAreBothNotEmpty(Map<String, String> address) {
+        return  ObjectUtils.isNotEmpty(address) && StringUtils.isNotBlank(address.get("AddressLine1"))
+                && StringUtils.isNotBlank(address.get("PostCode"));
     }
 }

@@ -21,10 +21,8 @@ public class DocumentHelperTest {
     private CallbackRequest callbackRequest;
     private ObjectMapper objectMapper = new ObjectMapper();
 
-
     private void setUpCaseData(String fileName) throws Exception {
-        try (InputStream resourceAsStream =
-                     getClass().getResourceAsStream(PATH + fileName)) {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
             callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
@@ -43,8 +41,7 @@ public class DocumentHelperTest {
         setUpCaseData("validate-pension-collection.json");
         List<CaseDocument> pensionDocuments = documentHelper.getPensionDocumentsData(
                 callbackRequest.getCaseDetails().getData());
-        assertThat(pensionDocuments.size(),
-                is(2));
+        assertThat(pensionDocuments.size(), is(2));
     }
 
     @Test
@@ -53,8 +50,7 @@ public class DocumentHelperTest {
         Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
                 callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(true));
-        assertThat(latestRespondToOrderDocuments.get().getDocumentBinaryUrl(),
-                is("http://doc2/binary"));
+        assertThat(latestRespondToOrderDocuments.get().getDocumentBinaryUrl(), is("http://doc2/binary"));
     }
 
     @Test
