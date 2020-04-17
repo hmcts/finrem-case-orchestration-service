@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FormAToCaseTransformer;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.AddressesMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapper;
 
 import java.util.List;
 import java.util.Map;
@@ -40,9 +40,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.AddressesMapperTest.assertAddressIsTransformed;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.AddressesMapperTest.buildImmutableMap;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.AddressesMapperTest.getOcrFieldsForAddresses;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.ContactDetailsMapperTest.assertAddressIsTransformed;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.ContactDetailsMapperTest.buildImmutableMap;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.ContactDetailsMapperTest.getOcrFieldsForAddresses;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
 
@@ -186,10 +186,10 @@ public class FormAToCaseTransformerTest {
 
         assertTransformationForAddressIsValid(
                 incomingExceptionRecord,
-                AddressesMapper.CcdFields.APPLICANT_SOLICITOR,
-                AddressesMapper.CcdFields.RESPONDENT_SOLICITOR,
-                AddressesMapper.CcdFields.APPLICANT,
-                AddressesMapper.CcdFields.RESPONDENT
+                ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR,
+                ContactDetailsMapper.CcdFields.RESPONDENT_SOLICITOR,
+                ContactDetailsMapper.CcdFields.APPLICANT,
+                ContactDetailsMapper.CcdFields.RESPONDENT
         );
     }
 
@@ -199,10 +199,10 @@ public class FormAToCaseTransformerTest {
 
         assertTransformationForAddressIsValid(
                 incomingExceptionRecord,
-                AddressesMapper.CcdFields.APPLICANT,
-                AddressesMapper.CcdFields.RESPONDENT,
-                AddressesMapper.CcdFields.APPLICANT_SOLICITOR,
-                AddressesMapper.CcdFields.RESPONDENT_SOLICITOR
+                ContactDetailsMapper.CcdFields.APPLICANT,
+                ContactDetailsMapper.CcdFields.RESPONDENT,
+                ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR,
+                ContactDetailsMapper.CcdFields.RESPONDENT_SOLICITOR
         );
     }
 
@@ -422,17 +422,17 @@ public class FormAToCaseTransformerTest {
             String expectedApplicantPopulatedField,
             String expectedRespondentPopulatedField,
             String expectedApplicantEmptyField,
-            String expectedRespondentEmptyField)  {
+            String expectedRespondentEmptyField) {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord);
 
         assertAddressIsTransformed(
                 (Map) transformedCaseData.get(expectedApplicantPopulatedField),
                 buildImmutableMap(
                         "AddressLine1", "Road",
-                        "AddressLine2",  "House",
+                        "AddressLine2", "House",
                         "AddressTown", "Manchester",
                         "AddressPostcode", "SW9 9SD",
-                        "AddressCounty",  "There",
+                        "AddressCounty", "There",
                         "AddressCountry", "Germany"
                 )
         );

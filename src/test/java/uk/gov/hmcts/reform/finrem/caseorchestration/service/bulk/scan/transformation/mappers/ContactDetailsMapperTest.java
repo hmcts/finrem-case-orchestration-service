@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.AddressesMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +16,7 @@ import java.util.function.BiFunction;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class AddressesMapperTest {
+public class ContactDetailsMapperTest {
 
     public static final String LINE_1 = "AddressLine1";
     public static final String LINE_2 = "AddressLine2";
@@ -30,10 +30,10 @@ public class AddressesMapperTest {
         List<OcrDataField> ocrFields = getOcrFieldsForAddresses();
         Map<String, Object> data = new HashMap<>();
 
-        AddressesMapper.applyAddressesMappings(ocrFields, data);
+        ContactDetailsMapper.applyAddressesMappings(ocrFields, data);
 
         assertAddressIsTransformed(
-                (Map) data.get(AddressesMapper.CcdFields.APPLICANT),
+                (Map) data.get(ContactDetailsMapper.CcdFields.APPLICANT),
                 buildImmutableMap(
                         LINE_1, "Road",
                         LINE_2, "House",
@@ -45,7 +45,7 @@ public class AddressesMapperTest {
         );
 
         assertAddressIsTransformed(
-                (Map) data.get(AddressesMapper.CcdFields.RESPONDENT),
+                (Map) data.get(ContactDetailsMapper.CcdFields.RESPONDENT),
                 buildImmutableMap(
                         LINE_1, "Avenue",
                         LINE_2, "Bungalow",

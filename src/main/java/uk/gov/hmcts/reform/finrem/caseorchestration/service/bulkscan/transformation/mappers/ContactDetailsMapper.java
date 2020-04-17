@@ -10,7 +10,7 @@ import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.applyMappings;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.isApplicantRepresented;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.isRespondentRepresented;
 
-public class AddressesMapper {
+public class ContactDetailsMapper {
 
     public static class CcdFields {
         public static final String APPLICANT = CCDConfigConstant.APPLICANT_ADDRESS;

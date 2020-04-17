@@ -5,8 +5,8 @@ import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.AddressesMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +31,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.applicantRepresentedPaperToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
@@ -68,7 +67,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         commaSeparatedEntryTransformer(OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "dischargePeriodicalPaymentSubstituteFor",
                 dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames, ocrDataFields, transformedCaseData);
 
-        AddressesMapper.applyAddressesMappings(ocrDataFields, transformedCaseData);
+        ContactDetailsMapper.applyAddressesMappings(ocrDataFields, transformedCaseData);
         ChildrenInfoMapper.applyMappings(ocrDataFields, transformedCaseData);
 
         mapAuthorisationSignedToYesOrNo(OcrFieldName.AUTHORISATION_SIGNED, "authorisationSigned", ocrDataFields, transformedCaseData);
@@ -107,7 +106,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             modifiedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
         }
 
-        AddressesMapper.setupContactDetailsForApplicantAndRespondent(modifiedCaseData);
+        ContactDetailsMapper.setupContactDetailsForApplicantAndRespondent(modifiedCaseData);
 
         return modifiedCaseData;
     }
@@ -115,7 +114,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
     private String getValueForIsRepresented(Map<String, Object> modifiedCaseData) {
         String applicantRepresentedPaperValue = nullToEmpty(modifiedCaseData.get(APPLICANT_REPRESENTED_PAPER));
 
-        return applicantRepresentedPaperValue.equalsIgnoreCase(FR_APPLICANT_REPRESENTED_3) ?  YES_VALUE : NO_VALUE;
+        return applicantRepresentedPaperValue.equalsIgnoreCase(FR_APPLICANT_REPRESENTED_3) ? YES_VALUE : NO_VALUE;
     }
 
     /**
