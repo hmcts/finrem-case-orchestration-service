@@ -24,11 +24,6 @@ public class DocumentHelper {
     private static final String CONSENT_ORDER_COLLECTION = "amendedConsentOrderCollection";
     private static final String RESPOND_TO_ORDER_DOCUMENTS = "respondToOrderDocuments";
     private ObjectMapper objectMapper;
-    private static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
-
-    private static boolean isAmendedConsentOrderType(RespondToOrderData respondToOrderData) {
-        return AMENDED_CONSENT_ORDER.equalsIgnoreCase(respondToOrderData.getRespondToOrder().getDocumentType());
-    }
 
 
     public CaseDocument getLatestAmendedConsentOrder(Map<String, Object> caseData) {
@@ -40,8 +35,6 @@ public class DocumentHelper {
         return reduce
                 .map(consentOrderData -> consentOrderData.getConsentOrder().getAmendedConsentOrder())
                 .orElseGet(() -> convertToCaseDocument(caseData.get("latestConsentOrder")));
-
-
     }
 
     public List<CaseDocument> getPensionDocumentsData(Map<String, Object> caseData) {
@@ -72,7 +65,6 @@ public class DocumentHelper {
         });
     }
 
-
     private List<RespondToOrderData> convertToRespondToOrderDataList(Object object) {
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.convertValue(object, new TypeReference<List<RespondToOrderData>>() {
@@ -84,13 +76,14 @@ public class DocumentHelper {
                 .map(this::convertToRespondToOrderDataList)
                 .orElse(emptyList())
                 .stream()
-                .filter(DocumentHelper::isAmendedConsentOrderType)
+                .filter(CommonConditions::isAmendedConsentOrderType)
                 .reduce((first, second) -> second);
         if (respondToOrderData.isPresent()) {
             return respondToOrderData
                     .map(respondToOrderData1 -> respondToOrderData.get().getRespondToOrder().getDocumentLink());
         }
-        return Optional.empty();
 
+        return Optional.empty();
     }
 }
+

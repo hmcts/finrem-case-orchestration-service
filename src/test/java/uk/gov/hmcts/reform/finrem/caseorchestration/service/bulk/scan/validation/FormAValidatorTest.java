@@ -33,21 +33,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_PBA_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_COUNTRY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_COUNTY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_LINE_1;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_POSTCODE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_TOWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_DX_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLYING_FOR_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_FIRM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SIGNED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SIGNED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SOLICITOR_ADDRESS;
@@ -71,11 +63,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_ADDRESS_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_ADDRESS_TOWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_FULL_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_COUNTRY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_COUNTY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_LINE_1;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_POSTCODE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_TOWN;
 
 public class FormAValidatorTest {
 
@@ -105,16 +92,9 @@ public class FormAValidatorTest {
                 new OcrDataField(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "a lump sum order,a pension compensation sharing order"),
                 new OcrDataField(APPLICANT_SOLICITOR_NAME, "Saul Call"),
                 new OcrDataField(APPLICANT_SOLICITOR_FIRM, "Better Divorce Ltd"),
-                new OcrDataField(APPLICANT_SOLICITOR_ADDRESS_LINE_1, "20 Solicitors Road"),
-                new OcrDataField(APPLICANT_SOLICITOR_ADDRESS_TOWN, "Soltown"),
-                new OcrDataField(APPLICANT_SOLICITOR_ADDRESS_COUNTY, "East Midlands"),
-                new OcrDataField(APPLICANT_SOLICITOR_ADDRESS_POSTCODE, "GL51 0EX"),
-                new OcrDataField(APPLICANT_SOLICITOR_ADDRESS_COUNTRY, "UK"),
-                new OcrDataField(APPLICANT_SOLICITOR_PHONE, "0712456543"),
                 new OcrDataField(APPLICANT_SOLICITOR_DX_NUMBER, "DX123"),
                 new OcrDataField(APPLICANT_SOLICITOR_REFERENCE, "SOL-RED"),
                 new OcrDataField(APPLICANT_PBA_NUMBER, "PBA123456"),
-                new OcrDataField(APPLICANT_SOLICITOR_EMAIL, "test@example.com"),
                 new OcrDataField(APPLICANT_ADDRESS_LINE_1, "Road"),
                 new OcrDataField(APPLICANT_ADDRESS_TOWN, "Manchester"),
                 new OcrDataField(APPLICANT_ADDRESS_COUNTY, "There"),
@@ -127,11 +107,6 @@ public class FormAValidatorTest {
                 new OcrDataField(RESPONDENT_ADDRESS_COUNTY, "Here"),
                 new OcrDataField(RESPONDENT_ADDRESS_POSTCODE, "SW1 9SD"),
                 new OcrDataField(RESPONDENT_ADDRESS_COUNTRY, "UK"),
-                new OcrDataField(RESPONDENT_SOLICITOR_ADDRESS_LINE_1, "Drive"),
-                new OcrDataField(RESPONDENT_SOLICITOR_ADDRESS_TOWN, "Leeds"),
-                new OcrDataField(RESPONDENT_SOLICITOR_ADDRESS_COUNTY, "Where"),
-                new OcrDataField(RESPONDENT_SOLICITOR_ADDRESS_POSTCODE, "SW9 USB"),
-                new OcrDataField(RESPONDENT_SOLICITOR_ADDRESS_COUNTRY, "Scotland"),
                 new OcrDataField("AddressofProperties", "26 Westminster Avenue"),
                 new OcrDataField("MortgageDetails", "We paid for the house with our mortgage which we split"),
                 new OcrDataField("OrderForChildren", "there is no agreement, but the applicant is applying for payments"),
@@ -204,7 +179,6 @@ public class FormAValidatorTest {
                 new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "No"),
                 new OcrDataField(DIVORCE_STAGE_REACHED, "The cree"),
                 new OcrDataField(APPLICANT_REPRESENTED, "It's wrong!"),
-                new OcrDataField(APPLICANT_SOLICITOR_EMAIL, "solicitor@firm"),
                 new OcrDataField(APPLICANT_EMAIL, "peter@com"),
                 new OcrDataField(ORDER_FOR_CHILDREN, "Not a valid order for children"),
                 new OcrDataField(ORDER_FOR_CHILDREN_NO_AGREEMENT, "Not a valid reason for no agreement"),
@@ -219,7 +193,7 @@ public class FormAValidatorTest {
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
         assertThat(validationResult.getErrors(), is(emptyList()));
-        assertThat(validationResult.getWarnings().size(), is(23));
+        assertThat(validationResult.getWarnings().size(), is(22));
         assertThat(validationResult.getWarnings(), hasItems(
                 mandatoryFieldIsMissing.apply(DIVORCE_CASE_NUMBER),
                 "HWFNumber is usually 6 digits",
@@ -243,7 +217,6 @@ public class FormAValidatorTest {
                         "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
                         "I am represented by a solicitor in these proceedings, who has signed Section 5"
                                 + " and all documents for my attention should be sent to my solicitor whose details are as follows"),
-                notInValidFormat(APPLICANT_SOLICITOR_EMAIL),
                 notInValidFormat(APPLICANT_EMAIL),
                 mustBeOneOf(ORDER_FOR_CHILDREN,
                         "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children",

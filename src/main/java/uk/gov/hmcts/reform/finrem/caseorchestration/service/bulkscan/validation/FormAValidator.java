@@ -28,9 +28,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_INTENDS_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_ADDRESS_POSTCODE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLYING_FOR_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SIGNED;
@@ -50,7 +47,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.PROVISION_MADE_FOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_ADDRESS_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_FULL_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_SOLICITOR_ADDRESS_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.natureOfApplicationChecklistToCcdFieldNames;
 
@@ -147,14 +143,10 @@ public class FormAValidator extends BulkScanFormValidator {
                         DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE,
                         dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames
                 ),
-                validateField(fieldsMap, APPLICANT_SOLICITOR_PHONE, CCD_PHONE_NUMBER_REGEX),
                 validateField(fieldsMap, APPLICANT_PHONE, CCD_PHONE_NUMBER_REGEX),
-                validateField(fieldsMap, APPLICANT_SOLICITOR_EMAIL, CCD_EMAIL_REGEX),
                 validateField(fieldsMap, APPLICANT_EMAIL, CCD_EMAIL_REGEX),
-                validatePostcode(fieldsMap, APPLICANT_SOLICITOR_ADDRESS_POSTCODE),
                 validatePostcode(fieldsMap, APPLICANT_ADDRESS_POSTCODE),
                 validatePostcode(fieldsMap, RESPONDENT_ADDRESS_POSTCODE),
-                validatePostcode(fieldsMap, RESPONDENT_SOLICITOR_ADDRESS_POSTCODE),
                 validateField(fieldsMap, DIVORCE_CASE_NUMBER, DIVORCE_CASE_NUMBER_REGEX)
         )
                 .flatMap(Collection::stream)

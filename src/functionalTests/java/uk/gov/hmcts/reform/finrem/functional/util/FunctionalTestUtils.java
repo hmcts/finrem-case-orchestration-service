@@ -129,7 +129,7 @@ public class FunctionalTestUtils {
 
     public void validatePostSuccess(String url, String filename, String journeyType) {
         int statusCode = getResponse(url, filename, journeyType).getStatusCode();
-        assertEquals(HttpStatus.OK, HttpStatus.valueOf(statusCode));
+        assertEquals(HttpStatus.OK.value(), statusCode);
     }
 
     public JsonPath getResponseData(String url, String jsonBody, String dataPath) {

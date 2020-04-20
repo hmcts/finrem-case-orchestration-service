@@ -36,7 +36,7 @@ public class NotificationService {
     private static final String MSG_SOLICITOR_EMAIL = " for solicitor email";
     private static final String EXCEPTION = "exception :";
     private static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
-    private static final String KENTFRC = "kentfrc";
+    private static final String KENT = "kent";
     private static final String REGION = "region";
     private static final String NEWPORT = "newport";
     private static final String SWANSEA = "swansea";
@@ -183,8 +183,8 @@ public class NotificationService {
 
     private String getSouthEastFRC(Map allocatedCourtMap) {
         String southEastList = (String) allocatedCourtMap.get("southEastList");
-        if (KENTFRC.equalsIgnoreCase(southEastList)) {
-            return KENTFRC;
+        if (KENT.equalsIgnoreCase(southEastList)) {
+            return KENT;
         }
         return EMPTY;
     }

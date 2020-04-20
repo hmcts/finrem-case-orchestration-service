@@ -7,12 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullName;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresented;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 public class CommonFunctionTest {
 
@@ -20,35 +19,46 @@ public class CommonFunctionTest {
     private static String L_NAME = "l";
 
     @Test
-    public void addressLineOneAndPostCodeAreBothNotEmptyReturnsTrue() {
-        asList(
-                asList("102 Petty France", "SW8 2PX"),
-                asList("102 Petty France", "invalid format of postcode")
-        ).forEach(testCase -> assertThat(addressLineOneAndPostCodeAreBothNotEmpty(address(testCase)), is(true)));
+    public void nullToEmptyShouldReturnEmptyWhenNull() {
+        assertThat(nullToEmpty(null), is(""));
     }
 
     @Test
-    public void addressLineOneAndPostCodeAreBothNotEmptyReturnsFalse() {
+    public void nullToEmptyShouldReturnEmptyWhenEmpty() {
+        assertThat(nullToEmpty(""), is(""));
+    }
+
+    @Test
+    public void nullToEmptyShouldReturnStringWhenString() {
+        assertThat(nullToEmpty("this is my value"), is("this is my value"));
+    }
+
+    @Test
+    public void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnTrueWhenLineOneAndPostCodeArePopulated() {
+        assertThat(
+                addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(asList("London Road", "sw2 3rf"))),
+                is(true)
+        );
+    }
+
+    @Test
+    public void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnFalseWhenNull() {
+        assertThat(addressLineOneAndPostCodeAreBothNotEmpty(null), is(false));
+    }
+
+    @Test
+    public void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnFalse() {
         asList(
+                asList("", "sw2 3rf"),
                 asList("", ""),
-                asList("Street", ""),
-                asList("", "SW2 9IP")
-        ).forEach(testCase -> assertThat(addressLineOneAndPostCodeAreBothNotEmpty(address(testCase)), is(false)));
-    }
-
-    @Test
-    public void isApplicantRepresentedShouldReturnTrue() {
-        assertThat(isApplicantRepresented(caseData("Yes")), is(true));
-    }
-
-    @Test
-    public void isApplicantRepresentedShouldReturnFalse() {
-        asList(
-                "no",
-                "234rt3egw43t2wgr42t",
-                null,
-                ""
-        ).forEach(v -> assertThat(isApplicantRepresented(caseData(v)), is(false)));
+                asList("London Road", ""),
+                asList("London Road", null),
+                asList(null, null),
+                asList(null, "Sw8 7ty")
+        ).forEach(data -> assertThat(
+                addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(data)),
+                is(false))
+        );
     }
 
     @Test
@@ -66,19 +76,13 @@ public class CommonFunctionTest {
         assertThat(buildFullName(fullName("    Pit   ", "     Smith    "), F_NAME, L_NAME), is("Pit Smith"));
     }
 
-    private static Map<String, Object> address(List<String> values) {
-        Map<String, Object> addressMap = new HashMap<>();
-        addressMap.put("AddressLine1", values.get(0));
-        addressMap.put("PostCode", values.get(1));
+    private static Map<String, String> createAddressObject(List<? extends Object> data) {
+        Map<String, String> address = new HashMap<>();
 
-        return addressMap;
-    }
+        address.put("AddressLine1", (String) data.get(0));
+        address.put("PostCode", (String) data.get(1));
 
-    private static Map<String, Object> caseData(String value) {
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put(APPLICANT_REPRESENTED, value);
-
-        return caseDataMap;
+        return address;
     }
 
     private static Map<String, Object> fullName(String firstName, String lastName) {

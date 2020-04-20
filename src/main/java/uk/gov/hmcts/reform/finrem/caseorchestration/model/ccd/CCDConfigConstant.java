@@ -9,7 +9,8 @@ public class CCDConfigConstant {
     public static final String APPLICANT_FIRST_MIDDLE_NAME = "applicantFMName";
     public static final String APPLICANT_LAST_NAME = "applicantLName";
     public static final String APPLICANT_ADDRESS = "applicantAddress";
-
+    public static final String APPLICANT_PHONE = "applicantPhone";
+    public static final String APPLICANT_EMAIL = "applicantEmail";
 
     public static final String APP_RESPONDENT_FIRST_MIDDLE_NAME = "appRespondentFMName";
     public static final String APP_RESPONDENT_LAST_NAME = "appRespondentLName";
@@ -19,6 +20,7 @@ public class CCDConfigConstant {
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
     public static final String SOLICITOR_NAME = "solicitorName";
     public static final String SOLICITOR_EMAIL = "solicitorEmail";
+    public static final String SOLICITOR_PHONE = "solicitorPhone";
     public static final String SOLICITOR_ADDRESS = "solicitorAddress";
     public static final String CONTESTED_SOLICITOR_EMAIL = "applicantSolicitorEmail";
     public static final String CONTESTED_SOLICITOR_NAME = "applicantSolicitorName";
@@ -26,6 +28,7 @@ public class CCDConfigConstant {
     public static final String APP_SOLICITOR_ADDRESS_CCD_FIELD = "solicitorAddress";
     public static final String SOLICITOR_AGREE_TO_RECEIVE_EMAILS = "solicitorAgreeToReceiveEmails";
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";
+    public static final String APPLICANT_REPRESENTED_PAPER = "applicantRepresentedPaper";
 
     //Respondent Solicitor Related
     public static final String RESPONDENT_REPRESENTED = "appRespondentRep";
@@ -79,4 +82,6 @@ public class CCDConfigConstant {
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
     public static final String UPLOAD_ORDER = "uploadOrder";
     public static final String CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER = "consentOrderApprovedNotificationLetter";
+
+    public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
 }
