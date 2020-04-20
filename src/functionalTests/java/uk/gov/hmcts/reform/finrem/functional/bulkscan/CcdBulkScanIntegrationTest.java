@@ -67,7 +67,7 @@ public class CcdBulkScanIntegrationTest {
     }
 
     private String transformOcrData(String path) throws Exception {
-        String token = idamUtils.generateServiceTokenWithValidMicroservice(bulkScanTransformationAndUpdateMicroservice);//TODO - I might be able to use the bean loaded in the context class
+        String token = idamUtils.generateServiceTokenWithValidMicroservice(bulkScanTransformationAndUpdateMicroservice);
         String body = ResourceLoader.loadResourceAsString(path);
         Response response = SerenityRest.given()
                 .header("Content-Type", APPLICATION_JSON_VALUE)
