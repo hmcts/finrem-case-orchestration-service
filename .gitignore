@@ -29,3 +29,7 @@ functional-output/
 /dist/
 /nbdist/
 /.nb-gradle/
+
+### Local test files (properties or yaml) ###
+/src/functionalTests/resources/application-local.*
+/src/main/resources/application-*.*

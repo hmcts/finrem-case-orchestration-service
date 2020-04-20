@@ -55,7 +55,7 @@ public class CcdBulkScanIntegrationTest {
     public void givenOcrPayload_whenTransformedPayloadUploadedToCcd_thenCaseIsCreated() throws Exception {
         String transformedOcrData = transformOcrData(FORM_A_JSON);
         Map caseCreationDetails = ResourceLoader.jsonToObject(transformedOcrData.getBytes(StandardCharsets.UTF_8), Map.class);
-        Object caseData = ((Map)caseCreationDetails.get("case_creation_details")).get("case_data");
+        Object caseData = ((Map) caseCreationDetails.get("case_creation_details")).get("case_data");
 
         try {
             UserDetails userDetails = idamUtils.createCaseworkerUser();
@@ -76,7 +76,7 @@ public class CcdBulkScanIntegrationTest {
                 .body(body)
                 .post(cosBaseUrl + "/transform-exception-record");
 
-        assertThat(HttpStatus.valueOf(response.getStatusCode()), is(HttpStatus.OK));
+        assertThat(response.getStatusCode(), is(HttpStatus.OK.value()));
 
         return response.body().asString();
     }
@@ -85,34 +85,35 @@ public class CcdBulkScanIntegrationTest {
         String serviceToken = idamUtils.generateServiceTokenWithValidMicroservice(DIVORCE_SERVICE_AUTHORISED_WITH_CCD);
 
         StartEventResponse startEventResponse = coreCaseDataApi.startForCaseworker(
-            userDetails.getAuthToken(),
-            serviceToken,
-            userDetails.getId(),
+                userDetails.getAuthToken(),
+                serviceToken,
+                userDetails.getId(),
                 DIVORCE_JURISDICTION_ID,
                 CASE_TYPE_ID_CONSENTED,
                 FR_NEW_PAPER_CASE_EVENT_ID
         );
 
         final CaseDataContent caseDataContent = CaseDataContent.builder()
-            .caseReference("FinRem-" + UUID.randomUUID().toString())
-            .data(caseData)
-            .event(Event.builder()
-                .id(startEventResponse.getEventId())
-                .summary("Case created")
-                .description("Case created by FinRem integration test from " + cosBaseUrl)
-                .build())
-            .eventToken(startEventResponse.getToken())
-            .build();
+                .caseReference("FinRem-" + UUID.randomUUID().toString())
+                .data(caseData)
+                .event(Event.builder()
+                        .id(startEventResponse.getEventId())
+                        .summary("Case created")
+                        .description("Case created by FinRem integration test from " + cosBaseUrl)
+                        .build())
+                .eventToken(startEventResponse.getToken())
+                .build();
 
         CaseDetails caseDetails = coreCaseDataApi.submitForCaseworker(
-            userDetails.getAuthToken(),
-            serviceToken,
-            userDetails.getId(),
-            DIVORCE_JURISDICTION_ID,
-            CASE_TYPE_ID_CONSENTED,
-            true,
-            caseDataContent);
+                userDetails.getAuthToken(),
+                serviceToken,
+                userDetails.getId(),
+                DIVORCE_JURISDICTION_ID,
+                CASE_TYPE_ID_CONSENTED,
+                true,
+                caseDataContent);
 
         log.info("Created case ID {}", caseDetails.getId());
     }
+
 }

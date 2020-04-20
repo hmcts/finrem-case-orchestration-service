@@ -46,7 +46,7 @@ public class IdamUtils {
 
     public String generateUserTokenWithNoRoles(String username, String password) {
         String userLoginDetails = String.join(":", username, password);
-        final String authHeader = "Basic " + new String(Base64.getEncoder().encode((userLoginDetails).getBytes()));
+        final String authHeader = "Basic " + new String(Base64.getEncoder().encode(userLoginDetails.getBytes()));
 
         Response response = RestAssured.given()
             .header(AUTHORIZATION_HEADER, authHeader)
@@ -54,7 +54,7 @@ public class IdamUtils {
             .post(idamCodeUrl());
 
         assert response.getStatusCode() < 300
-                : String.format("Code generation failed with code: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
+            : String.format("Code generation failed with code: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
 
         String code = response.getBody().path("code");
 
@@ -66,32 +66,32 @@ public class IdamUtils {
         String token = response.getBody().path("access_token");
 
         assert HttpStatus.valueOf(response.getStatusCode()) == HttpStatus.OK
-                : String.format("Token generation failed with code: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
+            : String.format("Token generation failed with code: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
 
         return token;
     }
 
     public String generateServiceTokenWithValidMicroservice(String microserviceName) {
         Response response = SerenityRest.given()
-                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                .relaxedHTTPSValidation()
-                .body(String.format("{\"microservice\": \"%s\"}", microserviceName))
-                .post(idamS2sAuthUrl + "/testing-support/lease");
+            .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+            .relaxedHTTPSValidation()
+            .body(String.format("{\"microservice\": \"%s\"}", microserviceName))
+            .post(idamS2sAuthUrl + "/testing-support/lease");
 
         assert response.getStatusCode() < 300
-                : String.format("Token generation failed with code: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
+            : String.format("Token generation failed with code: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
 
-        assert HttpStatus.valueOf(response.getStatusCode()) == HttpStatus.OK
-                : "Error generating code from IDAM: " + response.getStatusCode();
+        assert response.getStatusCode() == HttpStatus.OK.value()
+            : "Error generating code from IDAM: " + response.getStatusCode();
 
         return "Bearer " + response.getBody().asString();
     }
 
     public String getUserId(String jwt) {
         Response response = SerenityRest.given()
-                .header("Authorization", jwt)
-                .relaxedHTTPSValidation()
-                .get(idamUserBaseUrl + "/details");
+            .header("Authorization", jwt)
+            .relaxedHTTPSValidation()
+            .get(idamUserBaseUrl + "/details");
 
         return response.getBody().path("id").toString();
     }
@@ -99,7 +99,7 @@ public class IdamUtils {
     public UserDetails createCaseworkerUser() {
         String username = String.format("%s-%s@%s", CASEWORKER_USERNAME_PREFIX, UUID.randomUUID(), TESTUSER_MAIL_DOMAIN);
         String password = "GNU-TP-chapter13";
-        String[] roles = new String[] {
+        String[] roles = new String[]{
             "caseworker-divorce",
             "caseworker-divorce-financialremedy",
             "caseworker-divorce-financialremedy-courtadmin",
@@ -112,12 +112,12 @@ public class IdamUtils {
         String userId = getUserId(authToken);
 
         UserDetails userDetails = UserDetails.builder()
-                .username(username)
-                .emailAddress(username)
-                .password(password)
-                .authToken(authToken)
-                .id(userId)
-                .build();
+            .username(username)
+            .emailAddress(username)
+            .password(password)
+            .authToken(authToken)
+            .id(userId)
+            .build();
 
         createdUsers.add(userDetails);
 
@@ -130,37 +130,37 @@ public class IdamUtils {
         UserGroup[] rolesArray = new UserGroup[roles.length];
 
         RegisterUserRequest registerUserRequest =
-                RegisterUserRequest.builder()
-                        .email(username)
-                        .forename("Esme")
-                        .surname("Weatherwax")
-                        .password(password)
-                        .roles(rolesList.toArray(rolesArray))
-                        .userGroup(UserGroup.builder().code(userGroup).build())
-                        .build();
+            RegisterUserRequest.builder()
+                .email(username)
+                .forename("Esme")
+                .surname("Weatherwax")
+                .password(password)
+                .roles(rolesList.toArray(rolesArray))
+                .userGroup(UserGroup.builder().code(userGroup).build())
+                .build();
 
         Response response = SerenityRest.given()
-                .header("Content-Type", "application/json")
-                .relaxedHTTPSValidation()
-                .body(registerUserRequest)
-                .post(idamCreateUrl());
+            .header("Content-Type", "application/json")
+            .relaxedHTTPSValidation()
+            .body(registerUserRequest)
+            .post(idamCreateUrl());
 
         assert response.getStatusCode() < 300
-                : String.format("Creating user failed, status: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
+            : String.format("Creating user failed, status: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
 
         log.info("Test user created: {}", username);
     }
 
     public void deleteTestUsers() {
         createdUsers.stream()
-                .map(UserDetails::getUsername)
-                .forEach(this::deleteTestUser);
+            .map(UserDetails::getUsername)
+            .forEach(this::deleteTestUser);
     }
 
     private void deleteTestUser(String username) {
         Response response = SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .delete(idamDeleteUserUrl(username));
+            .relaxedHTTPSValidation()
+            .delete(idamDeleteUserUrl(username));
 
         if (response.getStatusCode() < 300) {
             log.info("Deleted test user {}", username);

@@ -23,15 +23,14 @@ public class ConsentOrderService {
     public CaseDocument getLatestConsentOrderData(CallbackRequest callbackRequest) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
-        Optional<CaseDocument> caseDocument;
-        if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(callbackRequest.getEventId())) {
-            caseDocument = documentHelper.getLatestRespondToOrderDocuments(caseData);
-        } else if (FR_AMENDED_CONSENT_ORDER.equalsIgnoreCase(callbackRequest.getEventId())) {
+        String eventId = callbackRequest.getEventId();
+        if (FR_RESPOND_TO_ORDER.equalsIgnoreCase(eventId)) {
+            return documentHelper.getLatestRespondToOrderDocuments(caseData)
+                    .orElseGet(() -> documentHelper.convertToCaseDocument(caseData.get("latestConsentOrder")));
+        } else if (FR_AMENDED_CONSENT_ORDER.equalsIgnoreCase(eventId)) {
             return documentHelper.getLatestAmendedConsentOrder(caseData);
         } else {
             return documentHelper.convertToCaseDocument(caseData.get("consentOrder"));
         }
-        return caseDocument
-                .orElseGet(() -> documentHelper.convertToCaseDocument(caseData.get("latestConsentOrder")));
     }
 }
