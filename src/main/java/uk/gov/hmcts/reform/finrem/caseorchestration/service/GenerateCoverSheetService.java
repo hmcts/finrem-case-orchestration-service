@@ -39,6 +39,7 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
         log.info("Generating Applicant cover sheet {} from {} for bulk print",
                 config.getBulkPrintFileName(),
                 config.getBulkPrintTemplate());
+
         prepareApplicantCoverSheet(caseDetails);
 
         return generateDocument(
@@ -52,6 +53,7 @@ public class GenerateCoverSheetService extends AbstractDocumentService {
         log.info("Generating Respondent cover sheet {} from {} for bulk print",
             config.getBulkPrintFileName(),
             config.getBulkPrintTemplate());
+
         prepareRespondentCoverSheet(caseDetails);
 
         return generateDocument(

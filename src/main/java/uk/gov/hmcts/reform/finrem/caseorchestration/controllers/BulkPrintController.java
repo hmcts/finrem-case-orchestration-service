@@ -69,8 +69,8 @@ public class BulkPrintController implements BaseController {
 
         caseDetails = callback.getCaseDetails();
 
-        generateCoversheetForApplicant(authToken);
-        generateCoversheetForRespondent(authToken);
+        generateAndSendCoversheetForApplicant(authToken);
+        generateAndSendCoversheetForRespondent(authToken);
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.remove(BULK_PRINT_COVER_SHEET);
@@ -79,7 +79,7 @@ public class BulkPrintController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    private void generateCoversheetForApplicant(String authToken) {
+    private void generateAndSendCoversheetForApplicant(String authToken) {
 
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -95,7 +95,7 @@ public class BulkPrintController implements BaseController {
         }
     }
 
-    private void generateCoversheetForRespondent(String authToken) {
+    private void generateAndSendCoversheetForRespondent(String authToken) {
 
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authToken);
         UUID respondentLetterId = bulkPrintService.sendForBulkPrint(respondentCoverSheet, caseDetails);

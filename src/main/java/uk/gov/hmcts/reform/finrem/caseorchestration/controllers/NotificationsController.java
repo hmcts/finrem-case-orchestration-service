@@ -24,6 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOL_CONSENT_FOR_EMAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
@@ -89,6 +90,11 @@ public class NotificationsController implements BaseController {
             // TODO: PUT THIS BEHIND A FEATURE TOGGLE SO WE CAN GO LIVE
             log.info("Sending 'Judge assigned to case' letter to bulk print");
             assignedToJudgeBulkPrintService.sendLetter(authorisationToken, callbackRequest.getCaseDetails());
+
+            caseData.remove("ree whatever we call document");
+            log.info("Bulk print is successful for 'Judge assigned to case' notification letter");
+
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
