@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service;
+package uk.gov.hmcts.reform.finrem.caseorchestration;
 
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
@@ -7,9 +7,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 
-@Profile("test-bulk-print-service")
+@Profile("test-mock-document-client")
 @Configuration
-public class BulkPrintServiceTestConfiguration {
+public class MockDocumentClientTestConfiguration {
 
     @Bean
     @Primary

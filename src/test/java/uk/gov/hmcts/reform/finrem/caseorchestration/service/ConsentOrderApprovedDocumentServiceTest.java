@@ -44,7 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
-@ActiveProfiles("test-bulk-print-service")
+@ActiveProfiles("test-mock-document-client")
 public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Autowired
