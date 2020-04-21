@@ -12,19 +12,26 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.AssignedToJudgeBulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.HelpWithFeesBulkPrintService;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOL_CONSENT_FOR_EMAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
@@ -34,6 +41,9 @@ public class NotificationsController implements BaseController {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private BulkPrintService bulkPrintService;
 
     @Autowired
     private HelpWithFeesBulkPrintService helpWithFeesBulkPrintService;
@@ -88,16 +98,33 @@ public class NotificationsController implements BaseController {
             notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
         } else if (isPaperApplication(caseData)) {
             // TODO: PUT THIS BEHIND A FEATURE TOGGLE SO WE CAN GO LIVE
+
             log.info("Sending 'Judge assigned to case' letter to bulk print");
-            assignedToJudgeBulkPrintService.sendLetter(authorisationToken, callbackRequest.getCaseDetails());
 
-            caseData.remove("ree whatever we call document");
+            generateAndSendJudgeAssignedToCaseLetter(authorisationToken, callbackRequest.getCaseDetails());
+
+            caseData.remove(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER);
             log.info("Bulk print is successful for 'Judge assigned to case' notification letter");
-
-            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
+
+    // will move elsewhere below once it works
+    private void generateAndSendJudgeAssignedToCaseLetter(String authToken, CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData(uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.AssignedToJudgeBulkPrintServiceTest);
+
+        CaseDocument judgeAssignedToCaseLetter =
+            assignedToJudgeBulkPrintService.generateJudgeAssignedToCaseLetter(authToken, caseDetails);
+        UUID judgeAssignedToCaseLetterId =
+            bulkPrintService.sendNotificationLetterForBulkPrint(judgeAssignedToCaseLetter, caseDetails);
+
+        caseData.put(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER, judgeAssignedToCaseLetter);
+        caseData.put(BULK_PRINT_LETTER_ID_APP, judgeAssignedToCaseLetterId);
+
+        log.info("Generated Judge assigned to case letter bulk print. letter: {}, letterId : {}",
+            judgeAssignedToCaseLetter, judgeAssignedToCaseLetterId);
+    }
+    // will move elsewhere above once it works
 
     @PostMapping(value = "/case-orchestration/notify/consent-order-made", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for Consent Order Made.")

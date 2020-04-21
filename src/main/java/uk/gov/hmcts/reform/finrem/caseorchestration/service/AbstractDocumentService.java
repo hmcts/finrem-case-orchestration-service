@@ -5,6 +5,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DataForTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -13,8 +14,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.TemplateDetai
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static java.util.Arrays.asList;
 
 public abstract class AbstractDocumentService {
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
@@ -69,7 +73,7 @@ public abstract class AbstractDocumentService {
         return caseDocument(miniFormA);
     }
 
-    UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
+    protected UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
         return documentClient.bulkPrint(bulkPrintRequest);
     }
 
@@ -110,5 +114,9 @@ public abstract class AbstractDocumentService {
         } catch (IOException e) {
             throw new IllegalStateException();
         }
+    }
+
+    protected List<BulkPrintDocument> preparePrintDocuments(CaseDocument document) {
+        return asList(BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl()).build());
     }
 }

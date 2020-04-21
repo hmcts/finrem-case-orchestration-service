@@ -133,7 +133,7 @@ public class NotificationsControllerTest {
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(assignedToJudgeBulkPrintService, times(1)).sendLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
+        verify(assignedToJudgeBulkPrintService, times(1)).generateJudgeAssignedToCaseLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
         verifyNoMoreInteractions(notificationService);
     }
 

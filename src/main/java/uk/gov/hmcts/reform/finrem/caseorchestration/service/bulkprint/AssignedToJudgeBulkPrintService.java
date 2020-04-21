@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.AssignedToJudgeLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AbstractDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -36,36 +35,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 public class AssignedToJudgeBulkPrintService extends AbstractDocumentService {
 
     @Autowired
-    private BulkPrintService bulkPrintService;
-
-    @Autowired
     public AssignedToJudgeBulkPrintService(DocumentClient documentClient, DocumentConfiguration config, ObjectMapper objectMapper) {
         super(documentClient, config, objectMapper);
-    }
-
-    public CaseDetails sendLetter(String authToken, CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-
-        CaseDocument assignedToJudgeLetter = generateAssignedToJudgeBulkPrintLetter(caseDetails, authToken);
-        // take generated letter and send for bulk print
-        bulkPrintService.sendForBulkPrint(assignedToJudgeLetter, caseDetails);
-        // also update to store letter in CCD
-
-        /* need to properly send to bulk print using:
-
-        return bulkPrint(
-            BulkPrintRequest.builder()
-                .caseId(caseDetails.getId().toString())
-                .letterType("FINANCIAL_REMEDY_PACK")
-                .bulkPrintDocuments(bulkPrintDocuments)
-                .build());
-         */
-
-        log.info("Application assigned to judge bulk print letter - generated {}", assignedToJudgeLetter);
-        // Need to remove the document before saving to CCD
-        caseData.remove(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER);
-
-        return caseDetails;
     }
 
     /*
@@ -73,31 +44,21 @@ public class AssignedToJudgeBulkPrintService extends AbstractDocumentService {
     have similar methods i.e. printLetter and sendLetterToBulkPrintService etc
      */
 
-    private CaseDocument generateAssignedToJudgeBulkPrintLetter(CaseDetails caseDetails, String authToken) {
-        String template = config.getApplicationAssignedToJudgeTemplate();
-        String filename = config.getApplicationAssignedToJudgeFileName();
+    public CaseDocument generateJudgeAssignedToCaseLetter(final String authToken, final CaseDetails caseDetails) {
+        log.info("Generating 'Assigned to Judge' letter {} from {} for bulk print",
+            config.getBulkPrintFileName(),
+            config.getBulkPrintTemplate());
 
-        log.info("Generating 'application assigned to judge' Letter {} from {} for bulk print", template, filename);
+        prepareJudgeAssignedToCaseLetter(caseDetails);
 
-        try {
-            AssignedToJudgeLetter letterToPrint = prepareAssignedToJudgeLetter(caseDetails);
-            // Set the built letter in the case data for sending to Docmosis
-            caseDetails.getData().put(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER, letterToPrint);
-
-            return generateDocument(
-                authToken,
-                caseDetails,
-                config.getApplicationAssignedToJudgeTemplate(),
-                config.getApplicationAssignedToJudgeFileName());
-
-        } catch (IllegalArgumentException exception) {
-            log.warn(
-                "Failed to generate 'application assigned to judge' Letter as not all required address details were present");
-            throw exception;
-        }
+        return generateDocument(
+            authToken,
+            caseDetails,
+            config.getBulkPrintTemplate(),
+            config.getBulkPrintFileName());
     }
 
-    private AssignedToJudgeLetter prepareAssignedToJudgeLetter(CaseDetails caseDetails) {
+    private void prepareJudgeAssignedToCaseLetter(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
         AssignedToJudgeLetter.AssignedToJudgeLetterBuilder assignedToJudgeLetterBuilder = AssignedToJudgeLetter.builder();
@@ -137,11 +98,13 @@ public class AssignedToJudgeBulkPrintService extends AbstractDocumentService {
             .phoneNumber("0300 303 0642")
             .openingHours("from 8.30am to 5pm");
 
-        return assignedToJudgeLetterBuilder
+        assignedToJudgeLetterBuilder
             .addressee(addresseeBuilder.build())
             .respondentName(buildFullName(caseData, APP_RESPONDENT_FIRST_MIDDLE_NAME, APP_RESPONDENT_LAST_NAME))
             .letterDate(String.valueOf(LocalDate.now()))
             .ctscContactDetails(ctscContactDetailsBuilder.build())
             .build();
+
+        caseDetails.getData().put(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER,  assignedToJudgeLetterBuilder);
     }
 }

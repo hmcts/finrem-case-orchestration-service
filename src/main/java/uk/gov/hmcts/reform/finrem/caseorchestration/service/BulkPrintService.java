@@ -29,7 +29,22 @@ public class BulkPrintService extends AbstractDocumentService {
         super(documentClient, config, objectMapper);
     }
 
-    public UUID sendForBulkPrint(final CaseDocument coverSheet, final CaseDetails caseDetails) {
+    public UUID sendNotificationLetterForBulkPrint(final CaseDocument letterToPrint, final CaseDetails caseDetails) {
+
+        log.info("Sending notification letter for bulk printing: {}", letterToPrint.getDocumentFilename());
+
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(letterToPrint.getDocumentBinaryUrl()).build());
+
+        return bulkPrint(
+            BulkPrintRequest.builder()
+                .caseId(caseDetails.getId().toString())
+                .letterType("FINANCIAL_REMEDY_PACK")
+                .bulkPrintDocuments(bulkPrintDocuments)
+                .build());
+    }
+
+    public UUID sendOrdersForBulkPrint(final CaseDocument coverSheet, final CaseDetails caseDetails) {
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
 

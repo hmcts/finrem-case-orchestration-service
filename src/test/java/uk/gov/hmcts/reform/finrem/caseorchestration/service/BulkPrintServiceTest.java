@@ -49,7 +49,7 @@ public class BulkPrintServiceTest {
 
         when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
-        UUID bulkPrintLetterId = service.sendForBulkPrint(
+        UUID bulkPrintLetterId = service.sendOrdersForBulkPrint(
             new CaseDocument(), caseDetails());
 
         assertThat(letterId, is(bulkPrintLetterId));
@@ -61,7 +61,7 @@ public class BulkPrintServiceTest {
 
         when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
-        UUID bulkPrintLetterId = service.sendForBulkPrint(
+        UUID bulkPrintLetterId = service.sendOrdersForBulkPrint(
             new CaseDocument(), caseDetailsForNonApproved());
 
         assertThat(letterId, is(bulkPrintLetterId));

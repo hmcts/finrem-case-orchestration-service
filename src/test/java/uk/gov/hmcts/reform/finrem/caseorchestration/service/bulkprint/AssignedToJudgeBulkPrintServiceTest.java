@@ -49,7 +49,7 @@ public class AssignedToJudgeBulkPrintServiceTest {
     @Mock
     private DocumentClient documentClient;
 
-    private ArgumentCaptor<DocumentGenerationRequest> bulkPrintRequestArgumentCaptor;
+    private ArgumentCaptor<DocumentGenerationRequest> bulkPrintRequestGeneratePdfCaptor;
     private AssignedToJudgeBulkPrintService assignedToJudgeBulkPrintService;
 
     @Before
@@ -57,20 +57,21 @@ public class AssignedToJudgeBulkPrintServiceTest {
         DocumentConfiguration config = new DocumentConfiguration();
         config.setApplicationAssignedToJudgeTemplate("FL-FRM-LET-ENG-00318.docx");
         config.setApplicationAssignedToJudgeFileName(FILE_NAME);
-        bulkPrintRequestArgumentCaptor = ArgumentCaptor.forClass(DocumentGenerationRequest.class);
+        bulkPrintRequestGeneratePdfCaptor = ArgumentCaptor.forClass(DocumentGenerationRequest.class);
 
-        when(documentClient.generatePdf(bulkPrintRequestArgumentCaptor.capture(), anyString()))
-                .thenReturn(buildDocumentModel());
+        when(documentClient.generatePdf(bulkPrintRequestGeneratePdfCaptor.capture(), anyString()))
+            .thenReturn(buildDocumentModel());
 
         assignedToJudgeBulkPrintService = new AssignedToJudgeBulkPrintService(
-                documentClient, config, new ObjectMapper()
+            documentClient, config, new ObjectMapper()
         );
     }
 
     @Test
     public void sendLetterShouldBeOkWhenNotRepresented() {
-        CaseDetails caseDetails = assignedToJudgeBulkPrintService.sendLetter(AUTH_TOKEN, buildCaseDetails());
 
+        CaseDetails caseDetails = buildCaseDetails();
+        assignedToJudgeBulkPrintService.generateJudgeAssignedToCaseLetter(AUTH_TOKEN, caseDetails);
         CaseDocument caseDocument = (CaseDocument) (caseDetails.getData().get(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER));
 
         assertThat(caseDocument.getDocumentFilename(), is(FILE_NAME));
@@ -81,8 +82,9 @@ public class AssignedToJudgeBulkPrintServiceTest {
 
     @Test
     public void sendLetterShouldBeOkWhenRepresented() {
-        CaseDetails caseDetails = assignedToJudgeBulkPrintService
-                .sendLetter(AUTH_TOKEN, buildCaseDetailsWithRepresentedApplicant());
+        CaseDetails caseDetails = buildCaseDetailsWithRepresentedApplicant();
+
+        assignedToJudgeBulkPrintService.generateJudgeAssignedToCaseLetter(AUTH_TOKEN, caseDetails);
 
         CaseDocument caseDocument = (CaseDocument) (caseDetails.getData().get(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER));
 
@@ -93,7 +95,7 @@ public class AssignedToJudgeBulkPrintServiceTest {
     }
 
     private Addressee getLetterAddressee() {
-        Map caseDetails = (Map) (bulkPrintRequestArgumentCaptor.getValue().getValues().get("caseDetails"));
+        Map<String, Object> caseDetails = (Map) (bulkPrintRequestGeneratePdfCaptor.getValue().getValues().get("caseDetails"));
         AssignedToJudgeLetter assignedToJudgeLetter = (AssignedToJudgeLetter) (caseDetails.get("caseData"));
 
         return assignedToJudgeLetter.getAddressee();
@@ -114,11 +116,11 @@ public class AssignedToJudgeBulkPrintServiceTest {
         caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
         caseData.put(SOLICITOR_NAME, TEST_SOLICITOR_NAME);
         caseData.put(APP_SOLICITOR_ADDRESS_CCD_FIELD, ImmutableMap.of(
-                "AddressLine1", "102 Petty France",
-                "AddressLine2", "Floor 6",
-                "AddressLine3", "My desk",
-                "PostTown", "London",
-                "PostCode", "4YU 0IO"
+            "AddressLine1", "102 Petty France",
+            "AddressLine2", "Floor 6",
+            "AddressLine3", "My desk",
+            "PostTown", "London",
+            "PostCode", "4YU 0IO"
         ));
 
         return caseDetails;
@@ -126,14 +128,14 @@ public class AssignedToJudgeBulkPrintServiceTest {
 
     private static Document buildDocumentModel() {
         Document document = new Document();
-        document.setBinaryUrl("sadasd");
+        document.setBinaryUrl("binaryUrl");
         document.setFileName(FILE_NAME);
-        document.setUrl("sdsdsd");
+        document.setUrl("url");
 
         return document;
     }
 
     /*
-    add test for feature toggle
+    Add tests for feature toggles
      */
 }
