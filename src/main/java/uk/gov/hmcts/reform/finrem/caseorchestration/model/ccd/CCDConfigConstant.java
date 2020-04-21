@@ -27,6 +27,7 @@ public class CCDConfigConstant {
     public static final String SOLICITOR_FIRM = "solicitorFirm";
     public static final String APP_SOLICITOR_ADDRESS_CCD_FIELD = "solicitorAddress";
     public static final String SOLICITOR_AGREE_TO_RECEIVE_EMAILS = "solicitorAgreeToReceiveEmails";
+    public static final String APPLICANT_SOL_CONSENT_FOR_EMAILS = "applicantSolicitorConsentForEmails";
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";
     public static final String APPLICANT_REPRESENTED_PAPER = "applicantRepresentedPaper";
 
@@ -47,6 +48,7 @@ public class CCDConfigConstant {
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
+
 
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
@@ -82,6 +84,8 @@ public class CCDConfigConstant {
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
     public static final String UPLOAD_ORDER = "uploadOrder";
     public static final String CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER = "consentOrderApprovedNotificationLetter";
+    public static final String HWF_SUCCESS_NOTIFICATION_LETTER = "hwfSuccessNotificationLetter";
+    public static final String ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER = "assignedToJudgeNotificationLetter";
 
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
 }

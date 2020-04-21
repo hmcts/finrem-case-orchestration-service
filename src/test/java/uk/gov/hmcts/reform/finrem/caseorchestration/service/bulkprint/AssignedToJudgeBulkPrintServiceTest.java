@@ -17,9 +17,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.AssignedToJudgeLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.HelpWithFeesSuccessLetter;
 
 import java.util.Map;
 
@@ -35,43 +35,43 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HWF_SUCCESS_NOTIFICATION_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentServiceTest.buildCaseDetails;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @TestPropertySource(locations = "/application.properties")
-public class HelpWithFeesBulkPrintServiceTest {
+public class AssignedToJudgeBulkPrintServiceTest {
 
-    public static final String FILE_NAME = "HelpWithFeesSuccessfulLetter.pdf";
+    public static final String FILE_NAME = "ApplicationHasBeenAssignedToJudge.pdf";
 
     @Mock
     private DocumentClient documentClient;
 
     private ArgumentCaptor<DocumentGenerationRequest> bulkPrintRequestArgumentCaptor;
-
-    private HelpWithFeesBulkPrintService helpWithFeesBulkPrintService;
+    private AssignedToJudgeBulkPrintService assignedToJudgeBulkPrintService;
 
     @Before
     public void setup() {
         DocumentConfiguration config = new DocumentConfiguration();
-        config.setHelpWithFeesSuccessfulTemplate("FL-FRM-DEC-ENG-00096.docx");
-        config.setHelpWithFeesSuccessfulFileName(FILE_NAME);
+        config.setApplicationAssignedToJudgeTemplate("FL-FRM-LET-ENG-00318.docx");
+        config.setApplicationAssignedToJudgeFileName(FILE_NAME);
         bulkPrintRequestArgumentCaptor = ArgumentCaptor.forClass(DocumentGenerationRequest.class);
 
         when(documentClient.generatePdf(bulkPrintRequestArgumentCaptor.capture(), anyString()))
                 .thenReturn(buildDocumentModel());
 
-        helpWithFeesBulkPrintService = new HelpWithFeesBulkPrintService(
+        assignedToJudgeBulkPrintService = new AssignedToJudgeBulkPrintService(
                 documentClient, config, new ObjectMapper()
         );
     }
 
     @Test
     public void sendLetterShouldBeOkWhenNotRepresented() {
-        CaseDetails caseDetails = helpWithFeesBulkPrintService.sendLetter(AUTH_TOKEN, buildCaseDetails());
-        CaseDocument caseDocument = (CaseDocument) (caseDetails.getData().get(HWF_SUCCESS_NOTIFICATION_LETTER));
+        CaseDetails caseDetails = assignedToJudgeBulkPrintService.sendLetter(AUTH_TOKEN, buildCaseDetails());
+
+        CaseDocument caseDocument = (CaseDocument) (caseDetails.getData().get(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER));
 
         assertThat(caseDocument.getDocumentFilename(), is(FILE_NAME));
         assertThat(getLetterAddressee().getName(), isApplicant());
@@ -81,10 +81,10 @@ public class HelpWithFeesBulkPrintServiceTest {
 
     @Test
     public void sendLetterShouldBeOkWhenRepresented() {
-        CaseDetails caseDetails = helpWithFeesBulkPrintService
+        CaseDetails caseDetails = assignedToJudgeBulkPrintService
                 .sendLetter(AUTH_TOKEN, buildCaseDetailsWithRepresentedApplicant());
 
-        CaseDocument caseDocument = (CaseDocument) (caseDetails.getData().get(HWF_SUCCESS_NOTIFICATION_LETTER));
+        CaseDocument caseDocument = (CaseDocument) (caseDetails.getData().get(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER));
 
         assertThat(caseDocument.getDocumentFilename(), is(FILE_NAME));
         assertThat(getLetterAddressee().getName(), isSolicitor());
@@ -94,9 +94,9 @@ public class HelpWithFeesBulkPrintServiceTest {
 
     private Addressee getLetterAddressee() {
         Map caseDetails = (Map) (bulkPrintRequestArgumentCaptor.getValue().getValues().get("caseDetails"));
-        HelpWithFeesSuccessLetter helpWithFeesSuccessLetter = (HelpWithFeesSuccessLetter) (caseDetails.get("caseData"));
+        AssignedToJudgeLetter assignedToJudgeLetter = (AssignedToJudgeLetter) (caseDetails.get("caseData"));
 
-        return helpWithFeesSuccessLetter.getAddressee();
+        return assignedToJudgeLetter.getAddressee();
     }
 
     private static Matcher<String> isApplicant() {
@@ -132,4 +132,8 @@ public class HelpWithFeesBulkPrintServiceTest {
 
         return document;
     }
+
+    /*
+    add test for feature toggle
+     */
 }

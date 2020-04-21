@@ -34,4 +34,6 @@ public class DocumentConfiguration {
     private String approvedConsentOrderNotificationFileName;
     private String helpWithFeesSuccessfulTemplate;
     private String helpWithFeesSuccessfulFileName;
+    private String applicationAssignedToJudgeTemplate;
+    private String applicationAssignedToJudgeFileName;
 }

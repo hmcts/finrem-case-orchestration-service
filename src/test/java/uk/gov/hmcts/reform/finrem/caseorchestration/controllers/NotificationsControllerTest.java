@@ -6,7 +6,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -15,6 +14,7 @@ import uk.gov.hmcts.reform.bsp.common.utils.ResourceLoader;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.AssignedToJudgeBulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.HelpWithFeesBulkPrintService;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -49,6 +50,9 @@ public class NotificationsControllerTest {
     @MockBean
     private HelpWithFeesBulkPrintService helpWithFeesBulkPrintService;
 
+    @MockBean
+    private AssignedToJudgeBulkPrintService assignedToJudgeBulkPrintService;
+
     private MockMvc mockMvc;
     private String requestContent;
 
@@ -63,7 +67,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -76,7 +80,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(helpWithFeesBulkPrintService, times(1)).sendLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
@@ -89,7 +93,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
@@ -101,7 +105,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -114,9 +118,22 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
+        verifyNoMoreInteractions(notificationService);
+    }
+
+    @Test
+    public void sendAssignToJudgeConfirmationBulkPrintLetter() throws Exception {
+        buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
+        mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(assignedToJudgeBulkPrintService, times(1)).sendLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
         verifyNoMoreInteractions(notificationService);
     }
 
@@ -126,7 +143,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -139,7 +156,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
@@ -151,7 +168,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -164,7 +181,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
@@ -176,7 +193,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -189,7 +206,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
@@ -201,7 +218,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
@@ -214,7 +231,7 @@ public class NotificationsControllerTest {
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);

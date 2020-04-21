@@ -24,6 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HWF_SUCCESS_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullName;
@@ -40,13 +41,10 @@ public class HelpWithFeesBulkPrintService extends AbstractDocumentService {
     }
 
     public CaseDetails sendLetter(String authToken, CaseDetails caseDetails) {
-        log.info("HWF success bulk print letter - started");
 
         CaseDocument successHwFLetter = generateHwFBulkPrintLetter(caseDetails, authToken);
-
         log.info("HWF success bulk print letter - generated {}", successHwFLetter);
-
-        caseDetails.getData().put("hwfSuccessNotificationLetter", successHwFLetter);
+        caseDetails.getData().put(HWF_SUCCESS_NOTIFICATION_LETTER, successHwFLetter);
 
         return caseDetails;
     }

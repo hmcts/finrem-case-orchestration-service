@@ -7,8 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 
@@ -35,6 +37,10 @@ public class CommonFunction {
 
     public static boolean isApplicantRepresented(Map<String, Object> caseData) {
         return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APPLICANT_REPRESENTED)));
+    }
+
+    public static boolean isPaperApplication(Map<String, Object> caseData) {
+        return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.get(PAPER_APPLICATION)));
     }
 
     public static String buildFullName(Map<String, Object> caseData, String applicantFirstMiddleName, String applicantLastName) {
