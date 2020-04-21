@@ -9,14 +9,21 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DataForTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.HelpWithFeesSuccessLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.TemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AbstractDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+import static java.util.Arrays.asList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.LetterAddressHelper.formatAddressForLetterPrinting;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
@@ -39,7 +46,7 @@ public class HelpWithFeesBulkPrintService extends AbstractDocumentService {
         super(documentClient, config, objectMapper);
     }
 
-    public CaseDetails sendLetter(String authToken, CaseDetails caseDetails) {
+    public UUID sendLetter(String authToken, CaseDetails caseDetails) {
         log.info("HWF success bulk print letter - started");
 
         CaseDocument successHwFLetter = generateHwFBulkPrintLetter(caseDetails, authToken);
@@ -48,7 +55,15 @@ public class HelpWithFeesBulkPrintService extends AbstractDocumentService {
 
         caseDetails.getData().put("hwfSuccessNotificationLetter", successHwFLetter);
 
-        return caseDetails;
+        return bulkPrint(BulkPrintRequest.builder()
+                .caseId(caseDetails.getId().toString())
+                .letterType("FINANCIAL_REMEDY_PACK")
+                .bulkPrintDocuments(preparePrintDocuments(successHwFLetter))
+                .build());
+    }
+
+    private List<BulkPrintDocument> preparePrintDocuments(CaseDocument document) {
+        return asList(BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl()).build());
     }
 
     private CaseDocument generateHwFBulkPrintLetter(CaseDetails caseDetails, String authToken) {

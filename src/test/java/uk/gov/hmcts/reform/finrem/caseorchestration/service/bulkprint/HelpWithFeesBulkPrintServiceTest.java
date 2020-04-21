@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.HelpWithFeesSuccessLetter;
@@ -47,7 +48,8 @@ public class HelpWithFeesBulkPrintServiceTest {
     @Mock
     private DocumentClient documentClient;
 
-    private ArgumentCaptor<DocumentGenerationRequest> bulkPrintRequestArgumentCaptor;
+    private ArgumentCaptor<DocumentGenerationRequest> bulkPrintRequestGeneratePdfCaptor;
+    private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestBulkPrintCaptor;
 
     private HelpWithFeesBulkPrintService helpWithFeesBulkPrintService;
 
@@ -56,9 +58,9 @@ public class HelpWithFeesBulkPrintServiceTest {
         DocumentConfiguration config = new DocumentConfiguration();
         config.setHelpWithFeesSuccessfulTemplate("FL-FRM-DEC-ENG-00096.docx");
         config.setHelpWithFeesSuccessfulFileName(FILE_NAME);
-        bulkPrintRequestArgumentCaptor = ArgumentCaptor.forClass(DocumentGenerationRequest.class);
+        bulkPrintRequestGeneratePdfCaptor = ArgumentCaptor.forClass(DocumentGenerationRequest.class);
 
-        when(documentClient.generatePdf(bulkPrintRequestArgumentCaptor.capture(), anyString()))
+        when(documentClient.generatePdf(bulkPrintRequestGeneratePdfCaptor.capture(), anyString()))
                 .thenReturn(buildDocumentModel());
 
         helpWithFeesBulkPrintService = new HelpWithFeesBulkPrintService(
@@ -68,7 +70,9 @@ public class HelpWithFeesBulkPrintServiceTest {
 
     @Test
     public void sendLetterShouldBeOkWhenNotRepresented() {
-        CaseDetails caseDetails = helpWithFeesBulkPrintService.sendLetter(AUTH_TOKEN, buildCaseDetails());
+        CaseDetails caseDetails = buildCaseDetails();
+
+        helpWithFeesBulkPrintService.sendLetter(AUTH_TOKEN, caseDetails);
 
         CaseDocument caseDocument = (CaseDocument) (caseDetails.getData().get("hwfSuccessNotificationLetter"));
 
@@ -80,8 +84,9 @@ public class HelpWithFeesBulkPrintServiceTest {
 
     @Test
     public void sendLetterShouldBeOkWhenRepresented() {
-        CaseDetails caseDetails = helpWithFeesBulkPrintService
-                .sendLetter(AUTH_TOKEN, buildCaseDetailsWithRepresentedApplicant());
+        CaseDetails caseDetails = buildCaseDetailsWithRepresentedApplicant();
+
+        helpWithFeesBulkPrintService.sendLetter(AUTH_TOKEN, caseDetails);
 
         CaseDocument caseDocument = (CaseDocument) (caseDetails.getData().get("hwfSuccessNotificationLetter"));
 
@@ -92,7 +97,7 @@ public class HelpWithFeesBulkPrintServiceTest {
     }
 
     private Addressee getLetterAddressee() {
-        Map caseDetails = (Map) (bulkPrintRequestArgumentCaptor.getValue().getValues().get("caseDetails"));
+        Map<String, Object> caseDetails = (Map) (bulkPrintRequestGeneratePdfCaptor.getValue().getValues().get("caseDetails"));
         HelpWithFeesSuccessLetter helpWithFeesSuccessLetter = (HelpWithFeesSuccessLetter) (caseDetails.get("caseData"));
 
         return helpWithFeesSuccessLetter.getAddressee();
@@ -125,9 +130,9 @@ public class HelpWithFeesBulkPrintServiceTest {
 
     private static Document buildDocumentModel() {
         Document document = new Document();
-        document.setBinaryUrl("sadasd");
+        document.setBinaryUrl("binaryUrl");
         document.setFileName(FILE_NAME);
-        document.setUrl("sdsdsd");
+        document.setUrl("url");
 
         return document;
     }

@@ -69,7 +69,7 @@ public abstract class AbstractDocumentService {
         return caseDocument(miniFormA);
     }
 
-    UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
+    protected UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
         return documentClient.bulkPrint(bulkPrintRequest);
     }
 
