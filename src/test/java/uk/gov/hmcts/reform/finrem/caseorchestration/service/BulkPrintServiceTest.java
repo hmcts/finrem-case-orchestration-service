@@ -44,7 +44,6 @@ public class BulkPrintServiceTest {
 
     @Test
     public void shouldSendNotificationLetterForBulkPrint() throws Exception {
-
         when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID notificationLetterId = service.sendNotificationLetterForBulkPrint(
@@ -56,7 +55,6 @@ public class BulkPrintServiceTest {
 
     @Test
     public void shouldSendOrdersForBulkPrintForApproved() throws Exception {
-
         when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID bulkPrintLetterId = service.sendOrdersForBulkPrint(
@@ -68,7 +66,6 @@ public class BulkPrintServiceTest {
 
     @Test
     public void shouldSendOrdersForBulkPrintForNotApproved() throws Exception {
-
         when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID bulkPrintLetterId = service.sendOrdersForBulkPrint(
