@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DataForTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.TemplateDetails;
@@ -53,7 +52,7 @@ public abstract class AbstractDocumentService {
         return caseDocument(miniFormA);
     }
 
-    protected CaseDocument generateDocument(String authToken, DataForTemplate data, TemplateDetails templateDetails) {
+    protected CaseDocument generateDocument(String authToken, Map<String, Object> data, TemplateDetails templateDetails) {
         Map<String, Object> caseDetailsMap = Collections.singletonMap(
                 DOCUMENT_CASE_DETAILS_JSON_KEY, Collections.singletonMap(
                         DOCUMENT_CASE_DATA_JSON_KEY, data

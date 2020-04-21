@@ -49,7 +49,6 @@ public class CCDConfigConstant {
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
 
-
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
     public static final String FEES = "Fees";

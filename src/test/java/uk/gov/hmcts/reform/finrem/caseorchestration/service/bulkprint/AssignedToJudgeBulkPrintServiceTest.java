@@ -3,13 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -30,9 +25,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = CaseOrchestrationApplication.class)
-@TestPropertySource(locations = "/application.properties")
 public class AssignedToJudgeBulkPrintServiceTest {
 
     private final ObjectMapper mapper = new ObjectMapper();

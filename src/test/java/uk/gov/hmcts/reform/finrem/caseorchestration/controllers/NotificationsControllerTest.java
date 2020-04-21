@@ -18,11 +18,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.AssignedToJudgeBulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.HelpWithFeesBulkPrintService;
 
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,7 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 @WebMvcTest(NotificationsController.class)
 public class NotificationsControllerTest {
     private static final String HWF_SUCCESSFUL_CALLBACK_URL = "/case-orchestration/notify/hwf-successful";
-    private static final String ASSIGN_TO_JUDGE_URL = "/case-orchestration/notify/assign-to-judge";
+    private static final String ASSIGN_TO_JUDGE_CALLBACK_URL = "/case-orchestration/notify/assign-to-judge";
     private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
     private static final String CONSENT_ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/consent-order-not-approved";
     private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/consent-order-available";
@@ -47,6 +50,15 @@ public class NotificationsControllerTest {
 
     @MockBean
     private NotificationService notificationService;
+
+    @MockBean
+    private BulkPrintService bulkPrintService;
+
+    @MockBean
+    private HelpWithFeesBulkPrintService helpWithFeesBulkPrintService;
+
+    @MockBean
+    private AssignedToJudgeBulkPrintService assignedToJudgeBulkPrintService;
 
     private MockMvc mockMvc;
     private String requestContent;
@@ -69,8 +81,6 @@ public class NotificationsControllerTest {
                 .sendHWFSuccessfulConfirmationEmail(any(CallbackRequest.class));
     }
 
-    // TODO: ADD TEST FOR HWF SUCCESSFUL WITH BULK PRINTING
-
     @Test
     public void shouldNotSendHwfSuccessfulConfirmationEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
@@ -84,9 +94,25 @@ public class NotificationsControllerTest {
     }
 
     @Test
+    public void sendHwfSuccessfulConfirmationBulkPrintLetter() throws Exception {
+        buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
+        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        when(bulkPrintService.sendNotificationLetterForBulkPrint(any(), any())).thenReturn(UUID.randomUUID());
+
+        verify(helpWithFeesBulkPrintService, times(1))
+            .generateHwfSuccessfulLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
+        verifyNoMoreInteractions(notificationService);
+    }
+
+    @Test
     public void sendAssignToJudgeConfirmationEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
-        mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
+        mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
                 .contentType(APPLICATION_JSON_VALUE))
@@ -99,7 +125,7 @@ public class NotificationsControllerTest {
     @Test
     public void shouldNotSendAssignToJudgeConfirmationEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
+        mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .content(requestContent)
                 .contentType(APPLICATION_JSON_VALUE))
@@ -108,8 +134,21 @@ public class NotificationsControllerTest {
         verifyNoMoreInteractions(notificationService);
     }
 
+    @Test
+    public void sendJudgeAssignedToCaseBulkPrintLetter() throws Exception {
+        buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
+        mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
-    // TODO: ADD TEST FOR ASSIGN JUDGE TO CASE NOTIFICATION WITH BULK PRINTING
+        when(bulkPrintService.sendNotificationLetterForBulkPrint(any(), any())).thenReturn(UUID.randomUUID());
+
+        verify(assignedToJudgeBulkPrintService, times(1))
+            .generateJudgeAssignedToCaseLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
+        verifyNoMoreInteractions(notificationService);
+    }
 
     @Test
     public void sendConsentOrderMadeConfirmationEmail() throws Exception {
