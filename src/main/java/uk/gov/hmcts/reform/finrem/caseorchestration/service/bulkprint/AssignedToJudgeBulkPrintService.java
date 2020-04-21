@@ -49,6 +49,7 @@ public class AssignedToJudgeBulkPrintService extends AbstractDocumentService {
         CaseDocument assignedToJudgeLetter = generateAssignedToJudgeBulkPrintLetter(caseDetails, authToken);
         // take generated letter and send for bulk print
         bulkPrintService.sendForBulkPrint(assignedToJudgeLetter, caseDetails);
+        // also update to store letter in CCD
 
         /* need to properly send to bulk print using:
 
