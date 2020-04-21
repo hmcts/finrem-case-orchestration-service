@@ -9,21 +9,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DataForTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.HelpWithFeesSuccessLetter;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.TemplateDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AbstractDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
-import static java.util.Arrays.asList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.LetterAddressHelper.formatAddressForLetterPrinting;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
@@ -47,36 +38,26 @@ public class HelpWithFeesBulkPrintService extends AbstractDocumentService {
         super(documentClient, config, objectMapper);
     }
 
-    public UUID sendLetter(String authToken, CaseDetails caseDetails) {
-        log.info("HWF success bulk print letter - started");
+    /*
+    create an interface that defines the methods we’re implementing if they’re going to
+    have similar methods i.e. printLetter and sendLetterToBulkPrintService etc
+     */
 
-        CaseDocument successHwFLetter = generateHwFBulkPrintLetter(caseDetails, authToken);
-        log.info("HWF success bulk print letter - generated {}", successHwFLetter);
-        caseDetails.getData().put(HWF_SUCCESS_NOTIFICATION_LETTER, successHwFLetter);
+    public CaseDocument generateHwfSuccessfulLetter(final String authToken, final CaseDetails caseDetails) {
+        log.info("Generating 'HWF success' letter {} from {} for bulk print",
+            config.getHelpWithFeesSuccessfulFileName(),
+            config.getHelpWithFeesSuccessfulTemplate());
 
-        return bulkPrint(BulkPrintRequest.builder()
-                .caseId(caseDetails.getId().toString())
-                .letterType("FINANCIAL_REMEDY_PACK")
-                .bulkPrintDocuments(preparePrintDocuments(successHwFLetter))
-                .build());
+        prepareHwfSuccessfulLetter(caseDetails);
+
+        return generateDocument(
+            authToken,
+            caseDetails,
+            config.getHelpWithFeesSuccessfulTemplate(),
+            config.getHelpWithFeesSuccessfulFileName());
     }
 
-    private CaseDocument generateHwFBulkPrintLetter(CaseDetails caseDetails, String authToken) {
-        String template = config.getHelpWithFeesSuccessfulTemplate();
-        String filename = config.getHelpWithFeesSuccessfulFileName();
-
-        log.info("Generating Help with Fees success Letter {} from {} for bulk print", template, filename);
-
-        try {
-            DataForTemplate data = prepareHelpWithFeesSuccessLetter(caseDetails);
-            return generateDocument(authToken, data, new TemplateDetails(template, filename));
-        } catch (IllegalArgumentException exception) {
-            log.warn("Failed to generate Help with Fees Success Letter as not all required address details were present");
-            throw exception;
-        }
-    }
-
-    private HelpWithFeesSuccessLetter prepareHelpWithFeesSuccessLetter(CaseDetails caseDetails) {
+    private void prepareHwfSuccessfulLetter(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
         HelpWithFeesSuccessLetter.HelpWithFeesSuccessLetterBuilder hwfBuilder = HelpWithFeesSuccessLetter.builder();
@@ -84,30 +65,32 @@ public class HelpWithFeesBulkPrintService extends AbstractDocumentService {
         String applicantName = buildFullName(caseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
 
         hwfBuilder
-                .caseNumber(nullToEmpty((caseDetails.getId())))
-                .reference("");
+            .caseNumber(nullToEmpty((caseDetails.getId())))
+            .reference("");
 
         if (isApplicantRepresented(caseData)) {
             log.info("Applicant is represented by a solicitor");
             addresseeBuilder
-                    .name(nullToEmpty(caseData.get(SOLICITOR_NAME)))
-                    .formattedAddress(formatAddressForLetterPrinting((Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD)));
+                .name(nullToEmpty(caseData.get(SOLICITOR_NAME)))
+                .formattedAddress(formatAddressForLetterPrinting((Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD)));
             hwfBuilder
-                    .applicantName(applicantName)
-                    .reference(nullToEmpty(caseData.get(SOLICITOR_REFERENCE)));
+                .applicantName(applicantName)
+                .reference(nullToEmpty(caseData.get(SOLICITOR_REFERENCE)));
         } else {
             log.info("Applicant is not represented by a solicitor");
             addresseeBuilder
-                    .name(applicantName)
-                    .formattedAddress(formatAddressForLetterPrinting((Map) caseData.get(APPLICANT_ADDRESS)));
+                .name(applicantName)
+                .formattedAddress(formatAddressForLetterPrinting((Map) caseData.get(APPLICANT_ADDRESS)));
             hwfBuilder
-                    .applicantName(applicantName);
+                .applicantName(applicantName);
         }
 
-        return hwfBuilder
-                .addressee(addresseeBuilder.build())
+        HelpWithFeesSuccessLetter builtHwfBuilder =
+            hwfBuilder.addressee(addresseeBuilder.build())
                 .respondentName(buildFullName(caseData, APP_RESPONDENT_FIRST_MIDDLE_NAME, APP_RESPONDENT_LAST_NAME))
                 .letterDate(String.valueOf(LocalDate.now()))
                 .build();
+
+        caseDetails.getData().put(HWF_SUCCESS_NOTIFICATION_LETTER,  builtHwfBuilder);
     }
 }

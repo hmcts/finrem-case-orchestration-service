@@ -36,7 +36,7 @@ public class AssignedToJudgeBulkPrintService extends AbstractDocumentService {
 
     @Autowired
     public AssignedToJudgeBulkPrintService(DocumentClient documentClient, DocumentConfiguration config, ObjectMapper objectMapper) {
-        super(documentClient, config, objectMapper);
+        super(documentClient,config, objectMapper);
     }
 
     /*
@@ -46,16 +46,16 @@ public class AssignedToJudgeBulkPrintService extends AbstractDocumentService {
 
     public CaseDocument generateJudgeAssignedToCaseLetter(final String authToken, final CaseDetails caseDetails) {
         log.info("Generating 'Assigned to Judge' letter {} from {} for bulk print",
-            config.getBulkPrintFileName(),
-            config.getBulkPrintTemplate());
+            config.getApplicationAssignedToJudgeFileName(),
+            config.getApplicationAssignedToJudgeTemplate());
 
         prepareJudgeAssignedToCaseLetter(caseDetails);
 
         return generateDocument(
             authToken,
             caseDetails,
-            config.getBulkPrintTemplate(),
-            config.getBulkPrintFileName());
+            config.getApplicationAssignedToJudgeTemplate(),
+            config.getApplicationAssignedToJudgeFileName());
     }
 
     private void prepareJudgeAssignedToCaseLetter(CaseDetails caseDetails) {
@@ -98,13 +98,13 @@ public class AssignedToJudgeBulkPrintService extends AbstractDocumentService {
             .phoneNumber("0300 303 0642")
             .openingHours("from 8.30am to 5pm");
 
-        assignedToJudgeLetterBuilder
+        AssignedToJudgeLetter builtAssignedToJudgeLetter = assignedToJudgeLetterBuilder
             .addressee(addresseeBuilder.build())
             .respondentName(buildFullName(caseData, APP_RESPONDENT_FIRST_MIDDLE_NAME, APP_RESPONDENT_LAST_NAME))
             .letterDate(String.valueOf(LocalDate.now()))
             .ctscContactDetails(ctscContactDetailsBuilder.build())
             .build();
 
-        caseDetails.getData().put(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER,  assignedToJudgeLetterBuilder);
+        caseDetails.getData().put(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER,  builtAssignedToJudgeLetter);
     }
 }

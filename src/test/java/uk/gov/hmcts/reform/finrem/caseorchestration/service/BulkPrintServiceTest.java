@@ -26,9 +26,7 @@ public class BulkPrintServiceTest {
     private DocumentClient documentClientMock;
 
     private ObjectMapper mapper = new ObjectMapper();
-
     private BulkPrintService service;
-
     private UUID letterId;
 
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor;
@@ -45,7 +43,19 @@ public class BulkPrintServiceTest {
     }
 
     @Test
-    public void shouldSendForBulkPrintForApproved() throws Exception {
+    public void shouldSendNotificationLetterForBulkPrint() throws Exception {
+
+        when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
+
+        UUID notificationLetterId = service.sendNotificationLetterForBulkPrint(
+            new CaseDocument(), caseDetailsForNonApproved());
+
+        assertThat(letterId, is(notificationLetterId));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().size(), is(1));
+    }
+
+    @Test
+    public void shouldSendOrdersForBulkPrintForApproved() throws Exception {
 
         when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
@@ -57,7 +67,7 @@ public class BulkPrintServiceTest {
     }
 
     @Test
-    public void shouldSendForBulkPrintForNotApproved() throws Exception {
+    public void shouldSendOrdersForBulkPrintForNotApproved() throws Exception {
 
         when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
@@ -70,14 +80,14 @@ public class BulkPrintServiceTest {
 
     private CaseDetails caseDetails() throws Exception {
         try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/bulk-print.json")) {
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }
 
     private CaseDetails caseDetailsForNonApproved() throws Exception {
         try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/bulk-print-not-approved.json")) {
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-not-approved.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }

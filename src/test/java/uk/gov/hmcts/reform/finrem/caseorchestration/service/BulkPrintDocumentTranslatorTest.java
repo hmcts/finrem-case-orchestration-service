@@ -34,7 +34,7 @@ public class BulkPrintDocumentTranslatorTest {
 
     private CaseDetails caseDetails() throws Exception {
         try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/bulk-print.json")) {
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }

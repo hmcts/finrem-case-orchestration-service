@@ -1,137 +1,160 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.HelpWithFeesSuccessLetter;
 
-import java.util.Map;
+import java.io.InputStream;
+import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HWF_SUCCESS_NOTIFICATION_LETTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentServiceTest.buildCaseDetails;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @TestPropertySource(locations = "/application.properties")
 public class HelpWithFeesBulkPrintServiceTest {
 
-    public static final String FILE_NAME = "HelpWithFeesSuccessfulLetter.pdf";
-
-    @Mock
-    private DocumentClient documentClient;
-
-    private ArgumentCaptor<DocumentGenerationRequest> bulkPrintRequestGeneratePdfCaptor;
+    private final ObjectMapper mapper = new ObjectMapper();
     private HelpWithFeesBulkPrintService helpWithFeesBulkPrintService;
 
     @Before
-    public void setup() {
+    public void setUp() {
         DocumentConfiguration config = new DocumentConfiguration();
         config.setHelpWithFeesSuccessfulTemplate("FL-FRM-DEC-ENG-00096.docx");
-        config.setHelpWithFeesSuccessfulFileName(FILE_NAME);
-        bulkPrintRequestGeneratePdfCaptor = ArgumentCaptor.forClass(DocumentGenerationRequest.class);
+        config.setHelpWithFeesSuccessfulFileName("HelpWithFeesSuccessfulLetter.pdf");
 
-        when(documentClient.generatePdf(bulkPrintRequestGeneratePdfCaptor.capture(), anyString()))
-                .thenReturn(buildDocumentModel());
-
-        helpWithFeesBulkPrintService = new HelpWithFeesBulkPrintService(
-                documentClient, config, new ObjectMapper()
-        );
+        DocumentClient generatorClient = new TestDocumentClient();
+        helpWithFeesBulkPrintService = new HelpWithFeesBulkPrintService(generatorClient, config, mapper);
     }
 
     @Test
-    public void sendLetterShouldBeOkWhenNotRepresented() {
+    public void shouldGenerateHwfSuccessfulPdf() throws Exception {
+        CaseDocument caseDocument = helpWithFeesBulkPrintService.generateHwfSuccessfulLetter(AUTH_TOKEN, caseDetails());
 
-        CaseDetails caseDetails = buildCaseDetails();
-        helpWithFeesBulkPrintService.sendLetter(AUTH_TOKEN, caseDetails);
-        CaseDocument caseDocument = (CaseDocument) (caseDetails.getData().get("hwfSuccessNotificationLetter"));
-
-        assertThat(caseDocument.getDocumentFilename(), is(FILE_NAME));
-        assertThat(getLetterAddressee().getName(), isApplicant());
-
-        verify(documentClient).generatePdf(any(DocumentGenerationRequest.class), eq(AUTH_TOKEN));
+        assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
+        assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
+        assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
     }
 
     @Test
-    public void sendLetterShouldBeOkWhenRepresented() {
-        CaseDetails caseDetails = buildCaseDetailsWithRepresentedApplicant();
+    public void shouldGenerateHwfSuccessfulLetterUsingApplicantAddressIfApplicantIsNotRepresented() throws Exception {
+        CaseDetails caseDetails = caseDetails();
+        helpWithFeesBulkPrintService.generateHwfSuccessfulLetter(AUTH_TOKEN, caseDetails);
 
-        helpWithFeesBulkPrintService.sendLetter(AUTH_TOKEN, caseDetails);
+        HelpWithFeesSuccessLetter helpWithFeesSuccessLetter
+            = (HelpWithFeesSuccessLetter) caseDetails.getData().get(HWF_SUCCESS_NOTIFICATION_LETTER);
 
-        CaseDocument caseDocument = (CaseDocument) (caseDetails.getData().get(HWF_SUCCESS_NOTIFICATION_LETTER));
+        Addressee testApplicantAddressee = Addressee.builder()
+            .name("John Doe")
+            .formattedAddress("1 Victoria Street"
+                + "\nWestminster"
+                + "\nGreater London"
+                + "\nUK"
+                + "\nLondon"
+                + "\nSE1")
+            .build();
 
-        assertThat(caseDocument.getDocumentFilename(), is(FILE_NAME));
-        assertThat(getLetterAddressee().getName(), isSolicitor());
-
-        verify(documentClient).generatePdf(any(DocumentGenerationRequest.class), eq(AUTH_TOKEN));
+        assertThat(helpWithFeesSuccessLetter.getCaseNumber(), is("1234567890"));
+        assertThat(helpWithFeesSuccessLetter.getReference(), is(""));
+        assertThat(helpWithFeesSuccessLetter.getAddressee(), is(testApplicantAddressee));
+        assertThat(helpWithFeesSuccessLetter.getLetterDate(), is("2020-04-21"));
+        assertThat(helpWithFeesSuccessLetter.getApplicantName(), is("John Doe"));
+        assertThat(helpWithFeesSuccessLetter.getRespondentName(), is("Jane Doe"));
     }
 
-    private Addressee getLetterAddressee() {
-        Map<String, Object> caseDetails = (Map) (bulkPrintRequestGeneratePdfCaptor.getValue().getValues().get("caseDetails"));
-        HelpWithFeesSuccessLetter helpWithFeesSuccessLetter = (HelpWithFeesSuccessLetter) (caseDetails.get("caseData"));
+    @Test
+    public void shouldGenerateHwfSuccessfulLetterUsingApplicantSolicitorAddressIfApplicantIsRepresented() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithSolicitors();
+        helpWithFeesBulkPrintService.generateHwfSuccessfulLetter(AUTH_TOKEN, caseDetails);
 
-        return helpWithFeesSuccessLetter.getAddressee();
+        HelpWithFeesSuccessLetter helpWithFeesSuccessLetter =
+            (HelpWithFeesSuccessLetter) caseDetails.getData().get(HWF_SUCCESS_NOTIFICATION_LETTER);
+
+        Addressee testSolicitorAddressee = Addressee.builder()
+            .name("Mr J Solicitor")
+            .formattedAddress("123 Applicant Solicitor Street"
+                + "\nSecond Address Line"
+                + "\nThird Address Line"
+                + "\nLondon"
+                + "\nUK"
+                + "\nLondon"
+                + "\nSE1")
+            .build();
+
+        assertThat(helpWithFeesSuccessLetter.getCaseNumber(), is("1234567890"));
+        assertThat(helpWithFeesSuccessLetter.getReference(), is("RG-123456789"));
+        assertThat(helpWithFeesSuccessLetter.getAddressee(), is(testSolicitorAddressee));
+        assertThat(helpWithFeesSuccessLetter.getLetterDate(), is("2020-04-21"));
+        assertThat(helpWithFeesSuccessLetter.getApplicantName(), is("John Doe"));
+        assertThat(helpWithFeesSuccessLetter.getRespondentName(), is("Jane Doe"));
     }
 
-    private static Matcher<String> isApplicant() {
-        return is("James Joyce");
+    private CaseDetails caseDetails() throws Exception {
+        try (InputStream resourceAsStream =
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
     }
 
-    private static Matcher<String> isSolicitor() {
-        return is(TEST_SOLICITOR_NAME);
+    private CaseDetails caseDetailsWithSolicitors() throws Exception {
+        try (InputStream resourceAsStream =
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-with-solicitors.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
     }
 
-    private static CaseDetails buildCaseDetailsWithRepresentedApplicant() {
-        CaseDetails caseDetails = buildCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
+    private static class TestDocumentClient implements DocumentClient {
 
-        caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
-        caseData.put(SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(APP_SOLICITOR_ADDRESS_CCD_FIELD, ImmutableMap.of(
-                "AddressLine1", "102 Petty France",
-                "AddressLine2", "Floor 6",
-                "AddressLine3", "My desk",
-                "PostTown", "London",
-                "PostCode", "4YU 0IO"
-        ));
+        @Override
+        public Document generatePdf(DocumentGenerationRequest request, String authorizationToken) {
+            assertThat(request.getTemplate(), is("FL-FRM-DEC-ENG-00096.docx"));
+            assertThat(request.getFileName(), is("HelpWithFeesSuccessfulLetter.pdf"));
+            return document();
+        }
 
-        return caseDetails;
-    }
+        @Override
+        public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
+            throw new UnsupportedOperationException();
+        }
 
-    private static Document buildDocumentModel() {
-        Document document = new Document();
-        document.setBinaryUrl("binaryUrl");
-        document.setFileName(FILE_NAME);
-        document.setUrl("url");
+        @Override
+        public void deleteDocument(String fileUrl, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
 
-        return document;
+        @Override
+        public DocumentValidationResponse checkUploadedFileType(String authorizationToken, String fileUrl) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Document stampDocument(Document document, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Document annexStampDocument(Document document, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
     }
 }

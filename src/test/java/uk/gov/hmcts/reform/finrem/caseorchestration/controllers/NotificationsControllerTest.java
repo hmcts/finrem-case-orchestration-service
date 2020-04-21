@@ -13,6 +13,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.bsp.common.utils.ResourceLoader;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.AssignedToJudgeBulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.HelpWithFeesBulkPrintService;
@@ -47,12 +48,6 @@ public class NotificationsControllerTest {
     @MockBean
     private NotificationService notificationService;
 
-    @MockBean
-    private HelpWithFeesBulkPrintService helpWithFeesBulkPrintService;
-
-    @MockBean
-    private AssignedToJudgeBulkPrintService assignedToJudgeBulkPrintService;
-
     private MockMvc mockMvc;
     private String requestContent;
 
@@ -74,18 +69,7 @@ public class NotificationsControllerTest {
                 .sendHWFSuccessfulConfirmationEmail(any(CallbackRequest.class));
     }
 
-    @Test
-    public void sendHwfSuccessfulConfirmationBulkPrintLetter() throws Exception {
-        buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
-        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .content(requestContent)
-                .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
-
-        verify(helpWithFeesBulkPrintService, times(1)).sendLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
-        verifyNoMoreInteractions(notificationService);
-    }
+    // TODO: ADD TEST FOR HWF SUCCESSFUL WITH BULK PRINTING
 
     @Test
     public void shouldNotSendHwfSuccessfulConfirmationEmail() throws Exception {
@@ -124,18 +108,8 @@ public class NotificationsControllerTest {
         verifyNoMoreInteractions(notificationService);
     }
 
-    @Test
-    public void sendAssignToJudgeConfirmationBulkPrintLetter() throws Exception {
-        buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
-        mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
 
-        verify(assignedToJudgeBulkPrintService, times(1)).generateJudgeAssignedToCaseLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
-        verifyNoMoreInteractions(notificationService);
-    }
+    // TODO: ADD TEST FOR ASSIGN JUDGE TO CASE NOTIFICATION WITH BULK PRINTING
 
     @Test
     public void sendConsentOrderMadeConfirmationEmail() throws Exception {

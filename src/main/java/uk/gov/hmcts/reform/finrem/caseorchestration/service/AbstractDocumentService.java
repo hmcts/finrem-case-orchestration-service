@@ -24,8 +24,8 @@ public abstract class AbstractDocumentService {
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
     private static final String DOCUMENT_CASE_DATA_JSON_KEY = "caseData";
 
-    protected final DocumentConfiguration config;
     private final DocumentClient documentClient;
+    protected final DocumentConfiguration config;
     protected final ObjectMapper objectMapper;
 
     public AbstractDocumentService(DocumentClient documentClient,

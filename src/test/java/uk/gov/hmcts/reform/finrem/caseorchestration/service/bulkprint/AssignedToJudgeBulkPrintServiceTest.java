@@ -1,16 +1,13 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
@@ -18,124 +15,161 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.AssignedToJudgeLetter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
-import java.util.Map;
+import java.io.InputStream;
+import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentServiceTest.buildCaseDetails;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @TestPropertySource(locations = "/application.properties")
 public class AssignedToJudgeBulkPrintServiceTest {
 
-    public static final String FILE_NAME = "ApplicationHasBeenAssignedToJudge.pdf";
-
-    @Mock
-    private DocumentClient documentClient;
-
-    private ArgumentCaptor<DocumentGenerationRequest> bulkPrintRequestGeneratePdfCaptor;
+    private final ObjectMapper mapper = new ObjectMapper();
     private AssignedToJudgeBulkPrintService assignedToJudgeBulkPrintService;
+    private CtscContactDetails ctscContactDetails;
 
     @Before
-    public void setup() {
+    public void setUp() {
         DocumentConfiguration config = new DocumentConfiguration();
+        config.setApplicationAssignedToJudgeFileName("ApplicationHasBeenAssignedToJudge.pdf");
         config.setApplicationAssignedToJudgeTemplate("FL-FRM-LET-ENG-00318.docx");
-        config.setApplicationAssignedToJudgeFileName(FILE_NAME);
-        bulkPrintRequestGeneratePdfCaptor = ArgumentCaptor.forClass(DocumentGenerationRequest.class);
 
-        when(documentClient.generatePdf(bulkPrintRequestGeneratePdfCaptor.capture(), anyString()))
-            .thenReturn(buildDocumentModel());
+        DocumentClient generatorClient = new TestDocumentClient();
+        assignedToJudgeBulkPrintService = new AssignedToJudgeBulkPrintService(generatorClient, config, mapper);
 
-        assignedToJudgeBulkPrintService = new AssignedToJudgeBulkPrintService(
-            documentClient, config, new ObjectMapper()
-        );
+        ctscContactDetails = CtscContactDetails.builder()
+            .serviceCentre("Courts and Tribunals Service Centre")
+            .careOf("c/o HMCTS Digital Financial Remedy")
+            .poBox("12746")
+            .town("HARLOW")
+            .postcode("CM20 9QZ")
+            .emailAddress("HMCTSFinancialRemedy@justice.gov.uk")
+            .phoneNumber("0300 303 0642")
+            .openingHours("from 8.30am to 5pm")
+            .build();
     }
 
     @Test
-    public void sendLetterShouldBeOkWhenNotRepresented() {
+    public void shouldGenerateApplicationHasBeenAssignedToJudgePdf() throws Exception {
+        CaseDocument caseDocument = assignedToJudgeBulkPrintService.generateJudgeAssignedToCaseLetter(AUTH_TOKEN, caseDetails());
 
-        CaseDetails caseDetails = buildCaseDetails();
-        assignedToJudgeBulkPrintService.generateJudgeAssignedToCaseLetter(AUTH_TOKEN, caseDetails);
-        CaseDocument caseDocument = (CaseDocument) (caseDetails.getData().get(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER));
-
-        assertThat(caseDocument.getDocumentFilename(), is(FILE_NAME));
-        assertThat(getLetterAddressee().getName(), isApplicant());
-
-        verify(documentClient).generatePdf(any(DocumentGenerationRequest.class), eq(AUTH_TOKEN));
+        assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
+        assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
+        assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
     }
 
     @Test
-    public void sendLetterShouldBeOkWhenRepresented() {
-        CaseDetails caseDetails = buildCaseDetailsWithRepresentedApplicant();
-
+    public void shouldGenerateAssignedToJudgeLetterUsingApplicantAddressIfApplicantIsNotRepresented() throws Exception {
+        CaseDetails caseDetails = caseDetails();
         assignedToJudgeBulkPrintService.generateJudgeAssignedToCaseLetter(AUTH_TOKEN, caseDetails);
 
-        CaseDocument caseDocument = (CaseDocument) (caseDetails.getData().get(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER));
+        AssignedToJudgeLetter assignedToJudgeLetter = (AssignedToJudgeLetter) caseDetails.getData().get(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER);
 
-        assertThat(caseDocument.getDocumentFilename(), is(FILE_NAME));
-        assertThat(getLetterAddressee().getName(), isSolicitor());
+        Addressee testApplicantAddressee = Addressee.builder()
+            .name("John Doe")
+            .formattedAddress("1 Victoria Street"
+                + "\nWestminster"
+                + "\nGreater London"
+                + "\nUK"
+                + "\nLondon"
+                + "\nSE1")
+            .build();
 
-        verify(documentClient).generatePdf(any(DocumentGenerationRequest.class), eq(AUTH_TOKEN));
+        assertThat(assignedToJudgeLetter.getCaseNumber(), is("1234567890"));
+        assertThat(assignedToJudgeLetter.getReference(), is(""));
+        assertThat(assignedToJudgeLetter.getAddressee(), is(testApplicantAddressee));
+        assertThat(assignedToJudgeLetter.getLetterDate(), is("2020-04-21"));
+        assertThat(assignedToJudgeLetter.getApplicantName(), is("John Doe"));
+        assertThat(assignedToJudgeLetter.getRespondentName(), is("Jane Doe"));
+        assertThat(assignedToJudgeLetter.getCtscContactDetails(), is(ctscContactDetails));
     }
 
-    private Addressee getLetterAddressee() {
-        Map<String, Object> caseDetails = (Map) (bulkPrintRequestGeneratePdfCaptor.getValue().getValues().get("caseDetails"));
-        AssignedToJudgeLetter assignedToJudgeLetter = (AssignedToJudgeLetter) (caseDetails.get("caseData"));
+    @Test
+    public void shouldGenerateAssignedToJudgeLetterUsingApplicantSolicitorAddressIfApplicantIsRepresented() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithSolicitors();
+        assignedToJudgeBulkPrintService.generateJudgeAssignedToCaseLetter(AUTH_TOKEN, caseDetails);
 
-        return assignedToJudgeLetter.getAddressee();
+        AssignedToJudgeLetter assignedToJudgeLetter =
+            (AssignedToJudgeLetter) caseDetails.getData().get(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER);
+
+        Addressee testSolicitorAddressee = Addressee.builder()
+            .name("Mr J Solicitor")
+            .formattedAddress("123 Applicant Solicitor Street"
+                + "\nSecond Address Line"
+                + "\nThird Address Line"
+                + "\nLondon"
+                + "\nUK"
+                + "\nLondon"
+                + "\nSE1")
+            .build();
+
+        assertThat(assignedToJudgeLetter.getCaseNumber(), is("1234567890"));
+        assertThat(assignedToJudgeLetter.getReference(), is("RG-123456789"));
+        assertThat(assignedToJudgeLetter.getAddressee(), is(testSolicitorAddressee));
+        assertThat(assignedToJudgeLetter.getLetterDate(), is("2020-04-21"));
+        assertThat(assignedToJudgeLetter.getApplicantName(), is("John Doe"));
+        assertThat(assignedToJudgeLetter.getRespondentName(), is("Jane Doe"));
+        assertThat(assignedToJudgeLetter.getCtscContactDetails(), is(ctscContactDetails));
     }
 
-    private static Matcher<String> isApplicant() {
-        return is("James Joyce");
+    private CaseDetails caseDetails() throws Exception {
+        try (InputStream resourceAsStream =
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
     }
 
-    private static Matcher<String> isSolicitor() {
-        return is(TEST_SOLICITOR_NAME);
+    private CaseDetails caseDetailsWithSolicitors() throws Exception {
+        try (InputStream resourceAsStream =
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-with-solicitors.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
     }
 
-    private static CaseDetails buildCaseDetailsWithRepresentedApplicant() {
-        CaseDetails caseDetails = buildCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
+    private static class TestDocumentClient implements DocumentClient {
 
-        caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
-        caseData.put(SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(APP_SOLICITOR_ADDRESS_CCD_FIELD, ImmutableMap.of(
-            "AddressLine1", "102 Petty France",
-            "AddressLine2", "Floor 6",
-            "AddressLine3", "My desk",
-            "PostTown", "London",
-            "PostCode", "4YU 0IO"
-        ));
+        @Override
+        public Document generatePdf(DocumentGenerationRequest request, String authorizationToken) {
+            assertThat(request.getTemplate(), is("FL-FRM-LET-ENG-00318.docx"));
+            assertThat(request.getFileName(), is("ApplicationHasBeenAssignedToJudge.pdf"));
+            return document();
+        }
 
-        return caseDetails;
+        @Override
+        public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void deleteDocument(String fileUrl, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public DocumentValidationResponse checkUploadedFileType(String authorizationToken, String fileUrl) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Document stampDocument(Document document, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Document annexStampDocument(Document document, String authorizationToken) {
+            throw new UnsupportedOperationException();
+        }
     }
-
-    private static Document buildDocumentModel() {
-        Document document = new Document();
-        document.setBinaryUrl("binaryUrl");
-        document.setFileName(FILE_NAME);
-        document.setUrl("url");
-
-        return document;
-    }
-
-    /*
-    Add tests for feature toggles
-     */
 }
+
