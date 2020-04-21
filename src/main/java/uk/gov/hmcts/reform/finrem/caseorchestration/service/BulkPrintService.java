@@ -30,7 +30,7 @@ public class BulkPrintService extends AbstractDocumentService {
     private static final String VALUE = "value";
 
     @Value("${feature.approved-consent-order-notification-letter}")
-    private boolean featureApprovedConsentOrderNotificationLetter;
+    private boolean approvedConsentOrderNotificationLetterFeature;
 
     @Autowired
     public BulkPrintService(DocumentClient documentClient,
@@ -91,7 +91,7 @@ public class BulkPrintService extends AbstractDocumentService {
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "orderLetter"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrder"));
 
-            if (featureApprovedConsentOrderNotificationLetter) {
+            if (approvedConsentOrderNotificationLetterFeature) {
                 bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrderApprovedNotificationLetter"));
             }
 

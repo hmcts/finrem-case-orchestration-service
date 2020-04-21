@@ -48,7 +48,7 @@ public class ConsentOrderApprovedController implements BaseController {
     private final ConsentOrderApprovedDocumentService service;
 
     @Value("${feature.approved-consent-order-notification-letter}")
-    private boolean featureApprovedConsentOrderNotificationLetter;
+    private boolean approvedConsentOrderNotificationLetterFeature;
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -77,7 +77,7 @@ public class ConsentOrderApprovedController implements BaseController {
             CaseDocument approvedConsentOrderLetter = service.generateApprovedConsentOrderLetter(caseDetails, authToken);
             CaseDocument consentOrderAnnexStamped = service.annexStampDocument(latestConsentOrder, authToken);
             CaseDocument approvedConsentOrderNotificationLetter = null;
-            if (featureApprovedConsentOrderNotificationLetter) {
+            if (approvedConsentOrderNotificationLetterFeature) {
                 approvedConsentOrderNotificationLetter = service.generateApprovedConsentOrderNotificationLetter(caseDetails, authToken);
             }
 
@@ -88,7 +88,7 @@ public class ConsentOrderApprovedController implements BaseController {
                 .orderLetter(approvedConsentOrderLetter)
                 .consentOrder(consentOrderAnnexStamped);
 
-            if (featureApprovedConsentOrderNotificationLetter) {
+            if (approvedConsentOrderNotificationLetterFeature) {
                 approvedOrderBuilder.consentOrderApprovedNotificationLetter(approvedConsentOrderNotificationLetter);
             }
 
