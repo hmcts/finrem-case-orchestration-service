@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.tasks.run.BootRun
+
 buildscript {
     ext {
         springBootVersion = '2.2.4.RELEASE'
@@ -24,7 +26,6 @@ plugins {
     id 'net.ltgt.apt' version '0.10'
 }
 
-
 apply plugin: 'au.com.dius.pact'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'jacoco'
@@ -35,14 +36,11 @@ apply plugin: 'org.sonarqube'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'net.serenity-bdd.aggregator'
 
-
-
 group = 'uk.gov.hmcts.reform.finrem'
 version = '0.0.1'
 mainClassName = 'uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
 
 repositories {
     mavenLocal()
@@ -51,7 +49,6 @@ repositories {
     maven { url "http://repo.maven.apache.org/maven2" }
     maven { url 'https://repo.spring.io/libs-milestone' }
 }
-
 
 sourceSets {
     testSmoke {
@@ -112,7 +109,7 @@ configurations {
 }
 
 def versions = [
-        bspCommonLib            : '0.0.32',
+        bspCommonLib            : '0.0.33',
         ccdClient               : '4.6.4',
         commonsBeanUtils        : '1.9.4',
         commonsIo               : '2.5',
@@ -321,6 +318,21 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
     testClassesDirs = sourceSets.testSmoke.output.classesDirs
     classpath = sourceSets.testSmoke.runtimeClasspath
     finalizedBy aggregate
+}
+
+task bootRunAat(type: BootRun, description: 'Runs the app using AAT config', dependsOn: 'classes', group: 'Application') {
+    doFirst() {
+        main = bootJar.mainClassName
+        classpath = sourceSets.main.runtimeClasspath
+        systemProperties = System.properties
+        systemProperty 'spring.profiles.active', 'aat'
+
+        //Proxy configuration
+        systemProperty 'http.proxyHost', 'proxyout.reform.hmcts.net'
+        systemProperty 'http.proxyPort', '8080'
+        systemProperty 'https.proxyHost', 'proxyout.reform.hmcts.net'
+        systemProperty 'https.proxyPort', '8080'
+    }
 }
 
 task functional(type: Test) {

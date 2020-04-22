@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.functional.bulkscan;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,15 @@ import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 import uk.gov.hmcts.reform.finrem.functional.model.UserDetails;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.collection.IsMapContaining.hasKey;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
@@ -55,38 +61,47 @@ public class CcdBulkScanIntegrationTest {
     public void givenOcrPayload_whenTransformedPayloadUploadedToCcd_thenCaseIsCreated() throws Exception {
         String transformedOcrData = transformOcrData(FORM_A_JSON);
         Map caseCreationDetails = ResourceLoader.jsonToObject(transformedOcrData.getBytes(StandardCharsets.UTF_8), Map.class);
-        Object caseData = ((Map)caseCreationDetails.get("case_creation_details")).get("case_data");
+        Object caseData = ((Map) caseCreationDetails.get("case_creation_details")).get("case_data");
 
-        try {
-            UserDetails userDetails = idamUtils.createCaseworkerUser();
-            submitCase(caseData, userDetails);
-        } finally {
-            idamUtils.deleteTestUsers();
-        }
+        UserDetails userDetails = idamUtils.createCaseworkerUser();
+        log.info("case data = {}, user details = {}", caseData, userDetails);
+        CaseDetails caseDetails = submitCase(caseData, userDetails);
+
+        Map<String, Object> persistedCaseData = caseDetails.getData();
+        assertThat(persistedCaseData, hasEntry("paperApplication", "Yes"));
+        assertThat(persistedCaseData, hasKey("formA"));
+        assertThat(persistedCaseData, hasKey("scannedD81s"));
+        assertThat((List<?>) persistedCaseData.get("scannedD81s"), hasSize(2));
+    }
+
+    @After
+    public void cleanUp() {
+        idamUtils.deleteTestUsers();
     }
 
     private String transformOcrData(String path) throws Exception {
         String token = idamUtils.generateServiceTokenWithValidMicroservice(bulkScanTransformationAndUpdateMicroservice);
         String body = ResourceLoader.loadResourceAsString(path);
         Response response = SerenityRest.given()
-                .header("Content-Type", APPLICATION_JSON_VALUE)
-                .header(SERVICE_AUTHORISATION_HEADER, token)
-                .relaxedHTTPSValidation()
-                .body(body)
-                .post(cosBaseUrl + "/transform-exception-record");
+            .header("Content-Type", APPLICATION_JSON_VALUE)
+            .header(SERVICE_AUTHORISATION_HEADER, token)
+            .relaxedHTTPSValidation()
+            .body(body)
+            .post(cosBaseUrl + "/transform-exception-record");
 
-        assertThat(HttpStatus.valueOf(response.getStatusCode()), is(HttpStatus.OK));
+        assertThat(response.getStatusCode(), is(HttpStatus.OK.value()));
 
         return response.body().asString();
     }
 
-    private void submitCase(Object caseData, UserDetails userDetails) {
+    private CaseDetails submitCase(Object caseData, UserDetails userDetails) {
         String serviceToken = idamUtils.generateServiceTokenWithValidMicroservice(DIVORCE_SERVICE_AUTHORISED_WITH_CCD);
+        String authorisationToken = "Bearer " + userDetails.getAuthToken();
 
         StartEventResponse startEventResponse = coreCaseDataApi.startForCaseworker(
-            userDetails.getAuthToken(),
-            serviceToken,
-            userDetails.getId(),
+                bearer.apply(userDetails.getAuthToken()),
+                serviceToken,
+                userDetails.getId(),
                 DIVORCE_JURISDICTION_ID,
                 CASE_TYPE_ID_CONSENTED,
                 FR_NEW_PAPER_CASE_EVENT_ID
@@ -104,14 +119,18 @@ public class CcdBulkScanIntegrationTest {
             .build();
 
         CaseDetails caseDetails = coreCaseDataApi.submitForCaseworker(
-            userDetails.getAuthToken(),
-            serviceToken,
-            userDetails.getId(),
-            DIVORCE_JURISDICTION_ID,
-            CASE_TYPE_ID_CONSENTED,
-            true,
-            caseDataContent);
+                bearer.apply(userDetails.getAuthToken()),
+                serviceToken,
+                userDetails.getId(),
+                DIVORCE_JURISDICTION_ID,
+                CASE_TYPE_ID_CONSENTED,
+                true,
+                caseDataContent);
 
         log.info("Created case ID {}", caseDetails.getId());
+        return caseDetails;
     }
+
+    private Function<String, String> bearer = token -> String.format("Bearer %s", token);
+
 }

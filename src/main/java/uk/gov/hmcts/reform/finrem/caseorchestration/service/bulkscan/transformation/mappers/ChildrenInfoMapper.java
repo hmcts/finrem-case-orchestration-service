@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildrenInfo;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ComplexTypeCollection;
 
 import java.util.List;
 import java.util.Map;
@@ -33,9 +33,9 @@ public class ChildrenInfoMapper {
     }
 
     public static void applyMappings(List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {
-        ChildrenInfo children = new ChildrenInfo();
+        ComplexTypeCollection<ChildInfo> children = new ComplexTypeCollection<>();
         for (int i = 1; isChildInfoPopulated(i, ocrDataFields); i++) {
-            children.addChild(mapChild(i, ocrDataFields));
+            children.addItem(mapChild(i, ocrDataFields));
         }
 
         if (!children.isEmpty()) {
@@ -49,18 +49,18 @@ public class ChildrenInfoMapper {
 
     private static ChildInfo mapChild(int index, List<OcrDataField> ocrDataFields) {
         String dob = transformFormDateIntoCcdDate(
-                "childInfo" + index + ".dateOfBirth",
-                getValueOrEmptyString(index, ocrDataFields, DOB)
+            "childInfo" + index + ".dateOfBirth",
+            getValueOrEmptyString(index, ocrDataFields, DOB)
         );
 
         return ChildInfo.builder()
-                .name(getValueOrEmptyString(index, ocrDataFields, NAME))
-                .dateOfBirth(dob)
-                .gender(getValueFromOcrDataFields(GENDER + index, ocrDataFields).orElse("notGiven"))
-                .relationshipToApplicant(getValueOrEmptyString(index, ocrDataFields, RELATION_TO_APPLICANT))
-                .relationshipToRespondent(getValueOrEmptyString(index, ocrDataFields, RELATION_TO_RESPONDENT))
-                .countryOfResidence(getValueOrEmptyString(index, ocrDataFields, COUNTRY))
-                .build();
+            .name(getValueOrEmptyString(index, ocrDataFields, NAME))
+            .dateOfBirth(dob)
+            .gender(getValueFromOcrDataFields(GENDER + index, ocrDataFields).orElse("notGiven"))
+            .relationshipToApplicant(getValueOrEmptyString(index, ocrDataFields, RELATION_TO_APPLICANT))
+            .relationshipToRespondent(getValueOrEmptyString(index, ocrDataFields, RELATION_TO_RESPONDENT))
+            .countryOfResidence(getValueOrEmptyString(index, ocrDataFields, COUNTRY))
+            .build();
     }
 
     private static String getValueOrEmptyString(int index, List<OcrDataField> ocrDataFields, String fieldPrefix) {
