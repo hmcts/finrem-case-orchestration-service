@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasEntry;
@@ -98,12 +99,12 @@ public class CcdBulkScanIntegrationTest {
         String authorisationToken = "Bearer " + userDetails.getAuthToken();
 
         StartEventResponse startEventResponse = coreCaseDataApi.startForCaseworker(
-            authorisationToken,
-            serviceToken,
-            userDetails.getId(),
-            DIVORCE_JURISDICTION_ID,
-            CASE_TYPE_ID_CONSENTED,
-            FR_NEW_PAPER_CASE_EVENT_ID
+                bearer.apply(userDetails.getAuthToken()),
+                serviceToken,
+                userDetails.getId(),
+                DIVORCE_JURISDICTION_ID,
+                CASE_TYPE_ID_CONSENTED,
+                FR_NEW_PAPER_CASE_EVENT_ID
         );
 
         final CaseDataContent caseDataContent = CaseDataContent.builder()
@@ -118,16 +119,18 @@ public class CcdBulkScanIntegrationTest {
             .build();
 
         CaseDetails caseDetails = coreCaseDataApi.submitForCaseworker(
-            authorisationToken,
-            serviceToken,
-            userDetails.getId(),
-            DIVORCE_JURISDICTION_ID,
-            CASE_TYPE_ID_CONSENTED,
-            true,
-            caseDataContent);
+                bearer.apply(userDetails.getAuthToken()),
+                serviceToken,
+                userDetails.getId(),
+                DIVORCE_JURISDICTION_ID,
+                CASE_TYPE_ID_CONSENTED,
+                true,
+                caseDataContent);
 
         log.info("Created case ID {}", caseDetails.getId());
         return caseDetails;
     }
 
+    private Function<String, String> bearer = token -> String.format("Bearer %s", token);
+  
 }
