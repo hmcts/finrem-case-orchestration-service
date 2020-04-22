@@ -1,6 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.ImmutableMap;
+import com.microsoft.applicationinsights.core.dependencies.io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import org.junit.Test;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,8 +13,17 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullName;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isAmendedConsentOrderType;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresented;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isNotEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresented;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 public class CommonFunctionTest {
@@ -36,8 +49,7 @@ public class CommonFunctionTest {
     @Test
     public void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnTrueWhenLineOneAndPostCodeArePopulated() {
         assertThat(
-                addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(asList("London Road", "sw2 3rf"))),
-                is(true)
+            addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(asList("London Road", "sw2 3rf"))), is(true)
         );
     }
 
@@ -91,5 +103,113 @@ public class CommonFunctionTest {
         fullNameMap.put(L_NAME, lastName);
 
         return fullNameMap;
+    }
+
+    @Test
+    public void isApplicantRepresentedShouldReturnTrueWhenApplicantRepresentedIsYes() {
+        assertThat(isApplicantRepresented(createCaseDataApplRepresented(YES_VALUE)), is(true));
+    }
+
+    @Test
+    public void isApplicantRepresentedShouldReturnFalse() {
+        asList(
+            NO_VALUE,
+            "",
+            null,
+            "this is some random string, that doesn't make any sense"
+        ).forEach(value -> assertThat(isApplicantRepresented(createCaseDataApplRepresented(value)), is(false)));
+    }
+
+    @Test
+    public void isRespondentRepresentedShouldReturnTrueWhenRepresentedSolicitorIsNotEmpty() {
+        asList("John Wayne", "     ", "234@#$@$@#REWF#@REWFR@#")
+            .forEach(value -> assertThat(
+                isRespondentRepresented(createCaseDataRespRepresented(value)), is(true)));
+    }
+
+    @Test
+    public void isRespondentRepresentedShouldReturnFalse() {
+        asList("", null)
+            .forEach(value -> assertThat(
+                isRespondentRepresented(createCaseDataRespRepresented(value)), is(false)));
+    }
+
+    @Test
+    public void isNotEmptyShouldReturnTrueWhenPopulated() {
+        asList(
+            YES_VALUE,
+            "    ",
+            "any value makes it not empty",
+            "1234",
+            "@#$R@#F@$T"
+        ).forEach(value -> assertThat(
+            isNotEmpty(APPLICANT_REPRESENTED, createCaseDataApplRepresented(value)), is(true))
+        );
+    }
+
+    @Test
+    public void isNotEmptyShouldReturnFalseWhenEmptyMap() {
+        assertThat(
+            isNotEmpty(APPLICANT_REPRESENTED, ImmutableMap.of()), is(false)
+        );
+    }
+
+    @Test
+    public void isNotEmptyShouldReturnFalseWhenFieldIsEmpty() {
+        assertThat(
+            isNotEmpty(APPLICANT_REPRESENTED, createCaseDataApplRepresented(StringUtil.EMPTY_STRING)), is(false)
+        );
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void isNotEmptyShouldThrowNullPointerException() {
+        isNotEmpty(APPLICANT_REPRESENTED, null);
+    }
+
+    @Test
+    public void isAmendedConsentOrderTypeShouldReturnFalseForDefaultEmptyObject() {
+        RespondToOrderData data = new RespondToOrderData();
+        data.setRespondToOrder(new RespondToOrder());
+
+        assertThat(isAmendedConsentOrderType(data), is(false));
+    }
+
+    @Test
+    public void isAmendedConsentOrderTypeShouldReturnFalseWhenDocumentTypeIsNotAmendedConsentOrder() {
+        assertThat(isAmendedConsentOrderType(getRespondToOrderData("ble ble ble")), is(false));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void isAmendedConsentOrderTypeShouldThrowNullPointerException() {
+        isAmendedConsentOrderType(null);
+    }
+
+    @Test
+    public void isAmendedConsentOrderTypeShouldReturnTrueWhenDocumentTypeIsAmendedConsentOrder() {
+        assertThat(isAmendedConsentOrderType(getRespondToOrderData(AMENDED_CONSENT_ORDER)), is(true));
+    }
+
+    private static RespondToOrderData getRespondToOrderData(String s) {
+        RespondToOrderData data = new RespondToOrderData();
+        RespondToOrder respondToOrder = new RespondToOrder();
+        respondToOrder.setDocumentType(s);
+        data.setRespondToOrder(respondToOrder);
+
+        return data;
+    }
+
+
+    private static Map<String, Object> createCaseDataApplRepresented(String value) {
+        Map<String, Object> data = new HashMap<>();
+        data.put(APPLICANT_REPRESENTED, value);
+
+        return data;
+    }
+
+    private static Map<String, Object> createCaseDataRespRepresented(String value) {
+        Map<String, Object> data = new HashMap<>();
+        data.put(RESP_SOLICITOR_NAME, value);
+
+        return data;
     }
 }

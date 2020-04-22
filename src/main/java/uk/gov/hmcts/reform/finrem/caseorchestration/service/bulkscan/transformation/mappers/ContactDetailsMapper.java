@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.applyMappings;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.isApplicantRepresented;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.isRespondentRepresented;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresented;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresented;
 
 public class ContactDetailsMapper {
 
