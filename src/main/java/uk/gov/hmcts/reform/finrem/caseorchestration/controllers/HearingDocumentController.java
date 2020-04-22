@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,15 +17,19 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import javax.validation.constraints.NotNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,8 +40,12 @@ public class HearingDocumentController implements BaseController {
     private final HearingDocumentService service;
     private final ValidateHearingService validateHearingService;
 
+    @Autowired
+    private NotificationService notificationService;
+// sendPrepareForHearingEmail
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
+    @ApiOperation(value = "Handles Form C and G generation as well as sending an email to solicitors to plan a hearing. "
+        + "Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
@@ -61,8 +70,19 @@ public class HearingDocumentController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
         caseData.putAll(service.generateHearingDocuments(authorisationToken, caseDetails));
 
+        if (hasSolicitorAgreedToReceiveEmails(caseData)) {
+            notificationService.sendPrepareForHearingEmail(callback);
+        }
+
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
         return ResponseEntity.ok(
                 AboutToStartOrSubmitCallbackResponse.builder().data(caseData).warnings(warnings).build());
     }
+
+    // This is a duplicate from Notification Controller. This will be removed and separated into a helper before merge
+    private boolean hasSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData) {
+        return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData
+            .get(SOLICITOR_AGREE_TO_RECEIVE_EMAILS)));
+    }
+
 }
