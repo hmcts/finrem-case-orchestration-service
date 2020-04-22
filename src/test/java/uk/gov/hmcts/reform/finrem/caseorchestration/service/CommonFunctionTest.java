@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.google.common.collect.ImmutableMap;
-import com.microsoft.applicationinsights.core.dependencies.io.grpc.netty.shaded.io.netty.util.internal.StringUtil;
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
@@ -10,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.microsoft.applicationinsights.core.dependencies.io.grpc.netty.shaded.io.netty.util.internal.StringUtil.EMPTY_STRING;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -18,12 +18,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullName;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isAmendedConsentOrderType;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresented;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isNotEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresented;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 public class CommonFunctionTest {
@@ -88,7 +90,7 @@ public class CommonFunctionTest {
         assertThat(buildFullName(fullName("    Pit   ", "     Smith    "), F_NAME, L_NAME), is("Pit Smith"));
     }
 
-    private static Map<String, String> createAddressObject(List<? extends Object> data) {
+    private static Map<String, String> createAddressObject(List<?> data) {
         Map<String, String> address = new HashMap<>();
 
         address.put("AddressLine1", (String) data.get(0));
@@ -106,32 +108,48 @@ public class CommonFunctionTest {
     }
 
     @Test
-    public void isApplicantRepresentedShouldReturnTrueWhenApplicantRepresentedIsYes() {
-        assertThat(isApplicantRepresented(createCaseDataApplRepresented(YES_VALUE)), is(true));
+    public void isApplicantRepresentedByASolicitorShouldReturnTrueWhenApplicantRepresentedIsYes() {
+        assertThat(isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(YES_VALUE)), is(true));
     }
 
     @Test
-    public void isApplicantRepresentedShouldReturnFalse() {
+    public void isApplicantRepresentedByASolicitorShouldReturnFalse() {
         asList(
             NO_VALUE,
             "",
             null,
             "this is some random string, that doesn't make any sense"
-        ).forEach(value -> assertThat(isApplicantRepresented(createCaseDataApplRepresented(value)), is(false)));
+        ).forEach(value -> assertThat(isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(value)), is(false)));
     }
 
     @Test
-    public void isRespondentRepresentedShouldReturnTrueWhenRepresentedSolicitorIsNotEmpty() {
+    public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnTrueWhenApplicantRepresentedIsYes() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, YES_VALUE);
+
+        assertThat(isApplicantSolicitorAgreeToReceiveEmails(data), is(true));
+    }
+
+    @Test
+    public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnFalseWhenApplicantRepresentedIsNo() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, null);
+
+        assertThat(isApplicantSolicitorAgreeToReceiveEmails(data), is(false));
+    }
+
+    @Test
+    public void isRespondentRepresentedByASolicitorShouldReturnTrueWhenRepresentedSolicitorIsNotEmpty() {
         asList("John Wayne", "     ", "234@#$@$@#REWF#@REWFR@#")
             .forEach(value -> assertThat(
-                isRespondentRepresented(createCaseDataRespRepresented(value)), is(true)));
+                isRespondentRepresentedByASolicitor(createCaseDataRespRepresented(value)), is(true)));
     }
 
     @Test
-    public void isRespondentRepresentedShouldReturnFalse() {
+    public void isRespondentRepresentedByASolicitorShouldReturnFalse() {
         asList("", null)
             .forEach(value -> assertThat(
-                isRespondentRepresented(createCaseDataRespRepresented(value)), is(false)));
+                isRespondentRepresentedByASolicitor(createCaseDataRespRepresented(value)), is(false)));
     }
 
     @Test
@@ -149,16 +167,12 @@ public class CommonFunctionTest {
 
     @Test
     public void isNotEmptyShouldReturnFalseWhenEmptyMap() {
-        assertThat(
-            isNotEmpty(APPLICANT_REPRESENTED, ImmutableMap.of()), is(false)
-        );
+        assertThat(isNotEmpty(APPLICANT_REPRESENTED, ImmutableMap.of()), is(false));
     }
 
     @Test
     public void isNotEmptyShouldReturnFalseWhenFieldIsEmpty() {
-        assertThat(
-            isNotEmpty(APPLICANT_REPRESENTED, createCaseDataApplRepresented(StringUtil.EMPTY_STRING)), is(false)
-        );
+        assertThat(isNotEmpty(APPLICANT_REPRESENTED, createCaseDataApplRepresented(EMPTY_STRING)), is(false));
     }
 
     @Test(expected = NullPointerException.class)
@@ -197,7 +211,6 @@ public class CommonFunctionTest {
 
         return data;
     }
-
 
     private static Map<String, Object> createCaseDataApplRepresented(String value) {
         Map<String, Object> data = new HashMap<>();

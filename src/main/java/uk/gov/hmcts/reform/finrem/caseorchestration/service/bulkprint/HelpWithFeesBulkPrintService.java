@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullName;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresented;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
@@ -68,7 +68,7 @@ public class HelpWithFeesBulkPrintService extends AbstractDocumentService {
             .caseNumber(nullToEmpty((caseDetails.getId())))
             .reference("");
 
-        if (isApplicantRepresented(caseData)) {
+        if (isApplicantRepresentedByASolicitor(caseData)) {
             log.info("Applicant is represented by a solicitor");
             addresseeBuilder
                 .name(nullToEmpty(caseData.get(SOLICITOR_NAME)))

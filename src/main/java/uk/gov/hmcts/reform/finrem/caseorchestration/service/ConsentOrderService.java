@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @Slf4j

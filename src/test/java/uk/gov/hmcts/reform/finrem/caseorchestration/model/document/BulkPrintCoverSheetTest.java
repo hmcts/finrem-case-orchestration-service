@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.document;
 
 import org.junit.Test;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintCoverSheet;
 
 import static org.junit.Assert.assertEquals;
 
