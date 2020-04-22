@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
@@ -81,7 +82,7 @@ public class AssignedToJudgeBulkPrintServiceTest {
         assertThat(assignedToJudgeLetter.getCaseNumber(), is("1234567890"));
         assertThat(assignedToJudgeLetter.getReference(), is(""));
         assertThat(assignedToJudgeLetter.getAddressee(), is(testApplicantAddressee));
-        assertThat(assignedToJudgeLetter.getLetterDate(), is("2020-04-21"));
+        assertThat(assignedToJudgeLetter.getLetterDate(), is(String.valueOf(LocalDate.now())));
         assertThat(assignedToJudgeLetter.getApplicantName(), is("John Doe"));
         assertThat(assignedToJudgeLetter.getRespondentName(), is("Jane Doe"));
         assertThat(assignedToJudgeLetter.getCtscContactDetails(), is(ctscContactDetails));
@@ -109,7 +110,7 @@ public class AssignedToJudgeBulkPrintServiceTest {
         assertThat(assignedToJudgeLetter.getCaseNumber(), is("1234567890"));
         assertThat(assignedToJudgeLetter.getReference(), is("RG-123456789"));
         assertThat(assignedToJudgeLetter.getAddressee(), is(testSolicitorAddressee));
-        assertThat(assignedToJudgeLetter.getLetterDate(), is("2020-04-21"));
+        assertThat(assignedToJudgeLetter.getLetterDate(), is(String.valueOf(LocalDate.now())));
         assertThat(assignedToJudgeLetter.getApplicantName(), is("John Doe"));
         assertThat(assignedToJudgeLetter.getRespondentName(), is("Jane Doe"));
         assertThat(assignedToJudgeLetter.getCtscContactDetails(), is(ctscContactDetails));

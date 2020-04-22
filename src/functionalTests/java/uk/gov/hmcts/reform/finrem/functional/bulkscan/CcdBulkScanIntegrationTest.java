@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.functional.model.UserDetails;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -59,7 +60,6 @@ public class CcdBulkScanIntegrationTest {
 
         try {
             UserDetails userDetails = idamUtils.createCaseworkerUser();
-            log.info("case data = {}, user details = {}", caseData, userDetails);
             submitCase(caseData, userDetails);
         } finally {
             idamUtils.deleteTestUsers();
@@ -85,7 +85,7 @@ public class CcdBulkScanIntegrationTest {
         String serviceToken = idamUtils.generateServiceTokenWithValidMicroservice(DIVORCE_SERVICE_AUTHORISED_WITH_CCD);
 
         StartEventResponse startEventResponse = coreCaseDataApi.startForCaseworker(
-                userDetails.getAuthToken(),
+                bearer.apply(userDetails.getAuthToken()),
                 serviceToken,
                 userDetails.getId(),
                 DIVORCE_JURISDICTION_ID,
@@ -105,7 +105,7 @@ public class CcdBulkScanIntegrationTest {
                 .build();
 
         CaseDetails caseDetails = coreCaseDataApi.submitForCaseworker(
-                userDetails.getAuthToken(),
+                bearer.apply(userDetails.getAuthToken()),
                 serviceToken,
                 userDetails.getId(),
                 DIVORCE_JURISDICTION_ID,
@@ -116,4 +116,5 @@ public class CcdBulkScanIntegrationTest {
         log.info("Created case ID {}", caseDetails.getId());
     }
 
+    private Function<String, String> bearer = token -> String.format("Bearer %s", token);
 }

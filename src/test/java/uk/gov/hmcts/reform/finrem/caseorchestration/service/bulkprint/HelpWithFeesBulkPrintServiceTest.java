@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValid
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.HelpWithFeesSuccessLetter;
 
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
@@ -77,7 +78,7 @@ public class HelpWithFeesBulkPrintServiceTest {
         assertThat(helpWithFeesSuccessLetter.getCaseNumber(), is("1234567890"));
         assertThat(helpWithFeesSuccessLetter.getReference(), is(""));
         assertThat(helpWithFeesSuccessLetter.getAddressee(), is(testApplicantAddressee));
-        assertThat(helpWithFeesSuccessLetter.getLetterDate(), is("2020-04-21"));
+        assertThat(helpWithFeesSuccessLetter.getLetterDate(), is(String.valueOf(LocalDate.now())));
         assertThat(helpWithFeesSuccessLetter.getApplicantName(), is("John Doe"));
         assertThat(helpWithFeesSuccessLetter.getRespondentName(), is("Jane Doe"));
     }
@@ -104,7 +105,7 @@ public class HelpWithFeesBulkPrintServiceTest {
         assertThat(helpWithFeesSuccessLetter.getCaseNumber(), is("1234567890"));
         assertThat(helpWithFeesSuccessLetter.getReference(), is("RG-123456789"));
         assertThat(helpWithFeesSuccessLetter.getAddressee(), is(testSolicitorAddressee));
-        assertThat(helpWithFeesSuccessLetter.getLetterDate(), is("2020-04-21"));
+        assertThat(helpWithFeesSuccessLetter.getLetterDate(), is(String.valueOf(LocalDate.now())));
         assertThat(helpWithFeesSuccessLetter.getApplicantName(), is("John Doe"));
         assertThat(helpWithFeesSuccessLetter.getRespondentName(), is("Jane Doe"));
     }
