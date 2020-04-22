@@ -18,7 +18,7 @@ import java.util.UUID;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-@FeignClient(name = "document-client", url = "${document.generator.service.api.baseurl}")
+@FeignClient(name = "document-client", url = "${document.generator.service.api.baseurl}", primary = false)
 public interface DocumentClient {
 
     @PostMapping(

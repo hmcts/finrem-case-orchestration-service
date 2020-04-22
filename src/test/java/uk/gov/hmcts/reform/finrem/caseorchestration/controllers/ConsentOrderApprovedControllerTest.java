@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -40,6 +41,9 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     @MockBean
     private ConsentOrderApprovedDocumentService service;
+
+    @Value("${feature.approved-consent-order-notification-letter}")
+    private boolean approvedConsentOrderNotificationLetterFeature;
 
     public String endpoint() {
         return "/case-orchestration/documents/consent-order-approved";
@@ -103,7 +107,9 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk());
         assertLetter(result);
         assertConsentOrder(result);
-        assertConsentOrderNotificationLetter(result);
+        if (approvedConsentOrderNotificationLetterFeature) {
+            assertConsentOrderNotificationLetter(result);
+        }
         assertPensionDocs(result);
     }
 
