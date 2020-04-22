@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +53,12 @@ public class NotificationsController implements BaseController {
     @Autowired
     private AssignedToJudgeBulkPrintService assignedToJudgeBulkPrintService;
 
+    @Value("${feature.hwf-Successful-notification-letter}")
+    private boolean hwfSuccessfulNotificationLetterFeature;
+
+    @Value("${feature.assigned-to-judge-notification-letter}")
+    private boolean assignedToJudgeNotificationLetterFeature;
+
     @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for HWF Successful.")
     @ApiResponses(value = {
@@ -69,12 +76,15 @@ public class NotificationsController implements BaseController {
                 log.info("Sending Consented HWF Successful email notification to Solicitor");
                 notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest);
             } else if (isPaperApplication(caseData)) {
-                // TODO: PUT THIS BEHIND A FEATURE TOGGLE SO WE CAN GO LIVE
-                log.info("Sending Consented HWF Successful notification bulk print letter");
-                generateAndSendHwfSuccessfulLetter(authToken, callbackRequest.getCaseDetails());
 
-                caseData.remove(HWF_SUCCESS_NOTIFICATION_LETTER);
-                log.info("Bulk print is successful for 'Judge assigned to case' notification letter");
+                // Temporary feature toggle until we're ready to release Bulk Print
+                if (hwfSuccessfulNotificationLetterFeature) {
+                    log.info("Sending Consented HWF Successful notification bulk print letter");
+                    generateAndSendHwfSuccessfulLetter(authToken, callbackRequest.getCaseDetails());
+
+                    caseData.remove(HWF_SUCCESS_NOTIFICATION_LETTER);
+                    log.info("Bulk print is successful for 'Judge assigned to case' notification letter");
+                }
             }
         } else if (isSolicitorAgreedToReceiveEmails(caseData, APPLICANT_SOL_CONSENT_FOR_EMAILS)) {
             log.info("Sending Contested HWF Successful email notification to Solicitor");
@@ -114,12 +124,15 @@ public class NotificationsController implements BaseController {
             log.info("Sending email notification to Solicitor for Judge assigned to case");
             notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
         } else if (isConsentedApplication(caseData) && isPaperApplication(caseData)) {
-            // TODO: PUT THIS BEHIND A FEATURE TOGGLE SO WE CAN GO LIVE
-            log.info("Sending 'Judge assigned to case' letter to bulk print");
-            generateAndSendJudgeAssignedToCaseLetter(authToken, callbackRequest.getCaseDetails());
 
-            caseData.remove(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER);
-            log.info("Bulk print is successful for 'Judge assigned to case' notification letter");
+            // Temporary feature toggle until we're ready to release Bulk Print
+            if (assignedToJudgeNotificationLetterFeature) {
+                log.info("Sending 'Judge assigned to case' letter to bulk print");
+                generateAndSendJudgeAssignedToCaseLetter(authToken, callbackRequest.getCaseDetails());
+
+                caseData.remove(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER);
+                log.info("Bulk print is successful for 'Judge assigned to case' notification letter");
+            }
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -132,7 +145,6 @@ public class NotificationsController implements BaseController {
             assignedToJudgeBulkPrintService.generateJudgeAssignedToCaseLetter(authToken, caseDetails);
         UUID judgeAssignedToCaseLetterId =
             bulkPrintService.sendNotificationLetterForBulkPrint(judgeAssignedToCaseLetter, caseDetails);
-
 
         caseData.put(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER_APP, judgeAssignedToCaseLetter);
         caseData.put(BULK_PRINT_LETTER_ID_APP, judgeAssignedToCaseLetterId);

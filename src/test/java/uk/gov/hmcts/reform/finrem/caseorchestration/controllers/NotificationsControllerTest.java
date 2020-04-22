@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -60,6 +61,12 @@ public class NotificationsControllerTest {
     @MockBean
     private AssignedToJudgeBulkPrintService assignedToJudgeBulkPrintService;
 
+    @Value("${feature.hwf-Successful-notification-letter}")
+    private boolean hwfSuccessfulNotificationLetterFeature;
+
+    @Value("${feature.assigned-to-judge-notification-letter}")
+    private boolean assignedToJudgeNotificationLetterFeature;
+
     private MockMvc mockMvc;
     private String requestContent;
 
@@ -95,18 +102,21 @@ public class NotificationsControllerTest {
 
     @Test
     public void sendHwfSuccessfulConfirmationBulkPrintLetter() throws Exception {
-        buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
-        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
 
-        when(bulkPrintService.sendNotificationLetterForBulkPrint(any(), any())).thenReturn(UUID.randomUUID());
+        if (hwfSuccessfulNotificationLetterFeature) {
+            buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
+            mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .content(requestContent)
+                .contentType(APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
 
-        verify(helpWithFeesBulkPrintService, times(1))
-            .generateHwfSuccessfulLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
-        verifyNoMoreInteractions(notificationService);
+            when(bulkPrintService.sendNotificationLetterForBulkPrint(any(), any())).thenReturn(UUID.randomUUID());
+
+            verify(helpWithFeesBulkPrintService, times(1))
+                .generateHwfSuccessfulLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
+            verifyNoMoreInteractions(notificationService);
+        }
     }
 
     @Test
@@ -136,18 +146,21 @@ public class NotificationsControllerTest {
 
     @Test
     public void sendJudgeAssignedToCaseBulkPrintLetter() throws Exception {
-        buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
-        mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
 
-        when(bulkPrintService.sendNotificationLetterForBulkPrint(any(), any())).thenReturn(UUID.randomUUID());
+        if (assignedToJudgeNotificationLetterFeature) {
+            buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
+            mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .content(requestContent)
+                .contentType(APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
 
-        verify(assignedToJudgeBulkPrintService, times(1))
-            .generateJudgeAssignedToCaseLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
-        verifyNoMoreInteractions(notificationService);
+            when(bulkPrintService.sendNotificationLetterForBulkPrint(any(), any())).thenReturn(UUID.randomUUID());
+
+            verify(assignedToJudgeBulkPrintService, times(1))
+                .generateJudgeAssignedToCaseLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
+            verifyNoMoreInteractions(notificationService);
+        }
     }
 
     @Test
