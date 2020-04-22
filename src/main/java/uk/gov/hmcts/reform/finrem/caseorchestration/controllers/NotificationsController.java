@@ -71,10 +71,9 @@ public class NotificationsController implements BaseController {
             } else if (isPaperApplication(caseData)) {
                 // TODO: PUT THIS BEHIND A FEATURE TOGGLE SO WE CAN GO LIVE
                 log.info("Sending Consented HWF Successful notification bulk print letter");
-
                 generateAndSendHwfSuccessfulLetter(authToken, callbackRequest.getCaseDetails());
 
-                caseData.remove(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER);
+                caseData.remove(HWF_SUCCESS_NOTIFICATION_LETTER);
                 log.info("Bulk print is successful for 'Judge assigned to case' notification letter");
             }
         } else if (isSolicitorAgreedToReceiveEmails(caseData, APPLICANT_SOL_CONSENT_FOR_EMAILS)) {
@@ -114,10 +113,9 @@ public class NotificationsController implements BaseController {
         if (isSolicitorAgreedToReceiveEmails(caseData, SOLICITOR_AGREE_TO_RECEIVE_EMAILS)) {
             log.info("Sending email notification to Solicitor for Judge assigned to case");
             notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
-        } else if (isPaperApplication(caseData)) {
+        } else if (isConsentedApplication(caseData) && isPaperApplication(caseData)) {
             // TODO: PUT THIS BEHIND A FEATURE TOGGLE SO WE CAN GO LIVE
             log.info("Sending 'Judge assigned to case' letter to bulk print");
-
             generateAndSendJudgeAssignedToCaseLetter(authToken, callbackRequest.getCaseDetails());
 
             caseData.remove(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER);
