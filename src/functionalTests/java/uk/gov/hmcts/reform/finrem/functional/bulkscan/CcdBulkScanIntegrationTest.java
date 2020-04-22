@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.functional.bulkscan;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,7 @@ public class CcdBulkScanIntegrationTest {
     @Value("${auth.provider.bulkscan.update.microservice}")
     private String bulkScanTransformationAndUpdateMicroservice;
 
+    @Ignore
     @Test
     public void givenOcrPayload_whenTransformedPayloadUploadedToCcd_thenCaseIsCreated() throws Exception {
         String transformedOcrData = transformOcrData(FORM_A_JSON);
