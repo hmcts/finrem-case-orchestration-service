@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -13,12 +12,14 @@ import java.io.IOException;
 import java.util.Collections;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
 public class GenerateMiniFormATest extends AbstractDocumentTest {
 
@@ -40,15 +41,15 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
         webClient.perform(MockMvcRequestBuilders.post(apiUrl())
             .content(objectMapper.writeValueAsString(request))
             .header(AUTHORIZATION, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .accept(MediaType.APPLICATION_JSON_VALUE))
+            .contentType(APPLICATION_JSON_VALUE)
+            .accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().json(expectedCaseData()));
     }
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
-        caseDetails.getData().put("miniFormA", caseDocument());
+        caseDetails.getData().put(MINI_FORM_A, caseDocument());
 
         return objectMapper.writeValueAsString(
                 AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
@@ -71,10 +72,9 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
             .build();
     }
 
-    protected CaseDetails copyWithOptionValueTranslation(CaseDetails caseDetails) {
+    CaseDetails copyWithOptionValueTranslation(CaseDetails caseDetails) {
         try {
-            CaseDetails deepCopy = objectMapper
-                .readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
+            CaseDetails deepCopy = objectMapper.readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
 
             optionIdToValueTranslator.translateFixedListOptions(deepCopy);
             return deepCopy;

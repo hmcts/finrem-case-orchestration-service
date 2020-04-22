@@ -32,17 +32,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.REJECTED_ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
 public class RefusalOrderDocumentServiceTest {
 
-    private DocumentClient generatorClient;
-    private DocumentConfiguration config;
     private ObjectMapper mapper = new ObjectMapper();
     private RefusalOrderDocumentService service;
 
     @Before
     public void setUp() {
-        config = new DocumentConfiguration();
+        DocumentConfiguration config = new DocumentConfiguration();
         config.setRejectedOrderTemplate("test_template");
         config.setRejectedOrderFileName("test_file");
         config.setRejectedOrderDocType(REJECTED_ORDER_TYPE);
@@ -52,7 +53,7 @@ public class RefusalOrderDocumentServiceTest {
         document.setFileName(FILE_NAME);
         document.setUrl(DOC_URL);
 
-        generatorClient = Mockito.mock(DocumentClient.class);
+        DocumentClient generatorClient = Mockito.mock(DocumentClient.class);
         when(generatorClient.generatePdf(isA(DocumentGenerationRequest.class), eq(AUTH_TOKEN))).thenReturn(document);
 
         service = new RefusalOrderDocumentService(generatorClient, config, mapper);
@@ -102,14 +103,14 @@ public class RefusalOrderDocumentServiceTest {
     }
 
     private CaseDocument getCaseDocument(Map<String, Object> caseData) {
-        Object orderRefusalPreviewDocument = caseData.get("orderRefusalPreviewDocument");
+        Object orderRefusalPreviewDocument = caseData.get(ORDER_REFUSAL_PREVIEW_COLLECTION);
 
         return mapper.convertValue(orderRefusalPreviewDocument, CaseDocument.class);
     }
 
     private ConsentOrderData consentOrderData(Map<String, Object> caseData) {
         List<ConsentOrderData> list =
-                mapper.convertValue(caseData.get("uploadOrder"), new TypeReference<List<ConsentOrderData>>() {
+                mapper.convertValue(caseData.get(UPLOAD_ORDER), new TypeReference<List<ConsentOrderData>>() {
                 });
 
         return list
@@ -125,7 +126,7 @@ public class RefusalOrderDocumentServiceTest {
     }
 
     private List<OrderRefusalData> refusalOrderCollection(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get("orderRefusalCollection"),
+        return mapper.convertValue(caseData.get(ORDER_REFUSAL_COLLECTION),
                 new TypeReference<List<OrderRefusalData>>() {
                 });
     }
