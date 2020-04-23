@@ -29,6 +29,6 @@ public class ApprovedOrder {
     @JsonIgnore
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
-//    @JsonProperty("consentOrderApprovedNotificationLetter")
+    @JsonProperty("consentOrderApprovedNotificationLetter")
     private CaseDocument consentOrderApprovedNotificationLetter;
 }
