@@ -109,6 +109,8 @@ public class ConsentOrderApprovedController implements BaseController {
 
             cleanupCaseDataBeforeSubmittingToCcd(caseDetails);
 
+            log.info("-------------------- Before deserialisation --------------------");
+            log.info("{}", approvedOrderData);
             log.info("Successfully generated documents for 'Consent Order Approved'");
         }
 
