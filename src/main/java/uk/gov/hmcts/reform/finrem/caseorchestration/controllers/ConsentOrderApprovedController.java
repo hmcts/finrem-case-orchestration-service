@@ -77,12 +77,13 @@ public class ConsentOrderApprovedController implements BaseController {
             CaseDocument approvedConsentOrderLetter = service.generateApprovedConsentOrderLetter(caseDetails, authToken);
             CaseDocument consentOrderAnnexStamped = service.annexStampDocument(latestConsentOrder, authToken);
             CaseDocument approvedConsentOrderNotificationLetter = null;
+
             if (approvedConsentOrderNotificationLetterFeature) {
                 approvedConsentOrderNotificationLetter = service.generateApprovedConsentOrderNotificationLetter(caseDetails, authToken);
-            }
 
-            log.info("consentNotificationLetter= {}, letter= {}, consentOrderAnnexStamped = {}",
-                approvedConsentOrderNotificationLetter, approvedConsentOrderLetter, consentOrderAnnexStamped);
+                log.info("consentNotificationLetter= {}, letter= {}, consentOrderAnnexStamped = {}",
+                    approvedConsentOrderNotificationLetter, approvedConsentOrderLetter, consentOrderAnnexStamped);
+            }
 
             ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
                 .orderLetter(approvedConsentOrderLetter)
@@ -102,6 +103,7 @@ public class ConsentOrderApprovedController implements BaseController {
             ApprovedOrderData approvedOrderData = ApprovedOrderData.builder()
                 .approvedOrder(approvedOrder)
                 .build();
+
             log.info("Generated ApprovedOrderData = {}", approvedOrderData);
 
             List<ApprovedOrderData> approvedOrders = asList(approvedOrderData);

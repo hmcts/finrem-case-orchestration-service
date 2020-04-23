@@ -40,26 +40,26 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         super(documentClient, config, objectMapper);
     }
 
+    private final String approvedConsentOrderTemplate = config.getApprovedConsentOrderTemplate();
+    private final String approvedConsentOrderFileName = config.getApprovedConsentOrderFileName();
+
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         log.info("Generating Approved Consent Order Letter {} from {} for bulk print",
-                config.getApprovedConsentOrderFileName(),
-                config.getApprovedConsentOrderTemplate());
+            approvedConsentOrderTemplate, approvedConsentOrderFileName);
 
-        return generateDocument(authToken, caseDetails,
-                config.getApprovedConsentOrderTemplate(),
-                config.getApprovedConsentOrderFileName());
+        return generateDocument(authToken, caseDetails, approvedConsentOrderTemplate, approvedConsentOrderFileName);
     }
 
     public CaseDocument generateApprovedConsentOrderNotificationLetter(CaseDetails caseDetails, String authToken) {
         log.info("Generating Approved Consent Order Notification Letter {} from {} for bulk print",
-                config.getApprovedConsentOrderFileName(),
-                config.getApprovedConsentOrderTemplate());
+            approvedConsentOrderTemplate, approvedConsentOrderFileName);
 
         prepareApprovedConsentOrderNotificationLetter(caseDetails);
 
-        return generateDocument(authToken, caseDetails,
-                config.getApprovedConsentOrderNotificationTemplate(),
-                config.getApprovedConsentOrderNotificationFileName());
+        CaseDocument generatedApprovedConsentOrderNotificationLetter =
+            generateDocument(authToken, caseDetails, approvedConsentOrderTemplate, approvedConsentOrderFileName);
+
+        return generatedApprovedConsentOrderNotificationLetter;
     }
 
     private void prepareApprovedConsentOrderNotificationLetter(CaseDetails caseDetails) {

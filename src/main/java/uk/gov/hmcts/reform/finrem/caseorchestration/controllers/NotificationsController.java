@@ -33,7 +33,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HWF_SUCCESS_NOTIFICATION_LETTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HWF_SUCCESS_NOTIFICATION_LETTER_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
@@ -69,7 +68,8 @@ public class NotificationsController implements BaseController {
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send email for HWF Successful for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
         if (isConsentedApplication(caseData)) {
             if (isSolicitorAgreedToReceiveEmails(caseData, SOLICITOR_AGREE_TO_RECEIVE_EMAILS)) {
 
@@ -80,7 +80,15 @@ public class NotificationsController implements BaseController {
                 // Temporary feature toggle until we're ready to release Bulk Print
                 if (hwfSuccessfulNotificationLetterFeature) {
                     log.info("Sending Consented HWF Successful notification bulk print letter");
-                    generateAndSendHwfSuccessfulLetter(authToken, callbackRequest.getCaseDetails());
+                    CaseDocument hwfSuccessfulLetter =
+                        helpWithFeesBulkPrintService.generateHwfSuccessfulLetter(authToken, caseDetails);
+                    UUID hwfSuccessfulLetterId = bulkPrintService.sendNotificationLetterForBulkPrint(hwfSuccessfulLetter, caseDetails);
+
+                    log.info("Generated 'HWF Successful' letter bulk print. letter: {}, letterId : {}",
+                        hwfSuccessfulLetter, hwfSuccessfulLetterId);
+                    /*
+                    update so we do store document in CCD - return from generateAndSendHwfSuccessfulLetter
+                     */
 
                     caseData.remove(HWF_SUCCESS_NOTIFICATION_LETTER);
                     log.info("Bulk print is successful for 'Judge assigned to case' notification letter");
@@ -92,21 +100,6 @@ public class NotificationsController implements BaseController {
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
-
-    // will move below elsewhere once it works
-    private void generateAndSendHwfSuccessfulLetter(String authToken, CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-
-        CaseDocument hwfSuccessfulLetter = helpWithFeesBulkPrintService.generateHwfSuccessfulLetter(authToken, caseDetails);
-        UUID hwfSuccessfulLetterId = bulkPrintService.sendNotificationLetterForBulkPrint(hwfSuccessfulLetter, caseDetails);
-
-        caseData.put(HWF_SUCCESS_NOTIFICATION_LETTER, hwfSuccessfulLetter);
-        caseData.put(HWF_SUCCESS_NOTIFICATION_LETTER_APP, hwfSuccessfulLetterId);
-
-        log.info("Generated 'HWF Successful' letter bulk print. letter: {}, letterId : {}",
-            hwfSuccessfulLetter, hwfSuccessfulLetterId);
-    }
-    // will move above elsewhere once it works
 
     @PostMapping(value = "/case-orchestration/notify/assign-to-judge", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify user by e-mail or letter when Judge is assigned to the case.")

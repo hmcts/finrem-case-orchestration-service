@@ -11,9 +11,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.HelpWithFeesSuccessLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AbstractDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.LetterAddressHelper.formatAddressForLetterPrinting;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
@@ -23,6 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HWF_SUCCESS_NOTIFICATION_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HWF_SUCCESS_NOTIFICATION_LETTER_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullName;
@@ -38,23 +41,29 @@ public class HelpWithFeesBulkPrintService extends AbstractDocumentService {
         super(documentClient, config, objectMapper);
     }
 
+    @Autowired
+    BulkPrintService bulkPrintService;
+
     /*
     create an interface that defines the methods we’re implementing if they’re going to
     have similar methods i.e. printLetter and sendLetterToBulkPrintService etc
      */
 
-    public CaseDocument generateHwfSuccessfulLetter(final String authToken, final CaseDetails caseDetails) {
+    public CaseDocument generateHwfSuccessfulLetter(String authToken, CaseDetails caseDetails) {
+
         log.info("Generating 'HWF success' letter {} from {} for bulk print",
             config.getHelpWithFeesSuccessfulFileName(),
             config.getHelpWithFeesSuccessfulTemplate());
 
         prepareHwfSuccessfulLetter(caseDetails);
 
-        return generateDocument(
+        CaseDocument generatedHwfSuccessfulLetter = generateDocument(
             authToken,
             caseDetails,
             config.getHelpWithFeesSuccessfulTemplate(),
             config.getHelpWithFeesSuccessfulFileName());
+
+        return generatedHwfSuccessfulLetter;
     }
 
     private void prepareHwfSuccessfulLetter(CaseDetails caseDetails) {
