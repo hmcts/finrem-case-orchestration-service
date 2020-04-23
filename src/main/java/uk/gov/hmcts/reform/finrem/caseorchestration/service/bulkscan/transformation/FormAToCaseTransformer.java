@@ -119,7 +119,8 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         return additionalCaseData;
     }
 
-    private ComplexTypeCollection<TypedCaseDocument> transformIntoTypedCaseDocuments(List<InputScannedDoc> inputScannedDocs, Map<String, String> subTypeToDocumentTypeMap) {
+    private ComplexTypeCollection<TypedCaseDocument> transformIntoTypedCaseDocuments(List<InputScannedDoc> inputScannedDocs,
+                                                                                     Map<String, String> subTypeToDocumentTypeMap) {
         ComplexTypeCollection<TypedCaseDocument> documentCollection = new ComplexTypeCollection<>();
 
         inputScannedDocs.stream()

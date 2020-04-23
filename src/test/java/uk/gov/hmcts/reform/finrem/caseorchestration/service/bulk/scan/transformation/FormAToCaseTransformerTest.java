@@ -423,7 +423,8 @@ public class FormAToCaseTransformerTest {
         assertDocumentsMatchExpectations((CaseDocument) transformedCaseData.get("formA"), "FormA");
 
         assertThat(transformedCaseData, hasKey("scannedD81s"));
-        ComplexTypeCollection<CaseDocument> d81Documents = (ComplexTypeCollection<CaseDocument>) transformedCaseData.get("scannedD81s");
+        ComplexTypeCollection<CaseDocument> d81Documents =
+            (ComplexTypeCollection<CaseDocument>) transformedCaseData.get("scannedD81s");
         assertThat(d81Documents, hasSize(2));
         CaseDocument d81DocumentsItem = d81Documents.getItem(0);
         assertThat(d81DocumentsItem.getDocumentUrl(), is("http://url/d81-1"));
@@ -435,7 +436,8 @@ public class FormAToCaseTransformerTest {
         assertThat(d81DocumentsItem.getDocumentFilename(), is("d81-2.pdf"));
 
         assertThat(transformedCaseData, hasKey("pensionCollection"));
-        ComplexTypeCollection<TypedCaseDocument> pensionDocuments = (ComplexTypeCollection<TypedCaseDocument>) transformedCaseData.get("pensionCollection");
+        ComplexTypeCollection<TypedCaseDocument> pensionDocuments =
+            (ComplexTypeCollection<TypedCaseDocument>) transformedCaseData.get("pensionCollection");
         assertThat(pensionDocuments, hasSize(5));
         TypedCaseDocument typedCaseDocument = pensionDocuments.getItem(0);
         assertThat(typedCaseDocument.getTypeOfDocument(), is("Form P1"));
@@ -454,7 +456,8 @@ public class FormAToCaseTransformerTest {
         assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), "PPF");
 
         assertThat(transformedCaseData, hasKey("otherCollection"));
-        ComplexTypeCollection<TypedCaseDocument> otherCollection = (ComplexTypeCollection<TypedCaseDocument>) transformedCaseData.get("otherCollection");
+        ComplexTypeCollection<TypedCaseDocument> otherCollection =
+            (ComplexTypeCollection<TypedCaseDocument>) transformedCaseData.get("otherCollection");
         assertThat(otherCollection, hasSize(3));
         TypedCaseDocument otherTypedDocument = otherCollection.getItem(0);
         assertThat(otherTypedDocument.getTypeOfDocument(), is("Other"));
