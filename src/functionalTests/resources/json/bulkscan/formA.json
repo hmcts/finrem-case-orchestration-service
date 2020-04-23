@@ -18,7 +18,7 @@
       "delivery_date": "2018-12-27T10:46:03.123"
     },
     {
-      "type": "Document",
+      "type": "Form",
       "subtype": "FormA",
       "url": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b220382d-3ea9-44a8-9306-ae71d693dca9",

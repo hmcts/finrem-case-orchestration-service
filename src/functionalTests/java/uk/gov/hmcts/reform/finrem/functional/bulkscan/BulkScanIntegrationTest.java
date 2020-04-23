@@ -26,7 +26,7 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
     private String cosBaseUrl;
 
     private static final String SERVICE_AUTHORISATION_HEADER = "ServiceAuthorization";
-    private static final String VALIDATION_END_POINT = "/forms/formA/validate-ocr";
+    private static final String VALIDATION_END_POINT = "/forms/FormA/validate-ocr";
     private static final String TRANSFORMATION_END_POINT = "/transform-exception-record";
     private static final String UPDATE_END_POINT = "/update-case";
     
