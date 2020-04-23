@@ -45,6 +45,7 @@ public class AssignedToJudgeBulkPrintService extends AbstractDocumentService {
      */
 
     public CaseDocument generateJudgeAssignedToCaseLetter(final String authToken, final CaseDetails caseDetails) {
+
         log.info("Generating 'Assigned to Judge' letter {} from {} for bulk print",
             config.getApplicationAssignedToJudgeFileName(),
             config.getApplicationAssignedToJudgeTemplate());

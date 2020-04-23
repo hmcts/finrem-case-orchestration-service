@@ -93,9 +93,9 @@ public class CCDConfigConstant {
     public static final String CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER = "consentOrderApprovedNotificationLetter";
 
     public static final String HWF_SUCCESS_NOTIFICATION_LETTER = "hwfSuccessNotificationLetter";
-    public static final String HWF_SUCCESS_NOTIFICATION_LETTER_APP = "hwfSuccessNotificationLetterApp";
+    public static final String HWF_SUCCESS_NOTIFICATION_LETTER_ID = "hwfSuccessNotificationLetterId";
     public static final String ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER = "assignedToJudgeNotificationLetter";
-    public static final String ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER_APP = "assignedToJudgeNotificationLetterApp";
+    public static final String ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER_ID = "assignedToJudgeNotificationLetterId";
 
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
 }
