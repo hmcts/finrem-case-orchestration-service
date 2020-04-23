@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 
 public class DocumentHelperTest {
 
@@ -66,7 +67,7 @@ public class DocumentHelperTest {
         setUpCaseData("draft-consent-order.json");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> data = caseDetails.getData();
-        CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.get("consentOrder"));
+        CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.get(CONSENT_ORDER));
 
         assertThat(caseDocument.getDocumentBinaryUrl(), is("http://file1.binary"));
         assertThat(caseDocument.getDocumentUrl(), is("http://file1"));

@@ -21,6 +21,7 @@ import java.util.Map;
 import static java.util.Objects.isNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 
 @Slf4j
 @RestController
@@ -45,11 +46,10 @@ public class CheckLatestConsentOrderController implements BaseController {
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         long caseId = callback.getCaseDetails().getId();
 
-        if (isNull(caseData.get("latestConsentOrder"))) {
+        if (isNull(caseData.get(LATEST_CONSENT_ORDER))) {
             log.info("Failed validation for {} as latest Consent Order field was null", caseId);
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(Arrays.asList("Latest Consent Order Field is empty. "
-                        + "Please use the Upload Consent Order Event instead of Send Order"))
+                .errors(Arrays.asList("Latest Consent Order Field is empty. Please use the Upload Consent Order Event instead of Send Order"))
                 .build());
         }
 

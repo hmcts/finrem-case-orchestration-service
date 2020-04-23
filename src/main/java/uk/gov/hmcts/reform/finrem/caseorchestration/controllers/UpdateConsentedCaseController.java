@@ -22,6 +22,7 @@ import java.util.Map;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
 
 @RestController
@@ -68,7 +69,7 @@ public class UpdateConsentedCaseController implements BaseController {
 
     private void updateLatestConsentOrder(CallbackRequest callbackRequest) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        caseData.put("latestConsentOrder", consentOrderService.getLatestConsentOrderData(callbackRequest));
+        caseData.put(LATEST_CONSENT_ORDER, consentOrderService.getLatestConsentOrderData(callbackRequest));
     }
 
     private void updateDivorceDetails(Map<String, Object> caseData) {
