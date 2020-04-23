@@ -20,6 +20,7 @@ import java.util.Objects;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALLOCATED_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.D81_QUESTION;
@@ -35,7 +36,6 @@ public class NotificationService {
     private static final String MESSAGE = "Failed to send notification email for case id : ";
     private static final String MSG_SOLICITOR_EMAIL = " for solicitor email";
     private static final String EXCEPTION = "exception :";
-    private static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
     private static final String KENT = "kent";
     private static final String REGION = "region";
     private static final String NEWPORT = "newport";
@@ -47,8 +47,10 @@ public class NotificationService {
     private static final String BIRMINGHAM = "birmingham";
     private static final String CONSENTED = "consented";
     private static final String CONTESTED = "contested";
+
     private final NotificationServiceConfiguration notificationServiceConfiguration;
     private final RestTemplate restTemplate;
+
     private NotificationRequest notificationRequest;
 
     public void sendHWFSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
@@ -211,7 +213,6 @@ public class NotificationService {
         return EMPTY;
     }
 
-
     private String getLondonFRC(Map allocatedCourtMap) {
         String londonList = (String) allocatedCourtMap.get("londonList");
         if ("cfc".equalsIgnoreCase(londonList)) {
@@ -219,7 +220,6 @@ public class NotificationService {
         }
         return EMPTY;
     }
-
 
     private String getMidlandFRC(Map allocatedCourtMap) {
         String midlandsList = (String) allocatedCourtMap.get("midlandsList");
@@ -230,5 +230,4 @@ public class NotificationService {
         }
         return EMPTY;
     }
-
 }

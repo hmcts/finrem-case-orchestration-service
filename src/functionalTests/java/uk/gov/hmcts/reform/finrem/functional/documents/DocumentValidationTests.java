@@ -26,6 +26,10 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
 
 @Slf4j
 public class DocumentValidationTests extends IntegrationTestBase {
@@ -33,6 +37,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
     private static final String RESPOND_TO_ORDER_SOLICITOR_JSON = "respond-to-order-solicitor.json";
     private static final String CONSENT_ORDER_JSON = "draft-consent-order.json";
     private static final String consentedDir = "/json/latestConsentedConsentOrder/";
+
     private ObjectMapper objectMapper = new ObjectMapper();
     private CallbackRequest callbackRequest;
 
@@ -63,7 +68,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
         setUpCaseDetails(CONSENT_ORDER_JSON);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> data = caseDetails.getData();
-        data.put("consentOrder", generateCaseDocument(CONSENT_ORDER_JSON));
+        data.put(CONSENT_ORDER, generateCaseDocument(CONSENT_ORDER_JSON));
         caseDetails.setData(data);
         callbackRequest.setCaseDetails(caseDetails);
         // call fileupload endpoint and assert
@@ -156,11 +161,11 @@ public class DocumentValidationTests extends IntegrationTestBase {
     private void setPensionCollectionData() throws Exception {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> data = caseDetails.getData();
-        Object pensionObject = data.get("pensionCollection");
+        Object pensionObject = data.get(PENSION_DOCS_COLLECTION);
         List<PensionCollectionData> respondToOrderData = convertToPensionCollectionDataList(pensionObject);
         PensionDocumentData pensionDocumentData = respondToOrderData.get(0).getPensionDocumentData();
         pensionDocumentData.setPensionDocument(generateCaseDocument(CONSENT_ORDER_JSON));
-        data.put("pensionCollection", respondToOrderData);
+        data.put(PENSION_DOCS_COLLECTION, respondToOrderData);
         caseDetails.setData(data);
         callbackRequest.setCaseDetails(caseDetails);
     }
@@ -168,11 +173,11 @@ public class DocumentValidationTests extends IntegrationTestBase {
     private void setResponseToOrderDocument() throws Exception {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> data = caseDetails.getData();
-        Object respondToOrderDocumentsObject = data.get("respondToOrderDocuments");
+        Object respondToOrderDocumentsObject = data.get(RESPOND_TO_ORDER_DOCUMENTS);
         List<RespondToOrderData> respondToOrderData = convertToRespondToOrderDataList(respondToOrderDocumentsObject);
         RespondToOrder respondToOrder = respondToOrderData.get(0).getRespondToOrder();
         respondToOrder.setDocumentLink(generateCaseDocument(RESPOND_TO_ORDER_SOLICITOR_JSON));
-        data.put("respondToOrderDocuments", respondToOrderData);
+        data.put(RESPOND_TO_ORDER_DOCUMENTS, respondToOrderData);
         caseDetails.setData(data);
         callbackRequest.setCaseDetails(caseDetails);
     }
@@ -180,12 +185,12 @@ public class DocumentValidationTests extends IntegrationTestBase {
     private void setAmendConsentOrderCollectionData() throws Exception {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> data = caseDetails.getData();
-        Object object = data.get("amendedConsentOrderCollection");
+        Object object = data.get(AMENDED_CONSENT_ORDER_COLLECTION);
         List<AmendedConsentOrderData> amendedConsentOrders = convertToAmendedConsentOrderDataList(object);
         int length = amendedConsentOrders.size();
         AmendedConsentOrder amendedConsentOrderData = amendedConsentOrders.get(length - 1).getConsentOrder();
         amendedConsentOrderData.setAmendedConsentOrder(generateCaseDocument(CONSENT_ORDER_JSON));
-        data.put("amendedConsentOrderCollection", amendedConsentOrders);
+        data.put(AMENDED_CONSENT_ORDER_COLLECTION, amendedConsentOrders);
         caseDetails.setData(data);
         callbackRequest.setCaseDetails(caseDetails);
     }

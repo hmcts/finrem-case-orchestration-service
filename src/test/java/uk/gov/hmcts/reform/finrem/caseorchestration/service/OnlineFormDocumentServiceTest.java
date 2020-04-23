@@ -20,6 +20,7 @@ import java.util.concurrent.CountDownLatch;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
 public class OnlineFormDocumentServiceTest {
 
@@ -66,7 +67,7 @@ public class OnlineFormDocumentServiceTest {
         documentMap.put("document_url", "http://test.url");
 
         Map<String, Object> data = new HashMap<>();
-        data.put("miniFormA", documentMap);
+        data.put(MINI_FORM_A, documentMap);
 
         return data;
     }
