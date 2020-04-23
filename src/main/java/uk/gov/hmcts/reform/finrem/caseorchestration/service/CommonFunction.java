@@ -28,12 +28,12 @@ public class CommonFunction {
     }
 
     static final Function<List<Map>, Map>
-        getLastMapValue = (listMap) ->
+        getLastMapValue = listMap ->
         listMap.stream().reduce((first, second) -> second).get();
 
     static final Function<List<Map>, Map>
-        getFirstMapValue = (listMap) ->
-        listMap.stream().findFirst().get();
+        getFirstMapValue = listMap ->
+        listMap.stream().findFirst().orElse(null);
 
     public static boolean addressLineOneAndPostCodeAreBothNotEmpty(Map address) {
         return  ObjectUtils.isNotEmpty(address)

@@ -28,8 +28,7 @@ public class OptionIdToValueTranslator {
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public OptionIdToValueTranslator(@Value("${optionsValueFile}") String optionsJsonFile,
-                                     ObjectMapper objectMapper) {
+    public OptionIdToValueTranslator(@Value("${optionsValueFile}") String optionsJsonFile, ObjectMapper objectMapper) {
         this.optionsJsonFile = optionsJsonFile;
         this.objectMapper = objectMapper;
     }
@@ -51,13 +50,10 @@ public class OptionIdToValueTranslator {
         }
     }
 
-
     public void translateFixedListOptions(CaseDetails caseDetails) {
-        Optional.ofNullable(caseDetails.getData()).ifPresent(caseData -> {
-            fixedListOption.optionsKeys().forEach(optionKey -> {
-                handleTranslation(caseData, optionKey);
-            });
-        });
+        Optional.ofNullable(caseDetails.getData()).ifPresent(caseData ->
+            fixedListOption.optionsKeys().forEach(optionKey ->
+                handleTranslation(caseData, optionKey)));
     }
 
     private void handleTranslation(Map<String, Object> data, String optionKey) {
@@ -73,7 +69,7 @@ public class OptionIdToValueTranslator {
             Map<String, String> optionMap = optionsMap(optionKey);
 
             List<String> collect = originalOptionsList.stream()
-                    .map(key -> optionMap.getOrDefault(key, (String) key))
+                    .map(key -> optionMap.getOrDefault(key, key))
                     .collect(Collectors.toList());
 
             data.put(optionKey, collect);

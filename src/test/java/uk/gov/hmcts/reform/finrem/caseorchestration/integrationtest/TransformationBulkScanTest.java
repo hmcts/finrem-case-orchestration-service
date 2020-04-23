@@ -38,8 +38,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @AutoConfigureMockMvc
 @RunWith(SpringRunner.class)
 public class TransformationBulkScanTest {
+
     private static final String TRANSFORMATION_URL = "/transform-exception-record";
-    private static final String FORMA_JSON_PATH = "fixtures/bulkscan.transformation/simple-formA.json";
+    private static final String FORM_A_JSON_PATH = "fixtures/bulkscan/transformation/simple-formA.json";
 
     @Autowired
     private MockMvc mockMvc;
@@ -57,7 +58,7 @@ public class TransformationBulkScanTest {
 
     @Test
     public void shouldReturnErrorResponseForInvalidData() throws Exception {
-        String jsonPayload = loadResourceAsString(FORMA_JSON_PATH);
+        String jsonPayload = loadResourceAsString(FORM_A_JSON_PATH);
         String warningMsg = "warn!";
 
         when(bulkScanFormValidator.validateBulkScanForm(any()))

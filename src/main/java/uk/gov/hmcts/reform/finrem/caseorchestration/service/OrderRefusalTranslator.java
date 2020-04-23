@@ -18,13 +18,16 @@ import java.util.function.UnaryOperator;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_COLLECTION;
 
 public final class OrderRefusalTranslator {
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final String ORDER_REFUSAL_COLLECTION_NEW = "orderRefusalCollectionNew";
     private static Map<String, String> REFUSAL_KEYS =
             ImmutableMap.of("Transferred to Applicant’s home Court", "Transferred to Applicant home Court - A",
                     "Transferred to Applicant's home Court", "Transferred to Applicant home Court - B"
             );
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static Function<CaseDetails, Pair<CaseDetails, List<OrderRefusalData>>> pickLatestOrderRefusal =
             OrderRefusalTranslator::applyPickLatest;
@@ -46,7 +49,7 @@ public final class OrderRefusalTranslator {
     private static Pair<CaseDetails, List<OrderRefusalData>> applyPickLatest(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        List<OrderRefusalData> orderRefusalCollectionNew = ofNullable(caseData.get("orderRefusalCollectionNew"))
+        List<OrderRefusalData> orderRefusalCollectionNew = ofNullable(caseData.get(ORDER_REFUSAL_COLLECTION_NEW))
                 .map(OrderRefusalTranslator::convertToRefusalOrderList)
                 .orElse(Collections.emptyList());
 
@@ -56,7 +59,7 @@ public final class OrderRefusalTranslator {
     private static Pair<CaseDetails, List<OrderRefusalData>> applyPickOrderRefusalCollection(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        List<OrderRefusalData> orderRefusalCollection = ofNullable(caseData.get("orderRefusalCollection"))
+        List<OrderRefusalData> orderRefusalCollection = ofNullable(caseData.get(ORDER_REFUSAL_COLLECTION))
                 .map(OrderRefusalTranslator::convertToRefusalOrderList)
                 .orElse(Collections.emptyList());
 
@@ -72,7 +75,7 @@ public final class OrderRefusalTranslator {
         CaseDetails caseDetails = pair.getLeft();
         Map<String, Object> caseData = caseDetails.getData();
         List<OrderRefusalData> orderRefusalCollection = pair.getRight();
-        caseData.put("orderRefusalCollectionNew", orderRefusalCollection);
+        caseData.put(ORDER_REFUSAL_COLLECTION_NEW, orderRefusalCollection);
 
         orderRefusalCollection.forEach(orderRefusalData -> {
             List<String> orderRefusal = orderRefusalData.getOrderRefusal().getOrderRefusal();
@@ -81,7 +84,6 @@ public final class OrderRefusalTranslator {
                             .map(s -> REFUSAL_KEYS.getOrDefault(s, s))
                             .collect(toList()));
         });
-
 
         return caseDetails;
     }
@@ -92,12 +94,12 @@ public final class OrderRefusalTranslator {
 
     public static Map<String, Object> copyToOrderRefusalCollection(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
-        if (nonNull(data.get("orderRefusalCollectionNew"))) {
+        if (nonNull(data.get(ORDER_REFUSAL_COLLECTION_NEW))) {
             Pair<CaseDetails, List<OrderRefusalData>> orderRefusalNew = pickLatestOrderRefusal.apply(caseDetails);
             Pair<CaseDetails, List<OrderRefusalData>> orderRefusalCollection = pickOrderRefusalCollection
                     .apply(caseDetails);
-            data.put("orderRefusalCollection", append(orderRefusalCollection, orderRefusalNew));
-            data.put("orderRefusalCollectionNew", null);
+            data.put(ORDER_REFUSAL_COLLECTION, append(orderRefusalCollection, orderRefusalNew));
+            data.put(ORDER_REFUSAL_COLLECTION_NEW, null);
         }
         return data;
     }

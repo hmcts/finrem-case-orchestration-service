@@ -18,28 +18,27 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
 
 @Component
 public class DocumentHelper {
 
-    private static final String CONSENT_ORDER_COLLECTION = "amendedConsentOrderCollection";
-    private static final String RESPOND_TO_ORDER_DOCUMENTS = "respondToOrderDocuments";
-    private ObjectMapper objectMapper;
-
-
     public CaseDocument getLatestAmendedConsentOrder(Map<String, Object> caseData) {
-        Optional<AmendedConsentOrderData> reduce = ofNullable(caseData.get(CONSENT_ORDER_COLLECTION))
+        Optional<AmendedConsentOrderData> reduce = ofNullable(caseData.get(AMENDED_CONSENT_ORDER_COLLECTION))
                 .map(this::convertToAmendedConsentOrderDataList)
                 .orElse(emptyList())
                 .stream()
                 .reduce((first, second) -> second);
         return reduce
                 .map(consentOrderData -> consentOrderData.getConsentOrder().getAmendedConsentOrder())
-                .orElseGet(() -> convertToCaseDocument(caseData.get("latestConsentOrder")));
+                .orElseGet(() -> convertToCaseDocument(caseData.get(LATEST_CONSENT_ORDER)));
     }
 
     public List<CaseDocument> getPensionDocumentsData(Map<String, Object> caseData) {
-        return ofNullable(caseData.get("pensionCollection"))
+        return ofNullable(caseData.get(PENSION_DOCS_COLLECTION))
                 .map(this::convertToPensionCollectionDataList)
                 .orElse(emptyList())
                 .stream()
@@ -50,7 +49,7 @@ public class DocumentHelper {
     }
 
     public CaseDocument convertToCaseDocument(Object object) {
-        objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.convertValue(object, CaseDocument.class);
     }
 
@@ -87,4 +86,3 @@ public class DocumentHelper {
         return Optional.empty();
     }
 }
-

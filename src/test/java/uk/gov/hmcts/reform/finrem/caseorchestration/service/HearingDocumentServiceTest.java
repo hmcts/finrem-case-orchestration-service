@@ -28,12 +28,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 
 public class HearingDocumentServiceTest {
 
     private DocumentClient generatorClient;
-    private DocumentConfiguration config;
     private ObjectMapper mapper = new ObjectMapper();
 
     private HearingDocumentService service;
@@ -41,11 +41,10 @@ public class HearingDocumentServiceTest {
     private static final String DATE_OF_HEARING = "2019-01-01";
     private static final String FORM_C = "formC";
     private static final String FORM_G = "formG";
-    private static final String FAST_TRACK_DECISION = "fastTrackDecision";
 
     @Before
     public void setUp() {
-        config = new DocumentConfiguration();
+        DocumentConfiguration config = new DocumentConfiguration();
         config.setFormCFastTrackTemplate("firstTrackTemplate");
         config.setFormCNonFastTrackTemplate("nonFastfirstTrackTemplate");
         config.setFormGTemplate("formGTemplate");

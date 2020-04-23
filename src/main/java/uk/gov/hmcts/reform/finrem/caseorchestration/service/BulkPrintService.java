@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getLastMapValue;
 
@@ -64,10 +66,10 @@ public class BulkPrintService extends AbstractDocumentService {
         List<BulkPrintDocument> approvedOrderCollection = approvedOrderCollection(caseDetails.getData());
         List<BulkPrintDocument> uploadOrder = uploadOrder(caseDetails.getData());
 
-        if (approvedOrderCollection.size() > 0) {
+        if (!approvedOrderCollection.isEmpty()) {
             log.info("Sending Approved Order Collections for Bulk Print.");
             bulkPrintDocuments.addAll(approvedOrderCollection);
-        } else if (uploadOrder.size() > 0) {
+        } else if (!uploadOrder.isEmpty()) {
             log.info("Sending Upload Order Collections for Bulk Print.");
             bulkPrintDocuments.addAll(uploadOrder);
         }
@@ -85,11 +87,11 @@ public class BulkPrintService extends AbstractDocumentService {
     List<BulkPrintDocument> uploadOrder(Map<String, Object> data) {
         log.info("Extracting 'uploadOrder' from case data for bulk print.");
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        List<Map> documentList = ofNullable(data.get("uploadOrder"))
+        List<Map> documentList = ofNullable(data.get(UPLOAD_ORDER))
             .map(i -> (List<Map>) i)
             .orElse(new ArrayList<>());
-        if (documentList.size() > 0) {
-            Map<String, Object> value = ((Map) getLastMapValue.apply(documentList).get("value"));
+        if (!documentList.isEmpty()) {
+            Map<String, Object> value = ((Map) getLastMapValue.apply(documentList).get(VALUE));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "DocumentLink"));
         }
         return bulkPrintDocuments;
@@ -103,9 +105,9 @@ public class BulkPrintService extends AbstractDocumentService {
             .orElse(new ArrayList<>());
 
         if (documentList.size() > 0) {
-            Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get("value"));
+            Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get(VALUE));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "orderLetter"));
-            bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrder"));
+            bulkPrintDocuments.addAll(convertBulkPrintDocument(value, CONSENT_ORDER));
 
             if (approvedConsentOrderNotificationLetterFeature) {
                 bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrderApprovedNotificationLetter"));
@@ -125,7 +127,7 @@ public class BulkPrintService extends AbstractDocumentService {
         Object documentLinkObj = data.get(documentName);
 
         if (documentLinkObj != null) {
-            Map<String, Object> documentLink = (Map) documentLinkObj;
+            Map documentLink = (Map) documentLinkObj;
             bulkPrintDocuments.add(BulkPrintDocument.builder()
                 .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
                 .build());
@@ -143,8 +145,8 @@ public class BulkPrintService extends AbstractDocumentService {
             .map(i -> (List<Map>) i)
             .orElse(new ArrayList<>());
 
-        for (Map<String, Object> document : documentList) {
-            Map<String, Object> value = ((Map) document.get(VALUE));
+        for (Map document : documentList) {
+            Map value = ((Map) document.get(VALUE));
 
             Object documentLinkObj = value.get(documentName);
 

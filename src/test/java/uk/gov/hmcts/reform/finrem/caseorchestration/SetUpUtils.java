@@ -30,6 +30,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
 public class SetUpUtils {
 
@@ -74,13 +76,13 @@ public class SetUpUtils {
 
     public static Map<String, Object> caseDataWithUploadOrder(String uploadOrderId) {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("uploadOrder", ImmutableList.of(consentOrderData(uploadOrderId)));
+        caseData.put(UPLOAD_ORDER, ImmutableList.of(consentOrderData(uploadOrderId)));
         return caseData;
     }
 
     public static Map<String, Object> caseDataWithPreviewOrder() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("orderRefusalPreviewDocument", caseDocument());
+        caseData.put(ORDER_REFUSAL_PREVIEW_COLLECTION, caseDocument());
         return caseData;
     }
 
