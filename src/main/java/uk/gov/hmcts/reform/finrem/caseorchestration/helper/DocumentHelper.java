@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction;
 
@@ -42,8 +42,8 @@ public class DocumentHelper {
                 .map(this::convertToPensionCollectionDataList)
                 .orElse(emptyList())
                 .stream()
-                .map(PensionCollectionData::getPensionDocumentData)
-                .map(PensionDocumentData::getPensionDocument)
+                .map(PensionCollectionData::getTypedCaseDocument)
+                .map(TypedCaseDocument::getPensionDocument)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }

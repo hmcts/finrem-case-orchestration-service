@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
+import com.google.common.collect.ImmutableMap;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.InputScannedDoc;
@@ -8,6 +9,7 @@ import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransfo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ComplexTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapper;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bsp.common.mapper.GenericMapper.getValueFromOcrDataFields;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.transformFormDateIntoCcdDate;
@@ -75,10 +78,63 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         ComplexTypeCollection<CaseDocument> d81DocumentCollection = inputScannedDocs.stream()
             .filter(doc -> doc.getSubtype().equals("D81"))
             .map(this::transformInputScannedDocIntoCaseDocument)
-            .collect(Collectors.collectingAndThen(Collectors.toList(), ComplexTypeCollection::new));
+            .collect(Collectors.collectingAndThen(toList(), ComplexTypeCollection::new));
         additionalCaseData.put("scannedD81s", d81DocumentCollection);
 
+        additionalCaseData.put("pensionCollection", transformIntoTypedCaseDocuments(inputScannedDocs, ImmutableMap.of(
+            "P1", "Form P1",
+            "PPF1", "Form PPF1",
+            "P2", "Form P2",
+            "PPF2", "Form PPF2",
+            "PPF", "Form PPF"
+        )));
+
+        additionalCaseData.put("otherCollection", transformIntoTypedCaseDocuments(inputScannedDocs, ImmutableMap.of(
+            "FormE", "Other",
+            "OtherSupportDocuments", "Other",
+            "CoverLetter", "Letter"
+        )));
+
+        inputScannedDocs.stream()
+            .filter(doc -> doc.getSubtype().equals("DraftConsentOrder"))
+            .findFirst()
+            .map(this::transformInputScannedDocIntoCaseDocument)
+            .ifPresent(doc -> {
+                additionalCaseData.put("consentOrder", doc);
+                additionalCaseData.put("latestConsentOrder", doc);
+            });
+
+        inputScannedDocs.stream()
+            .filter(doc -> doc.getSubtype().equals("DecreeNisi"))
+            .findFirst()
+            .map(this::transformInputScannedDocIntoCaseDocument)
+            .ifPresent(doc -> additionalCaseData.put("divorceUploadEvidence1", doc));
+
+        inputScannedDocs.stream()
+            .filter(doc -> doc.getSubtype().equals("DecreeAbsolute"))
+            .findFirst()
+            .map(this::transformInputScannedDocIntoCaseDocument)
+            .ifPresent(doc -> additionalCaseData.put("divorceUploadEvidence2", doc));
+
         return additionalCaseData;
+    }
+
+    private ComplexTypeCollection<TypedCaseDocument> transformIntoTypedCaseDocuments(List<InputScannedDoc> inputScannedDocs, Map<String, String> subTypeToDocumentTypeMap) {
+        ComplexTypeCollection<TypedCaseDocument> documentCollection = new ComplexTypeCollection<>();
+
+        inputScannedDocs.stream()
+            .filter(doc -> subTypeToDocumentTypeMap.containsKey(doc.getSubtype()))
+            .map(doc -> transformInputScannedDocIntoTypedCaseDocument(subTypeToDocumentTypeMap, doc))
+            .forEach(documentCollection::addItem);
+
+        return documentCollection;
+    }
+
+    private TypedCaseDocument transformInputScannedDocIntoTypedCaseDocument(Map<String, String> subTypeToDocumentTypeMap, InputScannedDoc doc) {
+        String typeOfDocument = subTypeToDocumentTypeMap.get(doc.getSubtype());
+        CaseDocument caseDocument = transformInputScannedDocIntoCaseDocument(doc);
+
+        return new TypedCaseDocument(typeOfDocument, caseDocument);
     }
 
     private CaseDocument transformInputScannedDocIntoCaseDocument(InputScannedDoc doc) {
@@ -214,7 +270,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
                     .stream()
                     .map(ocrValuesToCcdValues::get)
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .collect(toList());
 
             if (!transformedCommaSeparatedValue.isEmpty()) {
                 transformedCaseData.put(ccdName, transformedCommaSeparatedValue);

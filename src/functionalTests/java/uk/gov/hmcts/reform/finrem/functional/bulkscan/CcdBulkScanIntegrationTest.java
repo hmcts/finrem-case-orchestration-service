@@ -69,11 +69,20 @@ public class CcdBulkScanIntegrationTest {
         log.info("case data = {}, user details = {}", caseData, userDetails);
         CaseDetails caseDetails = submitCase(caseData, userDetails);
 
+        //Scanned documents
         Map<String, Object> persistedCaseData = caseDetails.getData();
         assertThat(persistedCaseData, hasEntry("paperApplication", "Yes"));
         assertThat(persistedCaseData, hasKey("formA"));
         assertThat(persistedCaseData, hasKey("scannedD81s"));
         assertThat((List<?>) persistedCaseData.get("scannedD81s"), hasSize(2));
+        assertThat(persistedCaseData, hasKey("pensionCollection"));
+        assertThat((List<?>) persistedCaseData.get("pensionCollection"), hasSize(5));//P1, PPF1, P2, PPF2, PPF
+        assertThat(persistedCaseData, hasKey("otherCollection"));
+        assertThat((List<?>) persistedCaseData.get("otherCollection"), hasSize(3));//FormE, CoverLetter, OtherSupportDocuments
+        assertThat(persistedCaseData, hasKey("consentOrder"));//Draft consent order
+        assertThat(persistedCaseData, hasKey("latestConsentOrder"));//Draft consent order
+        assertThat(persistedCaseData, hasKey("divorceUploadEvidence1"));//DecreeNisi
+        assertThat(persistedCaseData, hasKey("divorceUploadEvidence2"));//DecreeAbsolute
     }
 
     @After
@@ -98,15 +107,14 @@ public class CcdBulkScanIntegrationTest {
 
     private CaseDetails submitCase(Object caseData, UserDetails userDetails) {
         String serviceToken = idamUtils.generateServiceTokenWithValidMicroservice(DIVORCE_SERVICE_AUTHORISED_WITH_CCD);
-        String authorisationToken = "Bearer " + userDetails.getAuthToken();
 
         StartEventResponse startEventResponse = coreCaseDataApi.startForCaseworker(
-                bearer.apply(userDetails.getAuthToken()),
-                serviceToken,
-                userDetails.getId(),
-                DIVORCE_JURISDICTION_ID,
-                CASE_TYPE_ID_CONSENTED,
-                FR_NEW_PAPER_CASE_EVENT_ID
+            bearer.apply(userDetails.getAuthToken()),
+            serviceToken,
+            userDetails.getId(),
+            DIVORCE_JURISDICTION_ID,
+            CASE_TYPE_ID_CONSENTED,
+            FR_NEW_PAPER_CASE_EVENT_ID
         );
 
         final CaseDataContent caseDataContent = CaseDataContent.builder()
@@ -121,13 +129,13 @@ public class CcdBulkScanIntegrationTest {
             .build();
 
         CaseDetails caseDetails = coreCaseDataApi.submitForCaseworker(
-                bearer.apply(userDetails.getAuthToken()),
-                serviceToken,
-                userDetails.getId(),
-                DIVORCE_JURISDICTION_ID,
-                CASE_TYPE_ID_CONSENTED,
-                true,
-                caseDataContent);
+            bearer.apply(userDetails.getAuthToken()),
+            serviceToken,
+            userDetails.getId(),
+            DIVORCE_JURISDICTION_ID,
+            CASE_TYPE_ID_CONSENTED,
+            true,
+            caseDataContent);
 
         log.info("Created case ID {}", caseDetails.getId());
         return caseDetails;
