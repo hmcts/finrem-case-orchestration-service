@@ -18,15 +18,15 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_AMENDED_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_RESPOND_TO_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class DocumentValidationService {
-    private static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
-    private static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
-    private static final String CONSENT_ORDER = "consentOrder";
-    private static final String PENSION_COLLECTION = "pensionCollection";
     private static final String FR_SOLICITOR_CREATE = "FR_SolicitorCreate";
     private static final String FR_AMEND_APPLICATION_DETAILS = "FR_amendApplicationDetails";
 
@@ -37,8 +37,7 @@ public class DocumentValidationService {
         return nonNull(documentValidationResponse.getErrors());
     }
 
-    public DocumentValidationResponse validateDocument(CallbackRequest callbackRequest,
-                                                       String field, String authToken) {
+    public DocumentValidationResponse validateDocument(CallbackRequest callbackRequest, String field, String authToken) {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -56,15 +55,13 @@ public class DocumentValidationService {
         log.info("Invalid request with caseField = {} , event = {}", field, callbackRequest.getEventId());
         return DocumentValidationResponse.builder()
             .build();
-
     }
 
     private boolean respondToOrderDocument(CallbackRequest callbackRequest) {
         return FR_RESPOND_TO_ORDER.equalsIgnoreCase(callbackRequest.getEventId());
     }
 
-    private DocumentValidationResponse validatePensionDocuments(String authorizationToken,
-                                                                Map<String, Object> caseData) {
+    private DocumentValidationResponse validatePensionDocuments(String authorizationToken, Map<String, Object> caseData) {
 
         List<CaseDocument> caseDocuments = documentHelper.getPensionDocumentsData(caseData);
         if (!caseDocuments.isEmpty()) {
@@ -74,7 +71,7 @@ public class DocumentValidationService {
     }
 
     private boolean pensionDocuments(String field) {
-        return PENSION_COLLECTION.equalsIgnoreCase(field);
+        return PENSION_DOCS_COLLECTION.equalsIgnoreCase(field);
     }
 
     private boolean amendConsentOrder(CallbackRequest callbackRequest) {
@@ -92,20 +89,17 @@ public class DocumentValidationService {
 
     private DocumentValidationResponse validateRespondToOrderDocument(String authToken, Map<String, Object> caseData) {
         Optional<CaseDocument> caseDocument = documentHelper.getLatestRespondToOrderDocuments(caseData);
-        DocumentValidationResponse response = caseDocument
+        return caseDocument
             .map(document -> documentClient.checkUploadedFileType(authToken, document.getDocumentBinaryUrl()))
             .orElseGet(() -> DocumentValidationResponse.builder().build());
-        return response;
     }
 
-    private DocumentValidationResponse validateConsentOrderDocument(String authToken,
-                                                                    Map<String, Object> caseData) {
-        CaseDocument caseDocument = documentHelper.convertToCaseDocument(caseData.get("consentOrder"));
+    private DocumentValidationResponse validateConsentOrderDocument(String authToken, Map<String, Object> caseData) {
+        CaseDocument caseDocument = documentHelper.convertToCaseDocument(caseData.get(CONSENT_ORDER));
         return documentClient.checkUploadedFileType(authToken, caseDocument.getDocumentBinaryUrl());
     }
 
-    private DocumentValidationResponse validateLatestConsentOrderDocument(String authToken,
-                                                                          Map<String, Object> caseData) {
+    private DocumentValidationResponse validateLatestConsentOrderDocument(String authToken, Map<String, Object> caseData) {
         CaseDocument caseDocument = documentHelper.getLatestAmendedConsentOrder(caseData);
         return documentClient.checkUploadedFileType(authToken, caseDocument.getDocumentBinaryUrl());
     }

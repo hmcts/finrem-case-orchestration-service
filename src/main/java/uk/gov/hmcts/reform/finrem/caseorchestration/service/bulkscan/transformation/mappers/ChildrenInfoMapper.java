@@ -15,7 +15,7 @@ import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.transfor
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper.Fields.COUNTRY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper.Fields.DOB;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper.Fields.GENDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper.Fields.NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper.Fields.NAME_OF_CHILD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper.Fields.RELATION_TO_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper.Fields.RELATION_TO_RESPONDENT;
 
@@ -24,7 +24,7 @@ public class ChildrenInfoMapper {
 
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class Fields {
-        public static final String NAME = "NameOfChild";
+        public static final String NAME_OF_CHILD = "NameOfChild";
         public static final String GENDER = "GenderChild";
         public static final String DOB = "DateOfBirthChild";
         public static final String RELATION_TO_APPLICANT = "RelationshipToApplicantChild";
@@ -44,7 +44,7 @@ public class ChildrenInfoMapper {
     }
 
     private static boolean isChildInfoPopulated(int i, List<OcrDataField> ocrDataFields) {
-        return ocrDataFields.stream().anyMatch(item -> item.getName().equalsIgnoreCase(NAME + i));
+        return ocrDataFields.stream().anyMatch(item -> item.getName().equalsIgnoreCase(NAME_OF_CHILD + i));
     }
 
     private static ChildInfo mapChild(int index, List<OcrDataField> ocrDataFields) {
@@ -54,7 +54,7 @@ public class ChildrenInfoMapper {
         );
 
         return ChildInfo.builder()
-            .name(getValueOrEmptyString(index, ocrDataFields, NAME))
+            .name(getValueOrEmptyString(index, ocrDataFields, NAME_OF_CHILD))
             .dateOfBirth(dob)
             .gender(getValueFromOcrDataFields(GENDER + index, ocrDataFields).orElse("notGiven"))
             .relationshipToApplicant(getValueOrEmptyString(index, ocrDataFields, RELATION_TO_APPLICANT))

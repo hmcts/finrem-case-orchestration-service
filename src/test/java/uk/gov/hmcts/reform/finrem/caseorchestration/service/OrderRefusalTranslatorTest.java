@@ -13,6 +13,7 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.copyToOrderRefusalCollection;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.translateOrderRefusalCollection;
 
@@ -51,7 +52,7 @@ public class OrderRefusalTranslatorTest {
 
         Map<String, Object> data = copyToOrderRefusalCollection(caseDetails);
 
-        List<OrderRefusalData> orderRefusalData = orderRefusalDataList(data, "orderRefusalCollection");
+        List<OrderRefusalData> orderRefusalData = orderRefusalDataList(data, ORDER_REFUSAL_COLLECTION);
         List<String> orderRefusal = orderRefusalData.get(1).getOrderRefusal().getOrderRefusal();
 
         assertThat(orderRefusalData.size(), is(2));
@@ -69,7 +70,7 @@ public class OrderRefusalTranslatorTest {
 
         Map<String, Object> data = copyToOrderRefusalCollection(caseDetails);
 
-        List<OrderRefusalData> orderRefusalData = orderRefusalDataList(data, "orderRefusalCollection");
+        List<OrderRefusalData> orderRefusalData = orderRefusalDataList(data, ORDER_REFUSAL_COLLECTION);
         List<String> orderRefusal = orderRefusalData.get(0).getOrderRefusal().getOrderRefusal();
 
         assertThat(orderRefusalData.size(), is(1));

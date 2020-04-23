@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_ATTENDANCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIAM_EXEMPTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ATTENDED_MIAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLAIMING_EXEMPTION_MIAM;
 
 @Service
 public class MiamCheckService {
@@ -19,8 +19,8 @@ public class MiamCheckService {
 
     public List<String> miamExemptAttendCheck(CaseDetails  caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        String applicantAttended = Objects.toString(caseData.get(MIAM_ATTENDANCE));
-        String claimingExemption = Objects.toString(caseData.get(MIAM_EXEMPTION));
+        String applicantAttended = Objects.toString(caseData.get(APPLICANT_ATTENDED_MIAM));
+        String claimingExemption = Objects.toString(caseData.get(CLAIMING_EXEMPTION_MIAM));
 
         if (applicantAttended.equalsIgnoreCase("no")
                 && claimingExemption.equalsIgnoreCase("no")) {
