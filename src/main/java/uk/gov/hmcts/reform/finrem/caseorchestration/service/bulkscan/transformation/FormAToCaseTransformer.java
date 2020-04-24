@@ -35,6 +35,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED_PAPER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OTHER_DOCS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
@@ -81,7 +85,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             .collect(Collectors.collectingAndThen(toList(), ComplexTypeCollection::new));
         additionalCaseData.put("scannedD81s", d81DocumentCollection);
 
-        additionalCaseData.put("pensionCollection", transformIntoTypedCaseDocuments(inputScannedDocs, ImmutableMap.of(
+        additionalCaseData.put(PENSION_DOCS_COLLECTION, transformIntoTypedCaseDocuments(inputScannedDocs, ImmutableMap.of(
             "P1", "Form P1",
             "PPF1", "Form PPF1",
             "P2", "Form P2",
@@ -89,7 +93,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             "PPF", "Form PPF"
         )));
 
-        additionalCaseData.put("otherCollection", transformIntoTypedCaseDocuments(inputScannedDocs, ImmutableMap.of(
+        additionalCaseData.put(OTHER_DOCS_COLLECTION, transformIntoTypedCaseDocuments(inputScannedDocs, ImmutableMap.of(
             "FormE", "Other",
             "OtherSupportDocuments", "Other",
             "CoverLetter", "Letter"
@@ -100,8 +104,8 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             .findFirst()
             .map(this::transformInputScannedDocIntoCaseDocument)
             .ifPresent(doc -> {
-                additionalCaseData.put("consentOrder", doc);
-                additionalCaseData.put("latestConsentOrder", doc);
+                additionalCaseData.put(CONSENT_ORDER, doc);
+                additionalCaseData.put(LATEST_CONSENT_ORDER, doc);
             });
 
         inputScannedDocs.stream()
