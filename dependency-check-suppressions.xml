@@ -21,8 +21,8 @@
     </suppress>
 
     <suppress>
+        <notes>Vulnerability applies to Netty before 4.1.46, project uses 4.1.45</notes>
         <cve>CVE-2020-11612</cve>
-        <cve>CVE-2020-7009</cve>
     </suppress>
 
     <suppress>
