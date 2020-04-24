@@ -5,7 +5,7 @@
   "form_type": "FormA",
   "scanned_documents": [
     {
-      "type": "Document",
+      "type": "Other",
       "subtype": "D81",
       "url": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4ea4369a-57d0-4c88-ba86-949ed0faae12",
@@ -31,7 +31,7 @@
       "delivery_date": "2018-12-27T10:46:03.123"
     },
     {
-      "type": "Document",
+      "type": "Other",
       "subtype": "D81",
       "url": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
@@ -44,7 +44,7 @@
       "delivery_date": "2018-12-27T10:46:03.123"
     },
     {
-      "type": "Document",
+      "type": "Other",
       "subtype": "P1",
       "url": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
@@ -57,7 +57,7 @@
       "delivery_date": "2018-12-27T10:46:03.123"
     },
     {
-      "type": "Document",
+      "type": "Other",
       "subtype": "PPF1",
       "url": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
@@ -70,7 +70,7 @@
       "delivery_date": "2018-12-27T10:46:03.123"
     },
     {
-      "type": "Document",
+      "type": "Other",
       "subtype": "P2",
       "url": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
@@ -83,7 +83,7 @@
       "delivery_date": "2018-12-27T10:46:03.123"
     },
     {
-      "type": "Document",
+      "type": "Other",
       "subtype": "PPF2",
       "url": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
@@ -96,7 +96,7 @@
       "delivery_date": "2018-12-27T10:46:03.123"
     },
     {
-      "type": "Document",
+      "type": "Other",
       "subtype": "PPF",
       "url": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
@@ -109,7 +109,7 @@
       "delivery_date": "2018-12-27T10:46:03.123"
     },
     {
-      "type": "Document",
+      "type": "Other",
       "subtype": "FormE",
       "url": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
@@ -122,7 +122,7 @@
       "delivery_date": "2018-12-27T10:46:03.123"
     },
     {
-      "type": "Document",
+      "type": "Other",
       "subtype": "CoverLetter",
       "url": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
@@ -135,7 +135,7 @@
       "delivery_date": "2018-12-27T10:46:03.123"
     },
     {
-      "type": "Document",
+      "type": "Other",
       "subtype": "DraftConsentOrder",
       "url": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
@@ -148,7 +148,7 @@
       "delivery_date": "2018-12-27T10:46:03.123"
     },
     {
-      "type": "Document",
+      "type": "Other",
       "subtype": "DecreeNisi",
       "url": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
@@ -161,7 +161,7 @@
       "delivery_date": "2018-12-27T10:46:03.123"
     },
     {
-      "type": "Document",
+      "type": "Other",
       "subtype": "DecreeAbsolute",
       "url": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
@@ -174,7 +174,7 @@
       "delivery_date": "2018-12-27T10:46:03.123"
     },
     {
-      "type": "Document",
+      "type": "Other",
       "subtype": "OtherSupportDocuments",
       "url": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
