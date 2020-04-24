@@ -118,22 +118,6 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/prepare-for-hearing", consumes = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "send e-mail for 'Prepare for hearing'.")
-    @ApiResponses(value = {
-        @ApiResponse(code = 204, message = "Prepare for hearing e-mail sent successfully",
-            response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingEmail(
-        @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to send email to Solicitor for 'Prepare for hearing' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        if (hasSolicitorAgreedToReceiveEmails(caseData)) {
-            log.info("Sending email notification to Solicitor for 'Prepare for hearing'");
-            notificationService.sendPrepareForHearingEmail(callbackRequest);
-        }
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
 
     private boolean hasApplicantSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData) {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData
