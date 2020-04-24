@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -11,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import java.util.List;
 
@@ -34,6 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 
 @WebMvcTest(ConsentOrderApprovedController.class)
@@ -42,8 +43,8 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @MockBean
     private ConsentOrderApprovedDocumentService service;
 
-    @Value("${feature.approved-consent-order-notification-letter}")
-    private boolean approvedConsentOrderNotificationLetterFeature;
+    @MockBean
+    private FeatureToggleService featureToggleService;
 
     public String endpoint() {
         return "/case-orchestration/documents/consent-order-approved";
@@ -107,7 +108,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk());
         assertLetter(result);
         assertConsentOrder(result);
-        if (approvedConsentOrderNotificationLetterFeature) {
+        if (featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER)) {
             assertConsentOrderNotificationLetter(result);
         }
         assertPensionDocs(result);

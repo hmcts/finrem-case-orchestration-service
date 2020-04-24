@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -34,6 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDoc
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
@@ -51,10 +51,10 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     private DocumentClient documentClientMock;
 
     @Autowired
-    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    private FeatureToggleService featureToggleService;
 
-    @Value("${feature.approved-consent-order-notification-letter}")
-    private boolean approvedConsentOrderNotificationLetterFeature;
+    @Autowired
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
 
     private CaseDetails caseDetails;
 
@@ -63,7 +63,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         DocumentConfiguration config = new DocumentConfiguration();
         config.setApprovedConsentOrderTemplate("FL-FRM-DEC-ENG-00071.docx");
         config.setApprovedConsentOrderFileName("ApprovedConsentOrderLetter.pdf");
-        if (approvedConsentOrderNotificationLetterFeature) {
+        if (featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER)) {
             config.setApprovedConsentOrderNotificationTemplate("FL-FRM-LET-ENG-00095.docx");
             config.setApprovedConsentOrderNotificationFileName("ApprovedConsentOrderNotificationLetter.pdf");
         }
@@ -104,7 +104,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateApprovedConsentOrderNotificationLetterForApplicant() {
-        if (!approvedConsentOrderNotificationLetterFeature) {
+        if (!featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER)) {
             return;
         }
 
@@ -126,7 +126,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateApprovedConsentOrderNotificationLetterForApplicantSolicitor() {
-        if (!approvedConsentOrderNotificationLetterFeature) {
+        if (!featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER)) {
             return;
         }
 

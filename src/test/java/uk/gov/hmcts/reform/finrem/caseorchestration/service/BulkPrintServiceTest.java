@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -15,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.impl.FeatureToggleServiceImpl;
 
 import java.io.InputStream;
 import java.util.List;
@@ -23,6 +23,7 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER;
 
 @ActiveProfiles("test-mock-document-client")
 public class BulkPrintServiceTest extends BaseServiceTest {
@@ -33,8 +34,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     @Autowired
     private BulkPrintService bulkPrintService;
 
-    @Value("${feature.approved-consent-order-notification-letter}")
-    private boolean featureApprovedConsentOrderNotificationLetter;
+    @Autowired
+    private FeatureToggleServiceImpl featureToggleService;
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -60,7 +61,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         assertThat(bulkPrintLetterId, is(letterId));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().size(),
-            is(featureApprovedConsentOrderNotificationLetter ? 6 : 5));
+            is(featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER) ? 6 : 5));
     }
 
     @Test
@@ -85,7 +86,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     public void shouldConvertCollectionDocument() throws Exception {
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.approvedOrderCollection(caseDetails().getData());
 
-        assertThat(bulkPrintDocuments.size(), is(featureApprovedConsentOrderNotificationLetter ? 5 : 4));
+        assertThat(bulkPrintDocuments.size(),
+            is(featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER) ? 5 : 4));
     }
 
     private CaseDetails caseDetails() throws Exception {
