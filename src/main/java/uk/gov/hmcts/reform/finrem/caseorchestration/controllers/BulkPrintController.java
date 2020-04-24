@@ -86,7 +86,7 @@ public class BulkPrintController implements BaseController {
         if (applicantIsNotRepresentedByASolicitor(caseData) || solicitorDidNotAgreeToReceiveEmails(caseData)) {
 
             CaseDocument applicantCoverSheet = coverSheetService.generateApplicantCoverSheet(caseDetails, authToken);
-            UUID applicantLetterId = bulkPrintService.sendForBulkPrint(applicantCoverSheet, caseDetails);
+            UUID applicantLetterId = bulkPrintService.sendOrdersForBulkPrint(applicantCoverSheet, caseDetails);
 
             caseData.put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
             caseData.put(BULK_PRINT_LETTER_ID_APP, applicantLetterId);
@@ -98,7 +98,7 @@ public class BulkPrintController implements BaseController {
     private void generateCoversheetForRespondent(String authToken) {
 
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authToken);
-        UUID respondentLetterId = bulkPrintService.sendForBulkPrint(respondentCoverSheet, caseDetails);
+        UUID respondentLetterId = bulkPrintService.sendOrdersForBulkPrint(respondentCoverSheet, caseDetails);
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);

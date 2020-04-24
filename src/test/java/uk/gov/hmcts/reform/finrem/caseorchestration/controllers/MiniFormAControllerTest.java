@@ -34,8 +34,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
-@WebMvcTest(DocumentController.class)
-public class DocumentControllerTest extends BaseControllerTest {
+@WebMvcTest(MiniFormAController.class)
+public class MiniFormAControllerTest extends BaseControllerTest {
 
     private JsonNode requestContent;
 

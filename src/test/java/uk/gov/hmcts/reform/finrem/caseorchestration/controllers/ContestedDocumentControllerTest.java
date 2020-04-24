@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @WebMvcTest(ContestedDocumentController.class)
-public class ContestedDocumentControllerTest extends DocumentControllerTest {
+public class ContestedDocumentControllerTest extends MiniFormAControllerTest {
 
     @Override
     public String endpoint() {

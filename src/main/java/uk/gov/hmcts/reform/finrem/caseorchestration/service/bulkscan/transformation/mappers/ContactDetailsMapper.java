@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.applyMappings;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.isApplicantRepresented;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.isRespondentRepresented;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresentedByASolicitor;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ContactDetailsMapper {
@@ -46,7 +46,7 @@ public class ContactDetailsMapper {
     }
 
     private static void setupContactDetailsForApplicant(Map<String, Object> transformedCaseData) {
-        if (isApplicantRepresented(transformedCaseData)) {
+        if (isApplicantRepresentedByASolicitor(transformedCaseData)) {
             transformedCaseData.put(CcdFields.APPLICANT_SOLICITOR, transformedCaseData.get(CcdFields.APPLICANT));
             transformedCaseData.remove(CcdFields.APPLICANT);
 
@@ -59,7 +59,7 @@ public class ContactDetailsMapper {
     }
 
     private static void setupAddressForRespondent(Map<String, Object> transformedCaseData) {
-        if (isRespondentRepresented(transformedCaseData)) {
+        if (isRespondentRepresentedByASolicitor(transformedCaseData)) {
             transformedCaseData.put(CcdFields.RESPONDENT_SOLICITOR, transformedCaseData.get(CcdFields.RESPONDENT));
             transformedCaseData.remove(CcdFields.RESPONDENT);
         }
