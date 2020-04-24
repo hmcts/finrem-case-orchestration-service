@@ -37,13 +37,13 @@ public class CommonFunction {
 
     public static boolean addressLineOneAndPostCodeAreBothNotEmpty(Map address) {
         return  ObjectUtils.isNotEmpty(address)
-                && StringUtils.isNotBlank((String) address.get(LINE_1))
-                && StringUtils.isNotBlank((String) address.get(POSTCODE));
+            && StringUtils.isNotBlank((String) address.get(LINE_1))
+            && StringUtils.isNotBlank((String) address.get(POSTCODE));
     }
 
     public static String buildFullName(Map<String, Object> caseData, String applicantFirstMiddleName, String applicantLastName) {
         return (
-                nullToEmpty((caseData.get(applicantFirstMiddleName))).trim()
+            nullToEmpty((caseData.get(applicantFirstMiddleName))).trim()
                 + " "
                 + nullToEmpty((caseData.get(applicantLastName))).trim()
         ).trim();

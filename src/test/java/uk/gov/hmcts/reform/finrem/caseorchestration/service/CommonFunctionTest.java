@@ -63,15 +63,15 @@ public class CommonFunctionTest {
     @Test
     public void addressLineOneAndPostCodeAreBothNotEmptyShouldReturnFalse() {
         asList(
-                asList("", "sw2 3rf"),
-                asList("", ""),
-                asList("London Road", ""),
-                asList("London Road", null),
-                asList(null, null),
-                asList(null, "Sw8 7ty")
+            asList("", "sw2 3rf"),
+            asList("", ""),
+            asList("London Road", ""),
+            asList("London Road", null),
+            asList(null, null),
+            asList(null, "Sw8 7ty")
         ).forEach(data -> assertThat(
-                addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(data)),
-                is(false))
+            addressLineOneAndPostCodeAreBothNotEmpty(createAddressObject(data)),
+            is(false))
         );
     }
 

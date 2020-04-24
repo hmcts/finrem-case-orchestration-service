@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.model;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.document;
 
 import org.junit.Test;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintCoverSheet;
