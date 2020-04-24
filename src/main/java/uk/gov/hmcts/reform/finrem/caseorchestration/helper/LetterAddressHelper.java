@@ -1,18 +1,18 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-@Component
 public class LetterAddressHelper {
 
-    private List<String> addressLines = new ArrayList<>();
+    private LetterAddressHelper() {
+        // don't
+    }
 
-    public String formatAddressForLetterPrinting(Map<String, Object> address) {
+    public static String formatAddressForLetterPrinting(Map<String, Object> address) {
+        List<String> addressLines = new ArrayList<>();
 
         addressLines.add(String.valueOf((address.get("AddressLine1"))));
         addressLines.add(String.valueOf((address.get("AddressLine2"))));
