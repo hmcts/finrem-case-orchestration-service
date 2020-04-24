@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
@@ -77,9 +78,8 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                 + " " + nullToEmpty((caseData.get(APPLICANT_LAST_NAME)));
         String respondentName = nullToEmpty((caseData.get(APP_RESPONDENT_FIRST_MIDDLE_NAME)))
                 + " " + nullToEmpty((caseData.get(APP_RESPONDENT_LAST_NAME)));
-        String applicantRepresented = nullToEmpty(caseData.get(APPLICANT_REPRESENTED));
 
-        if (YES_VALUE.equalsIgnoreCase(applicantRepresented)) {
+        if (isApplicantRepresentedByASolicitor(caseData)) {
             log.info("Applicant is represented by a solicitor");
             reference = nullToEmpty((caseData.get(SOLICITOR_REFERENCE)));
             addresseeName = nullToEmpty((caseData.get(SOLICITOR_NAME)));

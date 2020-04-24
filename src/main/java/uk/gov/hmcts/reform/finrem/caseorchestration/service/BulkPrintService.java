@@ -41,7 +41,7 @@ public class BulkPrintService extends AbstractDocumentService {
         super(documentClient, config, objectMapper);
     }
 
-    public UUID sendForBulkPrint(final CaseDocument coverSheet, final CaseDetails caseDetails) {
+    public UUID sendOrdersForBulkPrint(final CaseDocument coverSheet, final CaseDetails caseDetails) {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
 
         bulkPrintDocuments.add(
