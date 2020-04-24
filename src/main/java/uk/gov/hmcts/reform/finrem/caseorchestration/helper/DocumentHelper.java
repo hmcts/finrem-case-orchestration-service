@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction;
 
 import java.util.List;
 import java.util.Map;
@@ -75,7 +76,7 @@ public class DocumentHelper {
                 .map(this::convertToRespondToOrderDataList)
                 .orElse(emptyList())
                 .stream()
-                .filter(CommonConditions::isAmendedConsentOrderType)
+                .filter(CommonFunction::isAmendedConsentOrderType)
                 .reduce((first, second) -> second);
         if (respondToOrderData.isPresent()) {
             return respondToOrderData

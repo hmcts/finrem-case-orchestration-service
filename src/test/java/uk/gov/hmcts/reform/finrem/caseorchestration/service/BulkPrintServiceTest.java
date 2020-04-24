@@ -52,10 +52,10 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldSendForBulkPrintForApproved() throws Exception {
+    public void shouldSendOrdersForBulkPrintForApproved() throws Exception {
         when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
-        UUID bulkPrintLetterId = bulkPrintService.sendForBulkPrint(
+        UUID bulkPrintLetterId = bulkPrintService.sendOrdersForBulkPrint(
             new CaseDocument(), caseDetails());
 
         assertThat(bulkPrintLetterId, is(letterId));
@@ -67,7 +67,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     public void shouldSendForBulkPrintForNotApproved() throws Exception {
         when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
-        UUID bulkPrintLetterId = bulkPrintService.sendForBulkPrint(
+        UUID bulkPrintLetterId = bulkPrintService.sendOrdersForBulkPrint(
             new CaseDocument(), caseDetailsForNonApproved());
 
         assertThat(bulkPrintLetterId, is(letterId));
@@ -90,14 +90,14 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
     private CaseDetails caseDetails() throws Exception {
         try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/bulk-print.json")) {
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }
 
     private CaseDetails caseDetailsForNonApproved() throws Exception {
         try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/bulk-print-not-approved.json")) {
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-not-approved.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }

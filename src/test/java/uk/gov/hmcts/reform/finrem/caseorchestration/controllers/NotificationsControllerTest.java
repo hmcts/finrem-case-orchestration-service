@@ -30,8 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
 public class NotificationsControllerTest {
-    private static final String HWF_SUCCESSFUL_EMAIL_URL = "/case-orchestration/notify/hwf-successful";
-    private static final String ASSIGN_TO_JUDGE_URL = "/case-orchestration/notify/assign-to-judge";
+    private static final String HWF_SUCCESSFUL_CALLBACK_URL = "/case-orchestration/notify/hwf-successful";
+    private static final String ASSIGN_TO_JUDGE_CALLBACK_URL = "/case-orchestration/notify/assign-to-judge";
     private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
     private static final String CONSENT_ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/consent-order-not-approved";
     private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/consent-order-available";
@@ -55,7 +55,7 @@ public class NotificationsControllerTest {
     @Test
     public void sendHwfSuccessfulConfirmationEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
-        mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
+        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
@@ -67,7 +67,7 @@ public class NotificationsControllerTest {
     @Test
     public void shouldNotSendHwfSuccessfulConfirmationEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
+        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
@@ -78,7 +78,7 @@ public class NotificationsControllerTest {
     @Test
     public void sendAssignToJudgeConfirmationEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
-        mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
+        mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
@@ -90,7 +90,7 @@ public class NotificationsControllerTest {
     @Test
     public void shouldNotSendAssignToJudgeConfirmationEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(ASSIGN_TO_JUDGE_URL)
+        mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
@@ -170,7 +170,7 @@ public class NotificationsControllerTest {
     @Test
     public void sendConsentedHwfSuccessfulConfirmationEmail() throws Exception {
         buildCcdRequest("/fixtures/contested/hwf.json");
-        mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
+        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
@@ -182,7 +182,7 @@ public class NotificationsControllerTest {
     @Test
     public void shouldNotSendContestedHwfSuccessfulEmail() throws Exception {
         buildCcdRequest("/fixtures/contested/contested-hwf-without-solicitor-consent.json");
-        mockMvc.perform(post(HWF_SUCCESSFUL_EMAIL_URL)
+        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
