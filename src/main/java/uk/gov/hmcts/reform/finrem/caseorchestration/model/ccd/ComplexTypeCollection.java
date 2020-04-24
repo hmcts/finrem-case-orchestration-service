@@ -52,5 +52,4 @@ public class ComplexTypeCollection<T> extends ArrayList<ImmutableMap<String, T>>
     private ImmutableMap<String, T> createElement(T item) {
         return ImmutableMap.of(COMPLEX_TYPE_KEY, item);
     }
-
 }

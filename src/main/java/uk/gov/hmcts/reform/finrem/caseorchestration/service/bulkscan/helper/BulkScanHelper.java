@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper;
 
 import com.google.common.collect.ImmutableMap;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 
 import java.util.Map;
 
@@ -11,6 +13,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domai
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.NatureOfApplication5b.FR_NATURE_OF_APPLICATION_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.NatureOfApplication5b.FR_NATURE_OF_APPLICATION_3;
 
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class BulkScanHelper {
 
     public static final Map<String, String> natureOfApplicationChecklistToCcdFieldNames =

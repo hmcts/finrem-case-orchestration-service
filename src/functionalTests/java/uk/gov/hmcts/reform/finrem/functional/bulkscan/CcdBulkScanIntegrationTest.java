@@ -134,5 +134,5 @@ public class CcdBulkScanIntegrationTest {
     }
 
     private Function<String, String> bearer = token -> String.format("Bearer %s", token);
-  
+
 }
