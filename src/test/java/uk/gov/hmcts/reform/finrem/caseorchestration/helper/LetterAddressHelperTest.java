@@ -10,6 +10,8 @@ import static org.junit.Assert.assertThat;
 
 public class LetterAddressHelperTest {
 
+    private LetterAddressHelper letterAddressHelper = new LetterAddressHelper();
+
     @Test
     public void testAddressIsCorrectlyFormatterForLetterPrinting() {
 
@@ -22,7 +24,7 @@ public class LetterAddressHelperTest {
         testAddressMap.put("PostTown", "London");
         testAddressMap.put("PostCode", "SW1");
 
-        String formattedAddress = LetterAddressHelper.formatAddressForLetterPrinting(testAddressMap);
+        String formattedAddress = letterAddressHelper.formatAddressForLetterPrinting(testAddressMap);
 
         String expectedAddress = "50 Applicant Street" + "\n"
                 + "Second Address Line" + "\n"
@@ -47,7 +49,7 @@ public class LetterAddressHelperTest {
         testAddressMap.put("PostTown", null);
         testAddressMap.put("PostCode", "SW1");
 
-        String formattedAddress = LetterAddressHelper.formatAddressForLetterPrinting(testAddressMap);
+        String formattedAddress = letterAddressHelper.formatAddressForLetterPrinting(testAddressMap);
         String expectedAddress = "50 Applicant Street" + "\n" + "England" + "\n" + "SW1";
 
         assertThat(formattedAddress, is(expectedAddress));
@@ -61,7 +63,7 @@ public class LetterAddressHelperTest {
         testAddressMap.put("AddressLine2", "");
         testAddressMap.put("PostCode", null);
 
-        String formattedAddress = LetterAddressHelper.formatAddressForLetterPrinting(testAddressMap);
+        String formattedAddress = letterAddressHelper.formatAddressForLetterPrinting(testAddressMap);
         String expectedAddress = "";
 
         assertThat(formattedAddress, is(expectedAddress));
@@ -79,7 +81,7 @@ public class LetterAddressHelperTest {
         testAddressMap.put("PostTown", null);
         testAddressMap.put("PostCode", null);
 
-        String formattedAddress = LetterAddressHelper.formatAddressForLetterPrinting(testAddressMap);
+        String formattedAddress = letterAddressHelper.formatAddressForLetterPrinting(testAddressMap);
         String expectedAddress = "";
 
         assertThat(formattedAddress, is(expectedAddress));
