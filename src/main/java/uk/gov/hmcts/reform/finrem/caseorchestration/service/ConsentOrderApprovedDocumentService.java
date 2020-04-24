@@ -34,32 +34,34 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 public class ConsentOrderApprovedDocumentService extends AbstractDocumentService {
 
+    private LetterAddressHelper letterAddressHelper;
+
     @Autowired
     public ConsentOrderApprovedDocumentService(DocumentClient documentClient, DocumentConfiguration config,
                                                ObjectMapper objectMapper) {
         super(documentClient, config, objectMapper);
     }
 
-    private final String approvedConsentOrderTemplate = config.getApprovedConsentOrderTemplate();
-    private final String approvedConsentOrderFileName = config.getApprovedConsentOrderFileName();
-
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         log.info("Generating Approved Consent Order Letter {} from {} for bulk print",
-            approvedConsentOrderTemplate, approvedConsentOrderFileName);
+                config.getApprovedConsentOrderFileName(),
+                config.getApprovedConsentOrderTemplate());
 
-        return generateDocument(authToken, caseDetails, approvedConsentOrderTemplate, approvedConsentOrderFileName);
+        return generateDocument(authToken, caseDetails,
+                config.getApprovedConsentOrderTemplate(),
+                config.getApprovedConsentOrderFileName());
     }
 
     public CaseDocument generateApprovedConsentOrderNotificationLetter(CaseDetails caseDetails, String authToken) {
         log.info("Generating Approved Consent Order Notification Letter {} from {} for bulk print",
-            approvedConsentOrderTemplate, approvedConsentOrderFileName);
+                config.getApprovedConsentOrderFileName(),
+                config.getApprovedConsentOrderTemplate());
 
         prepareApprovedConsentOrderNotificationLetter(caseDetails);
 
-        CaseDocument generatedApprovedConsentOrderNotificationLetter =
-            generateDocument(authToken, caseDetails, approvedConsentOrderTemplate, approvedConsentOrderFileName);
-
-        return generatedApprovedConsentOrderNotificationLetter;
+        return generateDocument(authToken, caseDetails,
+                config.getApprovedConsentOrderNotificationTemplate(),
+                config.getApprovedConsentOrderNotificationFileName());
     }
 
     private void prepareApprovedConsentOrderNotificationLetter(CaseDetails caseDetails) {
@@ -88,7 +90,7 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
         if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
             Addressee addressee = Addressee.builder()
                     .name(addresseeName)
-                    .formattedAddress(LetterAddressHelper.formatAddressForLetterPrinting(addressToSendTo))
+                    .formattedAddress(letterAddressHelper.formatAddressForLetterPrinting(addressToSendTo))
                     .build();
 
             caseData.put("caseNumber", ccdNumber);
@@ -104,6 +106,7 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
                     "Mandatory data missing from address when trying to generate Approved Consent Order Notification Letter");
         }
     }
+
 
     public CaseDocument annexStampDocument(CaseDocument document, String authToken) {
         return super.annexStampDocument(document, authToken);
