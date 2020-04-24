@@ -121,10 +121,10 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
     }
 
     private PensionCollectionData stampPensionDocuments(PensionCollectionData pensionDocument, String authToken) {
-        CaseDocument document = pensionDocument.getPensionDocumentData().getPensionDocument();
+        CaseDocument document = pensionDocument.getTypedCaseDocument().getPensionDocument();
         CaseDocument stampedDocument = stampDocument(document, authToken);
         PensionCollectionData stampedPensionData = copyOf(pensionDocument);
-        stampedPensionData.getPensionDocumentData().setPensionDocument(stampedDocument);
+        stampedPensionData.getTypedCaseDocument().setPensionDocument(stampedDocument);
         return stampedPensionData;
     }
 

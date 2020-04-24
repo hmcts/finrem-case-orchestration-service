@@ -15,9 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import java.io.InputStream;
@@ -58,7 +58,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
 
     private void setUpCaseDetails(String fileName) throws Exception {
         try (InputStream resourceAsStream =
-                     getClass().getResourceAsStream(consentedDir + fileName)) {
+                 getClass().getResourceAsStream(consentedDir + fileName)) {
             callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
@@ -124,10 +124,10 @@ public class DocumentValidationTests extends IntegrationTestBase {
 
     private io.restassured.path.json.JsonPath generateDocument(String jsonFileName, String url, String journeyType) {
         Response jsonResponse = SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(utils.getHeaders())
-                .body(utils.getJsonFromFile(jsonFileName, journeyType))
-                .when().post(url).andReturn();
+            .relaxedHTTPSValidation()
+            .headers(utils.getHeaders())
+            .body(utils.getJsonFromFile(jsonFileName, journeyType))
+            .when().post(url).andReturn();
 
         HttpStatus responseHttpStatus = HttpStatus.valueOf(jsonResponse.getStatusCode());
         assertEquals(HttpStatus.OK, responseHttpStatus);
@@ -149,13 +149,15 @@ public class DocumentValidationTests extends IntegrationTestBase {
     private List<RespondToOrderData> convertToRespondToOrderDataList(Object object) {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        return objectMapper.convertValue(object, new TypeReference<List<RespondToOrderData>>() {});
+        return objectMapper.convertValue(object, new TypeReference<List<RespondToOrderData>>() {
+        });
     }
 
     private List<PensionCollectionData> convertToPensionCollectionDataList(Object object) {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        return objectMapper.convertValue(object, new TypeReference<List<PensionCollectionData>>() {});
+        return objectMapper.convertValue(object, new TypeReference<List<PensionCollectionData>>() {
+        });
     }
 
     private void setPensionCollectionData() throws Exception {
@@ -163,8 +165,8 @@ public class DocumentValidationTests extends IntegrationTestBase {
         Map<String, Object> data = caseDetails.getData();
         Object pensionObject = data.get(PENSION_DOCS_COLLECTION);
         List<PensionCollectionData> respondToOrderData = convertToPensionCollectionDataList(pensionObject);
-        PensionDocumentData pensionDocumentData = respondToOrderData.get(0).getPensionDocumentData();
-        pensionDocumentData.setPensionDocument(generateCaseDocument(CONSENT_ORDER_JSON));
+        TypedCaseDocument typedCaseDocument = respondToOrderData.get(0).getTypedCaseDocument();
+        typedCaseDocument.setPensionDocument(generateCaseDocument(CONSENT_ORDER_JSON));
         data.put(PENSION_DOCS_COLLECTION, respondToOrderData);
         caseDetails.setData(data);
         callbackRequest.setCaseDetails(caseDetails);
@@ -198,6 +200,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
     private List<AmendedConsentOrderData> convertToAmendedConsentOrderDataList(Object object) {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        return objectMapper.convertValue(object, new TypeReference<List<AmendedConsentOrderData>>() {});
+        return objectMapper.convertValue(object, new TypeReference<List<AmendedConsentOrderData>>() {
+        });
     }
 }

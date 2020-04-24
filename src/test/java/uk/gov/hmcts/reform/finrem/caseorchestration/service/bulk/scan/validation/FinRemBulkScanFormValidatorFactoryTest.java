@@ -38,7 +38,7 @@ public class FinRemBulkScanFormValidatorFactoryTest {
 
     @Test
     public void shouldReturnValidatorForFormA() {
-        BulkScanFormValidator validator = classUnderTest.getValidator("formA");
+        BulkScanFormValidator validator = classUnderTest.getValidator("FormA");
 
         assertThat(validator, is(instanceOf(FormAValidator.class)));
         assertThat(validator, is(formAValidator));
