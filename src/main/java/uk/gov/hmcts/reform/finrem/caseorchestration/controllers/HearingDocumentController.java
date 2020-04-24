@@ -24,12 +24,10 @@ import javax.validation.constraints.NotNull;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.hasSolicitorAgreedToReceiveEmails;
 
 @RestController
 @RequiredArgsConstructor
@@ -42,7 +40,7 @@ public class HearingDocumentController implements BaseController {
 
     @Autowired
     private NotificationService notificationService;
-// sendPrepareForHearingEmail
+
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Form C and G generation as well as sending an email to solicitors to plan a hearing. "
         + "Serves as a callback from CCD")
@@ -78,11 +76,4 @@ public class HearingDocumentController implements BaseController {
         return ResponseEntity.ok(
                 AboutToStartOrSubmitCallbackResponse.builder().data(caseData).warnings(warnings).build());
     }
-
-    // This is a duplicate from Notification Controller. This will be removed and separated into a helper before merge
-    private boolean hasSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData) {
-        return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData
-            .get(SOLICITOR_AGREE_TO_RECEIVE_EMAILS)));
-    }
-
 }
