@@ -7,8 +7,10 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class PensionCollectionData {
+
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
-    private PensionDocumentData pensionDocumentData;
+    private TypedCaseDocument typedCaseDocument;
+
 }

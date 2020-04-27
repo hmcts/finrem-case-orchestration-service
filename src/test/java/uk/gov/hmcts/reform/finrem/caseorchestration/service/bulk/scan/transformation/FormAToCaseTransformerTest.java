@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransfo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ComplexTypeCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FormAToCaseTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapper;
@@ -21,6 +22,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -396,8 +398,19 @@ public class FormAToCaseTransformerTest {
     public void shouldTransformScannedDocuments() {
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
         scannedDocuments.add(InputScannedDoc.builder().subtype("D81").document(new InputScannedDocUrl("http://url/d81-1", "http://binUrl/d81-1/binary", "d81-1.pdf")).build());
-        scannedDocuments.add(InputScannedDoc.builder().subtype("FormA").document(new InputScannedDocUrl("http://url/formA", "http://binUrl/formA/binary", "formA.pdf")).build());
         scannedDocuments.add(InputScannedDoc.builder().subtype("D81").document(new InputScannedDocUrl("http://url/d81-2", "http://binUrl/d81-2/binary", "d81-2.pdf")).build());
+        scannedDocuments.add(createDoc("FormA"));
+        scannedDocuments.add(createDoc("P1"));
+        scannedDocuments.add(createDoc("PPF1"));
+        scannedDocuments.add(createDoc("P2"));
+        scannedDocuments.add(createDoc("PPF2"));
+        scannedDocuments.add(createDoc("PPF"));
+        scannedDocuments.add(createDoc("FormE"));
+        scannedDocuments.add(createDoc("CoverLetter"));
+        scannedDocuments.add(createDoc("OtherSupportDocuments"));
+        scannedDocuments.add(createDoc("DraftConsentOrder"));
+        scannedDocuments.add(createDoc("DecreeNisi"));
+        scannedDocuments.add(createDoc("DecreeAbsolute"));
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
             .id(TEST_CASE_ID)
             .scannedDocuments(scannedDocuments)
@@ -407,20 +420,76 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(exceptionRecord);
 
         assertThat(transformedCaseData, hasKey("formA"));
-        CaseDocument formA = (CaseDocument) transformedCaseData.get("formA");
-        assertThat(formA.getDocumentUrl(), is("http://url/formA"));
-        assertThat(formA.getDocumentBinaryUrl(), is("http://binUrl/formA/binary"));
-        assertThat(formA.getDocumentFilename(), is("formA.pdf"));
+        assertDocumentsMatchExpectations((CaseDocument) transformedCaseData.get("formA"), "FormA");
 
         assertThat(transformedCaseData, hasKey("scannedD81s"));
-        ComplexTypeCollection<CaseDocument> d81Documents = (ComplexTypeCollection<CaseDocument>) transformedCaseData.get("scannedD81s");
+        ComplexTypeCollection<CaseDocument> d81Documents =
+            (ComplexTypeCollection<CaseDocument>) transformedCaseData.get("scannedD81s");
         assertThat(d81Documents, hasSize(2));
-        assertThat(d81Documents.getItem(0).getDocumentUrl(), is("http://url/d81-1"));
-        assertThat(d81Documents.getItem(0).getDocumentBinaryUrl(), is("http://binUrl/d81-1/binary"));
-        assertThat(d81Documents.getItem(0).getDocumentFilename(), is("d81-1.pdf"));
-        assertThat(d81Documents.getItem(1).getDocumentUrl(), is("http://url/d81-2"));
-        assertThat(d81Documents.getItem(1).getDocumentBinaryUrl(), is("http://binUrl/d81-2/binary"));
-        assertThat(d81Documents.getItem(1).getDocumentFilename(), is("d81-2.pdf"));
+        CaseDocument d81DocumentsItem = d81Documents.getItem(0);
+        assertThat(d81DocumentsItem.getDocumentUrl(), is("http://url/d81-1"));
+        assertThat(d81DocumentsItem.getDocumentBinaryUrl(), is("http://binUrl/d81-1/binary"));
+        assertThat(d81DocumentsItem.getDocumentFilename(), is("d81-1.pdf"));
+        d81DocumentsItem = d81Documents.getItem(1);
+        assertThat(d81DocumentsItem.getDocumentUrl(), is("http://url/d81-2"));
+        assertThat(d81DocumentsItem.getDocumentBinaryUrl(), is("http://binUrl/d81-2/binary"));
+        assertThat(d81DocumentsItem.getDocumentFilename(), is("d81-2.pdf"));
+
+        assertThat(transformedCaseData, hasKey("pensionCollection"));
+        ComplexTypeCollection<TypedCaseDocument> pensionDocuments =
+            (ComplexTypeCollection<TypedCaseDocument>) transformedCaseData.get("pensionCollection");
+        assertThat(pensionDocuments, hasSize(5));
+        TypedCaseDocument typedCaseDocument = pensionDocuments.getItem(0);
+        assertThat(typedCaseDocument.getTypeOfDocument(), is("Form P1"));
+        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), "P1");
+        typedCaseDocument = pensionDocuments.getItem(1);
+        assertThat(typedCaseDocument.getTypeOfDocument(), is("Form PPF1"));
+        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), "PPF1");
+        typedCaseDocument = pensionDocuments.getItem(2);
+        assertThat(typedCaseDocument.getTypeOfDocument(), is("Form P2"));
+        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), "P2");
+        typedCaseDocument = pensionDocuments.getItem(3);
+        assertThat(typedCaseDocument.getTypeOfDocument(), is("Form PPF2"));
+        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), "PPF2");
+        typedCaseDocument = pensionDocuments.getItem(4);
+        assertThat(typedCaseDocument.getTypeOfDocument(), is("Form PPF"));
+        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), "PPF");
+
+        assertThat(transformedCaseData, hasKey("otherCollection"));
+        ComplexTypeCollection<TypedCaseDocument> otherCollection =
+            (ComplexTypeCollection<TypedCaseDocument>) transformedCaseData.get("otherCollection");
+        assertThat(otherCollection, hasSize(3));
+        TypedCaseDocument otherTypedDocument = otherCollection.getItem(0);
+        assertThat(otherTypedDocument.getTypeOfDocument(), is("Other"));
+        assertDocumentsMatchExpectations(otherTypedDocument.getPensionDocument(), "FormE");
+        otherTypedDocument = otherCollection.getItem(1);
+        assertThat(otherTypedDocument.getTypeOfDocument(), is("Letter"));
+        assertDocumentsMatchExpectations(otherTypedDocument.getPensionDocument(), "CoverLetter");
+        otherTypedDocument = otherCollection.getItem(2);
+        assertThat(otherTypedDocument.getTypeOfDocument(), is("Other"));
+        assertDocumentsMatchExpectations(otherTypedDocument.getPensionDocument(), "OtherSupportDocuments");
+
+        assertThat(transformedCaseData, hasKey("consentOrder"));
+        assertThat(transformedCaseData, hasKey("latestConsentOrder"));
+        CaseDocument draftConsentOrder = (CaseDocument) transformedCaseData.get("consentOrder");
+        assertThat(draftConsentOrder, equalTo(transformedCaseData.get("latestConsentOrder")));
+        assertDocumentsMatchExpectations(draftConsentOrder, "DraftConsentOrder");
+
+        assertThat(transformedCaseData, hasKey("divorceUploadEvidence1"));
+        assertDocumentsMatchExpectations((CaseDocument) transformedCaseData.get("divorceUploadEvidence1"), "DecreeNisi");
+
+        assertThat(transformedCaseData, hasKey("divorceUploadEvidence2"));
+        assertDocumentsMatchExpectations((CaseDocument) transformedCaseData.get("divorceUploadEvidence2"), "DecreeAbsolute");
+    }
+
+    private void assertDocumentsMatchExpectations(CaseDocument decreeAbsoluteDocument, String subType) {
+        assertThat(decreeAbsoluteDocument.getDocumentUrl(), is("http://url/" + subType));
+        assertThat(decreeAbsoluteDocument.getDocumentBinaryUrl(), is("http://binUrl/" + subType + "/binary"));
+        assertThat(decreeAbsoluteDocument.getDocumentFilename(), is(subType + ".pdf"));
+    }
+
+    private InputScannedDoc createDoc(String formSubType) {
+        return InputScannedDoc.builder().subtype(formSubType).document(new InputScannedDocUrl("http://url/" + formSubType, "http://binUrl/" + formSubType + "/binary", formSubType + ".pdf")).build();
     }
 
     private void assertOnSingleFieldTransformationResult(String ocrFieldName, String ocrFieldValue, String ccdFieldName, String ccdFieldValue) {
@@ -453,4 +522,5 @@ public class FormAToCaseTransformerTest {
         assertThat(child.getRelationshipToRespondent(), is(values.get(4)));
         assertThat(child.getCountryOfResidence(), is(values.get(5)));
     }
+
 }

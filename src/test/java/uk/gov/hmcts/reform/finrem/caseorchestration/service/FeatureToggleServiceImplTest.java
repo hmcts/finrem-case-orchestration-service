@@ -34,4 +34,19 @@ public class FeatureToggleServiceImplTest {
     public void givenToggleFalse_thenReturnFalse() {
         assertThat(classToTest.isFeatureEnabled(Features.APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER), is(false));
     }
+
+    @Test
+    public void isApprovedConsentOrderNotificationLetterEnabledReturnsTrue() {
+        assertThat(classToTest.isApprovedConsentOrderNotificationLetterEnabled(), is(false));
+    }
+
+    @Test
+    public void isHwfSuccessfulNotificationLetterEnabledReturnTrue() {
+        assertThat(classToTest.isHwfSuccessfulNotificationLetterEnabled(), is(true));
+    }
+
+    @Test
+    public void isAssignedToJudgeNotificationLetterEnabledReturnTrue() {
+        assertThat(classToTest.isAssignedToJudgeNotificationLetterEnabled(), is(false));
+    }
 }

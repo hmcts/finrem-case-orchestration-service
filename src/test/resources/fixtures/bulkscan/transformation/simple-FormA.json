@@ -2,7 +2,7 @@
   "case_type_id": "FinancialRemedyContested",
   "id": "LV481297",
   "po_box": "PO 17",
-  "form_type": "formA",
+  "form_type": "FormA",
   "ocr_data_fields": [
     {
       "name": "divorceCaseNumber",

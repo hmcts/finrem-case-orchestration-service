@@ -185,7 +185,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
         List<PensionCollectionData> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
 
-        stampPensionDocuments.forEach(data -> doCaseDocumentAssert(data.getPensionDocumentData().getPensionDocument()));
+        stampPensionDocuments.forEach(data -> doCaseDocumentAssert(data.getTypedCaseDocument().getPensionDocument()));
         verify(documentClientMock, times(2)).stampDocument(any(), anyString());
     }
 }
