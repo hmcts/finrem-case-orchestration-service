@@ -51,11 +51,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     private DocumentClient documentClientMock;
 
     @Autowired
-    private FeatureToggleService featureToggleService;
-
-    @Autowired
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
 
+    private final FeatureToggleService featureToggleService = new FeatureToggleService();
     private CaseDetails caseDetails;
 
     @Before
