@@ -38,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Slf4j
 @RestController
@@ -75,7 +76,7 @@ public class ConsentOrderApprovedController implements BaseController {
             CaseDocument approvedConsentOrderLetter = service.generateApprovedConsentOrderLetter(caseDetails, authToken);
             CaseDocument consentOrderAnnexStamped = service.annexStampDocument(latestConsentOrder, authToken);
             CaseDocument approvedConsentOrderNotificationLetter = null;
-            if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
+            if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled() && isPaperApplication(caseData)) {
                 approvedConsentOrderNotificationLetter = service.generateApprovedConsentOrderNotificationLetter(caseDetails, authToken);
 
                 log.info("Approved Consent Order Notification Letter Feature Toggled is Enabled");

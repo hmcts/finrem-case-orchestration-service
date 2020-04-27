@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -25,6 +24,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -59,7 +59,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         mvc.perform(post(endpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
     }
 
@@ -71,7 +71,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         mvc.perform(post(endpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 
@@ -87,7 +87,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         ResultActions result = mvc.perform(post(endpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE));
+            .contentType(APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
         result.andExpect(jsonPath("$.data", not(hasKey(LATEST_CONSENT_ORDER))));
@@ -105,7 +105,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         ResultActions result = mvc.perform(post(endpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE));
+            .contentType(APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
         assertLetter(result);
@@ -117,9 +117,54 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSendApprovedConsentOrderNotificationLetterWhenFeatureToggleIsEnabled() throws Exception {
+    public void shouldTriggerConsentOrderApprovedNotificationLetterIfIsPaperApplication() throws Exception {
+        setTestCaseDataFromResource("/fixtures/bulkprint/bulk-print-paper-application.json");
+
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
+        whenAnnexStampingDocument().thenReturn(caseDocument());
+        whenStampingDocument().thenReturn(caseDocument());
+        whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
+        // TODO: Remove line below once isApprovedConsentOrderNotificationLetterEnabled FT is removed
+        when(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()).thenReturn(true);
+
+        ResultActions result = mvc.perform(post(endpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE));
+
+        verify(service, times(1)).generateApprovedConsentOrderNotificationLetter(any(), any());
+
+        result.andExpect(status().isOk());
+        assertConsentOrderNotificationLetter(result);
+    }
+
+    @Test
+    public void shouldNotTriggerConsentOrderApprovedNotificationLetterIfIsNotPaperApplication() throws Exception {
 
         doValidCaseDataSetUp();
+
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
+        whenAnnexStampingDocument().thenReturn(caseDocument());
+        whenStampingDocument().thenReturn(caseDocument());
+        whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
+        // TODO: Remove line below once isApprovedConsentOrderNotificationLetterEnabled FT is removed
+        when(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()).thenReturn(true);
+
+        ResultActions result = mvc.perform(post(endpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE));
+
+        verify(service, never()).generateApprovedConsentOrderNotificationLetter(any(), any());
+        result.andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldSendApprovedConsentOrderNotificationLetterWhenFeatureToggleIsEnabled() throws Exception {
+
+        setTestCaseDataFromResource("/fixtures/bulkprint/bulk-print-paper-application.json");
         whenServiceGeneratesDocument().thenReturn(caseDocument());
         whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
@@ -130,7 +175,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         ResultActions result = mvc.perform(post(endpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE));
+            .contentType(APPLICATION_JSON_VALUE));
 
         verify(service, times(1)).generateApprovedConsentOrderNotificationLetter(any(), any());
 
@@ -152,7 +197,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         ResultActions result = mvc.perform(post(endpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE));
+            .contentType(APPLICATION_JSON_VALUE));
 
         verify(service, never()).generateApprovedConsentOrderNotificationLetter(any(), any());
         result.andExpect(status().isOk());
