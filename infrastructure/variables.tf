@@ -79,3 +79,15 @@ variable "common_tags" {
 variable "swagger_enabled" {
   default = true
 }
+
+variable "approved_consent_order_notification_letter_enabled" {
+  default = false
+}
+
+variable "hwf_successful_notification_letter" {
+  default = false
+}
+
+variable "assigned_to_judge_notification_letter" {
+  default = false
+}

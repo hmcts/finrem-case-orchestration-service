@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -20,6 +19,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
@@ -33,13 +33,9 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     @Autowired
     private BulkPrintService bulkPrintService;
 
-    @Value("${feature.approved-consent-order-notification-letter}")
-    private boolean featureApprovedConsentOrderNotificationLetter;
-
+    private final FeatureToggleService featureToggleService = new FeatureToggleService();
     private ObjectMapper mapper = new ObjectMapper();
-
     private UUID letterId;
-
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor;
 
     @Before
@@ -60,7 +56,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         assertThat(bulkPrintLetterId, is(letterId));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().size(),
-            is(featureApprovedConsentOrderNotificationLetter ? 6 : 5));
+            is(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled() ? 6 : 5));
     }
 
     @Test
@@ -85,7 +81,11 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     public void shouldConvertCollectionDocument() throws Exception {
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.approvedOrderCollection(caseDetails().getData());
 
-        assertThat(bulkPrintDocuments.size(), is(featureApprovedConsentOrderNotificationLetter ? 5 : 4));
+        if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
+            assertThat(bulkPrintDocuments, hasSize(5));
+        } else {
+            assertThat(bulkPrintDocuments, hasSize(4));
+        }
     }
 
     private CaseDetails caseDetails() throws Exception {
