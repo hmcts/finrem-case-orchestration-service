@@ -55,10 +55,10 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(endpoint())
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -67,10 +67,10 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenServiceGeneratesDocument().thenThrow(feignError());
 
         mvc.perform(post(endpoint())
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isInternalServerError());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -83,9 +83,9 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
 
         ResultActions result = mvc.perform(post(endpoint())
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
         result.andExpect(jsonPath("$.data", not(hasKey(LATEST_CONSENT_ORDER))));
@@ -101,9 +101,9 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
 
         ResultActions result = mvc.perform(post(endpoint())
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
         assertLetter(result);
@@ -137,15 +137,15 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     private void assertLetter(ResultActions result) throws Exception {
         String path = "$.data.approvedOrderCollection[0].value.orderLetter.";
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
-                .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
-                .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
+            .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
+            .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
     }
 
     private void assertConsentOrderNotificationLetter(ResultActions result) throws Exception {
         String path = "$.data.approvedOrderCollection[0].value.consentOrderApprovedNotificationLetter.";
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
-                .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
-                .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
+            .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
+            .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
     }
 
     private void assertConsentOrder(ResultActions result) throws Exception {
@@ -161,7 +161,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     private void assertDocument(ResultActions result, String path) throws Exception {
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
-                .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
-                .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
+            .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
+            .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
     }
 }
