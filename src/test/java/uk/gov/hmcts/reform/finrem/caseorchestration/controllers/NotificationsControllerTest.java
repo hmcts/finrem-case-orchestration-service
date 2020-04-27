@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.bsp.common.utils.ResourceLoader;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.AssignedToJudgeBulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.HelpWithFeesBulkPrintService;
@@ -25,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -59,13 +61,10 @@ public class NotificationsControllerTest {
     private HelpWithFeesBulkPrintService helpWithFeesBulkPrintService;
 
     @MockBean
+    private FeatureToggleService featureToggleService;
+
+    @MockBean
     private AssignedToJudgeBulkPrintService assignedToJudgeBulkPrintService;
-
-    @Value("${feature.hwf-Successful-notification-letter}")
-    private boolean hwfSuccessfulNotificationLetterFeature;
-
-    @Value("${feature.assigned-to-judge-notification-letter}")
-    private boolean assignedToJudgeNotificationLetterFeature;
 
     private MockMvc mockMvc;
     private String requestContent;
@@ -101,22 +100,41 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void sendHwfSuccessfulConfirmationBulkPrintLetter() throws Exception {
+    public void sendHwfSuccessfulConfirmationBulkPrintLetterIfToggledOn() throws Exception {
+        // TODO: Verify if I need to add logic for paper case or not
 
-        if (hwfSuccessfulNotificationLetterFeature) {
-            buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
-            mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .content(requestContent)
-                .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+        when(featureToggleService.isHwfSuccessfulNotificationLetterEnabled()).thenReturn(true);
 
-            when(bulkPrintService.sendNotificationLetterForBulkPrint(any(), any())).thenReturn(UUID.randomUUID());
+        buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
+        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
-            verify(helpWithFeesBulkPrintService, times(1))
-                .generateHwfSuccessfulLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
-            verifyNoMoreInteractions(notificationService);
-        }
+        when(bulkPrintService.sendNotificationLetterForBulkPrint(any(), any())).thenReturn(UUID.randomUUID());
+
+        verify(helpWithFeesBulkPrintService, times(1))
+            .generateHwfSuccessfulLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
+        verifyNoMoreInteractions(notificationService);
+    }
+
+    @Test
+    public void shouldNotSendHwfSuccessfulConfirmationBulkPrintLetterIfToggledOff() throws Exception {
+        // TODO: Verify if I need to add logic for paper case or not
+
+        when(featureToggleService.isHwfSuccessfulNotificationLetterEnabled()).thenReturn(false);
+
+        buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
+        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        when(bulkPrintService.sendNotificationLetterForBulkPrint(any(), any())).thenReturn(UUID.randomUUID());
+
+        verifyNoInteractions(helpWithFeesBulkPrintService);
     }
 
     @Test
@@ -145,22 +163,41 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void sendJudgeAssignedToCaseBulkPrintLetter() throws Exception {
+    public void sendJudgeAssignedToCaseBulkPrintLetterIfToggledOn() throws Exception {
+        // TODO: Verify if I need to add logic for paper case or not
 
-        if (assignedToJudgeNotificationLetterFeature) {
-            buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
-            mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .content(requestContent)
-                .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+        when(featureToggleService.isAssignedToJudgeNotificationLetterEnabled()).thenReturn(true);
 
-            when(bulkPrintService.sendNotificationLetterForBulkPrint(any(), any())).thenReturn(UUID.randomUUID());
+        buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
+        mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
-            verify(assignedToJudgeBulkPrintService, times(1))
-                .generateJudgeAssignedToCaseLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
-            verifyNoMoreInteractions(notificationService);
-        }
+        when(bulkPrintService.sendNotificationLetterForBulkPrint(any(), any())).thenReturn(UUID.randomUUID());
+
+        verify(assignedToJudgeBulkPrintService, times(1))
+            .generateJudgeAssignedToCaseLetter(eq(AUTH_TOKEN), any(CaseDetails.class));
+        verifyNoMoreInteractions(notificationService);
+    }
+
+    @Test
+    public void shouldNotSendJudgeAssignedToCaseBulkPrintLetterIfToggledOff() throws Exception {
+        // TODO: Verify if I need to add logic for paper case or not
+
+        when(featureToggleService.isAssignedToJudgeNotificationLetterEnabled()).thenReturn(false);
+
+        buildCcdRequest(CCD_REQUEST_WITH_BULK_PRINT_LETTER_CONSENT_JSON);
+        mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        when(bulkPrintService.sendNotificationLetterForBulkPrint(any(), any())).thenReturn(UUID.randomUUID());
+
+        verifyNoInteractions(assignedToJudgeBulkPrintService);
     }
 
     @Test

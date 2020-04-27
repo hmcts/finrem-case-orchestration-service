@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
@@ -31,14 +30,15 @@ public class BulkPrintService extends AbstractDocumentService {
     private static final String DOCUMENT_URL = "document_binary_url";
     private static final String VALUE = "value";
 
-    @Value("${feature.approved-consent-order-notification-letter}")
-    private boolean approvedConsentOrderNotificationLetterFeature;
+    private final FeatureToggleService featureToggleService;
 
     @Autowired
     public BulkPrintService(DocumentClient documentClient,
                             DocumentConfiguration config,
-                            ObjectMapper objectMapper) {
+                            ObjectMapper objectMapper,
+                            FeatureToggleService featureToggleService) {
         super(documentClient, config, objectMapper);
+        this.featureToggleService = featureToggleService;
     }
 
     public UUID sendNotificationLetterForBulkPrint(final CaseDocument letterToPrint, final CaseDetails caseDetails) {
@@ -108,8 +108,10 @@ public class BulkPrintService extends AbstractDocumentService {
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "orderLetter"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, CONSENT_ORDER));
 
-            if (approvedConsentOrderNotificationLetterFeature) {
+            if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
                 bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrderApprovedNotificationLetter"));
+                log.info("Approved Consent Order Notification Letter Feature Toggled is Enabled");
+                log.info("Adding consentOrderApprovedNotificationLetter document to BulkPrint documents list");
             }
 
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "pensionDocuments",

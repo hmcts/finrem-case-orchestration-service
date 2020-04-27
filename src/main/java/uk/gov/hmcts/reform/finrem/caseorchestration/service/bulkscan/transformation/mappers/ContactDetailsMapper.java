@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 
@@ -10,8 +12,10 @@ import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.applyMappings;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresentedByASolicitor;
 
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ContactDetailsMapper {
 
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class CcdFields {
         public static final String APPLICANT = CCDConfigConstant.APPLICANT_ADDRESS;
         public static final String APPLICANT_SOLICITOR = CCDConfigConstant.SOLICITOR_ADDRESS;
@@ -26,8 +30,6 @@ public class ContactDetailsMapper {
 
     /**
      * We only store contact details to citizens or theirs solicitors (if they are represented). Never both.
-     *
-     * <p>We don't need to stored data about applicant's/respondent's contact details when they are represented.
      */
     public static void setupContactDetailsForApplicantAndRespondent(Map<String, Object> transformedCaseData) {
         setupContactDetailsForApplicant(transformedCaseData);

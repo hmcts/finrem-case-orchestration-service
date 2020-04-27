@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
@@ -17,8 +19,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.tran
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper.Fields.RELATION_TO_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper.Fields.RELATION_TO_RESPONDENT;
 
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ChildrenInfoMapper {
 
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class Fields {
         public static final String NAME_OF_CHILD = "NameOfChild";
         public static final String GENDER = "GenderChild";
@@ -26,10 +30,6 @@ public class ChildrenInfoMapper {
         public static final String RELATION_TO_APPLICANT = "RelationshipToApplicantChild";
         public static final String RELATION_TO_RESPONDENT = "RelationshipToRespondentChild";
         public static final String COUNTRY = "CountryOfResidenceChild";
-    }
-
-    private ChildrenInfoMapper() {
-        // don't
     }
 
     public static void applyMappings(List<OcrDataField> ocrDataFields, Map<String, Object> modifiedMap) {

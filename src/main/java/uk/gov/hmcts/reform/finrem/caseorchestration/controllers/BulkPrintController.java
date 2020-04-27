@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,13 +40,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 public class BulkPrintController implements BaseController {
 
-    @Autowired
-    private BulkPrintService bulkPrintService;
-
-    @Autowired
-    private GenerateCoverSheetService coverSheetService;
+    private final BulkPrintService bulkPrintService;
+    private final GenerateCoverSheetService coverSheetService;
 
     private CaseDetails caseDetails;
+
+    public BulkPrintController(BulkPrintService bulkPrintService, GenerateCoverSheetService coverSheetService) {
+        this.bulkPrintService = bulkPrintService;
+        this.coverSheetService = coverSheetService;
+    }
 
     @PostMapping(path = "/bulk-print", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles bulk print")

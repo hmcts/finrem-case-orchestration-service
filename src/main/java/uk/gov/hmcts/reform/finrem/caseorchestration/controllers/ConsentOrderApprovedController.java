@@ -9,7 +9,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import javax.validation.constraints.NotNull;
 
@@ -46,9 +46,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ConsentOrderApprovedController implements BaseController {
 
     private final ConsentOrderApprovedDocumentService service;
-
-    @Value("${feature.approved-consent-order-notification-letter}")
-    private boolean approvedConsentOrderNotificationLetterFeature;
+    private final FeatureToggleService featureToggleService;
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -77,10 +75,10 @@ public class ConsentOrderApprovedController implements BaseController {
             CaseDocument approvedConsentOrderLetter = service.generateApprovedConsentOrderLetter(caseDetails, authToken);
             CaseDocument consentOrderAnnexStamped = service.annexStampDocument(latestConsentOrder, authToken);
             CaseDocument approvedConsentOrderNotificationLetter = null;
-
-            if (approvedConsentOrderNotificationLetterFeature) {
+            if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
                 approvedConsentOrderNotificationLetter = service.generateApprovedConsentOrderNotificationLetter(caseDetails, authToken);
 
+                log.info("Approved Consent Order Notification Letter Feature Toggled is Enabled");
                 log.info("consentNotificationLetter= {}, letter= {}, consentOrderAnnexStamped = {}",
                     approvedConsentOrderNotificationLetter, approvedConsentOrderLetter, consentOrderAnnexStamped);
             }
@@ -89,7 +87,7 @@ public class ConsentOrderApprovedController implements BaseController {
                 .orderLetter(approvedConsentOrderLetter)
                 .consentOrder(consentOrderAnnexStamped);
 
-            if (approvedConsentOrderNotificationLetterFeature) {
+            if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
                 approvedOrderBuilder.consentOrderApprovedNotificationLetter(approvedConsentOrderNotificationLetter);
             }
 
@@ -103,7 +101,6 @@ public class ConsentOrderApprovedController implements BaseController {
             ApprovedOrderData approvedOrderData = ApprovedOrderData.builder()
                 .approvedOrder(approvedOrder)
                 .build();
-
             log.info("Generated ApprovedOrderData = {}", approvedOrderData);
 
             List<ApprovedOrderData> approvedOrders = asList(approvedOrderData);

@@ -3,9 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.AssignedToJudgeBulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkprint.HelpWithFeesBulkPrintService;
@@ -38,25 +38,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 public class NotificationsController implements BaseController {
 
-    @Autowired
-    private NotificationService notificationService;
-
-    @Autowired
-    private BulkPrintService bulkPrintService;
-
-    @Autowired
-    private HelpWithFeesBulkPrintService helpWithFeesBulkPrintService;
-
-    @Autowired
-    private AssignedToJudgeBulkPrintService assignedToJudgeBulkPrintService;
-
-    @Value("${feature.hwf-Successful-notification-letter}")
-    private boolean hwfSuccessfulNotificationLetterFeature;
-
-    @Value("${feature.assigned-to-judge-notification-letter}")
-    private boolean assignedToJudgeNotificationLetterFeature;
+    private final NotificationService notificationService;
+    private final BulkPrintService bulkPrintService;
+    private final HelpWithFeesBulkPrintService helpWithFeesBulkPrintService;
+    private final AssignedToJudgeBulkPrintService assignedToJudgeBulkPrintService;
+    private final FeatureToggleService featureToggleService;
 
     @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for HWF Successful.")
@@ -75,26 +64,24 @@ public class NotificationsController implements BaseController {
 
                 log.info("Sending Consented HWF Successful email notification to Solicitor");
                 notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest);
-            } else if (isPaperApplication(caseData)) {
+            // TODO: Remove this when we're ready to release Bulk Print
+            // TODO: Does this need wrapped in paperApplication logic?
+            } else if (isPaperApplication(caseData) && featureToggleService.isHwfSuccessfulNotificationLetterEnabled()) {
 
-                // Temporary feature toggle until we're ready to release Bulk Print
-                if (hwfSuccessfulNotificationLetterFeature) {
-                    log.info("Sending Consented HWF Successful notification bulk print letter");
-                    CaseDocument hwfSuccessfulLetter =
-                        helpWithFeesBulkPrintService.generateHwfSuccessfulLetter(authToken, caseDetails);
-                    UUID hwfSuccessfulLetterId = bulkPrintService.sendNotificationLetterForBulkPrint(hwfSuccessfulLetter, caseDetails);
+                log.info("Sending Consented HWF Successful notification bulk print letter");
+                CaseDocument hwfSuccessfulLetter =
+                    helpWithFeesBulkPrintService.generateHwfSuccessfulLetter(authToken, caseDetails);
+                UUID hwfSuccessfulLetterId = bulkPrintService.sendNotificationLetterForBulkPrint(hwfSuccessfulLetter, caseDetails);
 
-                    log.info("Generated 'HWF Successful' letter bulk print. letter: {}, letterId : {}",
-                        hwfSuccessfulLetter, hwfSuccessfulLetterId);
+                log.info("Generated 'HWF Successful' letter bulk print. letter: {}, letterId : {}",
+                    hwfSuccessfulLetter, hwfSuccessfulLetterId);
 
-                    // Need to create CCD fields for hwfSuccessfulLetter document and ID
+                // Need to create CCD fields for hwfSuccessfulLetter document and ID
 
-                    caseData.put(HWF_SUCCESS_NOTIFICATION_LETTER, hwfSuccessfulLetter);
-                    caseData.put(HWF_SUCCESS_NOTIFICATION_LETTER_ID, hwfSuccessfulLetterId);
+                caseData.put(HWF_SUCCESS_NOTIFICATION_LETTER, hwfSuccessfulLetter);
+                caseData.put(HWF_SUCCESS_NOTIFICATION_LETTER_ID, hwfSuccessfulLetterId);
 
-                    caseData.remove(HWF_SUCCESS_NOTIFICATION_LETTER);
-                    log.info("Bulk print is successful for 'Judge assigned to case' notification letter");
-                }
+                log.info("Bulk print is successful for 'Judge assigned to case' notification letter");
             }
         } else if (isSolicitorAgreedToReceiveEmails(caseData, APPLICANT_SOL_CONSENT_FOR_EMAILS)) {
             log.info("Sending Contested HWF Successful email notification to Solicitor");
@@ -119,10 +106,11 @@ public class NotificationsController implements BaseController {
         if (isSolicitorAgreedToReceiveEmails(caseData, SOLICITOR_AGREE_TO_RECEIVE_EMAILS)) {
             log.info("Sending email notification to Solicitor for Judge assigned to case");
             notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
+            // TODO: Remove this when we're ready to release Bulk Print
+            // TODO: Does this need wrapped in paperApplication logic?
         } else if (isConsentedApplication(caseData) && isPaperApplication(caseData)) {
 
-            // Temporary feature toggle until we're ready to release Bulk Print
-            if (assignedToJudgeNotificationLetterFeature) {
+            if (featureToggleService.isAssignedToJudgeNotificationLetterEnabled()) {
                 log.info("Sending 'Judge assigned to case' letter to bulk print");
 
                 CaseDocument judgeAssignedToCaseLetter =
