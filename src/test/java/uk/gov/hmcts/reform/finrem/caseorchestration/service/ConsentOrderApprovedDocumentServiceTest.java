@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -102,12 +103,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         verify(documentClientMock, times(1)).generatePdf(any(), anyString());
     }
 
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     @Test
     public void shouldGenerateApprovedConsentOrderNotificationLetterForApplicant() {
-        if (!featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER)) {
-            return;
-        }
-
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
         caseDetails.getData().put(APPLICANT_REPRESENTED, NO_VALUE);
@@ -121,15 +119,11 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
                 .name("James Joyce")
                 .formattedAddress("50 Applicant Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSW1")
                 .build();
-        assertEquals(caseDetails.getData().get("addressee"), addressee);
+        assertEquals(addressee, caseDetails.getData().get("addressee"));
     }
 
     @Test
     public void shouldGenerateApprovedConsentOrderNotificationLetterForApplicantSolicitor() {
-        if (!featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER)) {
-            return;
-        }
-
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
         Map<String, Object> solicitorAddress = new HashMap<>();
@@ -151,13 +145,12 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
                 consentOrderApprovedDocumentService.generateApprovedConsentOrderNotificationLetter(caseDetails, AUTH_TOKEN);
 
         doCaseDocumentAssert(generatedApprovedConsentOrderNotificationLetter);
-        verify(documentClientMock, times(1)).generatePdf(any(), anyString());
 
         Addressee addressee = Addressee.builder()
                 .name("Saul Goodman")
                 .formattedAddress("123 Applicant Solicitor Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSE1")
                 .build();
-        assertEquals(caseDetails.getData().get("addressee"), addressee);
+        assertEquals(addressee, caseDetails.getData().get("addressee"));
     }
 
     @Test

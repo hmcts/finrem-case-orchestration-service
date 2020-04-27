@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
@@ -86,8 +87,11 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     public void shouldConvertCollectionDocument() throws Exception {
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.approvedOrderCollection(caseDetails().getData());
 
-        assertThat(bulkPrintDocuments.size(),
-            is(featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER) ? 5 : 4));
+        if (featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER)) {
+            assertThat(bulkPrintDocuments, hasSize(5));
+        } else {
+            assertThat(bulkPrintDocuments, hasSize(4));
+        }
     }
 
     private CaseDetails caseDetails() throws Exception {

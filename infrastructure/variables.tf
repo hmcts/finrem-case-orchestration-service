@@ -85,9 +85,9 @@ variable "approved_consent_order_notification_letter_enabled" {
 }
 
 variable "hwf_successful_notification_letter" {
-  default = true
+  default = false
 }
 
 variable "assigned_to_judge_notification_letter" {
-  default = true
+  default = false
 }

@@ -11,6 +11,5 @@ public enum Features {
     HWF_SUCCESSFUL_NOTIFICATION_LETTER("hwf_successful_notification_letter"),
     ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER("assigned_to_judge_notification_letter");
 
-
     private final String name;
 }
