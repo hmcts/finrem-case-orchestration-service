@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
@@ -132,8 +132,8 @@ public class SetUpUtils {
         return caseDocument;
     }
 
-    public static PensionDocumentData pensionDocument() {
-        PensionDocumentData document = new PensionDocumentData();
+    public static TypedCaseDocument pensionDocument() {
+        TypedCaseDocument document = new TypedCaseDocument();
         document.setPensionDocument(caseDocument());
         document.setTypeOfDocument(PENSION_TYPE);
 
@@ -142,7 +142,7 @@ public class SetUpUtils {
 
     public static PensionCollectionData pensionDocumentData() {
         PensionCollectionData document = new PensionCollectionData();
-        document.setPensionDocumentData(pensionDocument());
+        document.setTypedCaseDocument(pensionDocument());
         document.setId(PENSION_ID);
 
         return document;

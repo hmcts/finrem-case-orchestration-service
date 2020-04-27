@@ -40,7 +40,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class TransformationBulkScanTest {
 
     private static final String TRANSFORMATION_URL = "/transform-exception-record";
-    private static final String FORM_A_JSON_PATH = "fixtures/bulkscan/transformation/simple-formA.json";
+    private static final String FORM_A_JSON_PATH = "fixtures/bulkscan/transformation/simple-FormA.json";
 
     @Autowired
     private MockMvc mockMvc;
