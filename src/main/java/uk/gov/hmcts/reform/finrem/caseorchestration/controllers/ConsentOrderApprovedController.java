@@ -77,10 +77,11 @@ public class ConsentOrderApprovedController implements BaseController {
             CaseDocument approvedConsentOrderNotificationLetter = null;
             if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
                 approvedConsentOrderNotificationLetter = service.generateApprovedConsentOrderNotificationLetter(caseDetails, authToken);
-            }
 
-            log.info("consentNotificationLetter= {}, letter= {}, consentOrderAnnexStamped = {}",
-                approvedConsentOrderNotificationLetter, approvedConsentOrderLetter, consentOrderAnnexStamped);
+                log.info("Approved Consent Order Notification Letter Feature Toggled is Enabled");
+                log.info("consentNotificationLetter= {}, letter= {}, consentOrderAnnexStamped = {}",
+                    approvedConsentOrderNotificationLetter, approvedConsentOrderLetter, consentOrderAnnexStamped);
+            }
 
             ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
                 .orderLetter(approvedConsentOrderLetter)
