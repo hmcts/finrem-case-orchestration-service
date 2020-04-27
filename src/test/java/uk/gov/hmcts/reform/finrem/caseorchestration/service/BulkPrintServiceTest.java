@@ -33,13 +33,9 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     @Autowired
     private BulkPrintService bulkPrintService;
 
-    @Autowired
-    private FeatureToggleService featureToggleService;
-
+    private final FeatureToggleService featureToggleService = new FeatureToggleService();
     private ObjectMapper mapper = new ObjectMapper();
-
     private UUID letterId;
-
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor;
 
     @Before

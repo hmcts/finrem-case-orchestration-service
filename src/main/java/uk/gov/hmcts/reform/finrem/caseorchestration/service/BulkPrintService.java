@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
@@ -31,14 +30,15 @@ public class BulkPrintService extends AbstractDocumentService {
     private static final String DOCUMENT_URL = "document_binary_url";
     private static final String VALUE = "value";
 
-    @Autowired
-    FeatureToggleService featureToggleService;
+    private final FeatureToggleService featureToggleService;
 
     @Autowired
     public BulkPrintService(DocumentClient documentClient,
                             DocumentConfiguration config,
-                            ObjectMapper objectMapper) {
+                            ObjectMapper objectMapper,
+                            FeatureToggleService featureToggleService) {
         super(documentClient, config, objectMapper);
+        this.featureToggleService = featureToggleService;
     }
 
     public UUID sendOrdersForBulkPrint(final CaseDocument coverSheet, final CaseDetails caseDetails) {
