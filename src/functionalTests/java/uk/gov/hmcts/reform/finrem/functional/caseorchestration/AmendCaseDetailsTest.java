@@ -13,6 +13,9 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ATTENDED_MIAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLAIMING_EXEMPTION_MIAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 
 @RunWith(SerenityRunner.class)
 public class AmendCaseDetailsTest extends IntegrationTestBase {
@@ -112,7 +115,6 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyAmendRemovePropertyAdjustmentDetails() {
-
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "remove-property-adjustment-details1.json");
 
@@ -212,8 +214,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
         if (jsonPathEvaluator.get("benefitForChildrenDecision") != null
                 || jsonPathEvaluator.get("benefitPaymentChecklist") != null) {
-            Assert.fail("The periodic payment details are still showing even after payment for children is unchecked for"
-                + " contested in the result.");
+            Assert.fail("The periodic payment details are still showing even after payment for children is unchecked for contested in the result.");
         }
     }
 
@@ -315,15 +316,14 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-exceptions-when-applicant-attended-miam1.json");
 
-        if (jsonPathEvaluator.get("claimingExemptionMIAM") != null
+        if (jsonPathEvaluator.get(CLAIMING_EXEMPTION_MIAM) != null
                 || jsonPathEvaluator.get("familyMediatorMIAM") != null
                 || jsonPathEvaluator.get("MIAMExemptionsChecklist") != null
                 || jsonPathEvaluator.get("MIAMDomesticViolenceChecklist") != null
                 || jsonPathEvaluator.get("MIAMUrgencyReasonChecklist") != null
                 || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") != null
                 || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") != null) {
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are still showing "
-                    + "in the result.");
+            Assert.fail("The Miam exception details when applicant attended Miam for contested are still showing in the result.");
         }
     }
 
@@ -332,7 +332,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "update-miam-exceptions-when-applicant-not-claiming-exemption1.json");
 
-        if (jsonPathEvaluator.get("applicantAttendedMIAM") == null
+        if (jsonPathEvaluator.get(APPLICANT_ATTENDED_MIAM) == null
                 || jsonPathEvaluator.get("claimingExemptionMIAM") == null
                 || jsonPathEvaluator.get("familyMediatorMIAM") != null
                 || jsonPathEvaluator.get("MIAMExemptionsChecklist") != null
@@ -357,8 +357,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 || jsonPathEvaluator.get("MIAMUrgencyReasonChecklist") != null
                 || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") != null
                 || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") != null) {
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated"
-                + " in the result.");
+            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated in the result.");
         }
     }
 
@@ -372,8 +371,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 || jsonPathEvaluator.get("MIAMUrgencyReasonChecklist") == null
                 || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") == null
                 || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") == null) {
-            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated"
-                + " in the result.");
+            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated in the result.");
         }
     }
 
@@ -440,7 +438,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "amend-consent-order-by-solicitor.json");
 
-        if (jsonPathEvaluator.get("latestConsentOrder") == null) {
+        if (jsonPathEvaluator.get(LATEST_CONSENT_ORDER) == null) {
             Assert.fail("The latestConsentOrder field is not available.");
         }
     }
@@ -456,13 +454,11 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
     @Test
     public void verifyShouldUpdateLatestDraftConsentOrderWhenACaseIsAmended() {
-
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "amend-consent-order-by-solicitor.json");
         assertThat(jsonPathEvaluator.get("latestConsentOrder.document_binary_url"), is("http://file2.binary"));
         assertThat(jsonPathEvaluator.get("latestConsentOrder.document_filename"), is("file2"));
         assertThat(jsonPathEvaluator.get("latestConsentOrder.document_url"), is("http://file2"));
-
     }
 
     @Test

@@ -1,14 +1,14 @@
-
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.LetterAddressHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
@@ -21,7 +21,7 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,14 +44,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
-public class ConsentOrderApprovedDocumentServiceTest {
+@ActiveProfiles("test-mock-document-client")
+public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
-    @Mock
+    @Autowired
     private DocumentClient documentClientMock;
 
-    private ObjectMapper mapper = new ObjectMapper();
-    private ConsentOrderApprovedDocumentService service;
-    private LetterAddressHelper letterAddressHelper = new LetterAddressHelper();
+    @Autowired
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+
+    @Value("${feature.approved-consent-order-notification-letter}")
+    private boolean approvedConsentOrderNotificationLetterFeature;
+
     private CaseDetails caseDetails;
 
     @Before
@@ -59,10 +63,10 @@ public class ConsentOrderApprovedDocumentServiceTest {
         DocumentConfiguration config = new DocumentConfiguration();
         config.setApprovedConsentOrderTemplate("FL-FRM-DEC-ENG-00071.docx");
         config.setApprovedConsentOrderFileName("ApprovedConsentOrderLetter.pdf");
-        config.setApprovedConsentOrderNotificationTemplate("FL-FRM-LET-ENG-00095.docx");
-        config.setApprovedConsentOrderNotificationFileName("ApprovedConsentOrderNotificationLetter.pdf");
-        documentClientMock = mock(DocumentClient.class);
-        service = new ConsentOrderApprovedDocumentService(documentClientMock, config, mapper, letterAddressHelper);
+        if (approvedConsentOrderNotificationLetterFeature) {
+            config.setApprovedConsentOrderNotificationTemplate("FL-FRM-LET-ENG-00095.docx");
+            config.setApprovedConsentOrderNotificationFileName("ApprovedConsentOrderNotificationLetter.pdf");
+        }
 
         Map<String, Object> applicantAddress = new HashMap<>();
         applicantAddress.put("AddressLine1", "50 Applicant Street");
@@ -89,9 +93,10 @@ public class ConsentOrderApprovedDocumentServiceTest {
 
     @Test
     public void shouldGenerateApprovedConsentOrderLetter() {
+        reset(documentClientMock);
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
-        CaseDocument caseDocument = service.generateApprovedConsentOrderLetter(caseDetails, AUTH_TOKEN);
+        CaseDocument caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, AUTH_TOKEN);
 
         doCaseDocumentAssert(caseDocument);
         verify(documentClientMock, times(1)).generatePdf(any(), anyString());
@@ -99,12 +104,16 @@ public class ConsentOrderApprovedDocumentServiceTest {
 
     @Test
     public void shouldGenerateApprovedConsentOrderNotificationLetterForApplicant() {
+        if (!approvedConsentOrderNotificationLetterFeature) {
+            return;
+        }
+
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
         caseDetails.getData().put(APPLICANT_REPRESENTED, NO_VALUE);
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
-                service.generateApprovedConsentOrderNotificationLetter(caseDetails, AUTH_TOKEN);
+                consentOrderApprovedDocumentService.generateApprovedConsentOrderNotificationLetter(caseDetails, AUTH_TOKEN);
 
         doCaseDocumentAssert(generatedApprovedConsentOrderNotificationLetter);
 
@@ -117,6 +126,10 @@ public class ConsentOrderApprovedDocumentServiceTest {
 
     @Test
     public void shouldGenerateApprovedConsentOrderNotificationLetterForApplicantSolicitor() {
+        if (!approvedConsentOrderNotificationLetterFeature) {
+            return;
+        }
+
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
         Map<String, Object> solicitorAddress = new HashMap<>();
@@ -135,7 +148,7 @@ public class ConsentOrderApprovedDocumentServiceTest {
         caseData.put(APP_SOLICITOR_ADDRESS_CCD_FIELD, solicitorAddress);
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
-                service.generateApprovedConsentOrderNotificationLetter(caseDetails, AUTH_TOKEN);
+                consentOrderApprovedDocumentService.generateApprovedConsentOrderNotificationLetter(caseDetails, AUTH_TOKEN);
 
         doCaseDocumentAssert(generatedApprovedConsentOrderNotificationLetter);
         verify(documentClientMock, times(1)).generatePdf(any(), anyString());
@@ -149,11 +162,11 @@ public class ConsentOrderApprovedDocumentServiceTest {
 
     @Test
     public void shouldAnnexAndStampDocument() {
-        CaseDocument caseDocument = caseDocument();
-
+        reset(documentClientMock);
         when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
 
-        CaseDocument annexStampDocument = service.annexStampDocument(caseDocument, AUTH_TOKEN);
+        CaseDocument caseDocument = caseDocument();
+        CaseDocument annexStampDocument = consentOrderApprovedDocumentService.annexStampDocument(caseDocument, AUTH_TOKEN);
 
         doCaseDocumentAssert(annexStampDocument);
         verify(documentClientMock, times(1)).annexStampDocument(any(), anyString());
@@ -161,11 +174,11 @@ public class ConsentOrderApprovedDocumentServiceTest {
 
     @Test
     public void shouldStampDocument() {
-        CaseDocument caseDocument = caseDocument();
-
+        reset(documentClientMock);
         when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
 
-        CaseDocument stampDocument = service.stampDocument(caseDocument, AUTH_TOKEN);
+        CaseDocument caseDocument = caseDocument();
+        CaseDocument stampDocument = consentOrderApprovedDocumentService.stampDocument(caseDocument, AUTH_TOKEN);
 
         doCaseDocumentAssert(stampDocument);
         verify(documentClientMock, times(1)).stampDocument(any(), anyString());
@@ -173,13 +186,13 @@ public class ConsentOrderApprovedDocumentServiceTest {
 
     @Test
     public void shouldStampPensionDocuments() {
-        List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
-
+        reset(documentClientMock);
         when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
 
-        List<PensionCollectionData> stampPensionDocuments = service.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
+        List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
+        List<PensionCollectionData> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
 
-        stampPensionDocuments.forEach(data -> doCaseDocumentAssert(data.getPensionDocumentData().getPensionDocument()));
+        stampPensionDocuments.forEach(data -> doCaseDocumentAssert(data.getTypedCaseDocument().getPensionDocument()));
         verify(documentClientMock, times(2)).stampDocument(any(), anyString());
     }
 }

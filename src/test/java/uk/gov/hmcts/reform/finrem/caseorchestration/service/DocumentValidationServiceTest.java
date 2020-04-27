@@ -18,12 +18,15 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse.builder;
 
 public class DocumentValidationServiceTest extends BaseServiceTest {
 
     private static final String PATH = "/fixtures/latestConsentedConsentOrder/";
-    private static final String CONSENT_ORDER = "consentOrder";
     private static final String APPLICATION_PDF = "application/pdf";
     private static final String DRAFT_CONSENT_ORDER_JSON = "draft-consent-order.json";
     private static final String VALIDATE_PENSION_COLLECTION_JSON = "validate-pension-collection.json";
@@ -83,7 +86,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
                 "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"))
                 .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "amendedConsentOrderCollection", AUTH_TOKEN);
+            AMENDED_CONSENT_ORDER_COLLECTION, AUTH_TOKEN);
         assertThat(response.getMimeType(), is(APPLICATION_PDF));
     }
 
@@ -98,7 +101,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
                 "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"))
                 .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "amendedConsentOrderCollection", AUTH_TOKEN);
+            AMENDED_CONSENT_ORDER_COLLECTION, AUTH_TOKEN);
         assertThat(response.getErrors(), hasItem("Invalid file type"));
     }
 
@@ -114,7 +117,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
                 "http://file2.binary"))
                 .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "pensionCollection", AUTH_TOKEN);
+            PENSION_DOCS_COLLECTION, AUTH_TOKEN);
         assertThat(response.getErrors(), nullValue());
     }
 
@@ -132,7 +135,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
                 "http://file2.binary"))
                 .thenReturn(documentValidationResponse2);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "pensionCollection", AUTH_TOKEN);
+            PENSION_DOCS_COLLECTION, AUTH_TOKEN);
         assertThat(response.getErrors(), hasItem("Invalid file type"));
     }
 
@@ -140,7 +143,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     public void shouldNotThrowErrorWhenFileTypeValidationForEmptyPensionCollection() throws Exception {
         setUpCaseDetails(VALIDATE_PENSION_COLLECTION_WITHOUT_DATA_JSON);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "pensionCollection", AUTH_TOKEN);
+            PENSION_DOCS_COLLECTION, AUTH_TOKEN);
 
         assertThat(response.getErrors(), nullValue());
     }
@@ -154,7 +157,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
                 .thenReturn(documentValidationResponse);
 
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "respondToOrderDocuments", AUTH_TOKEN);
+            RESPOND_TO_ORDER_DOCUMENTS, AUTH_TOKEN);
         assertThat(response.getErrors(), nullValue());
     }
 
@@ -162,7 +165,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     public void shouldReturnErrorWhenFileTypeValidationForRespondToOrderCollection() throws Exception {
         setUpCaseDetails(RESPOND_TO_ORDER_SOL_JSON);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "respondToOrderDocuments", AUTH_TOKEN);
+            RESPOND_TO_ORDER_DOCUMENTS, AUTH_TOKEN);
         assertThat(response.getErrors(), nullValue());
     }
 

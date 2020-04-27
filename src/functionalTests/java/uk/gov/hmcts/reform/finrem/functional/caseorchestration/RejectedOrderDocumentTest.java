@@ -20,6 +20,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 
 @RunWith(SerenityRunner.class)
 public class RejectedOrderDocumentTest extends IntegrationTestBase {
@@ -28,6 +29,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
     private FunctionalTestUtils functionalTestUtils;
 
     private ObjectMapper objectMapper = new ObjectMapper();
+    private CallbackRequest callbackRequest = null;
 
     private final String contestedDir = "/json/contested/";
     private final String consentedDir = "/json/consented/";
@@ -38,8 +40,6 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
     @Value("${cos.consentOrder.not.approved}")
     private String consentOrderNotApprovedEndPoint;
 
-    private CallbackRequest callbackRequest = null;
-
     @Test
     public void verifyPreviewConsentOrderNotApproved() {
 
@@ -47,7 +47,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
         DocumentContext documentContext = JsonPath.parse(resourceAsStream);
 
         HashMap<String,Object> caseDetails = documentContext.read("$.case_details.case_data");
-        caseDetails.remove("orderRefusalPreviewDocument");
+        caseDetails.remove(ORDER_REFUSAL_PREVIEW_COLLECTION);
 
         try {
             callbackRequest = objectMapper.readValue(documentContext.jsonString(), CallbackRequest.class);
@@ -59,10 +59,8 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
 
         List<Object> orderRefusalPreviewDocuments = JsonPath.parse(response.asString())
             .read("$.data[?(@.orderRefusalPreviewDocument)]");
-        assertEquals("Request failed " + response.getStatusCode(), 200,
-            response.getStatusCode());
-        assertTrue("Order Refusal Preview Document not found ",
-            orderRefusalPreviewDocuments.size() > 0);
+        assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
+        assertTrue("Order Refusal Preview Document not found ", orderRefusalPreviewDocuments.size() > 0);
     }
 
     @Test
@@ -82,9 +80,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
 
         List<Object> uploadOrders = JsonPath.parse(response.getBody().asString())
             .read("$.data.uploadOrder[?(@.id)].id");
-        assertEquals("Request failed " + response.getStatusCode(), 200,
-            response.getStatusCode());
-        assertEquals("expected uploadOrder size not matching  ",
-            uploadOrdersBeforeCount + 1, uploadOrders.size());
+        assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
+        assertEquals("expected uploadOrder size not matching  ", uploadOrdersBeforeCount + 1, uploadOrders.size());
     }
 }

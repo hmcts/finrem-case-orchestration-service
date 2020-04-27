@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
@@ -30,6 +30,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
 public class SetUpUtils {
 
@@ -74,13 +76,13 @@ public class SetUpUtils {
 
     public static Map<String, Object> caseDataWithUploadOrder(String uploadOrderId) {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("uploadOrder", ImmutableList.of(consentOrderData(uploadOrderId)));
+        caseData.put(UPLOAD_ORDER, ImmutableList.of(consentOrderData(uploadOrderId)));
         return caseData;
     }
 
     public static Map<String, Object> caseDataWithPreviewOrder() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("orderRefusalPreviewDocument", caseDocument());
+        caseData.put(ORDER_REFUSAL_PREVIEW_COLLECTION, caseDocument());
         return caseData;
     }
 
@@ -130,8 +132,8 @@ public class SetUpUtils {
         return caseDocument;
     }
 
-    public static PensionDocumentData pensionDocument() {
-        PensionDocumentData document = new PensionDocumentData();
+    public static TypedCaseDocument pensionDocument() {
+        TypedCaseDocument document = new TypedCaseDocument();
         document.setPensionDocument(caseDocument());
         document.setTypeOfDocument(PENSION_TYPE);
 
@@ -140,7 +142,7 @@ public class SetUpUtils {
 
     public static PensionCollectionData pensionDocumentData() {
         PensionCollectionData document = new PensionCollectionData();
-        document.setPensionDocumentData(pensionDocument());
+        document.setTypedCaseDocument(pensionDocument());
         document.setId(PENSION_ID);
 
         return document;

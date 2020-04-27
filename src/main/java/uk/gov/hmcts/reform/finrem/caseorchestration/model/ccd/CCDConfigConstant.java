@@ -1,5 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class CCDConfigConstant {
 
     //Case related
@@ -41,12 +45,21 @@ public class CCDConfigConstant {
     //Document related
     public static final String MINI_FORM_A = "miniFormA";
     public static final String PENSION_DOCS_COLLECTION = "pensionCollection";
+    public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_TEXT = "generalLetterBody";
-    public static final String LATEST_CONSENT_ORDER = "latestConsentOrder";
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
+    public static final String RESPOND_TO_ORDER_DOCUMENTS = "respondToOrderDocuments";
+    public static final String CONSENT_ORDER = "consentOrder";
+    public static final String LATEST_CONSENT_ORDER = "latestConsentOrder";
+    public static final String AMENDED_CONSENT_ORDER_COLLECTION = "amendedConsentOrderCollection";
+    public static final String ORDER_REFUSAL_COLLECTION = "orderRefusalCollection";
+    public static final String ORDER_REFUSAL_PREVIEW_COLLECTION = "orderRefusalPreviewDocument";
+
+    public static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
+    public static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
 
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
@@ -65,13 +78,13 @@ public class CCDConfigConstant {
 
     public static final String HEARING_DATE = "hearingDate";
     public static final String CASE_ALLOCATED_TO = "caseAllocatedTo";
-    public static final String MIAM_ATTENDANCE = "applicantAttendedMIAM";
-    public static final String MIAM_EXEMPTION = "claimingExemptionMIAM";
+    public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMIAM";
+    public static final String FAMILY_MEDIATOR_MIAM = "familyMediatorMIAM";
+    public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMIAM";
     public static final String IS_ADMIN = "isAdmin";
     public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
     public static final String ROLES = "roles";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
-    public static final String JUDGE_ALLOCATED = "judgeAllocated";
 
     // Bulk Printing
     public static final String BULK_PRINT_COVER_SHEET = "bulkPrintCoverSheet";

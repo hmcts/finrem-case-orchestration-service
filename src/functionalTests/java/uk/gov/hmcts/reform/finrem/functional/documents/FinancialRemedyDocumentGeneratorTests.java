@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BINARY_URL_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
 @RunWith(SerenityRunner.class)
 public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
@@ -136,7 +137,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_JSON, generatorUrl,
-            "document", "miniForma", consentedDir);
+            "document", MINI_FORM_A, consentedDir);
 
         JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
         assertTrue(jsonPathEvaluator1.get("mimeType").toString().equalsIgnoreCase("application/pdf"));
@@ -147,7 +148,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void verifyGeneratedContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl,
-            "document", "miniForma", contestedDir);
+            "document", MINI_FORM_A, contestedDir);
 
         JsonPath jsonPathEvaluator1 = accessGeneratedDocument(fileRetrieveUrl(documentUrl));
 
@@ -183,7 +184,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_JSON, generatorUrl,
-            BINARY_URL_TYPE, "miniForma", consentedDir);
+            BINARY_URL_TYPE, MINI_FORM_A, consentedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
@@ -207,7 +208,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     public void downloadContestedDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
 
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl,
-            BINARY_URL_TYPE, "miniForma", contestedDir);
+            BINARY_URL_TYPE, MINI_FORM_A, contestedDir);
 
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
 
@@ -258,7 +259,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private String getDocumentUrlOrDocumentBinaryUrl(String jsonFile, String url, String urlType, String documentType, String journeyType) {
 
         switch (documentType) {
-            case "miniForma":
+            case MINI_FORM_A:
                 jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
                 if (urlType.equals("document")) {
                     url1 = jsonPathEvaluator.get("data.miniFormA.document_url");

@@ -16,11 +16,11 @@ public class ApplicationTypeTest {
 
     @Test
     public void covertAllApplicationTypes() {
-        assertEquals(ApplicationType.from("consented"), CONSENTED);
-        assertEquals(ApplicationType.from("consented"), CONSENTED);
+        assertEquals(CONSENTED, ApplicationType.from("consented"));
+        assertEquals(CONTESTED, ApplicationType.from("contested"));
 
-        assertEquals(ApplicationType.from("CONSENTED"), CONSENTED);
-        assertEquals(ApplicationType.from("CONTESTED"), CONTESTED);
+        assertEquals(CONSENTED, ApplicationType.from("CONSENTED"));
+        assertEquals(CONTESTED, ApplicationType.from("CONTESTED"));
     }
 
     @Test
@@ -30,7 +30,7 @@ public class ApplicationTypeTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void throwIllegalArumentException() {
+    public void throwIllegalArgumentException() {
         ApplicationType.from("abcd");
     }
 }

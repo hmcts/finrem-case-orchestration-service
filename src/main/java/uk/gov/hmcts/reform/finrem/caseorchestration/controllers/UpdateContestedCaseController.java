@@ -26,6 +26,10 @@ import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ATTENDED_MIAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLAIMING_EXEMPTION_MIAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAMILY_MEDIATOR_MIAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
 @RestController
@@ -82,7 +86,7 @@ public class UpdateContestedCaseController implements BaseController {
     }
 
     private void updateContestedFastTrackProcedureDetail(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("fastTrackDecision"), NO_VALUE)) {
+        if (equalsTo((String) caseData.get(FAST_TRACK_DECISION), NO_VALUE)) {
             caseData.put("fastTrackDecisionReason", null);
         }
     }
@@ -117,7 +121,7 @@ public class UpdateContestedCaseController implements BaseController {
     }
 
     private void updateContestedMiamDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("applicantAttendedMIAM"), YES_VALUE)) {
+        if (equalsTo((String) caseData.get(APPLICANT_ATTENDED_MIAM), YES_VALUE)) {
             removeAllMiamExceptionDetails(caseData);
             removeMiamCertificationDetailsForApplicantAttendedMiam(caseData);
         } else {
@@ -127,8 +131,8 @@ public class UpdateContestedCaseController implements BaseController {
     }
 
     private void updateWhenClaimingExemptionMiam(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("claimingExemptionMIAM"), NO_VALUE)) {
-            caseData.put("familyMediatorMIAM", null);
+        if (equalsTo((String) caseData.get(CLAIMING_EXEMPTION_MIAM), NO_VALUE)) {
+            caseData.put(FAMILY_MEDIATOR_MIAM, null);
             removeMiamExceptionDetails(caseData);
         } else {
             updateClaimingExemptionMiamDetails(caseData);
@@ -149,13 +153,13 @@ public class UpdateContestedCaseController implements BaseController {
     }
 
     private void removeAllMiamExceptionDetails(Map<String, Object> caseData) {
-        caseData.put("claimingExemptionMIAM", null);
-        caseData.put("familyMediatorMIAM", null);
+        caseData.put(CLAIMING_EXEMPTION_MIAM, null);
+        caseData.put(FAMILY_MEDIATOR_MIAM, null);
         removeMiamExceptionDetails(caseData);
     }
 
     private void updateClaimingExemptionMiamDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("familyMediatorMIAM"), "Yes")) {
+        if (equalsTo((String) caseData.get(FAMILY_MEDIATOR_MIAM), YES_VALUE)) {
             removeMiamExceptionDetails(caseData);
         } else {
             removeMiamCertificationDetails(caseData);

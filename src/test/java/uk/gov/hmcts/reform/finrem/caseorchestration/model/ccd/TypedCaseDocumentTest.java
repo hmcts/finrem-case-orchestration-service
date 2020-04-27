@@ -9,7 +9,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-public class PensionDocumentDataTest {
+public class TypedCaseDocumentTest {
 
     private final String json = "{\n"
             + "            \"typeOfDocument\": \"pdf\",\n"
@@ -23,9 +23,9 @@ public class PensionDocumentDataTest {
     @Test
     public void shouldGetPensionDocumentData() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        PensionDocumentData pensionDocumentData = objectMapper.readValue(json, PensionDocumentData.class);
-        assertThat(pensionDocumentData, is(notNullValue()));
-        CaseDocument pensionDocument = pensionDocumentData.getPensionDocument();
+        TypedCaseDocument typedCaseDocument = objectMapper.readValue(json, TypedCaseDocument.class);
+        assertThat(typedCaseDocument, is(notNullValue()));
+        CaseDocument pensionDocument = typedCaseDocument.getPensionDocument();
         assertThat(pensionDocument.getDocumentBinaryUrl(), is("http://file1.binary"));
         assertThat(pensionDocument.getDocumentUrl(), is("http://file1"));
         assertThat(pensionDocument.getDocumentFilename(), is("file1.pdf"));

@@ -147,10 +147,8 @@ public class NotificationsTest {
 
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
-        String response =
-            objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(caseDetails.getData()).build());
-        return response;
+        return objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDetails.getData()).build());
     }
 
     private void stubForNotification(String url, int value) {
