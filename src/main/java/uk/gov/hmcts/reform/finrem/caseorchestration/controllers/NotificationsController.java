@@ -118,7 +118,6 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-
     private boolean hasApplicantSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData) {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData
             .get("applicantSolicitorConsentForEmails")));

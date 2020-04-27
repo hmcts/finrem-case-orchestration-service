@@ -114,9 +114,10 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void sendPrepareForHearingNotificationEmail() {
-        // PLEASE REVIEW - I feel like this test is a false positive
-        Map<String, Object> caseData = new HashMap<>();
+        HashMap<String, Object> caseData = new HashMap<>();
         caseData.put("solicitorAgreeToReceiveEmails", "Yes");
+
+        callbackRequest = getContestedCallbackRequest(caseData);
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))

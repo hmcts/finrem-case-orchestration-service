@@ -111,7 +111,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotSendSolicitorEmailWhenAgreed() throws Exception {
+    public void shouldNotSendSolicitorEmailWhenNotAgreed() throws Exception {
 
         mvc.perform(post(HEARING_DOCUMENT_CALLBACK_URL)
             .content("{\n"
