@@ -135,8 +135,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         verify(service, times(1)).generateApprovedConsentOrderNotificationLetter(any(), any());
 
         result.andExpect(status().isOk());
-        // TODO: Reintroduce this and fix failing test
-        //assertConsentOrderNotificationLetter(result);
+        assertConsentOrderNotificationLetter(result);
     }
 
     @Test

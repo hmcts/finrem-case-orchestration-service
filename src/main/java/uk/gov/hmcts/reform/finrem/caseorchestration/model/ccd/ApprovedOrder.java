@@ -25,10 +25,6 @@ public class ApprovedOrder {
     private CaseDocument consentOrder;
     @JsonProperty("pensionDocuments")
     private List<PensionCollectionData> pensionDocuments;
-
-    @JsonIgnore
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     @JsonProperty("consentOrderApprovedNotificationLetter")
     private CaseDocument consentOrderApprovedNotificationLetter;
 }
