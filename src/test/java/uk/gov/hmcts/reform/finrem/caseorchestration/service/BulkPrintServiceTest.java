@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.impl.FeatureToggleServiceImpl;
 
 import java.io.InputStream;
 import java.util.List;
@@ -24,7 +23,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER;
 
 @ActiveProfiles("test-mock-document-client")
 public class BulkPrintServiceTest extends BaseServiceTest {
@@ -36,7 +34,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     private BulkPrintService bulkPrintService;
 
     @Autowired
-    private FeatureToggleServiceImpl featureToggleService;
+    private FeatureToggleService featureToggleService;
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -62,7 +60,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         assertThat(bulkPrintLetterId, is(letterId));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().size(),
-            is(featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER) ? 6 : 5));
+            is(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled() ? 6 : 5));
     }
 
     @Test
@@ -87,7 +85,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     public void shouldConvertCollectionDocument() throws Exception {
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.approvedOrderCollection(caseDetails().getData());
 
-        if (featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER)) {
+        if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
             assertThat(bulkPrintDocuments, hasSize(5));
         } else {
             assertThat(bulkPrintDocuments, hasSize(4));

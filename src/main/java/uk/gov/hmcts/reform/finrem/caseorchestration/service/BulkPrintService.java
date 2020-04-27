@@ -94,7 +94,7 @@ public class BulkPrintService extends AbstractDocumentService {
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, CONSENT_ORDER));
 
 
-            if (featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER)) {
+            if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
                 bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrderApprovedNotificationLetter"));
             }
 

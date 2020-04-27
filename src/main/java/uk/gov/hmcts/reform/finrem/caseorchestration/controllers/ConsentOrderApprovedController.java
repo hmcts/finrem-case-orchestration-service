@@ -48,9 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ConsentOrderApprovedController implements BaseController {
 
     private final ConsentOrderApprovedDocumentService service;
-
-    @Autowired
-    private FeatureToggleService featureToggleService;
+    private final FeatureToggleService featureToggleService;
 
     private ObjectMapper mapper = new ObjectMapper();
 
@@ -79,7 +77,7 @@ public class ConsentOrderApprovedController implements BaseController {
             CaseDocument approvedConsentOrderLetter = service.generateApprovedConsentOrderLetter(caseDetails, authToken);
             CaseDocument consentOrderAnnexStamped = service.annexStampDocument(latestConsentOrder, authToken);
             CaseDocument approvedConsentOrderNotificationLetter = null;
-            if (featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER)) {
+            if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
                 approvedConsentOrderNotificationLetter = service.generateApprovedConsentOrderNotificationLetter(caseDetails, authToken);
             }
 
@@ -90,7 +88,7 @@ public class ConsentOrderApprovedController implements BaseController {
                 .orderLetter(approvedConsentOrderLetter)
                 .consentOrder(consentOrderAnnexStamped);
 
-            if (featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER)) {
+            if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
                 approvedOrderBuilder.consentOrderApprovedNotificationLetter(approvedConsentOrderNotificationLetter);
             }
 

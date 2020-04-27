@@ -34,7 +34,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDoc
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
@@ -64,7 +63,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         DocumentConfiguration config = new DocumentConfiguration();
         config.setApprovedConsentOrderTemplate("FL-FRM-DEC-ENG-00071.docx");
         config.setApprovedConsentOrderFileName("ApprovedConsentOrderLetter.pdf");
-        if (featureToggleService.isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER)) {
+        if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
             config.setApprovedConsentOrderNotificationTemplate("FL-FRM-LET-ENG-00095.docx");
             config.setApprovedConsentOrderNotificationFileName("ApprovedConsentOrderNotificationLetter.pdf");
         }
