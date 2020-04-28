@@ -69,6 +69,16 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json").toURI()));
     }
 
+    private String prepareBodyWithSolicitorAgreedReceiveEmails(String value) {
+        return "{\n"
+            + "  \"case_details\": {\n"
+            + "    \"case_data\": {\n"
+            + "      \"solicitorAgreeToReceiveEmails\": \"" + value + "\"\n"
+            + "    }\n"
+            + "  }\n"
+            + "}\n";
+    }
+
     @Test
     public void generateHearingDocumentHttpError400() throws Exception {
         mvc.perform(post(HEARING_DOCUMENT_CALLBACK_URL)
@@ -96,13 +106,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void shouldSendSolicitorEmailWhenAgreed() throws Exception {
         mvc.perform(post(HEARING_DOCUMENT_CALLBACK_URL)
-            .content("{\n"
-                + "  \"case_details\": {\n"
-                + "    \"case_data\": {\n"
-                + "      \"solicitorAgreeToReceiveEmails\": \"Yes\"\n"
-                + "    }\n"
-                + "  }\n"
-                + "}\n")
+            .content(prepareBodyWithSolicitorAgreedReceiveEmails("Yes"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
@@ -114,13 +118,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     public void shouldNotSendSolicitorEmailWhenNotAgreed() throws Exception {
 
         mvc.perform(post(HEARING_DOCUMENT_CALLBACK_URL)
-            .content("{\n"
-                + "  \"case_details\": {\n"
-                + "    \"case_data\": {\n"
-                + "      \"solicitorAgreeToReceiveEmails\": \"No\"\n"
-                + "    }\n"
-                + "  }\n"
-                + "}\n")
+            .content(prepareBodyWithSolicitorAgreedReceiveEmails("No"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
