@@ -51,14 +51,15 @@ public class BulkPrintService extends AbstractDocumentService {
         List<BulkPrintDocument> uploadOrder = uploadOrder(caseDetails.getData());
 
         if (!approvedOrderCollection.isEmpty()) {
-            log.info("Sending Approved Order Collections for Bulk Print.");
+            log.info("Sending Approved Order Collections for Bulk Print.: {}", approvedOrderCollection);
             bulkPrintDocuments.addAll(approvedOrderCollection);
         } else if (!uploadOrder.isEmpty()) {
-            log.info("Sending Upload Order Collections for Bulk Print.");
+            log.info("Sending Upload Order Collections for Bulk Print: {}", uploadOrder);
             bulkPrintDocuments.addAll(uploadOrder);
         }
 
-        log.info("{} Order documents including cover sheet have been sent bulk print.", bulkPrintDocuments.size());
+        log.info("{} Order documents (including cover sheet) have been sent to bulk print.", bulkPrintDocuments.size());
+        log.info("Documents sent to Bulk Print: {}", bulkPrintDocuments);
 
         return bulkPrint(
             BulkPrintRequest.builder()
@@ -82,13 +83,14 @@ public class BulkPrintService extends AbstractDocumentService {
     }
 
     List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
-        log.info("Extracting 'approvedOrderCollection' from case data for bulk print.");
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         List<Map> documentList = ofNullable(data.get("approvedOrderCollection"))
             .map(i -> (List<Map>) i)
             .orElse(new ArrayList<>());
 
         if (documentList.size() > 0) {
+            log.info("Extracting 'approvedOrderCollection' from case data for bulk print.");
+
             Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get(VALUE));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "orderLetter"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, CONSENT_ORDER));
@@ -101,6 +103,8 @@ public class BulkPrintService extends AbstractDocumentService {
 
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "pensionDocuments",
                 "uploadedDocument"));
+        } else {
+            log.info("Failed to extract 'approvedOrderCollection' from case data for bulk print as document list was empty.");
         }
 
         return bulkPrintDocuments;

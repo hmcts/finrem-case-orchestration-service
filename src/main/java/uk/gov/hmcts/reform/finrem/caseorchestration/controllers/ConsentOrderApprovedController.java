@@ -52,7 +52,7 @@ public class ConsentOrderApprovedController implements BaseController {
     private ObjectMapper mapper = new ObjectMapper();
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles 'Consent Order Approved' generation. Serves as a callback from CCD")
+    @ApiOperation(value = "'Consent Order Approved' callback handler. Notifies users by email or bulk print letter")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
@@ -73,13 +73,20 @@ public class ConsentOrderApprovedController implements BaseController {
         List<PensionCollectionData> pensionDocs = getPensionDocuments(caseData);
 
         if (!isEmpty(latestConsentOrder)) {
+            log.info("Latest consent order is not empty");
             CaseDocument approvedConsentOrderLetter = service.generateApprovedConsentOrderLetter(caseDetails, authToken);
             CaseDocument consentOrderAnnexStamped = service.annexStampDocument(latestConsentOrder, authToken);
             CaseDocument approvedConsentOrderNotificationLetter = null;
+
+            log.info("isApprovedConsentOrderNotificationLetterEnabled toggle set to: {}",
+                featureToggleService.isApprovedConsentOrderNotificationLetterEnabled());
+            log.info("isPaperApplication set to: {}", isPaperApplication(caseData));
+
             if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled() && isPaperApplication(caseData)) {
                 approvedConsentOrderNotificationLetter = service.generateApprovedConsentOrderNotificationLetter(caseDetails, authToken);
 
                 log.info("Approved Consent Order Notification Letter Feature Toggled is Enabled");
+                log.info("Case is Paper Case");
                 log.info("consentNotificationLetter= {}, letter= {}, consentOrderAnnexStamped = {}",
                     approvedConsentOrderNotificationLetter, approvedConsentOrderLetter, consentOrderAnnexStamped);
             }
@@ -89,11 +96,13 @@ public class ConsentOrderApprovedController implements BaseController {
                 .consentOrder(consentOrderAnnexStamped);
 
             if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
+                log.info("Adding approvedConsentOrderNotificationLetter to approvedOrderBuilder");
                 approvedOrderBuilder.consentOrderApprovedNotificationLetter(approvedConsentOrderNotificationLetter);
             }
 
             ApprovedOrder approvedOrder = approvedOrderBuilder.build();
             if (!isEmpty(pensionDocs)) {
+                log.info("Pension Documents not empty for case - stamping Pension Documents");
                 List<PensionCollectionData> stampedPensionDocs = service.stampPensionDocuments(pensionDocs, authToken);
                 log.info("Generated StampedPensionDocs = {}", stampedPensionDocs);
                 approvedOrder.setPensionDocuments(stampedPensionDocs);
@@ -110,6 +119,8 @@ public class ConsentOrderApprovedController implements BaseController {
             cleanupCaseDataBeforeSubmittingToCcd(caseDetails);
 
             log.info("Successfully generated documents for 'Consent Order Approved'");
+        } else {
+            log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty");
         }
 
         return ResponseEntity.ok(
