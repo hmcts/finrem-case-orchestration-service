@@ -53,6 +53,7 @@ public class BulkPrintService extends AbstractDocumentService {
 
         if (!approvedOrderCollection.isEmpty()) {
             log.info("Sending Approved Order Collections for Bulk Print.: {}", approvedOrderCollection);
+
             bulkPrintDocuments.addAll(approvedOrderCollection);
         } else if (!uploadOrder.isEmpty()) {
             log.info("Sending Upload Order Collections for Bulk Print: {}", uploadOrder);

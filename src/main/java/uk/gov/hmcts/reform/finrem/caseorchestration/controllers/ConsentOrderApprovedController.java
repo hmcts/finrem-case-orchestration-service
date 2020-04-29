@@ -74,12 +74,14 @@ public class ConsentOrderApprovedController implements BaseController {
 
         if (!isEmpty(latestConsentOrder)) {
             log.info("Latest consent order is not empty");
+
             CaseDocument approvedConsentOrderLetter = service.generateApprovedConsentOrderLetter(caseDetails, authToken);
             CaseDocument consentOrderAnnexStamped = service.annexStampDocument(latestConsentOrder, authToken);
             CaseDocument approvedConsentOrderNotificationLetter = null;
 
             log.info("isApprovedConsentOrderNotificationLetterEnabled toggle set to: {}",
                 featureToggleService.isApprovedConsentOrderNotificationLetterEnabled());
+
             log.info("isPaperApplication set to: {}", isPaperApplication(caseData));
 
             if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled() && isPaperApplication(caseData)) {
@@ -105,6 +107,7 @@ public class ConsentOrderApprovedController implements BaseController {
 
             if (!isEmpty(pensionDocs)) {
                 log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder");
+
                 List<PensionCollectionData> stampedPensionDocs = service.stampPensionDocuments(pensionDocs, authToken);
                 log.info("Generated StampedPensionDocs = {}", stampedPensionDocs);
                 approvedOrder.setPensionDocuments(stampedPensionDocs);
