@@ -45,6 +45,12 @@ public abstract class BaseControllerTest extends BaseTest {
                 .getResource("/fixtures/pba-validate.json").toURI()));
     }
 
+    void doValidCaseDataSetUpForPaperApplication() throws IOException, URISyntaxException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/bulk-print-paper-application.json").toURI()));
+    }
+
     void doMissingLatestConsentOrder() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()

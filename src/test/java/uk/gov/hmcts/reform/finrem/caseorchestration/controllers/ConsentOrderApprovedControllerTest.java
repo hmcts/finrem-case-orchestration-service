@@ -110,9 +110,27 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk());
         assertLetter(result);
         assertConsentOrder(result);
-        if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
-            assertConsentOrderNotificationLetter(result);
-        }
+        assertPensionDocs(result);
+    }
+
+    @Test
+    public void consentOrderApprovedSuccessForPaperApplication() throws Exception {
+        doValidCaseDataSetUpForPaperApplication();
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
+        whenAnnexStampingDocument().thenReturn(caseDocument());
+        whenStampingDocument().thenReturn(caseDocument());
+        whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
+
+        ResultActions result = mvc.perform(post(endpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        assertLetter(result);
+        assertConsentOrder(result);
+        assertConsentOrderNotificationLetter(result);
         assertPensionDocs(result);
     }
 
