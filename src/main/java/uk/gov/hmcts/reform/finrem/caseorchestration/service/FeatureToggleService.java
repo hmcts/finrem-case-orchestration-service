@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.HWF_SUCCESSFUL_NOTIFICATION_LETTER;
 
 @Service
-@ConfigurationProperties(prefix = "feature-toggle")
+@ConfigurationProperties(prefix = "feature")
 @Configuration
 @Getter
 public class FeatureToggleService {
