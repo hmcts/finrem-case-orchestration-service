@@ -43,6 +43,7 @@ public class BulkPrintService extends AbstractDocumentService {
 
     public UUID sendOrdersForBulkPrint(final CaseDocument coverSheet, final CaseDetails caseDetails) {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        log.info("Sending Orders for Bulk Print.");
 
         bulkPrintDocuments.add(
             BulkPrintDocument.builder().binaryFileUrl(coverSheet.getDocumentBinaryUrl()).build());
@@ -99,6 +100,9 @@ public class BulkPrintService extends AbstractDocumentService {
                 bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrderApprovedNotificationLetter"));
                 log.info("Approved Consent Order Notification Letter Feature Toggled is Enabled");
                 log.info("Adding consentOrderApprovedNotificationLetter document to BulkPrint documents list");
+            } else {
+                log.info("isApprovedConsentOrderNotificationLetterEnabled toggled off"
+                    + " - not sending consentOrderApprovedNotificationLetter to bulk print");
             }
 
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "pensionDocuments",

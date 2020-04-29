@@ -83,10 +83,11 @@ public class ConsentOrderApprovedController implements BaseController {
             log.info("isPaperApplication set to: {}", isPaperApplication(caseData));
 
             if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled() && isPaperApplication(caseData)) {
+                log.info("isApprovedConsentOrderNotificationLetterEnabled is toggled on");
+                log.info("Case is Paper Case");
+
                 approvedConsentOrderNotificationLetter = service.generateApprovedConsentOrderNotificationLetter(caseDetails, authToken);
 
-                log.info("Approved Consent Order Notification Letter Feature Toggled is Enabled");
-                log.info("Case is Paper Case");
                 log.info("consentNotificationLetter= {}, letter= {}, consentOrderAnnexStamped = {}",
                     approvedConsentOrderNotificationLetter, approvedConsentOrderLetter, consentOrderAnnexStamped);
             }
