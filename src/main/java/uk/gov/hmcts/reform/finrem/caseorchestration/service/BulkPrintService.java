@@ -111,6 +111,7 @@ public class BulkPrintService extends AbstractDocumentService {
             log.info("Failed to extract 'approvedOrderCollection' from case data for bulk print as document list was empty.");
         }
 
+        log.info("Documents inside 'approvedOrderCollection' are: {}", bulkPrintDocuments);
         return bulkPrintDocuments;
     }
 
