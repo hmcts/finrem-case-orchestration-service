@@ -61,7 +61,7 @@ public class NotificationsControllerTest {
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendHWFSuccessfulConfirmationEmail(any(CallbackRequest.class));
+                .sendConsentedHWFSuccessfulConfirmationEmail(any(CallbackRequest.class));
     }
 
     @Test

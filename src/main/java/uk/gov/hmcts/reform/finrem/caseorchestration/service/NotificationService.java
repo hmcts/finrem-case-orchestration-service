@@ -53,7 +53,7 @@ public class NotificationService {
 
     private NotificationRequest notificationRequest;
 
-    public void sendHWFSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
+    public void sendConsentedHWFSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
         sendNotificationEmail(callbackRequest, uri);
     }
@@ -79,7 +79,12 @@ public class NotificationService {
     }
 
     public void sendContestedHwfSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
-        URI uri = buildUri(notificationServiceConfiguration.getConsentedHwfSuccessful());
+        URI uri = buildUri(notificationServiceConfiguration.getContestedHwfSuccessful());
+        sendNotificationEmail(callbackRequest, uri);
+    }
+
+    public void sendApplicationIssuedEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getApplicationIssued());
         sendNotificationEmail(callbackRequest, uri);
     }
 

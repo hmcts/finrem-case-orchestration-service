@@ -23,7 +23,7 @@ import java.util.Map;
 import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -160,7 +160,7 @@ public class UpdateConsentedCaseController implements BaseController {
         caseData.put("solicitorPhone", null);
         caseData.put("solicitorEmail", null);
         caseData.put("solicitorDXnumber", null);
-        caseData.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, null);
+        caseData.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, null);
     }
 
     private void removeApplicantAddress(Map<String, Object> caseData) {

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import javax.validation.constraints.NotNull;
@@ -23,6 +24,7 @@ import java.util.Map;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -32,8 +34,12 @@ public class ContestedDocumentController implements BaseController {
     @Autowired
     private OnlineFormDocumentService service;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @PostMapping(path = "/documents/generate-contested-mini-form-a", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles Contested Mini Form A generation. Serves as a callback from CCD")
+    @ApiOperation(value = "Handles Contested Mini Form A generation and 'Application issued' email to Applicant Solicitor."
+        + "Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
@@ -42,12 +48,16 @@ public class ContestedDocumentController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateContestedMiniFormA(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
-
         log.info("Received request to generate Contested Mini Form A for Case ID : {}", callback.getCaseDetails().getId());
 
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         CaseDocument document = service.generateContestedMiniFormA(authorisationToken, callback.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
+
+        if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
+            notificationService.sendApplicationIssuedEmail(callback);
+        }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }

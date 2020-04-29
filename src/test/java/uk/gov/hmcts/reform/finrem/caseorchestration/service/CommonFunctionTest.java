@@ -18,7 +18,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullName;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isAmendedConsentOrderType;
@@ -125,7 +125,7 @@ public class CommonFunctionTest {
     @Test
     public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnTrueWhenApplicantRepresentedIsYes() {
         Map<String, Object> data = new HashMap<>();
-        data.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, YES_VALUE);
+        data.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
 
         assertThat(isApplicantSolicitorAgreeToReceiveEmails(data), is(true));
     }
@@ -133,7 +133,7 @@ public class CommonFunctionTest {
     @Test
     public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnFalseWhenApplicantRepresentedIsNo() {
         Map<String, Object> data = new HashMap<>();
-        data.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS, null);
+        data.put(SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, null);
 
         assertThat(isApplicantSolicitorAgreeToReceiveEmails(data), is(false));
     }
