@@ -72,4 +72,9 @@ public class CommonFunction {
     public static boolean isAmendedConsentOrderType(RespondToOrderData respondToOrderData) {
         return AMENDED_CONSENT_ORDER.equalsIgnoreCase(respondToOrderData.getRespondToOrder().getDocumentType());
     }
+
+    public static boolean hasSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData) {
+        return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData
+            .get(SOLICITOR_AGREE_TO_RECEIVE_EMAILS)));
+    }
 }

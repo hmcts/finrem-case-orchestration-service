@@ -14,10 +14,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.CommonConditions.hasSolicitorAgreedToReceiveEmails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.hasSolicitorAgreedToReceiveEmails;
 
 @RestController
 @Slf4j
@@ -41,7 +43,7 @@ public class NotificationsController implements BaseController {
                 log.info("Sending Consented HWF Successful email notification to Solicitor");
                 notificationService.sendHWFSuccessfulConfirmationEmail(callbackRequest);
             }
-        } else if (hasSolicitorAgreedToReceiveEmails(caseData)) {
+        } else if (hasApplicantSolicitorAgreedToReceiveEmails(caseData)) {
             log.info("Sending Contested HWF Successful email notification to Solicitor");
             notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
         }
@@ -116,4 +118,8 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
+    private boolean hasApplicantSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData) {
+        return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData
+            .get("applicantSolicitorConsentForEmails")));
+    }
 }
