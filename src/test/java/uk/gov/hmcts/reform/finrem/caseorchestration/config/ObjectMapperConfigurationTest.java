@@ -10,8 +10,8 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -41,7 +41,7 @@ public class ObjectMapperConfigurationTest {
 
         ApprovedOrder approvedOrder = ApprovedOrder.builder().build();
         String approvedOrderJson = objectMapperConfiguration.objectMapper(Jackson2ObjectMapperBuilder.json()).writeValueAsString(approvedOrder);
-        assertThat(approvedOrderJson, not(containsString("\"consentOrderApprovedNotificationLetter\":null")));
+        assertThat(approvedOrderJson, hasNoJsonPath("consentOrderApprovedNotificationLetter"));
     }
 
     @Test
@@ -50,6 +50,6 @@ public class ObjectMapperConfigurationTest {
 
         ApprovedOrder approvedOrder = ApprovedOrder.builder().build();
         String approvedOrderJson = objectMapperConfiguration.objectMapper(Jackson2ObjectMapperBuilder.json()).writeValueAsString(approvedOrder);
-        assertThat(approvedOrderJson, containsString("\"consentOrderApprovedNotificationLetter\":null"));
+        assertThat(approvedOrderJson, hasJsonPath("consentOrderApprovedNotificationLetter"));
     }
 }
