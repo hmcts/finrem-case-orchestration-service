@@ -31,7 +31,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/consent-order-not-approved";
     private static final String END_POINT_CONSENT_ORDER_AVAILABLE = "http://localhost:8086/notify/consent-order-available";
     private static final String END_POINT_CONTESTED_HWF_SUCCESSFUL = "http://localhost:8086/notify/contested/hwf-successful";
-    private static final String END_POINT_APPLICATION_ISSUED = "http://localhost:8086/notify/contested/application-issued";
+    private static final String END_POINT_CONTESTED_APPLICATION_ISSUED = "http://localhost:8086/notify/contested/application-issued";
 
     @Autowired
     private NotificationService notificationService;
@@ -151,16 +151,16 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendApplicationIssuedEmail() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_APPLICATION_ISSUED))
+    public void sendContestedApplicationIssuedEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedApplicationIssuedEmail(callbackRequest);
     }
 
     @Test
-    public void throwExceptionWhenApplicationIssuedEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_APPLICATION_ISSUED))
+    public void throwExceptionWhenContestedApplicationIssuedEmailIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {

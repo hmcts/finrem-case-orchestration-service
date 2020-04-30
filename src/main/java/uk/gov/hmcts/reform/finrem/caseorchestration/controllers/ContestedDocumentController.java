@@ -55,7 +55,7 @@ public class ContestedDocumentController implements BaseController {
         caseData.put(MINI_FORM_A, document);
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
-            log.info("Sending Consented Application Issued email notification to Applicant Solicitor");
+            log.info("Sending Contested Application Issued email notification to Applicant Solicitor");
             notificationService.sendContestedApplicationIssuedEmail(callback);
         }
 
