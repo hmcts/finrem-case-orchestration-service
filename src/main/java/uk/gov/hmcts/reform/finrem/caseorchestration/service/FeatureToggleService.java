@@ -27,7 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.HWF_SU
 public class FeatureToggleService {
 
     @NotNull
-    Map<String, String> toggle = new HashMap<>();
+    private Map<String, String> toggle = new HashMap<>();
 
     private boolean isFeatureEnabled(Features feature) {
         return Optional.ofNullable(toggle.get(feature.getName()))
