@@ -121,7 +121,7 @@ public class NotificationService {
         notificationRequest.setName(Objects.toString(mapOfCaseData.get(solicitorName)));
         notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorEmail)));
 
-        if(caseType.equals(CONTESTED)){ //court info is not required in consented notifications
+        if (caseType.equals(CONTESTED)) { //court info is not required in consented notifications
             Object allocatedCourtList = mapOfCaseData.get(ALLOCATED_COURT_LIST);
             String selectedCourt = getSelectedCourt(allocatedCourtList);
 
@@ -189,7 +189,7 @@ public class NotificationService {
     private String getSouthEastFRC(Map allocatedCourtMap) {
         String southEastList = (String) allocatedCourtMap.get("southEastList");
         if (KENTFRC.equalsIgnoreCase(southEastList)) {
-                return KENTFRC;
+            return KENTFRC;
         }
         return EMPTY;
     }
