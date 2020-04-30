@@ -120,11 +120,11 @@ public class NotificationService {
         notificationRequest.setSolicitorReferenceNumber(Objects.toString(mapOfCaseData.get(solicitorReference)));
         notificationRequest.setName(Objects.toString(mapOfCaseData.get(solicitorName)));
         notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorEmail)));
+        notificationRequest.setCaseType(caseType);
 
-        if (caseType.equals(CONTESTED)) { //court info is not required in consented notifications
+        if (CONTESTED.equalsIgnoreCase(caseType)) {
             Object allocatedCourtList = mapOfCaseData.get(ALLOCATED_COURT_LIST);
             String selectedCourt = getSelectedCourt(allocatedCourtList);
-
             notificationRequest.setSelectedCourt(selectedCourt);
 
             log.info("selectedCourt is  {} for case Id : {}", selectedCourt,
@@ -132,7 +132,6 @@ public class NotificationService {
         }
         return notificationRequest;
     }
-
 
     private URI buildUri(String endPoint) {
         return fromHttpUrl(notificationServiceConfiguration.getUrl()
@@ -147,7 +146,6 @@ public class NotificationService {
         headers.add("Content-Type", "application/json");
         return headers;
     }
-
 
     private boolean isConsentedApplication(Map<String, Object> caseData) {
         return isNotEmpty((String) caseData.get(D81_QUESTION));
