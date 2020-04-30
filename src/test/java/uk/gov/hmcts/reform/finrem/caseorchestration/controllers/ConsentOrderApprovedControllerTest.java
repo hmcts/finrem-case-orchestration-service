@@ -22,7 +22,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -114,32 +113,29 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void consentOrderApprovedSuccessForPaperApplication() throws Exception {
-        if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
-            doValidCaseDataSetUpForPaperApplication();
-            whenServiceGeneratesDocument().thenReturn(caseDocument());
-            whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
-            whenAnnexStampingDocument().thenReturn(caseDocument());
-            whenStampingDocument().thenReturn(caseDocument());
-            whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
+    public void consentOrderApprovedSuccessForPaperApplicationIfConsentOrderApprovedNotificationLetterToggledOff() throws Exception {
+        doValidCaseDataSetUpForPaperApplication();
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
+        whenAnnexStampingDocument().thenReturn(caseDocument());
+        whenStampingDocument().thenReturn(caseDocument());
+        whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
+        when(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()).thenReturn(false);
 
-            ResultActions result = mvc.perform(post(endpoint())
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE));
+        ResultActions result = mvc.perform(post(endpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
 
-            result.andExpect(status().isOk());
-            assertLetter(result);
-            assertConsentOrder(result);
-            assertConsentOrderNotificationLetter(result);
-            assertPensionDocs(result);
-        }
+        result.andExpect(status().isOk());
+        assertLetter(result);
+        assertConsentOrder(result);
+        assertPensionDocs(result);
     }
 
     @Test
-    public void shouldTriggerConsentOrderApprovedNotificationLetterIfIsPaperApplication() throws Exception {
-        setTestCaseDataFromResource("/fixtures/bulkprint/bulk-print-paper-application.json");
-
+    public void consentOrderApprovedSuccessForPaperApplicationIfConsentOrderApprovedNotificationLetterToggledOn() throws Exception {
+        doValidCaseDataSetUpForPaperApplication();
         whenServiceGeneratesDocument().thenReturn(caseDocument());
         whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
@@ -152,10 +148,11 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE));
 
-        verify(service, times(1)).generateApprovedConsentOrderNotificationLetter(any(), any());
-
         result.andExpect(status().isOk());
+        assertLetter(result);
+        assertConsentOrder(result);
         assertConsentOrderNotificationLetter(result);
+        assertPensionDocs(result);
     }
 
     @Test
@@ -174,50 +171,11 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE));
 
+        result.andExpect(status().isOk());
+        assertLetter(result);
+        assertConsentOrder(result);
+        assertPensionDocs(result);
         verify(service, never()).generateApprovedConsentOrderNotificationLetter(any(), any());
-        result.andExpect(status().isOk());
-    }
-
-    @Test
-    public void shouldSendApprovedConsentOrderNotificationLetterWhenFeatureToggleIsEnabled() throws Exception {
-
-        setTestCaseDataFromResource("/fixtures/bulkprint/bulk-print-paper-application.json");
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
-        whenStampingDocument().thenReturn(caseDocument());
-        whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
-        when(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()).thenReturn(true);
-
-        ResultActions result = mvc.perform(post(endpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE));
-
-        verify(service, times(1)).generateApprovedConsentOrderNotificationLetter(any(), any());
-
-        result.andExpect(status().isOk());
-        assertConsentOrderNotificationLetter(result);
-    }
-
-    @Test
-    public void shouldNotSendApprovedConsentOrderNotificationLetterWhenFeatureToggleIsNotEnabled() throws Exception {
-
-        doValidCaseDataSetUp();
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
-        whenStampingDocument().thenReturn(caseDocument());
-        whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
-        when(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()).thenReturn(false);
-
-        ResultActions result = mvc.perform(post(endpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE));
-
-        verify(service, never()).generateApprovedConsentOrderNotificationLetter(any(), any());
-        result.andExpect(status().isOk());
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
