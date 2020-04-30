@@ -84,23 +84,22 @@ public class ConsentOrderApprovedController implements BaseController {
 
             log.info("isPaperApplication set to: {}", isPaperApplication(caseData));
 
-            if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled() && isPaperApplication(caseData)) {
-                log.info("isApprovedConsentOrderNotificationLetterEnabled is toggled on");
-                log.info("Case is Paper Case");
-
-                approvedConsentOrderNotificationLetter = service.generateApprovedConsentOrderNotificationLetter(caseDetails, authToken);
-
-                log.info("consentNotificationLetter= {}, letter= {}, consentOrderAnnexStamped = {}",
-                    approvedConsentOrderNotificationLetter, approvedConsentOrderLetter, consentOrderAnnexStamped);
-            }
-
             ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
                 .orderLetter(approvedConsentOrderLetter)
                 .consentOrder(consentOrderAnnexStamped);
 
             if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
-                log.info("Adding approvedConsentOrderNotificationLetter to approvedOrderBuilder");
-                approvedOrderBuilder.consentOrderApprovedNotificationLetter(approvedConsentOrderNotificationLetter);
+                log.info("isApprovedConsentOrderNotificationLetterEnabled is toggled on");
+
+                if (isPaperApplication(caseData)) {
+                    approvedConsentOrderNotificationLetter = service.generateApprovedConsentOrderNotificationLetter(caseDetails, authToken);
+
+                    log.info("consentNotificationLetter= {}, letter= {}, consentOrderAnnexStamped = {}",
+                        approvedConsentOrderNotificationLetter, approvedConsentOrderLetter, consentOrderAnnexStamped);
+
+                    log.info("Adding approvedConsentOrderNotificationLetter to approvedOrderBuilder");
+                    approvedOrderBuilder.consentOrderApprovedNotificationLetter(approvedConsentOrderNotificationLetter);
+                }
             }
 
             ApprovedOrder approvedOrder = approvedOrderBuilder.build();

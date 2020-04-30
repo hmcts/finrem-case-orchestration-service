@@ -145,7 +145,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
-        // TODO: Remove line below once isApprovedConsentOrderNotificationLetterEnabled FT is removed
         when(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()).thenReturn(true);
 
         ResultActions result = mvc.perform(post(endpoint())
@@ -161,7 +160,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotTriggerConsentOrderApprovedNotificationLetterIfIsNotPaperApplication() throws Exception {
-
         doValidCaseDataSetUp();
 
         whenServiceGeneratesDocument().thenReturn(caseDocument());
@@ -169,7 +167,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
-        // TODO: Remove line below once isApprovedConsentOrderNotificationLetterEnabled FT is removed
         when(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()).thenReturn(true);
 
         ResultActions result = mvc.perform(post(endpoint())

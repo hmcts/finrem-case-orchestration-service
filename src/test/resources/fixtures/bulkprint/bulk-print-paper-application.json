@@ -7,8 +7,8 @@
     "case_data": {
       "state": "applicationDrafted",
       "PBANumber": "PBA123",
-      "paperApplication": "Yes",
       "d81Question": "No",
+      "paperApplication": "Yes",
       "PBAreference": "ABCD",
       "consentOrder": {
         "document_url":"http://dm-store:8080/documents/0ddb806e-54f5-4780-96d5-37cb7869a63a",

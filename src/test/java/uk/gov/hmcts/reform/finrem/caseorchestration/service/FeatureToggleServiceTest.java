@@ -13,48 +13,36 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.APPROV
 
 public class FeatureToggleServiceTest {
 
-    private FeatureToggleService featureToggleService = new FeatureToggleService();
-
-    // TODO: Will fix these tests
-
-    @Test
-    public void givenToggleEnabled_thenReturnTrue() {
-        assertThat(featureToggleService.isHwfSuccessfulNotificationLetterEnabled(), is(false));
-    }
-
-    @Test
-    public void givenToggleFalse_thenReturnFalse() {
-        assertThat(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled(), is(false));
-    }
+    private FeatureToggleService classToTest = new FeatureToggleService();
 
     @Test
     public void isApprovedConsentOrderNotificationLetterEnabledReturnsTrue() {
-        assertThat(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled(), is(false));
+        assertThat(classToTest.isApprovedConsentOrderNotificationLetterEnabled(), is(false));
     }
 
     @Test
     public void isHwfSuccessfulNotificationLetterEnabledReturnTrue() {
-        assertThat(featureToggleService.isHwfSuccessfulNotificationLetterEnabled(), is(false));
+        assertThat(classToTest.isHwfSuccessfulNotificationLetterEnabled(), is(false));
     }
 
     @Test
     public void isAssignedToJudgeNotificationLetterEnabledReturnTrue() {
-        assertThat(featureToggleService.isAssignedToJudgeNotificationLetterEnabled(), is(false));
+        assertThat(classToTest.isAssignedToJudgeNotificationLetterEnabled(), is(false));
     }
 
     @Test
     public void getFieldsIgnoredDuringSerialisationEmptyWhenFeaturesEnabled() {
-        featureToggleService.toggle.put(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER.getName(), Boolean.TRUE.toString());
+        classToTest.toggle.put(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER.getName(), Boolean.TRUE.toString());
 
-        assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(),
+        assertThat(classToTest.getFieldsIgnoredDuringSerialisation(),
             not(hasEntry(equalTo(ApprovedOrder.class), containsInAnyOrder("consentOrderApprovedNotificationLetter"))));
     }
 
     @Test
     public void getFieldsIgnoredDuringSerialisationContainsElementsWhenFeaturesDisabled() {
-        featureToggleService.toggle.put(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER.getName(), Boolean.FALSE.toString());
+        classToTest.toggle.put(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER.getName(), Boolean.FALSE.toString());
 
-        assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(),
+        assertThat(classToTest.getFieldsIgnoredDuringSerialisation(),
             hasEntry(equalTo(ApprovedOrder.class), containsInAnyOrder("consentOrderApprovedNotificationLetter")));
     }
 }
