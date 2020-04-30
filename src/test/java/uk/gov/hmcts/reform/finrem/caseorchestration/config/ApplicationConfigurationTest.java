@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.config;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -25,10 +24,4 @@ public class ApplicationConfigurationTest {
     public void createRestTemplate() {
         assertThat(applicationConfiguration.restTemplate(), is(notNullValue()));
     }
-
-    @Test
-    public void createObjectMapper() {
-        assertThat(applicationConfiguration.objectMapper(Jackson2ObjectMapperBuilder.json()), is(notNullValue()));
-    }
-
 }
