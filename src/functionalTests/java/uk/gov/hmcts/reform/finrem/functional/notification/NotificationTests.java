@@ -24,7 +24,11 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.hwf-success.api}")
     private String hwfSuccessfulApiUri;
 
+    @Value("${cos.notification.contested-application-issued.api}")
+    private String contestedApplicationIssuedApiUri;
+
     private String consentedDir = "/json/consented/";
+    private String contestedDir = "/json/contested/";
 
     @Test
     public void verifyNotifyAssignToJudgeTestIsOkay() {
@@ -59,5 +63,12 @@ public class NotificationTests extends IntegrationTestBase {
 
         utils.validatePostSuccess(hwfSuccessfulApiUri,
                 "ccd-request-with-solicitor-hwfSuccessfulEmail1.json", consentedDir);
+    }
+
+    @Test
+    public void verifyNotifyContestedApplicationIssuedTestIsOkay() {
+
+        utils.validatePostSuccess(contestedApplicationIssuedApiUri,
+            "ccd-request-with-solicitor-applicationIssued1.json", contestedDir);
     }
 }

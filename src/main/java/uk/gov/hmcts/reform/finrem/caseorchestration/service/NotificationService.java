@@ -83,8 +83,8 @@ public class NotificationService {
         sendNotificationEmail(callbackRequest, uri);
     }
 
-    public void sendApplicationIssuedEmail(CallbackRequest callbackRequest) {
-        URI uri = buildUri(notificationServiceConfiguration.getApplicationIssued());
+    public void sendContestedApplicationIssuedEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getContestedApplicationIssued());
         sendNotificationEmail(callbackRequest, uri);
     }
 

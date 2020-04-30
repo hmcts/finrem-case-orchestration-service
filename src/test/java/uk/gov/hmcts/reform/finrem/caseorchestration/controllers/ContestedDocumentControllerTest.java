@@ -45,7 +45,7 @@ public class ContestedDocumentControllerTest extends MiniFormAControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(notificationService, times(1)).sendApplicationIssuedEmail(any());
+        verify(notificationService, times(1)).sendContestedApplicationIssuedEmail(any());
     }
 
     @Test
