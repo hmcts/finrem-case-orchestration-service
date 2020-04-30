@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -26,6 +27,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.HWF_SU
 @Getter
 public class FeatureToggleService {
 
+    public static final Map<Class, List<String>> APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER_FEATURE_FIELDS
+        = ImmutableMap.of(ApprovedOrder.class, asList("consentOrderApprovedNotificationLetter"));
+
     @NotNull
     private Map<String, String> toggle = new HashMap<>();
 
@@ -49,14 +53,15 @@ public class FeatureToggleService {
 
     /**
      * Given runtime feature toggle status, returns fields that should be ignored during serialisation (i.e. not
-     * serialised to JSON)
+     * serialised to JSON).
+     * All CaseFields in -nonprod files in CCD config repos should be added here to feature toggle serialisation.
      * @return a map with Class of ignored fields as key and field names as value
      */
     public Map<Class, List<String>> getFieldsIgnoredDuringSerialisation() {
         Map<Class, List<String>> ignoredFields = Maps.newHashMap();
 
         if (!isApprovedConsentOrderNotificationLetterEnabled()) {
-            ignoredFields.put(ApprovedOrder.class, asList("consentOrderApprovedNotificationLetter"));
+            ignoredFields.putAll(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER_FEATURE_FIELDS);
         }
 
         return ignoredFields;
