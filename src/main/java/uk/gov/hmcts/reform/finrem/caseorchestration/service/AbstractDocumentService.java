@@ -34,7 +34,7 @@ public abstract class AbstractDocumentService {
 
         Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails);
 
-        Document miniFormA =
+        Document generatedPdf =
                 documentClient.generatePdf(
                         DocumentGenerationRequest.builder()
                                 .template(template)
@@ -43,7 +43,7 @@ public abstract class AbstractDocumentService {
                                 .build(),
                         authorisationToken);
 
-        return caseDocument(miniFormA);
+        return caseDocument(generatedPdf);
     }
 
     UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {

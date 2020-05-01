@@ -14,6 +14,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.io.File;
@@ -23,9 +26,13 @@ import java.net.URISyntaxException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
@@ -37,12 +44,19 @@ public class NotificationsControllerTest {
     private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/consent-order-available";
     private static final String CCD_REQUEST_JSON = "/fixtures/model/ccd-request.json";
     private static final String CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON = "/fixtures/ccd-request-with-solicitor-email-consent.json";
+    private static final String BULK_PRINT_PAPER_APPLICATION_JSON = "/fixtures/bulkprint/bulk-print-paper-application.json";
 
     @Autowired
     private WebApplicationContext applicationContext;
 
     @MockBean
     private NotificationService notificationService;
+
+    @MockBean
+    private FeatureToggleService featureToggleService;
+
+    @MockBean
+    private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
     private MockMvc mockMvc;
     private JsonNode requestContent;
@@ -76,26 +90,60 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void sendAssignToJudgeConfirmationEmail() throws Exception {
+    public void sendAssignToJudgeConfirmationEmailIfDigitalCase() throws Exception {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
         mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verify(notificationService, times(1))
                 .sendAssignToJudgeConfirmationEmail(any(CallbackRequest.class));
+        verifyNoInteractions(assignedToJudgeDocumentService);
     }
 
     @Test
     public void shouldNotSendAssignToJudgeConfirmationEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
+    }
+
+    @Test
+    public void sendAssignToJudgeNotificationLetterIfIsConsentedAndIsPaperApplication_AndToggledOn() throws Exception {
+        buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
+
+        when(featureToggleService.isAssignedToJudgeNotificationLetterEnabled()).thenReturn(true);
+        mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(assignedToJudgeDocumentService, times(1))
+            .generateAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void shouldNotSendAssignToJudgeNotificationLetterIfIsConsentedAndIsPaperApplication_AndToggledOff() throws Exception {
+        buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
+
+        when(featureToggleService.isAssignedToJudgeNotificationLetterEnabled()).thenReturn(false);
+        mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verifyNoInteractions(assignedToJudgeDocumentService);
+        verifyNoInteractions(notificationService);
     }
 
     @Test
