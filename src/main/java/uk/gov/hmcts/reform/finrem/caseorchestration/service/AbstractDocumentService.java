@@ -92,7 +92,6 @@ public abstract class AbstractDocumentService {
 
     CtscContactDetails buildCtscContactDetails() {
 
-        // move this values to application.properties
         return CtscContactDetails.builder()
             .serviceCentre("Courts and Tribunals Service Centre")
             .careOf("c/o HMCTS Digital Financial Remedy")
