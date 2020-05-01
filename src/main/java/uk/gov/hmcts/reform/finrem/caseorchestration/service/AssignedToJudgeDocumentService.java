@@ -9,15 +9,11 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.LetterAddressHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
 
-import java.io.IOException;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 
-import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
@@ -48,19 +44,20 @@ public class AssignedToJudgeDocumentService extends AbstractDocumentService {
                 config.getApplicationAssignedToJudgeFileName(),
                 config.getApplicationAssignedToJudgeTemplate());
 
-        prepareAssignedToJudgeNotificationLetter(caseDetails);
+        CaseDetails caseDetailsForBulkPrint = prepareAssignedToJudgeNotificationLetter(caseDetails);
+
+        // Will remove once verified
+        log.info("Generating Assigned To Judge Notification Letter with case data: {}", caseDetails.getData());
 
         CaseDocument generatedAssignedToJudgeNotificationLetter =
-            generateDocument(authToken, caseDetails,
+            generateDocument(authToken, caseDetailsForBulkPrint,
                 config.getApplicationAssignedToJudgeTemplate(),
                 config.getApplicationAssignedToJudgeFileName());
-
-        cleanupCaseDataBeforeSubmittingToCcd(caseDetails);
 
         return generatedAssignedToJudgeNotificationLetter;
     }
 
-    private void prepareAssignedToJudgeNotificationLetter(CaseDetails caseDetails) {
+    private CaseDetails prepareAssignedToJudgeNotificationLetter(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         Map addressToSendTo;
 
@@ -95,21 +92,13 @@ public class AssignedToJudgeDocumentService extends AbstractDocumentService {
             caseData.put("letterDate", String.valueOf(LocalDate.now()));
             caseData.put("applicantName", applicantName);
             caseData.put("respondentName", respondentName);
+            caseData.put("ctscContactDetails", buildCtscContactDetails());
 
         } else {
             log.info("Failed to generate Assigned To Judge Notification Letter as not all required address details were present");
             throw new IllegalArgumentException(
                     "Mandatory data missing from address when trying to generate Assigned To Judge Notification Letter");
         }
-    }
-
-    private void cleanupCaseDataBeforeSubmittingToCcd(CaseDetails caseDetails) {
-        // Must remove any added case data as CCD will return an error
-        caseDetails.getData().remove("caseNumber");
-        caseDetails.getData().remove("reference");
-        caseDetails.getData().remove("addressee");
-        caseDetails.getData().remove("letterDate");
-        caseDetails.getData().remove("applicantName");
-        caseDetails.getData().remove("respondentName");
+        return caseDetails;
     }
 }

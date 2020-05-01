@@ -48,6 +48,21 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldSendAssignedToJudgeNotificationLetterForBulkPrint() throws Exception {
+        DocumentConfiguration config = new DocumentConfiguration();
+        config.setApplicationAssignedToJudgeTemplate("test_template");
+        config.setApplicationAssignedToJudgeFileName("test_file");
+
+        when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
+
+        UUID bulkPrintLetterId = bulkPrintService.sendNotificationLetterForBulkPrint(
+            new CaseDocument(), caseDetails());
+
+        assertThat(bulkPrintLetterId, is(letterId));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().size(), is(1));
+    }
+
+    @Test
     public void shouldSendOrdersForBulkPrintForApproved() throws Exception {
         when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 

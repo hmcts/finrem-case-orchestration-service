@@ -26,7 +26,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
@@ -91,6 +90,9 @@ public class NotificationsController implements BaseController {
 
                 // Send notification letter to Bulk Print
                 bulkPrintService.sendNotificationLetterForBulkPrint(assignedToJudgeNotificationLetter, caseDetails);
+
+                // will possibly remove once verified passing in reference works
+                cleanupCaseDataBeforeSubmittingToCcd(caseDetails);
             }
         }
 
@@ -151,5 +153,15 @@ public class NotificationsController implements BaseController {
     private boolean isSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData, String solicitorAgreeToReceiveEmails) {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData
                 .get(solicitorAgreeToReceiveEmails)));
+    }
+
+    private void cleanupCaseDataBeforeSubmittingToCcd(CaseDetails caseDetails) {
+        // Must remove any added case data as CCD will return an error
+        caseDetails.getData().remove("caseNumber");
+        caseDetails.getData().remove("reference");
+        caseDetails.getData().remove("addressee");
+        caseDetails.getData().remove("letterDate");
+        caseDetails.getData().remove("applicantName");
+        caseDetails.getData().remove("respondentName");
     }
 }

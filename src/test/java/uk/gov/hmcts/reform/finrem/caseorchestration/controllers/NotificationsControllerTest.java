@@ -16,6 +16,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -54,6 +55,9 @@ public class NotificationsControllerTest {
 
     @MockBean
     private FeatureToggleService featureToggleService;
+
+    @MockBean
+    private BulkPrintService bulkPrintService;
 
     @MockBean
     private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
@@ -101,6 +105,7 @@ public class NotificationsControllerTest {
         verify(notificationService, times(1))
                 .sendAssignToJudgeConfirmationEmail(any(CallbackRequest.class));
         verifyNoInteractions(assignedToJudgeDocumentService);
+        verifyNoInteractions(bulkPrintService);
     }
 
     @Test
@@ -128,6 +133,8 @@ public class NotificationsControllerTest {
 
         verify(assignedToJudgeDocumentService, times(1))
             .generateAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+        verify(bulkPrintService, times(1))
+            .sendNotificationLetterForBulkPrint(any(),any());
         verifyNoInteractions(notificationService);
     }
 

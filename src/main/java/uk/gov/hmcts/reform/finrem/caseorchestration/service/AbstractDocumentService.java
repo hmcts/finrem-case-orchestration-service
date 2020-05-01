@@ -6,6 +6,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
@@ -87,5 +88,20 @@ public abstract class AbstractDocumentService {
         } catch (IOException e) {
             throw new IllegalStateException();
         }
+    }
+
+    CtscContactDetails buildCtscContactDetails() {
+
+        // move this values to application.properties
+        return CtscContactDetails.builder()
+            .serviceCentre("Courts and Tribunals Service Centre")
+            .careOf("c/o HMCTS Digital Financial Remedy")
+            .poBox("12746")
+            .town("HARLOW")
+            .postcode("CM20 9QZ")
+            .emailAddress("HMCTSFinancialRemedy@justice.gov.uk")
+            .phoneNumber("0300 303 0642")
+            .openingHours("from 8.30am to 5pm")
+            .build();
     }
 }

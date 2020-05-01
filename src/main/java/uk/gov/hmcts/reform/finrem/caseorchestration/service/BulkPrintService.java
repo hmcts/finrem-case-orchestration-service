@@ -42,20 +42,20 @@ public class BulkPrintService extends AbstractDocumentService {
         this.featureToggleService = featureToggleService;
     }
 
-    public void sendNotificationLetterForBulkPrint(final CaseDocument notificationLetter, final CaseDetails caseDetails) {
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+    public UUID sendNotificationLetterForBulkPrint(final CaseDocument notificationLetter, final CaseDetails caseDetails) {
+        List<BulkPrintDocument> notificationLetterList = new ArrayList<>();
         log.info("Sending Notification Letter for Bulk Print.");
 
-        bulkPrintDocuments.add(
+        notificationLetterList.add(
             BulkPrintDocument.builder().binaryFileUrl(notificationLetter.getDocumentBinaryUrl()).build());
 
-        log.info("Notification letter sent to Bulk Print: {}", bulkPrintDocuments);
+        log.info("Notification letter sent to Bulk Print: {}", notificationLetterList);
 
-        bulkPrint(
+        return bulkPrint(
             BulkPrintRequest.builder()
                 .caseId(caseDetails.getId().toString())
                 .letterType("FINANCIAL_REMEDY_PACK")
-                .bulkPrintDocuments(bulkPrintDocuments)
+                .bulkPrintDocuments(notificationLetterList)
                 .build());
     }
 
