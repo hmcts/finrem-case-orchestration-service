@@ -50,4 +50,6 @@ withPipeline(type, product, app) {
     }
 
     enableSlackNotifications('#finrem-dev')
+    enableAksStagingDeployment()
+    disableLegacyDeploymentOnAAT()
 }
