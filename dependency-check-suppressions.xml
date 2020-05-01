@@ -32,7 +32,6 @@
 
     <suppress>
         <cve>CVE-2020-9488</cve>
-        <cve>CWE-79</cve>
     </suppress>
 
     <suppress>
