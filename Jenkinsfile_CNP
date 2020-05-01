@@ -50,9 +50,6 @@ withPipeline(type, product, app) {
     }
 
     enableSlackNotifications('#finrem-dev')
-
-    before('buildinfra:prod') {
-        error('Halting pipeline before PROD.')
-    }
-
+    enableAksStagingDeployment()
+    disableLegacyDeploymentOnAAT()
 }
