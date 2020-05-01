@@ -31,9 +31,19 @@
     </suppress>
 
     <suppress>
+        <cve>CVE-2020-9488</cve>
+        <cve>CWE-79</cve>
+    </suppress>
+
+    <suppress>
         <notes>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</notes>
         <packageUrl regex="true">^pkg:javascript/handlebars\.js@.*$</packageUrl>
         <vulnerabilityName>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</vulnerabilityName>
     </suppress>
 
+    <suppress>
+        <notes>Regex in its jQuery.htmlPrefilter  sometimes may introduce XSS</notes>
+        <packageUrl regex="true">^pkg:javascript/jquery\.js@.*$</packageUrl>
+        <vulnerabilityName>Regex in its jQuery.htmlPrefilter  sometimes may introduce XSS</vulnerabilityName>
+    </suppress>
 </suppressions>
