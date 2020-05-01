@@ -163,5 +163,6 @@ public class NotificationsController implements BaseController {
         caseDetails.getData().remove("letterDate");
         caseDetails.getData().remove("applicantName");
         caseDetails.getData().remove("respondentName");
+        caseDetails.getData().remove("ctscContactDetails");
     }
 }
