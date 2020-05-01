@@ -31,7 +31,26 @@
     </suppress>
 
     <suppress>
+        <notes><![CDATA[
+   only affects log appender over SMTP, seriously who does this...
+   ]]></notes>
         <cve>CVE-2020-9488</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   XSS issue, not relevant in performance tests
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.scala\-lang/scala\-library@.*$</packageUrl>
+        <cpe>cpe:/a:scala-lang:scala</cpe>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   XSS issue, not relevant in performance tests
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.scala\-lang/scala\-library@.*$</packageUrl>
+        <vulnerabilityName>CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')</vulnerabilityName>
     </suppress>
 
     <suppress>
