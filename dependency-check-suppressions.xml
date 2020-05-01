@@ -38,6 +38,14 @@
     </suppress>
 
     <suppress>
+        <notes><![CDATA[
+   XSS issue, not relevant in performance tests
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.scala\-lang/scala\-library@.*$</packageUrl>
+        <cpe>cpe:/a:scala-lang:scala</cpe>
+    </suppress>
+
+    <suppress>
         <notes>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</notes>
         <packageUrl regex="true">^pkg:javascript/handlebars\.js@.*$</packageUrl>
         <vulnerabilityName>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</vulnerabilityName>
