@@ -57,7 +57,6 @@ public class CCDConfigConstant {
     public static final String AMENDED_CONSENT_ORDER_COLLECTION = "amendedConsentOrderCollection";
     public static final String ORDER_REFUSAL_COLLECTION = "orderRefusalCollection";
     public static final String ORDER_REFUSAL_PREVIEW_COLLECTION = "orderRefusalPreviewDocument";
-    public static final String ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER = "assignedToJudgeNotificationLetter";
 
     public static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
     public static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";

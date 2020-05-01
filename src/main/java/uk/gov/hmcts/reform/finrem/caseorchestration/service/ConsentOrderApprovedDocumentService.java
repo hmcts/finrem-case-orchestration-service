@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.LetterAddressHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 
@@ -20,13 +19,10 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 public class ConsentOrderApprovedDocumentService extends AbstractDocumentService {
 
-    private LetterAddressHelper letterAddressHelper;
-
     @Autowired
     public ConsentOrderApprovedDocumentService(DocumentClient documentClient, DocumentConfiguration config,
-                                               ObjectMapper objectMapper, LetterAddressHelper letterAddressHelper) {
+                                               ObjectMapper objectMapper) {
         super(documentClient, config, objectMapper);
-        this.letterAddressHelper = letterAddressHelper;
     }
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
