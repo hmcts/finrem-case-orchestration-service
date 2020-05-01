@@ -44,7 +44,9 @@ module "finrem-cos" {
     AUTH_PROVIDER_SERVICE_CLIENT_KEY                      = "${data.azurerm_key_vault_secret.finrem-doc-s2s-auth-secret.value}"
     USERNAME-SOLICITOR                                    = "${data.azurerm_key_vault_secret.username-solicitor.value}"
     PASSWORD-SOLICITOR                                    = "${data.azurerm_key_vault_secret.password-solicitor.value}"
-
+    FEATURE_APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER    = "${var.approved_consent_order_notification_letter_enabled}"
+    FEATURE_HWF_SUCCESSFUL_NOTIFICATION_LETTER            = "${var.hwf_successful_notification_letter}"
+    FEATURE_ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER         = "${var.assigned_to_judge_notification_letter}"
   }
 }
 
