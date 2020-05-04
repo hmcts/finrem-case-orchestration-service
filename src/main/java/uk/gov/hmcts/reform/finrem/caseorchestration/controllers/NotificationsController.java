@@ -3,30 +3,41 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.Map;
 import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 public class NotificationsController implements BaseController {
 
-    @Autowired
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
+    private final BulkPrintService bulkPrintService;
+    private final FeatureToggleService featureToggleService;
+    private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
     @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for HWF Successful.")
@@ -52,19 +63,39 @@ public class NotificationsController implements BaseController {
     }
 
     @PostMapping(value = "/case-orchestration/notify/assign-to-judge", consumes = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "send e-mail for case assigned to Judge Successful.")
+    @ApiOperation(value = "Notify solicitor when Judge assigned to case via email or letter")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Case assigned to Judge e-mail sent successfully",
+            @ApiResponse(code = 204, message = "Case assigned to Judge notification sent successfully",
                     response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendAssignToJudgeConfirmationEmail(
-            @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to send email for Judge successfully assigned to case for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("Received request to notify solicitor for Judge successfully assigned to case for Case ID: {}",
+            callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (isSolicitorAgreedToReceiveEmails(caseData, SOLICITOR_AGREE_TO_RECEIVE_EMAILS)) {
             log.info("Sending email notification to Solicitor for Judge successfully assigned to case");
             notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
+        } else if (isConsentedApplication(caseData) && isPaperApplication(caseData)) {
+            if (featureToggleService.isAssignedToJudgeNotificationLetterEnabled()) {
+                log.info("isAssignedToJudgeNotificationLetterEnabled is toggled on");
+                log.info("Sending AssignedToJudge notification letter for bulk print");
+
+                CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+                // Generate PDF notification letter
+                CaseDocument assignedToJudgeNotificationLetter =
+                    assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, authToken);
+
+                // Send notification letter to Bulk Print
+                bulkPrintService.sendNotificationLetterForBulkPrint(assignedToJudgeNotificationLetter, caseDetails);
+
+                // will possibly remove once verified passing in reference works
+                cleanupCaseDataBeforeSubmittingToCcd(caseDetails);
+            }
         }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -122,5 +153,16 @@ public class NotificationsController implements BaseController {
     private boolean isSolicitorAgreedToReceiveEmails(Map<String, Object> mapOfCaseData, String solicitorAgreeToReceiveEmails) {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(mapOfCaseData
                 .get(solicitorAgreeToReceiveEmails)));
+    }
+
+    private void cleanupCaseDataBeforeSubmittingToCcd(CaseDetails caseDetails) {
+        // Must remove any added case data as CCD will return an error
+        caseDetails.getData().remove("caseNumber");
+        caseDetails.getData().remove("reference");
+        caseDetails.getData().remove("addressee");
+        caseDetails.getData().remove("letterDate");
+        caseDetails.getData().remove("applicantName");
+        caseDetails.getData().remove("respondentName");
+        caseDetails.getData().remove("ctscContactDetails");
     }
 }

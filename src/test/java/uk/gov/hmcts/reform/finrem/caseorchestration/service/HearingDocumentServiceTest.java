@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
@@ -65,7 +65,7 @@ public class HearingDocumentServiceTest {
     @Test
     public void generateFastTrackFormC() {
         Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
-        doCaseDocumentAssert((CaseDocument) result.get(FORM_C));
+        assertCaseDocument((CaseDocument) result.get(FORM_C));
         ((TestDocumentClient) generatorClient).verifyAdditionalFastTrackFields();
     }
 
@@ -73,15 +73,15 @@ public class HearingDocumentServiceTest {
     public void generateJudiciaryBasedFastTrackFormC() {
         Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN,
                 makeItJudiciaryFastTrackDecisionCase());
-        doCaseDocumentAssert((CaseDocument) result.get(FORM_C));
+        assertCaseDocument((CaseDocument) result.get(FORM_C));
         ((TestDocumentClient) generatorClient).verifyAdditionalFastTrackFields();
     }
 
     @Test
     public void generateNonFastTrackFormCAndFormG() {
         Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
-        doCaseDocumentAssert((CaseDocument) result.get(FORM_C));
-        doCaseDocumentAssert((CaseDocument) result.get(FORM_G));
+        assertCaseDocument((CaseDocument) result.get(FORM_C));
+        assertCaseDocument((CaseDocument) result.get(FORM_G));
         ((TestDocumentClient) generatorClient).verifyAdditionalNonFastTrackFields();
     }
 

@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
@@ -42,13 +42,13 @@ public class OnlineFormDocumentServiceTest {
     @Test
     public void generateMiniFormA() {
         service = new OnlineFormDocumentService(new DocumentClientStub(new CountDownLatch(1)), config, translator, mapper);
-        doCaseDocumentAssert(service.generateMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
+        assertCaseDocument(service.generateMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
     }
 
     @Test
     public void generateContestedMiniFormA() {
         service = new OnlineFormDocumentService(new DocumentClientStub(new CountDownLatch(1)), config, translator, mapper);
-        doCaseDocumentAssert(service.generateContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
+        assertCaseDocument(service.generateContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
     }
 
     @Test
@@ -59,7 +59,7 @@ public class OnlineFormDocumentServiceTest {
         CaseDocument result = service.generateDraftContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().data(caseData()).build());
         latch.await();
 
-        doCaseDocumentAssert(result);
+        assertCaseDocument(result);
     }
 
     private Map<String, Object> caseData() {

@@ -1,9 +1,6 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration;
+package uk.gov.hmcts.reform.finrem.caseorchestration.model.document;
 
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.TestPropertySource;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CtscContactDetails;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
@@ -15,11 +12,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
 
-@TestPropertySource(locations = "/application.properties")
-@DirtiesContext
-public abstract class BaseServiceTest extends BaseTest {
+public class CtscContactDetailsTest {
 
-    protected void verifyCtscContactDetails(CaseDetails caseDetails) {
+    @Test
+    public void checkAllStatusValues() {
+
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
             .careOf(CTSC_CARE_OF)
@@ -31,6 +28,13 @@ public abstract class BaseServiceTest extends BaseTest {
             .openingHours(CTSC_OPENING_HOURS)
             .build();
 
-        assertEquals(ctscContactDetails, caseDetails.getData().get("ctscContactDetails"));
+        assertEquals(CTSC_SERVICE_CENTRE, ctscContactDetails.getServiceCentre());
+        assertEquals(CTSC_CARE_OF, ctscContactDetails.getCareOf());
+        assertEquals(CTSC_PO_BOX, ctscContactDetails.getPoBox());
+        assertEquals(CTSC_TOWN, ctscContactDetails.getTown());
+        assertEquals(CTSC_POSTCODE, ctscContactDetails.getPostcode());
+        assertEquals(CTSC_EMAIL_ADDRESS, ctscContactDetails.getEmailAddress());
+        assertEquals(CTSC_PHONE_NUMBER, ctscContactDetails.getPhoneNumber());
+        assertEquals(CTSC_OPENING_HOURS, ctscContactDetails.getOpeningHours());
     }
 }
