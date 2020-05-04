@@ -18,6 +18,7 @@ import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getLastMapValue;
@@ -40,6 +41,24 @@ public class BulkPrintService extends AbstractDocumentService {
         super(documentClient, config, objectMapper);
         this.featureToggleService = featureToggleService;
     }
+
+    public UUID sendNotificationLetterForBulkPrint(final CaseDocument notificationLetter, final CaseDetails caseDetails) {
+        List<BulkPrintDocument> notificationLetterList = new ArrayList<>();
+        log.info("Sending Notification Letter for Bulk Print.");
+
+        notificationLetterList.add(
+            BulkPrintDocument.builder().binaryFileUrl(notificationLetter.getDocumentBinaryUrl()).build());
+
+        log.info("Notification letter sent to Bulk Print: {}", notificationLetterList);
+
+        return bulkPrint(
+            BulkPrintRequest.builder()
+                .caseId(caseDetails.getId().toString())
+                .letterType("FINANCIAL_REMEDY_PACK")
+                .bulkPrintDocuments(notificationLetterList)
+                .build());
+    }
+
 
     public UUID sendOrdersForBulkPrint(final CaseDocument coverSheet, final CaseDetails caseDetails) {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
@@ -98,7 +117,7 @@ public class BulkPrintService extends AbstractDocumentService {
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, CONSENT_ORDER));
 
             if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
-                bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "consentOrderApprovedNotificationLetter"));
+                bulkPrintDocuments.addAll(convertBulkPrintDocument(value, CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER));
                 log.info("Approved Consent Order Notification Letter Feature Toggled is Enabled");
                 log.info("Adding consentOrderApprovedNotificationLetter document to BulkPrint documents list");
             } else {

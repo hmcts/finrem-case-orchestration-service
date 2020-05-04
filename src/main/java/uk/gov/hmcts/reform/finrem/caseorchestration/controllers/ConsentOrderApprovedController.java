@@ -38,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Slf4j
 @RestController
@@ -81,19 +82,24 @@ public class ConsentOrderApprovedController implements BaseController {
             log.info("isApprovedConsentOrderNotificationLetterEnabled toggle set to: {}",
                 featureToggleService.isApprovedConsentOrderNotificationLetterEnabled());
 
-            if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
-                approvedConsentOrderNotificationLetter = service.generateApprovedConsentOrderNotificationLetter(caseDetails, authToken);
-
-                log.info("consentNotificationLetter= {}, letter= {}, consentOrderAnnexStamped = {}",
-                    approvedConsentOrderNotificationLetter, approvedConsentOrderLetter, consentOrderAnnexStamped);
-            }
+            log.info("isPaperApplication set to: {}", isPaperApplication(caseData));
 
             ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
                 .orderLetter(approvedConsentOrderLetter)
                 .consentOrder(consentOrderAnnexStamped);
 
             if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
-                approvedOrderBuilder.consentOrderApprovedNotificationLetter(approvedConsentOrderNotificationLetter);
+                log.info("isApprovedConsentOrderNotificationLetterEnabled is toggled on");
+
+                if (isPaperApplication(caseData)) {
+                    approvedConsentOrderNotificationLetter = service.generateApprovedConsentOrderNotificationLetter(caseDetails, authToken);
+
+                    log.info("consentNotificationLetter= {}, letter= {}, consentOrderAnnexStamped = {}",
+                        approvedConsentOrderNotificationLetter, approvedConsentOrderLetter, consentOrderAnnexStamped);
+
+                    log.info("Adding approvedConsentOrderNotificationLetter to approvedOrderBuilder");
+                    approvedOrderBuilder.consentOrderApprovedNotificationLetter(approvedConsentOrderNotificationLetter);
+                }
             }
 
             ApprovedOrder approvedOrder = approvedOrderBuilder.build();
