@@ -42,11 +42,11 @@ public class CommonFunction {
             && StringUtils.isNotBlank((String) address.get(POSTCODE));
     }
 
-    public static String buildFullName(Map<String, Object> caseData, String applicantFirstMiddleName, String applicantLastName) {
+    public static String buildFullName(Map<String, Object> caseData, String firstMiddleName, String lastName) {
         return (
-            nullToEmpty((caseData.get(applicantFirstMiddleName))).trim()
+            nullToEmpty((caseData.get(firstMiddleName))).trim()
                 + " "
-                + nullToEmpty((caseData.get(applicantLastName))).trim()
+                + nullToEmpty((caseData.get(lastName))).trim()
         ).trim();
     }
 
