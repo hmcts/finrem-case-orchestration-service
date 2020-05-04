@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CtscContactDetails;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
@@ -42,7 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
     @Autowired
-    private DocumentClient documentClientMock;
+    private DocumentClient documentClient;
 
     @Autowired
     private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
@@ -82,19 +81,19 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldGenerateAssignedToJudgeLetterForApplicant() {
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClient.generatePdf(any(), anyString())).thenReturn(document());
 
         CaseDocument generateAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN);
 
-        doCaseDocumentAssert(generateAssignedToJudgeNotificationLetter);
-        verify(documentClientMock, times(1)).generatePdf(any(), anyString());
-        verifyCtscContactDetails();
+        assertCaseDocument(generateAssignedToJudgeNotificationLetter);
+        verify(documentClient, times(1)).generatePdf(any(), anyString());
+        verifyCtscContactDetails(caseDetails);
     }
 
     @Test
     public void shouldGenerateAssignedToJudgeLetterForApplicantSolicitor() {
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClient.generatePdf(any(), anyString())).thenReturn(document());
 
         Map<String, Object> solicitorAddress = new HashMap<>();
         solicitorAddress.put("AddressLine1", "123 Applicant Solicitor Street");
@@ -114,28 +113,13 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
         CaseDocument generatedAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN);
 
-        doCaseDocumentAssert(generatedAssignedToJudgeNotificationLetter);
+        assertCaseDocument(generatedAssignedToJudgeNotificationLetter);
 
         Addressee addressee = Addressee.builder()
             .name("Saul Goodman")
             .formattedAddress("123 Applicant Solicitor Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSE1")
             .build();
         assertEquals(addressee, caseDetails.getData().get("addressee"));
-        verifyCtscContactDetails();
-    }
-
-    void verifyCtscContactDetails() {
-        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
-            .serviceCentre("Courts and Tribunals Service Centre")
-            .careOf("c/o HMCTS Digital Financial Remedy")
-            .poBox("12746")
-            .town("HARLOW")
-            .postcode("CM20 9QZ")
-            .emailAddress("HMCTSFinancialRemedy@justice.gov.uk")
-            .phoneNumber("0300 303 0642")
-            .openingHours("from 8.30am to 5pm")
-            .build();
-
-        assertEquals(ctscContactDetails, caseDetails.getData().get("ctscContactDetails"));
+        verifyCtscContactDetails(caseDetails);
     }
 }

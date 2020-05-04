@@ -27,8 +27,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -96,7 +96,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
         CaseDocument caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, AUTH_TOKEN);
 
-        doCaseDocumentAssert(caseDocument);
+        assertCaseDocument(caseDocument);
         verify(documentClientMock, times(1)).generatePdf(any(), anyString());
     }
 
@@ -110,7 +110,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
                 consentOrderApprovedDocumentService.generateApprovedConsentOrderNotificationLetter(caseDetails, AUTH_TOKEN);
 
-        doCaseDocumentAssert(generatedApprovedConsentOrderNotificationLetter);
+        assertCaseDocument(generatedApprovedConsentOrderNotificationLetter);
 
         Addressee addressee = Addressee.builder()
                 .name("James Joyce")
@@ -141,7 +141,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
                 consentOrderApprovedDocumentService.generateApprovedConsentOrderNotificationLetter(caseDetails, AUTH_TOKEN);
 
-        doCaseDocumentAssert(generatedApprovedConsentOrderNotificationLetter);
+        assertCaseDocument(generatedApprovedConsentOrderNotificationLetter);
 
         Addressee addressee = Addressee.builder()
                 .name("Saul Goodman")
@@ -158,7 +158,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         CaseDocument caseDocument = caseDocument();
         CaseDocument annexStampDocument = consentOrderApprovedDocumentService.annexStampDocument(caseDocument, AUTH_TOKEN);
 
-        doCaseDocumentAssert(annexStampDocument);
+        assertCaseDocument(annexStampDocument);
         verify(documentClientMock, times(1)).annexStampDocument(any(), anyString());
     }
 
@@ -170,7 +170,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         CaseDocument caseDocument = caseDocument();
         CaseDocument stampDocument = consentOrderApprovedDocumentService.stampDocument(caseDocument, AUTH_TOKEN);
 
-        doCaseDocumentAssert(stampDocument);
+        assertCaseDocument(stampDocument);
         verify(documentClientMock, times(1)).stampDocument(any(), anyString());
     }
 
@@ -182,7 +182,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
         List<PensionCollectionData> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
 
-        stampPensionDocuments.forEach(data -> doCaseDocumentAssert(data.getTypedCaseDocument().getPensionDocument()));
+        stampPensionDocuments.forEach(data -> assertCaseDocument(data.getTypedCaseDocument().getPensionDocument()));
         verify(documentClientMock, times(2)).stampDocument(any(), anyString());
     }
 }

@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 public class BulkPrintServiceTest extends BaseServiceTest {
 
     @Autowired
-    private DocumentClient documentClientMock;
+    private DocumentClient documentClient;
 
     @Autowired
     private BulkPrintService bulkPrintService;
@@ -53,18 +53,18 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         config.setApplicationAssignedToJudgeTemplate("test_template");
         config.setApplicationAssignedToJudgeFileName("test_file");
 
-        when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
+        when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID bulkPrintLetterId = bulkPrintService.sendNotificationLetterForBulkPrint(
             new CaseDocument(), caseDetails());
 
         assertThat(bulkPrintLetterId, is(letterId));
-        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().size(), is(1));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments(), hasSize(1));
     }
 
     @Test
     public void shouldSendOrdersForBulkPrintForApproved() throws Exception {
-        when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
+        when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID bulkPrintLetterId = bulkPrintService.sendOrdersForBulkPrint(
             new CaseDocument(), caseDetails());
@@ -76,20 +76,20 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldSendForBulkPrintForNotApproved() throws Exception {
-        when(documentClientMock.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
+        when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID bulkPrintLetterId = bulkPrintService.sendOrdersForBulkPrint(
             new CaseDocument(), caseDetailsForNonApproved());
 
         assertThat(bulkPrintLetterId, is(letterId));
-        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().size(), is(2));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments(), hasSize(2));
     }
 
     @Test
     public void shouldConvertDocument() throws Exception {
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.uploadOrder(caseDetails().getData());
 
-        assertThat(bulkPrintDocuments.size(), is(1));
+        assertThat(bulkPrintDocuments, hasSize(1));
     }
 
     @Test

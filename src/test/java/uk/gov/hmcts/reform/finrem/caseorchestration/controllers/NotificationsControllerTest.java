@@ -150,6 +150,7 @@ public class NotificationsControllerTest {
             .andExpect(status().isOk());
 
         verifyNoInteractions(assignedToJudgeDocumentService);
+        verifyNoInteractions(bulkPrintService);
         verifyNoInteractions(notificationService);
     }
 

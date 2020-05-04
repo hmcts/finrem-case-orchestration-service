@@ -30,7 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.REJECTED_ORDER_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.doCaseDocumentAssert;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
@@ -71,7 +71,7 @@ public class RefusalOrderDocumentServiceTest {
         assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));
         assertThat(consentOrderData.getConsentOrder().getDocumentComment(), is(equalTo("System Generated")));
 
-        doCaseDocumentAssert(consentOrderData.getConsentOrder().getDocumentLink());
+        assertCaseDocument(consentOrderData.getConsentOrder().getDocumentLink());
     }
 
     @Test
@@ -90,7 +90,7 @@ public class RefusalOrderDocumentServiceTest {
         assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));
         assertThat(consentOrderData.getConsentOrder().getDocumentComment(), is(equalTo("System Generated")));
 
-        doCaseDocumentAssert(consentOrderData.getConsentOrder().getDocumentLink());
+        assertCaseDocument(consentOrderData.getConsentOrder().getDocumentLink());
     }
 
     @Test
@@ -99,7 +99,7 @@ public class RefusalOrderDocumentServiceTest {
         Map<String, Object> caseData = service.previewConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
         CaseDocument caseDocument = getCaseDocument(caseData);
 
-        doCaseDocumentAssert(caseDocument);
+        assertCaseDocument(caseDocument);
     }
 
     private CaseDocument getCaseDocument(Map<String, Object> caseData) {
