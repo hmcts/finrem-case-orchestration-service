@@ -74,21 +74,23 @@ public class NotificationsControllerTest {
     public void sendHwfSuccessfulConfirmationEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendHWFSuccessfulConfirmationEmail(any(CallbackRequest.class));
+            .sendHWFSuccessfulConfirmationEmail(any(CallbackRequest.class));
     }
 
     @Test
     public void shouldNotSendHwfSuccessfulConfirmationEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
     }
@@ -158,21 +160,23 @@ public class NotificationsControllerTest {
     public void sendConsentOrderMadeConfirmationEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
         mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendConsentOrderMadeConfirmationEmail(any(CallbackRequest.class));
+            .sendConsentOrderMadeConfirmationEmail(any(CallbackRequest.class));
     }
 
     @Test
     public void shouldNotSendConsentOrderMadeConfirmationEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
     }
@@ -181,21 +185,23 @@ public class NotificationsControllerTest {
     public void sendConsentOrderNotApprovedEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
         mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendConsentOrderNotApprovedEmail(any(CallbackRequest.class));
+            .sendConsentOrderNotApprovedEmail(any(CallbackRequest.class));
     }
 
     @Test
     public void shouldNotSendConsentOrderNotApprovedEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(CONSENT_ORDER_NOT_APPROVED_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
     }
@@ -204,21 +210,23 @@ public class NotificationsControllerTest {
     public void sendConsentOrderAvailableEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
         mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendConsentOrderAvailableEmail(any(CallbackRequest.class));
+            .sendConsentOrderAvailableEmail(any(CallbackRequest.class));
     }
 
     @Test
     public void shouldNotSendConsentOrderAvailableEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
     }
@@ -227,21 +235,23 @@ public class NotificationsControllerTest {
     public void sendConsentedHwfSuccessfulConfirmationEmail() throws Exception {
         buildCcdRequest("/fixtures/contested/hwf.json");
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendContestedHwfSuccessfulConfirmationEmail(any(CallbackRequest.class));
+            .sendContestedHwfSuccessfulConfirmationEmail(any(CallbackRequest.class));
     }
 
     @Test
     public void shouldNotSendContestedHwfSuccessfulEmail() throws Exception {
         buildCcdRequest("/fixtures/contested/contested-hwf-without-solicitor-consent.json");
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verifyNoMoreInteractions(notificationService);
     }
