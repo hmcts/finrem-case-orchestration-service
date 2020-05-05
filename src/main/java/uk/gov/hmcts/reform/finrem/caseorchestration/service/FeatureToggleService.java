@@ -1,13 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.Features;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 
 import javax.validation.constraints.NotNull;
 
@@ -16,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Arrays.asList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.HWF_SUCCESSFUL_NOTIFICATION_LETTER;
@@ -26,9 +23,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.HWF_SU
 @Configuration
 @Getter
 public class FeatureToggleService {
-
-    public static final Map<Class, List<String>> APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER_FEATURE_FIELDS
-        = ImmutableMap.of(ApprovedOrder.class, asList("consentOrderApprovedNotificationLetter"));
 
     @NotNull
     private Map<String, String> toggle = new HashMap<>();
@@ -59,10 +53,6 @@ public class FeatureToggleService {
      */
     public Map<Class, List<String>> getFieldsIgnoredDuringSerialisation() {
         Map<Class, List<String>> ignoredFields = Maps.newHashMap();
-
-        if (!isApprovedConsentOrderNotificationLetterEnabled()) {
-            ignoredFields.putAll(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER_FEATURE_FIELDS);
-        }
 
         return ignoredFields;
     }
