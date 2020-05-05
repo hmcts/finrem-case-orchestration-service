@@ -148,9 +148,9 @@ public class SetUpUtils {
         return document;
     }
 
-    public static void doCaseDocumentAssert(CaseDocument result) {
-        assertThat(result.getDocumentFilename(), is(FILE_NAME));
-        assertThat(result.getDocumentUrl(), is(DOC_URL));
-        assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
+    public static void assertCaseDocument(CaseDocument caseDocument) {
+        assertThat(caseDocument.getDocumentFilename(), is(FILE_NAME));
+        assertThat(caseDocument.getDocumentUrl(), is(DOC_URL));
+        assertThat(caseDocument.getDocumentBinaryUrl(), is(BINARY_URL));
     }
 }
