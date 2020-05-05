@@ -151,8 +151,8 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk());
         assertLetter(result);
         assertConsentOrder(result);
-        assertConsentOrderNotificationLetter(result);
         assertPensionDocs(result);
+        assertConsentOrderNotificationLetter(result);
     }
 
     @Test
@@ -206,7 +206,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     }
 
     private void assertConsentOrderNotificationLetter(ResultActions result) throws Exception {
-        String path = "$.data.approvedOrderCollection[0].value.consentOrderApprovedNotificationLetter.";
+        String path = "$.data.consentOrderApprovedNotificationLetter.";
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
             .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
             .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));

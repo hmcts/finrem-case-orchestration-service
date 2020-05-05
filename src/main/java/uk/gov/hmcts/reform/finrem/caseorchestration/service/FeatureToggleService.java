@@ -54,7 +54,7 @@ public class FeatureToggleService {
     /**
      * Given runtime feature toggle status, returns fields that should be ignored during serialisation (i.e. not
      * serialised to JSON).
-     * All CaseFields in -nonprod files in CCD config repos should be added here to feature toggle serialisation.
+     * All CaseFields in "-nonprod.json" files in CCD config repos should be added here to feature toggle serialisation.
      * @return a map with Class of ignored fields as key and field names as value
      */
     public Map<Class, List<String>> getFieldsIgnoredDuringSerialisation() {
