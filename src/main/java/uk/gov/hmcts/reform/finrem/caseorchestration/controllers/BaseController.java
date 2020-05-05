@@ -16,8 +16,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public interface BaseController {
 
     /**
-     * Throws exception if case data is missing in callback request.
-     * @param callbackRequest
+     * Throws exception if callback request is missing case data.
      */
     default void validateCaseData(CallbackRequest callbackRequest) {
         if (callbackRequest == null || callbackRequest.getCaseDetails() == null
