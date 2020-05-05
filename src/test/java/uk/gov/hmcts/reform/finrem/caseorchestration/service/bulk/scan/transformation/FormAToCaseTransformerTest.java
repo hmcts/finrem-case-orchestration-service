@@ -39,11 +39,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED_PAPER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
@@ -275,7 +275,7 @@ public class FormAToCaseTransformerTest {
             hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
             hasEntry(PAPER_APPLICATION, YES_VALUE),
             hasEntry(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL),
-            hasEntry(SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE)
+            hasEntry(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE)
         ));
     }
 
@@ -290,7 +290,7 @@ public class FormAToCaseTransformerTest {
         assertThat(transformedCaseData, allOf(
             hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
             hasEntry(PAPER_APPLICATION, YES_VALUE),
-            hasEntry(SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, NO_VALUE)
+            hasEntry(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, NO_VALUE)
         ));
     }
 
