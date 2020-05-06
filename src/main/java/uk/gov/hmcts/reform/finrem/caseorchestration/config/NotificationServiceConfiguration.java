@@ -17,4 +17,5 @@ public class NotificationServiceConfiguration {
     private String consentOrderAvailable;
     private String contestedHwfSuccessful;
     private String contestedApplicationIssued;
+    private String solicitorResponsibleToDraftOrder;
 }

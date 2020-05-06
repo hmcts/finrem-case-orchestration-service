@@ -88,6 +88,11 @@ public class NotificationService {
         sendNotificationEmail(callbackRequest, uri);
     }
 
+    public void sendSolicitorToDraftOrderEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getSolicitorResponsibleToDraftOrder());
+        sendNotificationEmail(callbackRequest, uri);
+    }
+
     private void sendNotificationEmail(CallbackRequest callbackRequest, URI uri) {
         try {
             if (isConsentedApplication(callbackRequest.getCaseDetails().getData())) {
