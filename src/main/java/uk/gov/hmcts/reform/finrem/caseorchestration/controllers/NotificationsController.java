@@ -147,6 +147,23 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
+    @PostMapping(value = "/case-orchestration/notify/draft-order", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send e-mail for Solicitor To Draft Order")
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "Draft Order e-mail sent successfully",
+                    response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendDraftOrderEmail(
+            @RequestBody CallbackRequest callbackRequest) {
+        log.info("Received request to send email for 'Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
+            log.info("Sending email notification to Solicitor for 'Solicitor To Draft Order'");
+            notificationService.sendSolicitorToDraftOrderEmail(callbackRequest);
+        }
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
     private void cleanupCaseDataBeforeSubmittingToCcd(CaseDetails caseDetails) {
         // Must remove any added case data as CCD will return an error
         caseDetails.getData().remove("caseNumber");
