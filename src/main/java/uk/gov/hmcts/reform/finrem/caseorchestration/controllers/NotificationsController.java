@@ -158,7 +158,7 @@ public class NotificationsController implements BaseController {
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
-            log.info("Sending email notification to Solicitor for 'Solicitor To Draft Order'");
+            log.info("Sending email notification to Solicitor for 'Draft Order'");
             notificationService.sendSolicitorToDraftOrderEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());

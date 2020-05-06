@@ -43,6 +43,7 @@ public class NotificationsControllerTest {
     private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
     private static final String CONSENT_ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/consent-order-not-approved";
     private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/consent-order-available";
+    private static final String CONTESTED_DRAFT_ORDER_URL = "/case-orchestration/notify/draft-order";
     private static final String CCD_REQUEST_JSON = "/fixtures/model/ccd-request.json";
     private static final String CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON = "/fixtures/ccd-request-with-solicitor-email-consent.json";
     private static final String BULK_PRINT_PAPER_APPLICATION_JSON = "/fixtures/bulkprint/bulk-print-paper-application.json";
@@ -239,6 +240,29 @@ public class NotificationsControllerTest {
     public void shouldNotSendContestedHwfSuccessfulEmail() throws Exception {
         buildCcdRequest("/fixtures/contested/contested-hwf-without-solicitor-consent.json");
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
+                .content(requestContent.toString())
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
+
+        verifyNoMoreInteractions(notificationService);
+    }
+
+    @Test
+    public void sendDraftOrderEmail() throws Exception {
+        buildCcdRequest(CCD_REQUEST_JSON);
+        mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
+                .content(requestContent.toString())
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+                .sendSolicitorToDraftOrderEmail(any(CallbackRequest.class));
+    }
+
+    @Test
+    public void shouldNotSendDraftOrderEmail() throws Exception {
+        buildCcdRequest(CCD_REQUEST_JSON);
+        mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
