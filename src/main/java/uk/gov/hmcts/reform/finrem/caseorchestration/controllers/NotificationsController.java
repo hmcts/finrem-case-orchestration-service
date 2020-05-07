@@ -93,6 +93,7 @@ public class NotificationsController implements BaseController {
             callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
         if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
             log.info("Sending email notification to Solicitor for Judge successfully assigned to case");
             notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
@@ -128,6 +129,7 @@ public class NotificationsController implements BaseController {
         log.info("Received request to send email for 'Consent Order Made' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
         if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
             log.info("Sending email notification to Solicitor for 'Consent Order Made'");
             notificationService.sendConsentOrderMadeConfirmationEmail(callbackRequest);
@@ -145,6 +147,7 @@ public class NotificationsController implements BaseController {
         log.info("Received request to send email for 'Consent Order Not Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
         if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
             log.info("Sending email notification to Solicitor for 'Consent Order Not Approved'");
             notificationService.sendConsentOrderNotApprovedEmail(callbackRequest);
@@ -162,6 +165,7 @@ public class NotificationsController implements BaseController {
         log.info("Received request to send email for 'Consent Order Available' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
         if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
             log.info("Sending email notification to Solicitor for 'Consent Order Available'");
             notificationService.sendConsentOrderAvailableEmail(callbackRequest);

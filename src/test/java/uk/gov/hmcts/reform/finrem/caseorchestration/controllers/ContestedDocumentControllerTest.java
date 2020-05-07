@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -8,6 +9,8 @@ import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+
+import java.io.File;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,20 +30,10 @@ public class ContestedDocumentControllerTest extends MiniFormAControllerTest {
     @MockBean
     private NotificationService notificationService;
 
-    private String prepareBodyWithSolicitorAgreedReceiveEmails(String value) {
-        return "{\n"
-            + "  \"case_details\": {\n"
-            + "    \"case_data\": {\n"
-            + "      \"solicitorAgreeToReceiveEmails\": \"" + value + "\"\n"
-            + "    }\n"
-            + "  }\n"
-            + "}\n";
-    }
-
     @Test
     public void shouldSendSolicitorEmailWhenAgreed() throws Exception {
         mvc.perform(post(endpoint())
-            .content(prepareBodyWithSolicitorAgreedReceiveEmails("Yes"))
+            .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
@@ -50,8 +43,12 @@ public class ContestedDocumentControllerTest extends MiniFormAControllerTest {
 
     @Test
     public void shouldNotSendSolicitorEmailWhenNotAgreed() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision-without-email-consent.json").toURI()));
+
         mvc.perform(post(endpoint())
-            .content(prepareBodyWithSolicitorAgreedReceiveEmails("No"))
+            .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());

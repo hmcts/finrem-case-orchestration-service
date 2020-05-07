@@ -9,14 +9,19 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -35,24 +40,31 @@ public class FinalOrderControllerTest extends BaseControllerTest {
     @MockBean
     private ConsentOrderApprovedDocumentService service;
 
+    @MockBean
+    private NotificationService notificationService;
+
     private static final String SEND_ORDER_ENDPOINT = "/case-orchestration/contested/send-order";
 
     private void doCaseDataSetUp() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/final-order-for-stamping.json").toURI()));
+        setUpCaseData("/fixtures/final-order-for-stamping.json");
+    }
+
+    private void doCaseDataSetUpWithoutEmailConsent() throws IOException, URISyntaxException {
+        setUpCaseData("/fixtures/final-order-for-stamping-without-email-consent.json");
     }
 
     private void doCaseDataSetUpWithoutAnyHearingOrder() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        requestContent = objectMapper.readTree(new File(getClass()
-              .getResource("/fixtures/final-order-for-stamping-without-hearing-order.json").toURI()));
+        setUpCaseData("/fixtures/final-order-for-stamping-without-hearing-order.json");
     }
 
     private void doCaseDataSetUpWithoutAnyFinalOrder() throws IOException, URISyntaxException {
+        setUpCaseData("/fixtures/final-order-for-stamping-without-existing-order.json");
+    }
+
+    private void setUpCaseData(String requestBodyUri) throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                  .getResource("/fixtures/final-order-for-stamping-without-existing-order.json").toURI()));
+            .getResource(requestBodyUri).toURI()));
     }
 
     @Test
@@ -60,10 +72,10 @@ public class FinalOrderControllerTest extends BaseControllerTest {
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(SEND_ORDER_ENDPOINT)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -72,9 +84,9 @@ public class FinalOrderControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
 
         ResultActions result = mvc.perform(post(SEND_ORDER_ENDPOINT)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
         result.andDo(print());
@@ -119,5 +131,31 @@ public class FinalOrderControllerTest extends BaseControllerTest {
 
     private OngoingStubbing<CaseDocument> whenStampingDocument() {
         return when(service.stampDocument(isA(CaseDocument.class), anyString()));
+    }
+
+    @Test
+    public void shouldSendSolicitorEmailWhenAgreed() throws Exception {
+        doCaseDataSetUp();
+
+        mvc.perform(post(SEND_ORDER_ENDPOINT)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1)).sendContestOrderApprovedEmail(any());
+    }
+
+    @Test
+    public void shouldNotSendSolicitorEmailWhenNotAgreed() throws Exception {
+        doCaseDataSetUpWithoutEmailConsent();
+
+        mvc.perform(post(SEND_ORDER_ENDPOINT)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verifyNoInteractions(notificationService);
     }
 }

@@ -88,6 +88,16 @@ public class NotificationService {
         sendNotificationEmail(callbackRequest, uri);
     }
 
+    public void sendContestOrderApprovedEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getContestOrderApproved());
+        sendNotificationEmail(callbackRequest, uri);
+    }
+
+    public void sendPrepareForHearingEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getPrepareForHearing());
+        sendNotificationEmail(callbackRequest, uri);
+    }
+
     private void sendNotificationEmail(CallbackRequest callbackRequest, URI uri) {
         try {
             if (isConsentedApplication(callbackRequest.getCaseDetails().getData())) {
