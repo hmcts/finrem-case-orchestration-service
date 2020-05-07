@@ -89,7 +89,7 @@ public class NotificationService {
     }
 
     public void sendSolicitorToDraftOrderEmail(CallbackRequest callbackRequest) {
-        URI uri = buildUri(notificationServiceConfiguration.getSolicitorResponsibleToDraftOrder());
+        URI uri = buildUri(notificationServiceConfiguration.getContestedDraftOrder());
         sendNotificationEmail(callbackRequest, uri);
     }
 

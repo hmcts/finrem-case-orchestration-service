@@ -32,7 +32,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_CONSENT_ORDER_AVAILABLE = "http://localhost:8086/notify/consent-order-available";
     private static final String END_POINT_CONTESTED_HWF_SUCCESSFUL = "http://localhost:8086/notify/contested/hwf-successful";
     private static final String END_POINT_CONTESTED_APPLICATION_ISSUED = "http://localhost:8086/notify/contested/application-issued";
-    private static final String END_POINT_CONTESTED_DRAFT_ORDER = "http://localhost:8086/notify/draft-order";
+    private static final String END_POINT_CONTESTED_DRAFT_ORDER = "http://localhost:8086/notify/contested/draft-order";
 
     @Autowired
     private NotificationService notificationService;
