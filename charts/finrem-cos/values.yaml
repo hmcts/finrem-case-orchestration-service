@@ -8,7 +8,7 @@ java:
     IDAM_API_URL: "https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net"
     IDAM_S2S_URL : "http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     DOCUMENT_GENERATOR_SERVICE_API_BASEURL : "http://finrem-dgcs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
-    FINREM_NOTIFICATION_SERVICE_BASE_URL : "http://finrem-ns-pr-133.service.core-compute-preview.internal"
+    FINREM_NOTIFICATION_SERVICE_BASE_URL : "http://finrem-ns-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     PAYMENT_SERVICE_API_BASEURL : "http://finrem-ps-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
   keyVaults:
     finrem:
