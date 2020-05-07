@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import javax.validation.constraints.NotNull;
 
@@ -34,6 +35,7 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
 
 @Slf4j
 @RestController
@@ -44,8 +46,11 @@ public class FinalOrderController implements BaseController {
     @Autowired
     private ConsentOrderApprovedDocumentService service;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @PostMapping(path = "/contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
+    @ApiOperation(value = "Handles Consent order approved generation and email notification. Serves as a callback from CCD")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
                     response = AboutToStartOrSubmitCallbackResponse.class),
@@ -71,6 +76,11 @@ public class FinalOrderController implements BaseController {
             log.info("FinalOrderController called with latestHearingOrder = {}", latestHearingOrder);
 
             stampAndAddToCollection(caseData, latestHearingOrder, authToken);
+        }
+
+        if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
+            log.info("Sending 'Contest Order Approved' email notification to Applicant Solicitor");
+            notificationService.sendContestOrderApprovedEmail(callback);
         }
 
         return ResponseEntity.ok(

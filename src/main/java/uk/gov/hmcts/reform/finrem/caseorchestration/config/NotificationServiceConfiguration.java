@@ -15,6 +15,8 @@ public class NotificationServiceConfiguration {
     private String consentOrderMade;
     private String consentOrderNotApproved;
     private String consentOrderAvailable;
-    private String consentedHwfSuccessful;
     private String prepareForHearing;
+    private String contestedHwfSuccessful;
+    private String contestedApplicationIssued;
+    private String contestOrderApproved;
 }
