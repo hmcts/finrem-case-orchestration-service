@@ -169,7 +169,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         }
     }
 
-        @Test
+    @Test
     public void sendSolicitorToDraftOrderEmail() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
