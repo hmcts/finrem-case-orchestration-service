@@ -1,7 +1,0 @@
-vault_section = "test"
-idam_api_url = "http://betaDevBccidamAppLB.reform.hmcts.net"
-idam_s2s-auth_url = "http://rpe-service-auth-provider-saat.service.core-compute-saat.internal"
-finrem_ns_url = "http://finrem-ns-saat.service.core-compute-saat.internal"
-document_generator_baseurl = "http://finrem-dgcs-saat.service.core-compute-saat.internal"
-payment_api_url = "http://finrem-ps-saat.service.core-compute-saat.internal"
-fees_api_url = "http://fees-register-api-saat.service.core-compute-saat.internal"
