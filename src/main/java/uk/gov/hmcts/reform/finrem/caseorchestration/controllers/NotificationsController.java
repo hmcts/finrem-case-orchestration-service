@@ -157,11 +157,22 @@ public class NotificationsController implements BaseController {
         log.info("Received request to send email for 'Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
+        //TODO, check isApplicantSolicitorResponsibleToDraftOrder()
+
         if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
             log.info("Sending email notification to Solicitor for 'Draft Order'");
             notificationService.sendSolicitorToDraftOrderEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+
+    private boolean isApplicantSolicitorResponsibleToDraftOrder() {
+        // TODO check the new CCD Field if ApplicantSol Is Selected
+        // solicitorResponsibleForDraftingOrder - CaseField
+        // applicantSolicitor / respondentSolicitor
+        return true;
     }
 
     private void cleanupCaseDataBeforeSubmittingToCcd(CaseDetails caseDetails) {

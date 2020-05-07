@@ -249,7 +249,7 @@ public class NotificationsControllerTest {
 
     @Test
     public void sendDraftOrderEmail() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
+        buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
         mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -260,7 +260,7 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void shouldNotSendDraftOrderEmail() throws Exception {
+    public void shouldNotSendDraftOrderEmailAsSolicitorOptedOutOfEmailComms() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
                 .content(requestContent.toString())
