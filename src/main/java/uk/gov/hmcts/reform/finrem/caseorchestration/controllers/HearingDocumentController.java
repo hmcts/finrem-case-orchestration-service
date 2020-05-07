@@ -21,12 +21,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.hasSolicitorAgreedToReceiveEmails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
 
 @RestController
 @RequiredArgsConstructor
@@ -67,7 +68,7 @@ public class HearingDocumentController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
         caseData.putAll(service.generateHearingDocuments(authorisationToken, caseDetails));
 
-        if (hasSolicitorAgreedToReceiveEmails(caseData)) {
+        if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
             notificationService.sendPrepareForHearingEmail(callback);
         }
 
