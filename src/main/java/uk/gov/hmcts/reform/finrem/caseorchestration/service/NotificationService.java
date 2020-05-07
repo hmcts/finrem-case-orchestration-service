@@ -36,7 +36,7 @@ public class NotificationService {
     private static final String MESSAGE = "Failed to send notification email for case id : ";
     private static final String MSG_SOLICITOR_EMAIL = " for solicitor email";
     private static final String EXCEPTION = "exception :";
-    private static final String KENT = "kent";
+    private static final String KENTFRC = "kentfrc";
     private static final String REGION = "region";
     private static final String NEWPORT = "newport";
     private static final String SWANSEA = "swansea";
@@ -116,23 +116,27 @@ public class NotificationService {
     private NotificationRequest buildNotificationRequest(CallbackRequest callbackRequest,
                                                          String solicitorReference,
                                                          String solicitorName,
-                                                         String solicitorEmail, String caseType) throws IOException {
+                                                         String solicitorEmail,
+                                                         String caseType) throws IOException {
         NotificationRequest notificationRequest = new NotificationRequest();
-        notificationRequest.setCaseReferenceNumber(Objects.toString(callbackRequest.getCaseDetails().getId()));
         Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
+
+        notificationRequest.setCaseReferenceNumber(Objects.toString(callbackRequest.getCaseDetails().getId()));
         notificationRequest.setSolicitorReferenceNumber(Objects.toString(mapOfCaseData.get(solicitorReference)));
         notificationRequest.setName(Objects.toString(mapOfCaseData.get(solicitorName)));
         notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorEmail)));
-        Object allocatedCourtList = mapOfCaseData.get(ALLOCATED_COURT_LIST);
+        notificationRequest.setCaseType(caseType);
+
         if (CONTESTED.equalsIgnoreCase(caseType)) {
+            Object allocatedCourtList = mapOfCaseData.get(ALLOCATED_COURT_LIST);
             String selectedCourt = getSelectedCourt(allocatedCourtList);
-            log.info("selectedCourt is  {} for contested case Id : {}", selectedCourt,
-                    notificationRequest.getCaseReferenceNumber());
             notificationRequest.setSelectedCourt(selectedCourt);
+
+            log.info("selectedCourt is  {} for case Id : {}", selectedCourt,
+                notificationRequest.getCaseReferenceNumber());
         }
         return notificationRequest;
     }
-
 
     private URI buildUri(String endPoint) {
         return fromHttpUrl(notificationServiceConfiguration.getUrl()
@@ -147,7 +151,6 @@ public class NotificationService {
         headers.add("Content-Type", "application/json");
         return headers;
     }
-
 
     private boolean isConsentedApplication(Map<String, Object> caseData) {
         return isNotEmpty((String) caseData.get(D81_QUESTION));
@@ -165,11 +168,9 @@ public class NotificationService {
         if ("northwest".equalsIgnoreCase(region)) {
             return getNorthWestFRC(allocatedCourtMap);
         }
-
         if ("northeast".equalsIgnoreCase(region)) {
             return getNorthEastFRC(allocatedCourtMap);
         }
-
         if ("southeast".equalsIgnoreCase(region)) {
             return getSouthEastFRC(allocatedCourtMap);
         } else if ("wales".equalsIgnoreCase(region)) {
@@ -190,8 +191,8 @@ public class NotificationService {
 
     private String getSouthEastFRC(Map allocatedCourtMap) {
         String southEastList = (String) allocatedCourtMap.get("southEastList");
-        if (KENT.equalsIgnoreCase(southEastList)) {
-            return KENT;
+        if (KENTFRC.equalsIgnoreCase(southEastList)) {
+            return KENTFRC;
         }
         return EMPTY;
     }
