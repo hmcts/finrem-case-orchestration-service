@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
@@ -119,10 +120,14 @@ public abstract class AbstractDocumentService {
     }
 
     CaseDetails prepareNotificationLetter(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
+        // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
+        CaseDetails caseDetailsCopy = caseDetails.toBuilder()
+            .data(Maps.newHashMap(caseDetails.getData()))
+            .build();
+        Map<String, Object> caseData = caseDetailsCopy.getData();
         Map addressToSendTo;
 
-        String ccdNumber = nullToEmpty((caseDetails.getId()));
+        String ccdNumber = nullToEmpty((caseDetailsCopy.getId()));
         String reference = "";
         String addresseeName;
         String applicantName = buildFullName(caseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
@@ -158,7 +163,7 @@ public abstract class AbstractDocumentService {
             throw new IllegalArgumentException(
                 "Mandatory data missing from address when trying to generate Assigned To Judge Notification Letter");
         }
-        return caseDetails;
+        return caseDetailsCopy;
     }
 
     CtscContactDetails buildCtscContactDetails() {
