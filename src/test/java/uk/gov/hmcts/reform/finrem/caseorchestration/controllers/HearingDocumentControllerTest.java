@@ -69,16 +69,6 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json").toURI()));
     }
 
-    private String prepareBodyWithSolicitorAgreedReceiveEmails(String value) {
-        return "{\n"
-            + "  \"case_details\": {\n"
-            + "    \"case_data\": {\n"
-            + "      \"solicitorAgreeToReceiveEmails\": \"" + value + "\"\n"
-            + "    }\n"
-            + "  }\n"
-            + "}\n";
-    }
-
     @Test
     public void generateHearingDocumentHttpError400() throws Exception {
         mvc.perform(post(HEARING_DOCUMENT_CALLBACK_URL)
@@ -106,7 +96,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void shouldSendSolicitorEmailWhenAgreed() throws Exception {
         mvc.perform(post(HEARING_DOCUMENT_CALLBACK_URL)
-            .content(prepareBodyWithSolicitorAgreedReceiveEmails("Yes"))
+            .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
@@ -116,9 +106,12 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotSendSolicitorEmailWhenNotAgreed() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision-without-email-consent.json").toURI()));
 
         mvc.perform(post(HEARING_DOCUMENT_CALLBACK_URL)
-            .content(prepareBodyWithSolicitorAgreedReceiveEmails("No"))
+            .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
