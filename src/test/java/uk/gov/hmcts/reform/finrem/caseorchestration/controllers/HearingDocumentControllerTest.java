@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import java.io.File;
@@ -20,6 +21,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,7 +39,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 
 @WebMvcTest(HearingDocumentController.class)
 public class HearingDocumentControllerTest extends BaseControllerTest {
-    private static final String GEN_DOC_URL = "/case-orchestration/documents/hearing";
+    private static final String HEARING_DOCUMENT_CALLBACK_URL = "/case-orchestration/documents/hearing";
+
+    @MockBean
+    private NotificationService notificationService;
 
     @MockBean
     private HearingDocumentService service;
@@ -61,10 +69,20 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json").toURI()));
     }
 
+    private String prepareBodyWithSolicitorAgreedReceiveEmails(String value) {
+        return "{\n"
+            + "  \"case_details\": {\n"
+            + "    \"case_data\": {\n"
+            + "      \"solicitorAgreeToReceiveEmails\": \"" + value + "\"\n"
+            + "    }\n"
+            + "  }\n"
+            + "}\n";
+    }
+
     @Test
     public void generateHearingDocumentHttpError400() throws Exception {
-        mvc.perform(post(GEN_DOC_URL)
-                .content("kwuilebge")
+        mvc.perform(post(HEARING_DOCUMENT_CALLBACK_URL)
+                .content("Dummy Data")
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest());
@@ -75,7 +93,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         when(service.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
                 .thenReturn(ImmutableMap.of("formC", caseDocument()));
 
-        mvc.perform(post(GEN_DOC_URL)
+        mvc.perform(post(HEARING_DOCUMENT_CALLBACK_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -86,11 +104,34 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void shouldSendSolicitorEmailWhenAgreed() throws Exception {
+        mvc.perform(post(HEARING_DOCUMENT_CALLBACK_URL)
+            .content(prepareBodyWithSolicitorAgreedReceiveEmails("Yes"))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1)).sendPrepareForHearingEmail(any());
+    }
+
+    @Test
+    public void shouldNotSendSolicitorEmailWhenNotAgreed() throws Exception {
+
+        mvc.perform(post(HEARING_DOCUMENT_CALLBACK_URL)
+            .content(prepareBodyWithSolicitorAgreedReceiveEmails("No"))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
     public void generateMiniFormAHttpError500() throws Exception {
         when(service.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
                 .thenThrow(feignError());
 
-        mvc.perform(post(GEN_DOC_URL)
+        mvc.perform(post(HEARING_DOCUMENT_CALLBACK_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
