@@ -88,7 +88,6 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
         assertCaseDocument(generateAssignedToJudgeNotificationLetter);
         verify(documentClient, times(1)).generatePdf(any(), anyString());
-        verifyCtscContactDetails(caseDetails);
     }
 
     @Test
@@ -114,12 +113,5 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
             = assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(generatedAssignedToJudgeNotificationLetter);
-
-        Addressee addressee = Addressee.builder()
-            .name("Saul Goodman")
-            .formattedAddress("123 Applicant Solicitor Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSE1")
-            .build();
-        assertEquals(addressee, caseDetails.getData().get("addressee"));
-        verifyCtscContactDetails(caseDetails);
     }
 }
