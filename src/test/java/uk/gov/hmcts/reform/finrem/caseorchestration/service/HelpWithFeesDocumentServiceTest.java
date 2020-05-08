@@ -10,12 +10,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -88,7 +86,6 @@ public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
 
         assertCaseDocument(generatedHwfSuccessfulNotificationLetter);
         verify(documentClient, times(1)).generatePdf(any(), anyString());
-        verifyCtscContactDetails(caseDetails);
     }
 
     @Test
@@ -114,12 +111,5 @@ public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
             = helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(generatedHwfSuccessfulNotificationLetter);
-
-        Addressee addressee = Addressee.builder()
-            .name("Saul Goodman")
-            .formattedAddress("123 Applicant Solicitor Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSE1")
-            .build();
-        assertEquals(addressee, caseDetails.getData().get("addressee"));
-        verifyCtscContactDetails(caseDetails);
     }
 }

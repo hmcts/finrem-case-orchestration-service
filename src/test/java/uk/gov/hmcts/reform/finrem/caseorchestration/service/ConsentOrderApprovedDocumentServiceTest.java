@@ -11,14 +11,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.reset;
@@ -111,12 +109,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
                 consentOrderApprovedDocumentService.generateApprovedConsentOrderNotificationLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(generatedApprovedConsentOrderNotificationLetter);
-
-        Addressee addressee = Addressee.builder()
-                .name("James Joyce")
-                .formattedAddress("50 Applicant Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSW1")
-                .build();
-        assertEquals(addressee, caseDetails.getData().get("addressee"));
     }
 
     @Test
@@ -142,12 +134,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
                 consentOrderApprovedDocumentService.generateApprovedConsentOrderNotificationLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(generatedApprovedConsentOrderNotificationLetter);
-
-        Addressee addressee = Addressee.builder()
-                .name("Saul Goodman")
-                .formattedAddress("123 Applicant Solicitor Street\nSecond Address Line\nThird Address Line\nLondon\nEngland\nLondon\nSE1")
-                .build();
-        assertEquals(addressee, caseDetails.getData().get("addressee"));
     }
 
     @Test
