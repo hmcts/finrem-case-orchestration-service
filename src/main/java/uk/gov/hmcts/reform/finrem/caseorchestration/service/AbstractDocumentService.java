@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
@@ -83,7 +84,6 @@ public abstract class AbstractDocumentService {
         documentClient.deleteDocument(documentUrl, authorisationToken);
     }
 
-
     public CaseDocument annexStampDocument(CaseDocument document, String authorisationToken) {
         Document stampedDocument = documentClient.annexStampDocument(toDocument(document), authorisationToken);
         return caseDocument(stampedDocument);
@@ -119,24 +119,28 @@ public abstract class AbstractDocumentService {
     }
 
     CaseDetails prepareNotificationLetter(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
+        // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
+        CaseDetails caseDetailsCopy = caseDetails.toBuilder()
+            .data(Maps.newHashMap(caseDetails.getData()))
+            .build();
+        Map<String, Object> docmosisCaseData = caseDetailsCopy.getData();
         Map addressToSendTo;
 
-        String ccdNumber = nullToEmpty((caseDetails.getId()));
+        String ccdNumber = nullToEmpty((caseDetailsCopy.getId()));
         String reference = "";
         String addresseeName;
-        String applicantName = buildFullName(caseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
-        String respondentName =  buildFullName(caseData, APP_RESPONDENT_FIRST_MIDDLE_NAME, APP_RESPONDENT_LAST_NAME);
+        String applicantName = buildFullName(docmosisCaseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
+        String respondentName =  buildFullName(docmosisCaseData, APP_RESPONDENT_FIRST_MIDDLE_NAME, APP_RESPONDENT_LAST_NAME);
 
-        if (isApplicantRepresentedByASolicitor(caseData)) {
+        if (isApplicantRepresentedByASolicitor(docmosisCaseData)) {
             log.info("Applicant is represented by a solicitor");
-            reference = nullToEmpty((caseData.get(SOLICITOR_REFERENCE)));
-            addresseeName = nullToEmpty((caseData.get(SOLICITOR_NAME)));
-            addressToSendTo = (Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
+            reference = nullToEmpty((docmosisCaseData.get(SOLICITOR_REFERENCE)));
+            addresseeName = nullToEmpty((docmosisCaseData.get(SOLICITOR_NAME)));
+            addressToSendTo = (Map) docmosisCaseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
         } else {
             log.info("Applicant is not represented by a solicitor");
             addresseeName = applicantName;
-            addressToSendTo = (Map) caseData.get(APPLICANT_ADDRESS);
+            addressToSendTo = (Map) docmosisCaseData.get(APPLICANT_ADDRESS);
         }
 
         if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
@@ -145,20 +149,20 @@ public abstract class AbstractDocumentService {
                 .formattedAddress(letterAddressHelper.formatAddressForLetterPrinting(addressToSendTo))
                 .build();
 
-            caseData.put("caseNumber", ccdNumber);
-            caseData.put("reference", reference);
-            caseData.put("addressee",  addressee);
-            caseData.put("letterDate", String.valueOf(LocalDate.now()));
-            caseData.put("applicantName", applicantName);
-            caseData.put("respondentName", respondentName);
-            caseData.put("ctscContactDetails", buildCtscContactDetails());
+            docmosisCaseData.put("caseNumber", ccdNumber);
+            docmosisCaseData.put("reference", reference);
+            docmosisCaseData.put("addressee",  addressee);
+            docmosisCaseData.put("letterDate", String.valueOf(LocalDate.now()));
+            docmosisCaseData.put("applicantName", applicantName);
+            docmosisCaseData.put("respondentName", respondentName);
+            docmosisCaseData.put("ctscContactDetails", buildCtscContactDetails());
 
         } else {
-            log.info("Failed to generate Notification Letter as not all required address details were present");
+            log.info("Failed to generate notification letter as not all required address details were present");
             throw new IllegalArgumentException(
-                "Mandatory data missing from address when trying to generate Assigned To Judge Notification Letter");
+                "Mandatory data missing from address when trying to generate notification letter");
         }
-        return caseDetails;
+        return caseDetailsCopy;
     }
 
     CtscContactDetails buildCtscContactDetails() {
