@@ -40,10 +40,10 @@ public class NotificationsController implements BaseController {
     @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for HWF Successful.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "HWFSuccessful e-mail sent successfully",
-                    response = AboutToStartOrSubmitCallbackResponse.class)})
+        @ApiResponse(code = 200, message = "HWFSuccessful e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendHwfSuccessfulConfirmationEmail(
-            @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send email for HWF Successful for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
@@ -63,8 +63,8 @@ public class NotificationsController implements BaseController {
     @PostMapping(value = "/case-orchestration/notify/assign-to-judge", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify solicitor when Judge assigned to case via email or letter")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Case assigned to Judge notification sent successfully",
-                    response = AboutToStartOrSubmitCallbackResponse.class)})
+        @ApiResponse(code = 204, message = "Case assigned to Judge notification sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendAssignToJudgeConfirmationEmail(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody CallbackRequest callbackRequest) {
@@ -89,9 +89,6 @@ public class NotificationsController implements BaseController {
 
                 // Send notification letter to Bulk Print
                 bulkPrintService.sendNotificationLetterForBulkPrint(assignedToJudgeNotificationLetter, caseDetails);
-
-                // will possibly remove once verified passing in reference works
-                cleanupCaseDataBeforeSubmittingToCcd(caseDetails);
             }
         }
 
@@ -101,10 +98,10 @@ public class NotificationsController implements BaseController {
     @PostMapping(value = "/case-orchestration/notify/consent-order-made", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for Consent Order Made.")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Consent order made e-mail sent successfully",
-                    response = AboutToStartOrSubmitCallbackResponse.class)})
+        @ApiResponse(code = 204, message = "Consent order made e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderMadeConfirmationEmail(
-            @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send email for 'Consent Order Made' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
@@ -119,10 +116,10 @@ public class NotificationsController implements BaseController {
     @PostMapping(value = "/case-orchestration/notify/consent-order-not-approved", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for Consent order not approved.")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Consent order not approved e-mail sent successfully",
-                    response = AboutToStartOrSubmitCallbackResponse.class)})
+        @ApiResponse(code = 204, message = "Consent order not approved e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderNotApprovedEmail(
-            @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send email for 'Consent Order Not Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
@@ -137,10 +134,10 @@ public class NotificationsController implements BaseController {
     @PostMapping(value = "/case-orchestration/notify/consent-order-available", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for Consent order available.")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Consent order available e-mail sent successfully",
-                    response = AboutToStartOrSubmitCallbackResponse.class)})
+        @ApiResponse(code = 204, message = "Consent order available e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderAvailableEmail(
-            @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send email for 'Consent Order Available' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
@@ -150,16 +147,5 @@ public class NotificationsController implements BaseController {
             notificationService.sendConsentOrderAvailableEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-    private void cleanupCaseDataBeforeSubmittingToCcd(CaseDetails caseDetails) {
-        // Must remove any added case data as CCD will return an error
-        caseDetails.getData().remove("caseNumber");
-        caseDetails.getData().remove("reference");
-        caseDetails.getData().remove("addressee");
-        caseDetails.getData().remove("letterDate");
-        caseDetails.getData().remove("applicantName");
-        caseDetails.getData().remove("respondentName");
-        caseDetails.getData().remove("ctscContactDetails");
     }
 }
