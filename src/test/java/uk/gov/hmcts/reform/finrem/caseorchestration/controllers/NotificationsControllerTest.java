@@ -126,7 +126,7 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void sendAssignToJudgeNotificationLetterIfIsConsentedAndIsPaperApplication_AndToggledOn() throws Exception {
+    public void sendAssignToJudgeNotificationLetterIfIsPaperApplication_AndToggledOn() throws Exception {
         buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
 
         when(featureToggleService.isAssignedToJudgeNotificationLetterEnabled()).thenReturn(true);
@@ -144,7 +144,7 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void shouldNotSendAssignToJudgeNotificationLetterIfIsConsentedAndIsPaperApplication_AndToggledOff() throws Exception {
+    public void shouldNotSendAssignToJudgeNotificationLetterIfIsPaperApplication_AndToggledOff() throws Exception {
         buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
 
         when(featureToggleService.isAssignedToJudgeNotificationLetterEnabled()).thenReturn(false);
