@@ -24,7 +24,17 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.hwf-success.api}")
     private String hwfSuccessfulApiUri;
 
+    @Value("${cos.notification.prepare-for-hearing.api}")
+    private String prepareForHearingApiUri;
+
+    @Value("${cos.notification.contest-application-issued.api}")
+    private String contestApplicationIssuedApiUri;
+
+    @Value("${cos.notification.contest-order-approved.api}")
+    private String contestOrderApprovedApiUri;
+
     private String consentedDir = "/json/consented/";
+    private String contestedDir = "/json/contested/";
 
     @Test
     public void verifyNotifyAssignToJudgeTestIsOkay() {
@@ -59,5 +69,26 @@ public class NotificationTests extends IntegrationTestBase {
 
         utils.validatePostSuccess(hwfSuccessfulApiUri,
                 "ccd-request-with-solicitor-hwfSuccessfulEmail1.json", consentedDir);
+    }
+
+    @Test
+    public void verifyNotifyPrepareForHearingTestIsOkay() {
+
+        utils.validatePostSuccess(prepareForHearingApiUri,
+            "ccd-request-with-solicitor-prepareForHearing.json", contestedDir);
+    }
+
+    @Test
+    public void verifyNotifyContestApplicationIssuedIsOkay() {
+
+        utils.validatePostSuccess(contestApplicationIssuedApiUri,
+            "ccd-request-with-solicitor-contestApplicationIssued.json", contestedDir);
+    }
+
+    @Test
+    public void verifyNotifyContestOrderApprovedIsOkay() {
+
+        utils.validatePostSuccess(contestOrderApprovedApiUri,
+            "ccd-request-with-solicitor-contestOrderApproved.json", contestedDir);
     }
 }
