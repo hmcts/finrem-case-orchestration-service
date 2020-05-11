@@ -42,13 +42,13 @@ public class ConsentOrderApprovedDocumentService extends AbstractDocumentService
 
         CaseDetails caseDetailsForBulkPrint = prepareNotificationLetter(caseDetails);
 
-        CaseDocument generatedApprovedConsentOrderNotificationletter = generateDocument(authToken, caseDetailsForBulkPrint,
+        CaseDocument generatedApprovedConsentOrderNotificationLetter = generateDocument(authToken, caseDetailsForBulkPrint,
                 config.getApprovedConsentOrderNotificationTemplate(),
                 config.getApprovedConsentOrderNotificationFileName());
 
-        log.info("Generated Approved Consent Order Notification Letter: {}", generatedApprovedConsentOrderNotificationletter);
+        log.info("Generated Approved Consent Order Notification Letter: {}", generatedApprovedConsentOrderNotificationLetter);
 
-        return generatedApprovedConsentOrderNotificationletter;
+        return generatedApprovedConsentOrderNotificationLetter;
     }
 
     public CaseDocument annexStampDocument(CaseDocument document, String authToken) {
