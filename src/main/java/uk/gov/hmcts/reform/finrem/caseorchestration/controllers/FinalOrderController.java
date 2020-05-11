@@ -7,8 +7,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import javax.validation.constraints.NotNull;
 
@@ -37,12 +37,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 public class FinalOrderController implements BaseController {
-    private ObjectMapper mapper = new ObjectMapper();
 
-    @Autowired
-    private ConsentOrderApprovedDocumentService service;
+    private final GenericDocumentService genericDocumentService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
@@ -83,7 +83,7 @@ public class FinalOrderController implements BaseController {
 
     private void stampAndAddToCollection(Map<String, Object> caseData, CaseDocument latestHearingOrder, String authToken) {
         if (!isEmpty(latestHearingOrder)) {
-            CaseDocument stampedDocs = service.stampDocument(latestHearingOrder, authToken);
+            CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken);
             log.info("Stamped Documents = {}", stampedDocs);
 
             List<HearingOrderCollectionData> finalOrderCollection = getFinalOrderDocuments(caseData);
@@ -106,13 +106,13 @@ public class FinalOrderController implements BaseController {
     }
 
     private List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
+        return objectMapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
             new TypeReference<List<HearingOrderCollectionData>>() {
             });
     }
 
     private List<HearingOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION),
+        return objectMapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION),
             new TypeReference<List<HearingOrderCollectionData>>() {
             });
     }

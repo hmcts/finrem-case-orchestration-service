@@ -26,7 +26,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class GenerateCoverSheetServiceTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
-    private GenerateCoverSheetService coverSheetService;
+    private GenericDocumentService genericDocumentService;
+    private GenerateCoverSheetService generateCoverSheetService;
 
     @Before
     public void setUp() {
@@ -35,12 +36,13 @@ public class GenerateCoverSheetServiceTest {
         config.setBulkPrintTemplate("test_template");
 
         DocumentClient generatorClient = new TestDocumentClient();
-        coverSheetService = new GenerateCoverSheetService(generatorClient, config, mapper);
+        genericDocumentService = new GenericDocumentService(generatorClient, mapper);
+        generateCoverSheetService = new GenerateCoverSheetService(genericDocumentService, config);
     }
 
     @Test
     public void shouldGenerateApplicantCoverSheet() throws Exception {
-        CaseDocument caseDocument = coverSheetService.generateApplicantCoverSheet(caseDetails(), AUTH_TOKEN);
+        CaseDocument caseDocument = generateCoverSheetService.generateApplicantCoverSheet(caseDetails(), AUTH_TOKEN);
 
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
@@ -49,7 +51,7 @@ public class GenerateCoverSheetServiceTest {
 
     @Test
     public void shouldGenerateRespondentCoverSheet() throws Exception {
-        CaseDocument caseDocument = coverSheetService.generateRespondentCoverSheet(caseDetails(), AUTH_TOKEN);
+        CaseDocument caseDocument = generateCoverSheetService.generateRespondentCoverSheet(caseDetails(), AUTH_TOKEN);
 
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
@@ -59,7 +61,7 @@ public class GenerateCoverSheetServiceTest {
     @Test
     public void shouldGenerateApplicantCoverSheetUsingApplicantAddressWhenApplicantSolicitorAddressIsEmpty() throws Exception {
         CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
-        coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+        generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
 
@@ -71,7 +73,7 @@ public class GenerateCoverSheetServiceTest {
     @Test
     public void shouldGenerateRespondentCoverSheetUsingRespondentAddressWhenRespondentSolicitorAddressIsEmpty() throws Exception {
         CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
-        coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
+        generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
 
@@ -83,7 +85,7 @@ public class GenerateCoverSheetServiceTest {
     @Test
     public void shouldGenerateApplicantCoverSheetUsingApplicantSolicitorAddress() throws Exception {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
-        coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+        generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
 
@@ -95,7 +97,7 @@ public class GenerateCoverSheetServiceTest {
     @Test
     public void shouldGenerateRespondentCoverSheetUsingRespondentSolicitorAddress() throws Exception {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
-        coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
+        generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
 
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
 
