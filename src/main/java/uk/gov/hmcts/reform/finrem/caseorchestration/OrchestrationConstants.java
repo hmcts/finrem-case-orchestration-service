@@ -11,6 +11,7 @@ public class OrchestrationConstants {
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
     // Bulk Scan & Printing
+    public static final String CASE_TYPE_ID = "case_type_id";
     public static final String BULK_SCAN_CASE_REFERENCE = "bulkScanCaseReference";
     public static final String CASE_TYPE_ID_CONSENTED = "FinancialRemedyMVP2";
     public static final String PAPER_APPLICATION = "paperApplication";
