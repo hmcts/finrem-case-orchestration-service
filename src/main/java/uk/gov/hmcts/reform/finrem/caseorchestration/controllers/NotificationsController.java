@@ -74,10 +74,9 @@ public class NotificationsController implements BaseController {
             callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        if (isSolicitorAgreedToReceiveEmails(caseData, SOLICITOR_AGREE_TO_RECEIVE_EMAILS)) {
-            log.info("Sending email notification to Solicitor for Judge successfully assigned to case");
-            notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
-        } else if (isConsentedApplication(caseData) && isPaperApplication(caseData)) {
+        log.info("isAssignedToJudgeNotificationLetterEnabled is toggled to: {}",
+            featureToggleService.isAssignedToJudgeNotificationLetterEnabled());
+        if (isConsentedApplication(caseData) && isPaperApplication(caseData)) {
             if (featureToggleService.isAssignedToJudgeNotificationLetterEnabled()) {
                 log.info("isAssignedToJudgeNotificationLetterEnabled is toggled on");
                 log.info("Sending AssignedToJudge notification letter for bulk print");
@@ -91,6 +90,9 @@ public class NotificationsController implements BaseController {
                 // Send notification letter to Bulk Print
                 bulkPrintService.sendNotificationLetterForBulkPrint(assignedToJudgeNotificationLetter, caseDetails);
             }
+        } else if (isSolicitorAgreedToReceiveEmails(caseData, SOLICITOR_AGREE_TO_RECEIVE_EMAILS)) {
+            log.info("Sending email notification to Solicitor for Judge successfully assigned to case");
+            notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
