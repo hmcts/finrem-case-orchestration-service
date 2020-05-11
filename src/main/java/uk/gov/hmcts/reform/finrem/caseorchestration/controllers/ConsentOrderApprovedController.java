@@ -128,19 +128,9 @@ public class ConsentOrderApprovedController implements BaseController {
         List<ApprovedOrderData> approvedOrders = asList(approvedOrderData);
         caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
-        cleanupCaseDataBeforeSubmittingToCcd(caseDetails);
+
 
         log.info("Successfully generated documents for 'Consent Order Approved'");
-    }
-
-    private void cleanupCaseDataBeforeSubmittingToCcd(CaseDetails caseDetails) {
-        // Must remove any added case data as CCD will return an error
-        caseDetails.getData().remove("caseNumber");
-        caseDetails.getData().remove("reference");
-        caseDetails.getData().remove("addressee");
-        caseDetails.getData().remove("letterDate");
-        caseDetails.getData().remove("applicantName");
-        caseDetails.getData().remove("respondentName");
     }
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {
