@@ -29,7 +29,7 @@ public class HelpWithFeesDocumentService extends AbstractDocumentService {
         CaseDocument generatedHwfSuccessfulNotificationLetter =
             generateDocument(authToken, caseDetailsForBulkPrint,
                 config.getHelpWithFeesSuccessfulTemplate(),
-                config.getApplicationAssignedToJudgeFileName());
+                config.getHelpWithFeesSuccessfulFileName());
 
         log.info("Generated Help With Fees Successful Notification Letter: {}", generatedHwfSuccessfulNotificationLetter);
 

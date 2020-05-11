@@ -50,12 +50,11 @@ public class NotificationsController implements BaseController {
         log.info("Received request to send email for HWF Successful for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        log.info("isHwfSuccessfulNotificationLetterEnabled is toggled to: {}",
+            featureToggleService.isHwfSuccessfulNotificationLetterEnabled());
 
         if (isConsentedApplication(caseData)) {
-            if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
-                log.info("Sending Consented HWF Successful email notification to Solicitor");
-                notificationService.sendConsentedHWFSuccessfulConfirmationEmail(callbackRequest);
-            } else if (isPaperApplication(caseData) && featureToggleService.isHwfSuccessfulNotificationLetterEnabled()) {
+            if (isPaperApplication(caseData) && featureToggleService.isHwfSuccessfulNotificationLetterEnabled()) {
                 log.info("Case is paper application");
                 log.info("isHwfSuccessfulNotificationLetterEnabled is toggled on");
                 log.info("Sending Consented HWF Successful notification letter for bulk print");
@@ -68,6 +67,9 @@ public class NotificationsController implements BaseController {
 
                 // Send notification letter to Bulk Print
                 bulkPrintService.sendNotificationLetterForBulkPrint(hwfSuccessfulNotificationLetter, caseDetails);
+            } else if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
+                log.info("Sending Consented HWF Successful email notification to Solicitor");
+                notificationService.sendConsentedHWFSuccessfulConfirmationEmail(callbackRequest);
             }
         } else if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
             log.info("Sending Contested HWF Successful email notification to Solicitor");
