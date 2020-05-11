@@ -5,7 +5,6 @@
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_data": {
-      "solicitorAgreeToReceiveEmails": "Yes",
       "uploadHearingOrder": [
         {
           "id": 1,
