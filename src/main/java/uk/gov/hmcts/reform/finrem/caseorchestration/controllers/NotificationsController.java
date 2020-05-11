@@ -74,6 +74,7 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         log.info("isAssignedToJudgeNotificationLetterEnabled is toggled to: {}",
             featureToggleService.isAssignedToJudgeNotificationLetterEnabled());
+
         if (isPaperApplication(caseData)) {
             if (featureToggleService.isAssignedToJudgeNotificationLetterEnabled()) {
                 log.info("isAssignedToJudgeNotificationLetterEnabled is toggled on");
@@ -88,6 +89,7 @@ public class NotificationsController implements BaseController {
                 // Send notification letter to Bulk Print
                 bulkPrintService.sendNotificationLetterForBulkPrint(assignedToJudgeNotificationLetter, caseDetails);
             }
+            log.info("Case is paper application but 'AssignedToJudgeNotificationLetter' feature is not enabled");
         } else if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
             log.info("Sending email notification to Solicitor for Judge successfully assigned to case");
             notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
