@@ -80,7 +80,7 @@ public class NotificationsController implements BaseController {
         log.info("isConsentedApplication is set to: {}", isConsentedApplication(caseData));
         log.info("isPaperApplication is set to: {}", isPaperApplication(caseData));
 
-        if (isConsentedApplication(caseData) && isPaperApplication(caseData)) {
+        if (isPaperApplication(caseData)) {
             if (featureToggleService.isAssignedToJudgeNotificationLetterEnabled()) {
                 log.info("isAssignedToJudgeNotificationLetterEnabled is toggled on");
                 log.info("Sending AssignedToJudge notification letter for bulk print");

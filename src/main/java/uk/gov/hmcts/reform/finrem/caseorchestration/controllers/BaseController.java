@@ -26,7 +26,7 @@ public interface BaseController {
 
     static boolean isConsentedApplication(Map<String, Object> caseData) {
         return isNotEmpty((String) caseData.get(D81_QUESTION))
-            || Objects.toString(caseData.get(CASE_TYPE_ID)).equalsIgnoreCase(CASE_TYPE_ID_CONSENTED);
+            || CASE_TYPE_ID_CONSENTED.equalsIgnoreCase(Objects.toString(caseData.get(CASE_TYPE_ID)));
     }
 
     default boolean isPBAPayment(Map<String, Object> caseData) {
