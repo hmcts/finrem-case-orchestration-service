@@ -69,6 +69,7 @@ public class HearingDocumentController implements BaseController {
         caseData.putAll(service.generateHearingDocuments(authorisationToken, caseDetails));
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
+            log.info("Sending 'Prepare for Hearing' email notification to Applicant Solicitor");
             notificationService.sendPrepareForHearingEmail(callback);
         }
 
