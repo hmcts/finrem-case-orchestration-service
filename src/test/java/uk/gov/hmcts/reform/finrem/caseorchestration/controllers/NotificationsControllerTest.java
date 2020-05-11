@@ -47,6 +47,9 @@ public class NotificationsControllerTest {
     private static final String CCD_REQUEST_JSON = "/fixtures/model/ccd-request.json";
     private static final String CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON = "/fixtures/ccd-request-with-solicitor-email-consent.json";
     private static final String BULK_PRINT_PAPER_APPLICATION_JSON = "/fixtures/bulkprint/bulk-print-paper-application.json";
+    private static final String DRAFT_ORDER_SUCCESSFUL_APPLICANT_SOL = "/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json";
+    private static final String DRAFT_ORDER_UNSUCCESSFUL_APPLICANT_SOL = "/fixtures/applicant-solicitor-to-draft-order-without-email-consent.json";
+    private static final String DRAFT_ORDER_UNSUCCESSFUL_RESPONDENT_SOL = "/fixtures/respondent-solicitor-to-draft-order-with-email-consent.json";
 
     @Autowired
     private WebApplicationContext applicationContext;
@@ -248,8 +251,8 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void sendDraftOrderEmail() throws Exception {
-        buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
+    public void sendDraftOrderEmailWhenApplicantSolicitorIsNominatedAndIsAcceptingEmails() throws Exception {
+        buildCcdRequest(DRAFT_ORDER_SUCCESSFUL_APPLICANT_SOL);
         mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -261,7 +264,18 @@ public class NotificationsControllerTest {
 
     @Test
     public void shouldNotSendDraftOrderEmailAsSolicitorOptedOutOfEmailComms() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
+        buildCcdRequest(DRAFT_ORDER_UNSUCCESSFUL_APPLICANT_SOL);
+        mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
+                .content(requestContent.toString())
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
+
+        verifyNoMoreInteractions(notificationService);
+    }
+
+    @Test
+    public void shouldNotSendDraftOrderEmailAsRespondentSolicitorIsNominated() throws Exception {
+        buildCcdRequest(DRAFT_ORDER_UNSUCCESSFUL_RESPONDENT_SOL);
         mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
                 .content(requestContent.toString())
                 .contentType(MediaType.APPLICATION_JSON_VALUE))

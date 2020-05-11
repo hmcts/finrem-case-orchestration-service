@@ -25,6 +25,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorResponsibleToDraftOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @RestController
@@ -154,25 +155,16 @@ public class NotificationsController implements BaseController {
                     response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendDraftOrderEmail(
             @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to send email for 'Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to send email for 'Applicant Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
+
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
-        //TODO, check isApplicantSolicitorResponsibleToDraftOrder()
-
-        if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
-            log.info("Sending email notification to Solicitor for 'Draft Order'");
+        if (isApplicantSolicitorResponsibleToDraftOrder(caseData) && isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
+            log.info("Sending email notification to Applicant Solicitor for 'Draft Order'");
             notificationService.sendSolicitorToDraftOrderEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-
-    private boolean isApplicantSolicitorResponsibleToDraftOrder() {
-        // TODO check the new CCD Field if ApplicantSol Is Selected
-        // solicitorResponsibleForDraftingOrder - CaseField
-        // applicantSolicitor / respondentSolicitor
-        return true;
     }
 
     private void cleanupCaseDataBeforeSubmittingToCcd(CaseDetails caseDetails) {
