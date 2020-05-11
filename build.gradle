@@ -130,7 +130,7 @@ def versions = [
         serviceTokenGenerator   : '3.0.0',
         springfoxSwagger        : '2.9.2',
         sonarPitest             : '0.5',
-        wiremock                : '2.25.1'
+        wiremock                : '2.26.3'
 ]
 
 dependencyManagement {
