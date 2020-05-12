@@ -58,15 +58,19 @@ public class GenerateCoverSheetService {
     }
 
     private void prepareApplicantCoverSheet(CaseDetails caseDetails) {
-        populateBulkPrintCoverSheet(caseDetails, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME, APPLICANT_ADDRESS, SOLICITOR_ADDRESS);
+        populateCaseDataWithBulkPrintCoverSheet(caseDetails, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME,
+            APPLICANT_ADDRESS, SOLICITOR_ADDRESS);
     }
 
     private void prepareRespondentCoverSheet(CaseDetails caseDetails) {
-        populateBulkPrintCoverSheet(caseDetails, APP_RESPONDENT_FIRST_MIDDLE_NAME, APP_RESPONDENT_LAST_NAME, RESPONDENT_ADDRESS, RESP_SOLICITOR_ADDRESS);
+        populateCaseDataWithBulkPrintCoverSheet(caseDetails, APP_RESPONDENT_FIRST_MIDDLE_NAME, APP_RESPONDENT_LAST_NAME,
+            RESPONDENT_ADDRESS, RESP_SOLICITOR_ADDRESS);
     }
 
-    private void populateBulkPrintCoverSheet(CaseDetails caseDetails, String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,
-                                             String partyAddressCcdFieldName, String partySolicitorAddressCcdFieldName) {
+    private void populateCaseDataWithBulkPrintCoverSheet(CaseDetails caseDetails, String partyFirstMiddleNameCcdFieldName,
+                                                         String partyLastNameCcdFieldName, String partyAddressCcdFieldName,
+                                                         String partySolicitorAddressCcdFieldName) {
+
         BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder = BulkPrintCoverSheet.builder()
             .ccdNumber(caseDetails.getId().toString())
             .recipientName(join(nullToEmpty(caseDetails.getData().get(partyFirstMiddleNameCcdFieldName)), " ",
