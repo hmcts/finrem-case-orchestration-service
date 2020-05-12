@@ -19,8 +19,8 @@ public class AssignedToJudgeDocumentService {
 
     public CaseDocument generateAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken) {
         log.info("Generating Assigned To Judge Notification Letter {} from {} for bulk print",
-            documentConfiguration.getAssignedToJudgeNotificationFileName(),
-            documentConfiguration.getAssignedToJudgeNotificationTemplate());
+            documentConfiguration.getAssignedToJudgeNotificationTemplate(),
+            documentConfiguration.getAssignedToJudgeNotificationFileName());
 
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareNotificationLetter(caseDetails);
 
