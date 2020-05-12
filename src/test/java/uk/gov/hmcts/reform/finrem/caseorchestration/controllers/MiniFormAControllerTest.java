@@ -37,7 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 @WebMvcTest(MiniFormAController.class)
 public class MiniFormAControllerTest extends BaseControllerTest {
 
-    private JsonNode requestContent;
+    protected JsonNode requestContent;
 
     @MockBean
     protected OnlineFormDocumentService documentService;

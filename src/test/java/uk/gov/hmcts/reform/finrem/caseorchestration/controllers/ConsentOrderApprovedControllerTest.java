@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.util.List;
 
@@ -42,7 +43,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     @MockBean
-    private ConsentOrderApprovedDocumentService service;
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+
+    @MockBean
+    private GenericDocumentService genericDocumentService;
 
     @MockBean
     private FeatureToggleService featureToggleService;
@@ -175,27 +179,27 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         assertLetter(result);
         assertConsentOrder(result);
         assertPensionDocs(result);
-        verify(service, never()).generateApprovedConsentOrderNotificationLetter(any(), any());
+        verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderNotificationLetter(any(), any());
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
-        return when(service.generateApprovedConsentOrderLetter(isA(CaseDetails.class), anyString()));
+        return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(isA(CaseDetails.class), anyString()));
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesNotificationLetter() {
-        return when(service.generateApprovedConsentOrderNotificationLetter(isA(CaseDetails.class), anyString()));
+        return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderNotificationLetter(isA(CaseDetails.class), anyString()));
     }
 
     private OngoingStubbing<CaseDocument> whenAnnexStampingDocument() {
-        return when(service.annexStampDocument(isA(CaseDocument.class), anyString()));
+        return when(consentOrderApprovedDocumentService.annexStampDocument(isA(CaseDocument.class), anyString()));
     }
 
     private OngoingStubbing<CaseDocument> whenStampingDocument() {
-        return when(service.stampDocument(isA(CaseDocument.class), anyString()));
+        return when(genericDocumentService.stampDocument(isA(CaseDocument.class), anyString()));
     }
 
     private OngoingStubbing<List<PensionCollectionData>> whenStampingPensionDocuments() {
-        return when(service.stampPensionDocuments(any(), anyString()));
+        return when(consentOrderApprovedDocumentService.stampPensionDocuments(any(), anyString()));
     }
 
     private void assertLetter(ResultActions result) throws Exception {

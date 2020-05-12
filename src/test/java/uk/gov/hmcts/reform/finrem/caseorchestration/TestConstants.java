@@ -5,10 +5,6 @@ public class TestConstants {
     public static final String TEST_SERVICE_TOKEN = "testServiceToken";
     public static final String AUTH_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9";
 
-    public static final String TEST_DIVORCE_CASE_ID = "LV17D80101";
-    public static final String TEST_SOLICITOR_ACCOUNT_NUMBER = "test.solicitor.account";
-    public static final String TEST_SOLICITOR_FIRM_NAME = "test.solicitor.firm";
-    public static final String TEST_SOLICITOR_COMPANY = "Awesome Solicitors LLP";
     public static final String TEST_SOLICITOR_REFERENCE = "RG-123456789";
     public static final String TEST_SOLICITOR_NAME = "Saul Goodman";
     public static final String TEST_SOLICITOR_EMAIL = "testSolicitor@email.com";

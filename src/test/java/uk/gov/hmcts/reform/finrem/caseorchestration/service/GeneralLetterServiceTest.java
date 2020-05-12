@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
@@ -34,7 +35,8 @@ public class GeneralLetterServiceTest {
 
     private DocumentClient generatorClient;
     private ObjectMapper mapper = new ObjectMapper();
-    private GeneralLetterService service;
+    private GenericDocumentService genericDocumentService;
+    private GeneralLetterService generalLetterService;
 
     @Before
     public void setUp() {
@@ -43,12 +45,13 @@ public class GeneralLetterServiceTest {
         config.setGeneralLetterFileName("test_file");
 
         generatorClient = new TestDocumentClient();
-        service = new GeneralLetterService(generatorClient, config, mapper);
+        genericDocumentService = new GenericDocumentService(generatorClient, mapper);
+        generalLetterService = new GeneralLetterService(genericDocumentService, config, new DocumentHelper(mapper), mapper);
     }
 
     @Test
     public void generateGeneralLetter() throws Exception {
-        Map<String, Object> documentMap = service.createGeneralLetter(AUTH_TOKEN, caseDetails());
+        Map<String, Object> documentMap = generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails());
 
         List<GeneralLetterData> result = (List<GeneralLetterData>) documentMap.get(GENERAL_LETTER);
         assertThat(result, hasSize(2));
