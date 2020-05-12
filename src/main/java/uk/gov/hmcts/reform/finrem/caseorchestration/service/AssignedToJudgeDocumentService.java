@@ -19,15 +19,15 @@ public class AssignedToJudgeDocumentService {
 
     public CaseDocument generateAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken) {
         log.info("Generating Assigned To Judge Notification Letter {} from {} for bulk print",
-            documentConfiguration.getApplicationAssignedToJudgeFileName(),
-            documentConfiguration.getApplicationAssignedToJudgeTemplate());
+            documentConfiguration.getAssignedToJudgeNotificationFileName(),
+            documentConfiguration.getAssignedToJudgeNotificationTemplate());
 
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareNotificationLetter(caseDetails);
 
         CaseDocument generatedAssignedToJudgeNotificationLetter = genericDocumentService.generateDocument(authToken,
             caseDetailsForBulkPrint,
-            documentConfiguration.getApplicationAssignedToJudgeTemplate(),
-            documentConfiguration.getApplicationAssignedToJudgeFileName());
+            documentConfiguration.getAssignedToJudgeNotificationTemplate(),
+            documentConfiguration.getAssignedToJudgeNotificationFileName());
 
         log.info("Generated Assigned To Judge Notification Letter: {}", generatedAssignedToJudgeNotificationLetter);
 
