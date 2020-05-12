@@ -1,10 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -19,21 +17,17 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 
-@RunWith(SpringRunner.class)
 public class DocumentHelperTest {
 
     private static final String PATH = "/fixtures/latestConsentedConsentOrder/";
 
-    @Autowired
     private DocumentHelper documentHelper;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
-    private CallbackRequest prepareCallbackRequest(String fileName) throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
-        }
+    @Before
+    public void setup() {
+        objectMapper = new ObjectMapper();
+        documentHelper = new DocumentHelper(objectMapper);
     }
 
     @Test
@@ -155,5 +149,11 @@ public class DocumentHelperTest {
         String expectedAddress = "";
 
         assertThat(formattedAddress, is(expectedAddress));
+    }
+
+    private CallbackRequest prepareCallbackRequest(String fileName) throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+        }
     }
 }
