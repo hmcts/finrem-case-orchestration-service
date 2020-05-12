@@ -46,14 +46,16 @@ public class BulkPrintService extends AbstractDocumentService {
         List<BulkPrintDocument> notificationLetterList = new ArrayList<>();
         log.info("Sending Notification Letter for Bulk Print.");
 
+        String caseId = caseDetails.getId().toString();
+
         notificationLetterList.add(
             BulkPrintDocument.builder().binaryFileUrl(notificationLetter.getDocumentBinaryUrl()).build());
 
-        log.info("Notification letter sent to Bulk Print: {}", notificationLetterList);
+        log.info("Notification letter sent to Bulk Print: {} for Case ID: {}", notificationLetterList, caseId);
 
         return bulkPrint(
             BulkPrintRequest.builder()
-                .caseId(caseDetails.getId().toString())
+                .caseId(caseId)
                 .letterType("FINANCIAL_REMEDY_PACK")
                 .bulkPrintDocuments(notificationLetterList)
                 .build());
