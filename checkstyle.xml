@@ -206,6 +206,7 @@
             <property name="sortImportsInGroupAlphabetically" value="true"/>
             <property name="separateLineBetweenGroups" value="false"/>
         </module>
+        <module name="UnusedImports"/>
         <module name="MethodParamPad"/>
         <module name="NoWhitespaceBefore">
             <property name="tokens"
