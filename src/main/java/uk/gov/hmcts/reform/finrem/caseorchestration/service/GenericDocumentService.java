@@ -73,12 +73,4 @@ public class GenericDocumentService {
         document.setUrl(caseDocument.getDocumentUrl());
         return document;
     }
-
-    CaseDetails copyOf(CaseDetails caseDetails) {
-        try {
-            return objectMapper.readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
-        } catch (IOException e) {
-            throw new IllegalStateException();
-        }
-    }
 }
