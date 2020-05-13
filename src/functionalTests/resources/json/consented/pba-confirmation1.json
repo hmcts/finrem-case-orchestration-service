@@ -312,7 +312,8 @@
     },
     "id": "string",
     "jurisdiction": "string",
-    "state": "string"
+    "state": "string",
+    "case_type_id": "FinancialRemedyMVP2"
   },
   "event_id": "string",
   "token": "string"

@@ -18,15 +18,14 @@ import java.util.Map;
 import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALLOCATED_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.D81_QUESTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 
 @Service
 @Slf4j
@@ -105,7 +104,7 @@ public class NotificationService {
 
     private void sendNotificationEmail(CallbackRequest callbackRequest, URI uri) {
         try {
-            if (isConsentedApplication(callbackRequest.getCaseDetails().getData())) {
+            if (isConsentedApplication(callbackRequest.getCaseDetails())) {
                 notificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
                         SOLICITOR_NAME, SOLICITOR_EMAIL, CONSENTED);
             } else {
@@ -167,11 +166,7 @@ public class NotificationService {
         return headers;
     }
 
-    private boolean isConsentedApplication(Map<String, Object> caseData) {
-        return isNotEmpty((String) caseData.get(D81_QUESTION));
-    }
-
-    private String getSelectedCourt(Object allocatedCourtList) throws IOException {
+    private String getSelectedCourt(Object allocatedCourtList) {
         HashMap<String, Object> allocatedCourtMap = (HashMap<String, Object>) allocatedCourtList;
         String region = (String) allocatedCourtMap.get(REGION);
         if ("midlands".equalsIgnoreCase(region)) {

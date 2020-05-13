@@ -50,7 +50,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Before
     public void setUp() {
         mockServer = MockRestServiceServer.createServer(restTemplate);
-        callbackRequest = getCallbackRequest();
+        callbackRequest = getConsentedCallbackRequest();
     }
 
     @Test
@@ -89,7 +89,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
 
         try {
-            notificationService.sendAssignToJudgeConfirmationEmail(getCallbackRequest());
+            notificationService.sendAssignToJudgeConfirmationEmail(getConsentedCallbackRequest());
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
@@ -515,20 +515,21 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(BULK_PRINT_LETTER_ID_RES, "notingham");
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
+                .caseTypeId("FinancialRemedyContested")
                 .id(12345L)
                 .data(caseData)
                 .build())
             .build();
     }
 
-    private CallbackRequest getCallbackRequest() {
+    private CallbackRequest getConsentedCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        caseData.put("d81Question", "No");
         caseData.put("solicitorEmail", "test@test.com");
         caseData.put("solicitorName", "solicitorName");
         caseData.put("solicitorReference", "56789");
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
+                .caseTypeId("FinancialRemedyMVP2")
                 .id(12345L)
                 .data(caseData)
                 .build())

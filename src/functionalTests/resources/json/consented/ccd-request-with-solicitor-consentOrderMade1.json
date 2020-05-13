@@ -312,6 +312,7 @@
     },
     "id": "12345678",
     "jurisdiction": "divorce",
-    "state": "created"
+    "state": "created",
+    "case_type_id": "FinancialRemedyMVP2"
   }
 }

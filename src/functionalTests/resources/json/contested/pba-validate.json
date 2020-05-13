@@ -4,6 +4,7 @@
     "id": "989898",
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "helpWithFeesQuestion": "No",
       "applicantLName":"Guy",
