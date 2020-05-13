@@ -4,6 +4,7 @@
     "id": "123",
     "jurisdiction": "DIVORCE",
     "state": "consentOrderApproved",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "applicantRepresented": "Yes",
       "solicitorAgreeToReceiveEmails": "Yes",
