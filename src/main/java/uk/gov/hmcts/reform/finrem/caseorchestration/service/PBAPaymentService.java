@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.PaymentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.FeeRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequest;
@@ -15,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRes
 import java.math.BigDecimal;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FEES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FEE_AMOUNT;
@@ -26,6 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 
 @Service
 @RequiredArgsConstructor
@@ -43,20 +44,19 @@ public class PBAPaymentService {
     @Value("${payment.api.contested-description}")
     private String contestedDescription;
 
-    public PaymentResponse makePayment(String authToken, String ccdCaseId, Map<String, Object> mapOfCaseData) {
-        log.info("Inside makePayment, authToken : {}, ccdCaseId : {}, caseData : {}", authToken, ccdCaseId,
-                mapOfCaseData);
-        PaymentRequest paymentRequest = buildPaymentRequest(ccdCaseId, mapOfCaseData);
+    public PaymentResponse makePayment(String authToken, CaseDetails caseDetails) {
+        log.info("Inside makePayment for ccdCaseId : {}", caseDetails.getId());
+        PaymentRequest paymentRequest = buildPaymentRequest(caseDetails);
         log.info("paymentRequest: {}", paymentRequest);
         PaymentResponse paymentResponse = paymentClient.pbaPayment(authToken, paymentRequest);
         log.info("paymentResponse : {} ", paymentResponse);
         return paymentResponse;
     }
 
-    private PaymentRequest buildPaymentRequest(String ccdCaseId, Map<String, Object> mapOfCaseData) {
-        FeeRequest feeRequest = buildFeeRequest(mapOfCaseData);
+    private PaymentRequest buildPaymentRequest(CaseDetails caseDetails) {
+        FeeRequest feeRequest = buildFeeRequest(caseDetails.getData());
         log.info("Fee request : {} ", feeRequest);
-        return buildPaymentRequestWithFee(ccdCaseId, mapOfCaseData, feeRequest);
+        return buildPaymentRequestWithFee(caseDetails, feeRequest);
     }
 
     private FeeRequest buildFeeRequest(Map<String, Object> mapOfCaseData) {
@@ -75,11 +75,11 @@ public class PBAPaymentService {
                 .build();
     }
 
-    private PaymentRequest buildPaymentRequestWithFee(String ccdCaseId, Map<String, Object> mapOfCaseData,
-                                                      FeeRequest fee) {
+    private PaymentRequest buildPaymentRequestWithFee(CaseDetails caseDetails, FeeRequest fee) {
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode dataJsonNode = mapper.valueToTree(mapOfCaseData);
-        String description = isConsentedApplication(mapOfCaseData) ? consentedDescription : contestedDescription;
+        JsonNode dataJsonNode = mapper.valueToTree(caseDetails.getData());
+        String ccdCaseId = String.valueOf(caseDetails.getId());
+        String description = isConsentedApplication(caseDetails) ? consentedDescription : contestedDescription;
         return PaymentRequest.builder()
                 .accountNumber(dataJsonNode.path(PBA_NUMBER).asText())
                 .caseReference(dataJsonNode.path(DIVORCE_CASE_NUMBER).asText())

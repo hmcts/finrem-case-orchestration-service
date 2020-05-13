@@ -2,6 +2,7 @@
   "event_id": "some_event_id",
   "case_details": {
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted"
+    "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyMVP2"
   }
 }

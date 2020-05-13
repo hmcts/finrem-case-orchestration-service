@@ -4,9 +4,9 @@
   "case_details": {
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "PBANumber": "PBA123456",
-      "d81Question": "No",
       "PBAreference": "ABCD",
       "consentOrder": {
         "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",

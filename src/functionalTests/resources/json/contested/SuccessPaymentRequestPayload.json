@@ -4,6 +4,7 @@
     "id": "17878767",
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "helpWithFeesQuestion": "No",
       "PBANumber": "PBA0066906",
