@@ -312,7 +312,6 @@
     },
     "id": "12345678",
     "jurisdiction": "divorce",
-    "state": "created",
-    "case_type_id": "FinancialRemedyContested"
+    "state": "created"
   }
 }
