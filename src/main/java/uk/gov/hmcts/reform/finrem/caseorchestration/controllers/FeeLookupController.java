@@ -28,10 +28,10 @@ import java.util.Map;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,11 +53,11 @@ public class FeeLookupController implements BaseController {
 
         validateCaseData(callbackRequest);
 
-        Map<String, Object> mapOfCaseData = caseDetails.getData();
-        ApplicationType applicationType = isConsentedApplication(mapOfCaseData) ? CONSENTED : CONTESTED;
+        ApplicationType applicationType = isConsentedApplication(caseDetails) ? CONSENTED : CONTESTED;
         FeeResponse feeResponse = feeService.getApplicationFee(applicationType);
 
         FeeCaseData feeResponseData = FeeCaseData.builder().build();
+        Map<String, Object> mapOfCaseData = caseDetails.getData();
         updateCaseWithFee(mapOfCaseData, feeResponseData, feeResponse);
         ObjectMapper objectMapper = new ObjectMapper();
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()

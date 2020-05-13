@@ -68,7 +68,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass().getResource("/fixtures/pba-payment.json").toURI()));
 
         when(feeService.getApplicationFee(CONSENTED)).thenReturn(fee(CONSENTED));
-        when(pbaPaymentService.makePayment(anyString(), anyString(), any())).thenReturn(paymentResponse(success));
+        when(pbaPaymentService.makePayment(anyString(), any())).thenReturn(paymentResponse(success));
     }
 
     private void doPBAPaymentReferenceAlreadyExistsSetup() throws Exception {
@@ -76,7 +76,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass().getResource(pbaPaymentAlreadyExists).toURI()));
 
         when(feeService.getApplicationFee(CONSENTED)).thenReturn(fee(CONSENTED));
-        when(pbaPaymentService.makePayment(anyString(), anyString(), any())).thenReturn(paymentResponse(true));
+        when(pbaPaymentService.makePayment(anyString(), any())).thenReturn(paymentResponse(true));
     }
 
     private void doHWFSetUp() throws Exception {
@@ -102,7 +102,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.amountToPay", is("1000")))
                 .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(pbaPaymentService, never()).makePayment(anyString(), anyString(), any());
+        verify(pbaPaymentService, never()).makePayment(anyString(), any());
     }
 
     @Test
@@ -115,7 +115,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors", hasSize(1)))
                 .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(pbaPaymentService, times(1)).makePayment(anyString(), anyString(), any());
+        verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
 
     }
 
@@ -134,7 +134,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.amountToPay", is("1000")))
                 .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(pbaPaymentService, times(1)).makePayment(anyString(), anyString(), any());
+        verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
     }
 
     @Test
@@ -147,6 +147,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(pbaPaymentService, times(0)).makePayment(anyString(), anyString(), any());
+        verify(pbaPaymentService, times(0)).makePayment(anyString(), any());
     }
 }
