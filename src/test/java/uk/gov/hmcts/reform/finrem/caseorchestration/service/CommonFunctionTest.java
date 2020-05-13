@@ -239,6 +239,14 @@ public class CommonFunctionTest {
         assertThat(isApplicantSolicitorResponsibleToDraftOrder(data), is(false));
     }
 
+    @Test
+    public void isApplicantSolicitorResponsibleToDraftOrderFalseWhenNull() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, null);
+
+        assertThat(isApplicantSolicitorResponsibleToDraftOrder(data), is(false));
+    }
+
     private static RespondToOrderData getRespondToOrderData(String s) {
         RespondToOrderData data = new RespondToOrderData();
         RespondToOrder respondToOrder = new RespondToOrder();

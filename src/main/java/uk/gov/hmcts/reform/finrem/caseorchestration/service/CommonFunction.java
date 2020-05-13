@@ -78,6 +78,6 @@ public class CommonFunction {
     }
 
     public static boolean isApplicantSolicitorResponsibleToDraftOrder(Map<String, Object> caseData) {
-        return caseData.get(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER).equals(APPLICANT_SOLICITOR);
+        return APPLICANT_SOLICITOR.equals(nullToEmpty(caseData.get(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER)));
     }
 }
