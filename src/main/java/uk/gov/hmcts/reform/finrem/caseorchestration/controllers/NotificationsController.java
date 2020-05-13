@@ -178,7 +178,8 @@ public class NotificationsController implements BaseController {
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingOrderSentEmail(
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to send email for 'Prepare for Hearing (after order sent)' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to send email for 'Prepare for Hearing (after order sent)' for Case ID: {}",
+            callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
