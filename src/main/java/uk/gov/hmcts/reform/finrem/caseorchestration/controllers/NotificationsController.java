@@ -170,6 +170,24 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
+    @PostMapping(value = "/case-orchestration/notify/prepare-for-hearing-order-sent", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send e-mail for 'Prepare for Hearing (after order sent)'.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "'Prepare for Hearing (after send order)' e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendPrepareForHearingOrderSentEmail(
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("Received request to send email for 'Prepare for Hearing (after order sent)' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
+        if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
+            log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing (after send order)'");
+            notificationService.sendPrepareForHearingOrderSentEmail(callbackRequest);
+        }
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
     @PostMapping(value = "/case-orchestration/notify/contest-application-issued", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for Contested 'Application Issued'.")
     @ApiResponses(value = {
