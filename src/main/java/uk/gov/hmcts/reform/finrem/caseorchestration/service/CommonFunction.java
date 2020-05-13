@@ -15,6 +15,7 @@ import java.util.function.Function;
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.Field.LINE_1;
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.Field.POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER;
@@ -79,5 +80,9 @@ public class CommonFunction {
 
     public static boolean isConsentedApplication(CaseDetails caseDetails) {
         return CASE_TYPE_ID_CONSENTED.equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
+    }
+
+    public static boolean isContestedApplication(CaseDetails caseDetails) {
+        return CASE_TYPE_ID_CONTESTED.equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
     }
 }

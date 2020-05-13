@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
@@ -247,6 +248,30 @@ public class CommonFunctionTest {
             "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
 
         assertThat(isConsentedApplication(caseDetails), is(false));
+    }
+
+    @Test
+    public void isContestedApplicationShouldReturnTrueWheCaseTypeIsSetToContested() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isContestedApplication(caseDetails), is(true));
+    }
+
+    @Test
+    public void isContestedApplicationShouldReturnFalseWheCaseTypeIsSetToConsented() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/valid-latest-consent-order.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isContestedApplication(caseDetails), is(false));
+    }
+
+    @Test
+    public void isContestedApplicationShouldReturnFalseWheCaseTypeIsSetToNull() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isContestedApplication(caseDetails), is(false));
     }
 
     private static RespondToOrderData getRespondToOrderData(String s) {

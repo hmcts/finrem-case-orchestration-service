@@ -58,6 +58,11 @@
         "document_filename": "file1",
         "document_binary_url": "http://file1.binary"
       },
+      "allocatedCourtList": {
+        "region": "southeast",
+        "southEastList": "kentfrc",
+        "kentSurreyCourtList": "FR_kent_surrey_hc_list_1"
+      },
       "divorceCaseNumber": "DD12D12345",
       "divorceDecreeAbsoluteDate": "2020-02-21",
       "divorceDecreeNisiDate": "2019-02-21",

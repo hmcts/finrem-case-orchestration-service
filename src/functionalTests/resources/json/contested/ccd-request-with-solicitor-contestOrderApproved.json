@@ -7,6 +7,11 @@
       "PBANumber": "PBA222",
       "PBAPaymentReference": "PBAPaymentRef123",
       "PBAreference": "PBARef123",
+      "allocatedCourtList": {
+        "region": "southeast",
+        "southEastList": "kentfrc",
+        "kentSurreyCourtList": "FR_kent_surrey_hc_list_1"
+      },
       "amendedConsentOrderCollection": [
         {
           "id": "1",
