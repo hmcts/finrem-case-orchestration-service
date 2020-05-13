@@ -49,8 +49,8 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     @Before
     public void setUp() {
         DocumentConfiguration config = new DocumentConfiguration();
-        config.setApplicationAssignedToJudgeTemplate("FL-FRM-LET-ENG-00318.docx");
-        config.setApplicationAssignedToJudgeFileName("AssignedToJudgeNotificationLetter.pdf");
+        config.setAssignedToJudgeNotificationTemplate("FL-FRM-LET-ENG-00318.docx");
+        config.setAssignedToJudgeNotificationFileName("AssignedToJudgeNotificationLetter.pdf");
 
         Map<String, Object> applicantAddress = new HashMap<>();
         applicantAddress.put("AddressLine1", "50 Applicant Street");
