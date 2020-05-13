@@ -3,6 +3,7 @@
   "case_details": {
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
       "d81Question": "No",
       "PBAreference": "ABCD",
