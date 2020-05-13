@@ -78,6 +78,6 @@ public class CommonFunction {
     }
 
     public static boolean isConsentedApplication(CaseDetails caseDetails) {
-        return CASE_TYPE_ID_CONSENTED.equalsIgnoreCase(caseDetails.getCaseTypeId());
+        return CASE_TYPE_ID_CONSENTED.equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
     }
 }

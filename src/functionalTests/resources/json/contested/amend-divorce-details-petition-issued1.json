@@ -5,6 +5,7 @@
     "id": "12345678",
     "jurisdiction": "divorce",
     "state": "created",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "applicantLName": "Ramisetti",
       "dateOfMarriage": "2012-10-10",
