@@ -78,7 +78,8 @@ public class NotificationsController implements BaseController {
         if (isPaperApplication(caseData)) {
             if (featureToggleService.isAssignedToJudgeNotificationLetterEnabled()) {
                 log.info("isAssignedToJudgeNotificationLetterEnabled is toggled on");
-                log.info("Sending AssignedToJudge notification letter for bulk print");
+                log.info("Sending AssignedToJudge notification letter for bulk print for Case ID: {}",
+                    callbackRequest.getCaseDetails().getId());
 
                 CaseDetails caseDetails = callbackRequest.getCaseDetails();
 

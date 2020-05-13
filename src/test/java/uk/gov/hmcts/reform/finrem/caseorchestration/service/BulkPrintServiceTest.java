@@ -50,8 +50,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     @Test
     public void shouldSendAssignedToJudgeNotificationLetterForBulkPrint() throws Exception {
         DocumentConfiguration config = new DocumentConfiguration();
-        config.setApplicationAssignedToJudgeTemplate("test_template");
-        config.setApplicationAssignedToJudgeFileName("test_file");
+        config.setAssignedToJudgeNotificationTemplate("test_template");
+        config.setAssignedToJudgeNotificationFileName("test_file");
 
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 

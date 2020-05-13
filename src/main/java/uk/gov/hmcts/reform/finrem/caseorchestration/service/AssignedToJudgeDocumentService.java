@@ -21,15 +21,15 @@ public class AssignedToJudgeDocumentService extends AbstractDocumentService {
 
     public CaseDocument generateAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken) {
         log.info("Generating Assigned To Judge Notification Letter {} from {} for bulk print",
-                config.getApplicationAssignedToJudgeFileName(),
-                config.getApplicationAssignedToJudgeTemplate());
+                config.getAssignedToJudgeNotificationTemplate(),
+                config.getAssignedToJudgeNotificationFileName());
 
         CaseDetails caseDetailsForBulkPrint = prepareNotificationLetter(caseDetails);
 
         CaseDocument generatedAssignedToJudgeNotificationLetter =
             generateDocument(authToken, caseDetailsForBulkPrint,
-                config.getApplicationAssignedToJudgeTemplate(),
-                config.getApplicationAssignedToJudgeFileName());
+                config.getAssignedToJudgeNotificationTemplate(),
+                config.getAssignedToJudgeNotificationFileName());
 
         log.info("Generated Assigned To Judge Notification Letter: {}", generatedAssignedToJudgeNotificationLetter);
 
