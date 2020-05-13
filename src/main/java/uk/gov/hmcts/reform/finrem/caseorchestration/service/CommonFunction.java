@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.function.Function;
 
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.Field.LINE_1;
 import static uk.gov.hmcts.reform.bsp.common.mapper.AddressMapper.Field.POSTCODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER;
@@ -73,5 +75,9 @@ public class CommonFunction {
 
     public static boolean isAmendedConsentOrderType(RespondToOrderData respondToOrderData) {
         return AMENDED_CONSENT_ORDER.equalsIgnoreCase(respondToOrderData.getRespondToOrder().getDocumentType());
+    }
+
+    public static boolean isConsentedApplication(CaseDetails caseDetails) {
+        return CASE_TYPE_ID_CONSENTED.equalsIgnoreCase(caseDetails.getCaseTypeId());
     }
 }

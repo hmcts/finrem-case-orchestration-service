@@ -7,9 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.D81_QUESTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HELP_WITH_FEES_QUESTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_PAYMENT_REFERENCE;
 
@@ -20,10 +18,6 @@ public interface BaseController {
             || callbackRequest.getCaseDetails().getData() == null) {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
         }
-    }
-
-    static boolean isConsentedApplication(Map<String, Object> caseData) {
-        return isNotEmpty((String) caseData.get(D81_QUESTION));
     }
 
     default boolean isPBAPayment(Map<String, Object> caseData) {
