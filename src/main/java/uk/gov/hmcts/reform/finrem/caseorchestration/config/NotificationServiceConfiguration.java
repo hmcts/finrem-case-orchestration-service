@@ -20,4 +20,5 @@ public class NotificationServiceConfiguration {
     private String contestedHwfSuccessful;
     private String contestedApplicationIssued;
     private String contestOrderApproved;
+    private String contestedDraftOrder;
 }
