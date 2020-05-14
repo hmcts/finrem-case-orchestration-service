@@ -1,35 +1,33 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 @Service
 @Slf4j
-public class HelpWithFeesDocumentService extends AbstractDocumentService {
+@RequiredArgsConstructor
+public class HelpWithFeesDocumentService {
 
-    @Autowired
-    public HelpWithFeesDocumentService(DocumentClient documentClient, DocumentConfiguration config,
-                                       ObjectMapper objectMapper) {
-        super(documentClient, config, objectMapper);
-    }
+    private final GenericDocumentService genericDocumentService;
+    private final DocumentConfiguration documentConfiguration;
+    private final DocumentHelper documentHelper;
 
     public CaseDocument generateHwfSuccessfulNotificationLetter(CaseDetails caseDetails, String authToken) {
         log.info("Generating Help With Fees Successful Notification Letter {} from {} for bulk print",
-            config.getHelpWithFeesSuccessfulNotificationFileName(),
-            config.getHelpWithFeesSuccessfulNotificationTemplate());
+            documentConfiguration.getHelpWithFeesSuccessfulNotificationFileName(),
+            documentConfiguration.getHelpWithFeesSuccessfulNotificationTemplate());
 
-        CaseDetails caseDetailsForBulkPrint = prepareNotificationLetter(caseDetails);
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareNotificationLetter(caseDetails);
 
-        CaseDocument generatedHwfSuccessfulNotificationLetter =
-            generateDocument(authToken, caseDetailsForBulkPrint,
-                config.getHelpWithFeesSuccessfulNotificationTemplate(),
-                config.getHelpWithFeesSuccessfulNotificationFileName());
+        CaseDocument generatedHwfSuccessfulNotificationLetter = genericDocumentService.generateDocument(authToken,
+            caseDetailsForBulkPrint,
+            documentConfiguration.getHelpWithFeesSuccessfulNotificationTemplate(),
+            documentConfiguration.getHelpWithFeesSuccessfulNotificationFileName());
 
         log.info("Generated Help With Fees Successful Notification Letter: {}", generatedHwfSuccessfulNotificationLetter);
 
