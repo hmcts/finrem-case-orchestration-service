@@ -34,6 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @RestController
@@ -80,11 +81,10 @@ public class BulkPrintController implements BaseController {
     }
 
     private void generateCoversheetForApplicant(String authToken) {
-
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (applicantIsNotRepresentedByASolicitor(caseData) || solicitorDidNotAgreeToReceiveEmails(caseData)) {
-
+        if (applicantIsNotRepresentedByASolicitor(caseData) || solicitorDidNotAgreeToReceiveEmails(caseData)
+            || isPaperApplication(caseData)) {
             CaseDocument applicantCoverSheet = coverSheetService.generateApplicantCoverSheet(caseDetails, authToken);
             UUID applicantLetterId = bulkPrintService.sendOrdersForBulkPrint(applicantCoverSheet, caseDetails);
 
@@ -96,7 +96,6 @@ public class BulkPrintController implements BaseController {
     }
 
     private void generateCoversheetForRespondent(String authToken) {
-
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authToken);
         UUID respondentLetterId = bulkPrintService.sendOrdersForBulkPrint(respondentCoverSheet, caseDetails);
 
