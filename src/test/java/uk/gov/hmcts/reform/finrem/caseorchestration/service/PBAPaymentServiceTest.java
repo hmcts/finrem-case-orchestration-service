@@ -59,8 +59,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + " ]"
                         + "}");
 
-        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, "123",
-                callbackRequest.getCaseDetails().getData());
+        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
 
         assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
         assertThat(paymentResponse.getStatus(), is("Success"));
@@ -88,8 +87,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + " ]"
                         + "}");
 
-        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, "123",
-                callbackRequest.getCaseDetails().getData());
+        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
 
         assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
         assertThat(paymentResponse.getStatus(), is("Failed"));
@@ -120,8 +118,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + " ]"
                         + "}");
 
-        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, "123",
-                callbackRequest.getCaseDetails().getData());
+        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
 
         assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
         assertThat(paymentResponse.getStatus(), is("Failed"));
@@ -151,8 +148,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + " ]"
                         + "}");
 
-        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, "123",
-                callbackRequest.getCaseDetails().getData());
+        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
 
         assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
         assertThat(paymentResponse.getStatus(), is("Failed"));
@@ -175,8 +171,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
                         + "  \"path\": \"/credit-account-payments\""
                         + "}");
 
-        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, "123",
-                callbackRequest.getCaseDetails().getData());
+        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
 
         assertThat(paymentResponse.getReference(), nullValue());
         assertThat(paymentResponse.getStatus(), is("403"));

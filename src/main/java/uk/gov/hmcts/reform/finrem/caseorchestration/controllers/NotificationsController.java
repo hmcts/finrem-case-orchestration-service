@@ -23,8 +23,8 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @RestController
@@ -49,7 +49,7 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
-            if (isConsentedApplication(caseData)) {
+            if (isConsentedApplication(callbackRequest.getCaseDetails())) {
                 log.info("Sending Consented HWF Successful email notification to Solicitor");
                 notificationService.sendConsentedHWFSuccessfulConfirmationEmail(callbackRequest);
             } else {
@@ -78,7 +78,8 @@ public class NotificationsController implements BaseController {
         if (isPaperApplication(caseData)) {
             if (featureToggleService.isAssignedToJudgeNotificationLetterEnabled()) {
                 log.info("isAssignedToJudgeNotificationLetterEnabled is toggled on");
-                log.info("Sending AssignedToJudge notification letter for bulk print");
+                log.info("Sending AssignedToJudge notification letter for bulk print for Case ID: {}",
+                    callbackRequest.getCaseDetails().getId());
 
                 CaseDetails caseDetails = callbackRequest.getCaseDetails();
 

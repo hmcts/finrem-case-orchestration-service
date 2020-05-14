@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseController.isConsentedApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,17 +40,17 @@ public class PaymentConfirmationController implements BaseController {
         log.info("Received request for PBA confirmation for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callbackRequest);
-        Map<String,Object> caseData = caseDetails.getData();
 
         SubmittedCallbackResponse callbackResponse = SubmittedCallbackResponse.builder()
-            .confirmationBody(confirmationBody(caseData))
+            .confirmationBody(confirmationBody(caseDetails))
             .build();
 
         return ResponseEntity.ok(callbackResponse);
     }
 
-    private String confirmationBody(Map<String, Object> caseData) throws IOException {
-        boolean isConsentedApplication = isConsentedApplication(caseData);
+    private String confirmationBody(CaseDetails caseDetails) throws IOException {
+        boolean isConsentedApplication = isConsentedApplication(caseDetails);
+        Map<String,Object> caseData = caseDetails.getData();
         log.info("Application type isConsentedApplication : {}", isConsentedApplication);
 
         String confirmationBody;
