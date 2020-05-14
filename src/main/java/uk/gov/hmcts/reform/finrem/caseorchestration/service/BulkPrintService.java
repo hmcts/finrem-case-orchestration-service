@@ -1,12 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
@@ -24,23 +21,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getLastMapValue;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
-public class BulkPrintService extends AbstractDocumentService {
+public class BulkPrintService {
 
     private static final String DOCUMENT_FILENAME = "document_filename";
     private static final String DOCUMENT_URL = "document_binary_url";
     private static final String VALUE = "value";
 
     private final FeatureToggleService featureToggleService;
-
-    @Autowired
-    public BulkPrintService(DocumentClient documentClient,
-                            DocumentConfiguration config,
-                            ObjectMapper objectMapper,
-                            FeatureToggleService featureToggleService) {
-        super(documentClient, config, objectMapper);
-        this.featureToggleService = featureToggleService;
-    }
+    private final GenericDocumentService genericDocumentService;
 
     public UUID sendNotificationLetterForBulkPrint(final CaseDocument notificationLetter, final CaseDetails caseDetails) {
         List<BulkPrintDocument> notificationLetterList = new ArrayList<>();
@@ -53,7 +43,7 @@ public class BulkPrintService extends AbstractDocumentService {
 
         log.info("Notification letter sent to Bulk Print: {} for Case ID: {}", notificationLetterList, caseId);
 
-        return bulkPrint(
+        return genericDocumentService.bulkPrint(
             BulkPrintRequest.builder()
                 .caseId(caseId)
                 .letterType("FINANCIAL_REMEDY_PACK")
@@ -84,7 +74,7 @@ public class BulkPrintService extends AbstractDocumentService {
         log.info("{} Order documents (including cover sheet) have been sent to bulk print.", bulkPrintDocuments.size());
         log.info("Documents sent to Bulk Print: {}", bulkPrintDocuments);
 
-        return bulkPrint(
+        return genericDocumentService.bulkPrint(
             BulkPrintRequest.builder()
                 .caseId(caseDetails.getId().toString())
                 .letterType("FINANCIAL_REMEDY_PACK")

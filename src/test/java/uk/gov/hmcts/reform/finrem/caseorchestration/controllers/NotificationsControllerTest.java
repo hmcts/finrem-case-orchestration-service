@@ -29,7 +29,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
 public class NotificationsControllerTest {
+    //URLs
     private static final String HWF_SUCCESSFUL_CALLBACK_URL = "/case-orchestration/notify/hwf-successful";
     private static final String ASSIGN_TO_JUDGE_CALLBACK_URL = "/case-orchestration/notify/assign-to-judge";
     private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
@@ -47,9 +47,15 @@ public class NotificationsControllerTest {
     private static final String PREPARE_FOR_HEARING_CALLBACK_URL = "/case-orchestration/notify/prepare-for-hearing";
     private static final String CONTESTED_APPLICATION_ISSUED_CALLBACK_URL = "/case-orchestration/notify/contest-application-issued";
     private static final String CONTEST_ORDER_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contest-order-approved";
+    private static final String CONTESTED_DRAFT_ORDER_URL = "/case-orchestration/notify/draft-order";
+
+    //JSON Data
     private static final String CCD_REQUEST_JSON = "/fixtures/model/ccd-request.json";
     private static final String CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON = "/fixtures/ccd-request-with-solicitor-email-consent.json";
     private static final String BULK_PRINT_PAPER_APPLICATION_JSON = "/fixtures/bulkprint/bulk-print-paper-application.json";
+    private static final String DRAFT_ORDER_SUCCESSFUL_APPLICANT_SOL = "/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json";
+    private static final String DRAFT_ORDER_UNSUCCESSFUL_APPLICANT_SOL = "/fixtures/applicant-solicitor-to-draft-order-without-email-consent.json";
+    private static final String DRAFT_ORDER_UNSUCCESSFUL_RESPONDENT_SOL = "/fixtures/respondent-solicitor-to-draft-order-with-email-consent.json";
 
     @Autowired
     private WebApplicationContext applicationContext;
@@ -101,7 +107,7 @@ public class NotificationsControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verifyNoMoreInteractions(notificationService);
+        verifyNoInteractions(notificationService);
     }
 
     @Test
@@ -162,7 +168,7 @@ public class NotificationsControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verifyNoMoreInteractions(notificationService);
+        verifyNoInteractions(notificationService);
     }
 
     @Test
@@ -221,7 +227,7 @@ public class NotificationsControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verifyNoMoreInteractions(notificationService);
+        verifyNoInteractions(notificationService);
     }
 
     @Test
@@ -246,7 +252,7 @@ public class NotificationsControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verifyNoMoreInteractions(notificationService);
+        verifyNoInteractions(notificationService);
     }
 
     @Test
@@ -271,7 +277,7 @@ public class NotificationsControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verifyNoMoreInteractions(notificationService);
+        verifyNoInteractions(notificationService);
     }
 
     @Test
@@ -296,7 +302,7 @@ public class NotificationsControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verifyNoMoreInteractions(notificationService);
+        verifyNoInteractions(notificationService);
     }
 
     @Test
@@ -367,6 +373,40 @@ public class NotificationsControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
+
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void sendDraftOrderEmailWhenApplicantSolicitorIsNominatedAndIsAcceptingEmails() throws Exception {
+        buildCcdRequest(DRAFT_ORDER_SUCCESSFUL_APPLICANT_SOL);
+        mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
+                .content(requestContent.toString())
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+                .sendSolicitorToDraftOrderEmail(any(CallbackRequest.class));
+    }
+
+    @Test
+    public void shouldNotSendDraftOrderEmailAsSolicitorOptedOutOfEmailComms() throws Exception {
+        buildCcdRequest(DRAFT_ORDER_UNSUCCESSFUL_APPLICANT_SOL);
+        mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
+                .content(requestContent.toString())
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
+
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void shouldNotSendDraftOrderEmailAsRespondentSolicitorIsNominated() throws Exception {
+        buildCcdRequest(DRAFT_ORDER_UNSUCCESSFUL_RESPONDENT_SOL);
+        mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
+                .content(requestContent.toString())
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
 
         verifyNoInteractions(notificationService);
     }

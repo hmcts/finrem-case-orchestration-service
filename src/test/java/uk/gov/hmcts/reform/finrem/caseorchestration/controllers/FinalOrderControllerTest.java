@@ -8,7 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 public class FinalOrderControllerTest extends BaseControllerTest {
 
     @MockBean
-    private ConsentOrderApprovedDocumentService service;
+    private GenericDocumentService genericDocumentService;
 
     private static final String SEND_ORDER_ENDPOINT = "/case-orchestration/contested/send-order";
 
@@ -118,6 +118,6 @@ public class FinalOrderControllerTest extends BaseControllerTest {
     }
 
     private OngoingStubbing<CaseDocument> whenStampingDocument() {
-        return when(service.stampDocument(isA(CaseDocument.class), anyString()));
+        return when(genericDocumentService.stampDocument(isA(CaseDocument.class), anyString()));
     }
 }

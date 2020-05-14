@@ -149,18 +149,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldStampDocument() {
-        reset(documentClientMock);
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
-
-        CaseDocument caseDocument = caseDocument();
-        CaseDocument stampDocument = consentOrderApprovedDocumentService.stampDocument(caseDocument, AUTH_TOKEN);
-
-        assertCaseDocument(stampDocument);
-        verify(documentClientMock, times(1)).stampDocument(any(), anyString());
-    }
-
-    @Test
     public void shouldStampPensionDocuments() {
         reset(documentClientMock);
         when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());

@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalData;
@@ -39,7 +40,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class RefusalOrderDocumentServiceTest {
 
     private ObjectMapper mapper = new ObjectMapper();
-    private RefusalOrderDocumentService service;
+    private GenericDocumentService genericDocumentService;
+    private RefusalOrderDocumentService refusalOrderDocumentService;
 
     @Before
     public void setUp() {
@@ -56,14 +58,15 @@ public class RefusalOrderDocumentServiceTest {
         DocumentClient generatorClient = Mockito.mock(DocumentClient.class);
         when(generatorClient.generatePdf(isA(DocumentGenerationRequest.class), eq(AUTH_TOKEN))).thenReturn(document);
 
-        service = new RefusalOrderDocumentService(generatorClient, config, mapper);
+        genericDocumentService = new GenericDocumentService(generatorClient, mapper);
+        refusalOrderDocumentService = new RefusalOrderDocumentService(genericDocumentService, config, new DocumentHelper(mapper), mapper);
     }
 
     @Test
     public void generateConsentOrderNotApproved() throws Exception {
         CaseDetails caseDetails = caseDetails("/fixtures/model/case-details.json");
 
-        Map<String, Object> caseData = service.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
         ConsentOrderData consentOrderData = consentOrderData(caseData);
 
         assertThat(consentOrderData.getId(), is(notNullValue()));
@@ -78,7 +81,7 @@ public class RefusalOrderDocumentServiceTest {
     public void multipleRefusalOrdersGenerateConsentOrderNotApproved() throws Exception {
         CaseDetails caseDetails = caseDetails("/fixtures/model/copy-case-details-multiple-orders.json");
 
-        Map<String, Object> caseData = service.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
         List<OrderRefusalData> orderRefusalData = refusalOrderCollection(caseData);
         assertThat(orderRefusalData.size(), is(2));
         assertThat(orderRefusalData.get(0).getId(), Is.is("1"));
@@ -96,7 +99,7 @@ public class RefusalOrderDocumentServiceTest {
     @Test
     public void previewConsentOrderNotApproved() throws Exception {
         CaseDetails caseDetails = caseDetails("/fixtures/model/case-details.json");
-        Map<String, Object> caseData = service.previewConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        Map<String, Object> caseData = refusalOrderDocumentService.previewConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
         CaseDocument caseDocument = getCaseDocument(caseData);
 
         assertCaseDocument(caseDocument);
