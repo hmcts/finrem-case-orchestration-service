@@ -4,6 +4,7 @@
     "id": "123",
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "PBANumber": "PBA123",
       "d81Question": "No",

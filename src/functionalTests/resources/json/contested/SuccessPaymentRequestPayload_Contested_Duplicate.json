@@ -6,6 +6,7 @@
     "id": "100090018",
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
      "ignore_warning": false,
       "event_data": {
