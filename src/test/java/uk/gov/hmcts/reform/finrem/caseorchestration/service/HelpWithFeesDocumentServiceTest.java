@@ -49,8 +49,8 @@ public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
     @Before
     public void setUp() {
         DocumentConfiguration config = new DocumentConfiguration();
-        config.setHelpWithFeesSuccessfulTemplate("FL-FRM-LET-ENG-00096.docx");
-        config.setHelpWithFeesSuccessfulFileName("HelpWithFeesSuccessfulNotificationLetter.pdf");
+        config.setHelpWithFeesSuccessfulNotificationTemplate("FL-FRM-LET-ENG-00096.docx");
+        config.setHelpWithFeesSuccessfulNotificationFileName("HelpWithFeesSuccessfulNotificationLetter.pdf");
 
         Map<String, Object> applicantAddress = new HashMap<>();
         applicantAddress.put("AddressLine1", "50 Applicant Street");

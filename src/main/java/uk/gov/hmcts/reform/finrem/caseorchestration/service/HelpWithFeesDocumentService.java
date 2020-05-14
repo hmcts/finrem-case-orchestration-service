@@ -21,15 +21,15 @@ public class HelpWithFeesDocumentService extends AbstractDocumentService {
 
     public CaseDocument generateHwfSuccessfulNotificationLetter(CaseDetails caseDetails, String authToken) {
         log.info("Generating Help With Fees Successful Notification Letter {} from {} for bulk print",
-            config.getHelpWithFeesSuccessfulFileName(),
-            config.getHelpWithFeesSuccessfulTemplate());
+            config.getHelpWithFeesSuccessfulNotificationFileName(),
+            config.getHelpWithFeesSuccessfulNotificationTemplate());
 
         CaseDetails caseDetailsForBulkPrint = prepareNotificationLetter(caseDetails);
 
         CaseDocument generatedHwfSuccessfulNotificationLetter =
             generateDocument(authToken, caseDetailsForBulkPrint,
-                config.getHelpWithFeesSuccessfulTemplate(),
-                config.getHelpWithFeesSuccessfulFileName());
+                config.getHelpWithFeesSuccessfulNotificationTemplate(),
+                config.getHelpWithFeesSuccessfulNotificationFileName());
 
         log.info("Generated Help With Fees Successful Notification Letter: {}", generatedHwfSuccessfulNotificationLetter);
 
