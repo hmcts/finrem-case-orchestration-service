@@ -24,6 +24,7 @@ import java.util.Map;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorResponsibleToDraftOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
@@ -203,6 +204,25 @@ public class NotificationsController implements BaseController {
         if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
             log.info("Sending 'Contest Order Approved' email notification to Applicant Solicitor");
             notificationService.sendContestOrderApprovedEmail(callbackRequest);
+        }
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    @PostMapping(value = "/case-orchestration/notify/draft-order", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send e-mail for Solicitor To Draft Order")
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "Draft Order e-mail sent successfully",
+                    response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendDraftOrderEmail(
+            @RequestBody CallbackRequest callbackRequest) {
+        log.info("Received request to send email for 'Applicant Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+
+        if (isApplicantSolicitorResponsibleToDraftOrder(caseData) && isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
+            log.info("Sending email notification to Applicant Solicitor for 'Draft Order'");
+            notificationService.sendSolicitorToDraftOrderEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
