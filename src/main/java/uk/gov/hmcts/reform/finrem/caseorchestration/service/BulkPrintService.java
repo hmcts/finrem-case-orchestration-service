@@ -79,7 +79,12 @@ public class BulkPrintService {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(coverSheet.getDocumentBinaryUrl()).build());
 
-        List<BulkPrintDocument> approvedOrderCollection = approvedOrderCollection(caseDetails.getData(), recipientIsApplicant);
+        if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled() && recipientIsApplicant) {
+            log.info("Adding consentOrderApprovedNotificationLetter document to BulkPrint documents list");
+            bulkPrintDocuments.addAll(convertBulkPrintDocument(caseDetails.getData(), CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER));
+        }
+
+        List<BulkPrintDocument> approvedOrderCollection = approvedOrderCollection(caseDetails.getData());
         if (!approvedOrderCollection.isEmpty()) {
             log.info("Sending Approved Order Collections for Bulk Print.: {}", approvedOrderCollection);
             bulkPrintDocuments.addAll(approvedOrderCollection);
@@ -114,7 +119,7 @@ public class BulkPrintService {
         return bulkPrintDocuments;
     }
 
-    List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data, boolean recipientIsApplicant) {
+    List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         List<Map> documentList = ofNullable(data.get(APPROVED_ORDER_COLLECTION))
             .map(i -> (List<Map>) i)
@@ -130,11 +135,6 @@ public class BulkPrintService {
                 "uploadedDocument"));
         } else {
             log.info("Failed to extract 'approvedOrderCollection' from case data for bulk print as document list was empty.");
-        }
-
-        if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled() && recipientIsApplicant) {
-            log.info("Adding consentOrderApprovedNotificationLetter document to BulkPrint documents list");
-            bulkPrintDocuments.addAll(convertBulkPrintDocument(data, CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER));
         }
 
         log.info("Documents inside 'approvedOrderCollection' are: {}", bulkPrintDocuments);
