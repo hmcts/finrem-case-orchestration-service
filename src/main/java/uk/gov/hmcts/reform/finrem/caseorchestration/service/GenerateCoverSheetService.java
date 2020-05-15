@@ -98,7 +98,8 @@ public class GenerateCoverSheetService {
         caseDetails.getData().put(BULK_PRINT_COVER_SHEET, bulkPrintCoverSheetBuilder.build());
     }
 
-    private void fillBulkPrintCoverSheetWithAddress(BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder, Map<String, Object> address) {
+    private void fillBulkPrintCoverSheetWithAddress(BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder,
+                                                    Map<String, Object> address) {
         bulkPrintCoverSheetBuilder
             .addressLine1(nullToEmpty(address.get("AddressLine1")))
             .addressLine2(nullToEmpty(address.get("AddressLine2")))
