@@ -93,14 +93,9 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldConvertCollectionDocument() throws Exception {
-        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.approvedOrderCollection(caseDetails().getData(), true);
+        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.approvedOrderCollection(caseDetails().getData());
 
-        System.out.println(bulkPrintDocuments);
-        if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
-            assertThat(bulkPrintDocuments, hasSize(5));
-        } else {
-            assertThat(bulkPrintDocuments, hasSize(4));
-        }
+        assertThat(bulkPrintDocuments, hasSize(4));
     }
 
     private CaseDetails caseDetails() throws Exception {
