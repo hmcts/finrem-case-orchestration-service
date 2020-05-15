@@ -56,7 +56,8 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
         when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(coverSheetService.generateApplicantCoverSheet(any(), any())).thenReturn(new CaseDocument());
-        when(bulkPrintService.sendOrdersForBulkPrint(any(), any())).thenReturn(randomId);
+        when(bulkPrintService.sendOrderForBulkPrintApplicant(any(), any())).thenReturn(randomId);
+        when(bulkPrintService.sendOrderForBulkPrintRespondent(any(), any())).thenReturn(randomId);
 
         mvc.perform(
                 post(BULK_PRINT_URI)
@@ -69,7 +70,8 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.bulkPrintLetterIdRes", is(randomId.toString())))
                 .andExpect(jsonPath("$.data.bulkPrintCoverSheetApp").exists())
                 .andExpect(jsonPath("$.data.bulkPrintLetterIdApp", is(randomId.toString())));
-        verify(bulkPrintService, times(2)).sendOrdersForBulkPrint(any(), any());
+        verify(bulkPrintService, times(1)).sendOrderForBulkPrintApplicant(any(), any());
+        verify(bulkPrintService, times(1)).sendOrderForBulkPrintRespondent(any(), any());
         verify(coverSheetService).generateRespondentCoverSheet(any(), any());
         verify(coverSheetService).generateApplicantCoverSheet(any(), any());
     }
@@ -85,7 +87,8 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
         when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(coverSheetService.generateApplicantCoverSheet(any(), any())).thenReturn(new CaseDocument());
-        when(bulkPrintService.sendOrdersForBulkPrint(any(), any())).thenReturn(randomId);
+        when(bulkPrintService.sendOrderForBulkPrintApplicant(any(), any())).thenReturn(randomId);
+        when(bulkPrintService.sendOrderForBulkPrintRespondent(any(), any())).thenReturn(randomId);
 
         mvc.perform(
                 post(BULK_PRINT_URI)
@@ -98,7 +101,8 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.bulkPrintLetterIdRes", is(randomId.toString())))
                 .andExpect(jsonPath("$.data.bulkPrintCoverSheetApp").exists())
                 .andExpect(jsonPath("$.data.bulkPrintLetterIdApp", is(randomId.toString())));
-        verify(bulkPrintService, times(2)).sendOrdersForBulkPrint(any(), any());
+        verify(bulkPrintService, times(1)).sendOrderForBulkPrintApplicant(any(), any());
+        verify(bulkPrintService, times(1)).sendOrderForBulkPrintRespondent(any(), any());
         verify(coverSheetService).generateRespondentCoverSheet(any(), any());
         verify(coverSheetService).generateApplicantCoverSheet(any(), any());
     }
@@ -113,7 +117,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                                 .toURI()));
 
         when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenReturn(new CaseDocument());
-        when(bulkPrintService.sendOrdersForBulkPrint(any(), any())).thenReturn(randomId);
+        when(bulkPrintService.sendOrderForBulkPrintRespondent(any(), any())).thenReturn(randomId);
 
         mvc.perform(
                 post(BULK_PRINT_URI)
@@ -124,7 +128,8 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 .andDo(print())
                 .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes").exists())
                 .andExpect(jsonPath("$.data.bulkPrintLetterIdRes", is(randomId.toString())));
-        verify(bulkPrintService).sendOrdersForBulkPrint(any(), any());
+        verify(bulkPrintService, times(0)).sendOrderForBulkPrintApplicant(any(), any());
+        verify(bulkPrintService).sendOrderForBulkPrintRespondent(any(), any());
         verify(coverSheetService).generateRespondentCoverSheet(any(), any());
     }
 
@@ -151,7 +156,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 objectMapper.readTree(
                         new File(getClass().getResource(CONTESTED_HWF_JSON).toURI()));
         when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenReturn(new CaseDocument());
-        when(bulkPrintService.sendOrdersForBulkPrint(any(), any())).thenThrow(feignError());
+        when(bulkPrintService.sendOrderForBulkPrintRespondent(any(), any())).thenThrow(feignError());
         mvc.perform(
                 post(BULK_PRINT_URI)
                         .content(requestContent.toString())
@@ -159,6 +164,6 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isInternalServerError());
         verify(coverSheetService).generateRespondentCoverSheet(any(), any());
-        verify(bulkPrintService).sendOrdersForBulkPrint(any(), any());
+        verify(bulkPrintService).sendOrderForBulkPrintRespondent(any(), any());
     }
 }

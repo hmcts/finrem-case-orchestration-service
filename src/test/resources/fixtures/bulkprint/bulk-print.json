@@ -51,11 +51,6 @@
               "document_filename": "ApprovedConsentOrderLetter.pdf",
               "document_binary_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8/binary"
             },
-            "consentOrderApprovedNotificationLetter": {
-              "document_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8",
-              "document_filename": "ApprovedConsentOrderNotificationLetter.pdf",
-              "document_binary_url": "http://localhost:4506/documents/ad2da2ss-23xd-3f33-f3ff-243f787a9fb8/binary"
-            },
             "consentOrder": {
               "document_url": "http://localhost:4506/documents/3e3b6389-a9da-4b1e-b7d0-e949701efcd1",
               "document_filename": "011.pdf",
@@ -116,6 +111,11 @@
           }
         }
       ],
+      "consentOrderApprovedNotificationLetter": {
+        "document_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8",
+        "document_filename": "ApprovedConsentOrderNotificationLetter.pdf",
+        "document_binary_url": "http://localhost:4506/documents/ad2da2ss-23xd-3f33-f3ff-243f787a9fb8/binary"
+      },
       "applicantAddress": {
         "AddressLine1": "1 Victoria Street",
         "AddressLine2": "Westminster",

@@ -128,8 +128,6 @@ public class ConsentOrderApprovedController implements BaseController {
         List<ApprovedOrderData> approvedOrders = asList(approvedOrderData);
         caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
-
-
         log.info("Successfully generated documents for 'Consent Order Approved'");
     }
 

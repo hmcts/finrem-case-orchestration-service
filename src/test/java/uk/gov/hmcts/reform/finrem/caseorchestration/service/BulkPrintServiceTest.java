@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -25,16 +26,14 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test-mock-document-client")
+@SpringBootTest(properties = {"feature.toggle.approved_consent_order_notification_letter=true"})
 public class BulkPrintServiceTest extends BaseServiceTest {
 
-    @Autowired
-    private DocumentClient documentClient;
+    @Autowired private DocumentClient documentClient;
+    @Autowired private BulkPrintService bulkPrintService;
+    @Autowired private FeatureToggleService featureToggleService;
+    @Autowired private ObjectMapper mapper;
 
-    @Autowired
-    private BulkPrintService bulkPrintService;
-
-    private final FeatureToggleService featureToggleService = new FeatureToggleService();
-    private ObjectMapper mapper = new ObjectMapper();
     private UUID letterId;
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor;
 
@@ -63,10 +62,10 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldSendOrdersForBulkPrintForApproved() throws Exception {
+    public void shouldSendOrderDocumentsForBulkPrintForApproved() throws Exception {
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
-        UUID bulkPrintLetterId = bulkPrintService.sendOrdersForBulkPrint(
+        UUID bulkPrintLetterId = bulkPrintService.sendOrderForBulkPrintApplicant(
             new CaseDocument(), caseDetails());
 
         assertThat(bulkPrintLetterId, is(letterId));
@@ -78,7 +77,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     public void shouldSendForBulkPrintForNotApproved() throws Exception {
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
-        UUID bulkPrintLetterId = bulkPrintService.sendOrdersForBulkPrint(
+        UUID bulkPrintLetterId = bulkPrintService.sendOrderForBulkPrintRespondent(
             new CaseDocument(), caseDetailsForNonApproved());
 
         assertThat(bulkPrintLetterId, is(letterId));
@@ -94,8 +93,9 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldConvertCollectionDocument() throws Exception {
-        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.approvedOrderCollection(caseDetails().getData());
+        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.approvedOrderCollection(caseDetails().getData(), true);
 
+        System.out.println(bulkPrintDocuments);
         if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
             assertThat(bulkPrintDocuments, hasSize(5));
         } else {
