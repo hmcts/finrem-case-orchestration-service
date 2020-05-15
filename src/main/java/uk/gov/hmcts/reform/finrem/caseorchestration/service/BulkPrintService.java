@@ -67,32 +67,31 @@ public class BulkPrintService {
     }
 
     /**
+     * Sending approved order collection or upload order (if approved order collection is empty) to bulk print.
      * @param coverSheet cover sheet document
-     * @param caseDetails
-     * @param recipientIsApplicant true if applicant is the recipient, false for respondent being the recipient.
+     * @param caseDetails {@link CaseDetails} object
+     * @param recipientIsApplicant true if applicant is the recipient, false for respondent being the recipient
      * @return
      */
     private UUID sendOrdersForBulkPrint(final CaseDocument coverSheet, final CaseDetails caseDetails, boolean recipientIsApplicant) {
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         log.info("Sending Orders for Bulk Print.");
 
-        bulkPrintDocuments.add(
-            BulkPrintDocument.builder().binaryFileUrl(coverSheet.getDocumentBinaryUrl()).build());
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(coverSheet.getDocumentBinaryUrl()).build());
 
         List<BulkPrintDocument> approvedOrderCollection = approvedOrderCollection(caseDetails.getData(), recipientIsApplicant);
-        List<BulkPrintDocument> uploadOrder = uploadOrder(caseDetails.getData());
-
         if (!approvedOrderCollection.isEmpty()) {
             log.info("Sending Approved Order Collections for Bulk Print.: {}", approvedOrderCollection);
-
             bulkPrintDocuments.addAll(approvedOrderCollection);
-        } else if (!uploadOrder.isEmpty()) {
-            log.info("Sending Upload Order Collections for Bulk Print: {}", uploadOrder);
-            bulkPrintDocuments.addAll(uploadOrder);
+        } else {
+            List<BulkPrintDocument> uploadOrder = uploadOrder(caseDetails.getData());
+            if (!uploadOrder.isEmpty()) {
+                log.info("Sending Upload Order Collections for Bulk Print: {}", uploadOrder);
+                bulkPrintDocuments.addAll(uploadOrder);
+            }
         }
 
-        log.info("{} Order documents (including cover sheet) have been sent to bulk print.", bulkPrintDocuments.size());
-        log.info("Documents sent to Bulk Print: {}", bulkPrintDocuments);
+        log.info("{} Order documents (including cover sheet) have been sent to bulk print: {}", bulkPrintDocuments.size(), bulkPrintDocuments);
 
         return genericDocumentService.bulkPrint(
             BulkPrintRequest.builder()

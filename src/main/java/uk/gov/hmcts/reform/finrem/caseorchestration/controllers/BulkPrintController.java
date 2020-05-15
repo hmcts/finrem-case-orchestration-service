@@ -74,7 +74,7 @@ public class BulkPrintController implements BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.remove(BULK_PRINT_COVER_SHEET);
-        
+
         log.info("Bulk print is successful.");
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
