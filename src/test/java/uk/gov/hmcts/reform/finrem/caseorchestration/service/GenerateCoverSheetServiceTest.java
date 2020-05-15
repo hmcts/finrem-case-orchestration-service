@@ -106,6 +106,32 @@ public class GenerateCoverSheetServiceTest {
         assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
     }
 
+    @Test
+    public void whenPartyIsRepresented_thenSolicitorNameIsUsedOnCoverSheet() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithSolicitors();
+
+        generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
+        assertThat(bulkPrintCoverSheet.getRecipientName(), is("Mr J Solicitor\nSolicitor & Co"));
+
+        generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
+        bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
+        assertThat(bulkPrintCoverSheet.getRecipientName(), is("Ms J Solicitor\nLaw in Pink Ltd."));
+    }
+
+    @Test
+    public void whenPartyIsNotRepresented_thenPartyNameIsUsedOnCoverSheet() throws Exception {
+        CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
+
+        generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
+        assertThat(bulkPrintCoverSheet.getRecipientName(), is("John Doe"));
+
+        generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
+        bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
+        assertThat(bulkPrintCoverSheet.getRecipientName(), is("Jane Doe"));
+    }
+
     private CaseDetails caseDetails() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
