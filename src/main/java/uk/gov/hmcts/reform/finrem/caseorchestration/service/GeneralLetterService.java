@@ -3,12 +3,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
@@ -25,31 +25,32 @@ import java.util.function.UnaryOperator;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
-public class GeneralLetterService extends AbstractDocumentService {
+public class GeneralLetterService {
+
+    private final GenericDocumentService genericDocumentService;
+    private final DocumentConfiguration documentConfiguration;
+    private final DocumentHelper documentHelper;
+    private final ObjectMapper objectMapper;
 
     private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
     private Function<CaseDocument, GeneralLetterData> createGeneralLetterData = this::applyGeneralLetterData;
     private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
 
-    @Autowired
-    public GeneralLetterService(DocumentClient documentClient, DocumentConfiguration config, ObjectMapper objectMapper) {
-        super(documentClient, config, objectMapper);
-    }
-
     public Map<String, Object> createGeneralLetter(String authorisationToken, CaseDetails caseDetails) {
 
         log.info("Generating General letter for Case ID: {}", caseDetails.getId());
         return generateDocument
-                .andThen(createGeneralLetterData)
-                .andThen(data -> populateGeneralLetterData(data, caseDetails))
-                .apply(copyOf(caseDetails), authorisationToken);
+            .andThen(createGeneralLetterData)
+            .andThen(data -> populateGeneralLetterData(data, caseDetails))
+            .apply(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken);
     }
 
     private CaseDocument applyGenerateDocument(CaseDetails caseDetails, String authorisationToken) {
-        return generateDocument(authorisationToken, addExtraFields.apply(caseDetails),
-                config.getGeneralLetterTemplate(),
-                config.getGeneralLetterFileName());
+        return genericDocumentService.generateDocument(authorisationToken, addExtraFields.apply(caseDetails),
+            documentConfiguration.getGeneralLetterTemplate(),
+            documentConfiguration.getGeneralLetterFileName());
     }
 
     private GeneralLetterData applyGeneralLetterData(CaseDocument caseDocument) {
@@ -74,8 +75,8 @@ public class GeneralLetterService extends AbstractDocumentService {
         Map<String, Object> caseData = caseDetails.getData();
 
         List<GeneralLetterData> generalLetterDataList = Optional.ofNullable(caseData.get(GENERAL_LETTER))
-                .map(this::convertToUploadOrderList)
-                .orElse(new ArrayList<>());
+            .map(this::convertToUploadOrderList)
+            .orElse(new ArrayList<>());
 
         generalLetterDataList.add(generalLetterData);
 
@@ -83,6 +84,7 @@ public class GeneralLetterService extends AbstractDocumentService {
     }
 
     private List<GeneralLetterData> convertToUploadOrderList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<GeneralLetterData>>() {});
+        return objectMapper.convertValue(object, new TypeReference<List<GeneralLetterData>>() {
+        });
     }
 }

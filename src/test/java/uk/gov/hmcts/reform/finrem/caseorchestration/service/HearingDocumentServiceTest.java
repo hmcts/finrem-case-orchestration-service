@@ -7,6 +7,7 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -36,7 +37,8 @@ public class HearingDocumentServiceTest {
     private DocumentClient generatorClient;
     private ObjectMapper mapper = new ObjectMapper();
 
-    private HearingDocumentService service;
+    private GenericDocumentService genericDocumentService;
+    private HearingDocumentService hearingDocumentService;
 
     private static final String DATE_OF_HEARING = "2019-01-01";
     private static final String FORM_C = "formC";
@@ -53,25 +55,26 @@ public class HearingDocumentServiceTest {
         config.setMiniFormFileName("file_name");
 
         generatorClient = new TestDocumentClient();
-        service = new HearingDocumentService(generatorClient, config, mapper);
+        genericDocumentService = new GenericDocumentService(generatorClient, mapper);
+        hearingDocumentService = new HearingDocumentService(genericDocumentService, config, new DocumentHelper(mapper));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void fastTrackDecisionNotSupplied() {
         CaseDetails caseDetails = CaseDetails.builder().data(ImmutableMap.of()).build();
-        service.generateHearingDocuments(AUTH_TOKEN, caseDetails);
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails);
     }
 
     @Test
     public void generateFastTrackFormC() {
-        Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
+        Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
         assertCaseDocument((CaseDocument) result.get(FORM_C));
         ((TestDocumentClient) generatorClient).verifyAdditionalFastTrackFields();
     }
 
     @Test
     public void generateJudiciaryBasedFastTrackFormC() {
-        Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN,
+        Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN,
                 makeItJudiciaryFastTrackDecisionCase());
         assertCaseDocument((CaseDocument) result.get(FORM_C));
         ((TestDocumentClient) generatorClient).verifyAdditionalFastTrackFields();
@@ -79,7 +82,7 @@ public class HearingDocumentServiceTest {
 
     @Test
     public void generateNonFastTrackFormCAndFormG() {
-        Map<String, Object> result = service.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
+        Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
         assertCaseDocument((CaseDocument) result.get(FORM_C));
         assertCaseDocument((CaseDocument) result.get(FORM_G));
         ((TestDocumentClient) generatorClient).verifyAdditionalNonFastTrackFields();
@@ -88,7 +91,7 @@ public class HearingDocumentServiceTest {
     @Test(expected = CompletionException.class)
     public void unsuccessfulGenerateHearingDocuments() {
         ((TestDocumentClient) generatorClient).throwException();
-        service.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
     }
 
     private CaseDetails makeItNonFastTrackDecisionCase() {

@@ -6,6 +6,7 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -16,7 +17,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -26,7 +30,8 @@ public class OnlineFormDocumentServiceTest {
 
     private DocumentConfiguration config;
     private ObjectMapper mapper = new ObjectMapper();
-    private OnlineFormDocumentService service;
+    private GenericDocumentService genericDocumentService;
+    private OnlineFormDocumentService onlineFormDocumentService;
     private OptionIdToValueTranslator translator;
 
     @Before
@@ -41,24 +46,28 @@ public class OnlineFormDocumentServiceTest {
 
     @Test
     public void generateMiniFormA() {
-        service = new OnlineFormDocumentService(new DocumentClientStub(new CountDownLatch(1)), config, translator, mapper);
-        assertCaseDocument(service.generateMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
+        genericDocumentService = new GenericDocumentService(new DocumentClientStub(new CountDownLatch(1)), mapper);
+        onlineFormDocumentService = new OnlineFormDocumentService(genericDocumentService, config, translator, new DocumentHelper(mapper));
+        assertCaseDocument(onlineFormDocumentService.generateMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
     }
 
     @Test
     public void generateContestedMiniFormA() {
-        service = new OnlineFormDocumentService(new DocumentClientStub(new CountDownLatch(1)), config, translator, mapper);
-        assertCaseDocument(service.generateContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
+        genericDocumentService = new GenericDocumentService(new DocumentClientStub(new CountDownLatch(1)), mapper);
+        onlineFormDocumentService = new OnlineFormDocumentService(genericDocumentService, config, translator, new DocumentHelper(mapper));
+        assertCaseDocument(onlineFormDocumentService.generateContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
     }
 
     @Test
     public void generateContestedDraftMiniFormA() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(2);
-        service = new OnlineFormDocumentService(new DocumentClientStub(latch), config, translator, mapper);
+        genericDocumentService = new GenericDocumentService(new DocumentClientStub(latch), mapper);
+        onlineFormDocumentService = new OnlineFormDocumentService(genericDocumentService, config, translator, new DocumentHelper(mapper));
 
-        CaseDocument result = service.generateDraftContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().data(caseData()).build());
-        latch.await();
+        CaseDocument result = onlineFormDocumentService.generateDraftContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().data(caseData()).build());
+        latch.await(30, TimeUnit.SECONDS);
 
+        assertThat(latch.getCount(), is(0L));
         assertCaseDocument(result);
     }
 

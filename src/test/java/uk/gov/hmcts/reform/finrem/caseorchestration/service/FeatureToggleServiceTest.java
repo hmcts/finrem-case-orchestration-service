@@ -6,13 +6,9 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Enclosed.class)
@@ -42,10 +38,8 @@ public class FeatureToggleServiceTest {
 
         @Test
         public void getFieldsIgnoredDuringSerialisationEmptyWhenFeaturesEnabled() {
-            assertThat(classToTest.getFieldsIgnoredDuringSerialisation(),
-                not(hasEntry(equalTo(ApprovedOrder.class), containsInAnyOrder("consentOrderApprovedNotificationLetter"))));
+            assertThat(classToTest.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
         }
-
     }
 
     @RunWith(SpringRunner.class)
@@ -72,10 +66,7 @@ public class FeatureToggleServiceTest {
 
         @Test
         public void getFieldsIgnoredDuringSerialisationContainsElementsWhenFeaturesDisabled() {
-            assertThat(classToTest.getFieldsIgnoredDuringSerialisation(),
-                hasEntry(equalTo(ApprovedOrder.class), containsInAnyOrder("consentOrderApprovedNotificationLetter")));
+            assertThat(classToTest.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
         }
-
     }
-
 }

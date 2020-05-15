@@ -56,11 +56,6 @@
               "document_filename": "011.pdf",
               "document_binary_url": "http://localhost:4506/documents/3e3b6389-a9da-4b1e-b7d0-e949701efcd1/binary"
             },
-            "consentOrderApprovedNotificationLetter": {
-              "document_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8",
-              "document_filename": "ApprovedConsentOrderNotificationLetter.pdf",
-              "document_binary_url": "http://localhost:4506/documents/ad2da2ss-23xd-3f33-f3ff-243f787a9fb8/binary"
-            },
             "pensionDocuments": [
               {
                 "id": "3bc538b9-8a6e-4fd1-84de-eeb01460f900",
@@ -116,6 +111,15 @@
           }
         }
       ],
+      "consentOrderApprovedNotificationLetter": {
+        "document_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8",
+        "document_filename": "ApprovedConsentOrderNotificationLetter.pdf",
+        "document_binary_url": "http://localhost:4506/documents/ad2da2ss-23xd-3f33-f3ff-243f787a9fb8/binary"
+      },
+      "applicantFMName": "John",
+      "applicantLName": "Doe",
+      "appRespondentFMName": "Jane",
+      "appRespondentLName": "Doe",
       "solicitorAddress": {
         "AddressLine1": "",
         "AddressLine2": "",

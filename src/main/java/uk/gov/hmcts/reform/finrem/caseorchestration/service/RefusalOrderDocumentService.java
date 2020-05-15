@@ -2,12 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
@@ -26,36 +26,36 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalT
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.translateOrderRefusalCollection;
 
 @Service
-public class RefusalOrderDocumentService extends AbstractDocumentService {
+@RequiredArgsConstructor
+public class RefusalOrderDocumentService {
 
     private static final String DOCUMENT_COMMENT = "System Generated";
+
+    private final GenericDocumentService genericDocumentService;
+    private final DocumentConfiguration documentConfiguration;
+    private final DocumentHelper documentHelper;
+    private final ObjectMapper objectMapper;
 
     private Function<Pair<CaseDetails, String>, CaseDocument> generateDocument = this::applyGenerateRefusalOrder;
     private Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
 
-    @Autowired
-    public RefusalOrderDocumentService(DocumentClient documentClient,
-                                       DocumentConfiguration config, ObjectMapper objectMapper) {
-        super(documentClient, config, objectMapper);
-    }
-
     public Map<String, Object> generateConsentOrderNotApproved(
-            String authorisationToken, final CaseDetails caseDetails) {
+        String authorisationToken, final CaseDetails caseDetails) {
 
         translateOrderRefusalCollection
-                .andThen(generateDocument)
-                .andThen(createConsentOrderData)
-                .andThen(consentOrderData -> populateConsentOrderData(consentOrderData, caseDetails))
-                .apply(Pair.of(copyOf(caseDetails), authorisationToken));
+            .andThen(generateDocument)
+            .andThen(createConsentOrderData)
+            .andThen(consentOrderData -> populateConsentOrderData(consentOrderData, caseDetails))
+            .apply(Pair.of(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken));
         return copyToOrderRefusalCollection(caseDetails);
     }
 
     public Map<String, Object> previewConsentOrderNotApproved(
-            String authorisationToken, final CaseDetails caseDetails) {
+        String authorisationToken, final CaseDetails caseDetails) {
         return translateOrderRefusalCollection
-                .andThen(generateDocument)
-                .andThen(caseDocument -> populateConsentOrderNotApproved(caseDocument, caseDetails))
-                .apply(Pair.of(copyOf(caseDetails), authorisationToken));
+            .andThen(generateDocument)
+            .andThen(caseDocument -> populateConsentOrderNotApproved(caseDocument, caseDetails))
+            .apply(Pair.of(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken));
     }
 
     private Map<String, Object> populateConsentOrderNotApproved(CaseDocument caseDocument, CaseDetails caseDetails) {
@@ -69,22 +69,22 @@ public class RefusalOrderDocumentService extends AbstractDocumentService {
         Map<String, Object> caseData = caseDetails.getData();
 
         List<ConsentOrderData> uploadOrder = Optional.ofNullable(caseData.get(UPLOAD_ORDER))
-                .map(this::convertToUploadOrderList)
-                .orElse(new ArrayList<>());
+            .map(this::convertToUploadOrderList)
+            .orElse(new ArrayList<>());
         uploadOrder.add(consentOrderData);
         caseData.put(UPLOAD_ORDER, uploadOrder);
         return caseData;
     }
 
     private CaseDocument applyGenerateRefusalOrder(Pair<CaseDetails, String> data) {
-        return generateDocument(data.getRight(), data.getLeft(),
-                config.getRejectedOrderTemplate(),
-                config.getRejectedOrderFileName());
+        return genericDocumentService.generateDocument(data.getRight(), data.getLeft(),
+            documentConfiguration.getRejectedOrderTemplate(),
+            documentConfiguration.getRejectedOrderFileName());
     }
 
     private ConsentOrderData applyCreateConsentOrderData(CaseDocument caseDocument) {
         ConsentOrder consentOrder = new ConsentOrder();
-        consentOrder.setDocumentType(config.getRejectedOrderDocType());
+        consentOrder.setDocumentType(documentConfiguration.getRejectedOrderDocType());
         consentOrder.setDocumentDateAdded(new Date());
         consentOrder.setDocumentLink(caseDocument);
         consentOrder.setDocumentComment(DOCUMENT_COMMENT);
