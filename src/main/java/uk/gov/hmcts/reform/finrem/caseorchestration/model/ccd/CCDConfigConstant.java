@@ -40,6 +40,11 @@ public class CCDConfigConstant {
     public static final String RESP_SOLICITOR_NAME = "rSolicitorName";
     public static final String RESP_SOLICITOR_ADDRESS = "rSolicitorAddress";
 
+    //Draft Order Related
+    public static final String SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER = "solicitorResponsibleForDraftingOrder";
+    public static final String APPLICANT_SOLICITOR = "applicantSolicitor";
+    public static final String RESPONDENT_SOLICITOR = "respondentSolicitor";
+
     //Application Type related
     public static final String D81_QUESTION = "d81Question";
 

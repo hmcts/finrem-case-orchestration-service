@@ -97,6 +97,16 @@ public class NotificationService {
         sendNotificationEmail(callbackRequest, uri);
     }
 
+    public void sendPrepareForHearingOrderSentEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getPrepareForHearingOrderSent());
+        sendNotificationEmail(callbackRequest, uri);
+    }
+
+    public void sendSolicitorToDraftOrderEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getContestedDraftOrder());
+        sendNotificationEmail(callbackRequest, uri);
+    }
+
     private void sendNotificationEmail(CallbackRequest callbackRequest, URI uri) {
         try {
             if (isConsentedApplication(callbackRequest.getCaseDetails())) {
