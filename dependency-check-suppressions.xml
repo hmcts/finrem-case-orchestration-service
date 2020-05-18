@@ -2,66 +2,29 @@
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
 
     <suppress>
-        <notes>Vulnerability applies to gradle before 6, project uses 6</notes>
-        <cve>CVE-2019-11065</cve>
-        <cve>CVE-2019-15052</cve>
-        <cve>CVE-2019-16370</cve>
+        <notes><![CDATA[file name: spring-security-crypto-5.2.2.RELEASE.jar]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-crypto@.*$</packageUrl>
+        <cpe>cpe:/a:pivotal_software:spring_security</cpe>
     </suppress>
-
     <suppress>
-        <notes>Vulnerability applies to Spring Framework 5.0.5, project uses 5.2.0</notes>
-        <cve>CVE-2018-1258</cve>
-    </suppress>
-
-    <suppress>
-        <notes>Vulnerability applies to Netty before version 4.1.42, project uses 4.1.42</notes>
-        <cve>CVE-2014-3488</cve>
-        <cve>CVE-2015-2156</cve>
-        <cve>CVE-2019-16869</cve>
-    </suppress>
-
-    <suppress>
-        <notes>Vulnerability applies to Netty before 4.1.46, project uses 4.1.45</notes>
-        <cve>CVE-2020-11612</cve>
-    </suppress>
-
-    <suppress>
-        <notes>Vulnerability applies Eclipse Jetty. Default unhandled Error response content does not escape Exception messages in stacktraces included in error output.</notes>
-        <cve>CVE-2019-17632</cve>
-    </suppress>
-
-    <suppress>
-        <notes><![CDATA[
-   only affects log appender over SMTP, seriously who does this...
-   ]]></notes>
+        <notes>only affects log appender over SMTP, seriously who does this...</notes>
         <cve>CVE-2020-9488</cve>
     </suppress>
-
     <suppress>
-        <notes><![CDATA[
-   XSS issue, not relevant in performance tests
-   ]]></notes>
-        <packageUrl regex="true">^pkg:maven/org\.scala\-lang/scala\-library@.*$</packageUrl>
-        <cpe>cpe:/a:scala-lang:scala</cpe>
-    </suppress>
-
-    <suppress>
-        <notes><![CDATA[
-   XSS issue, not relevant in performance tests
-   ]]></notes>
+        <notes> XSS issue, not relevant in performance tests</notes>
         <packageUrl regex="true">^pkg:maven/org\.scala\-lang/scala\-library@.*$</packageUrl>
         <vulnerabilityName>CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')</vulnerabilityName>
     </suppress>
-
     <suppress>
-        <notes>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</notes>
-        <packageUrl regex="true">^pkg:javascript/handlebars\.js@.*$</packageUrl>
+        <notes>Wiremock - 2.6.3 - A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</notes>
+        <packageUrl regex="true">^pkg:javascript/handlebars@.*$</packageUrl>
         <vulnerabilityName>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</vulnerabilityName>
+        <vulnerabilityName>Disallow calling helperMissing and blockHelperMissing directly</vulnerabilityName>
+        <vulnerabilityName>Prototype pollution</vulnerabilityName>
     </suppress>
-
     <suppress>
-        <notes>Regex in its jQuery.htmlPrefilter  sometimes may introduce XSS</notes>
-        <packageUrl regex="true">^pkg:javascript/jquery\.js@.*$</packageUrl>
+        <notes>Wiremock - 2.6.3 - Regex in its jQuery.htmlPrefilter</notes>
+        <packageUrl regex="true">^pkg:javascript/jquery@.*$</packageUrl>
         <vulnerabilityName>Regex in its jQuery.htmlPrefilter  sometimes may introduce XSS</vulnerabilityName>
     </suppress>
 </suppressions>
