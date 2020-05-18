@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 import uk.gov.hmcts.reform.finrem.functional.util.FunctionalTestUtils;
@@ -80,7 +81,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
 
         List<Object> uploadOrders = JsonPath.parse(response.getBody().asString())
             .read("$.data.uploadOrder[?(@.id)].id");
-        assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
+        assertEquals("Request failed " + response.getStatusCode(), HttpStatus.OK.value(), response.getStatusCode());
         assertEquals("expected uploadOrder size not matching  ", uploadOrdersBeforeCount + 1, uploadOrders.size());
     }
 }

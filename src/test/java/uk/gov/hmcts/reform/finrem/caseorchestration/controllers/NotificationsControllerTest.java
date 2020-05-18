@@ -45,6 +45,7 @@ public class NotificationsControllerTest {
     private static final String CONSENT_ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/consent-order-not-approved";
     private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/consent-order-available";
     private static final String PREPARE_FOR_HEARING_CALLBACK_URL = "/case-orchestration/notify/prepare-for-hearing";
+    private static final String PREPARE_FOR_HEARING_ORDER_SENT_CALLBACK_URL = "/case-orchestration/notify/prepare-for-hearing-order-sent";
     private static final String CONTESTED_APPLICATION_ISSUED_CALLBACK_URL = "/case-orchestration/notify/contest-application-issued";
     private static final String CONTEST_ORDER_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contest-order-approved";
     private static final String CONTESTED_DRAFT_ORDER_URL = "/case-orchestration/notify/draft-order";
@@ -321,6 +322,30 @@ public class NotificationsControllerTest {
     public void shouldNotSendPrepareForHearingEmailWhenNotAgreed() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(PREPARE_FOR_HEARING_CALLBACK_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void shouldSendPrepareForHearingOrderSentEmailWhenAgreed() throws Exception {
+        buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
+        mockMvc.perform(post(PREPARE_FOR_HEARING_ORDER_SENT_CALLBACK_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1)).sendPrepareForHearingOrderSentEmail(any());
+    }
+
+    @Test
+    public void shouldNotSendPrepareForHearingOrderSentEmailWhenNotAgreed() throws Exception {
+        buildCcdRequest(CCD_REQUEST_JSON);
+        mockMvc.perform(post(PREPARE_FOR_HEARING_ORDER_SENT_CALLBACK_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))

@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
@@ -51,28 +52,51 @@ public class BulkPrintService {
                 .build());
     }
 
+    /**
+     * Send order documents to printing and posting to applicant or applicant solicitor.
+     */
+    public UUID sendOrderForBulkPrintApplicant(final CaseDocument coverSheet, final CaseDetails caseDetails) {
+        return sendOrdersForBulkPrint(coverSheet, caseDetails, true);
+    }
 
-    public UUID sendOrdersForBulkPrint(final CaseDocument coverSheet, final CaseDetails caseDetails) {
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+    /**
+     * Send order documents to printing and posting to respondent or respondent solicitor.
+     */
+    public UUID sendOrderForBulkPrintRespondent(final CaseDocument coverSheet, final CaseDetails caseDetails) {
+        return sendOrdersForBulkPrint(coverSheet, caseDetails, false);
+    }
+
+    /**
+     * Sending approved order collection or upload order (if approved order collection is empty) to bulk print.
+     * @param coverSheet cover sheet document
+     * @param caseDetails {@link CaseDetails} object
+     * @param recipientIsApplicant true if applicant is the recipient, false for respondent being the recipient
+     * @return
+     */
+    private UUID sendOrdersForBulkPrint(final CaseDocument coverSheet, final CaseDetails caseDetails, boolean recipientIsApplicant) {
         log.info("Sending Orders for Bulk Print.");
 
-        bulkPrintDocuments.add(
-            BulkPrintDocument.builder().binaryFileUrl(coverSheet.getDocumentBinaryUrl()).build());
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(coverSheet.getDocumentBinaryUrl()).build());
 
-        List<BulkPrintDocument> approvedOrderCollection = approvedOrderCollection(caseDetails.getData());
-        List<BulkPrintDocument> uploadOrder = uploadOrder(caseDetails.getData());
-
-        if (!approvedOrderCollection.isEmpty()) {
-            log.info("Sending Approved Order Collections for Bulk Print.: {}", approvedOrderCollection);
-
-            bulkPrintDocuments.addAll(approvedOrderCollection);
-        } else if (!uploadOrder.isEmpty()) {
-            log.info("Sending Upload Order Collections for Bulk Print: {}", uploadOrder);
-            bulkPrintDocuments.addAll(uploadOrder);
+        if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled() && recipientIsApplicant) {
+            log.info("Adding consentOrderApprovedNotificationLetter document to BulkPrint documents list");
+            bulkPrintDocuments.addAll(convertBulkPrintDocument(caseDetails.getData(), CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER));
         }
 
-        log.info("{} Order documents (including cover sheet) have been sent to bulk print.", bulkPrintDocuments.size());
-        log.info("Documents sent to Bulk Print: {}", bulkPrintDocuments);
+        List<BulkPrintDocument> approvedOrderCollection = approvedOrderCollection(caseDetails.getData());
+        if (!approvedOrderCollection.isEmpty()) {
+            log.info("Sending Approved Order Collections for Bulk Print.: {}", approvedOrderCollection);
+            bulkPrintDocuments.addAll(approvedOrderCollection);
+        } else {
+            List<BulkPrintDocument> uploadOrder = uploadOrder(caseDetails.getData());
+            if (!uploadOrder.isEmpty()) {
+                log.info("Sending Upload Order Collections for Bulk Print: {}", uploadOrder);
+                bulkPrintDocuments.addAll(uploadOrder);
+            }
+        }
+
+        log.info("{} Order documents (including cover sheet) have been sent to bulk print: {}", bulkPrintDocuments.size(), bulkPrintDocuments);
 
         return genericDocumentService.bulkPrint(
             BulkPrintRequest.builder()
@@ -97,7 +121,7 @@ public class BulkPrintService {
 
     List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        List<Map> documentList = ofNullable(data.get("approvedOrderCollection"))
+        List<Map> documentList = ofNullable(data.get(APPROVED_ORDER_COLLECTION))
             .map(i -> (List<Map>) i)
             .orElse(new ArrayList<>());
 
@@ -107,16 +131,6 @@ public class BulkPrintService {
             Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get(VALUE));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "orderLetter"));
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, CONSENT_ORDER));
-
-            if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
-                bulkPrintDocuments.addAll(convertBulkPrintDocument(value, CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER));
-                log.info("Approved Consent Order Notification Letter Feature Toggled is Enabled");
-                log.info("Adding consentOrderApprovedNotificationLetter document to BulkPrint documents list");
-            } else {
-                log.info("isApprovedConsentOrderNotificationLetterEnabled toggled off"
-                    + " - not sending consentOrderApprovedNotificationLetter to bulk print");
-            }
-
             bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "pensionDocuments",
                 "uploadedDocument"));
         } else {

@@ -38,7 +38,7 @@ public class CaseOrchestrationSmokeTests {
     private int connectionManagerTimeOut;
 
     private RestAssuredConfig config;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
 
     @Before
