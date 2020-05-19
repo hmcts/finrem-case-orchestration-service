@@ -6,24 +6,24 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath("net.serenity-bdd:serenity-gradle-plugin:2.0.42")
-        classpath group: 'org.sonarsource.scanner.gradle', name: 'sonarqube-gradle-plugin', version: '2.6.2'
+        classpath("net.serenity-bdd:serenity-gradle-plugin:2.2.8")
+        classpath group: 'org.sonarsource.scanner.gradle', name: 'sonarqube-gradle-plugin', version: '2.8.0.1969'
     }
 }
 
 plugins {
-    id 'au.com.dius.pact' version '3.5.24'
+    id 'au.com.dius.pact' version '3.6.15'
     id 'application'
     id 'checkstyle'
-    id 'com.github.ben-manes.versions' version '0.27.0'
+    id 'com.github.ben-manes.versions' version '0.28.0'
     id 'io.franzbecker.gradle-lombok' version '1.14'
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id "info.solidsoft.pitest" version "1.4.5"
     id 'jacoco'
-    id 'org.owasp.dependencycheck' version '5.2.4'
-    id 'org.sonarqube' version '2.7.1'
+    id 'org.owasp.dependencycheck' version '5.3.2.1'
+    id 'org.sonarqube' version '2.8'
     id 'org.springframework.boot' version '2.2.6.RELEASE'
-    id 'net.ltgt.apt' version '0.10'
+    id 'net.ltgt.apt' version '0.21'
 }
 
 apply plugin: 'au.com.dius.pact'
@@ -45,7 +45,6 @@ targetCompatibility = 1.8
 repositories {
     jcenter()
     maven { url "https://dl.bintray.com/hmcts/hmcts-maven" }
-    maven { url "http://repo.maven.apache.org/maven2" }
     maven { url 'https://repo.spring.io/libs-milestone' }
 }
 
@@ -108,29 +107,29 @@ configurations {
 }
 
 def versions = [
-        bspCommonLib            : '0.0.33',
+        bspCommonLib            : '0.0.38',
         ccdClient               : '4.6.4',
         commonsBeanUtils        : '1.9.4',
-        commonsIo               : '2.5',
+        commonsIo               : '2.6',
         commonsLang3            : '3.9',
-        gradlePitest            : '1.4.5',
+        gradlePitest            : '1.5.1',
         jsonAssert              : '1.2.3',
-        junit                   : '4.12',
+        junit                   : '4.13',
         lombok                  : '1.16.18',
-        mockito                 : '3.2.0',
+        mockito                 : '3.3.3',
         nimbus                  : '5.1',
         pact_version            : '3.5.24',
         pdfbox                  : '2.0.8',
-        pitest                  : '1.4.5',
+        pitest                  : '1.5.2',
         powerMock               : '1.7.3',
-        reformLogging           : '5.1.1',
+        reformLogging           : '5.1.5',
         restAssured             : '3.0.3',
         serenity                : '2.0.90',
-        serenityCucumber        : '1.9.49',
-        serviceTokenGenerator   : '3.0.0',
+        serenityCucumber        : '1.9.51',
+        serviceTokenGenerator   : '3.1.1',
         springfoxSwagger        : '2.9.2',
         sonarPitest             : '0.5',
-        wiremock                : '2.25.1'
+        wiremock                : '2.26.3'
 ]
 
 dependencyManagement {
@@ -186,7 +185,7 @@ dependencies {
     testSmokeImplementation sourceSets.main.runtimeClasspath
     testSmokeImplementation sourceSets.test.runtimeClasspath
 
-    functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.0'
+    functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
     functionalImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
@@ -213,8 +212,8 @@ dependencies {
     contractImplementation group: 'au.com.dius', name: 'pact-jvm-consumer-junit5_2.12', version: versions.pact_version
     contractImplementation group: 'au.com.dius', name: 'pact-jvm-consumer-java8_2.12', version: versions.pact_version
     contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    contractImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.2'
-    contractImplementation 'org.junit.jupiter:junit-jupiter-engine:5.3.2'
+    contractImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0-M1'
+    contractImplementation 'org.junit.jupiter:junit-jupiter-engine:5.7.0-M1'
     contractImplementation sourceSets.main.runtimeClasspath
     contractImplementation sourceSets.test.runtimeClasspath
 }
@@ -227,7 +226,7 @@ dependencyCheck {
     suppressionFile = 'dependency-check-suppressions.xml'
 }
 
-checkstyle.toolVersion = '8.29'
+checkstyle.toolVersion = '8.32'
 checkstyle.configFile = new File(rootDir, "checkstyle.xml")
 
 // make build fail on Checkstyle issues (https://github.com/gradle/gradle/issues/881)
@@ -301,7 +300,7 @@ bootJar {
         attributes 'Implementation-Title': project.name,
                 'Implementation-Version': project.version
     }
-    archiveName 'finrem-case-orchestration.jar'
+    archiveFileName = 'finrem-case-orchestration.jar'
 }
 
 pact {
