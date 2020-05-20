@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.Map;
@@ -37,26 +38,43 @@ public class NotificationsController implements BaseController {
     private final BulkPrintService bulkPrintService;
     private final FeatureToggleService featureToggleService;
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
+    private final HelpWithFeesDocumentService helpWithFeesDocumentService;
 
     @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "send e-mail for HWF Successful.")
+    @ApiOperation(value = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "HWFSuccessful e-mail sent successfully",
+        @ApiResponse(code = 200, message = "HWFSuccessful notification sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendHwfSuccessfulConfirmationEmail(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send email for HWF Successful for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        log.info("isHwfSuccessfulNotificationLetterEnabled is toggled to: {}",
+            featureToggleService.isHwfSuccessfulNotificationLetterEnabled());
 
-        if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
-            if (isConsentedApplication(callbackRequest.getCaseDetails())) {
+        if (isConsentedApplication(callbackRequest.getCaseDetails())) {
+            if (isPaperApplication(caseData) && featureToggleService.isHwfSuccessfulNotificationLetterEnabled()) {
+                log.info("Case is paper application");
+                log.info("isHwfSuccessfulNotificationLetterEnabled is toggled on");
+                log.info("Sending Consented HWF Successful notification letter for bulk print");
+
+                CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+                // Generate PDF notification letter
+                CaseDocument hwfSuccessfulNotificationLetter =
+                    helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(caseDetails, authToken);
+
+                // Send notification letter to Bulk Print
+                bulkPrintService.sendNotificationLetterForBulkPrint(hwfSuccessfulNotificationLetter, caseDetails);
+            } else if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
                 log.info("Sending Consented HWF Successful email notification to Solicitor");
                 notificationService.sendConsentedHWFSuccessfulConfirmationEmail(callbackRequest);
-            } else {
-                log.info("Sending Contested HWF Successful email notification to Solicitor");
-                notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
             }
+        } else if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
+            log.info("Sending Contested HWF Successful email notification to Solicitor");
+            notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
