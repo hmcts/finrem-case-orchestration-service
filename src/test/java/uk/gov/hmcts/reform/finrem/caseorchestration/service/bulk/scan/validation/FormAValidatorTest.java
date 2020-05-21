@@ -268,23 +268,6 @@ public class FormAValidatorTest {
     }
 
     @Test
-    public void shouldPassValidationIfChildrensDateOfBirthNotPresent() {
-        List<OcrDataField> ocrDataFields = new ArrayList<>(mandatoryFieldsWithValues);
-        List<OcrDataField> childDobFields = asList(
-            new OcrDataField(DATE_OF_BIRTH_CHILD_1, ""),
-            new OcrDataField(DATE_OF_BIRTH_CHILD_2, "")
-        );
-
-        ocrDataFields.addAll(childDobFields);
-
-        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(ocrDataFields);
-
-        assertThat(validationResult.getStatus(), is(SUCCESS));
-        assertThat(validationResult.getWarnings(), is(emptyList()));
-        assertThat(validationResult.getErrors(), is(emptyList()));
-    }
-
-    @Test
     public void shouldValidateDivorceCaseNumber() {
         OcrValidationResult ocrInvalidResult = formAValidator.validateBulkScanForm(asList(
                 new OcrDataField(DIVORCE_CASE_NUMBER, "1234567890")

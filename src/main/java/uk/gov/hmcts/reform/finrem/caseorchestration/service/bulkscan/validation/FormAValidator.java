@@ -153,13 +153,8 @@ public class FormAValidator extends BulkScanFormValidator {
                 .collect(Collectors.toList());
 
         validateFormDate(fieldsMap, AUTHORISATION_DATE).ifPresent(errorMessages::add);
-        // Only validate Children's DoB if present
-        if (StringUtils.isNotEmpty(fieldsMap.get(DATE_OF_BIRTH_CHILD_1))) {
-            validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_1).ifPresent(errorMessages::add);
-        }
-        if (StringUtils.isNotEmpty(fieldsMap.get(DATE_OF_BIRTH_CHILD_2))) {
-            validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_2).ifPresent(errorMessages::add);
-        }
+        validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_1).ifPresent(errorMessages::add);
+        validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_2).ifPresent(errorMessages::add);
 
         return errorMessages;
     }
