@@ -85,13 +85,6 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldConvertDocument() throws Exception {
-        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.uploadOrder(caseDetails().getData());
-
-        assertThat(bulkPrintDocuments, hasSize(1));
-    }
-
-    @Test
     public void shouldConvertCollectionDocument() throws Exception {
         List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.approvedOrderCollection(caseDetails().getData());
 

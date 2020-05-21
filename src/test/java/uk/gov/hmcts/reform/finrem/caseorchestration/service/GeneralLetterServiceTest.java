@@ -45,7 +45,7 @@ public class GeneralLetterServiceTest {
         config.setGeneralLetterFileName("test_file");
 
         generatorClient = new TestDocumentClient();
-        genericDocumentService = new GenericDocumentService(generatorClient, mapper);
+        genericDocumentService = new GenericDocumentService(generatorClient);
         generalLetterService = new GeneralLetterService(genericDocumentService, config, new DocumentHelper(mapper), mapper);
     }
 

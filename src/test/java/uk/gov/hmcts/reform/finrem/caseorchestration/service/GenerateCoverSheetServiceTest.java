@@ -36,7 +36,7 @@ public class GenerateCoverSheetServiceTest {
         config.setBulkPrintTemplate("test_template");
 
         DocumentClient generatorClient = new TestDocumentClient();
-        genericDocumentService = new GenericDocumentService(generatorClient, mapper);
+        genericDocumentService = new GenericDocumentService(generatorClient);
         generateCoverSheetService = new GenerateCoverSheetService(genericDocumentService, config);
     }
 
@@ -154,7 +154,6 @@ public class GenerateCoverSheetServiceTest {
     }
 
     private static class TestDocumentClient implements DocumentClient {
-
         @Override
         public Document generatePdf(DocumentGenerationRequest request, String authorizationToken) {
             assertThat(request.getTemplate(), is("test_template"));

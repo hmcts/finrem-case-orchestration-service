@@ -55,7 +55,7 @@ public class HearingDocumentServiceTest {
         config.setMiniFormFileName("file_name");
 
         generatorClient = new TestDocumentClient();
-        genericDocumentService = new GenericDocumentService(generatorClient, mapper);
+        genericDocumentService = new GenericDocumentService(generatorClient);
         hearingDocumentService = new HearingDocumentService(genericDocumentService, config, new DocumentHelper(mapper));
     }
 

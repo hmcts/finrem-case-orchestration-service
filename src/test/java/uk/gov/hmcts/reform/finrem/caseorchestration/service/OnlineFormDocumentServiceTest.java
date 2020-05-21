@@ -46,14 +46,14 @@ public class OnlineFormDocumentServiceTest {
 
     @Test
     public void generateMiniFormA() {
-        genericDocumentService = new GenericDocumentService(new DocumentClientStub(new CountDownLatch(1)), mapper);
+        genericDocumentService = new GenericDocumentService(new DocumentClientStub(new CountDownLatch(1)));
         onlineFormDocumentService = new OnlineFormDocumentService(genericDocumentService, config, translator, new DocumentHelper(mapper));
         assertCaseDocument(onlineFormDocumentService.generateMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
     }
 
     @Test
     public void generateContestedMiniFormA() {
-        genericDocumentService = new GenericDocumentService(new DocumentClientStub(new CountDownLatch(1)), mapper);
+        genericDocumentService = new GenericDocumentService(new DocumentClientStub(new CountDownLatch(1)));
         onlineFormDocumentService = new OnlineFormDocumentService(genericDocumentService, config, translator, new DocumentHelper(mapper));
         assertCaseDocument(onlineFormDocumentService.generateContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().build()));
     }
@@ -61,7 +61,7 @@ public class OnlineFormDocumentServiceTest {
     @Test
     public void generateContestedDraftMiniFormA() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(2);
-        genericDocumentService = new GenericDocumentService(new DocumentClientStub(latch), mapper);
+        genericDocumentService = new GenericDocumentService(new DocumentClientStub(latch));
         onlineFormDocumentService = new OnlineFormDocumentService(genericDocumentService, config, translator, new DocumentHelper(mapper));
 
         CaseDocument result = onlineFormDocumentService.generateDraftContestedMiniFormA(AUTH_TOKEN, CaseDetails.builder().data(caseData()).build());

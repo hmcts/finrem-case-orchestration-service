@@ -4,8 +4,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetSe
 
 import javax.validation.constraints.NotNull;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -34,19 +35,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
+@RequiredArgsConstructor
 @Slf4j
 public class BulkPrintController implements BaseController {
 
-    @Autowired
-    private BulkPrintService bulkPrintService;
-
-    @Autowired
-    private GenerateCoverSheetService coverSheetService;
+    private final BulkPrintService bulkPrintService;
+    private final GenerateCoverSheetService coverSheetService;
 
     private CaseDetails caseDetails;
 
@@ -61,23 +61,30 @@ public class BulkPrintController implements BaseController {
             @ApiResponse(code = 500, message = "Internal Server Error")
         })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> bulkPrint(
-        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authorisationToken,
         @NotNull @RequestBody @ApiParam("Callback") CallbackRequest callback) {
 
         log.info("Received request for Bulk Print for Case ID");
 
         validateCaseData(callback);
         caseDetails = callback.getCaseDetails();
-
-        generateCoversheetForApplicant(authToken);
-        generateCoversheetForRespondent(authToken);
-
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.remove(BULK_PRINT_COVER_SHEET);
 
-        log.info("Bulk print is successful.");
+        if (isOrderNotApprovedDocumentCollectionPresent(caseData)) {
+            bulkPrintService.printOrderNotApprovedDocuments(caseDetails, authorisationToken);
+        } else {
+            generateCoversheetForApplicant(authorisationToken);
+            generateCoversheetForRespondent(authorisationToken);
+            caseData.remove(BULK_PRINT_COVER_SHEET);
+        }
+
+        log.info("Bulk print is successful");
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    private boolean isOrderNotApprovedDocumentCollectionPresent(Map<String, Object> caseData) {
+        return caseData.get(UPLOAD_ORDER) != null && !((List<Map>) caseData.get(UPLOAD_ORDER)).isEmpty();
     }
 
     private void generateCoversheetForApplicant(String authToken) {
@@ -107,12 +114,10 @@ public class BulkPrintController implements BaseController {
     }
 
     private boolean applicantIsNotRepresentedByASolicitor(Map<String, Object> caseData) {
-
         return NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APPLICANT_REPRESENTED)));
     }
 
     private boolean solicitorDidNotAgreeToReceiveEmails(Map<String, Object> caseData) {
-
         return NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED)));
     }
 }

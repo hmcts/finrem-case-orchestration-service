@@ -37,7 +37,7 @@ public class ConsentOrderApprovedDocumentService {
             documentConfiguration.getApprovedConsentOrderFileName(),
             documentConfiguration.getApprovedConsentOrderTemplate());
 
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareNotificationLetter(caseDetails);
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter = genericDocumentService.generateDocument(authToken, caseDetailsForBulkPrint,
             documentConfiguration.getApprovedConsentOrderNotificationTemplate(),

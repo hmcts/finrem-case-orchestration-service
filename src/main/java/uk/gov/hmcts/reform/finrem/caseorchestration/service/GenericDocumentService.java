@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -21,7 +20,6 @@ public class GenericDocumentService {
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
 
     private final DocumentClient documentClient;
-    private final ObjectMapper objectMapper;
 
     public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
                                           String template, String fileName) {
@@ -57,11 +55,11 @@ public class GenericDocumentService {
         return toCaseDocument(stampedDocument);
     }
 
-    private CaseDocument toCaseDocument(Document miniFormA) {
+    private CaseDocument toCaseDocument(Document document) {
         CaseDocument caseDocument = new CaseDocument();
-        caseDocument.setDocumentBinaryUrl(miniFormA.getBinaryUrl());
-        caseDocument.setDocumentFilename(miniFormA.getFileName());
-        caseDocument.setDocumentUrl(miniFormA.getUrl());
+        caseDocument.setDocumentBinaryUrl(document.getBinaryUrl());
+        caseDocument.setDocumentFilename(document.getFileName());
+        caseDocument.setDocumentUrl(document.getUrl());
         return caseDocument;
     }
 

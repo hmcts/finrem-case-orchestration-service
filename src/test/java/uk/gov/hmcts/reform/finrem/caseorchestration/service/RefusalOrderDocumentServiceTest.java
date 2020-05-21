@@ -58,7 +58,7 @@ public class RefusalOrderDocumentServiceTest {
         DocumentClient generatorClient = Mockito.mock(DocumentClient.class);
         when(generatorClient.generatePdf(isA(DocumentGenerationRequest.class), eq(AUTH_TOKEN))).thenReturn(document);
 
-        genericDocumentService = new GenericDocumentService(generatorClient, mapper);
+        genericDocumentService = new GenericDocumentService(generatorClient);
         refusalOrderDocumentService = new RefusalOrderDocumentService(genericDocumentService, config, new DocumentHelper(mapper), mapper);
     }
 

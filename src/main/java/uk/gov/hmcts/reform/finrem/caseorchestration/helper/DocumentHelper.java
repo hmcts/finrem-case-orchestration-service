@@ -115,27 +115,27 @@ public class DocumentHelper {
         return Optional.empty();
     }
 
-    public CaseDetails prepareNotificationLetter(CaseDetails caseDetails) {
+    public CaseDetails prepareLetterToApplicantTemplateData(CaseDetails caseDetails) {
         // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
         CaseDetails caseDetailsCopy = deepCopy(caseDetails, CaseDetails.class);
-        Map<String, Object> docmosisCaseData = caseDetailsCopy.getData();
+        Map<String, Object> caseData = caseDetailsCopy.getData();
         Map addressToSendTo;
 
         String ccdNumber = nullToEmpty((caseDetailsCopy.getId()));
         String reference = "";
         String addresseeName;
-        String applicantName = buildFullName(docmosisCaseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
-        String respondentName =  buildFullName(docmosisCaseData, APP_RESPONDENT_FIRST_MIDDLE_NAME, APP_RESPONDENT_LAST_NAME);
+        String applicantName = buildFullName(caseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
+        String respondentName =  buildFullName(caseData, APP_RESPONDENT_FIRST_MIDDLE_NAME, APP_RESPONDENT_LAST_NAME);
 
-        if (isApplicantRepresentedByASolicitor(docmosisCaseData)) {
+        if (isApplicantRepresentedByASolicitor(caseData)) {
             log.info("Applicant is represented by a solicitor");
-            reference = nullToEmpty((docmosisCaseData.get(SOLICITOR_REFERENCE)));
-            addresseeName = nullToEmpty((docmosisCaseData.get(SOLICITOR_NAME)));
-            addressToSendTo = (Map) docmosisCaseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
+            reference = nullToEmpty((caseData.get(SOLICITOR_REFERENCE)));
+            addresseeName = nullToEmpty((caseData.get(SOLICITOR_NAME)));
+            addressToSendTo = (Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
         } else {
             log.info("Applicant is not represented by a solicitor");
             addresseeName = applicantName;
-            addressToSendTo = (Map) docmosisCaseData.get(APPLICANT_ADDRESS);
+            addressToSendTo = (Map) caseData.get(APPLICANT_ADDRESS);
         }
 
         if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
@@ -144,17 +144,16 @@ public class DocumentHelper {
                 .formattedAddress(formatAddressForLetterPrinting(addressToSendTo))
                 .build();
 
-            docmosisCaseData.put("caseNumber", ccdNumber);
-            docmosisCaseData.put("reference", reference);
-            docmosisCaseData.put("addressee",  addressee);
-            docmosisCaseData.put("letterDate", String.valueOf(LocalDate.now()));
-            docmosisCaseData.put("applicantName", applicantName);
-            docmosisCaseData.put("respondentName", respondentName);
-            docmosisCaseData.put("ctscContactDetails", buildCtscContactDetails());
+            caseData.put("caseNumber", ccdNumber);
+            caseData.put("reference", reference);
+            caseData.put("addressee",  addressee);
+            caseData.put("letterDate", String.valueOf(LocalDate.now()));
+            caseData.put("applicantName", applicantName);
+            caseData.put("respondentName", respondentName);
+            caseData.put("ctscContactDetails", buildCtscContactDetails());
         } else {
-            log.info("Failed to generate notification letter as not all required address details were present");
-            throw new IllegalArgumentException(
-                "Mandatory data missing from address when trying to generate notification letter");
+            log.info("Failed to prepare template data as not all required address details were present");
+            throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
         }
 
         return caseDetailsCopy;
