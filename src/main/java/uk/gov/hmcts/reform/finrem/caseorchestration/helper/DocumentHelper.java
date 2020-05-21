@@ -182,7 +182,7 @@ public class DocumentHelper {
     }
 
     public String formatAddressForLetterPrinting(Map<String, Object> address) {
-        return Stream.of("AddressLine1", "AddressLine2", "AddressLine3", "County", "Country", "PostTown", "PostCode")
+        return Stream.of("AddressLine1", "AddressLine2", "AddressLine3", "County", "PostTown", "PostCode")
             .map(address::get)
             .filter(Objects::nonNull)
             .map(Object::toString)
