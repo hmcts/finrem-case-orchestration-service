@@ -22,6 +22,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus.SUCCESS;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus.WARNINGS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ADDRESS_OF_PROPERTIES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_COUNTRY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_COUNTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_LINE_1;
@@ -45,6 +46,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.AUTHORISATION_SOLICITOR_POSITION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_MADE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.CHILD_SUPPORT_AGENCY_CALCULATION_REASON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DATE_OF_BIRTH_CHILD_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DATE_OF_BIRTH_CHILD_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
@@ -53,6 +55,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.GENDER_CHILD_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.GENDER_CHILD_2;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.HWF_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.MORTGAGE_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.NATURE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ORDER_FOR_CHILDREN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ORDER_FOR_CHILDREN_NO_AGREEMENT;
@@ -107,13 +110,13 @@ public class FormAValidatorTest {
                 new OcrDataField(RESPONDENT_ADDRESS_COUNTY, "Here"),
                 new OcrDataField(RESPONDENT_ADDRESS_POSTCODE, "SW1 9SD"),
                 new OcrDataField(RESPONDENT_ADDRESS_COUNTRY, "UK"),
-                new OcrDataField("AddressofProperties", "26 Westminster Avenue"),
-                new OcrDataField("MortgageDetails", "We paid for the house with our mortgage which we split"),
-                new OcrDataField("OrderForChildren", "there is no agreement, but the applicant is applying for payments"),
-                new OcrDataField("OrderForChildrenNoAgreement",
+                new OcrDataField(ADDRESS_OF_PROPERTIES, "26 Westminster Avenue"),
+                new OcrDataField(MORTGAGE_DETAILS, "We paid for the house with our mortgage which we split"),
+                new OcrDataField(ORDER_FOR_CHILDREN, "there is no agreement, but the applicant is applying for payments"),
+                new OcrDataField(ORDER_FOR_CHILDREN_NO_AGREEMENT,
                         "in addition to child support maintenance already paid under a Child Support Agency assessment"),
-                new OcrDataField("ChildSupportAgencyCalculationMade", "Yes"),
-                new OcrDataField("ChildSupportAgencyCalculationReason", "Various reasons why I'm making this application"),
+                new OcrDataField(CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "Yes"),
+                new OcrDataField(CHILD_SUPPORT_AGENCY_CALCULATION_REASON, "Various reasons why I'm making this application"),
                 new OcrDataField(AUTHORISATION_FIRM, "Better Divorce Ltd"),
                 new OcrDataField(AUTHORISATION_SOLICITOR_ADDRESS, "1 Single Lane, Liverpool, LE5 AV2"),
                 new OcrDataField(AUTHORISATION_SOLICITOR_POSITION, "I'm the CEO")
@@ -262,6 +265,23 @@ public class FormAValidatorTest {
 
         assertThat(validationResult.getStatus(), is(SUCCESS));
         assertThat(validationResult.getWarnings(), is(emptyList()));
+    }
+
+    @Test
+    public void shouldPassValidationIfChildrensDateOfBirthNotPresent() {
+        List<OcrDataField> ocrDataFields = new ArrayList<>(mandatoryFieldsWithValues);
+        List<OcrDataField> childDobFields = asList(
+            new OcrDataField(DATE_OF_BIRTH_CHILD_1, ""),
+            new OcrDataField(DATE_OF_BIRTH_CHILD_2, "")
+        );
+
+        ocrDataFields.addAll(childDobFields);
+
+        OcrValidationResult validationResult = formAValidator.validateBulkScanForm(ocrDataFields);
+
+        assertThat(validationResult.getStatus(), is(SUCCESS));
+        assertThat(validationResult.getWarnings(), is(emptyList()));
+        assertThat(validationResult.getErrors(), is(emptyList()));
     }
 
     @Test
