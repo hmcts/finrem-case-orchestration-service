@@ -33,7 +33,7 @@ public class BulkPrintService {
 
     private final FeatureToggleService featureToggleService;
     private final GenericDocumentService genericDocumentService;
-    private final OrderNotApprovedDocumentService orderNotApprovedDocumentService;
+    private final ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
 
     public UUID sendNotificationLetterForBulkPrint(final CaseDocument notificationLetter, final CaseDetails caseDetails) {
         List<BulkPrintDocument> notificationLetterList = Collections.singletonList(
@@ -145,7 +145,7 @@ public class BulkPrintService {
     }
 
     public Optional<UUID> printOrderNotApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
-        List<BulkPrintDocument> applicantDocuments = orderNotApprovedDocumentService.generateApplicantDocuments(
+        List<BulkPrintDocument> applicantDocuments = consentOrderNotApprovedDocumentService.generateApplicantDocuments(
             caseDetails, authorisationToken);
         return !applicantDocuments.isEmpty()
             ? Optional.of(bulkPrintDocuments(caseDetails.getId(), applicantDocuments))

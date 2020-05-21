@@ -25,19 +25,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.assertCaseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
@@ -64,27 +60,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
             config.setApprovedConsentOrderNotificationFileName("ApprovedConsentOrderNotificationLetter.pdf");
         }
 
-        Map<String, Object> applicantAddress = new HashMap<>();
-        applicantAddress.put("AddressLine1", "50 Applicant Street");
-        applicantAddress.put("AddressLine2", "Second Address Line");
-        applicantAddress.put("AddressLine3", "Third Address Line");
-        applicantAddress.put("County", "London");
-        applicantAddress.put("Country", "England");
-        applicantAddress.put("PostTown", "London");
-        applicantAddress.put("PostCode", "SW1");
-
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "James");
-        caseData.put(APPLICANT_LAST_NAME, "Joyce");
-        caseData.put(APPLICANT_ADDRESS, applicantAddress);
-        caseData.put(APPLICANT_REPRESENTED, null);
-        caseData.put(APP_RESPONDENT_FIRST_MIDDLE_NAME, "Jane");
-        caseData.put(APP_RESPONDENT_LAST_NAME, "Doe");
-
-        caseDetails = CaseDetails.builder()
-                .id(123456789L)
-                .data(caseData)
-                .build();
+        caseDetails = defaultCaseDetails();
     }
 
     @Test

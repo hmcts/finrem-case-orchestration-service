@@ -3,8 +3,8 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentMatcher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,18 +25,14 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
 @ActiveProfiles("test-mock-document-client")
-public class OrderNotApprovedDocumentServiceTest extends BaseServiceTest {
+@SpringBootTest(properties = {"feature.toggle.consent_order_not_approved_applicant_document_generation=true"})
+public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest {
 
     private static final String COVER_LETTER_URL = "cover_letter_url";
     private static final String GENERAL_ORDER_URL = "general_letter_url";
@@ -53,40 +48,21 @@ public class OrderNotApprovedDocumentServiceTest extends BaseServiceTest {
     private DocumentClient documentClient;
 
     @Autowired
-    private OrderNotApprovedDocumentService orderNotApprovedDocumentService;
+    private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
 
     private CaseDetails caseDetails;
     private List<BulkPrintDocument> generatedDocuments;
 
     @Before
     public void setup() {
-        Map<String, Object> applicantAddress = new HashMap<>();
-        applicantAddress.put("AddressLine1", "50 Applicant Street");
-        applicantAddress.put("AddressLine2", "Second Address Line");
-        applicantAddress.put("AddressLine3", "Third Address Line");
-        applicantAddress.put("County", "London");
-        applicantAddress.put("Country", "England");
-        applicantAddress.put("PostTown", "London");
-        applicantAddress.put("PostCode", "SW1");
+        caseDetails = defaultCaseDetails();
 
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "James");
-        caseData.put(APPLICANT_LAST_NAME, "Joyce");
-        caseData.put(APPLICANT_ADDRESS, applicantAddress);
-        caseData.put(APPLICANT_REPRESENTED, null);
-        caseData.put(APP_RESPONDENT_FIRST_MIDDLE_NAME, "Jane");
-        caseData.put(APP_RESPONDENT_LAST_NAME, "Doe");
-
+        Map<String, Object> caseData = caseDetails.getData();
         caseData.put(PAPER_APPLICATION, YES_VALUE);
         caseData.put(UPLOAD_ORDER, Collections.singletonList(
             ImmutableMap.of("value", ImmutableMap.of(
                 "DocumentLink", ImmutableMap.of(
                     "document_binary_url", GENERAL_ORDER_URL)))));
-
-        caseDetails = CaseDetails.builder()
-            .id(123456789L)
-            .data(caseData)
-            .build();
 
         Document coverLetter = document();
         coverLetter.setBinaryUrl(COVER_LETTER_URL);
@@ -106,7 +82,7 @@ public class OrderNotApprovedDocumentServiceTest extends BaseServiceTest {
             anyString()))
             .thenReturn(replyCoversheet);
 
-        generatedDocuments = orderNotApprovedDocumentService.generateApplicantDocuments(caseDetails, AUTH_TOKEN);
+        generatedDocuments = consentOrderNotApprovedDocumentService.generateApplicantDocuments(caseDetails, AUTH_TOKEN);
     }
 
     @Test
@@ -116,7 +92,8 @@ public class OrderNotApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void whenApplicantDocumentsGenerated_thenCoverLetterIsFirstDocument() {
-        assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
+        BulkPrintDocument coverLetter = generatedDocuments.get(0);
+        assertThat(coverLetter.getBinaryFileUrl(), is(COVER_LETTER_URL));
     }
 
     @Test
@@ -131,13 +108,8 @@ public class OrderNotApprovedDocumentServiceTest extends BaseServiceTest {
 
     private DocumentGenerationRequest matchDocumentGenerationRequestTemplateAndFilename(String template, String filename) {
         return argThat(
-            new ArgumentMatcher<DocumentGenerationRequest>() {
-                @Override
-                public boolean matches(DocumentGenerationRequest request) {
-                    return request != null
-                        && template.equals(request.getTemplate())
-                        && filename.equals(request.getFileName());
-                }
-            });
+            documentGenerationRequest -> documentGenerationRequest != null
+                && template.equals(documentGenerationRequest.getTemplate())
+                && filename.equals(documentGenerationRequest.getFileName()));
     }
 }

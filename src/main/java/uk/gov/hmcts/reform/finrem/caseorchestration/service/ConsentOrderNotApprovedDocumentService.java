@@ -25,13 +25,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class OrderNotApprovedDocumentService {
+public class ConsentOrderNotApprovedDocumentService {
 
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final DocumentConfiguration documentConfiguration;
+    private final FeatureToggleService featureToggleService;
 
     public List<BulkPrintDocument> generateApplicantDocuments(CaseDetails caseDetails, String authorisationToken) {
+        if (!featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()) {
+            return Collections.emptyList();
+        }
+
         Map<String, Object> caseData = caseDetails.getData();
 
         if (!isPaperApplication(caseData)) {
