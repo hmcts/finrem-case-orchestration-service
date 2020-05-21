@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.io.File;
@@ -72,6 +73,9 @@ public class NotificationsControllerTest {
     @MockBean
     private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
 
+    @MockBean
+    private HelpWithFeesDocumentService helpWithFeesDocumentService;
+
     private MockMvc mockMvc;
     private JsonNode requestContent;
 
@@ -81,7 +85,7 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void sendHwfSuccessfulConfirmationEmail() throws Exception {
+    public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() throws Exception {
         buildCcdRequest(CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON);
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -91,6 +95,8 @@ public class NotificationsControllerTest {
 
         verify(notificationService, times(1))
             .sendConsentedHWFSuccessfulConfirmationEmail(any(CallbackRequest.class));
+        verifyNoInteractions(helpWithFeesDocumentService);
+        verifyNoInteractions(bulkPrintService);
     }
 
     @Test
@@ -102,6 +108,40 @@ public class NotificationsControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void sendHwfSuccessfulNotificationLetterIfIsConsentedAndIsPaperApplication_AndToggledOn() throws Exception {
+        buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
+
+        when(featureToggleService.isHwfSuccessfulNotificationLetterEnabled()).thenReturn(true);
+        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(helpWithFeesDocumentService, times(1))
+            .generateHwfSuccessfulNotificationLetter(any(CaseDetails.class),any());
+        verify(bulkPrintService, times(1))
+            .sendNotificationLetterForBulkPrint(any(),any());
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void shouldNotSendHwfSuccessfulNotificationLetterIfIsConsentedAndIsPaperApplication_AndToggledOff() throws Exception {
+        buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
+
+        when(featureToggleService.isHwfSuccessfulNotificationLetterEnabled()).thenReturn(false);
+        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verifyNoInteractions(helpWithFeesDocumentService);
+        verifyNoInteractions(bulkPrintService);
         verifyNoInteractions(notificationService);
     }
 

@@ -34,7 +34,7 @@ public class GenerateCoverSheetService {
 
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
-    
+
     private enum AddressFoundInCaseData { SOLICITOR, PARTY, NONE }
 
     public CaseDocument generateApplicantCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
