@@ -105,7 +105,6 @@ public class GenerateCoverSheetService {
             .addressLine2(nullToEmpty(address.get("AddressLine2")))
             .addressLine3(nullToEmpty(address.get("AddressLine3")))
             .county(nullToEmpty(address.get("County")))
-            .country(nullToEmpty(address.get("Country")))
             .postTown(nullToEmpty(address.get("PostTown")))
             .postCode(nullToEmpty(address.get("PostCode")))
             .build();
