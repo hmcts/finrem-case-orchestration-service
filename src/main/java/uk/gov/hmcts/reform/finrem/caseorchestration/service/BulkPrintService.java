@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -24,7 +24,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderNotApprovedDocumentCollectionPresent;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class BulkPrintService {
 
@@ -35,6 +34,17 @@ public class BulkPrintService {
     private final ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final DocumentHelper documentHelper;
+
+    public BulkPrintService(GenericDocumentService genericDocumentService,
+                            ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService,
+                            @Lazy ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
+                            DocumentHelper documentHelper) {
+        this.genericDocumentService = genericDocumentService;
+        this.consentOrderNotApprovedDocumentService = consentOrderNotApprovedDocumentService;
+        this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
+        this.documentHelper = documentHelper;
+    }
+
 
     public UUID sendNotificationLetterForBulkPrint(final CaseDocument notificationLetter, final CaseDetails caseDetails) {
         List<BulkPrintDocument> notificationLetterList = Collections.singletonList(
