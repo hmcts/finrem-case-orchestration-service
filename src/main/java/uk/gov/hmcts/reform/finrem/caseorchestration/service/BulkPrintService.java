@@ -112,7 +112,7 @@ public class BulkPrintService {
                 .bulkPrintDocuments(documents)
                 .build());
 
-        log.info("Letter ID {} for {} document(s) sent to bulk print: {}", documents.size(), documents);
+        log.info("Letter ID {} for {} document(s) sent to bulk print: {}", letterId, documents.size(), documents);
 
         return letterId;
     }
