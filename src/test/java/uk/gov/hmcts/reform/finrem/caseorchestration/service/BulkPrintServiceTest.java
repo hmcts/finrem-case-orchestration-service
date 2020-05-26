@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
@@ -23,8 +22,11 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchDocumentGenerationRequestTemplateAndFilename;
 
 @ActiveProfiles("test-mock-document-client")
 @SpringBootTest(properties = {"feature.toggle.approved_consent_order_notification_letter=true"})
@@ -35,6 +37,9 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     @Autowired private FeatureToggleService featureToggleService;
     @Autowired private ObjectMapper mapper;
 
+    @Autowired
+    private DocumentClient documentClientMock;
+
     private UUID letterId;
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor;
 
@@ -42,17 +47,10 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     public void setUp() {
         letterId = UUID.randomUUID();
         bulkPrintRequestArgumentCaptor = ArgumentCaptor.forClass(BulkPrintRequest.class);
-        DocumentConfiguration config = new DocumentConfiguration();
-        config.setApprovedConsentOrderTemplate("test_template");
-        config.setApprovedConsentOrderFileName("test_file");
     }
 
     @Test
     public void shouldSendAssignedToJudgeNotificationLetterForBulkPrint() throws Exception {
-        DocumentConfiguration config = new DocumentConfiguration();
-        config.setAssignedToJudgeNotificationTemplate("test_template");
-        config.setAssignedToJudgeNotificationFileName("test_file");
-
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID bulkPrintLetterId = bulkPrintService.sendNotificationLetterForBulkPrint(
@@ -64,6 +62,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldSendOrderDocumentsForBulkPrintForApproved() throws Exception {
+        when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(
+            "FL-FRM-LET-ENG-00070.docx", "BulkPrintCoverSheet.pdf"), anyString())).thenReturn(document());
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID bulkPrintLetterId = bulkPrintService.printApplicantConsentOrderApprovedDocuments(caseDetails(), AUTH_TOKEN);
