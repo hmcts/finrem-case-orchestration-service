@@ -129,6 +129,7 @@ def versions = [
         serviceTokenGenerator   : '3.1.1',
         springfoxSwagger        : '2.9.2',
         sonarPitest             : '0.5',
+        tomcat                  : '9.0.35',
         wiremock                : '2.26.3'
 ]
 
@@ -138,10 +139,12 @@ dependencyManagement {
         dependency group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
         // CVE-2018-10237
         dependency group: 'com.google.guava', name: 'guava', version: '28.1-jre'
-        // CVE-2019-17563
-        dependency group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.31'
-        dependency group: 'org.apache.tomcat.embed', name: 'tomcat-embed-el', version: '9.0.31'
-        dependency group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: '9.0.31'
+        // CVE-2020-9484
+        dependencySet(group: 'org.apache.tomcat.embed', version: versions.tomcat) {
+            entry 'tomcat-embed-core'
+            entry 'tomcat-embed-el'
+            entry 'tomcat-embed-websocket'
+        }
     }
 }
 
