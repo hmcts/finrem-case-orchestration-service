@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @ActiveProfiles("test-mock-document-client")
 @SpringBootTest(properties = {"feature.toggle.approved_consent_order_notification_letter=true"})
@@ -65,8 +66,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     public void shouldSendOrderDocumentsForBulkPrintForApproved() throws Exception {
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
-        UUID bulkPrintLetterId = bulkPrintService.sendOrderForBulkPrintApplicant(
-            new CaseDocument(), caseDetails());
+        UUID bulkPrintLetterId = bulkPrintService.printApplicantConsentOrderApprovedDocuments(caseDetails(), AUTH_TOKEN);
 
         assertThat(bulkPrintLetterId, is(letterId));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().size(),

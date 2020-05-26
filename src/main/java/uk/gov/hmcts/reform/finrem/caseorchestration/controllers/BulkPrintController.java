@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetSe
 
 import javax.validation.constraints.NotNull;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -31,11 +30,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderNotApprovedDocumentCollectionPresent;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
@@ -47,8 +45,6 @@ public class BulkPrintController implements BaseController {
 
     private final BulkPrintService bulkPrintService;
     private final GenerateCoverSheetService coverSheetService;
-
-    private CaseDetails caseDetails;
 
     @PostMapping(path = "/bulk-print", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles bulk print")
@@ -64,45 +60,28 @@ public class BulkPrintController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authorisationToken,
         @NotNull @RequestBody @ApiParam("Callback") CallbackRequest callback) {
 
-        log.info("Received request for Bulk Print for Case ID");
-
+        CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("Received request for Bulk Print for Case ID {}", caseDetails.getId());
         validateCaseData(callback);
-        caseDetails = callback.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (isOrderNotApprovedDocumentCollectionPresent(caseData)) {
-            bulkPrintService.printOrderNotApprovedDocuments(caseDetails, authorisationToken);
-        } else {
-            generateCoversheetForApplicant(authorisationToken);
-            generateCoversheetForRespondent(authorisationToken);
-            caseData.remove(BULK_PRINT_COVER_SHEET);
+        if (applicantIsNotRepresentedByASolicitor(caseData) || solicitorDidNotAgreeToReceiveEmails(caseData)
+            || isPaperApplication(caseData)) {
+            UUID applicantLetterId = isOrderNotApprovedDocumentCollectionPresent(caseData)
+                ? bulkPrintService.printApplicantConsentOrderNotApprovedDocuments(caseDetails, authorisationToken)
+                : bulkPrintService.printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken);
+            caseData.put(BULK_PRINT_LETTER_ID_APP, applicantLetterId);
         }
+
+        generateCoversheetForRespondentAndSendOrders(caseDetails, authorisationToken);
+        caseData.remove(BULK_PRINT_COVER_SHEET);
 
         log.info("Bulk print is successful");
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    private boolean isOrderNotApprovedDocumentCollectionPresent(Map<String, Object> caseData) {
-        return caseData.get(UPLOAD_ORDER) != null && !((List<Map>) caseData.get(UPLOAD_ORDER)).isEmpty();
-    }
-
-    private void generateCoversheetForApplicant(String authToken) {
-        Map<String, Object> caseData = caseDetails.getData();
-
-        if (applicantIsNotRepresentedByASolicitor(caseData) || solicitorDidNotAgreeToReceiveEmails(caseData)
-            || isPaperApplication(caseData)) {
-            CaseDocument applicantCoverSheet = coverSheetService.generateApplicantCoverSheet(caseDetails, authToken);
-            UUID applicantLetterId = bulkPrintService.sendOrderForBulkPrintApplicant(applicantCoverSheet, caseDetails);
-
-            caseData.put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
-            caseData.put(BULK_PRINT_LETTER_ID_APP, applicantLetterId);
-
-            log.info("Generated Applicant CoverSheet for bulk print. coversheet: {}, letterId : {}", applicantCoverSheet, applicantLetterId);
-        }
-    }
-
-    private void generateCoversheetForRespondent(String authToken) {
+    private void generateCoversheetForRespondentAndSendOrders(CaseDetails caseDetails, String authToken) {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authToken);
         UUID respondentLetterId = bulkPrintService.sendOrderForBulkPrintRespondent(respondentCoverSheet, caseDetails);
 

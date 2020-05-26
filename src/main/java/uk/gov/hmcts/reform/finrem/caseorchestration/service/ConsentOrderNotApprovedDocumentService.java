@@ -15,12 +15,12 @@ import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService.DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService.DOCUMENT_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getLastMapValue;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Service
 @RequiredArgsConstructor
@@ -30,25 +30,25 @@ public class ConsentOrderNotApprovedDocumentService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final DocumentConfiguration documentConfiguration;
+    private final GenerateCoverSheetService generateCoverSheetService;
     private final FeatureToggleService featureToggleService;
 
-    public List<BulkPrintDocument> generateApplicantDocuments(CaseDetails caseDetails, String authorisationToken) {
-        if (!featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()) {
-            return Collections.emptyList();
-        }
-
+    public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
-
-        if (!isPaperApplication(caseData)) {
-            return Collections.emptyList();
-        }
-
         log.info("Generating consent order not approved documents for applicant, case ID {}", caseDetails.getId());
 
-        List<BulkPrintDocument> documents = asList(
-            coverLetter(caseDetails, authorisationToken),
-            generalOrder(caseData),
-            replyCoversheet(caseDetails, authorisationToken));
+        List<BulkPrintDocument> documents;
+
+        if (featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()) {
+            documents = asList(
+                coverLetter(caseDetails, authorisationToken),
+                generalOrder(caseData),
+                replyCoversheet(caseDetails, authorisationToken));
+        } else {
+            documents = asList(
+                defaultCoversheet(caseDetails, authorisationToken),
+                generalOrder(caseData));
+        }
 
         return documents;
     }
@@ -63,7 +63,7 @@ public class ConsentOrderNotApprovedDocumentService {
         return BulkPrintDocument.builder().binaryFileUrl(coverLetter.getDocumentBinaryUrl()).build();
     }
 
-    private BulkPrintDocument generalOrder(Map<String, Object> caseData) {
+    public BulkPrintDocument generalOrder(Map<String, Object> caseData) {
         log.info("Extracting 'uploadOrder' from case data for bulk print.");
         List<Map> documentList = ofNullable(caseData.get(UPLOAD_ORDER))
             .map(i -> (List<Map>) i)
@@ -93,5 +93,11 @@ public class ConsentOrderNotApprovedDocumentService {
             documentConfiguration.getConsentOrderNotApprovedReplyCoversheetTemplate(),
             documentConfiguration.getConsentOrderNotApprovedReplyCoversheetFileName());
         return BulkPrintDocument.builder().binaryFileUrl(coverLetter.getDocumentBinaryUrl()).build();
+    }
+
+    private BulkPrintDocument defaultCoversheet(CaseDetails caseDetails, String authorisationToken) {
+        CaseDocument applicantCoverSheet = generateCoverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
+        caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
+        return BulkPrintDocument.builder().binaryFileUrl(applicantCoverSheet.getDocumentBinaryUrl()).build();
     }
 }

@@ -29,7 +29,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
@@ -110,18 +109,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
                 consentOrderApprovedDocumentService.generateApprovedConsentOrderNotificationLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(generatedApprovedConsentOrderNotificationLetter);
-    }
-
-    @Test
-    public void shouldAnnexAndStampDocument() {
-        reset(documentClientMock);
-        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
-
-        CaseDocument caseDocument = caseDocument();
-        CaseDocument annexStampDocument = consentOrderApprovedDocumentService.annexStampDocument(caseDocument, AUTH_TOKEN);
-
-        assertCaseDocument(annexStampDocument);
-        verify(documentClientMock, times(1)).annexStampDocument(any(), anyString());
     }
 
     @Test

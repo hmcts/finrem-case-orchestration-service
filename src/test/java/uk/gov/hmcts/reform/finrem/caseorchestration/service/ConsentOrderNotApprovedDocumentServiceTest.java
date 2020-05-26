@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -31,12 +31,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.docume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
 @ActiveProfiles("test-mock-document-client")
-@SpringBootTest(properties = {"feature.toggle.consent_order_not_approved_applicant_document_generation=true"})
 public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest {
 
     private static final String COVER_LETTER_URL = "cover_letter_url";
     private static final String GENERAL_ORDER_URL = "general_letter_url";
     private static final String REPLY_COVERSHEET_URL = "reply_coversheet_url";
+    private static final String DEFAULT_COVERSHEET_URL = "default_coversheet_url";
 
     private static final String CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_TEMPLATE = "FL-FRM-LET-ENG-00319.docx";
     private static final String CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_FILENAME = "consentOrderNotApprovedCoverLetter.pdf";
@@ -44,14 +44,19 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     private static final String CONSENT_ORDER_NOT_APPROVED_REPLY_COVERSHEET_TEMPLATE = "FL-FRM-LET-ENG-00320.docx";
     private static final String CONSENT_ORDER_NOT_APPROVED_REPLY_COVERSHEET_FILENAME = "consentOrderNotApprovedReplyCoversheet.pdf";
 
+    private static final String BULK_PRINT_TEMPLATE = "FL-FRM-LET-ENG-00070.docx";
+    private static final String BULK_PRINT_FILENAME = "BulkPrintCoverSheet.pdf";
+
     @Autowired
     private DocumentClient documentClient;
 
     @Autowired
     private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
 
+    @MockBean
+    private FeatureToggleService featureToggleService;
+
     private CaseDetails caseDetails;
-    private List<BulkPrintDocument> generatedDocuments;
 
     @Before
     public void setup() {
@@ -64,46 +69,42 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
                 "DocumentLink", ImmutableMap.of(
                     "document_binary_url", GENERAL_ORDER_URL)))));
 
-        Document coverLetter = document();
-        coverLetter.setBinaryUrl(COVER_LETTER_URL);
-        when(documentClient.generatePdf(
-            matchDocumentGenerationRequestTemplateAndFilename(
-                CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_TEMPLATE,
-                CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_FILENAME),
-            anyString()))
-            .thenReturn(coverLetter);
+        mockDocumentClientToReturnUrlForDocumentGenerationRequest(CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_TEMPLATE,
+            CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_FILENAME, COVER_LETTER_URL);
+        mockDocumentClientToReturnUrlForDocumentGenerationRequest(CONSENT_ORDER_NOT_APPROVED_REPLY_COVERSHEET_TEMPLATE,
+            CONSENT_ORDER_NOT_APPROVED_REPLY_COVERSHEET_FILENAME, REPLY_COVERSHEET_URL);
+        mockDocumentClientToReturnUrlForDocumentGenerationRequest(BULK_PRINT_TEMPLATE, BULK_PRINT_FILENAME, DEFAULT_COVERSHEET_URL);
+    }
 
-        Document replyCoversheet = document();
-        replyCoversheet.setBinaryUrl(REPLY_COVERSHEET_URL);
-        when(documentClient.generatePdf(
-            matchDocumentGenerationRequestTemplateAndFilename(
-                CONSENT_ORDER_NOT_APPROVED_REPLY_COVERSHEET_TEMPLATE,
-                CONSENT_ORDER_NOT_APPROVED_REPLY_COVERSHEET_FILENAME),
-            anyString()))
-            .thenReturn(replyCoversheet);
-
-        generatedDocuments = consentOrderNotApprovedDocumentService.generateApplicantDocuments(caseDetails, AUTH_TOKEN);
+    private void mockDocumentClientToReturnUrlForDocumentGenerationRequest(String requestedTemplate, String requestedFilename,
+                                                                           String generatedDocumentUrl) {
+        Document generatedDocument = document();
+        generatedDocument.setBinaryUrl(generatedDocumentUrl);
+        when(documentClient.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(requestedTemplate, requestedFilename),
+            anyString())).thenReturn(generatedDocument);
     }
 
     @Test
-    public void whenApplicantDocumentsGenerated_thenItHasThreeDocuments() {
+    public void givenFeatureIsEnabled_whenApplicantLetterPackIsPrepared_thenItHasExpectedDocuments() {
+        when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(true);
+        List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
+            caseDetails, AUTH_TOKEN);
+
         assertThat(generatedDocuments, hasSize(3));
-    }
-
-    @Test
-    public void whenApplicantDocumentsGenerated_thenCoverLetterIsFirstDocument() {
-        BulkPrintDocument coverLetter = generatedDocuments.get(0);
-        assertThat(coverLetter.getBinaryFileUrl(), is(COVER_LETTER_URL));
-    }
-
-    @Test
-    public void whenApplicantDocumentsGenerated_thenGeneralOrderIsSecondDocument() {
+        assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
         assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(GENERAL_ORDER_URL));
+        assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(REPLY_COVERSHEET_URL));
     }
 
     @Test
-    public void whenApplicantDocumentsGenerated_thenCoverLetterIsThirdDocument() {
-        assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(REPLY_COVERSHEET_URL));
+    public void givenFeatureIsDisabled_whenApplicantLetterPackIsPrepared_thenItHasExpectedDocuments() {
+        when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(false);
+        List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
+            caseDetails, AUTH_TOKEN);
+
+        assertThat(generatedDocuments, hasSize(2));
+        assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(DEFAULT_COVERSHEET_URL));
+        assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(GENERAL_ORDER_URL));
     }
 
     private DocumentGenerationRequest matchDocumentGenerationRequestTemplateAndFilename(String template, String filename) {

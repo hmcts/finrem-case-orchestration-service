@@ -13,11 +13,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -47,6 +49,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullName;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
@@ -56,6 +59,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @RequiredArgsConstructor
 @Slf4j
 public class DocumentHelper {
+
+    public static final String DOCUMENT_URL = "document_binary_url";
 
     private final ObjectMapper objectMapper;
 
@@ -188,5 +193,33 @@ public class DocumentHelper {
             .filter(StringUtils::isNotEmpty)
             .filter(s -> !s.equals("null"))
             .collect(Collectors.joining("\n"));
+    }
+
+    public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {
+        Map<String, Object> documentLink = (Map) data.get(documentName);
+
+        return documentLink != null
+            ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(documentLink.get(DOCUMENT_URL).toString()).build())
+            : Optional.empty();
+    }
+
+    public List<BulkPrintDocument> getCollectionOfDocumentLinksAsBulkPrintDocuments(Map<String, Object> data, String collectionName,
+                                                                                     String documentName) {
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+
+        List<Map> documentList = ofNullable(data.get(collectionName))
+            .map(i -> (List<Map>) i)
+            .orElse(new ArrayList<>());
+
+        for (Map document : documentList) {
+            Map value = (Map) document.get(VALUE);
+            Map<String, Object> documentLink = (Map) value.get(documentName);
+            if (documentLink != null) {
+                bulkPrintDocuments.add(BulkPrintDocument.builder()
+                    .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
+                    .build());
+            }
+        }
+        return bulkPrintDocuments;
     }
 }
