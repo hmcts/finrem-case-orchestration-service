@@ -43,7 +43,7 @@ public class ConsentOrderNotApprovedDocumentService {
             documents = asList(
                 coverLetter(caseDetails, authorisationToken),
                 generalOrder(caseData),
-                replyCoversheet(caseDetails, authorisationToken));
+                applicantReplyCoversheet(caseDetails, authorisationToken));
         } else {
             documents = asList(
                 defaultCoversheet(caseDetails, authorisationToken),
@@ -85,14 +85,15 @@ public class ConsentOrderNotApprovedDocumentService {
         throw new IllegalStateException("General order not found in application not approved case");
     }
 
-    private BulkPrintDocument replyCoversheet(CaseDetails caseDetails, String authorisationToken) {
+    private BulkPrintDocument applicantReplyCoversheet(CaseDetails caseDetails, String authorisationToken) {
         CaseDetails caseDetailsWithTemplateData = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
-        CaseDocument coverLetter = genericDocumentService.generateDocument(
+        CaseDocument applicantCoversheet = genericDocumentService.generateDocument(
             authorisationToken,
             caseDetailsWithTemplateData,
             documentConfiguration.getConsentOrderNotApprovedReplyCoversheetTemplate(),
             documentConfiguration.getConsentOrderNotApprovedReplyCoversheetFileName());
-        return BulkPrintDocument.builder().binaryFileUrl(coverLetter.getDocumentBinaryUrl()).build();
+        caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoversheet);
+        return BulkPrintDocument.builder().binaryFileUrl(applicantCoversheet.getDocumentBinaryUrl()).build();
     }
 
     private BulkPrintDocument defaultCoversheet(CaseDetails caseDetails, String authorisationToken) {
