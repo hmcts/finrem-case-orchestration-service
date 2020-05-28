@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -34,8 +35,13 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
     @Autowired private DocumentClient documentClient;
     @Autowired private BulkPrintService bulkPrintService;
-    @Autowired private FeatureToggleService featureToggleService;
     @Autowired private ObjectMapper mapper;
+
+    @Value("${document.bulkPrintTemplate}") private String documentBulkPrintTemplate;
+    @Value("${document.bulkPrintFileName}") private String documentBulkPrintFileName;
+
+    @Value("${document.approvedConsentOrderNotificationTemplate}") private String documentApprovedConsentOrderNotificationTemplate;
+    @Value("${document.approvedConsentOrderNotificationFileName}") private String documentApprovedConsentOrderNotificationFileName;
 
     @Autowired
     private DocumentClient documentClientMock;
@@ -63,14 +69,16 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     @Test
     public void shouldSendOrderDocumentsForBulkPrintForApproved() throws Exception {
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(
-            "FL-FRM-LET-ENG-00070.docx", "BulkPrintCoverSheet.pdf"), anyString())).thenReturn(document());
+            documentBulkPrintTemplate, documentBulkPrintFileName), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(
+            documentApprovedConsentOrderNotificationTemplate, documentApprovedConsentOrderNotificationFileName), anyString()))
+            .thenReturn(document());
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID bulkPrintLetterId = bulkPrintService.printApplicantConsentOrderApprovedDocuments(caseDetails(), AUTH_TOKEN);
 
         assertThat(bulkPrintLetterId, is(letterId));
-        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().size(),
-            is(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled() ? 6 : 5));
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments(), hasSize(6));
     }
 
     @Test
