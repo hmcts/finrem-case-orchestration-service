@@ -1,122 +1,75 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getLastMapValue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderNotApprovedDocumentCollectionPresent;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class BulkPrintService {
 
-    private static final String DOCUMENT_FILENAME = "document_filename";
-    private static final String DOCUMENT_URL = "document_binary_url";
-    private static final String VALUE = "value";
+    private static final String FINANCIAL_REMEDY_PACK_LETTER_TYPE = "FINANCIAL_REMEDY_PACK";
+    static final String DOCUMENT_FILENAME = "document_filename";
 
-    private final FeatureToggleService featureToggleService;
     private final GenericDocumentService genericDocumentService;
+    private final ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+    private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    private final DocumentHelper documentHelper;
+
+    public BulkPrintService(GenericDocumentService genericDocumentService,
+                            ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService,
+                            @Lazy ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
+                            DocumentHelper documentHelper) {
+        this.genericDocumentService = genericDocumentService;
+        this.consentOrderNotApprovedDocumentService = consentOrderNotApprovedDocumentService;
+        this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
+        this.documentHelper = documentHelper;
+    }
+
 
     public UUID sendNotificationLetterForBulkPrint(final CaseDocument notificationLetter, final CaseDetails caseDetails) {
-        List<BulkPrintDocument> notificationLetterList = new ArrayList<>();
-        log.info("Sending Notification Letter for Bulk Print.");
-
-        String caseId = caseDetails.getId().toString();
-
-        notificationLetterList.add(
+        List<BulkPrintDocument> notificationLetterList = Collections.singletonList(
             BulkPrintDocument.builder().binaryFileUrl(notificationLetter.getDocumentBinaryUrl()).build());
 
+        Long caseId = caseDetails.getId();
         log.info("Notification letter sent to Bulk Print: {} for Case ID: {}", notificationLetterList, caseId);
 
-        return genericDocumentService.bulkPrint(
-            BulkPrintRequest.builder()
-                .caseId(caseId)
-                .letterType("FINANCIAL_REMEDY_PACK")
-                .bulkPrintDocuments(notificationLetterList)
-                .build());
+        return bulkPrintDocuments(caseId, notificationLetterList);
     }
 
-    /**
-     * Send order documents to printing and posting to applicant or applicant solicitor.
-     */
-    public UUID sendOrderForBulkPrintApplicant(final CaseDocument coverSheet, final CaseDetails caseDetails) {
-        return sendOrdersForBulkPrint(coverSheet, caseDetails, true);
-    }
-
-    /**
-     * Send order documents to printing and posting to respondent or respondent solicitor.
-     */
     public UUID sendOrderForBulkPrintRespondent(final CaseDocument coverSheet, final CaseDetails caseDetails) {
-        return sendOrdersForBulkPrint(coverSheet, caseDetails, false);
-    }
-
-    /**
-     * Sending approved order collection or upload order (if approved order collection is empty) to bulk print.
-     * @param coverSheet cover sheet document
-     * @param caseDetails {@link CaseDetails} object
-     * @param recipientIsApplicant true if applicant is the recipient, false for respondent being the recipient
-     * @return
-     */
-    private UUID sendOrdersForBulkPrint(final CaseDocument coverSheet, final CaseDetails caseDetails, boolean recipientIsApplicant) {
-        log.info("Sending Orders for Bulk Print.");
+        log.info("Sending order documents to recipient / solicitor for Bulk Print");
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(coverSheet.getDocumentBinaryUrl()).build());
 
-        if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled() && recipientIsApplicant) {
-            log.info("Adding consentOrderApprovedNotificationLetter document to BulkPrint documents list");
-            bulkPrintDocuments.addAll(convertBulkPrintDocument(caseDetails.getData(), CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER));
-        }
+        Map<String, Object> caseData = caseDetails.getData();
+        List<BulkPrintDocument> orderDocuments = isOrderNotApprovedDocumentCollectionPresent(caseData)
+            ? asList(consentOrderNotApprovedDocumentService.generalOrder(caseData))
+            : approvedOrderCollection(caseData);
 
-        List<BulkPrintDocument> approvedOrderCollection = approvedOrderCollection(caseDetails.getData());
-        if (!approvedOrderCollection.isEmpty()) {
-            log.info("Sending Approved Order Collections for Bulk Print.: {}", approvedOrderCollection);
-            bulkPrintDocuments.addAll(approvedOrderCollection);
-        } else {
-            List<BulkPrintDocument> uploadOrder = uploadOrder(caseDetails.getData());
-            if (!uploadOrder.isEmpty()) {
-                log.info("Sending Upload Order Collections for Bulk Print: {}", uploadOrder);
-                bulkPrintDocuments.addAll(uploadOrder);
-            }
-        }
+        bulkPrintDocuments.addAll(orderDocuments);
 
-        log.info("{} Order documents (including cover sheet) have been sent to bulk print: {}", bulkPrintDocuments.size(), bulkPrintDocuments);
-
-        return genericDocumentService.bulkPrint(
-            BulkPrintRequest.builder()
-                .caseId(caseDetails.getId().toString())
-                .letterType("FINANCIAL_REMEDY_PACK")
-                .bulkPrintDocuments(bulkPrintDocuments)
-                .build());
-    }
-
-    List<BulkPrintDocument> uploadOrder(Map<String, Object> data) {
-        log.info("Extracting 'uploadOrder' from case data for bulk print.");
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        List<Map> documentList = ofNullable(data.get(UPLOAD_ORDER))
-            .map(i -> (List<Map>) i)
-            .orElse(new ArrayList<>());
-        if (!documentList.isEmpty()) {
-            Map<String, Object> value = ((Map) getLastMapValue.apply(documentList).get(VALUE));
-            bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "DocumentLink"));
-        }
-        return bulkPrintDocuments;
+        return bulkPrintDocuments(caseDetails.getId(), bulkPrintDocuments);
     }
 
     List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
@@ -125,60 +78,42 @@ public class BulkPrintService {
             .map(i -> (List<Map>) i)
             .orElse(new ArrayList<>());
 
-        if (documentList.size() > 0) {
+        if (!documentList.isEmpty()) {
             log.info("Extracting 'approvedOrderCollection' from case data for bulk print.");
-
             Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get(VALUE));
-            bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "orderLetter"));
-            bulkPrintDocuments.addAll(convertBulkPrintDocument(value, CONSENT_ORDER));
-            bulkPrintDocuments.addAll(convertBulkPrintDocument(value, "pensionDocuments",
-                "uploadedDocument"));
+            documentHelper.getDocumentLinkAsBulkPrintDocument(value, "orderLetter").ifPresent(bulkPrintDocuments::add);
+            documentHelper.getDocumentLinkAsBulkPrintDocument(value, CONSENT_ORDER).ifPresent(bulkPrintDocuments::add);
+            bulkPrintDocuments.addAll(documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(value,
+                "pensionDocuments", "uploadedDocument"));
         } else {
             log.info("Failed to extract 'approvedOrderCollection' from case data for bulk print as document list was empty.");
         }
 
-        log.info("Documents inside 'approvedOrderCollection' are: {}", bulkPrintDocuments);
         return bulkPrintDocuments;
     }
 
-    private List<BulkPrintDocument> convertBulkPrintDocument(Map<String, Object> data, String documentName) {
-        log.info("Extracting '{}' document from case data for bulk print.", documentName);
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+    public UUID printApplicantConsentOrderNotApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
+        List<BulkPrintDocument> applicantDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
+            caseDetails, authorisationToken);
+        return bulkPrintDocuments(caseDetails.getId(), applicantDocuments);
+    }
 
-        Object documentLinkObj = data.get(documentName);
+    public UUID printApplicantConsentOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
+        List<BulkPrintDocument> applicantDocuments = consentOrderApprovedDocumentService.prepareApplicantLetterPack(
+            caseDetails, authorisationToken);
+        return bulkPrintDocuments(caseDetails.getId(), applicantDocuments);
+    }
 
-        if (documentLinkObj != null) {
-            Map documentLink = (Map) documentLinkObj;
-            bulkPrintDocuments.add(BulkPrintDocument.builder()
-                .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
+    private UUID bulkPrintDocuments(Long caseId, List<BulkPrintDocument> documents) {
+        UUID letterId = genericDocumentService.bulkPrint(
+            BulkPrintRequest.builder()
+                .caseId(String.valueOf(caseId))
+                .letterType(FINANCIAL_REMEDY_PACK_LETTER_TYPE)
+                .bulkPrintDocuments(documents)
                 .build());
-            log.info("Sending {} ({}) for bulk print.", documentName, documentLink.get(DOCUMENT_FILENAME));
-        }
-        return bulkPrintDocuments;
-    }
 
-    private List<BulkPrintDocument> convertBulkPrintDocument(Map<String, Object> data, String collectionName, String documentName) {
-        log.info("Extracting '{}' collection from case data for bulk print.", collectionName);
+        log.info("Letter ID {} for {} document(s) sent to bulk print: {}", letterId, documents.size(), documents);
 
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-
-        List<Map> documentList = ofNullable(data.get(collectionName))
-            .map(i -> (List<Map>) i)
-            .orElse(new ArrayList<>());
-
-        for (Map document : documentList) {
-            Map value = ((Map) document.get(VALUE));
-
-            Object documentLinkObj = value.get(documentName);
-
-            if (documentLinkObj != null) {
-                Map<String, Object> documentLink = (Map) documentLinkObj;
-                bulkPrintDocuments.add(BulkPrintDocument.builder()
-                    .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
-                    .build());
-                log.info("Sending {} ({}) for bulk print.", collectionName, documentLink.get(DOCUMENT_FILENAME));
-            }
-        }
-        return bulkPrintDocuments;
+        return letterId;
     }
 }

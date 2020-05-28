@@ -7,6 +7,7 @@ import feign.Request;
 import feign.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpServerErrorException;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
 import java.math.BigDecimal;
@@ -28,12 +30,19 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
-public class SetUpUtils {
+public class TestSetUpUtils {
 
     public static final String DOC_URL = "http://dm-store/lhjbyuivu87y989hijbb";
     public static final String BINARY_URL = DOC_URL + "/binary";
@@ -149,8 +158,43 @@ public class SetUpUtils {
     }
 
     public static void assertCaseDocument(CaseDocument caseDocument) {
+        assertCaseDocument(caseDocument, BINARY_URL);
+    }
+
+    public static void assertCaseDocument(CaseDocument caseDocument, String binaryUrl) {
         assertThat(caseDocument.getDocumentFilename(), is(FILE_NAME));
         assertThat(caseDocument.getDocumentUrl(), is(DOC_URL));
-        assertThat(caseDocument.getDocumentBinaryUrl(), is(BINARY_URL));
+        assertThat(caseDocument.getDocumentBinaryUrl(), is(binaryUrl));
+    }
+
+    public static CaseDetails defaultCaseDetails() {
+        Map<String, Object> applicantAddress = new HashMap<>();
+        applicantAddress.put("AddressLine1", "50 Applicant Street");
+        applicantAddress.put("AddressLine2", "Second Address Line");
+        applicantAddress.put("AddressLine3", "Third Address Line");
+        applicantAddress.put("County", "London");
+        applicantAddress.put("Country", "England");
+        applicantAddress.put("PostTown", "London");
+        applicantAddress.put("PostCode", "SW1");
+
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "James");
+        caseData.put(APPLICANT_LAST_NAME, "Joyce");
+        caseData.put(APPLICANT_ADDRESS, applicantAddress);
+        caseData.put(APPLICANT_REPRESENTED, null);
+        caseData.put(APP_RESPONDENT_FIRST_MIDDLE_NAME, "Jane");
+        caseData.put(APP_RESPONDENT_LAST_NAME, "Doe");
+
+        return CaseDetails.builder()
+            .id(123456789L)
+            .data(caseData)
+            .build();
+    }
+
+    public static DocumentGenerationRequest matchDocumentGenerationRequestTemplateAndFilename(String template, String filename) {
+        return argThat(
+            documentGenerationRequest -> documentGenerationRequest != null
+                && template.equals(documentGenerationRequest.getTemplate())
+                && filename.equals(documentGenerationRequest.getFileName()));
     }
 }

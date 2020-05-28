@@ -71,14 +71,14 @@ public class GenerateCoverSheetService {
             populateCaseDataWithBulkPrintCoverSheet(caseDetails,
                 sendToSolicitor ? solicitorName(caseData.get(solicitorNameCcdFieldName), caseData.get(solicitorFirmCcdFieldName))
                     : partyName(caseData.get(partyFirstMiddleNameCcdFieldName), caseData.get(partyLastNameCcdFieldName)),
-                sendToSolicitor ? (Map)caseData.get(solicitorAddressCcdFieldName) : (Map)caseData.get(partyAddressCcdFieldName));
+                sendToSolicitor ? (Map) caseData.get(solicitorAddressCcdFieldName) : (Map) caseData.get(partyAddressCcdFieldName));
         }
     }
 
     private AddressFoundInCaseData checkAddress(Map<String, Object> caseData, String partyAddressCcdFieldName,
                                                 String solicitorAddressCcdFieldName) {
-        return addressLineOneAndPostCodeAreBothNotEmpty((Map)caseData.get(solicitorAddressCcdFieldName)) ? AddressFoundInCaseData.SOLICITOR
-            : addressLineOneAndPostCodeAreBothNotEmpty((Map)caseData.get(partyAddressCcdFieldName)) ? AddressFoundInCaseData.PARTY
+        return addressLineOneAndPostCodeAreBothNotEmpty((Map) caseData.get(solicitorAddressCcdFieldName)) ? AddressFoundInCaseData.SOLICITOR
+            : addressLineOneAndPostCodeAreBothNotEmpty((Map) caseData.get(partyAddressCcdFieldName)) ? AddressFoundInCaseData.PARTY
             : AddressFoundInCaseData.NONE;
     }
 
