@@ -25,7 +25,8 @@ public class BulkScanHelper {
                     .put("Pension Compensation Sharing Order", "Pension Compensation Sharing Order")
                     .put("Pension Compensation Attachment Order", "Pension Compensation Attachment Order")
                     .put("A settlement or a transfer of property", "A settlement or a transfer of property")
-                    .put("Property Adjustment Order", "Property Adjustment Order")
+                    //The below field intentionally has 2 spaces to match CCD config. Will be addressed before release
+                    .put("Property Adjustment Order", "Property Adjustment  Order")
                     .build();
 
     public static final Map<String, String> dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames =
