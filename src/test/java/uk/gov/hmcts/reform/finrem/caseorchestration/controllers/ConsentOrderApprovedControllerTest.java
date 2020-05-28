@@ -29,14 +29,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.PENSION_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.feignError;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.PENSION_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 
 @WebMvcTest(ConsentOrderApprovedController.class)
@@ -117,14 +118,13 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void consentOrderApprovedSuccessForPaperApplicationIfConsentOrderApprovedNotificationLetterToggledOff() throws Exception {
+    public void consentOrderApprovedSuccessForPaperApplication() throws Exception {
         doValidCaseDataSetUpForPaperApplication();
         whenServiceGeneratesDocument().thenReturn(caseDocument());
         whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
-        when(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()).thenReturn(false);
 
         ResultActions result = mvc.perform(post(endpoint())
             .content(requestContent.toString())
@@ -135,28 +135,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         assertLetter(result);
         assertConsentOrder(result);
         assertPensionDocs(result);
-    }
-
-    @Test
-    public void consentOrderApprovedSuccessForPaperApplicationIfConsentOrderApprovedNotificationLetterToggledOn() throws Exception {
-        doValidCaseDataSetUpForPaperApplication();
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
-        whenStampingDocument().thenReturn(caseDocument());
-        whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
-        when(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()).thenReturn(true);
-
-        ResultActions result = mvc.perform(post(endpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE));
-
-        result.andExpect(status().isOk());
-        assertLetter(result);
-        assertConsentOrder(result);
-        assertPensionDocs(result);
-        assertConsentOrderNotificationLetter(result);
     }
 
     @Test
@@ -179,7 +157,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         assertLetter(result);
         assertConsentOrder(result);
         assertPensionDocs(result);
-        verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderNotificationLetter(any(), any());
+        verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderCoverLetter(any(), any());
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
@@ -187,11 +165,11 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesNotificationLetter() {
-        return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderNotificationLetter(isA(CaseDetails.class), anyString()));
+        return when(consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(isA(CaseDetails.class), anyString()));
     }
 
     private OngoingStubbing<CaseDocument> whenAnnexStampingDocument() {
-        return when(consentOrderApprovedDocumentService.annexStampDocument(isA(CaseDocument.class), anyString()));
+        return when(genericDocumentService.annexStampDocument(isA(CaseDocument.class), anyString()));
     }
 
     private OngoingStubbing<CaseDocument> whenStampingDocument() {
@@ -206,14 +184,14 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         String path = "$.data.approvedOrderCollection[0].value.orderLetter.";
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
             .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
-            .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
+            .andExpect(jsonPath(path + DOCUMENT_BINARY_URL, is(BINARY_URL)));
     }
 
     private void assertConsentOrderNotificationLetter(ResultActions result) throws Exception {
         String path = "$.data.consentOrderApprovedNotificationLetter.";
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
             .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
-            .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
+            .andExpect(jsonPath(path + DOCUMENT_BINARY_URL, is(BINARY_URL)));
     }
 
     private void assertConsentOrder(ResultActions result) throws Exception {
@@ -230,6 +208,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     private void assertDocument(ResultActions result, String path) throws Exception {
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
             .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
-            .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
+            .andExpect(jsonPath(path + DOCUMENT_BINARY_URL, is(BINARY_URL)));
     }
 }

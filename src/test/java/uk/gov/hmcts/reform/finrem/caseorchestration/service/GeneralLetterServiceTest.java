@@ -24,11 +24,11 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.DOC_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 
 public class GeneralLetterServiceTest {
@@ -45,7 +45,7 @@ public class GeneralLetterServiceTest {
         config.setGeneralLetterFileName("test_file");
 
         generatorClient = new TestDocumentClient();
-        genericDocumentService = new GenericDocumentService(generatorClient, mapper);
+        genericDocumentService = new GenericDocumentService(generatorClient);
         generalLetterService = new GeneralLetterService(genericDocumentService, config, new DocumentHelper(mapper), mapper);
     }
 

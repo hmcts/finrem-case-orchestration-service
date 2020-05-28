@@ -19,8 +19,8 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.SetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
 
 public class GenerateCoverSheetServiceTest {
@@ -36,7 +36,7 @@ public class GenerateCoverSheetServiceTest {
         config.setBulkPrintTemplate("test_template");
 
         DocumentClient generatorClient = new TestDocumentClient();
-        genericDocumentService = new GenericDocumentService(generatorClient, mapper);
+        genericDocumentService = new GenericDocumentService(generatorClient);
         generateCoverSheetService = new GenerateCoverSheetService(genericDocumentService, config);
     }
 
@@ -154,7 +154,6 @@ public class GenerateCoverSheetServiceTest {
     }
 
     private static class TestDocumentClient implements DocumentClient {
-
         @Override
         public Document generatePdf(DocumentGenerationRequest request, String authorizationToken) {
             assertThat(request.getTemplate(), is("test_template"));
