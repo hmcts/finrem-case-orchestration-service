@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 
 @Component
 public class ServiceUtils {
@@ -54,7 +55,7 @@ public class ServiceUtils {
         Map<String,String> uploadedDocument = new HashMap<>();
         uploadedDocument.put("document_url",fileUploadResponse.get("fileUrl").toString());
         uploadedDocument.put("document_filename",fileUploadResponse.get("fileName").toString());
-        uploadedDocument.put("document_binary_url",fileUploadResponse.get("fileUrl").toString() + "/binary");
+        uploadedDocument.put(DOCUMENT_BINARY_URL,fileUploadResponse.get("fileUrl").toString() + "/binary");
 
         return uploadedDocument;
     }

@@ -37,10 +37,8 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Slf4j
 @RestController
@@ -93,23 +91,10 @@ public class ConsentOrderApprovedController implements BaseController {
 
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
         CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken);
-        CaseDocument approvedConsentOrderNotificationLetter = null;
 
         ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)
             .consentOrder(consentOrderAnnexStamped);
-
-        if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()
-            && isPaperApplication(caseData)) {
-            approvedConsentOrderNotificationLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderNotificationLetter(
-                caseDetails, authToken);
-
-            log.info("consentNotificationLetter = {}, letter = {}, consentOrderAnnexStamped = {}",
-                approvedConsentOrderNotificationLetter, approvedConsentOrderLetter, consentOrderAnnexStamped);
-
-            log.info("Adding approvedConsentOrderNotificationLetter to approvedOrderBuilder");
-            caseData.put(CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER, approvedConsentOrderNotificationLetter);
-        }
 
         ApprovedOrder approvedOrder = approvedOrderBuilder.build();
 

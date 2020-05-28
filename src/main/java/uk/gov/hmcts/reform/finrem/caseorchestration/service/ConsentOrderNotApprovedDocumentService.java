@@ -15,7 +15,7 @@ import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
@@ -75,7 +75,7 @@ public class ConsentOrderNotApprovedDocumentService {
             if (documentLinkObj != null) {
                 Map documentLink = (Map) documentLinkObj;
                 BulkPrintDocument generalOrder = BulkPrintDocument.builder()
-                    .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
+                    .binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL).toString())
                     .build();
                 log.info("Sending general order ({}) for bulk print.", documentLink.get(DOCUMENT_FILENAME));
                 return generalOrder;

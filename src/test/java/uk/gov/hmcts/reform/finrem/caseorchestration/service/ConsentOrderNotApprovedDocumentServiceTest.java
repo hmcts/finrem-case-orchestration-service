@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchDocumentGenerationRequestTemplateAndFilename;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
@@ -68,7 +69,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         caseData.put(UPLOAD_ORDER, Collections.singletonList(
             ImmutableMap.of("value", ImmutableMap.of(
                 "DocumentLink", ImmutableMap.of(
-                    "document_binary_url", GENERAL_ORDER_URL)))));
+                    DOCUMENT_BINARY_URL, GENERAL_ORDER_URL)))));
 
         mockDocumentClientToReturnUrlForDocumentGenerationRequest(CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_TEMPLATE,
             CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_FILENAME, COVER_LETTER_URL);

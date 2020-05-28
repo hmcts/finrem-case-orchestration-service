@@ -158,9 +158,13 @@ public class TestSetUpUtils {
     }
 
     public static void assertCaseDocument(CaseDocument caseDocument) {
+        assertCaseDocument(caseDocument, BINARY_URL);
+    }
+
+    public static void assertCaseDocument(CaseDocument caseDocument, String binaryUrl) {
         assertThat(caseDocument.getDocumentFilename(), is(FILE_NAME));
         assertThat(caseDocument.getDocumentUrl(), is(DOC_URL));
-        assertThat(caseDocument.getDocumentBinaryUrl(), is(BINARY_URL));
+        assertThat(caseDocument.getDocumentBinaryUrl(), is(binaryUrl));
     }
 
     public static CaseDetails defaultCaseDetails() {

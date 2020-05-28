@@ -60,7 +60,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 public class DocumentHelper {
 
-    public static final String DOCUMENT_URL = "document_binary_url";
+    public static final String DOCUMENT_BINARY_URL = "document_binary_url";
 
     private final ObjectMapper objectMapper;
 
@@ -199,7 +199,7 @@ public class DocumentHelper {
         Map<String, Object> documentLink = (Map) data.get(documentName);
 
         return documentLink != null
-            ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(documentLink.get(DOCUMENT_URL).toString()).build())
+            ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL).toString()).build())
             : Optional.empty();
     }
 
@@ -216,10 +216,14 @@ public class DocumentHelper {
             Map<String, Object> documentLink = (Map) value.get(documentName);
             if (documentLink != null) {
                 bulkPrintDocuments.add(BulkPrintDocument.builder()
-                    .binaryFileUrl(documentLink.get(DOCUMENT_URL).toString())
+                    .binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL).toString())
                     .build());
             }
         }
         return bulkPrintDocuments;
+    }
+
+    public static BulkPrintDocument caseDocumentToBulkPrintDocument(CaseDocument document) {
+        return BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl()).build();
     }
 }

@@ -15,8 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.caseDocumentToBulkPrintDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Service
 @RequiredArgsConstructor
@@ -40,18 +41,14 @@ public class ConsentOrderApprovedDocumentService {
             documentConfiguration.getApprovedConsentOrderFileName());
     }
 
-    public CaseDocument generateApprovedConsentOrderNotificationLetter(CaseDetails caseDetails, String authToken) {
-        log.info("Generating Approved Consent Order Notification Letter {} from {} for bulk print",
-            documentConfiguration.getApprovedConsentOrderFileName(),
-            documentConfiguration.getApprovedConsentOrderTemplate());
-
+    public CaseDocument generateApprovedConsentOrderCoverLetter(CaseDetails caseDetails, String authToken) {
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter = genericDocumentService.generateDocument(authToken, caseDetailsForBulkPrint,
             documentConfiguration.getApprovedConsentOrderNotificationTemplate(),
             documentConfiguration.getApprovedConsentOrderNotificationFileName());
 
-        log.info("Generated Approved Consent Order Notification Letter: {}", generatedApprovedConsentOrderNotificationLetter);
+        log.info("Generated Approved Consent Order cover Letter: {}", generatedApprovedConsentOrderNotificationLetter);
 
         return generatedApprovedConsentOrderNotificationLetter;
     }
@@ -76,11 +73,11 @@ public class ConsentOrderApprovedDocumentService {
         caseData.put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(applicantCoverSheet.getDocumentBinaryUrl()).build());
+        bulkPrintDocuments.add(caseDocumentToBulkPrintDocument(applicantCoverSheet));
 
-        if (featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
-            documentHelper.getDocumentLinkAsBulkPrintDocument(caseDetails.getData(), CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER)
-                .ifPresent(bulkPrintDocuments::add);
+        if (isPaperApplication(caseData) && featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
+            CaseDocument coverLetter = generateApprovedConsentOrderCoverLetter(caseDetails, authorisationToken);
+            bulkPrintDocuments.add(caseDocumentToBulkPrintDocument(coverLetter));
         }
 
         List<BulkPrintDocument> approvedOrderCollection = bulkPrintService.approvedOrderCollection(caseDetails.getData());

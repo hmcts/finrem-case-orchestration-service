@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 
 @WebMvcTest(FinalOrderController.class)
 public class FinalOrderControllerTest extends BaseControllerTest {
@@ -81,7 +82,7 @@ public class FinalOrderControllerTest extends BaseControllerTest {
         String path = "$.data.finalOrderCollection[1].value.uploadDraftDocument.";
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
             .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
-            .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
+            .andExpect(jsonPath(path + DOCUMENT_BINARY_URL, is(BINARY_URL)));
 
     }
 
@@ -114,7 +115,7 @@ public class FinalOrderControllerTest extends BaseControllerTest {
         String path = "$.data.finalOrderCollection[0].value.uploadDraftDocument.";
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
             .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
-            .andExpect(jsonPath(path + "document_binary_url", is(BINARY_URL)));
+            .andExpect(jsonPath(path + DOCUMENT_BINARY_URL, is(BINARY_URL)));
     }
 
     private OngoingStubbing<CaseDocument> whenStampingDocument() {
