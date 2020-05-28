@@ -48,10 +48,13 @@ public class ChildrenInfoMapper {
     }
 
     private static ChildInfo mapChild(int index, List<OcrDataField> ocrDataFields) {
-        String dob = transformFormDateIntoCcdDate(
-            "childInfo" + index + ".dateOfBirth",
-            getValueOrEmptyString(index, ocrDataFields, DOB)
-        );
+
+        String childsDob = getValueOrEmptyString(index, ocrDataFields, DOB);
+        String dob = "";
+        // Only map childs DOB if it is present
+        if (StringUtils.isNotBlank(childsDob)) {
+            dob = transformFormDateIntoCcdDate("childInfo" + index + ".dateOfBirth", childsDob);
+        }
 
         return ChildInfo.builder()
             .name(getValueOrEmptyString(index, ocrDataFields, NAME_OF_CHILD))
