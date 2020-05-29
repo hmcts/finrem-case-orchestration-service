@@ -4,7 +4,7 @@
     "id": "123",
     "jurisdiction": "DIVORCE",
     "state": "orderMade",
-    "case_type_id": "FinancialRemedyContested",
+    "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
       "applicantRepresented": "No",
       "uploadOrder":[

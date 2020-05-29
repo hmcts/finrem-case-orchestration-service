@@ -4,27 +4,10 @@
     "id": "123",
     "jurisdiction": "DIVORCE",
     "state": "consentOrderApproved",
-    "case_type_id": "FinancialRemedyContested",
+    "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
       "applicantRepresented": "Yes",
       "solicitorAgreeToReceiveEmails": "Yes",
-      "uploadOrder":[
-        {
-          "id":"92d30d00-1cd6-4ab1-aca9-cd361d21634e",
-          "value":{
-            "DocumentLink":{
-              "document_url":"http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7",
-              "document_filename":"case_001.pdf",
-              "document_binary_url":"http://dm-store:8080/documents/2dc053c3-c7ae-41ba-b561-305a2d0f69a7/binary"
-            },
-            "DocumentType":"Other",
-            "DocumentComment":null,
-            "DocumentFileName":null,
-            "DocumentDateAdded":null,
-            "DocumentEmailContent":null
-          }
-        }
-      ],
       "pensionCollection": [
         {
           "id": "63c0570f-25bf-4d18-99ed-8c13c2c5dafa",
