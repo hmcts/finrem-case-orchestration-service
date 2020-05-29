@@ -112,11 +112,11 @@ public class GenerateCoverSheetServiceTest {
 
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
         BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
-        assertThat(bulkPrintCoverSheet.getRecipientName(), is("Mr J Solicitor\nSolicitor & Co"));
+        assertThat(bulkPrintCoverSheet.getRecipientName(), is("Mr J Solicitor"));
 
         generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
-        assertThat(bulkPrintCoverSheet.getRecipientName(), is("Ms J Solicitor\nLaw in Pink Ltd."));
+        assertThat(bulkPrintCoverSheet.getRecipientName(), is("Ms J Solicitor"));
     }
 
     @Test
