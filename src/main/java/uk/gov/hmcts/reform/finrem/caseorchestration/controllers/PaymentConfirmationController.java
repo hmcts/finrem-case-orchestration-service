@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @SuppressWarnings("unchecked")
 public class PaymentConfirmationController implements BaseController {
     private final PaymentConfirmationService paymentConfirmationService;
+    private final CaseRoleService caseRoleService;
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/payment-confirmation", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -40,6 +42,14 @@ public class PaymentConfirmationController implements BaseController {
         log.info("Received request for PBA confirmation for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callbackRequest);
+
+        log.info("Adding Applicant Solicitor Case Role for Case ID: {}", caseDetails.getId());
+        try {
+            caseRoleService.addApplicantSolicitorRole(authToken, caseDetails.getId().toString());
+            log.info("Successfully added Applicant Solicitor Case Role for Case ID: {}", caseDetails.getId());
+        } catch (Exception e) {
+            log.error("Failed to add Applicant Solicitor Case Role for Case ID: {} Error occurred: {}", caseDetails.getId(), e.getMessage());
+        }
 
         SubmittedCallbackResponse callbackResponse = SubmittedCallbackResponse.builder()
             .confirmationBody(confirmationBody(caseDetails))

@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseRoleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
 
 import java.io.File;
@@ -29,6 +30,9 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
 
     @MockBean
     private PaymentConfirmationService paymentConfirmationService;
+
+    @MockBean
+    private CaseRoleService caseRoleService;
 
     private void doConfirmationSetup(boolean isConsented, boolean isHwf) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();

@@ -113,6 +113,7 @@ def versions = [
         commonsIo               : '2.6',
         commonsLang3            : '3.9',
         gradlePitest            : '1.5.1',
+        idamClient              : '1.1.0',
         jsonAssert              : '1.2.3',
         junit                   : '4.13',
         lombok                  : '1.16.18',
@@ -165,6 +166,7 @@ dependencies {
     implementation group: 'uk.gov.hmcts.reform', name: 'bsp-common-lib', version: versions.bspCommonLib
     implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
     implementation group: 'uk.gov.hmcts.reform', name: 'health-spring-boot-starter', version:'0.0.5'
+    implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: versions.idamClient
     implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
     implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
     implementation group: 'uk.gov.hmcts.reform', name: 'logging-httpcomponents', version: versions.reformLogging

@@ -31,5 +31,7 @@ public class OrchestrationConstants {
     public static final String CTSC_PHONE_NUMBER = "0300 303 0642";
     public static final String CTSC_OPENING_HOURS = "from 8.30am to 5pm";
 
-
+    // Case Roles
+    public static final String APP_SOL_ROLE = "[APPSOLICITOR]";
+    public static final String RESP_SOL_ROLE = "[RESPSOLICITOR]";
 }
