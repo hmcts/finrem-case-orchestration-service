@@ -18,3 +18,5 @@ java:
         - username-solicitor
         - password-solicitor
         - AppInsightsInstrumentationKey
+        - idam-caseworker-username
+        - idam-caseworker-password

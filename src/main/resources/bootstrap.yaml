@@ -9,4 +9,6 @@ spring:
         idam-secret: OAUTH2_CLIENT_FINREM
         username-solicitor: USERNAME-SOLICITOR
         password-solicitor: PASSWORD-SOLICITOR
+        idam-caseworker-username: IDAM_CASEWORKER_USERNAME
+        idam-caseworker-password: IDAM_CASEWORKER_PASSWORD
         AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key

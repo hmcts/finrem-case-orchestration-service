@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
@@ -8,6 +9,8 @@ import uk.gov.hmcts.reform.idam.client.models.User;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class IdamUserService {
 
     @Value("${idam.caseworker.username}")
@@ -16,8 +19,7 @@ public class IdamUserService {
     @Value("${idam.caseworker.password}")
     private String caseworkerPassword;
 
-    @Autowired
-    private IdamClient idamClient;
+    private final IdamClient idamClient;
 
     public User retrieveUser(String authorisation) {
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
