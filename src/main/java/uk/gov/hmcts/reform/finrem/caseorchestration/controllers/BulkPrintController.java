@@ -33,7 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderNotApprovedDocumentCollectionPresent;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderApprovedDocumentCollectionPresent;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
@@ -67,9 +67,9 @@ public class BulkPrintController implements BaseController {
 
         if (applicantIsNotRepresentedByASolicitor(caseData) || solicitorDidNotAgreeToReceiveEmails(caseData)
             || isPaperApplication(caseData)) {
-            UUID applicantLetterId = isOrderNotApprovedDocumentCollectionPresent(caseData)
-                ? bulkPrintService.printApplicantConsentOrderNotApprovedDocuments(caseDetails, authorisationToken)
-                : bulkPrintService.printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken);
+            UUID applicantLetterId = isOrderApprovedDocumentCollectionPresent(caseData)
+                ? bulkPrintService.printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken)
+                : bulkPrintService.printApplicantConsentOrderNotApprovedDocuments(caseDetails, authorisationToken);
             caseData.put(BULK_PRINT_LETTER_ID_APP, applicantLetterId);
         }
 
