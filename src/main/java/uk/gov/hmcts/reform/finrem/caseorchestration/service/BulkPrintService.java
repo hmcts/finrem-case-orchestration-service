@@ -21,7 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderNotApprovedDocumentCollectionPresent;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderApprovedDocumentCollectionPresent;
 
 @Service
 @Slf4j
@@ -63,9 +63,9 @@ public class BulkPrintService {
         bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(coverSheet.getDocumentBinaryUrl()).build());
 
         Map<String, Object> caseData = caseDetails.getData();
-        List<BulkPrintDocument> orderDocuments = isOrderNotApprovedDocumentCollectionPresent(caseData)
-            ? asList(consentOrderNotApprovedDocumentService.generalOrder(caseData))
-            : approvedOrderCollection(caseData);
+        List<BulkPrintDocument> orderDocuments = isOrderApprovedDocumentCollectionPresent(caseData)
+            ? approvedOrderCollection(caseData)
+            : asList(consentOrderNotApprovedDocumentService.generalOrder(caseData));
 
         bulkPrintDocuments.addAll(orderDocuments);
 
