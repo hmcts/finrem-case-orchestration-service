@@ -126,4 +126,16 @@ public class BulkScanServiceTest {
         verify(finRemBulkScanFormTransformerFactory, never()).getTransformer(TEST_FORM_TYPE);
         verify(bulkScanFormTransformer, never()).transformIntoCaseData(exceptionRecord);
     }
+
+    /*
+    @Test(expected = InvalidDataException.class)
+    public void shouldThrowInvalidDataExceptionForTransformerWhenNoFormADocumentsAreAttached() {
+
+    }
+
+    @Test(expected = InvalidDataException.class)
+    public void shouldThrowInvalidDataExceptionForTransformerWhenMoreThanOneFormADocumentsAreAttached() {
+
+    }
+     */
 }
