@@ -104,7 +104,6 @@ public class DocumentHelperTest {
             + "Second Address Line" + "\n"
             + "Third Address Line" + "\n"
             + "Greater London" + "\n"
-            + "England" + "\n"
             + "London" + "\n"
             + "SW1";
 
@@ -123,7 +122,30 @@ public class DocumentHelperTest {
         testAddressMap.put("PostCode", "SW1");
 
         String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
-        String expectedAddress = "50 Applicant Street" + "\n" + "England" + "\n" + "SW1";
+        String expectedAddress = "50 Applicant Street" + "\n" + "SW1";
+
+        assertThat(formattedAddress, is(expectedAddress));
+    }
+
+    @Test
+    public void testAddressWithCountryIsNotInOutputForLetterPrinting() {
+
+        Map<String, Object> testAddressMap = new HashMap<>();
+        testAddressMap.put("AddressLine1", "50 Applicant Street");
+        testAddressMap.put("AddressLine2", "Second Address Line");
+        testAddressMap.put("AddressLine3", "Third Address Line");
+        testAddressMap.put("County", "Greater London");
+        testAddressMap.put("Country", "England");
+        testAddressMap.put("PostTown", "London");
+        testAddressMap.put("PostCode", "SW1");
+
+        String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
+        String expectedAddress = "50 Applicant Street" + "\n"
+            + "Second Address Line" + "\n"
+            + "Third Address Line" + "\n"
+            + "Greater London" + "\n"
+            + "London" + "\n"
+            + "SW1";
 
         assertThat(formattedAddress, is(expectedAddress));
     }
