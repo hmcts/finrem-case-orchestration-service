@@ -9,11 +9,36 @@
       "PBANumber": "PBA123",
       "d81Question": "No",
       "PBAreference": "ABCD",
-      "consentOrder": {
-        "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
-      },
+      "approvedOrderCollection": [
+        {
+          "id": "00ffa155-e60f-499a-9295-77b598bf16d1",
+          "value": {
+            "orderLetter": {
+              "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
+              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+              "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
+            },
+            "consentOrder": {
+              "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
+              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+              "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
+            },
+            "pensionDocuments": [
+              {
+                "id": "3bc538b9-8a6e-4fd1-84de-eeb01460f900",
+                "value": {
+                  "typeOfDocument": "Form PPF2",
+                  "uploadedDocument": {
+                    "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
+                    "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+                    "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
       "d81Applicant": {
         "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
@@ -32,6 +57,7 @@
       "solicitorPhone": "9963472494",
       "applicantFMName": "Poor",
       "authorisation2b": "test",
+      "applicantRepresented": "Yes",
       "otherCollection": [
         {
           "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
