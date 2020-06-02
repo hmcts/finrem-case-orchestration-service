@@ -18,9 +18,6 @@ public class BulkPrintCoverSheet {
     @JsonProperty("County")
     private String county;
 
-    @JsonProperty("Country")
-    private String country;
-
     @JsonProperty("PostCode")
     private String postCode;
 
