@@ -17,7 +17,6 @@ public class BulkPrintCoverSheetTest {
                 .addressLine2("AddressLine2")
                 .addressLine3("AddressLine3")
                 .county("County")
-                .country("Country")
                 .postTown("PostTown")
                 .postCode("PostCode")
                 .build();
@@ -27,7 +26,6 @@ public class BulkPrintCoverSheetTest {
         assertEquals("AddressLine2", bulkPrintCoverSheet.getAddressLine2());
         assertEquals("AddressLine3", bulkPrintCoverSheet.getAddressLine3());
         assertEquals("County", bulkPrintCoverSheet.getCounty());
-        assertEquals("Country", bulkPrintCoverSheet.getCountry());
         assertEquals("PostTown", bulkPrintCoverSheet.getPostTown());
         assertEquals("PostCode", bulkPrintCoverSheet.getPostCode());
     }

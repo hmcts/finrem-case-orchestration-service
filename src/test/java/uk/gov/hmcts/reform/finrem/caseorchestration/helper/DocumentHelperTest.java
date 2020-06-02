@@ -6,6 +6,7 @@ import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CtscContactDetails;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -14,7 +15,17 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_EMAIL_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PHONE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_POSTCODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 
 public class DocumentHelperTest {
@@ -78,7 +89,6 @@ public class DocumentHelperTest {
 
     @Test
     public void testAddressIsCorrectlyFormatterForLetterPrinting() {
-
         Map<String, Object> testAddressMap = new HashMap<>();
         testAddressMap.put("AddressLine1", "50 Applicant Street");
         testAddressMap.put("AddressLine2", "Second Address Line");
@@ -94,7 +104,6 @@ public class DocumentHelperTest {
             + "Second Address Line" + "\n"
             + "Third Address Line" + "\n"
             + "Greater London" + "\n"
-            + "England" + "\n"
             + "London" + "\n"
             + "SW1";
 
@@ -103,7 +112,6 @@ public class DocumentHelperTest {
 
     @Test
     public void testAddressWithNullValuesIsCorrectlyFormatterForLetterPrinting() {
-
         Map<String, Object> testAddressMap = new HashMap<>();
         testAddressMap.put("AddressLine1", "50 Applicant Street");
         testAddressMap.put("AddressLine2", "");
@@ -114,14 +122,36 @@ public class DocumentHelperTest {
         testAddressMap.put("PostCode", "SW1");
 
         String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
-        String expectedAddress = "50 Applicant Street" + "\n" + "England" + "\n" + "SW1";
+        String expectedAddress = "50 Applicant Street" + "\n" + "SW1";
+
+        assertThat(formattedAddress, is(expectedAddress));
+    }
+
+    @Test
+    public void testAddressWithCountryIsNotInOutputForLetterPrinting() {
+
+        Map<String, Object> testAddressMap = new HashMap<>();
+        testAddressMap.put("AddressLine1", "50 Applicant Street");
+        testAddressMap.put("AddressLine2", "Second Address Line");
+        testAddressMap.put("AddressLine3", "Third Address Line");
+        testAddressMap.put("County", "Greater London");
+        testAddressMap.put("Country", "England");
+        testAddressMap.put("PostTown", "London");
+        testAddressMap.put("PostCode", "SW1");
+
+        String formattedAddress = documentHelper.formatAddressForLetterPrinting(testAddressMap);
+        String expectedAddress = "50 Applicant Street" + "\n"
+            + "Second Address Line" + "\n"
+            + "Third Address Line" + "\n"
+            + "Greater London" + "\n"
+            + "London" + "\n"
+            + "SW1";
 
         assertThat(formattedAddress, is(expectedAddress));
     }
 
     @Test
     public void testAddressWithMissingFieldsAndEmptyValuesIsCorrectlyFormatterForLetterPrinting() {
-
         Map<String, Object> testAddressMap = new HashMap<>();
         testAddressMap.put("AddressLine1", "null");
         testAddressMap.put("AddressLine2", "");
@@ -135,7 +165,6 @@ public class DocumentHelperTest {
 
     @Test
     public void testAddressWithAllNullValuesIsCorrectlyFormatterForLetterPrinting() {
-
         Map<String, Object> testAddressMap = new HashMap<>();
         testAddressMap.put("AddressLine1", null);
         testAddressMap.put("AddressLine2", null);
@@ -149,6 +178,24 @@ public class DocumentHelperTest {
         String expectedAddress = "";
 
         assertThat(formattedAddress, is(expectedAddress));
+    }
+
+    @Test
+    public void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated() {
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterToApplicantTemplateData(defaultCaseDetails());
+
+        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
+            .serviceCentre(CTSC_SERVICE_CENTRE)
+            .careOf(CTSC_CARE_OF)
+            .poBox(CTSC_PO_BOX)
+            .town(CTSC_TOWN)
+            .postcode(CTSC_POSTCODE)
+            .emailAddress(CTSC_EMAIL_ADDRESS)
+            .phoneNumber(CTSC_PHONE_NUMBER)
+            .openingHours(CTSC_OPENING_HOURS)
+            .build();
+
+        assertEquals(ctscContactDetails, preparedCaseDetails.getData().get("ctscContactDetails"));
     }
 
     private CallbackRequest prepareCallbackRequest(String fileName) throws Exception {

@@ -8,10 +8,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.caseDocumentToBulkPrintDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Service
 @RequiredArgsConstructor
@@ -19,8 +25,11 @@ import static java.util.stream.Collectors.toList;
 public class ConsentOrderApprovedDocumentService {
 
     private final GenericDocumentService genericDocumentService;
+    private final GenerateCoverSheetService generateCoverSheetService;
     private final DocumentConfiguration documentConfiguration;
+    private final BulkPrintService bulkPrintService;
     private final DocumentHelper documentHelper;
+    private final FeatureToggleService featureToggleService;
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         log.info("Generating Approved Consent Order Letter {} from {} for bulk print",
@@ -32,24 +41,16 @@ public class ConsentOrderApprovedDocumentService {
             documentConfiguration.getApprovedConsentOrderFileName());
     }
 
-    public CaseDocument generateApprovedConsentOrderNotificationLetter(CaseDetails caseDetails, String authToken) {
-        log.info("Generating Approved Consent Order Notification Letter {} from {} for bulk print",
-            documentConfiguration.getApprovedConsentOrderFileName(),
-            documentConfiguration.getApprovedConsentOrderTemplate());
-
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareNotificationLetter(caseDetails);
+    public CaseDocument generateApprovedConsentOrderCoverLetter(CaseDetails caseDetails, String authToken) {
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter = genericDocumentService.generateDocument(authToken, caseDetailsForBulkPrint,
             documentConfiguration.getApprovedConsentOrderNotificationTemplate(),
             documentConfiguration.getApprovedConsentOrderNotificationFileName());
 
-        log.info("Generated Approved Consent Order Notification Letter: {}", generatedApprovedConsentOrderNotificationLetter);
+        log.info("Generated Approved Consent Order cover Letter: {}", generatedApprovedConsentOrderNotificationLetter);
 
         return generatedApprovedConsentOrderNotificationLetter;
-    }
-
-    public CaseDocument annexStampDocument(CaseDocument document, String authToken) {
-        return genericDocumentService.annexStampDocument(document, authToken);
     }
 
     public List<PensionCollectionData> stampPensionDocuments(List<PensionCollectionData> pensionList, String authToken) {
@@ -63,5 +64,25 @@ public class ConsentOrderApprovedDocumentService {
         PensionCollectionData stampedPensionData = documentHelper.deepCopy(pensionDocument, PensionCollectionData.class);
         stampedPensionData.getTypedCaseDocument().setPensionDocument(stampedDocument);
         return stampedPensionData;
+    }
+
+    public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken) {
+        log.info("Sending Approved Consent Order to applicant / solicitor for Bulk Print");
+        Map<String, Object> caseData = caseDetails.getData();
+        CaseDocument applicantCoverSheet = generateCoverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
+        caseData.put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
+
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        bulkPrintDocuments.add(caseDocumentToBulkPrintDocument(applicantCoverSheet));
+
+        if (isPaperApplication(caseData) && featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
+            CaseDocument coverLetter = generateApprovedConsentOrderCoverLetter(caseDetails, authorisationToken);
+            bulkPrintDocuments.add(caseDocumentToBulkPrintDocument(coverLetter));
+        }
+
+        List<BulkPrintDocument> approvedOrderCollection = bulkPrintService.approvedOrderCollection(caseDetails.getData());
+        bulkPrintDocuments.addAll(approvedOrderCollection);
+
+        return bulkPrintDocuments;
     }
 }

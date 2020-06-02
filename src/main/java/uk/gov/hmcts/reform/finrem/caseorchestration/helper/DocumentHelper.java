@@ -13,11 +13,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -47,6 +49,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullName;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
@@ -56,6 +59,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @RequiredArgsConstructor
 @Slf4j
 public class DocumentHelper {
+
+    public static final String DOCUMENT_BINARY_URL = "document_binary_url";
 
     private final ObjectMapper objectMapper;
 
@@ -115,27 +120,27 @@ public class DocumentHelper {
         return Optional.empty();
     }
 
-    public CaseDetails prepareNotificationLetter(CaseDetails caseDetails) {
+    public CaseDetails prepareLetterToApplicantTemplateData(CaseDetails caseDetails) {
         // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
         CaseDetails caseDetailsCopy = deepCopy(caseDetails, CaseDetails.class);
-        Map<String, Object> docmosisCaseData = caseDetailsCopy.getData();
+        Map<String, Object> caseData = caseDetailsCopy.getData();
         Map addressToSendTo;
 
         String ccdNumber = nullToEmpty((caseDetailsCopy.getId()));
         String reference = "";
         String addresseeName;
-        String applicantName = buildFullName(docmosisCaseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
-        String respondentName =  buildFullName(docmosisCaseData, APP_RESPONDENT_FIRST_MIDDLE_NAME, APP_RESPONDENT_LAST_NAME);
+        String applicantName = buildFullName(caseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
+        String respondentName =  buildFullName(caseData, APP_RESPONDENT_FIRST_MIDDLE_NAME, APP_RESPONDENT_LAST_NAME);
 
-        if (isApplicantRepresentedByASolicitor(docmosisCaseData)) {
+        if (isApplicantRepresentedByASolicitor(caseData)) {
             log.info("Applicant is represented by a solicitor");
-            reference = nullToEmpty((docmosisCaseData.get(SOLICITOR_REFERENCE)));
-            addresseeName = nullToEmpty((docmosisCaseData.get(SOLICITOR_NAME)));
-            addressToSendTo = (Map) docmosisCaseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
+            reference = nullToEmpty((caseData.get(SOLICITOR_REFERENCE)));
+            addresseeName = nullToEmpty((caseData.get(SOLICITOR_NAME)));
+            addressToSendTo = (Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
         } else {
             log.info("Applicant is not represented by a solicitor");
             addresseeName = applicantName;
-            addressToSendTo = (Map) docmosisCaseData.get(APPLICANT_ADDRESS);
+            addressToSendTo = (Map) caseData.get(APPLICANT_ADDRESS);
         }
 
         if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
@@ -144,17 +149,16 @@ public class DocumentHelper {
                 .formattedAddress(formatAddressForLetterPrinting(addressToSendTo))
                 .build();
 
-            docmosisCaseData.put("caseNumber", ccdNumber);
-            docmosisCaseData.put("reference", reference);
-            docmosisCaseData.put("addressee",  addressee);
-            docmosisCaseData.put("letterDate", String.valueOf(LocalDate.now()));
-            docmosisCaseData.put("applicantName", applicantName);
-            docmosisCaseData.put("respondentName", respondentName);
-            docmosisCaseData.put("ctscContactDetails", buildCtscContactDetails());
+            caseData.put("caseNumber", ccdNumber);
+            caseData.put("reference", reference);
+            caseData.put("addressee",  addressee);
+            caseData.put("letterDate", String.valueOf(LocalDate.now()));
+            caseData.put("applicantName", applicantName);
+            caseData.put("respondentName", respondentName);
+            caseData.put("ctscContactDetails", buildCtscContactDetails());
         } else {
-            log.info("Failed to generate notification letter as not all required address details were present");
-            throw new IllegalArgumentException(
-                "Mandatory data missing from address when trying to generate notification letter");
+            log.info("Failed to prepare template data as not all required address details were present");
+            throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
         }
 
         return caseDetailsCopy;
@@ -182,12 +186,44 @@ public class DocumentHelper {
     }
 
     public String formatAddressForLetterPrinting(Map<String, Object> address) {
-        return Stream.of("AddressLine1", "AddressLine2", "AddressLine3", "County", "Country", "PostTown", "PostCode")
+        return Stream.of("AddressLine1", "AddressLine2", "AddressLine3", "County", "PostTown", "PostCode")
             .map(address::get)
             .filter(Objects::nonNull)
             .map(Object::toString)
             .filter(StringUtils::isNotEmpty)
             .filter(s -> !s.equals("null"))
             .collect(Collectors.joining("\n"));
+    }
+
+    public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {
+        Map<String, Object> documentLink = (Map) data.get(documentName);
+
+        return documentLink != null
+            ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL).toString()).build())
+            : Optional.empty();
+    }
+
+    public List<BulkPrintDocument> getCollectionOfDocumentLinksAsBulkPrintDocuments(Map<String, Object> data, String collectionName,
+                                                                                     String documentName) {
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+
+        List<Map> documentList = ofNullable(data.get(collectionName))
+            .map(i -> (List<Map>) i)
+            .orElse(new ArrayList<>());
+
+        for (Map document : documentList) {
+            Map value = (Map) document.get(VALUE);
+            Map<String, Object> documentLink = (Map) value.get(documentName);
+            if (documentLink != null) {
+                bulkPrintDocuments.add(BulkPrintDocument.builder()
+                    .binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL).toString())
+                    .build());
+            }
+        }
+        return bulkPrintDocuments;
+    }
+
+    public static BulkPrintDocument caseDocumentToBulkPrintDocument(CaseDocument document) {
+        return BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl()).build();
     }
 }

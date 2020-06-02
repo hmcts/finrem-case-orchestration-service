@@ -39,7 +39,6 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_REPRESENTED = "appRespondentRep";
     public static final String RESP_SOLICITOR_NAME = "rSolicitorName";
     public static final String RESP_SOLICITOR_ADDRESS = "rSolicitorAddress";
-    public static final String RESPONDENT_SOLICITOR_FIRM = "rSolicitorFirm";
 
     //Draft Order Related
     public static final String SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER = "solicitorResponsibleForDraftingOrder";
@@ -101,7 +100,6 @@ public class CCDConfigConstant {
     public static final String BULK_PRINT_LETTER_ID_APP = "bulkPrintLetterIdApp";
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
     public static final String UPLOAD_ORDER = "uploadOrder";
-    public static final String CONSENT_ORDER_APPROVED_NOTIFICATION_LETTER = "consentOrderApprovedNotificationLetter";
 
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
 }

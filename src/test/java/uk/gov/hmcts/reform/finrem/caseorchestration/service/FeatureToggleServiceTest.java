@@ -15,58 +15,78 @@ import static org.junit.Assert.assertThat;
 public class FeatureToggleServiceTest {
 
     @RunWith(SpringRunner.class)
-    @SpringBootTest(properties = {"feature.toggle.approved_consent_order_notification_letter=true"})
+    @SpringBootTest(properties = {
+        "feature.toggle.approved_consent_order_notification_letter=true",
+        "feature.toggle.hwf_successful_notification_letter=true",
+        "feature.toggle.assigned_to_judge_notification_letter=true",
+        "feature.toggle.consent_order_not_approved_applicant_document_generation=true"
+    })
     public static class ApprovedConsentOrderNotificationSwitchedOn {
 
         @Autowired
-        private FeatureToggleService classToTest;
+        private FeatureToggleService featureToggleService;
 
         @Test
         public void isApprovedConsentOrderNotificationLetterEnabledReturnsTrue() {
-            assertThat(classToTest.isApprovedConsentOrderNotificationLetterEnabled(), is(true));
+            assertThat(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled(), is(true));
         }
 
         @Test
         public void isHwfSuccessfulNotificationLetterEnabledReturnTrue() {
-            assertThat(classToTest.isHwfSuccessfulNotificationLetterEnabled(), is(false));
+            assertThat(featureToggleService.isHwfSuccessfulNotificationLetterEnabled(), is(true));
         }
 
         @Test
         public void isAssignedToJudgeNotificationLetterEnabledReturnTrue() {
-            assertThat(classToTest.isAssignedToJudgeNotificationLetterEnabled(), is(false));
+            assertThat(featureToggleService.isAssignedToJudgeNotificationLetterEnabled(), is(true));
+        }
+
+        @Test
+        public void isConsentOrderNotApprovedApplicantDocumentGenerationEnabledReturnTrue() {
+            assertThat(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled(), is(true));
         }
 
         @Test
         public void getFieldsIgnoredDuringSerialisationEmptyWhenFeaturesEnabled() {
-            assertThat(classToTest.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
+            assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
         }
     }
 
     @RunWith(SpringRunner.class)
-    @SpringBootTest(properties = {"feature.toggle.approved_consent_order_notification_letter=false"})
+    @SpringBootTest(properties = {
+        "feature.toggle.approved_consent_order_notification_letter=false",
+        "feature.toggle.hwf_successful_notification_letter=false",
+        "feature.toggle.assigned_to_judge_notification_letter=false",
+        "feature.toggle.consent_order_not_approved_applicant_document_generation=false"
+    })
     public static class ApprovedConsentOrderNotificationSwitchedOff {
 
         @Autowired
-        private FeatureToggleService classToTest;
+        private FeatureToggleService featureToggleService;
 
         @Test
         public void isApprovedConsentOrderNotificationLetterEnabledReturnsFalse() {
-            assertThat(classToTest.isApprovedConsentOrderNotificationLetterEnabled(), is(false));
+            assertThat(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled(), is(false));
         }
 
         @Test
-        public void isHwfSuccessfulNotificationLetterEnabledReturnTrue() {
-            assertThat(classToTest.isHwfSuccessfulNotificationLetterEnabled(), is(false));
+        public void isHwfSuccessfulNotificationLetterEnabledReturnFalse() {
+            assertThat(featureToggleService.isHwfSuccessfulNotificationLetterEnabled(), is(false));
         }
 
         @Test
-        public void isAssignedToJudgeNotificationLetterEnabledReturnTrue() {
-            assertThat(classToTest.isAssignedToJudgeNotificationLetterEnabled(), is(false));
+        public void isAssignedToJudgeNotificationLetterEnabledReturnFalse() {
+            assertThat(featureToggleService.isAssignedToJudgeNotificationLetterEnabled(), is(false));
+        }
+
+        @Test
+        public void isConsentOrderNotApprovedApplicantDocumentGenerationEnabledReturnFalse() {
+            assertThat(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled(), is(false));
         }
 
         @Test
         public void getFieldsIgnoredDuringSerialisationContainsElementsWhenFeaturesDisabled() {
-            assertThat(classToTest.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
+            assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
         }
     }
 }
