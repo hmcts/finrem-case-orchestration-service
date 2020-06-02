@@ -5,10 +5,10 @@ import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import static org.junit.Assert.assertEquals;
@@ -66,11 +66,10 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Value("${case.orchestration.api}")
     private String caseOrchestration;
 
-    @Ignore
     @Test
     public void verifyBulkPrintDocumentGenerationShouldReturnOkResponseCode() {
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
-            "document", "generalOrder", consentedDir);
+            BINARY_URL_TYPE, "generalOrder", consentedDir);
 
         String payload = utils.getJsonFromFile("bulk-print.json", consentedDir)
             .replace("$DOCUMENT-BINARY-URL", documentUrl);
@@ -245,65 +244,47 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     private JsonPath generateDocument(String jsonFileName, String url, String journeyType) {
-
         Response jsonResponse = SerenityRest.given()
             .relaxedHTTPSValidation()
             .headers(utils.getHeaders())
             .body(utils.getJsonFromFile(jsonFileName, journeyType))
             .when().post(url).andReturn();
 
-        int statusCode = jsonResponse.getStatusCode();
-        assertEquals(200, statusCode);
+        assertEquals(HttpStatus.OK, HttpStatus.valueOf(jsonResponse.getStatusCode()));
 
         return jsonResponse.jsonPath();
     }
 
     private String getDocumentUrlOrDocumentBinaryUrl(String jsonFile, String url, String urlType, String documentType, String journeyType) {
-
+        jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
+        String path = null;
         switch (documentType) {
             case MINI_FORM_A:
-                jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
-                if (urlType.equals("document")) {
-                    url1 = jsonPathEvaluator.get("data.miniFormA.document_url");
-                } else if (urlType.equals(BINARY_URL_TYPE)) {
-                    url1 = jsonPathEvaluator.get("data.miniFormA.document_binary_url");
-                }
+                path = "data.miniFormA";
                 break;
             case "generalOrder":
-                jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
-                if (urlType.equals("document")) {
-                    url1 = jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentLink.document_url");
-                } else if (urlType.equals(BINARY_URL_TYPE)) {
-                    url1 = jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentLink.document_binary_url");
-                }
+                path = "data.uploadOrder[0].value.DocumentLink";
                 break;
             case "approvedConsentOrder":
-                jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
-                if (urlType.equals("document")) {
-                    url1 = jsonPathEvaluator.get("data.approvedConsentOrderLetter.document_url");
-                } else if (urlType.equals(BINARY_URL_TYPE)) {
-                    url1 = jsonPathEvaluator.get("data.approvedConsentOrderLetter.document_binary_url");
-                }
+                path = "data.approvedConsentOrderLetter";
                 break;
             case "hearing":
-                jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
-                if (urlType.equals("document")) {
-                    url1 = jsonPathEvaluator.get("data.formC.document_url");
-                } else if (urlType.equals(BINARY_URL_TYPE)) {
-                    url1 = jsonPathEvaluator.get("data.formC.document_binary_url");
-                }
+                path = "data.formC";
                 break;
             case "hearingG":
-                jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
-                if (urlType.equals("document")) {
-                    url1 = jsonPathEvaluator.get("data.formG.document_url");
-                } else if (urlType.equals(BINARY_URL_TYPE)) {
-                    url1 = jsonPathEvaluator.get("data.formG.document_binary_url");
-                }
+                path = "data.formG";
                 break;
             default:
-                jsonPathEvaluator = generateDocument(jsonFile, url, journeyType);
                 break;
+        }
+
+        path = path == null ? null
+            : urlType.equals("document") ? path + ".document_url"
+            : urlType.equals(BINARY_URL_TYPE) ? path + ".document_binary_url"
+            : path;
+
+        if (path != null) {
+            url1 = jsonPathEvaluator.get(path);
         }
 
         return url1;
