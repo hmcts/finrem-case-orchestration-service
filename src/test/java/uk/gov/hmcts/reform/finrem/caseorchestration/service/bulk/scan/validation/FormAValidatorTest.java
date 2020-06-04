@@ -280,6 +280,12 @@ public class FormAValidatorTest {
         assertThat(ocrValidResult.getWarnings(), not(hasItem("divorceCaseNumber is not in a valid format")));
     }
 
+    /*
+    shouldProduceErrorsForIncorrectNumberOfAttachedDocuments
+    shouldProduceErrorsForDocumentFieldsNotFound
+    shouldProduceErrorsForDocumentSubTypeNotAccepted
+     */
+
     private String notInValidFormat(String fieldName) {
         return String.format("%s is not in a valid format", fieldName);
     }

@@ -2,14 +2,20 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.InputScannedDoc;
+import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -197,7 +203,88 @@ public class FormAValidator extends BulkScanFormValidator {
     private static List<String> validateHwfNumber(Map<String, String> fieldsMap, String fieldName) {
         String hwfNumber = fieldsMap.get(fieldName);
         return hwfNumber != null && !hwfNumber.matches(HWF_NUMBER_6_DIGITS_REGEX)
-                ? asList("HWFNumber is usually 6 digits")
+                ? Collections.singletonList("HWFNumber is usually 6 digits")
                 : emptyList();
+    }
+
+    public OcrValidationResult validateFormAScannedDocuments(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException {
+
+        List<InputScannedDoc> scannedDocuments = exceptionRecord.getScannedDocuments();
+        List<InputScannedDoc> inputScannedDocs = Optional.ofNullable(scannedDocuments).orElse(emptyList());
+        OcrValidationResult.Builder documentValidationResultBuilder = OcrValidationResult.builder();
+
+        List<String> validationMessagesForScannedDocuments = produceErrorsForIncorrectNumberOfAttachedDocuments(inputScannedDocs);
+        validationMessagesForScannedDocuments.forEach(documentValidationResultBuilder::addWarning);
+
+        List<String> validationMessagesForDocumentFieldsNotFound = produceErrorsForDocumentFieldsNotFound(inputScannedDocs);
+        validationMessagesForDocumentFieldsNotFound.forEach(documentValidationResultBuilder::addWarning);
+
+        List<String> validationMessagesForDocumentSubTypeNotAccepted = produceErrorsForDocumentSubTypeNotAccepted(inputScannedDocs);
+        validationMessagesForDocumentSubTypeNotAccepted.forEach(documentValidationResultBuilder::addWarning);
+
+        return documentValidationResultBuilder.build();
+    }
+
+    private List<String> produceErrorsForIncorrectNumberOfAttachedDocuments(List<InputScannedDoc> inputScannedDocs) {
+
+        /*
+        Validates only a single Form A Document and a single Draft Consent Order should be attached to the Exception Record
+        Validates that there is at least 1 D81 document attached to the Exception Record
+         */
+
+        List<String> validationErrorMessages = new ArrayList<>();
+
+        long numberOfFormADocumentsAttached = inputScannedDocs.stream()
+            .filter(doc -> doc.getSubtype().equals("FormA"))
+            .count();
+
+        long numberOfDraftConsentOrderDocumentsAttached = inputScannedDocs.stream()
+            .filter(doc -> doc.getSubtype().equals("DraftConsentOrder"))
+            .count();
+
+        long numberOfD81DocumentsAttached = inputScannedDocs.stream()
+            .filter(doc -> doc.getSubtype().equals("D81"))
+            .count();
+
+        if (numberOfFormADocumentsAttached != 1) {
+            validationErrorMessages.add("Must be only a single document with subtype of 'FormA'");
+        }
+
+        if (numberOfDraftConsentOrderDocumentsAttached != 1) {
+            validationErrorMessages.add("Must be only a single document with subtype of 'DraftConsentOrder'");
+        }
+
+        if (numberOfD81DocumentsAttached == 0) {
+            validationErrorMessages.add("Must be at least one document with subtype of 'D81'");
+        }
+
+        return validationErrorMessages;
+    }
+
+    private List<String> produceErrorsForDocumentFieldsNotFound(List<InputScannedDoc> inputScannedDocs) {
+
+        /*
+        Validates that all documents have the following fields populated:
+            Type
+            Subtype
+            Filename
+            document:
+                - document_url
+                - document_binary_url
+         */
+        List<String> validationErrorMessages = new ArrayList<>();
+
+        return validationErrorMessages;
+    }
+
+    private List<String> produceErrorsForDocumentSubTypeNotAccepted(List<InputScannedDoc> inputScannedDocs) {
+
+        /*
+        If a document is received that does not have a sub-type on the expected sub-type list
+        Warning rules: "document sub-type not accepted."
+        */
+        List<String> validationErrorMessages = new ArrayList<>();
+
+        return validationErrorMessages;
     }
 }
