@@ -262,6 +262,23 @@ public class FormAValidator extends BulkScanFormValidator {
         return attachedDocumentsValidationErrorMessages;
     }
 
+    private static final List<String> MANDATORY_DOC_FIELDS = asList(
+        "type",
+        "subtype"
+
+        /*
+        "Type",
+        "SubType",
+        "Filename",
+        "Document",
+        "InputScannedDocUrl",
+            "document_url",
+            "document_binary_url"
+         */
+    );
+
+
+
     private List<String> produceErrorsForDocumentFieldsNotFound(List<InputScannedDoc> inputScannedDocs) {
 
         /*
@@ -269,16 +286,15 @@ public class FormAValidator extends BulkScanFormValidator {
             Type
             Subtype
             Filename
-            document:
+            InputScannedDocUrl:
                 - document_url
                 - document_binary_url
-
-            loop through documents checking for each error
-            for (each item in list){
-            }
          */
 
-        List<String> documentFieldsNotFoundValidationErrorMessages = new ArrayList<>();
+        List<String> documentFieldsNotFoundValidationErrorMessages = MANDATORY_DOC_FIELDS.stream()
+            .filter(f -> !inputScannedDocs.contains(f))
+            .map(f -> String.format("Mandatory document field \"%s\" is missing", f))
+            .collect(Collectors.toList());
 
         return documentFieldsNotFoundValidationErrorMessages;
     }
@@ -286,8 +302,7 @@ public class FormAValidator extends BulkScanFormValidator {
     private List<String> produceErrorsForDocumentSubTypeNotAccepted(List<InputScannedDoc> inputScannedDocs) {
 
         /*
-        If a document is received that does not have a sub-type on the expected sub-type list
-        Warning rules: "document sub-type not accepted."
+        Validate if a document is received that does not have a sub-type on the expected sub-type list
         */
 
         List<String> incomingDocSubTypes =

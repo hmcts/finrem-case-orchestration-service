@@ -367,6 +367,27 @@ public class FormAValidatorTest {
     }
 
     @Test
+    public void shouldReturnSuccessResponseWhenAllDocumentsAttachedHaveCorrectAllMandatoryFieldsWhenValidated() {
+
+        List<InputScannedDoc> scannedDocuments = new ArrayList<>();
+        scannedDocuments.add(createDoc("FormA"));
+        scannedDocuments.add(createDoc("D81"));
+        scannedDocuments.add(createDoc("DraftConsentOrder"));
+
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder()
+            .id(TEST_CASE_ID)
+            .scannedDocuments(scannedDocuments)
+            .ocrDataFields(emptyList())
+            .build();
+
+        OcrValidationResult documentValidationResult = formAValidator.validateFormAScannedDocuments(exceptionRecord);
+
+        assertThat(documentValidationResult.getStatus(), is(SUCCESS));
+        assertThat(documentValidationResult.getWarnings(), is(emptyList()));
+        assertThat(documentValidationResult.getErrors(), is(emptyList()));
+    }
+
+    @Test
     public void shouldProduceWarningsForDocumentFieldsNotFound() {
         // TODO - FIX ME
     }
@@ -461,6 +482,14 @@ public class FormAValidatorTest {
 
     // TODO - move this to common tests class?
     private InputScannedDoc createDoc(String formSubType) {
-        return InputScannedDoc.builder().subtype(formSubType).document(new InputScannedDocUrl("http://url/" + formSubType, "http://binUrl/" + formSubType + "/binary", formSubType + ".pdf")).build();
+        return InputScannedDoc.builder()
+            .type("Form")
+            .subtype(formSubType)
+            .document(
+                new InputScannedDocUrl(
+                    "http://url/" + formSubType,
+                    "http://binUrl/" + formSubType + "/binary",
+                    formSubType + ".pdf"))
+            .build();
     }
 }
