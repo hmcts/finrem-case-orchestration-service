@@ -3,6 +3,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.validatio
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.InputScannedDoc;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.InputScannedDocUrl;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FormAValidator;
@@ -22,6 +25,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus.SUCCESS;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus.WARNINGS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ADDRESS_OF_PROPERTIES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_COUNTRY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_COUNTY;
@@ -280,11 +284,144 @@ public class FormAValidatorTest {
         assertThat(ocrValidResult.getWarnings(), not(hasItem("divorceCaseNumber is not in a valid format")));
     }
 
-    /*
-    shouldProduceErrorsForIncorrectNumberOfAttachedDocuments
-    shouldProduceErrorsForDocumentFieldsNotFound
-    shouldProduceErrorsForDocumentSubTypeNotAccepted
-     */
+    @Test
+    public void shouldReturnSuccessResponseWhenCorrectDocumentsAreAttachedWhenValidated() {
+
+        List<InputScannedDoc> scannedDocuments = new ArrayList<>();
+
+        scannedDocuments.add(createDoc("FormA"));
+        scannedDocuments.add(createDoc("D81"));
+        scannedDocuments.add(createDoc("DraftConsentOrder"));
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder()
+            .id(TEST_CASE_ID)
+            .scannedDocuments(scannedDocuments)
+            .ocrDataFields(emptyList())
+            .build();
+
+        OcrValidationResult documentValidationResult = formAValidator.validateFormAScannedDocuments(exceptionRecord);
+
+        assertThat(documentValidationResult.getStatus(), is(SUCCESS));
+        assertThat(documentValidationResult.getWarnings(), is(emptyList()));
+        assertThat(documentValidationResult.getErrors(), is(emptyList()));
+    }
+
+    @Test
+    public void shouldProduceWarningWhenMultipleFormADocumentsAreAttached() {
+        List<InputScannedDoc> scannedDocuments = new ArrayList<>();
+
+        scannedDocuments.add(createDoc("FormA"));
+        scannedDocuments.add(createDoc("FormA"));
+        scannedDocuments.add(createDoc("D81"));
+        scannedDocuments.add(createDoc("DraftConsentOrder"));
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder()
+            .id(TEST_CASE_ID)
+            .scannedDocuments(scannedDocuments)
+            .ocrDataFields(emptyList())
+            .build();
+
+        OcrValidationResult documentValidationResult = formAValidator.validateFormAScannedDocuments(exceptionRecord);
+
+        assertThat(documentValidationResult.getStatus(), is(WARNINGS));
+        assertThat(documentValidationResult.getWarnings(), hasItem("Must be only a single document with subtype of 'FormA'"));
+        assertThat(documentValidationResult.getErrors(), is(emptyList()));
+    }
+
+    @Test
+    public void shouldProduceWarningWhenMultipleDraftConsentOrderDocumentsAreAttached() {
+        List<InputScannedDoc> scannedDocuments = new ArrayList<>();
+
+        scannedDocuments.add(createDoc("FormA"));
+        scannedDocuments.add(createDoc("D81"));
+        scannedDocuments.add(createDoc("DraftConsentOrder"));
+        scannedDocuments.add(createDoc("DraftConsentOrder"));
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder()
+            .id(TEST_CASE_ID)
+            .scannedDocuments(scannedDocuments)
+            .ocrDataFields(emptyList())
+            .build();
+
+        OcrValidationResult documentValidationResult = formAValidator.validateFormAScannedDocuments(exceptionRecord);
+
+        assertThat(documentValidationResult.getStatus(), is(WARNINGS));
+        assertThat(documentValidationResult.getWarnings(), hasItem("Must be only a single document with subtype of 'DraftConsentOrder'"));
+        assertThat(documentValidationResult.getErrors(), is(emptyList()));
+    }
+
+    @Test
+    public void shouldProduceWarningWhenNoD81DocumentIsAttached() {
+        List<InputScannedDoc> scannedDocuments = new ArrayList<>();
+
+        scannedDocuments.add(createDoc("FormA"));
+        scannedDocuments.add(createDoc("DraftConsentOrder"));
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder()
+            .id(TEST_CASE_ID)
+            .scannedDocuments(scannedDocuments)
+            .ocrDataFields(emptyList())
+            .build();
+
+        OcrValidationResult documentValidationResult = formAValidator.validateFormAScannedDocuments(exceptionRecord);
+
+        assertThat(documentValidationResult.getStatus(), is(WARNINGS));
+        assertThat(documentValidationResult.getWarnings(), hasItem("Must be at least one document with subtype of 'D81'"));
+        assertThat(documentValidationResult.getErrors(), is(emptyList()));
+    }
+
+    @Test
+    public void shouldProduceWarningsForDocumentFieldsNotFound() {
+        // TODO - FIX ME
+    }
+
+    @Test
+    public void shouldReturnSuccessResponseWhenDocumentsAttachedHaveCorrectSubTypesWhenValidated() {
+
+        List<InputScannedDoc> scannedDocuments = new ArrayList<>();
+        scannedDocuments.add(createDoc("D81"));
+        scannedDocuments.add(createDoc("FormA"));
+        scannedDocuments.add(createDoc("P1"));
+        scannedDocuments.add(createDoc("PPF1"));
+        scannedDocuments.add(createDoc("P2"));
+        scannedDocuments.add(createDoc("PPF2"));
+        scannedDocuments.add(createDoc("PPF"));
+        scannedDocuments.add(createDoc("FormE"));
+        scannedDocuments.add(createDoc("CoverLetter"));
+        scannedDocuments.add(createDoc("OtherSupportDocuments"));
+        scannedDocuments.add(createDoc("DraftConsentOrder"));
+        scannedDocuments.add(createDoc("DecreeNisi"));
+        scannedDocuments.add(createDoc("DecreeAbsolute"));
+
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder()
+            .id(TEST_CASE_ID)
+            .scannedDocuments(scannedDocuments)
+            .ocrDataFields(emptyList())
+            .build();
+
+        OcrValidationResult documentValidationResult = formAValidator.validateFormAScannedDocuments(exceptionRecord);
+
+        assertThat(documentValidationResult.getStatus(), is(SUCCESS));
+        assertThat(documentValidationResult.getWarnings(), is(emptyList()));
+        assertThat(documentValidationResult.getErrors(), is(emptyList()));
+    }
+
+    @Test
+    public void shouldProduceWarningWhenDocumentWithWrongSubTypeIsAttached() {
+        List<InputScannedDoc> scannedDocuments = new ArrayList<>();
+
+        scannedDocuments.add(createDoc("D81"));
+        scannedDocuments.add(createDoc("FormA"));
+        scannedDocuments.add(createDoc("DraftConsentOrder"));
+        scannedDocuments.add(createDoc("PassportPhoto"));
+        ExceptionRecord exceptionRecord = ExceptionRecord.builder()
+            .id(TEST_CASE_ID)
+            .scannedDocuments(scannedDocuments)
+            .ocrDataFields(emptyList())
+            .build();
+
+        OcrValidationResult documentValidationResult = formAValidator.validateFormAScannedDocuments(exceptionRecord);
+
+        assertThat(documentValidationResult.getStatus(), is(WARNINGS));
+        assertThat(documentValidationResult.getWarnings(), hasItem("Document sub-type not accepted: \"PassportPhoto\""));
+        assertThat(documentValidationResult.getErrors(), is(emptyList()));
+    }
 
     private String notInValidFormat(String fieldName) {
         return String.format("%s is not in a valid format", fieldName);
@@ -321,4 +458,9 @@ public class FormAValidatorTest {
 
     private Function<String, String> mandatoryFieldIsMissing = fieldName -> String.format("Mandatory field \"%s\" is missing", fieldName);
     private Function<OcrDataField, OcrDataField> emptyValueOcrDataField = dataField -> new OcrDataField(dataField.getName(), "");
+
+    // TODO - move this to common tests class?
+    private InputScannedDoc createDoc(String formSubType) {
+        return InputScannedDoc.builder().subtype(formSubType).document(new InputScannedDocUrl("http://url/" + formSubType, "http://binUrl/" + formSubType + "/binary", formSubType + ".pdf")).build();
+    }
 }

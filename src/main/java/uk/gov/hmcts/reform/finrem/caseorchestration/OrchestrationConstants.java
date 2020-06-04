@@ -3,6 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
+import static java.util.Arrays.asList;
+
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class OrchestrationConstants {
 
@@ -31,5 +35,20 @@ public class OrchestrationConstants {
     public static final String CTSC_PHONE_NUMBER = "0300 303 0642";
     public static final String CTSC_OPENING_HOURS = "from 8.30am to 5pm";
 
-
+    // List of allowed Document Subtypes that can be attached to a BSP Exception Record
+    public static final List<String> ALLOWED_DOCUMENT_SUBTYPES = asList(
+        "D81",
+        "FormA",
+        "P1",
+        "PPF1",
+        "P2",
+        "PPF2",
+        "PPF",
+        "FormE",
+        "CoverLetter",
+        "OtherSupportDocuments",
+        "DraftConsentOrder",
+        "DecreeNisi",
+        "DecreeAbsolute"
+    );
 }

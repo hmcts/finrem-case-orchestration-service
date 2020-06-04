@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.bsp.common.service.validation.PostcodeValidato
 import static uk.gov.hmcts.reform.bsp.common.service.validation.RegExpValidator.validateField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.validateFormDate;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.ALLOWED_DOCUMENT_SUBTYPES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
@@ -228,11 +229,11 @@ public class FormAValidator extends BulkScanFormValidator {
     private List<String> produceErrorsForIncorrectNumberOfAttachedDocuments(List<InputScannedDoc> inputScannedDocs) {
 
         /*
-        Validates only a single Form A Document and a single Draft Consent Order should be attached to the Exception Record
-        Validates that there is at least 1 D81 document attached to the Exception Record
+        Validates that only one 'Form A' and one 'Draft Consent Order' are attached to the Exception Record
+        Validates that there is at least one 'D81' attached to the Exception Record
          */
 
-        List<String> validationErrorMessages = new ArrayList<>();
+        List<String> attachedDocumentsValidationErrorMessages = new ArrayList<>();
 
         long numberOfFormADocumentsAttached = inputScannedDocs.stream()
             .filter(doc -> doc.getSubtype().equals("FormA"))
@@ -247,18 +248,18 @@ public class FormAValidator extends BulkScanFormValidator {
             .count();
 
         if (numberOfFormADocumentsAttached != 1) {
-            validationErrorMessages.add("Must be only a single document with subtype of 'FormA'");
+            attachedDocumentsValidationErrorMessages.add("Must be only a single document with subtype of 'FormA'");
         }
 
         if (numberOfDraftConsentOrderDocumentsAttached != 1) {
-            validationErrorMessages.add("Must be only a single document with subtype of 'DraftConsentOrder'");
+            attachedDocumentsValidationErrorMessages.add("Must be only a single document with subtype of 'DraftConsentOrder'");
         }
 
         if (numberOfD81DocumentsAttached == 0) {
-            validationErrorMessages.add("Must be at least one document with subtype of 'D81'");
+            attachedDocumentsValidationErrorMessages.add("Must be at least one document with subtype of 'D81'");
         }
 
-        return validationErrorMessages;
+        return attachedDocumentsValidationErrorMessages;
     }
 
     private List<String> produceErrorsForDocumentFieldsNotFound(List<InputScannedDoc> inputScannedDocs) {
@@ -271,10 +272,15 @@ public class FormAValidator extends BulkScanFormValidator {
             document:
                 - document_url
                 - document_binary_url
-         */
-        List<String> validationErrorMessages = new ArrayList<>();
 
-        return validationErrorMessages;
+            loop through documents checking for each error
+            for (each item in list){
+            }
+         */
+
+        List<String> documentFieldsNotFoundValidationErrorMessages = new ArrayList<>();
+
+        return documentFieldsNotFoundValidationErrorMessages;
     }
 
     private List<String> produceErrorsForDocumentSubTypeNotAccepted(List<InputScannedDoc> inputScannedDocs) {
@@ -283,8 +289,15 @@ public class FormAValidator extends BulkScanFormValidator {
         If a document is received that does not have a sub-type on the expected sub-type list
         Warning rules: "document sub-type not accepted."
         */
-        List<String> validationErrorMessages = new ArrayList<>();
 
-        return validationErrorMessages;
+        List<String> incomingDocSubTypes =
+            inputScannedDocs.stream()
+                .map(InputScannedDoc::getSubtype)
+                .collect(Collectors.toList());
+
+        return incomingDocSubTypes.stream()
+            .filter(docSubType -> !ALLOWED_DOCUMENT_SUBTYPES.contains(docSubType))
+            .map(docSubType -> String.format("Document sub-type not accepted: \"%s\"", docSubType))
+            .collect(Collectors.toList());
     }
 }
