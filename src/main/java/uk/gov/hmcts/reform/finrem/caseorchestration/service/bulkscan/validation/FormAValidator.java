@@ -2,6 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.InputScannedDoc;
+import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 
 import java.util.ArrayList;
@@ -10,6 +14,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -130,6 +135,23 @@ public class FormAValidator extends BulkScanFormValidator {
         return ALLOWED_VALUES_PER_FIELD;
     }
 
+    // List of allowed Document Subtypes that can be attached to a BSP Exception Record
+    private static final List<String> ALLOWED_DOCUMENT_SUBTYPES = asList(
+        "D81",
+        "FormA",
+        "P1",
+        "PPF1",
+        "P2",
+        "PPF2",
+        "PPF",
+        "FormE",
+        "CoverLetter",
+        "OtherSupportDocuments",
+        "DraftConsentOrder",
+        "DecreeNisi",
+        "DecreeAbsolute"
+    );
+
     @Override
     protected List<String> runPostProcessingValidation(Map<String, String> fieldsMap) {
         List<String> errorMessages = Stream.of(
@@ -199,5 +221,73 @@ public class FormAValidator extends BulkScanFormValidator {
         return hwfNumber != null && !hwfNumber.matches(HWF_NUMBER_6_DIGITS_REGEX)
                 ? asList("HWFNumber is usually 6 digits")
                 : emptyList();
+    }
+
+    public OcrValidationResult validateFormAScannedDocuments(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException {
+
+        List<InputScannedDoc> scannedDocuments = exceptionRecord.getScannedDocuments();
+        List<InputScannedDoc> inputScannedDocs = Optional.ofNullable(scannedDocuments).orElse(emptyList());
+        OcrValidationResult.Builder documentValidationResultBuilder = OcrValidationResult.builder();
+
+        List<String> validationMessagesForScannedDocuments = produceErrorsForIncorrectNumberOfAttachedDocuments(inputScannedDocs);
+        validationMessagesForScannedDocuments.forEach(documentValidationResultBuilder::addWarning);
+
+        List<String> validationMessagesForDocumentSubTypeNotAccepted = produceErrorsForDocumentSubTypeNotAccepted(inputScannedDocs);
+        validationMessagesForDocumentSubTypeNotAccepted.forEach(documentValidationResultBuilder::addWarning);
+
+        return documentValidationResultBuilder.build();
+    }
+
+    private List<String> produceErrorsForIncorrectNumberOfAttachedDocuments(List<InputScannedDoc> inputScannedDocs) {
+
+        /*
+        Validates that only one 'Form A' and one 'Draft Consent Order' are attached to the Exception Record
+        Validates that there is at least one 'D81' attached to the Exception Record
+         */
+
+        List<String> attachedDocumentsValidationErrorMessages = new ArrayList<>();
+
+        long numberOfFormADocumentsAttached = inputScannedDocs.stream()
+            .filter(doc -> doc.getSubtype().equals("FormA"))
+            .count();
+
+        long numberOfDraftConsentOrderDocumentsAttached = inputScannedDocs.stream()
+            .filter(doc -> doc.getSubtype().equals("DraftConsentOrder"))
+            .count();
+
+        long numberOfD81DocumentsAttached = inputScannedDocs.stream()
+            .filter(doc -> doc.getSubtype().equals("D81"))
+            .count();
+
+        if (numberOfFormADocumentsAttached != 1) {
+            attachedDocumentsValidationErrorMessages.add("Must be only a single document with subtype of 'FormA'");
+        }
+
+        if (numberOfDraftConsentOrderDocumentsAttached != 1) {
+            attachedDocumentsValidationErrorMessages.add("Must be only a single document with subtype of 'DraftConsentOrder'");
+        }
+
+        if (numberOfD81DocumentsAttached == 0) {
+            attachedDocumentsValidationErrorMessages.add("Must be at least one document with subtype of 'D81'");
+        }
+
+        return attachedDocumentsValidationErrorMessages;
+    }
+
+    private List<String> produceErrorsForDocumentSubTypeNotAccepted(List<InputScannedDoc> inputScannedDocs) {
+
+        /*
+        Validate if a document is received that does not have a sub-type on the expected sub-type list
+        */
+
+        List<String> incomingDocSubTypes =
+            inputScannedDocs.stream()
+                .map(InputScannedDoc::getSubtype)
+                .collect(Collectors.toList());
+
+        return incomingDocSubTypes.stream()
+            .filter(docSubType -> !ALLOWED_DOCUMENT_SUBTYPES.contains(docSubType))
+            .map(docSubType -> String.format("Document sub-type not accepted: \"%s\"", docSubType))
+            .collect(Collectors.toList());
     }
 }
