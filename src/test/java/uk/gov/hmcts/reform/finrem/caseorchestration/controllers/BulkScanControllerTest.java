@@ -117,7 +117,7 @@ public class BulkScanControllerTest {
     @Test
     public void shouldReturnUpdateServiceResults() {
         ResponseEntity<SuccessfulUpdateResponse> response =
-                bulkScanController.updateCase();
+                bulkScanController.updateCase(TEST_SERVICE_TOKEN, new Object());
 
         assertThat(response.getStatusCode(), is(NOT_IMPLEMENTED));
     }

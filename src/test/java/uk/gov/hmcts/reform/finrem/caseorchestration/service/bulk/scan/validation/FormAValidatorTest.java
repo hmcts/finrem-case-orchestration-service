@@ -475,7 +475,6 @@ public class FormAValidatorTest {
     private Function<String, String> mandatoryFieldIsMissing = fieldName -> String.format("Mandatory field \"%s\" is missing", fieldName);
     private Function<OcrDataField, OcrDataField> emptyValueOcrDataField = dataField -> new OcrDataField(dataField.getName(), "");
 
-    // TODO - move this to common tests class?
     private InputScannedDoc createDoc(String formSubType) {
         return InputScannedDoc.builder()
             .type("Form")

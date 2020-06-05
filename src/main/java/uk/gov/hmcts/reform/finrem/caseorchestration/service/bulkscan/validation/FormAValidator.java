@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,6 @@ import static uk.gov.hmcts.reform.bsp.common.service.validation.PostcodeValidato
 import static uk.gov.hmcts.reform.bsp.common.service.validation.RegExpValidator.validateField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.validateFormDate;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.ALLOWED_DOCUMENT_SUBTYPES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
@@ -137,6 +135,23 @@ public class FormAValidator extends BulkScanFormValidator {
         return ALLOWED_VALUES_PER_FIELD;
     }
 
+    // List of allowed Document Subtypes that can be attached to a BSP Exception Record
+    private static final List<String> ALLOWED_DOCUMENT_SUBTYPES = asList(
+        "D81",
+        "FormA",
+        "P1",
+        "PPF1",
+        "P2",
+        "PPF2",
+        "PPF",
+        "FormE",
+        "CoverLetter",
+        "OtherSupportDocuments",
+        "DraftConsentOrder",
+        "DecreeNisi",
+        "DecreeAbsolute"
+    );
+
     @Override
     protected List<String> runPostProcessingValidation(Map<String, String> fieldsMap) {
         List<String> errorMessages = Stream.of(
@@ -204,7 +219,7 @@ public class FormAValidator extends BulkScanFormValidator {
     private static List<String> validateHwfNumber(Map<String, String> fieldsMap, String fieldName) {
         String hwfNumber = fieldsMap.get(fieldName);
         return hwfNumber != null && !hwfNumber.matches(HWF_NUMBER_6_DIGITS_REGEX)
-                ? Collections.singletonList("HWFNumber is usually 6 digits")
+                ? asList("HWFNumber is usually 6 digits")
                 : emptyList();
     }
 

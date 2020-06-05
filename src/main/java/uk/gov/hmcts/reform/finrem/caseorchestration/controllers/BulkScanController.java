@@ -3,9 +3,11 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,21 +33,22 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
 @Slf4j
 @Controller
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class BulkScanController {
 
-    private final BulkScanService bulkScanService;
+    @Autowired
+    private BulkScanService bulkScanService;
 
-    private final AuthService authService;
+    @Autowired
+    private AuthService authService;
 
-    @PostMapping(path = BulkScanEndpoints.VALIDATE, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PostMapping(path = BulkScanEndpoints.VALIDATE, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation("Validates OCR form data based on form type")
     @ApiResponses({
         @ApiResponse(
@@ -79,8 +82,8 @@ public class BulkScanController {
 
     @PostMapping(
         path = BulkScanEndpoints.TRANSFORM,
-        consumes = APPLICATION_JSON_VALUE,
-        produces = APPLICATION_JSON_VALUE
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
     )
     @ApiOperation(value = "Transform exception record into CCD case data")
     @ApiResponses({
@@ -124,8 +127,8 @@ public class BulkScanController {
 
     @PostMapping(
         path = BulkScanEndpoints.UPDATE,
-        consumes = APPLICATION_JSON_VALUE,
-        produces = APPLICATION_JSON_VALUE
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
     )
     @ApiOperation(value = "OUT OF SCOPE: API to update Financial Remedy case data by bulk scan")
     @ApiResponses({
@@ -138,7 +141,10 @@ public class BulkScanController {
         @ApiResponse(code = 403, message = "Calling service is not authorised to use the endpoint"),
         @ApiResponse(code = 422, message = "Exception record is well-formed, but contains invalid data.")
     })
-    public ResponseEntity<SuccessfulUpdateResponse> updateCase() {
+    public ResponseEntity<SuccessfulUpdateResponse> updateCase(
+        @RequestHeader(name = SERVICE_AUTHORISATION_HEADER) String s2sAuthToken,
+        @Valid @RequestBody Object request
+    ) {
         log.warn("Bulk scan /POST update is not implemented for fin-rem cos");
 
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
