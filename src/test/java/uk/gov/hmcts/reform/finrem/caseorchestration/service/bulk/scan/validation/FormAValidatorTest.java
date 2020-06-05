@@ -285,7 +285,7 @@ public class FormAValidatorTest {
     }
 
     @Test
-    public void shouldReturnSuccessResponseWhenCorrectDocumentsAreAttachedWhenValidated() {
+    public void shouldReturnSuccessResponseWhenCorrectDocumentsAreAttached() {
 
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
 
@@ -367,7 +367,7 @@ public class FormAValidatorTest {
     }
 
     @Test
-    public void shouldReturnSuccessResponseWhenAllDocumentsAttachedHaveCorrectAllMandatoryFieldsWhenValidated() {
+    public void shouldReturnSuccessResponseWhenAllDocumentsAttachedHaveCorrectMandatoryFields() {
 
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
         scannedDocuments.add(createDoc("FormA"));
@@ -388,7 +388,7 @@ public class FormAValidatorTest {
     }
 
     @Test
-    public void shouldReturnSuccessResponseWhenDocumentsAttachedHaveCorrectSubTypesWhenValidated() {
+    public void shouldReturnSuccessResponseWhenDocumentsAttachedHaveCorrectSubTypes() {
 
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
         scannedDocuments.add(createDoc("D81"));
