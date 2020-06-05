@@ -25,6 +25,19 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus.SUCCESS;
 import static uk.gov.hmcts.reform.bsp.common.model.validation.out.ValidationStatus.WARNINGS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.COVER_LETTER_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.D81_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DECREE_ABSOLUTE_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DECREE_NISI_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DRAFT_CONSENT_ORDER_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.FORM_A_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.FORM_E_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.OTHER_SUPPORT_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.P1_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.P2_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF1_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF2_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ADDRESS_OF_PROPERTIES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_COUNTRY;
@@ -289,9 +302,9 @@ public class FormAValidatorTest {
 
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
 
-        scannedDocuments.add(createDoc("FormA"));
-        scannedDocuments.add(createDoc("D81"));
-        scannedDocuments.add(createDoc("DraftConsentOrder"));
+        scannedDocuments.add(createDoc(FORM_A_DOCUMENT));
+        scannedDocuments.add(createDoc(D81_DOCUMENT));
+        scannedDocuments.add(createDoc(DRAFT_CONSENT_ORDER_DOCUMENT));
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
             .id(TEST_CASE_ID)
             .scannedDocuments(scannedDocuments)
@@ -309,10 +322,10 @@ public class FormAValidatorTest {
     public void shouldProduceWarningWhenMultipleFormADocumentsAreAttached() {
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
 
-        scannedDocuments.add(createDoc("FormA"));
-        scannedDocuments.add(createDoc("FormA"));
-        scannedDocuments.add(createDoc("D81"));
-        scannedDocuments.add(createDoc("DraftConsentOrder"));
+        scannedDocuments.add(createDoc(FORM_A_DOCUMENT));
+        scannedDocuments.add(createDoc(FORM_A_DOCUMENT));
+        scannedDocuments.add(createDoc(D81_DOCUMENT));
+        scannedDocuments.add(createDoc(DRAFT_CONSENT_ORDER_DOCUMENT));
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
             .id(TEST_CASE_ID)
             .scannedDocuments(scannedDocuments)
@@ -330,10 +343,10 @@ public class FormAValidatorTest {
     public void shouldProduceWarningWhenMultipleDraftConsentOrderDocumentsAreAttached() {
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
 
-        scannedDocuments.add(createDoc("FormA"));
-        scannedDocuments.add(createDoc("D81"));
-        scannedDocuments.add(createDoc("DraftConsentOrder"));
-        scannedDocuments.add(createDoc("DraftConsentOrder"));
+        scannedDocuments.add(createDoc(FORM_A_DOCUMENT));
+        scannedDocuments.add(createDoc(D81_DOCUMENT));
+        scannedDocuments.add(createDoc(DRAFT_CONSENT_ORDER_DOCUMENT));
+        scannedDocuments.add(createDoc(DRAFT_CONSENT_ORDER_DOCUMENT));
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
             .id(TEST_CASE_ID)
             .scannedDocuments(scannedDocuments)
@@ -351,8 +364,8 @@ public class FormAValidatorTest {
     public void shouldProduceWarningWhenNoD81DocumentIsAttached() {
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
 
-        scannedDocuments.add(createDoc("FormA"));
-        scannedDocuments.add(createDoc("DraftConsentOrder"));
+        scannedDocuments.add(createDoc(FORM_A_DOCUMENT));
+        scannedDocuments.add(createDoc(DRAFT_CONSENT_ORDER_DOCUMENT));
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
             .id(TEST_CASE_ID)
             .scannedDocuments(scannedDocuments)
@@ -370,9 +383,9 @@ public class FormAValidatorTest {
     public void shouldReturnSuccessResponseWhenAllDocumentsAttachedHaveCorrectMandatoryFields() {
 
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
-        scannedDocuments.add(createDoc("FormA"));
-        scannedDocuments.add(createDoc("D81"));
-        scannedDocuments.add(createDoc("DraftConsentOrder"));
+        scannedDocuments.add(createDoc(FORM_A_DOCUMENT));
+        scannedDocuments.add(createDoc(D81_DOCUMENT));
+        scannedDocuments.add(createDoc(DRAFT_CONSENT_ORDER_DOCUMENT));
 
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
             .id(TEST_CASE_ID)
@@ -391,19 +404,19 @@ public class FormAValidatorTest {
     public void shouldReturnSuccessResponseWhenDocumentsAttachedHaveCorrectSubTypes() {
 
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
-        scannedDocuments.add(createDoc("D81"));
-        scannedDocuments.add(createDoc("FormA"));
-        scannedDocuments.add(createDoc("P1"));
-        scannedDocuments.add(createDoc("PPF1"));
-        scannedDocuments.add(createDoc("P2"));
-        scannedDocuments.add(createDoc("PPF2"));
-        scannedDocuments.add(createDoc("PPF"));
-        scannedDocuments.add(createDoc("FormE"));
-        scannedDocuments.add(createDoc("CoverLetter"));
-        scannedDocuments.add(createDoc("OtherSupportDocuments"));
-        scannedDocuments.add(createDoc("DraftConsentOrder"));
-        scannedDocuments.add(createDoc("DecreeNisi"));
-        scannedDocuments.add(createDoc("DecreeAbsolute"));
+        scannedDocuments.add(createDoc(D81_DOCUMENT));
+        scannedDocuments.add(createDoc(FORM_A_DOCUMENT));
+        scannedDocuments.add(createDoc(P1_DOCUMENT));
+        scannedDocuments.add(createDoc(PPF1_DOCUMENT));
+        scannedDocuments.add(createDoc(P2_DOCUMENT));
+        scannedDocuments.add(createDoc(PPF2_DOCUMENT));
+        scannedDocuments.add(createDoc(PPF_DOCUMENT));
+        scannedDocuments.add(createDoc(FORM_E_DOCUMENT));
+        scannedDocuments.add(createDoc(COVER_LETTER_DOCUMENT));
+        scannedDocuments.add(createDoc(OTHER_SUPPORT_DOCUMENTS));
+        scannedDocuments.add(createDoc(DRAFT_CONSENT_ORDER_DOCUMENT));
+        scannedDocuments.add(createDoc(DECREE_NISI_DOCUMENT));
+        scannedDocuments.add(createDoc(DECREE_ABSOLUTE_DOCUMENT));
 
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
             .id(TEST_CASE_ID)
@@ -422,9 +435,9 @@ public class FormAValidatorTest {
     public void shouldProduceWarningWhenDocumentWithWrongSubTypeIsAttached() {
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
 
-        scannedDocuments.add(createDoc("D81"));
-        scannedDocuments.add(createDoc("FormA"));
-        scannedDocuments.add(createDoc("DraftConsentOrder"));
+        scannedDocuments.add(createDoc(D81_DOCUMENT));
+        scannedDocuments.add(createDoc(FORM_A_DOCUMENT));
+        scannedDocuments.add(createDoc(DRAFT_CONSENT_ORDER_DOCUMENT));
         scannedDocuments.add(createDoc("PassportPhoto"));
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
             .id(TEST_CASE_ID)

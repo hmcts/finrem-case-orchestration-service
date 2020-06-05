@@ -27,6 +27,19 @@ import static uk.gov.hmcts.reform.bsp.common.service.validation.PostcodeValidato
 import static uk.gov.hmcts.reform.bsp.common.service.validation.RegExpValidator.validateField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.validateFormDate;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.COVER_LETTER_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.D81_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DECREE_ABSOLUTE_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DECREE_NISI_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DRAFT_CONSENT_ORDER_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.FORM_A_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.FORM_E_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.OTHER_SUPPORT_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.P1_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.P2_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF1_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF2_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
@@ -137,19 +150,19 @@ public class FormAValidator extends BulkScanFormValidator {
 
     // List of allowed Document Subtypes that can be attached to a BSP Exception Record
     private static final List<String> ALLOWED_DOCUMENT_SUBTYPES = asList(
-        "D81",
-        "FormA",
-        "P1",
-        "PPF1",
-        "P2",
-        "PPF2",
-        "PPF",
-        "FormE",
-        "CoverLetter",
-        "OtherSupportDocuments",
-        "DraftConsentOrder",
-        "DecreeNisi",
-        "DecreeAbsolute"
+        D81_DOCUMENT,
+        FORM_A_DOCUMENT,
+        P1_DOCUMENT,
+        PPF1_DOCUMENT,
+        P2_DOCUMENT,
+        PPF2_DOCUMENT,
+        PPF_DOCUMENT,
+        FORM_E_DOCUMENT,
+        COVER_LETTER_DOCUMENT,
+        OTHER_SUPPORT_DOCUMENTS,
+        DRAFT_CONSENT_ORDER_DOCUMENT,
+        DECREE_NISI_DOCUMENT,
+        DECREE_ABSOLUTE_DOCUMENT
     );
 
     @Override
@@ -238,25 +251,28 @@ public class FormAValidator extends BulkScanFormValidator {
         return documentValidationResultBuilder.build();
     }
 
+    /**
+     * Validates that only one 'Form A' and one 'Draft Consent Order' are attached to the Exception Record.
+     * Validates that there is at least one 'D81' attached to the Exception Record.
+     *
+     * @param inputScannedDocs list of documents attached to Exception Record
+     * @return a list of error messages if incorrect number of docs attached
+     */
     private List<String> produceErrorsForIncorrectNumberOfAttachedDocuments(List<InputScannedDoc> inputScannedDocs) {
 
-        /*
-        Validates that only one 'Form A' and one 'Draft Consent Order' are attached to the Exception Record
-        Validates that there is at least one 'D81' attached to the Exception Record
-         */
 
         List<String> attachedDocumentsValidationErrorMessages = new ArrayList<>();
 
         long numberOfFormADocumentsAttached = inputScannedDocs.stream()
-            .filter(doc -> doc.getSubtype().equals("FormA"))
+            .filter(doc -> doc.getSubtype().equals(FORM_A_DOCUMENT))
             .count();
 
         long numberOfDraftConsentOrderDocumentsAttached = inputScannedDocs.stream()
-            .filter(doc -> doc.getSubtype().equals("DraftConsentOrder"))
+            .filter(doc -> doc.getSubtype().equals(DRAFT_CONSENT_ORDER_DOCUMENT))
             .count();
 
         long numberOfD81DocumentsAttached = inputScannedDocs.stream()
-            .filter(doc -> doc.getSubtype().equals("D81"))
+            .filter(doc -> doc.getSubtype().equals(D81_DOCUMENT))
             .count();
 
         if (numberOfFormADocumentsAttached != 1) {
@@ -274,11 +290,13 @@ public class FormAValidator extends BulkScanFormValidator {
         return attachedDocumentsValidationErrorMessages;
     }
 
+    /**
+     * Validate if a document is received that does not have a sub-type on the expected sub-type list.
+     *
+     * @param inputScannedDocs list of documents attached to Exception Record
+     * @return a list of error messages for docs with incorrect SubTypes
+     */
     private List<String> produceErrorsForDocumentSubTypeNotAccepted(List<InputScannedDoc> inputScannedDocs) {
-
-        /*
-        Validate if a document is received that does not have a sub-type on the expected sub-type list
-        */
 
         List<String> incomingDocSubTypes =
             inputScannedDocs.stream()
