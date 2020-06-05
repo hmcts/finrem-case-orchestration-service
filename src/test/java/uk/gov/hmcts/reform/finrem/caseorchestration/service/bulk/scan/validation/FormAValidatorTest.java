@@ -388,11 +388,6 @@ public class FormAValidatorTest {
     }
 
     @Test
-    public void shouldProduceWarningsForDocumentFieldsNotFound() {
-        // TODO - FIX ME
-    }
-
-    @Test
     public void shouldReturnSuccessResponseWhenDocumentsAttachedHaveCorrectSubTypesWhenValidated() {
 
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();

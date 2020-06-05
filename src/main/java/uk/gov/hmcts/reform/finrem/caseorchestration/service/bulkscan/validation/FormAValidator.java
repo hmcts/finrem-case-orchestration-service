@@ -217,9 +217,6 @@ public class FormAValidator extends BulkScanFormValidator {
         List<String> validationMessagesForScannedDocuments = produceErrorsForIncorrectNumberOfAttachedDocuments(inputScannedDocs);
         validationMessagesForScannedDocuments.forEach(documentValidationResultBuilder::addWarning);
 
-        List<String> validationMessagesForDocumentFieldsNotFound = produceErrorsForDocumentFieldsNotFound(inputScannedDocs);
-        validationMessagesForDocumentFieldsNotFound.forEach(documentValidationResultBuilder::addWarning);
-
         List<String> validationMessagesForDocumentSubTypeNotAccepted = produceErrorsForDocumentSubTypeNotAccepted(inputScannedDocs);
         validationMessagesForDocumentSubTypeNotAccepted.forEach(documentValidationResultBuilder::addWarning);
 
@@ -260,43 +257,6 @@ public class FormAValidator extends BulkScanFormValidator {
         }
 
         return attachedDocumentsValidationErrorMessages;
-    }
-
-    private static final List<String> MANDATORY_DOC_FIELDS = asList(
-        "type",
-        "subtype"
-
-        /*
-        "Type",
-        "SubType",
-        "Filename",
-        "Document",
-        "InputScannedDocUrl",
-            "document_url",
-            "document_binary_url"
-         */
-    );
-
-
-
-    private List<String> produceErrorsForDocumentFieldsNotFound(List<InputScannedDoc> inputScannedDocs) {
-
-        /*
-        Validates that all documents have the following fields populated:
-            Type
-            Subtype
-            Filename
-            InputScannedDocUrl:
-                - document_url
-                - document_binary_url
-         */
-
-        List<String> documentFieldsNotFoundValidationErrorMessages = MANDATORY_DOC_FIELDS.stream()
-            .filter(f -> !inputScannedDocs.contains(f))
-            .map(f -> String.format("Mandatory document field \"%s\" is missing", f))
-            .collect(Collectors.toList());
-
-        return documentFieldsNotFoundValidationErrorMessages;
     }
 
     private List<String> produceErrorsForDocumentSubTypeNotAccepted(List<InputScannedDoc> inputScannedDocs) {
