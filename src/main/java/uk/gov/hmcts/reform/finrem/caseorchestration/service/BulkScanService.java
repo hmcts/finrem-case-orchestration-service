@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bsp.common.error.InvalidDataException;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
@@ -17,7 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.
 import java.util.List;
 import java.util.Map;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class BulkScanService {
 
