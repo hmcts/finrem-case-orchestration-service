@@ -27,8 +27,21 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.bsp.common.mapper.GenericMapper.getValueFromOcrDataFields;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.transformFormDateIntoCcdDate;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.COVER_LETTER_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.D81_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DECREE_ABSOLUTE_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DECREE_NISI_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DRAFT_CONSENT_ORDER_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.FORM_A_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.FORM_E_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.OTHER_SUPPORT_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.P1_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.P2_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF1_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF2_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domain.FormA.ApplicantRepresentedPaper.FR_APPLICANT_REPRESENTED_3;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
@@ -74,33 +87,33 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         List<InputScannedDoc> inputScannedDocs = Optional.ofNullable(scannedDocuments).orElse(emptyList());
 
         inputScannedDocs.stream()
-            .filter(doc -> doc.getSubtype().equals("FormA"))
+            .filter(doc -> doc.getSubtype().equals(FORM_A_DOCUMENT))
             .findFirst()
             .map(this::transformInputScannedDocIntoCaseDocument)
             .ifPresent(doc -> additionalCaseData.put("formA", doc));
 
         ComplexTypeCollection<CaseDocument> d81DocumentCollection = inputScannedDocs.stream()
-            .filter(doc -> doc.getSubtype().equals("D81"))
+            .filter(doc -> doc.getSubtype().equals(D81_DOCUMENT))
             .map(this::transformInputScannedDocIntoCaseDocument)
             .collect(Collectors.collectingAndThen(toList(), ComplexTypeCollection::new));
         additionalCaseData.put("scannedD81s", d81DocumentCollection);
 
         additionalCaseData.put(PENSION_DOCS_COLLECTION, transformIntoTypedCaseDocuments(inputScannedDocs, ImmutableMap.of(
-            "P1", "Form P1",
-            "PPF1", "Form PPF1",
-            "P2", "Form P2",
-            "PPF2", "Form PPF2",
-            "PPF", "Form PPF"
+            P1_DOCUMENT, "Form P1",
+            PPF1_DOCUMENT, "Form PPF1",
+            P2_DOCUMENT, "Form P2",
+            PPF2_DOCUMENT, "Form PPF2",
+            PPF_DOCUMENT, "Form PPF"
         )));
 
         additionalCaseData.put(OTHER_DOCS_COLLECTION, transformIntoTypedCaseDocuments(inputScannedDocs, ImmutableMap.of(
-            "FormE", "Other",
-            "OtherSupportDocuments", "Other",
-            "CoverLetter", "Letter"
+            FORM_E_DOCUMENT, "Other",
+            OTHER_SUPPORT_DOCUMENTS, "Other",
+            COVER_LETTER_DOCUMENT, "Letter"
         )));
 
         inputScannedDocs.stream()
-            .filter(doc -> doc.getSubtype().equals("DraftConsentOrder"))
+            .filter(doc -> doc.getSubtype().equals(DRAFT_CONSENT_ORDER_DOCUMENT))
             .findFirst()
             .map(this::transformInputScannedDocIntoCaseDocument)
             .ifPresent(doc -> {
@@ -109,13 +122,13 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
             });
 
         inputScannedDocs.stream()
-            .filter(doc -> doc.getSubtype().equals("DecreeNisi"))
+            .filter(doc -> doc.getSubtype().equals(DECREE_NISI_DOCUMENT))
             .findFirst()
             .map(this::transformInputScannedDocIntoCaseDocument)
             .ifPresent(doc -> additionalCaseData.put("divorceUploadEvidence1", doc));
 
         inputScannedDocs.stream()
-            .filter(doc -> doc.getSubtype().equals("DecreeAbsolute"))
+            .filter(doc -> doc.getSubtype().equals(DECREE_ABSOLUTE_DOCUMENT))
             .findFirst()
             .map(this::transformInputScannedDocIntoCaseDocument)
             .ifPresent(doc -> additionalCaseData.put("divorceUploadEvidence2", doc));

@@ -6,6 +6,7 @@
     "state": "consentOrderApproved",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
+      "paperApplication": "Yes",
       "applicantRepresented": "Yes",
       "solicitorAgreeToReceiveEmails": "No",
       "pensionCollection": [
@@ -21,11 +22,47 @@
           }
         }
       ],
-      "approvedConsentOrderLetter": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/51f1fce6-1246-43b0-9ab0-08434d9af008",
-        "document_filename": "ApprovedConsentOrderLetter.pdf",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/51f1fce6-1246-43b0-9ab0-08434d9af008/binary"
-      },
+      "approvedOrderCollection": [
+        {
+          "id": "00ffa155-e60f-499a-9295-77b598bf16d1",
+          "value": {
+            "orderLetter": {
+              "document_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8",
+              "document_filename": "ApprovedConsentOrderLetter.pdf",
+              "document_binary_url": "http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8/binary"
+            },
+            "consentOrder": {
+              "document_url": "http://localhost:4506/documents/3e3b6389-a9da-4b1e-b7d0-e949701efcd1",
+              "document_filename": "011.pdf",
+              "document_binary_url": "http://localhost:4506/documents/3e3b6389-a9da-4b1e-b7d0-e949701efcd1/binary"
+            },
+            "pensionDocuments": [
+              {
+                "id": "3bc538b9-8a6e-4fd1-84de-eeb01460f900",
+                "value": {
+                  "typeOfDocument": "Form PPF2",
+                  "uploadedDocument": {
+                    "document_url": "http://localhost:4506/documents/0be0f91e-04e1-4db4-b43e-70e40bb3d952",
+                    "document_filename": "006.pdf",
+                    "document_binary_url": "http://localhost:4506/documents/0be0f91e-04e1-4db4-b43e-70e40bb3d952/binary"
+                  }
+                }
+              },
+              {
+                "id": "5b9be58f-c368-411a-bd3a-ff1c104ba87f",
+                "value": {
+                  "typeOfDocument": "Form PPF1",
+                  "uploadedDocument": {
+                    "document_url": "http://localhost:4506/documents/ba37e288-cf8d-426b-a368-7f237be756b7",
+                    "document_filename": "014.pdf",
+                    "document_binary_url": "http://localhost:4506/documents/ba37e288-cf8d-426b-a368-7f237be756b7/binary"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
       "latestConsentOrder": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/9c4419ef-6be7-4014-9fc8-2335faa25fa8",
         "document_filename": "D81 Form.pdf",

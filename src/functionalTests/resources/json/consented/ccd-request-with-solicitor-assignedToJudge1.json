@@ -95,7 +95,8 @@
       "miniFormA": {
         "document_url": "http://doc1",
         "document_filename": "doc1",
-        "document_binary_url": "http://doc1.binary"     },
+        "document_binary_url": "http://doc1.binary"
+      },
       "natureOfApplication2": [
         "item1",
         "item2"
