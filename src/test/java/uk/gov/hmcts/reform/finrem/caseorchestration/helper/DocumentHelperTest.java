@@ -198,6 +198,30 @@ public class DocumentHelperTest {
         assertEquals(ctscContactDetails, preparedCaseDetails.getData().get("ctscContactDetails"));
     }
 
+    @Test
+    public void testSolicitorFirmIsCorrectlyFormattedForLetterPrinting() {
+        Map<String, Object> testNameMap = new HashMap<>();
+        testNameMap.put("solicitorName", "Mr Awesome Solicitor");
+        testNameMap.put("solicitorFirm", "Awesome Solicitor Firm");
+
+        String formattedName = documentHelper.formatSolicitorDetailsForLetterPrinting(testNameMap);
+        String expectedName = "Awesome Solicitor Firm";
+
+        assertThat(formattedName, is(expectedName));
+    }
+
+    @Test
+    public void testSolicitorNameIsCorrectlyFormattedForLetterPrinting() {
+        Map<String, Object> testNameMap = new HashMap<>();
+        testNameMap.put("solicitorName", "Mr Awesome Solicitor");
+        testNameMap.put("solicitorFirm", null);
+
+        String formattedName = documentHelper.formatSolicitorDetailsForLetterPrinting(testNameMap);
+        String expectedName = "Mr Awesome Solicitor";
+
+        assertThat(formattedName, is(expectedName));
+    }
+
     private CallbackRequest prepareCallbackRequest(String fileName) throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class);

@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_EMAIL_ADDRESS;
@@ -47,6 +48,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
@@ -135,7 +137,7 @@ public class DocumentHelper {
         if (isApplicantRepresentedByASolicitor(caseData)) {
             log.info("Applicant is represented by a solicitor");
             reference = nullToEmpty((caseData.get(SOLICITOR_REFERENCE)));
-            addresseeName = nullToEmpty((caseData.get(SOLICITOR_NAME)));
+            addresseeName = formatSolicitorDetailsForLetterPrinting(caseData);
             addressToSendTo = (Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
         } else {
             log.info("Applicant is not represented by a solicitor");
@@ -182,6 +184,14 @@ public class DocumentHelper {
             return objectMapper.readValue(objectMapper.writeValueAsString(object), objectClass);
         } catch (IOException e) {
             throw new IllegalStateException();
+        }
+    }
+
+    public String formatSolicitorDetailsForLetterPrinting(Map<String, Object> caseData) {
+        if (nonNull(caseData.get(SOLICITOR_NAME)) && nonNull(caseData.get(SOLICITOR_FIRM))) {
+            return nullToEmpty((caseData.get(SOLICITOR_FIRM)));
+        } else {
+            return nullToEmpty((caseData.get(SOLICITOR_NAME)));
         }
     }
 
