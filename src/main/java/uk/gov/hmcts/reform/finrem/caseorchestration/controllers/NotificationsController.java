@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -39,6 +40,7 @@ public class NotificationsController implements BaseController {
     private final FeatureToggleService featureToggleService;
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     private final HelpWithFeesDocumentService helpWithFeesDocumentService;
+    private final GeneralEmailService generalEmailService;
 
     @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
@@ -262,5 +264,23 @@ public class NotificationsController implements BaseController {
             notificationService.sendSolicitorToDraftOrderEmail(callbackRequest);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    @PostMapping(value = "/case-orchestration/notify/general-email", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send a general email")
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "General e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralEmail(
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("Received request to send email for 'Applicant Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+
+        log.info("Sending general email notification");
+        notificationService.sendGeneralEmail(callbackRequest);
+
+        CaseDetails updatedDetails = generalEmailService.storeGeneralEmail(callbackRequest.getCaseDetails());
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(updatedDetails.getData()).build());
     }
 }

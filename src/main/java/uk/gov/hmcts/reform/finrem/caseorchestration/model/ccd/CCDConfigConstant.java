@@ -67,6 +67,13 @@ public class CCDConfigConstant {
     public static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
     public static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
 
+    //general email
+    public static final String GENERAL_EMAIL = "generalEmailCollection";
+    public static final String GENERAL_EMAIL_RECIPIENT = "generalEmailRecipient";
+    public static final String GENERAL_EMAIL_CREATED_BY = "generalEmailCreatedBy";
+    public static final String GENERAL_EMAIL_BODY = "generalEmailBody";
+
+
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
     public static final String FEES = "Fees";

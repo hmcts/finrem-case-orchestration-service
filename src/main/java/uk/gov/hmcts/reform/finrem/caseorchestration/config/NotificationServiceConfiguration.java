@@ -21,4 +21,5 @@ public class NotificationServiceConfiguration {
     private String contestedApplicationIssued;
     private String contestOrderApproved;
     private String contestedDraftOrder;
+    private String generalEmail;
 }
