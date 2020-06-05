@@ -55,73 +55,73 @@ public class NotificationService {
 
     public void sendConsentedHWFSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
-        NotificationRequest notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendAssignToJudgeConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getAssignToJudge());
-        NotificationRequest notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendConsentOrderMadeConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderMade());
-        NotificationRequest notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendConsentOrderNotApprovedEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderNotApproved());
-        NotificationRequest notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendConsentOrderAvailableEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailable());
-        NotificationRequest notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendContestedHwfSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedHwfSuccessful());
-        NotificationRequest notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendContestedApplicationIssuedEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedApplicationIssued());
-        NotificationRequest notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendContestOrderApprovedEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestOrderApproved());
-        NotificationRequest notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendPrepareForHearingEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getPrepareForHearing());
-        NotificationRequest notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendPrepareForHearingOrderSentEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getPrepareForHearingOrderSent());
-        NotificationRequest notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendSolicitorToDraftOrderEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedDraftOrder());
-        NotificationRequest notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendGeneralEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getGeneralEmail());
-        NotificationRequest notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest = createNotificationRequest(callbackRequest);
         notificationRequest.setNotificationEmail(Objects.toString(callbackRequest.getCaseDetails().getData().get("generalEmailRecipient")));
         sendNotificationEmail(notificationRequest, uri);
     }
