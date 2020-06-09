@@ -119,8 +119,15 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendGeneralEmail(CallbackRequest callbackRequest) {
-        URI uri = buildUri(notificationServiceConfiguration.getGeneralEmail());
+    public void sendConsentGeneralEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getConsentGeneralEmail());
+        notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest.setNotificationEmail(Objects.toString(callbackRequest.getCaseDetails().getData().get("generalEmailRecipient")));
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+    public void sendContestedGeneralEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralEmail());
         notificationRequest = createNotificationRequest(callbackRequest);
         notificationRequest.setNotificationEmail(Objects.toString(callbackRequest.getCaseDetails().getData().get("generalEmailRecipient")));
         sendNotificationEmail(notificationRequest, uri);

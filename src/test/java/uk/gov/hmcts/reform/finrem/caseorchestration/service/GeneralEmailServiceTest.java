@@ -29,27 +29,53 @@ public class GeneralEmailServiceTest {
     }
 
     @Test
-    public void generateGeneralEmail() throws Exception {
-        CaseDetails caseDetails = generalEmailService.storeGeneralEmail(caseDetails());
+    public void generateGeneralEmailConsented() throws Exception {
+        CaseDetails caseDetails = generalEmailService.storeGeneralEmail(caseDetailsConsented());
         List<GeneralEmail> generalEmailList = (List<GeneralEmail>)caseDetails.getData().get("generalEmailCollection");
         caseDetails.getData();
         assertThat(generalEmailList, hasSize(2));
 
         GeneralEmail originalEmail = generalEmailList.get(0);
         assertThat(originalEmail.getId(), notNullValue());
-        assertThat(originalEmail.getGeneralEmailData().getRecipient(), is("a1@a.com"));
-        assertThat(originalEmail.getGeneralEmailData().getCreatedBy(), is("first user"));
-        assertThat(originalEmail.getGeneralEmailData().getBody(), is("original email body"));
+        assertThat(originalEmail.getGeneralEmailData().getGeneralEmailRecipient(), is("a1@a.com"));
+        assertThat(originalEmail.getGeneralEmailData().getGeneralEmailCreatedBy(), is("first user"));
+        assertThat(originalEmail.getGeneralEmailData().getGeneralEmailBody(), is("original email body"));
 
         GeneralEmail addedEmail = generalEmailList.get(1);
         assertThat(addedEmail.getId(), notNullValue());
-        assertThat(addedEmail.getGeneralEmailData().getRecipient(), is("b1@b.com"));
-        assertThat(addedEmail.getGeneralEmailData().getCreatedBy(), is("Test user"));
-        assertThat(addedEmail.getGeneralEmailData().getBody(), is("Test email body"));
+        assertThat(addedEmail.getGeneralEmailData().getGeneralEmailRecipient(), is("b1@b.com"));
+        assertThat(addedEmail.getGeneralEmailData().getGeneralEmailCreatedBy(), is("Test user"));
+        assertThat(addedEmail.getGeneralEmailData().getGeneralEmailBody(), is("Test email body"));
     }
 
-    private CaseDetails caseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-email.json")) {
+    @Test
+    public void generateGeneralEmailContested() throws Exception {
+        CaseDetails caseDetails = generalEmailService.storeGeneralEmail(caseDetailsContested());
+        List<GeneralEmail> generalEmailList = (List<GeneralEmail>)caseDetails.getData().get("generalEmailCollection");
+        caseDetails.getData();
+        assertThat(generalEmailList, hasSize(2));
+
+        GeneralEmail originalEmail = generalEmailList.get(0);
+        assertThat(originalEmail.getId(), notNullValue());
+        assertThat(originalEmail.getGeneralEmailData().getGeneralEmailRecipient(), is("a1@a.com"));
+        assertThat(originalEmail.getGeneralEmailData().getGeneralEmailCreatedBy(), is("first user"));
+        assertThat(originalEmail.getGeneralEmailData().getGeneralEmailBody(), is("original email body"));
+
+        GeneralEmail addedEmail = generalEmailList.get(1);
+        assertThat(addedEmail.getId(), notNullValue());
+        assertThat(addedEmail.getGeneralEmailData().getGeneralEmailRecipient(), is("b1@b.com"));
+        assertThat(addedEmail.getGeneralEmailData().getGeneralEmailCreatedBy(), is("Test user"));
+        assertThat(addedEmail.getGeneralEmailData().getGeneralEmailBody(), is("Test email body"));
+    }
+
+    private CaseDetails caseDetailsConsented() throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/general-email-consented.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
+    }
+
+    private CaseDetails caseDetailsContested() throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/contested/general-email-contested.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }

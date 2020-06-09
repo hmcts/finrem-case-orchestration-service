@@ -44,9 +44,9 @@ public class GeneralEmailService {
 
     private GeneralEmail applyGeneralEmailData(CaseDetails caseDetails) {
         GeneralEmailData generalEmailData = new GeneralEmailData();
-        generalEmailData.setRecipient(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_RECIPIENT)));
-        generalEmailData.setCreatedBy(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_CREATED_BY)));
-        generalEmailData.setBody(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_BODY)));
+        generalEmailData.setGeneralEmailRecipient(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_RECIPIENT)));
+        generalEmailData.setGeneralEmailCreatedBy(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_CREATED_BY)));
+        generalEmailData.setGeneralEmailBody(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_BODY)));
 
         GeneralEmail generalEmail = new GeneralEmail();
         generalEmail.setId(UUID.randomUUID().toString());

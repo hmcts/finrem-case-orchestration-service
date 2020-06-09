@@ -59,7 +59,8 @@ public class NotificationsControllerTest {
     private static final String DRAFT_ORDER_SUCCESSFUL_APPLICANT_SOL = "/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json";
     private static final String DRAFT_ORDER_UNSUCCESSFUL_APPLICANT_SOL = "/fixtures/applicant-solicitor-to-draft-order-without-email-consent.json";
     private static final String DRAFT_ORDER_UNSUCCESSFUL_RESPONDENT_SOL = "/fixtures/respondent-solicitor-to-draft-order-with-email-consent.json";
-    private static final String GENERAL_EMAIL = "/fixtures/general-email.json";
+    private static final String GENERAL_EMAIL_CONSENTED = "/fixtures/general-email-consented.json";
+    private static final String GENERAL_EMAIL_CONTESTED = "/fixtures/contested/general-email-contested.json";
 
     @Autowired
     private WebApplicationContext applicationContext;
@@ -443,8 +444,8 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void sendGeneralEmail() throws Exception {
-        buildCcdRequest(GENERAL_EMAIL);
+    public void sendGeneralEmailConsented() throws Exception {
+        buildCcdRequest(GENERAL_EMAIL_CONSENTED);
         when(generalEmailService.storeGeneralEmail(any(CaseDetails.class)))
             .thenReturn(CaseDetails.builder().build());
         mockMvc.perform(post(GENERAL_EMAIL_URL)
@@ -453,7 +454,24 @@ public class NotificationsControllerTest {
             .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-            .sendGeneralEmail(any(CallbackRequest.class));
+            .sendConsentGeneralEmail(any(CallbackRequest.class));
+
+        verify(generalEmailService, times(1))
+            .storeGeneralEmail(any(CaseDetails.class));
+    }
+
+    @Test
+    public void sendGeneralEmailContested() throws Exception {
+        buildCcdRequest(GENERAL_EMAIL_CONTESTED);
+        when(generalEmailService.storeGeneralEmail(any(CaseDetails.class)))
+            .thenReturn(CaseDetails.builder().build());
+        mockMvc.perform(post(GENERAL_EMAIL_URL)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+            .sendContestedGeneralEmail(any(CallbackRequest.class));
 
         verify(generalEmailService, times(1))
             .storeGeneralEmail(any(CaseDetails.class));

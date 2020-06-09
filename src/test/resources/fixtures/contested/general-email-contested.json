@@ -5,7 +5,7 @@
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
-    "case_type_id": "FinancialRemedyMVP2",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "PBANumber": "PBA123456",
       "d81Question": "No",
@@ -91,14 +91,16 @@
       "generalEmailRecipient": "b1@b.com",
       "generalEmailCreatedBy": "Test user",
       "generalEmailBody": "Test email body",
-      "generalEmailCollection": [{
-        "id": "1",
-        "value": {
-          "generalEmailRecipient": "a1@a.com",
-          "generalEmailCreatedBy": "first user",
-          "generalEmailBody": "original email body"
+      "generalEmailCollection": [
+        {
+          "id": "6261060a-b6de-4909-98de-9d34a912857c",
+          "value": {
+            "generalEmailRecipient": "a1@a.com",
+            "generalEmailCreatedBy": "first user",
+            "generalEmailBody": "original email body"
+          }
         }
-      }],
+      ],
       "generalLetterCollection": [
         {
           "id": "1",

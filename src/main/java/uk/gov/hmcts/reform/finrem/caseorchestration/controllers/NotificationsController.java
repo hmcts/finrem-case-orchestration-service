@@ -277,7 +277,11 @@ public class NotificationsController implements BaseController {
         validateCaseData(callbackRequest);
 
         log.info("Sending general email notification");
-        notificationService.sendGeneralEmail(callbackRequest);
+        if (isConsentedApplication(callbackRequest.getCaseDetails())) {
+            notificationService.sendConsentGeneralEmail(callbackRequest);
+        } else {
+            notificationService.sendContestedGeneralEmail(callbackRequest);
+        }
 
         CaseDetails updatedDetails = generalEmailService.storeGeneralEmail(callbackRequest.getCaseDetails());
 

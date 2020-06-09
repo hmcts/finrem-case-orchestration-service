@@ -8,9 +8,9 @@ import lombok.Data;
 @Data
 public class GeneralEmailData {
     @JsonProperty("generalEmailRecipient")
-    private String recipient;
+    private String generalEmailRecipient;
     @JsonProperty("generalEmailCreatedBy")
-    private String createdBy;
+    private String generalEmailCreatedBy;
     @JsonProperty("generalEmailBody")
-    private String body;
+    private String generalEmailBody;
 }
