@@ -62,6 +62,8 @@ public class GenerateCoverSheetService {
         prepareCoverSheet(caseDetailsCopy, partyAddressCcdFieldName, solicitorAddressCcdFieldName, solicitorNameCcdFieldName,
             partyFirstMiddleNameCcdFieldName, partyLastNameCcdFieldName);
 
+        log.info("Temporary log, remove after testing, generateCoverSheet data: {}", caseDetailsCopy);
+
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy, documentConfiguration.getBulkPrintTemplate(),
             documentConfiguration.getBulkPrintFileName());
     }

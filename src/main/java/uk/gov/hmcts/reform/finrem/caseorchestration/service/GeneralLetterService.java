@@ -56,6 +56,8 @@ public class GeneralLetterService {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         prepareCaseDetailsForDocumentGeneration(caseDetailsCopy);
 
+        log.info("Temporary log, remove after testing, generateCoverSheet data: {}", caseDetailsCopy);
+
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getGeneralLetterTemplate(), documentConfiguration.getGeneralLetterFileName());
     }
