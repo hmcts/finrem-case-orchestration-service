@@ -49,7 +49,7 @@ public class GeneralEmailStartController implements BaseController {
         validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.put("generalEmailCreatedBy", service.getIdamFullName(authorisationToken));
+        caseData.put("generalEmailCreatedByName", service.getIdamFullName(authorisationToken));
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

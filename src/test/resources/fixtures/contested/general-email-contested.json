@@ -88,15 +88,15 @@
       "generalLetterRecipientAddress": "",
       "generalLetterCreatedBy": "",
       "generalLetterBody": "Test content for the letter body",
-      "generalEmailRecipient": "b1@b.com",
-      "generalEmailCreatedBy": "Test user",
+      "generalEmailRecipientAddress": "b1@b.com",
+      "generalEmailCreatedByName": "Test user",
       "generalEmailBody": "Test email body",
       "generalEmailCollection": [
         {
           "id": "6261060a-b6de-4909-98de-9d34a912857c",
           "value": {
-            "generalEmailRecipient": "a1@a.com",
-            "generalEmailCreatedBy": "first user",
+            "generalEmailRecipientAddress": "a1@a.com",
+            "generalEmailCreatedByName": "first user",
             "generalEmailBody": "original email body"
           }
         }

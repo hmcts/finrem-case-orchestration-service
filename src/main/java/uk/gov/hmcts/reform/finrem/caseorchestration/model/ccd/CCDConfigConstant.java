@@ -69,8 +69,8 @@ public class CCDConfigConstant {
 
     //general email
     public static final String GENERAL_EMAIL = "generalEmailCollection";
-    public static final String GENERAL_EMAIL_RECIPIENT = "generalEmailRecipient";
-    public static final String GENERAL_EMAIL_CREATED_BY = "generalEmailCreatedBy";
+    public static final String GENERAL_EMAIL_RECIPIENT_ADDRESS = "generalEmailRecipientAddress";
+    public static final String GENERAL_EMAIL_CREATED_BY_NAME = "generalEmailCreatedByName";
     public static final String GENERAL_EMAIL_BODY = "generalEmailBody";
 
 

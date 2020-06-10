@@ -20,8 +20,8 @@ import java.util.function.Function;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_BODY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_CREATED_BY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_CREATED_BY_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT_ADDRESS;
 
 
 @Service
@@ -44,8 +44,8 @@ public class GeneralEmailService {
 
     private GeneralEmail applyGeneralEmailData(CaseDetails caseDetails) {
         GeneralEmailData generalEmailData = new GeneralEmailData();
-        generalEmailData.setGeneralEmailRecipient(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_RECIPIENT)));
-        generalEmailData.setGeneralEmailCreatedBy(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_CREATED_BY)));
+        generalEmailData.setGeneralEmailRecipientAddress(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_RECIPIENT_ADDRESS)));
+        generalEmailData.setGeneralEmailCreatedByName(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_CREATED_BY_NAME)));
         generalEmailData.setGeneralEmailBody(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_BODY)));
 
         GeneralEmail generalEmail = new GeneralEmail();
