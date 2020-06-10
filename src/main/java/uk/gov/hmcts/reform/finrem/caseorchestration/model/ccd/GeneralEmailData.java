@@ -7,10 +7,10 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class GeneralEmailData {
-    @JsonProperty("generalEmailRecipientAddress")
-    private String generalEmailRecipientAddress;
-    @JsonProperty("generalEmailCreatedByName")
-    private String generalEmailCreatedByName;
+    @JsonProperty("generalEmailRecipient")
+    private String generalEmailRecipient;
+    @JsonProperty("generalEmailCreatedBy")
+    private String generalEmailCreatedBy;
     @JsonProperty("generalEmailBody")
     private String generalEmailBody;
 }

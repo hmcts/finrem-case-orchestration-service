@@ -37,14 +37,14 @@ public class GeneralEmailServiceTest {
 
         GeneralEmail originalEmail = generalEmailList.get(0);
         assertThat(originalEmail.getId(), notNullValue());
-        assertThat(originalEmail.getGeneralEmailData().getGeneralEmailRecipientAddress(), is("a1@a.com"));
-        assertThat(originalEmail.getGeneralEmailData().getGeneralEmailCreatedByName(), is("first user"));
+        assertThat(originalEmail.getGeneralEmailData().getGeneralEmailRecipient(), is("a1@a.com"));
+        assertThat(originalEmail.getGeneralEmailData().getGeneralEmailCreatedBy(), is("first user"));
         assertThat(originalEmail.getGeneralEmailData().getGeneralEmailBody(), is("original email body"));
 
         GeneralEmail addedEmail = generalEmailList.get(1);
         assertThat(addedEmail.getId(), notNullValue());
-        assertThat(addedEmail.getGeneralEmailData().getGeneralEmailRecipientAddress(), is("b1@b.com"));
-        assertThat(addedEmail.getGeneralEmailData().getGeneralEmailCreatedByName(), is("Test user"));
+        assertThat(addedEmail.getGeneralEmailData().getGeneralEmailRecipient(), is("b1@b.com"));
+        assertThat(addedEmail.getGeneralEmailData().getGeneralEmailCreatedBy(), is("Test user"));
         assertThat(addedEmail.getGeneralEmailData().getGeneralEmailBody(), is("Test email body"));
     }
 
@@ -57,14 +57,14 @@ public class GeneralEmailServiceTest {
 
         GeneralEmail originalEmail = generalEmailList.get(0);
         assertThat(originalEmail.getId(), notNullValue());
-        assertThat(originalEmail.getGeneralEmailData().getGeneralEmailRecipientAddress(), is("a1@a.com"));
-        assertThat(originalEmail.getGeneralEmailData().getGeneralEmailCreatedByName(), is("first user"));
+        assertThat(originalEmail.getGeneralEmailData().getGeneralEmailRecipient(), is("a1@a.com"));
+        assertThat(originalEmail.getGeneralEmailData().getGeneralEmailCreatedBy(), is("first user"));
         assertThat(originalEmail.getGeneralEmailData().getGeneralEmailBody(), is("original email body"));
 
         GeneralEmail addedEmail = generalEmailList.get(1);
         assertThat(addedEmail.getId(), notNullValue());
-        assertThat(addedEmail.getGeneralEmailData().getGeneralEmailRecipientAddress(), is("b1@b.com"));
-        assertThat(addedEmail.getGeneralEmailData().getGeneralEmailCreatedByName(), is("Test user"));
+        assertThat(addedEmail.getGeneralEmailData().getGeneralEmailRecipient(), is("b1@b.com"));
+        assertThat(addedEmail.getGeneralEmailData().getGeneralEmailCreatedBy(), is("Test user"));
         assertThat(addedEmail.getGeneralEmailData().getGeneralEmailBody(), is("Test email body"));
     }
 

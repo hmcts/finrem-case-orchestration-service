@@ -42,7 +42,7 @@ public class GeneralEmailStartControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, bearerToken)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.generalEmailCreatedByName", is("Firstname LastName")));
+            .andExpect(jsonPath("$.data.generalEmailCreatedBy", is("Firstname LastName")));
 
     }
 
