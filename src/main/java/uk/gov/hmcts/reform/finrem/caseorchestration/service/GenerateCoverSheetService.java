@@ -6,24 +6,26 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintCoverSheet;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
 
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +34,7 @@ public class GenerateCoverSheetService {
 
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
+    private final DocumentHelper documentHelper;
 
     private enum AddressFoundInCaseData { SOLICITOR, PARTY, NONE }
 
@@ -39,21 +42,27 @@ public class GenerateCoverSheetService {
         log.info("Generating Applicant cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
 
-        prepareCoverSheet(caseDetails, APPLICANT_ADDRESS, SOLICITOR_ADDRESS, SOLICITOR_NAME,
+        return generateCoverSheet(caseDetails, authorisationToken, APPLICANT_ADDRESS, SOLICITOR_ADDRESS, SOLICITOR_NAME,
             APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
-
-        return genericDocumentService.generateDocument(authorisationToken, caseDetails, documentConfiguration.getBulkPrintTemplate(),
-            documentConfiguration.getBulkPrintFileName());
     }
 
     public CaseDocument generateRespondentCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
         log.info("Generating Respondent cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
 
-        prepareCoverSheet(caseDetails, RESPONDENT_ADDRESS, RESP_SOLICITOR_ADDRESS, RESP_SOLICITOR_NAME,
+        return generateCoverSheet(caseDetails, authorisationToken, RESPONDENT_ADDRESS, RESP_SOLICITOR_ADDRESS, RESP_SOLICITOR_NAME,
             APP_RESPONDENT_FIRST_MIDDLE_NAME, APP_RESPONDENT_LAST_NAME);
+    }
 
-        return genericDocumentService.generateDocument(authorisationToken, caseDetails, documentConfiguration.getBulkPrintTemplate(),
+    private CaseDocument generateCoverSheet(CaseDetails caseDetails, String authorisationToken, String partyAddressCcdFieldName,
+                                            String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
+                                            String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName) {
+
+        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        prepareCoverSheet(caseDetailsCopy, partyAddressCcdFieldName, solicitorAddressCcdFieldName, solicitorNameCcdFieldName,
+            partyFirstMiddleNameCcdFieldName, partyLastNameCcdFieldName);
+
+        return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy, documentConfiguration.getBulkPrintTemplate(),
             documentConfiguration.getBulkPrintFileName());
     }
 
@@ -66,10 +75,16 @@ public class GenerateCoverSheetService {
         if (addressFoundInCaseData != AddressFoundInCaseData.NONE) {
             boolean sendToSolicitor = addressFoundInCaseData == AddressFoundInCaseData.SOLICITOR;
 
-            populateCaseDataWithBulkPrintCoverSheet(caseDetails,
-                sendToSolicitor ? (String) caseData.get(solicitorNameCcdFieldName)
-                    : partyName(caseData.get(partyFirstMiddleNameCcdFieldName), caseData.get(partyLastNameCcdFieldName)),
-                sendToSolicitor ? (Map) caseData.get(solicitorAddressCcdFieldName) : (Map) caseData.get(partyAddressCcdFieldName));
+            Addressee addressee = Addressee.builder()
+                .name(sendToSolicitor
+                    ? (String) caseData.get(solicitorNameCcdFieldName)
+                    : partyName(caseData.get(partyFirstMiddleNameCcdFieldName), caseData.get(partyLastNameCcdFieldName)))
+                .formattedAddress(documentHelper.formatAddressForLetterPrinting(sendToSolicitor
+                    ? (Map) caseData.get(solicitorAddressCcdFieldName)
+                    : (Map) caseData.get(partyAddressCcdFieldName)))
+                .build();
+            caseData.put(ADDRESSEE, addressee);
+            caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
         }
     }
 
@@ -82,25 +97,5 @@ public class GenerateCoverSheetService {
 
     private String partyName(Object partyFirstMiddleName, Object partyLastName) {
         return StringUtils.joinWith(" ", partyFirstMiddleName, partyLastName).trim();
-    }
-
-    private void populateCaseDataWithBulkPrintCoverSheet(CaseDetails caseDetails, String name, Map address) {
-        BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder = BulkPrintCoverSheet.builder()
-            .ccdNumber(caseDetails.getId().toString())
-            .recipientName(name);
-        fillBulkPrintCoverSheetWithAddress(bulkPrintCoverSheetBuilder, address);
-        caseDetails.getData().put(BULK_PRINT_COVER_SHEET, bulkPrintCoverSheetBuilder.build());
-    }
-
-    private void fillBulkPrintCoverSheetWithAddress(BulkPrintCoverSheet.BulkPrintCoverSheetBuilder bulkPrintCoverSheetBuilder,
-                                                    Map<String, Object> address) {
-        bulkPrintCoverSheetBuilder
-            .addressLine1(nullToEmpty(address.get("AddressLine1")))
-            .addressLine2(nullToEmpty(address.get("AddressLine2")))
-            .addressLine3(nullToEmpty(address.get("AddressLine3")))
-            .county(nullToEmpty(address.get("County")))
-            .postTown(nullToEmpty(address.get("PostTown")))
-            .postCode(nullToEmpty(address.get("PostCode")))
-            .build();
     }
 }

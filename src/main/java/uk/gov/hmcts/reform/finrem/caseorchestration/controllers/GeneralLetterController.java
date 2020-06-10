@@ -4,8 +4,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,18 +19,16 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Map;
-
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
+@RequiredArgsConstructor
 @Slf4j
 public class GeneralLetterController implements BaseController {
 
-    @Autowired
-    private GeneralLetterService service;
+    private final GeneralLetterService service;
 
     @PostMapping(path = "/documents/general-letter", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Creates general letter for case worker. Serves as a callback from CCD")
@@ -45,14 +43,10 @@ public class GeneralLetterController implements BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for generating general letter with Case ID: {}", caseDetails.getId());
-
         validateCaseData(callback);
 
-        Map<String, Object> generalLetters = service.createGeneralLetter(authorisationToken, caseDetails);
+        service.createGeneralLetter(authorisationToken, caseDetails);
 
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.putAll(generalLetters);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 }

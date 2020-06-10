@@ -3,41 +3,45 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintCoverSheet;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
 
 import java.io.InputStream;
-import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 
-public class GenerateCoverSheetServiceTest {
+@ActiveProfiles("test-mock-document-client")
+public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    @Autowired private GenerateCoverSheetService generateCoverSheetService;
+    @Autowired private ObjectMapper mapper;
+
+    @MockBean
     private GenericDocumentService genericDocumentService;
-    private GenerateCoverSheetService generateCoverSheetService;
+
+    @Captor
+    private ArgumentCaptor<CaseDetails> generateDocumentCaseDetailsCaptor;
 
     @Before
-    public void setUp() {
-        DocumentConfiguration config = new DocumentConfiguration();
-        config.setBulkPrintFileName("test_file");
-        config.setBulkPrintTemplate("test_template");
-
-        DocumentClient generatorClient = new TestDocumentClient();
-        genericDocumentService = new GenericDocumentService(generatorClient);
-        generateCoverSheetService = new GenerateCoverSheetService(genericDocumentService, config);
+    public void setup() {
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
     }
 
     @Test
@@ -63,11 +67,7 @@ public class GenerateCoverSheetServiceTest {
         CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
-        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
-
-        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("50 Applicant Street"));
-        assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
-        assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
+        assertCoversheetAddress("50 Applicant Street\nLondon\nSE1");
     }
 
     @Test
@@ -75,11 +75,7 @@ public class GenerateCoverSheetServiceTest {
         CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
         generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
 
-        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
-
-        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("51 Respondent Street"));
-        assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
-        assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
+        assertCoversheetAddress("51 Respondent Street\nLondon\nSE1");
     }
 
     @Test
@@ -87,11 +83,7 @@ public class GenerateCoverSheetServiceTest {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
-        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
-
-        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("123 Applicant Solicitor Street"));
-        assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
-        assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
+        assertCoversheetAddress("123 Applicant Solicitor Street\nSecond Address Line\nThird Address Line\nGreater London\nLondon\nSE1");
     }
 
     @Test
@@ -99,11 +91,7 @@ public class GenerateCoverSheetServiceTest {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
         generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
 
-        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
-
-        assertThat(bulkPrintCoverSheet.getAddressLine1(), is("321 Respondent Solicitor Street"));
-        assertThat(bulkPrintCoverSheet.getPostCode(), is("SE1"));
-        assertThat(bulkPrintCoverSheet.getPostTown(), is("London"));
+        assertCoversheetAddress("321 Respondent Solicitor Street\nLondon\nSE1");
     }
 
     @Test
@@ -111,12 +99,10 @@ public class GenerateCoverSheetServiceTest {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
 
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
-        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
-        assertThat(bulkPrintCoverSheet.getRecipientName(), is("Mr J Solicitor"));
+        assertAddresseeName(1, "Mr J Solicitor");
 
         generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
-        bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
-        assertThat(bulkPrintCoverSheet.getRecipientName(), is("Ms J Solicitor"));
+        assertAddresseeName(2, "Ms J Solicitor");
     }
 
     @Test
@@ -124,12 +110,10 @@ public class GenerateCoverSheetServiceTest {
         CaseDetails caseDetails = caseDetailsWithEmptySolAddress();
 
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
-        BulkPrintCoverSheet bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
-        assertThat(bulkPrintCoverSheet.getRecipientName(), is("John Doe"));
+        assertAddresseeName(1, "John Doe");
 
         generateCoverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
-        bulkPrintCoverSheet = (BulkPrintCoverSheet) caseDetails.getData().get(BULK_PRINT_COVER_SHEET);
-        assertThat(bulkPrintCoverSheet.getRecipientName(), is("Jane Doe"));
+        assertAddresseeName(2, "Jane Doe");
     }
 
     private CaseDetails caseDetails() throws Exception {
@@ -153,36 +137,17 @@ public class GenerateCoverSheetServiceTest {
         }
     }
 
-    private static class TestDocumentClient implements DocumentClient {
-        @Override
-        public Document generatePdf(DocumentGenerationRequest request, String authorizationToken) {
-            assertThat(request.getTemplate(), is("test_template"));
-            return document();
-        }
+    private void assertCoversheetAddress(String formattedAddress) {
+        verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
+            any(), any());
+        Addressee addressee = (Addressee) generateDocumentCaseDetailsCaptor.getValue().getData().get(ADDRESSEE);
+        assertThat(addressee.getFormattedAddress(), is(formattedAddress));
+    }
 
-        @Override
-        public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void deleteDocument(String fileUrl, String authorizationToken) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public DocumentValidationResponse checkUploadedFileType(String authorizationToken, String fileUrl) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Document stampDocument(Document document, String authorizationToken) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Document annexStampDocument(Document document, String authorizationToken) {
-            throw new UnsupportedOperationException();
-        }
+    private void assertAddresseeName(int invocation, String name) {
+        verify(genericDocumentService, times(invocation)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
+            any(), any());
+        Addressee addressee = (Addressee) generateDocumentCaseDetailsCaptor.getValue().getData().get(ADDRESSEE);
+        assertThat(addressee.getName(), is(name));
     }
 }
