@@ -44,14 +44,12 @@ public class GeneralEmailStartController implements BaseController {
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to clear general letter fields for Case ID: {}", caseDetails.getId());
+        log.info("Received request to pre populate general email fields for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.put("generalEmailRecipient", null);
         caseData.put("generalEmailCreatedBy", service.getIdamFullName(authorisationToken));
-        caseData.put("generalEmailBody", null);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
