@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_BODY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
@@ -57,12 +57,12 @@ public class GeneralEmailService {
     private CaseDetails populateGeneralEmailData(GeneralEmail generalEmail, CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        List<GeneralEmail> generalEmailList = Optional.ofNullable(caseData.get(GENERAL_EMAIL))
+        List<GeneralEmail> generalEmailList = Optional.ofNullable(caseData.get(GENERAL_EMAIL_COLLECTION))
             .map(this::convertToUploadOrderList)
             .orElse(new ArrayList<>());
 
         generalEmailList.add(generalEmail);
-        caseDetails.getData().put(GENERAL_EMAIL, generalEmailList);
+        caseDetails.getData().put(GENERAL_EMAIL_COLLECTION, generalEmailList);
         return caseDetails;
     }
 

@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_COLLECTION;
 
 public class GeneralEmailServiceTest {
 
@@ -31,7 +32,7 @@ public class GeneralEmailServiceTest {
     @Test
     public void generateGeneralEmailConsented() throws Exception {
         CaseDetails caseDetails = generalEmailService.storeGeneralEmail(caseDetailsConsented());
-        List<GeneralEmail> generalEmailList = (List<GeneralEmail>)caseDetails.getData().get("generalEmailCollection");
+        List<GeneralEmail> generalEmailList = (List<GeneralEmail>)caseDetails.getData().get(GENERAL_EMAIL_COLLECTION);
         caseDetails.getData();
         assertThat(generalEmailList, hasSize(2));
 
@@ -51,7 +52,7 @@ public class GeneralEmailServiceTest {
     @Test
     public void generateGeneralEmailContested() throws Exception {
         CaseDetails caseDetails = generalEmailService.storeGeneralEmail(caseDetailsContested());
-        List<GeneralEmail> generalEmailList = (List<GeneralEmail>)caseDetails.getData().get("generalEmailCollection");
+        List<GeneralEmail> generalEmailList = (List<GeneralEmail>)caseDetails.getData().get(GENERAL_EMAIL_COLLECTION);
         caseDetails.getData();
         assertThat(generalEmailList, hasSize(2));
 

@@ -23,6 +23,9 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_BODY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_CREATED_BY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -49,9 +52,9 @@ public class GeneralEmailStartController implements BaseController {
         validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.put("generalEmailRecipient", null);
-        caseData.put("generalEmailCreatedBy", service.getIdamFullName(authorisationToken));
-        caseData.put("generalEmailBody", null);
+        caseData.put(GENERAL_EMAIL_RECIPIENT, null);
+        caseData.put(GENERAL_EMAIL_CREATED_BY, service.getIdamFullName(authorisationToken));
+        caseData.put(GENERAL_EMAIL_BODY, null);
 
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
