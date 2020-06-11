@@ -63,6 +63,7 @@ public class DocumentHelper {
     public static final String DOCUMENT_BINARY_URL = "document_binary_url";
     public static final String ADDRESSEE = "addressee";
     public static final String CTSC_CONTACT_DETAILS = "ctscContactDetails";
+    public static final String CASE_NUMBER = "caseNumber";
 
     private final ObjectMapper objectMapper;
 
@@ -151,7 +152,7 @@ public class DocumentHelper {
                 .formattedAddress(formatAddressForLetterPrinting(addressToSendTo))
                 .build();
 
-            caseData.put("caseNumber", ccdNumber);
+            caseData.put(CASE_NUMBER, ccdNumber);
             caseData.put("reference", reference);
             caseData.put(ADDRESSEE,  addressee);
             caseData.put("letterDate", String.valueOf(LocalDate.now()));

@@ -15,7 +15,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.io.InputStream;
+import java.util.Map;
 
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,6 +28,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
 
 @ActiveProfiles("test-mock-document-client")
 public class GenerateCoverSheetServiceTest extends BaseServiceTest {
@@ -51,6 +55,8 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
+
+        assertCoversheetCalledWithRequiredData();
     }
 
     @Test
@@ -60,6 +66,8 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
+
+        assertCoversheetCalledWithRequiredData();
     }
 
     @Test
@@ -149,5 +157,15 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
             any(), any());
         Addressee addressee = (Addressee) generateDocumentCaseDetailsCaptor.getValue().getData().get(ADDRESSEE);
         assertThat(addressee.getName(), is(name));
+    }
+
+    private void assertCoversheetCalledWithRequiredData() {
+        verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
+            any(), any());
+        Map<String, Object> data = generateDocumentCaseDetailsCaptor.getValue().getData();
+
+        assertThat(data, hasKey(ADDRESSEE));
+        assertThat(data, hasKey(CTSC_CONTACT_DETAILS));
+        assertThat(data, hasKey(CASE_NUMBER));
     }
 }
