@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 
@@ -56,7 +57,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Test
     public void generateGeneralLetter() throws Exception {
-        CaseDetails caseDetails = caseDetails();
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
         List<GeneralLetterData> generalLetterData = (List<GeneralLetterData>) caseDetails.getData().get(GENERAL_LETTER);
@@ -71,6 +72,24 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
         assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
         assertThat(data.get("ccdCaseNumber"), is(1234567890L));
+    }
+
+    @Test
+    public void givenNoPreviousGeneralLettersGenerated_generateGeneralLetter() throws Exception {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter-empty-collection.json", mapper);
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
+
+        List<GeneralLetterData> generalLetterData = (List<GeneralLetterData>) caseDetails.getData().get(GENERAL_LETTER);
+        assertThat(generalLetterData, hasSize(1));
+
+        doCaseDocumentAssert(generalLetterData.get(0).getGeneralLetter().getGeneratedLetter());
+
+        verify(genericDocumentService, times(1)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
+
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
+        assertThat(data.get("ccdCaseNumber"), is(1234567891L));
     }
 
     @Test

@@ -14,12 +14,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.bsp.common.utils.LetterAddressHelper.formatAddressForLetterPrinting;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
@@ -106,7 +106,7 @@ public class GeneralLetterService {
         Map<String, Object> caseData = caseDetails.getData();
         List<GeneralLetterData> generalLetterDataList = Optional.ofNullable(caseData.get(GENERAL_LETTER))
             .map(this::convertToGeneralLetterData)
-            .orElse(emptyList());
+            .orElse(new ArrayList<>(1));
 
         generalLetterDataList.add(generatedLetterData);
 
