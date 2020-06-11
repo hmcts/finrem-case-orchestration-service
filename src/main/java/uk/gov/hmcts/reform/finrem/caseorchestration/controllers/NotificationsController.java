@@ -273,7 +273,7 @@ public class NotificationsController implements BaseController {
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralEmail(
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to send email for 'Applicant Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to send general email for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
 
         log.info("Sending general email notification");

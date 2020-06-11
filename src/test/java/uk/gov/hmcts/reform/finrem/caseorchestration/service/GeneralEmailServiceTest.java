@@ -80,6 +80,4 @@ public class GeneralEmailServiceTest {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }
-
-
 }
