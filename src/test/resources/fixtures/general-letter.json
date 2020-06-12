@@ -55,13 +55,13 @@
         "document_binary_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
       },
       "solicitorAddress": {
-        "County": "test",
-        "Country": "United Kingdom",
-        "PostCode": "b1 1ab",
+        "County": "Andhra Pradesh",
+        "Country": "India",
+        "PostCode": "B1 1AB",
         "PostTown": "SRIKALAHASTI",
-        "AddressLine1": "House no: 6-354-2, Gandhi Street",
-        "AddressLine2": "Srikalahasti, Chittor District",
-        "AddressLine3": "test"
+        "AddressLine1": "House no: 6-354-2",
+        "AddressLine2": "Gandhi Street",
+        "AddressLine3": "Chittor District"
       },
       "authorisationFirm": "test",
       "authorisationName": "test",

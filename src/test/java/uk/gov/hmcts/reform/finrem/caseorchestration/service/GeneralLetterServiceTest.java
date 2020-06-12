@@ -72,6 +72,12 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
         assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
         assertThat(data.get("ccdCaseNumber"), is(1234567890L));
+        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("House no: 6-354-2\n" +
+            "Gandhi Street\n" +
+            "Chittor District\n" +
+            "Andhra Pradesh\n" +
+            "SRIKALAHASTI\n" +
+            "B1 1AB"));
     }
 
     @Test

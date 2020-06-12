@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.bsp.common.utils.LetterAddressHelper.formatAddressForLetterPrinting;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
@@ -78,20 +77,20 @@ public class GeneralLetterService {
             data.put("reference", data.get(SOLICITOR_REFERENCE));
             addresseeBuilder
                 .name((String) data.get(SOLICITOR_NAME))
-                .formattedAddress(formatAddressForLetterPrinting((Map) data.get(SOLICITOR_ADDRESS)));
+                .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(SOLICITOR_ADDRESS)));
         } else if ("respondentSolicitor".equalsIgnoreCase(generalLetterAddressTo)) {
             data.put("reference", data.get("rSolicitorReference"));
             addresseeBuilder
                 .name((String) data.get(RESP_SOLICITOR_NAME))
-                .formattedAddress(formatAddressForLetterPrinting((Map) data.get(RESP_SOLICITOR_ADDRESS)));
+                .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(RESP_SOLICITOR_ADDRESS)));
         } else if ("respondent".equalsIgnoreCase(generalLetterAddressTo)) {
             addresseeBuilder
                 .name(StringUtils.joinWith(" ", data.get(APP_RESPONDENT_FIRST_MIDDLE_NAME), data.get(APP_RESPONDENT_LAST_NAME)))
-                .formattedAddress(formatAddressForLetterPrinting((Map) data.get(RESPONDENT_ADDRESS)));
+                .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(RESPONDENT_ADDRESS)));
         } else if ("other".equalsIgnoreCase(generalLetterAddressTo)) {
             addresseeBuilder
                 .name((String) data.get("generalLetterRecipient"))
-                .formattedAddress(formatAddressForLetterPrinting((Map) data.get("generalLetterRecipientAddress")));
+                .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get("generalLetterRecipientAddress")));
         }
         data.put(ADDRESSEE, addresseeBuilder.build());
     }
