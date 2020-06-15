@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bsp.common.error.InvalidDataException;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class BulkScanService {
 
     private final FinRemBulkScanFormValidatorFactory finRemBulkScanFormValidatorFactory;
@@ -34,6 +36,8 @@ public class BulkScanService {
 
     public Map<String, Object> transformBulkScanForm(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException, InvalidDataException {
         validateForTransformation(exceptionRecord);
+
+        log.info("Exception Record OCR Data fields: {}", exceptionRecord.getOcrDataFields());
 
         BulkScanFormTransformer bulkScanFormTransformer = finRemBulkScanFormTransformerFactory.getTransformer(exceptionRecord.getFormType());
         return bulkScanFormTransformer.transformIntoCaseData(exceptionRecord);
