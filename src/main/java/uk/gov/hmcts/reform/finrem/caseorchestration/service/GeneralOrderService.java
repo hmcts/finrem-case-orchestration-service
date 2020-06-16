@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,9 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderData;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -32,7 +28,7 @@ public class GeneralOrderService {
     private final ObjectMapper objectMapper;
 
     private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
-    private Function<CaseDocument, GeneralOrderData> createGeneralOrderData = this::applyGeneralOrderData;
+    private Function<CaseDocument, GeneralOrder> createGeneralOrderData = this::applyGeneralOrderData;
     private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
 
     public Map<String, Object> createGeneralOrder(String authorisationToken, CaseDetails caseDetails) {
@@ -50,14 +46,14 @@ public class GeneralOrderService {
             documentConfiguration.getGeneralOrderFileName());
     }
 
-    private GeneralOrderData applyGeneralOrderData(CaseDocument caseDocument) {
+    private GeneralOrder applyGeneralOrderData(CaseDocument caseDocument) {
         GeneralOrder generalOrder = new GeneralOrder();
         generalOrder.setGeneralOrder(caseDocument);
 
-        GeneralOrderData generalOrderData = new GeneralOrderData();
-        generalOrderData.setGeneralOrder(generalOrder);
+        //GeneralOrderData generalOrderData = new GeneralOrderData();
+        //generalOrderData.setGeneralOrder(generalOrder);
 
-        return generalOrderData;
+        return generalOrder;
     }
 
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
@@ -67,16 +63,8 @@ public class GeneralOrderService {
         return caseDetails;
     }
 
-    private Map<String, Object> populateGeneralOrderData(GeneralOrderData generalOrderData, CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-
-        caseData.put(GENERAL_ORDER, generalOrderData);
-
-        return ImmutableMap.of(GENERAL_ORDER, caseData);
-    }
-
-    private List<GeneralOrderData> convertToUploadOrderList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<GeneralOrderData>>() {
-        });
+    private Map<String, Object> populateGeneralOrderData(GeneralOrder generalOrderData, CaseDetails caseDetails) {
+        caseDetails.getData().put(GENERAL_ORDER, generalOrderData);
+        return caseDetails.getData();
     }
 }
