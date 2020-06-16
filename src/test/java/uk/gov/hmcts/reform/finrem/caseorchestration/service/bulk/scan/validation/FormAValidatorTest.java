@@ -257,8 +257,8 @@ public class FormAValidatorTest {
                 AUTHORISATION_DATE + " must be a valid date",
                 DATE_OF_BIRTH_CHILD_1 + " must be a valid date",
                 DATE_OF_BIRTH_CHILD_2 + " must be a valid date",
-                GENDER_CHILD_1 + " must be \"male\", \"female\" or \"notGiven\"",
-                GENDER_CHILD_2 + " must be \"male\", \"female\" or \"notGiven\""
+                GENDER_CHILD_1 + " must be \"Male\", \"Female\" or left blank",
+                GENDER_CHILD_2 + " must be \"Male\", \"Female\" or left blank"
         ));
     }
 
