@@ -53,6 +53,7 @@ public class CCDConfigConstant {
     public static final String PENSION_DOCS_COLLECTION = "pensionCollection";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
+    public static final String GENERAL_ORDER = "generalOrder";
     public static final String GENERAL_LETTER_TEXT = "generalLetterBody";
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
