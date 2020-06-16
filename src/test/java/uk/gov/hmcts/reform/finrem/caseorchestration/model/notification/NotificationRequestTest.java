@@ -11,13 +11,14 @@ public class NotificationRequestTest {
     @Test
     public void shouldReturnNotificationRequestData() {
         underTest = new NotificationRequest("12345", "67890",
-                "Padmaja", "test@test.com", "nottingham", "consented");
+                "Padmaja", "test@test.com", "nottingham", "consented", "general body");
         assertEquals("12345", underTest.getCaseReferenceNumber());
         assertEquals("67890", underTest.getSolicitorReferenceNumber());
         assertEquals("Padmaja", underTest.getName());
         assertEquals("test@test.com", underTest.getNotificationEmail());
         assertEquals("nottingham", underTest.getSelectedCourt());
         assertEquals("consented", underTest.getCaseType());
+        assertEquals("general body", underTest.getGeneralEmailBody());
     }
 
     @Test
@@ -28,6 +29,7 @@ public class NotificationRequestTest {
         assertNull(underTest.getName());
         assertNull(underTest.getNotificationEmail());
         assertNull(underTest.getCaseType());
+        assertNull(underTest.getGeneralEmailBody());
     }
 
     @Test
@@ -39,11 +41,13 @@ public class NotificationRequestTest {
         underTest.setCaseReferenceNumber("54321");
         underTest.setSelectedCourt("nottingham");
         underTest.setCaseType("consented");
+        underTest.setGeneralEmailBody("general body");
         assertEquals("54321", underTest.getCaseReferenceNumber());
         assertEquals("67891", underTest.getSolicitorReferenceNumber());
         assertEquals("Prashanth", underTest.getName());
         assertEquals("test1@test1.com", underTest.getNotificationEmail());
         assertEquals("nottingham", underTest.getSelectedCourt());
         assertEquals("consented", underTest.getCaseType());
+        assertEquals("general body", underTest.getGeneralEmailBody());
     }
 }
