@@ -50,9 +50,6 @@ public class GeneralOrderService {
         GeneralOrder generalOrder = new GeneralOrder();
         generalOrder.setGeneralOrder(caseDocument);
 
-        //GeneralOrderData generalOrderData = new GeneralOrderData();
-        //generalOrderData.setGeneralOrder(generalOrder);
-
         return generalOrder;
     }
 
