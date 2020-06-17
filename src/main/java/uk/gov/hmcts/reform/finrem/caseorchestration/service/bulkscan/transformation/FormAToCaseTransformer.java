@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
 import com.google.common.collect.ImmutableMap;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.InputScannedDoc;
@@ -64,6 +65,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.help
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.orderForChildrenToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.provisionMadeForToCcdFieldNames;
 
+@Slf4j
 @Component
 public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
@@ -218,6 +220,10 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         }
 
         ContactDetailsMapper.setupContactDetailsForApplicantAndRespondent(modifiedCaseData);
+
+        // TODO: Remove once triaged NPE in BSP SIT as it will log PII once in Production
+        log.info("Transformed case data is: ");
+        modifiedCaseData.forEach((key, value) -> log.info(key + " : " + value));
 
         return modifiedCaseData;
     }
