@@ -4,8 +4,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,15 +23,16 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_TEXT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_ADDRESS_TO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_BODY;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
+@RequiredArgsConstructor
 @Slf4j
 public class GeneralLetterStartController implements BaseController {
 
-    @Autowired
-    private IdamService service;
+    private final IdamService idamService;
 
     @PostMapping(path = "/general-letter-start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Clears previous entered field values. Serves as a callback from CCD")
@@ -50,11 +51,11 @@ public class GeneralLetterStartController implements BaseController {
         validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.put("generalLetterAddressTo", null);
+        caseData.put(GENERAL_LETTER_ADDRESS_TO, null);
         caseData.put("generalLetterRecipient", null);
         caseData.put("generalLetterRecipientAddress", null);
-        caseData.put("generalLetterCreatedBy", service.getIdamFullName(authorisationToken));
-        caseData.put(GENERAL_LETTER_TEXT, null);
+        caseData.put("generalLetterCreatedBy", idamService.getIdamFullName(authorisationToken));
+        caseData.put(GENERAL_LETTER_BODY, null);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

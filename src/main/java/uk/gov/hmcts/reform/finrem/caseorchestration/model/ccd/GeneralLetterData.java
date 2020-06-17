@@ -2,10 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data
+@Builder
+@Getter
 public class GeneralLetterData {
     @JsonProperty("id")
     private String id;

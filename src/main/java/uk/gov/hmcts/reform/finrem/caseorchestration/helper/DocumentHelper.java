@@ -61,6 +61,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 public class DocumentHelper {
 
     public static final String DOCUMENT_BINARY_URL = "document_binary_url";
+    public static final String ADDRESSEE = "addressee";
+    public static final String CTSC_CONTACT_DETAILS = "ctscContactDetails";
+    public static final String CASE_NUMBER = "caseNumber";
 
     private final ObjectMapper objectMapper;
 
@@ -149,13 +152,13 @@ public class DocumentHelper {
                 .formattedAddress(formatAddressForLetterPrinting(addressToSendTo))
                 .build();
 
-            caseData.put("caseNumber", ccdNumber);
+            caseData.put(CASE_NUMBER, ccdNumber);
             caseData.put("reference", reference);
-            caseData.put("addressee",  addressee);
+            caseData.put(ADDRESSEE,  addressee);
             caseData.put("letterDate", String.valueOf(LocalDate.now()));
             caseData.put("applicantName", applicantName);
             caseData.put("respondentName", respondentName);
-            caseData.put("ctscContactDetails", buildCtscContactDetails());
+            caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
         } else {
             log.info("Failed to prepare template data as not all required address details were present");
             throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
@@ -164,7 +167,7 @@ public class DocumentHelper {
         return caseDetailsCopy;
     }
 
-    private static CtscContactDetails buildCtscContactDetails() {
+    public static CtscContactDetails buildCtscContactDetails() {
         return CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
             .careOf(CTSC_CARE_OF)

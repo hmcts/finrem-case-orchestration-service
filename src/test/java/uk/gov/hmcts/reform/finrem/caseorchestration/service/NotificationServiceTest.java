@@ -579,7 +579,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("solicitorEmail", "test@test.com");
         caseData.put("solicitorName", "solicitorName");
-        caseData.put("solicitorReference", "56789");
+        caseData.put(SOLICITOR_REFERENCE, "56789");
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                 .caseTypeId("FinancialRemedyMVP2")
