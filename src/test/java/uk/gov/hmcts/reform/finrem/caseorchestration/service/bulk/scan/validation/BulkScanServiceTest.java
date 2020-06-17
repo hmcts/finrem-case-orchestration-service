@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransfo
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FinRemBulkScanFormTransformerFactory;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FinRemBulkScanFormValidatorFactory;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FormAValidator;
 
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,9 @@ public class BulkScanServiceTest {
 
     @Mock
     private BulkScanFormValidator bulkScanFormValidator;
+
+    @Mock
+    private FormAValidator formAValidator;
 
     @Mock
     private FinRemBulkScanFormValidatorFactory finRemBulkScanFormValidatorFactory;
@@ -90,6 +94,7 @@ public class BulkScanServiceTest {
         OcrValidationResult resultFromValidator = OcrValidationResult.builder().build();
         when(finRemBulkScanFormValidatorFactory.getValidator(TEST_FORM_TYPE)).thenReturn(bulkScanFormValidator);
         when(bulkScanFormValidator.validateBulkScanForm(any())).thenReturn(resultFromValidator);
+        when(formAValidator.validateFormAScannedDocuments(any())).thenReturn(resultFromValidator);
         when(finRemBulkScanFormTransformerFactory.getTransformer(TEST_FORM_TYPE)).thenReturn(bulkScanFormTransformer);
         when(bulkScanFormTransformer.transformIntoCaseData(exceptionRecord)).thenReturn(singletonMap(TEST_KEY, TEST_VALUE));
 

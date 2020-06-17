@@ -53,6 +53,8 @@ public class CCDConfigConstant {
     public static final String PENSION_DOCS_COLLECTION = "pensionCollection";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
+    public static final String GENERAL_LETTER_BODY = "generalLetterBody";
+    public static final String GENERAL_LETTER_TEXT = "generalLetterBody";
     public static final String GENERAL_ORDER = "generalOrder";
     public static final String GENERAL_ORDER_CREATED_BY = "generalOrderCreatedBy";
     public static final String GENERAL_ORDER_BODY_TEXT = "generalOrderBodyText";
@@ -63,7 +65,6 @@ public class CCDConfigConstant {
     public static final String GENERAL_ORDER_COLLECTION_CONTESTED_DOCUMENT = "additionalDocument";
     public static final String GENERAL_ORDER_COLLECTION_CONSENTED = "generalOrderCollection";
     public static final String GENERAL_ORDER_COLLECTION_CONSENTED_DOCUMENT = "generalOrder_documentUpload";
-    public static final String GENERAL_LETTER_TEXT = "generalLetterBody";
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
@@ -73,9 +74,17 @@ public class CCDConfigConstant {
     public static final String AMENDED_CONSENT_ORDER_COLLECTION = "amendedConsentOrderCollection";
     public static final String ORDER_REFUSAL_COLLECTION = "orderRefusalCollection";
     public static final String ORDER_REFUSAL_PREVIEW_COLLECTION = "orderRefusalPreviewDocument";
+    public static final String GENERAL_LETTER_ADDRESS_TO = "generalLetterAddressTo";
 
     public static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
     public static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
+
+    //general email
+    public static final String GENERAL_EMAIL_COLLECTION = "generalEmailCollection";
+    public static final String GENERAL_EMAIL_RECIPIENT = "generalEmailRecipient";
+    public static final String GENERAL_EMAIL_CREATED_BY = "generalEmailCreatedBy";
+    public static final String GENERAL_EMAIL_BODY = "generalEmailBody";
+
 
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
@@ -103,7 +112,6 @@ public class CCDConfigConstant {
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
 
     // Bulk Printing
-    public static final String BULK_PRINT_COVER_SHEET = "bulkPrintCoverSheet";
     public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
     public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
     public static final String BULK_PRINT_LETTER_ID = "bulkPrintLetterId";

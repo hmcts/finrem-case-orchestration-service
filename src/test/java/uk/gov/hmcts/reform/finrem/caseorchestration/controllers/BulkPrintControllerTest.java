@@ -124,7 +124,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 .andDo(print())
                 .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes").exists())
                 .andExpect(jsonPath("$.data.bulkPrintLetterIdRes", is(randomId.toString())));
-        verify(bulkPrintService, times(0)).printApplicantConsentOrderApprovedDocuments(any(), any());
+        verify(bulkPrintService, times(1)).printApplicantConsentOrderApprovedDocuments(any(), any());
         verify(bulkPrintService).sendOrderForBulkPrintRespondent(any(), any());
         verify(coverSheetService).generateRespondentCoverSheet(any(), any());
     }
@@ -161,5 +161,34 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 .andExpect(status().isInternalServerError());
         verify(coverSheetService).generateRespondentCoverSheet(any(), any());
         verify(bulkPrintService).sendOrderForBulkPrintRespondent(any(), any());
+    }
+
+    @Test
+    public void givenOrderNotApprovedFirstAndThenOrderIsApproved_WhenBulkPrinting_ThenConsentOrderApprovedDocumentsArePrinted() throws Exception {
+        final UUID randomId = UUID.randomUUID();
+        requestContent =
+            objectMapper.readTree(
+                new File(getClass()
+                    .getResource(CONSENTED_BULK_PRINT_CONSENT_ORDER_APPROVED_JSON)
+                    .toURI()));
+
+        when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenReturn(new CaseDocument());
+        when(coverSheetService.generateApplicantCoverSheet(any(), any())).thenReturn(new CaseDocument());
+        when(bulkPrintService.printApplicantConsentOrderApprovedDocuments(any(), any())).thenReturn(randomId);
+        when(bulkPrintService.sendOrderForBulkPrintRespondent(any(), any())).thenReturn(randomId);
+
+        mvc.perform(
+            post(BULK_PRINT_URI)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes").exists())
+            .andExpect(jsonPath("$.data.bulkPrintLetterIdRes", is(randomId.toString())))
+            .andExpect(jsonPath("$.data.bulkPrintLetterIdApp", is(randomId.toString())));
+        verify(bulkPrintService, times(0)).printApplicantConsentOrderNotApprovedDocuments(any(), any());
+        verify(bulkPrintService, times(1)).printApplicantConsentOrderApprovedDocuments(any(), any());
+        verify(bulkPrintService, times(1)).sendOrderForBulkPrintRespondent(any(), any());
     }
 }

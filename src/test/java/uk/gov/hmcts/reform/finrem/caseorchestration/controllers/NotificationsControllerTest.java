@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -49,6 +50,7 @@ public class NotificationsControllerTest {
     private static final String CONTESTED_APPLICATION_ISSUED_CALLBACK_URL = "/case-orchestration/notify/contest-application-issued";
     private static final String CONTEST_ORDER_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contest-order-approved";
     private static final String CONTESTED_DRAFT_ORDER_URL = "/case-orchestration/notify/draft-order";
+    private static final String GENERAL_EMAIL_URL = "/case-orchestration/notify/general-email";
 
     //JSON Data
     private static final String CCD_REQUEST_JSON = "/fixtures/model/ccd-request.json";
@@ -57,6 +59,8 @@ public class NotificationsControllerTest {
     private static final String DRAFT_ORDER_SUCCESSFUL_APPLICANT_SOL = "/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json";
     private static final String DRAFT_ORDER_UNSUCCESSFUL_APPLICANT_SOL = "/fixtures/applicant-solicitor-to-draft-order-without-email-consent.json";
     private static final String DRAFT_ORDER_UNSUCCESSFUL_RESPONDENT_SOL = "/fixtures/respondent-solicitor-to-draft-order-with-email-consent.json";
+    private static final String GENERAL_EMAIL_CONSENTED = "/fixtures/general-email-consented.json";
+    private static final String GENERAL_EMAIL_CONTESTED = "/fixtures/contested/general-email-contested.json";
 
     @Autowired
     private WebApplicationContext applicationContext;
@@ -72,6 +76,9 @@ public class NotificationsControllerTest {
 
     @MockBean
     private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
+
+    @MockBean
+    private GeneralEmailService generalEmailService;
 
     @MockBean
     private HelpWithFeesDocumentService helpWithFeesDocumentService;
@@ -434,6 +441,40 @@ public class NotificationsControllerTest {
                 .andExpect(status().isOk());
 
         verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void sendGeneralEmailConsented() throws Exception {
+        buildCcdRequest(GENERAL_EMAIL_CONSENTED);
+        when(generalEmailService.storeGeneralEmail(any(CaseDetails.class)))
+            .thenReturn(CaseDetails.builder().build());
+        mockMvc.perform(post(GENERAL_EMAIL_URL)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+            .sendConsentGeneralEmail(any(CallbackRequest.class));
+
+        verify(generalEmailService, times(1))
+            .storeGeneralEmail(any(CaseDetails.class));
+    }
+
+    @Test
+    public void sendGeneralEmailContested() throws Exception {
+        buildCcdRequest(GENERAL_EMAIL_CONTESTED);
+        when(generalEmailService.storeGeneralEmail(any(CaseDetails.class)))
+            .thenReturn(CaseDetails.builder().build());
+        mockMvc.perform(post(GENERAL_EMAIL_URL)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+            .sendContestedGeneralEmail(any(CallbackRequest.class));
+
+        verify(generalEmailService, times(1))
+            .storeGeneralEmail(any(CaseDetails.class));
     }
 
     private void buildCcdRequest(String fileName) throws IOException, URISyntaxException {
