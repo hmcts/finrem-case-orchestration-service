@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -27,6 +29,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -107,12 +110,12 @@ public class TestSetUpUtils {
     }
 
     private static GeneralLetterData generalLetterData() {
-        GeneralLetter generalLetter = new GeneralLetter();
-        generalLetter.setGeneratedLetter(caseDocument());
+        GeneralLetter generalLetter = new GeneralLetter(caseDocument());
 
-        GeneralLetterData generalLetterData = new GeneralLetterData();
-        generalLetterData.setId(UUID.randomUUID().toString());
-        generalLetterData.setGeneralLetter(generalLetter);
+        GeneralLetterData generalLetterData = GeneralLetterData.builder()
+            .id(UUID.randomUUID().toString())
+            .generalLetter(generalLetter)
+            .build();
 
         return generalLetterData;
     }

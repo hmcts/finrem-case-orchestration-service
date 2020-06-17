@@ -59,10 +59,7 @@ public class GeneralOrderService {
     }
 
     private GeneralOrder applyGeneralOrderData(CaseDocument caseDocument) {
-        GeneralOrder generalOrder = new GeneralOrder();
-        generalOrder.setGeneralOrder(caseDocument);
-
-        return generalOrder;
+        return new GeneralOrder(caseDocument);
     }
 
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
@@ -89,12 +86,9 @@ public class GeneralOrderService {
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        GeneralOrderConsented generalOrder = new GeneralOrderConsented();
-        generalOrder.setGeneralOrder(documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER)));
+        GeneralOrderConsented generalOrder = new GeneralOrderConsented(documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER)));
 
-        GeneralOrderConsentedData consentedData = new GeneralOrderConsentedData();
-        consentedData.setId(UUID.randomUUID().toString());
-        consentedData.setGeneralOrder(generalOrder);
+        GeneralOrderConsentedData consentedData = new GeneralOrderConsentedData(UUID.randomUUID().toString(), generalOrder);
 
         List<GeneralOrderConsentedData> generalOrderList = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONSENTED))
             .map(this::convertToGeneralOrderConsentedList)
@@ -109,12 +103,9 @@ public class GeneralOrderService {
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        GeneralOrderContested generalOrder = new GeneralOrderContested();
-        generalOrder.setGeneralOrder(documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER)));
+        GeneralOrderContested generalOrder = new GeneralOrderContested(documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER)));
 
-        GeneralOrderContestedData contestedData = new GeneralOrderContestedData();
-        contestedData.setId(UUID.randomUUID().toString());
-        contestedData.setGeneralOrder(generalOrder);
+        GeneralOrderContestedData contestedData = new GeneralOrderContestedData(UUID.randomUUID().toString(), generalOrder);
 
         List<GeneralOrderContestedData> generalOrderList = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONTESTED))
             .map(this::convertToGeneralOrderContestedList)
