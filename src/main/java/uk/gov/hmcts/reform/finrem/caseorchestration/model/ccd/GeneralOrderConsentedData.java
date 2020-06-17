@@ -6,9 +6,9 @@ import lombok.Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
-public class GeneralOrderData {
+public class GeneralOrderConsentedData {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")
-    private GeneralOrder generalOrder;
+    private GeneralOrderConsented generalOrder;
 }

@@ -47,10 +47,31 @@ public class GeneralOrderController implements BaseController {
 
         validateCaseData(callback);
 
-        Map<String, Object> generalLetters = service.createGeneralOrder(authorisationToken, caseDetails);
+        Map<String, Object> generalOrder = service.createGeneralOrder(authorisationToken, caseDetails);
 
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.putAll(generalLetters);
+        caseData.putAll(generalOrder);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+
+    @PostMapping(path = "/submit-general-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Saves created general order to case documents. Serves as a callback from CCD")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> submitGeneralOrder(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+
+        CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("Received request for storing general order with Case ID: {}", caseDetails.getId());
+        validateCaseData(callback);
+
+        Map<String, Object> caseData = service.populateGeneralOrderCollection(caseDetails);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

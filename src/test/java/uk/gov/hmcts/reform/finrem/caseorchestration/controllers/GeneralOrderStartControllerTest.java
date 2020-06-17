@@ -83,6 +83,6 @@ public class GeneralOrderStartControllerTest extends BaseControllerTest {
     private void generalOrderStartControllerSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/general-order.json").toURI()));
+            .getResource("/fixtures/general-order-consented.json").toURI()));
     }
 }

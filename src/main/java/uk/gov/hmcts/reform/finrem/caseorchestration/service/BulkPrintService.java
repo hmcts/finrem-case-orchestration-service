@@ -64,7 +64,7 @@ public class BulkPrintService {
 
         Map<String, Object> caseData = caseDetails.getData();
         List<BulkPrintDocument> orderDocuments = isOrderNotApprovedDocumentCollectionPresent(caseData)
-            ? asList(consentOrderNotApprovedDocumentService.generalOrder(caseData))
+            ? asList(consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseData))
             : approvedOrderCollection(caseData);
 
         bulkPrintDocuments.addAll(orderDocuments);
