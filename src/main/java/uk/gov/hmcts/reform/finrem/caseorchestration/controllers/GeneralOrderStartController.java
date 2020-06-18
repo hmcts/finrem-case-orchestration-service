@@ -49,7 +49,7 @@ public class GeneralOrderStartController implements BaseController {
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to clear general letter fields for Case ID: {}", caseDetails.getId());
+        log.info("Received request to clear general order fields for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callback);
 
