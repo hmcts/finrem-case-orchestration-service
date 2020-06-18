@@ -54,12 +54,12 @@ public class GeneralOrderControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(
-                jsonPath("$.data.generalOrder.document_url", is(DOC_URL)))
+                jsonPath("$.data.generalOrderPreviewDocument.document_url", is(DOC_URL)))
             .andExpect(
-                jsonPath("$.data.generalOrder.document_filename",
+                jsonPath("$.data.generalOrderPreviewDocument.document_filename",
                     is(FILE_NAME)))
             .andExpect(
-                jsonPath("$.data.generalOrder.document_binary_url",
+                jsonPath("$.data.generalOrderPreviewDocument.document_binary_url",
                     is(BINARY_URL)));
 
     }
