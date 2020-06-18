@@ -70,7 +70,8 @@ public class GeneralOrderService {
     }
 
     private Map<String, Object> populateGeneralOrderData(GeneralOrderPreviewDocument generalOrderData, CaseDetails caseDetails) {
-        log.info("Populating case {} field {} with {}", caseDetails.getId(), GENERAL_ORDER_PREVIEW_DOCUMENT, generalOrderData.getGeneralOrder().getDocumentFilename());
+        log.info("Populating case {} field {} with {}",
+            caseDetails.getId(), GENERAL_ORDER_PREVIEW_DOCUMENT, generalOrderData.getGeneralOrder().getDocumentFilename());
         caseDetails.getData().put(GENERAL_ORDER_PREVIEW_DOCUMENT, generalOrderData);
         return caseDetails.getData();
     }
