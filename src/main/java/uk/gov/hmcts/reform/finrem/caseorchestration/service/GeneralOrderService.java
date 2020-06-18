@@ -9,11 +9,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsented;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class GeneralOrderService {
     private final ObjectMapper objectMapper;
 
     private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
-    private Function<CaseDocument, GeneralOrder> createGeneralOrderData = this::applyGeneralOrderData;
+    private Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
     private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
 
     public Map<String, Object> createGeneralOrder(String authorisationToken, CaseDetails caseDetails) {
@@ -58,8 +58,8 @@ public class GeneralOrderService {
             documentConfiguration.getGeneralOrderFileName());
     }
 
-    private GeneralOrder applyGeneralOrderData(CaseDocument caseDocument) {
-        return new GeneralOrder(caseDocument);
+    private GeneralOrderPreviewDocument applyGeneralOrderData(CaseDocument caseDocument) {
+        return new GeneralOrderPreviewDocument(caseDocument);
     }
 
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
@@ -69,7 +69,7 @@ public class GeneralOrderService {
         return caseDetails;
     }
 
-    private Map<String, Object> populateGeneralOrderData(GeneralOrder generalOrderData, CaseDetails caseDetails) {
+    private Map<String, Object> populateGeneralOrderData(GeneralOrderPreviewDocument generalOrderData, CaseDetails caseDetails) {
         caseDetails.getData().put(GENERAL_ORDER_PREVIEW_DOCUMENT, generalOrderData);
         return caseDetails.getData();
     }

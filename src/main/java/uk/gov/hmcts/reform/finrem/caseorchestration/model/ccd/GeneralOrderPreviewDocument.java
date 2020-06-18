@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GeneralOrder {
-    @JsonProperty("generalOrder")
+public class GeneralOrderPreviewDocument {
+    @JsonProperty("generalOrderPreviewDocument")
     private CaseDocument generalOrder;
 }
