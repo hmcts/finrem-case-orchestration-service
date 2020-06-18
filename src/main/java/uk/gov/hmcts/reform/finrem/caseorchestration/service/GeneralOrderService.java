@@ -24,9 +24,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 
 @Service
@@ -70,7 +70,7 @@ public class GeneralOrderService {
     }
 
     private Map<String, Object> populateGeneralOrderData(GeneralOrder generalOrderData, CaseDetails caseDetails) {
-        caseDetails.getData().put(GENERAL_ORDER, generalOrderData);
+        caseDetails.getData().put(GENERAL_ORDER_PREVIEW_DOCUMENT, generalOrderData);
         return caseDetails.getData();
     }
 
@@ -86,7 +86,8 @@ public class GeneralOrderService {
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        GeneralOrderConsented generalOrder = new GeneralOrderConsented(documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER)));
+        GeneralOrderConsented generalOrder =
+            new GeneralOrderConsented(documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER_PREVIEW_DOCUMENT)));
 
         GeneralOrderConsentedData consentedData = new GeneralOrderConsentedData(UUID.randomUUID().toString(), generalOrder);
 
@@ -103,7 +104,8 @@ public class GeneralOrderService {
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        GeneralOrderContested generalOrder = new GeneralOrderContested(documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER)));
+        GeneralOrderContested generalOrder =
+            new GeneralOrderContested(documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER_PREVIEW_DOCUMENT)));
 
         GeneralOrderContestedData contestedData = new GeneralOrderContestedData(UUID.randomUUID().toString(), generalOrder);
 

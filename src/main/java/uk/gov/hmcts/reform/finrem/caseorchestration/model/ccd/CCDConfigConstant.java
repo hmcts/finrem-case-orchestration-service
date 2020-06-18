@@ -55,7 +55,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_BODY = "generalLetterBody";
     public static final String GENERAL_LETTER_TEXT = "generalLetterBody";
-    public static final String GENERAL_ORDER = "generalOrder";
+    public static final String GENERAL_ORDER_PREVIEW_DOCUMENT = "generalOrderPreviewDocument";
     public static final String GENERAL_ORDER_CREATED_BY = "generalOrderCreatedBy";
     public static final String GENERAL_ORDER_BODY_TEXT = "generalOrderBodyText";
     public static final String GENERAL_ORDER_DOCUMENT = "generalOrderDocument";

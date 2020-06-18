@@ -31,9 +31,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 
 
 public class GeneralOrderServiceTest {
@@ -57,7 +57,7 @@ public class GeneralOrderServiceTest {
     public void generateGeneralOrder() throws Exception {
         Map<String, Object> documentMap = generalOrderService.createGeneralOrder(AUTH_TOKEN, consentedCaseDetails());
 
-        GeneralOrder result = (GeneralOrder) documentMap.get(GENERAL_ORDER);
+        GeneralOrder result = (GeneralOrder) documentMap.get(GENERAL_ORDER_PREVIEW_DOCUMENT);
         doCaseDocumentAssert(result.getGeneralOrder());
         ((GeneralOrderServiceTest.TestDocumentClient) generatorClient).verifyAdditionalFields();
     }
