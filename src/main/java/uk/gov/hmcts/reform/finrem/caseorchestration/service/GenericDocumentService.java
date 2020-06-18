@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GenericDocumentService {
 
     private static final String DOCUMENT_CASE_DETAILS_JSON_KEY = "caseDetails";
@@ -25,7 +27,7 @@ public class GenericDocumentService {
                                           String template, String fileName) {
 
         Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails);
-
+        log.info("About to generated document for {} ", caseDetails.getId());
         Document generatedPdf = documentClient.generatePdf(
             DocumentGenerationRequest.builder()
                 .template(template)
@@ -33,6 +35,9 @@ public class GenericDocumentService {
                 .values(caseDetailsMap)
                 .build(),
             authorisationToken);
+
+
+        log.info("Generated document for {} with file name {}", caseDetails.getId(), generatedPdf.getFileName());
 
         return toCaseDocument(generatedPdf);
     }

@@ -51,7 +51,7 @@ public class GeneralOrderController implements BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.putAll(generalOrder);
-
+        log.info("Generated general order for case {} with case data of {}", caseDetails.getId(), caseData);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
