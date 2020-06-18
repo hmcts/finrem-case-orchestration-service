@@ -54,13 +54,11 @@ public class CCDConfigConstant {
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_BODY = "generalLetterBody";
-    public static final String GENERAL_LETTER_TEXT = "generalLetterBody";
     public static final String GENERAL_ORDER_PREVIEW_DOCUMENT = "generalOrderPreviewDocument";
     public static final String GENERAL_ORDER_CREATED_BY = "generalOrderCreatedBy";
     public static final String GENERAL_ORDER_BODY_TEXT = "generalOrderBodyText";
-    public static final String GENERAL_ORDER_DOCUMENT = "generalOrderDocument";
     public static final String GENERAL_ORDER_DATE = "generalOrderDate";
-    public static final String GENERAL_ORDER_ADDRESS_TO = "generalOrderAddressto";
+    public static final String GENERAL_ORDER_ADDRESS_TO = "generalOrderAddressTo";
     public static final String GENERAL_ORDER_COLLECTION_CONTESTED = "generalOrders";
     public static final String GENERAL_ORDER_COLLECTION_CONTESTED_DOCUMENT = "additionalDocument";
     public static final String GENERAL_ORDER_COLLECTION_CONSENTED = "generalOrderCollection";
