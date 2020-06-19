@@ -16,6 +16,21 @@ public class OrchestrationConstants {
     public static final String CASE_TYPE_ID_CONTESTED = "FinancialRemedyContested";
     public static final String PAPER_APPLICATION = "paperApplication";
 
+    // Bulk Scan & Printing Document SubTypes
+    public static final String FORM_A_DOCUMENT = "FormA";
+    public static final String D81_DOCUMENT = "D81";
+    public static final String P1_DOCUMENT = "P1";
+    public static final String PPF1_DOCUMENT = "PPF1";
+    public static final String P2_DOCUMENT = "P2";
+    public static final String PPF2_DOCUMENT = "PPF2";
+    public static final String PPF_DOCUMENT = "PPF";
+    public static final String FORM_E_DOCUMENT = "FormE";
+    public static final String COVER_LETTER_DOCUMENT = "CoverLetter";
+    public static final String OTHER_SUPPORT_DOCUMENTS = "OtherSupportDocuments";
+    public static final String DRAFT_CONSENT_ORDER_DOCUMENT = "DraftConsentOrder";
+    public static final String DECREE_NISI_DOCUMENT = "DecreeNisi";
+    public static final String DECREE_ABSOLUTE_DOCUMENT = "DecreeAbsolute";
+
     public static final String BINARY_URL_TYPE = "binary";
 
     public static final String YES_VALUE = "Yes";

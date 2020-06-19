@@ -1,7 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
+import uk.gov.hmcts.reform.bsp.common.model.shared.in.InputScannedDoc;
+import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
 import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 
 import java.util.ArrayList;
@@ -10,6 +15,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,6 +28,19 @@ import static uk.gov.hmcts.reform.bsp.common.service.validation.PostcodeValidato
 import static uk.gov.hmcts.reform.bsp.common.service.validation.RegExpValidator.validateField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.getCommaSeparatedValuesFromOcrDataField;
 import static uk.gov.hmcts.reform.bsp.common.utils.BulkScanCommonHelper.validateFormDate;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.COVER_LETTER_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.D81_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DECREE_ABSOLUTE_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DECREE_NISI_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DRAFT_CONSENT_ORDER_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.FORM_A_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.FORM_E_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.OTHER_SUPPORT_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.P1_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.P2_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF1_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF2_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
@@ -50,6 +69,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.natureOfApplicationChecklistToCcdFieldNames;
 
+@Slf4j
 @Component
 public class FormAValidator extends BulkScanFormValidator {
 
@@ -120,7 +140,7 @@ public class FormAValidator extends BulkScanFormValidator {
                 "Litigation Friend",
                 "Applicant's solicitor"
         ));
-        final List<String> genderEnum = asList("male", "female", "notGiven");
+        final List<String> genderEnum = asList("Male", "Female", EMPTY);
         ALLOWED_VALUES_PER_FIELD.put(GENDER_CHILD_1, genderEnum);
         ALLOWED_VALUES_PER_FIELD.put(GENDER_CHILD_2, genderEnum);
     }
@@ -129,6 +149,23 @@ public class FormAValidator extends BulkScanFormValidator {
     protected Map<String, List<String>> getAllowedValuesPerField() {
         return ALLOWED_VALUES_PER_FIELD;
     }
+
+    // List of allowed Document Subtypes that can be attached to a BSP Exception Record
+    private static final List<String> ALLOWED_DOCUMENT_SUBTYPES = asList(
+        D81_DOCUMENT,
+        FORM_A_DOCUMENT,
+        P1_DOCUMENT,
+        PPF1_DOCUMENT,
+        P2_DOCUMENT,
+        PPF2_DOCUMENT,
+        PPF_DOCUMENT,
+        FORM_E_DOCUMENT,
+        COVER_LETTER_DOCUMENT,
+        OTHER_SUPPORT_DOCUMENTS,
+        DRAFT_CONSENT_ORDER_DOCUMENT,
+        DECREE_NISI_DOCUMENT,
+        DECREE_ABSOLUTE_DOCUMENT
+    );
 
     @Override
     protected List<String> runPostProcessingValidation(Map<String, String> fieldsMap) {
@@ -156,6 +193,8 @@ public class FormAValidator extends BulkScanFormValidator {
         validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_1).ifPresent(errorMessages::add);
         validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_2).ifPresent(errorMessages::add);
 
+        log.info("Form A Validation (Post-processing) returned the following errors: {}", errorMessages);
+
         return errorMessages;
     }
 
@@ -180,6 +219,8 @@ public class FormAValidator extends BulkScanFormValidator {
             validationWarningMessages.add(
                     String.format("%s contains a value that is not accepted", commaSeparatedFieldKey)
             );
+            log.info("Form A Validation of non-mandatory comma separated fields: "
+                + "{} contains a value that is not accepted", commaSeparatedFieldKey);
         }
 
         return validationWarningMessages;
@@ -199,5 +240,83 @@ public class FormAValidator extends BulkScanFormValidator {
         return hwfNumber != null && !hwfNumber.matches(HWF_NUMBER_6_DIGITS_REGEX)
                 ? asList("HWFNumber is usually 6 digits")
                 : emptyList();
+    }
+
+    public OcrValidationResult validateFormAScannedDocuments(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException {
+
+        List<InputScannedDoc> scannedDocuments = exceptionRecord.getScannedDocuments();
+        List<InputScannedDoc> inputScannedDocs = Optional.ofNullable(scannedDocuments).orElse(emptyList());
+        OcrValidationResult.Builder documentValidationResultBuilder = OcrValidationResult.builder();
+
+        List<String> validationMessagesForScannedDocuments = produceErrorsForIncorrectNumberOfAttachedDocuments(inputScannedDocs);
+        validationMessagesForScannedDocuments.forEach(documentValidationResultBuilder::addWarning);
+
+        List<String> validationMessagesForDocumentSubTypeNotAccepted = produceErrorsForDocumentSubTypeNotAccepted(inputScannedDocs);
+        validationMessagesForDocumentSubTypeNotAccepted.forEach(documentValidationResultBuilder::addWarning);
+
+        return documentValidationResultBuilder.build();
+    }
+
+    /**
+     * Validates that only one 'Form A' and one 'Draft Consent Order' are attached to the Exception Record.
+     * Validates that there is at least one 'D81' attached to the Exception Record.
+     *
+     * @param inputScannedDocs list of documents attached to Exception Record
+     * @return a list of error messages if incorrect number of docs attached
+     */
+    private List<String> produceErrorsForIncorrectNumberOfAttachedDocuments(List<InputScannedDoc> inputScannedDocs) {
+
+        List<String> attachedDocumentsValidationErrorMessages = new ArrayList<>();
+
+        long numberOfFormADocumentsAttached = inputScannedDocs.stream()
+            .filter(doc -> doc.getSubtype().equals(FORM_A_DOCUMENT))
+            .count();
+
+        long numberOfDraftConsentOrderDocumentsAttached = inputScannedDocs.stream()
+            .filter(doc -> doc.getSubtype().equals(DRAFT_CONSENT_ORDER_DOCUMENT))
+            .count();
+
+        long numberOfD81DocumentsAttached = inputScannedDocs.stream()
+            .filter(doc -> doc.getSubtype().equals(D81_DOCUMENT))
+            .count();
+
+        if (numberOfFormADocumentsAttached != 1) {
+            attachedDocumentsValidationErrorMessages.add("Must be only a single document with subtype of 'FormA'");
+            log.info("Form A Validation of Scanned Documents failed."
+                + " Expected 1 Form A attached, received {}", numberOfFormADocumentsAttached);
+        }
+
+        if (numberOfDraftConsentOrderDocumentsAttached != 1) {
+            attachedDocumentsValidationErrorMessages.add("Must be only a single document with subtype of 'DraftConsentOrder'");
+            log.info("Form A Validation of Scanned Documents failed."
+                + " Expected 1 Draft Consent Order attached, received {}", numberOfDraftConsentOrderDocumentsAttached);
+        }
+
+        if (numberOfD81DocumentsAttached == 0) {
+            attachedDocumentsValidationErrorMessages.add("Must be at least one document with subtype of 'D81'");
+            log.info("Form A Validation of Scanned Documents failed."
+                + " Expected at least 1 D81 attached, received {}", numberOfD81DocumentsAttached);
+        }
+
+        return attachedDocumentsValidationErrorMessages;
+    }
+
+    /**
+     * Validate if a document is received that does not have a sub-type on the expected sub-type list.
+     *
+     * @param inputScannedDocs list of documents attached to Exception Record
+     * @return a list of error messages for docs with incorrect SubTypes
+     */
+    private List<String> produceErrorsForDocumentSubTypeNotAccepted(List<InputScannedDoc> inputScannedDocs) {
+
+        List<String> incomingDocSubTypes =
+            inputScannedDocs.stream()
+                .map(InputScannedDoc::getSubtype)
+                .collect(Collectors.toList());
+
+        return incomingDocSubTypes.stream()
+            .filter(docSubType -> !ALLOWED_DOCUMENT_SUBTYPES.contains(docSubType))
+            .map(docSubType -> String.format("Document sub-type not accepted: \"%s\"", docSubType))
+            .collect(Collectors.toList());
     }
 }

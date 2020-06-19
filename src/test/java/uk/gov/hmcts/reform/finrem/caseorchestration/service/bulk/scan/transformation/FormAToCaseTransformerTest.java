@@ -31,8 +31,21 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BULK_SCAN_CASE_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.COVER_LETTER_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.D81_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DECREE_ABSOLUTE_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DECREE_NISI_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.DRAFT_CONSENT_ORDER_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.FORM_A_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.FORM_E_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.OTHER_SUPPORT_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.P1_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.P2_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF1_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF2_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
@@ -95,13 +108,13 @@ public class FormAToCaseTransformerTest {
             new OcrDataField(OcrFieldName.AUTHORISATION_DATE, "12/03/2020"),
             new OcrDataField(OcrFieldName.AUTHORISATION_SOLICITOR_POSITION, "I'm the CEO"),
             new OcrDataField(OcrFieldName.NAME_CHILD_1, "Johny Bravo"),
-            new OcrDataField(OcrFieldName.GENDER_CHILD_1, "male"),
+            new OcrDataField(OcrFieldName.GENDER_CHILD_1, "Male"),
             new OcrDataField(OcrFieldName.DATE_OF_BIRTH_CHILD_1, "12/03/2000"),
             new OcrDataField(OcrFieldName.RELATIONSHIP_TO_APPLICANT_CHILD_1, "son"),
             new OcrDataField(OcrFieldName.RELATIONSHIP_TO_RESPONDENT_CHILD_1, "SON"),
             new OcrDataField(OcrFieldName.COUNTRY_CHILD_1, "New Zeeland"),
             new OcrDataField(OcrFieldName.NAME_CHILD_2, "Anne Shirley"),
-            new OcrDataField(OcrFieldName.GENDER_CHILD_2, "female"),
+            new OcrDataField(OcrFieldName.GENDER_CHILD_2, "Female"),
             new OcrDataField(OcrFieldName.DATE_OF_BIRTH_CHILD_2, "12/03/1895"),
             new OcrDataField(OcrFieldName.RELATIONSHIP_TO_APPLICANT_CHILD_2, "daughter"),
             new OcrDataField(OcrFieldName.RELATIONSHIP_TO_RESPONDENT_CHILD_2, "Daughter"),
@@ -397,20 +410,20 @@ public class FormAToCaseTransformerTest {
     @Test
     public void shouldTransformScannedDocuments() {
         List<InputScannedDoc> scannedDocuments = new ArrayList<>();
-        scannedDocuments.add(InputScannedDoc.builder().subtype("D81").document(new InputScannedDocUrl("http://url/d81-1", "http://binUrl/d81-1/binary", "d81-1.pdf")).build());
-        scannedDocuments.add(InputScannedDoc.builder().subtype("D81").document(new InputScannedDocUrl("http://url/d81-2", "http://binUrl/d81-2/binary", "d81-2.pdf")).build());
-        scannedDocuments.add(createDoc("FormA"));
-        scannedDocuments.add(createDoc("P1"));
-        scannedDocuments.add(createDoc("PPF1"));
-        scannedDocuments.add(createDoc("P2"));
-        scannedDocuments.add(createDoc("PPF2"));
-        scannedDocuments.add(createDoc("PPF"));
-        scannedDocuments.add(createDoc("FormE"));
-        scannedDocuments.add(createDoc("CoverLetter"));
-        scannedDocuments.add(createDoc("OtherSupportDocuments"));
-        scannedDocuments.add(createDoc("DraftConsentOrder"));
-        scannedDocuments.add(createDoc("DecreeNisi"));
-        scannedDocuments.add(createDoc("DecreeAbsolute"));
+        scannedDocuments.add(InputScannedDoc.builder().subtype(D81_DOCUMENT).document(new InputScannedDocUrl("http://url/d81-1", "http://binUrl/d81-1/binary", "d81-1.pdf")).build());
+        scannedDocuments.add(InputScannedDoc.builder().subtype(D81_DOCUMENT).document(new InputScannedDocUrl("http://url/d81-2", "http://binUrl/d81-2/binary", "d81-2.pdf")).build());
+        scannedDocuments.add(createDoc(FORM_A_DOCUMENT));
+        scannedDocuments.add(createDoc(P1_DOCUMENT));
+        scannedDocuments.add(createDoc(PPF1_DOCUMENT));
+        scannedDocuments.add(createDoc(P2_DOCUMENT));
+        scannedDocuments.add(createDoc(PPF2_DOCUMENT));
+        scannedDocuments.add(createDoc(PPF_DOCUMENT));
+        scannedDocuments.add(createDoc(FORM_E_DOCUMENT));
+        scannedDocuments.add(createDoc(COVER_LETTER_DOCUMENT));
+        scannedDocuments.add(createDoc(OTHER_SUPPORT_DOCUMENTS));
+        scannedDocuments.add(createDoc(DRAFT_CONSENT_ORDER_DOCUMENT));
+        scannedDocuments.add(createDoc(DECREE_NISI_DOCUMENT));
+        scannedDocuments.add(createDoc(DECREE_ABSOLUTE_DOCUMENT));
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
             .id(TEST_CASE_ID)
             .scannedDocuments(scannedDocuments)
@@ -420,7 +433,7 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> transformedCaseData = formAToCaseTransformer.transformIntoCaseData(exceptionRecord);
 
         assertThat(transformedCaseData, hasKey("formA"));
-        assertDocumentsMatchExpectations((CaseDocument) transformedCaseData.get("formA"), "FormA");
+        assertDocumentsMatchExpectations((CaseDocument) transformedCaseData.get("formA"), FORM_A_DOCUMENT);
 
         assertThat(transformedCaseData, hasKey("scannedD81s"));
         ComplexTypeCollection<CaseDocument> d81Documents =
@@ -441,19 +454,19 @@ public class FormAToCaseTransformerTest {
         assertThat(pensionDocuments, hasSize(5));
         TypedCaseDocument typedCaseDocument = pensionDocuments.getItem(0);
         assertThat(typedCaseDocument.getTypeOfDocument(), is("Form P1"));
-        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), "P1");
+        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), P1_DOCUMENT);
         typedCaseDocument = pensionDocuments.getItem(1);
         assertThat(typedCaseDocument.getTypeOfDocument(), is("Form PPF1"));
-        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), "PPF1");
+        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), PPF1_DOCUMENT);
         typedCaseDocument = pensionDocuments.getItem(2);
         assertThat(typedCaseDocument.getTypeOfDocument(), is("Form P2"));
-        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), "P2");
+        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), P2_DOCUMENT);
         typedCaseDocument = pensionDocuments.getItem(3);
         assertThat(typedCaseDocument.getTypeOfDocument(), is("Form PPF2"));
-        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), "PPF2");
+        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), PPF2_DOCUMENT);
         typedCaseDocument = pensionDocuments.getItem(4);
         assertThat(typedCaseDocument.getTypeOfDocument(), is("Form PPF"));
-        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), "PPF");
+        assertDocumentsMatchExpectations(typedCaseDocument.getPensionDocument(), PPF_DOCUMENT);
 
         assertThat(transformedCaseData, hasKey("otherCollection"));
         ComplexTypeCollection<TypedCaseDocument> otherCollection =
@@ -461,25 +474,25 @@ public class FormAToCaseTransformerTest {
         assertThat(otherCollection, hasSize(3));
         TypedCaseDocument otherTypedDocument = otherCollection.getItem(0);
         assertThat(otherTypedDocument.getTypeOfDocument(), is("Other"));
-        assertDocumentsMatchExpectations(otherTypedDocument.getPensionDocument(), "FormE");
+        assertDocumentsMatchExpectations(otherTypedDocument.getPensionDocument(), FORM_E_DOCUMENT);
         otherTypedDocument = otherCollection.getItem(1);
         assertThat(otherTypedDocument.getTypeOfDocument(), is("Letter"));
-        assertDocumentsMatchExpectations(otherTypedDocument.getPensionDocument(), "CoverLetter");
+        assertDocumentsMatchExpectations(otherTypedDocument.getPensionDocument(), COVER_LETTER_DOCUMENT);
         otherTypedDocument = otherCollection.getItem(2);
         assertThat(otherTypedDocument.getTypeOfDocument(), is("Other"));
-        assertDocumentsMatchExpectations(otherTypedDocument.getPensionDocument(), "OtherSupportDocuments");
+        assertDocumentsMatchExpectations(otherTypedDocument.getPensionDocument(), OTHER_SUPPORT_DOCUMENTS);
 
         assertThat(transformedCaseData, hasKey("consentOrder"));
         assertThat(transformedCaseData, hasKey("latestConsentOrder"));
         CaseDocument draftConsentOrder = (CaseDocument) transformedCaseData.get("consentOrder");
         assertThat(draftConsentOrder, equalTo(transformedCaseData.get("latestConsentOrder")));
-        assertDocumentsMatchExpectations(draftConsentOrder, "DraftConsentOrder");
+        assertDocumentsMatchExpectations(draftConsentOrder, DRAFT_CONSENT_ORDER_DOCUMENT);
 
         assertThat(transformedCaseData, hasKey("divorceUploadEvidence1"));
-        assertDocumentsMatchExpectations((CaseDocument) transformedCaseData.get("divorceUploadEvidence1"), "DecreeNisi");
+        assertDocumentsMatchExpectations((CaseDocument) transformedCaseData.get("divorceUploadEvidence1"), DECREE_NISI_DOCUMENT);
 
         assertThat(transformedCaseData, hasKey("divorceUploadEvidence2"));
-        assertDocumentsMatchExpectations((CaseDocument) transformedCaseData.get("divorceUploadEvidence2"), "DecreeAbsolute");
+        assertDocumentsMatchExpectations((CaseDocument) transformedCaseData.get("divorceUploadEvidence2"), DECREE_ABSOLUTE_DOCUMENT);
     }
 
     private void assertDocumentsMatchExpectations(CaseDocument decreeAbsoluteDocument, String subType) {
@@ -510,8 +523,8 @@ public class FormAToCaseTransformerTest {
     private void assertChildrenInfo(Map<String, Object> transformedCaseData) {
         ComplexTypeCollection<ChildInfo> children = (ComplexTypeCollection<ChildInfo>) transformedCaseData.get("childrenInfo");
 
-        assertChild(children.getItem(0), asList("Johny Bravo", "2000-03-12", "male", "son", "SON", "New Zeeland"));
-        assertChild(children.getItem(1), asList("Anne Shirley", "1895-03-12", "female", "daughter", "Daughter", "Canada"));
+        assertChild(children.getItem(0), asList("Johny Bravo", "2000-03-12", "Male", "son", "SON", "New Zeeland"));
+        assertChild(children.getItem(1), asList("Anne Shirley", "1895-03-12", "Female", "daughter", "Daughter", "Canada"));
     }
 
     private void assertChild(ChildInfo child, List<String> values) {
@@ -522,5 +535,4 @@ public class FormAToCaseTransformerTest {
         assertThat(child.getRelationshipToRespondent(), is(values.get(4)));
         assertThat(child.getCountryOfResidence(), is(values.get(5)));
     }
-
 }
