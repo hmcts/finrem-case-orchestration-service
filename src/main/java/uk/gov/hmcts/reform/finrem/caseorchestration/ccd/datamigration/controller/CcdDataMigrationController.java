@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,25 +35,38 @@ public class CcdDataMigrationController {
             @RequestHeader(value = AUTHORIZATION_HEADER) final String authorisationToken,
             @RequestBody @ApiParam("CaseData") final CallbackRequest ccdRequest) {
 
-        log.info("FRMig: ccdMigrationRequest >>> authorisationToken {}, ccdRequest {}", authorisationToken, ccdRequest);
-        final Map<String, Object> caseData = ccdRequest.getCaseDetails().getData();
-        boolean migrationRequired = false;
-        final Object caseId = ccdRequest.getCaseDetails().getId();
-        final boolean applicantRepresentedExist = caseData.containsKey(APPLICANT_REPRESENTED);
-        log.info("FR Migration: {} ,applicantRepresentedExist : {}", caseId, applicantRepresentedExist);
+        CaseDetails caseDetails = ccdRequest.getCaseDetails();
+        log.info("FR case migration request received for case {}", caseDetails.getId());
 
-        if (!applicantRepresentedExist) {
-            caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
-            log.info("FR Migration: {} setting applicantRepresented to Yes.", caseId);
-            migrationRequired = true;
+        AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder responseBuilder =
+            AboutToStartOrSubmitCallbackResponse.builder();
+
+        if (migrationRequired(caseDetails)) {
+            Map<String, Object> caseData = migrateCaseData(caseDetails.getData());
+            responseBuilder.data(caseData);
         }
 
-        if (migrationRequired) {
-            log.info("FR Migration: {} End of case migration {} ", caseId, caseData);
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build();
+        return responseBuilder.build();
+    }
+
+    private boolean migrationRequired(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        if (caseData.get("natureOfApplication2") != null) {
+            List<String> list = (List) caseData.get("natureOfApplication2");
+            return list.contains("Property Adjustment  Order");
         } else {
-            log.info("FR Migration: {} Returning without migration", caseId);
-            return AboutToStartOrSubmitCallbackResponse.builder().build();
+            return false;
         }
+    }
+
+    private Map<String, Object> migrateCaseData(Map<String, Object> caseData) {
+        if (caseData.get("natureOfApplication2") != null) {
+            List<String> list = (List) caseData.get("natureOfApplication2");
+            int elementToFixIndex = list.indexOf("Property Adjustment  Order");
+            if (elementToFixIndex >= 0) {
+                list.set(elementToFixIndex, "Property Adjustment Order");
+            }
+        }
+        return caseData;
     }
 }
