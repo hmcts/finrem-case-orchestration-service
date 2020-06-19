@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralLetterService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;

@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controlle
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
