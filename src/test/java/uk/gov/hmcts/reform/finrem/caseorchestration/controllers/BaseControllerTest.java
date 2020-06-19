@@ -19,6 +19,9 @@ public abstract class BaseControllerTest extends BaseTest {
     @Autowired
     protected WebApplicationContext applicationContext;
 
+    @Autowired
+    protected ObjectMapper objectMapper;
+
     protected MockMvc mvc;
     protected JsonNode requestContent;
 
@@ -28,25 +31,21 @@ public abstract class BaseControllerTest extends BaseTest {
     }
 
     void doEmptyCaseDataSetUp() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/empty-casedata.json").toURI()));
     }
 
     void doValidCaseDataSetUp() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/pba-validate.json").toURI()));
     }
 
     void doValidCaseDataSetUpForPaperApplication() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/bulkprint/bulk-print-paper-application.json").toURI()));
     }
 
     void doMissingLatestConsentOrder() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/hwf.json").toURI()));
     }
@@ -57,5 +56,13 @@ public abstract class BaseControllerTest extends BaseTest {
         caseDocument.setDocumentBinaryUrl("http://doc1/binary");
         caseDocument.setDocumentFilename("doc1");
         return caseDocument;
+    }
+
+    String resourceContentAsString(String resourcePath) {
+        try {
+            return objectMapper.readTree(new File(getClass().getResource(resourcePath).toURI())).toString();
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
     }
 }
