@@ -26,6 +26,7 @@ import java.util.function.UnaryOperator;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 
@@ -75,6 +76,8 @@ public class GeneralOrderService {
     }
 
     public Map<String, Object> populateGeneralOrderCollection(CaseDetails caseDetails) {
+        caseDetails.getData().put(GENERAL_ORDER_LATEST_DOCUMENT,
+            documentHelper.convertToCaseDocument(caseDetails.getData().get(GENERAL_ORDER_PREVIEW_DOCUMENT)));
         if (isConsentedApplication(caseDetails)) {
             return populateGeneralOrderCollectionConsented(caseDetails);
         } else {

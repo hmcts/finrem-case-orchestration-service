@@ -31,7 +31,7 @@ public class GeneralOrderController implements BaseController {
     @Autowired
     private GeneralOrderService service;
 
-    @PostMapping(path = "/documents/general-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/documents/preview-general-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Creates general order letter. Serves as a callback from CCD")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",

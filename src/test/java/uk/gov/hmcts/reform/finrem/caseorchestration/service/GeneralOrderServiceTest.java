@@ -32,6 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 
 
@@ -81,6 +82,14 @@ public class GeneralOrderServiceTest {
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
         assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrder().getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+        CaseDocument latestGeneralOrder = (CaseDocument)documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
+        assertThat(latestGeneralOrder.getDocumentUrl(),
+            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
+        assertThat(latestGeneralOrder.getDocumentFilename(),
+            is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
+        assertThat(latestGeneralOrder.getDocumentBinaryUrl(),
+            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+
     }
 
     @Test
@@ -102,6 +111,14 @@ public class GeneralOrderServiceTest {
         assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrder().getDocumentFilename(),
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
         assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrder().getDocumentBinaryUrl(),
+            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+
+        CaseDocument latestGeneralOrder = (CaseDocument)documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
+        assertThat(latestGeneralOrder.getDocumentUrl(),
+            is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
+        assertThat(latestGeneralOrder.getDocumentFilename(),
+            is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
+        assertThat(latestGeneralOrder.getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
 

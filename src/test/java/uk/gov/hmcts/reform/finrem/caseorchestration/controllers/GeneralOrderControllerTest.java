@@ -36,7 +36,7 @@ public class GeneralOrderControllerTest extends BaseControllerTest {
     private GeneralOrderService documentService;
 
     public String generateEndpoint() {
-        return "/case-orchestration/documents/general-order";
+        return "/case-orchestration/documents/preview-general-order";
     }
 
     public String submitEndpoint() {
