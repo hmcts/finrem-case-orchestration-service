@@ -24,7 +24,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_BODY_TEXT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_JUDGE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_RECITALS;
 
 @WebMvcTest(GeneralOrderStartController.class)
 public class GeneralOrderStartControllerTest extends BaseControllerTest {
@@ -53,7 +56,10 @@ public class GeneralOrderStartControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_DATE, is(nullValue())))
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_BODY_TEXT, is(nullValue())))
             .andExpect(jsonPath("$.data." + GENERAL_ORDER_CREATED_BY, is("Integration Test")))
-            .andExpect(jsonPath("$.data." + GENERAL_ORDER_PREVIEW_DOCUMENT, is(nullValue())));
+            .andExpect(jsonPath("$.data." + GENERAL_ORDER_PREVIEW_DOCUMENT, is(nullValue())))
+            .andExpect(jsonPath("$.data." + GENERAL_ORDER_RECITALS, is(nullValue())))
+            .andExpect(jsonPath("$.data." + GENERAL_ORDER_JUDGE_NAME, is(nullValue())))
+            .andExpect(jsonPath("$.data." + GENERAL_ORDER_JUDGE_TYPE, is(nullValue())));
     }
 
     @Test

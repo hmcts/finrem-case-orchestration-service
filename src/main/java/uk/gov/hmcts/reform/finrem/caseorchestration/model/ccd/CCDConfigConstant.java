@@ -59,6 +59,9 @@ public class CCDConfigConstant {
     public static final String GENERAL_ORDER_BODY_TEXT = "generalOrderBodyText";
     public static final String GENERAL_ORDER_DATE = "generalOrderDate";
     public static final String GENERAL_ORDER_ADDRESS_TO = "generalOrderAddressTo";
+    public static final String GENERAL_ORDER_JUDGE_TYPE = "generalOrderJudgeType";
+    public static final String GENERAL_ORDER_RECITALS = "generalOrderRecitals";
+    public static final String GENERAL_ORDER_JUDGE_NAME = "generalOrderJudgeName";
     public static final String GENERAL_ORDER_COLLECTION_CONTESTED = "generalOrders";
     public static final String GENERAL_ORDER_COLLECTION_CONTESTED_DOCUMENT = "additionalDocument";
     public static final String GENERAL_ORDER_COLLECTION_CONSENTED = "generalOrderCollection";

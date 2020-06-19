@@ -27,7 +27,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_BODY_TEXT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_JUDGE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_RECITALS;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -58,6 +61,9 @@ public class GeneralOrderStartController implements BaseController {
         caseData.put(GENERAL_ORDER_DATE, null);
         caseData.put(GENERAL_ORDER_BODY_TEXT, null);
         caseData.put(GENERAL_ORDER_PREVIEW_DOCUMENT, null);
+        caseData.put(GENERAL_ORDER_RECITALS, null);
+        caseData.put(GENERAL_ORDER_JUDGE_NAME, null);
+        caseData.put(GENERAL_ORDER_JUDGE_TYPE, null);
         caseData.put(GENERAL_ORDER_CREATED_BY, service.getIdamFullName(authorisationToken));
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
