@@ -1,0 +1,18 @@
+{
+  "token": "test_token",
+  "event_id": "FR_migrateCase",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "DIVORCE",
+    "case_type_id": "FinancialRemedyMVP2",
+    "state": "created",
+    "case_data": {
+      "natureOfApplication2": [
+        "Property Adjustment  Order",
+        "Pension Sharing Order",
+        "Lump Sum Order"
+      ],
+      "judgeAllocated": "FR_judgeAllocatedList_3"
+    }
+  }
+}
