@@ -27,6 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_ADDRESS_TO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_PREVIEW;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
@@ -44,9 +45,14 @@ public class GeneralLetterService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
 
+    public void previewGeneralLetter(String authorisationToken, CaseDetails caseDetails) {
+        log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());
+        CaseDocument generalLetterDocument = generateGeneralLetterDocument(caseDetails, authorisationToken);
+        caseDetails.getData().put(GENERAL_LETTER_PREVIEW, generalLetterDocument);
+    }
+
     public void createGeneralLetter(String authorisationToken, CaseDetails caseDetails) {
         log.info("Generating General letter for Case ID: {}", caseDetails.getId());
-
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
         addGeneralLetterToCaseData(caseDetails, document);
     }
@@ -54,8 +60,6 @@ public class GeneralLetterService {
     private CaseDocument generateGeneralLetterDocument(CaseDetails caseDetails, String authorisationToken) {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         prepareCaseDetailsForDocumentGeneration(caseDetailsCopy);
-
-        log.info("Temporary log, remove after testing, generalLetter data: {}", caseDetailsCopy);
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getGeneralLetterTemplate(), documentConfiguration.getGeneralLetterFileName());
