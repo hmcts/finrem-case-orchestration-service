@@ -35,6 +35,32 @@ public class CCDConfigConstant {
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";
     public static final String APPLICANT_REPRESENTED_PAPER = "applicantRepresentedPaper";
 
+    //Court related
+    public static final String KENTFRC = "kentfrc";
+    public static final String REGION = "regionFRCList";
+    public static final String WALES_FRC_LIST = "walesFRCList";
+    public static final String SOUTHEAST_FRC_LIST = "southEastFRCList";
+    public static final String NORTHEAST_FRC_LIST = "northEastFRCList";
+    public static final String NORTHWEST_FRC_LIST = "northWestFRCList";
+    public static final String LONDON_FRC_LIST = "londonFRCList";
+    public static final String MIDLANDS_FRC_LIST = "midlandsFRCList";
+    public static final String LIVERPOOL = "liverpool";
+    public static final String MANCHESTER = "manchester";
+    public static final String CFC = "cfc";
+    public static final String NEWPORT = "newport";
+    public static final String MIDLANDS = "midlands";
+    public static final String LONDON = "london";
+    public static final String NORTHWEST = "northwest";
+    public static final String NORTHEAST = "northeast";
+    public static final String SOUTHEAST = "southeast";
+    public static final String WALES = "wales";
+    public static final String SWANSEA = "swansea";
+    public static final String CLEAVELAND = "cleaveland";
+    public static final String NWYORKSHIRE = "nwyorkshire";
+    public static final String HSYORKSHIRE = "hsyorkshire";
+    public static final String NOTTINGHAM = "nottingham";
+    public static final String BIRMINGHAM = "birmingham";
+
     //Respondent Solicitor Related
     public static final String RESPONDENT_REPRESENTED = "appRespondentRep";
     public static final String RESP_SOLICITOR_NAME = "rSolicitorName";
@@ -90,7 +116,6 @@ public class CCDConfigConstant {
     public static final String IS_ADMIN = "isAdmin";
     public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
     public static final String ROLES = "roles";
-    public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
 
     // Bulk Printing
     public static final String BULK_PRINT_COVER_SHEET = "bulkPrintCoverSheet";
