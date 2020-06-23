@@ -324,8 +324,8 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
 }
 
 task bootRunAat(type: BootRun, description: 'Runs the app using AAT config', dependsOn: 'classes', group: 'Application') {
+    main = bootJar.mainClassName
     doFirst() {
-        main = bootJar.mainClassName
         classpath = sourceSets.main.runtimeClasspath
         systemProperties = System.properties
         systemProperty 'spring.profiles.active', 'aat'

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -9,7 +8,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 
-import java.io.File;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
@@ -25,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.fileContentAsString;
 
 @WebMvcTest(BulkPrintController.class)
 public class BulkPrintControllerTest extends BaseControllerTest {
@@ -37,8 +36,6 @@ public class BulkPrintControllerTest extends BaseControllerTest {
     private static final String CONSENTED_BULK_PRINT_CONSENT_ORDER_NOT_APPROVED_JSON
         = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @MockBean
     private BulkPrintService bulkPrintService;
 
@@ -48,12 +45,6 @@ public class BulkPrintControllerTest extends BaseControllerTest {
     @Test
     public void shouldSendForBulkPrintPackWithRespondentAndApplicantAddress() throws Exception {
         final UUID randomId = UUID.randomUUID();
-        requestContent =
-                objectMapper.readTree(
-                        new File(getClass()
-                                .getResource(CONSENTED_BULK_PRINT_CONSENT_ORDER_NOT_APPROVED_JSON)
-                                .toURI()));
-
         when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(coverSheetService.generateApplicantCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(bulkPrintService.printApplicantConsentOrderNotApprovedDocuments(any(), any())).thenReturn(randomId);
@@ -61,7 +52,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
         mvc.perform(
                 post(BULK_PRINT_URI)
-                        .content(requestContent.toString())
+                        .content(fileContentAsString(CONSENTED_BULK_PRINT_CONSENT_ORDER_NOT_APPROVED_JSON))
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
@@ -77,12 +68,6 @@ public class BulkPrintControllerTest extends BaseControllerTest {
     @Test
     public void shouldSendForBulkPrintPackWithRespondentAndApplicantAddressAsSolicitorEmailIsNo() throws Exception {
         final UUID randomId = UUID.randomUUID();
-        requestContent =
-                objectMapper.readTree(
-                        new File(getClass()
-                                .getResource(CONSENTED_BULK_PRINT_SIMPLE_JSON)
-                                .toURI()));
-
         when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(coverSheetService.generateApplicantCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(bulkPrintService.printApplicantConsentOrderApprovedDocuments(any(), any())).thenReturn(randomId);
@@ -90,7 +75,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
         mvc.perform(
                 post(BULK_PRINT_URI)
-                        .content(requestContent.toString())
+                        .content(fileContentAsString(CONSENTED_BULK_PRINT_SIMPLE_JSON))
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
@@ -106,18 +91,12 @@ public class BulkPrintControllerTest extends BaseControllerTest {
     @Test
     public void shouldSendForBulkPrintPackWithOnlyRespondentAddress() throws Exception {
         final UUID randomId = UUID.randomUUID();
-        requestContent =
-                objectMapper.readTree(
-                        new File(getClass()
-                                .getResource(CONSENTED_BULK_PRINT_CONSENT_ORDER_APPROVED_JSON)
-                                .toURI()));
-
         when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(bulkPrintService.sendOrderForBulkPrintRespondent(any(), any())).thenReturn(randomId);
 
         mvc.perform(
                 post(BULK_PRINT_URI)
-                        .content(requestContent.toString())
+                        .content(fileContentAsString(CONSENTED_BULK_PRINT_CONSENT_ORDER_APPROVED_JSON))
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
@@ -131,14 +110,10 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldThrowExceptionOnCoverSheetGeneration() throws Exception {
-        requestContent =
-                objectMapper.readTree(
-                        new File(getClass().getResource(CONTESTED_HWF_JSON).toURI()));
-
         when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenThrow(feignError());
         mvc.perform(
                 post(BULK_PRINT_URI)
-                        .content(requestContent.toString())
+                        .content(fileContentAsString(CONTESTED_HWF_JSON))
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isInternalServerError());
@@ -148,14 +123,11 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldThrowExceptionOnSendForBulkPrint() throws Exception {
-        requestContent =
-                objectMapper.readTree(
-                        new File(getClass().getResource(CONTESTED_HWF_JSON).toURI()));
         when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(bulkPrintService.sendOrderForBulkPrintRespondent(any(), any())).thenThrow(feignError());
         mvc.perform(
                 post(BULK_PRINT_URI)
-                        .content(requestContent.toString())
+                        .content(fileContentAsString(CONTESTED_HWF_JSON))
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isInternalServerError());
@@ -166,12 +138,6 @@ public class BulkPrintControllerTest extends BaseControllerTest {
     @Test
     public void givenOrderNotApprovedFirstAndThenOrderIsApproved_WhenBulkPrinting_ThenConsentOrderApprovedDocumentsArePrinted() throws Exception {
         final UUID randomId = UUID.randomUUID();
-        requestContent =
-            objectMapper.readTree(
-                new File(getClass()
-                    .getResource(CONSENTED_BULK_PRINT_CONSENT_ORDER_APPROVED_JSON)
-                    .toURI()));
-
         when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(coverSheetService.generateApplicantCoverSheet(any(), any())).thenReturn(new CaseDocument());
         when(bulkPrintService.printApplicantConsentOrderApprovedDocuments(any(), any())).thenReturn(randomId);
@@ -179,7 +145,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
         mvc.perform(
             post(BULK_PRINT_URI)
-                .content(requestContent.toString())
+                .content(fileContentAsString(CONSENTED_BULK_PRINT_CONSENT_ORDER_APPROVED_JSON))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
