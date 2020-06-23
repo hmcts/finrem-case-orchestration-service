@@ -37,11 +37,6 @@ public class BulkScanService {
     public Map<String, Object> transformBulkScanForm(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException, InvalidDataException {
         validateForTransformation(exceptionRecord);
 
-        // TODO: Remove once triaged NPE in BSP SIT as it will log PII once in Production
-        for (OcrDataField dataField : exceptionRecord.getOcrDataFields()) {
-            log.info("Exception Record OCR Data field and value: {}, {}", dataField.getName(), dataField.getValue());
-        }
-
         BulkScanFormTransformer bulkScanFormTransformer = finRemBulkScanFormTransformerFactory.getTransformer(exceptionRecord.getFormType());
         return bulkScanFormTransformer.transformIntoCaseData(exceptionRecord);
     }
