@@ -22,11 +22,11 @@
       },
       "solicitorFirm": "Mr",
       "solicitorName": "Solictor",
-      "applicantLName": "Guy",
       "authorisation3": "2010-01-01",
       "solicitorEmail": "test@admin.com",
       "solicitorPhone": "9963472494",
-      "applicantFMName": "Poor",
+      "applicantFMName": "Contested Applicant",
+      "applicantLName": "Name",
       "authorisation2b": "test",
       "otherCollection": [
         {
@@ -60,7 +60,7 @@
       },
       "authorisationFirm": "test",
       "authorisationName": "test",
-      "divorceCaseNumber": "DD12D12345",
+      "divorceCaseNumber": "DD98D76543",
       "respondentAddress": {
         "County": "Essex",
         "Country": "United Kingdom",
@@ -70,14 +70,25 @@
         "AddressLine2": "AddressGlobalUK",
         "AddressLine3": "London"
       },
+      "allocatedCourtList": {
+        "region": "midlands",
+        "midlandsList": "nottingham",
+        "nottinghamCourtList": "FR_s_NottinghamList_1"
+      },
       "solicitorDXnumber": null,
       "appRespondentLName": "Korivi",
       "solicitorReference": "LL01",
-      "appRespondentFMName": "test",
+      "respondentFMName": "Contested Respondent",
+      "respondentLName": "Name",
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "Yes",
+      "generalOrderJudgeType": "Her Honour Judge",
+      "generalOrderJudgeName": "Contested",
+      "generalOrderRecitals": "Contested Recitals",
+      "generalOrderDate": "01/06/2020",
+      "generalOrderBodyText": "Test is dummy text for contested",
       "generalOrderPreviewDocument": {
         "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",

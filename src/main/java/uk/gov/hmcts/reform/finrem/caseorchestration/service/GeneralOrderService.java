@@ -4,9 +4,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsented;
@@ -45,11 +47,11 @@ public class GeneralOrderService {
     private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
 
     public Map<String, Object> createGeneralOrder(String authorisationToken, CaseDetails caseDetails) {
-
         log.info("Generating General Order for Case ID: {}", caseDetails.getId());
+
         return generateDocument
             .andThen(createGeneralOrderData)
-            .andThen(data -> populateGeneralOrderData(data, caseDetails))
+            .andThen(data -> previewGeneralOrderData(data, caseDetails))
             .apply(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken);
     }
 
@@ -64,13 +66,32 @@ public class GeneralOrderService {
     }
 
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
-        Map<String, Object> data = caseDetails.getData();
-        data.put("ccdCaseNumber", caseDetails.getId());
+        Map<String, Object> caseData = caseDetails.getData();
+
+        caseData.put("DivorceCaseNumber", caseDetails.getData().get("divorceCaseNumber"));
+        caseData.put("ApplicantName", DocumentHelper.getApplicantFullName(caseDetails));
+
+        if (isConsentedApplication(caseDetails)) {
+            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameConsented(caseDetails));
+            caseData.put("GeneralOrderCourt", "Courts and Tribunal Service Centre");
+        } else {
+            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameContested(caseDetails));
+            caseData.put("GeneralOrderCourt", ContestedCourtHelper.getSelectedCourt(caseDetails));
+        }
+
+        caseData.put("GeneralOrderJudgeDetails",
+            StringUtils.joinWith(" ",
+            caseDetails.getData().get("generalOrderJudgeType"),
+            caseDetails.getData().get("generalOrderJudgeName")));
+
+        caseData.put("GeneralOrderRecitals", caseDetails.getData().get("generalOrderRecitals"));
+        caseData.put("GeneralOrderDate", caseDetails.getData().get("generalOrderDate"));
+        caseData.put("GeneralOrderBodyText", caseDetails.getData().get("generalOrderBodyText"));
 
         return caseDetails;
     }
 
-    private Map<String, Object> populateGeneralOrderData(GeneralOrderPreviewDocument generalOrderData, CaseDetails caseDetails) {
+    private Map<String, Object> previewGeneralOrderData(GeneralOrderPreviewDocument generalOrderData, CaseDetails caseDetails) {
         caseDetails.getData().put(GENERAL_ORDER_PREVIEW_DOCUMENT, generalOrderData.getGeneralOrder());
         return caseDetails.getData();
     }

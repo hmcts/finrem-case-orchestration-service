@@ -226,6 +226,18 @@ public class DocumentHelper {
         return bulkPrintDocuments;
     }
 
+    public static String getApplicantFullName(CaseDetails caseDetails) {
+        return buildFullName(caseDetails.getData(),"applicantFMName", "applicantLName");
+    }
+
+    public static String getRespondentFullNameConsented(CaseDetails caseDetails) {
+        return buildFullName(caseDetails.getData(),"appRespondentFMName", "appRespondentLName");
+    }
+
+    public static String getRespondentFullNameContested(CaseDetails caseDetails) {
+        return buildFullName(caseDetails.getData(),"respondentFMName", "respondentLName");
+    }
+
     public static BulkPrintDocument caseDocumentToBulkPrintDocument(CaseDocument document) {
         return BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl()).build();
     }

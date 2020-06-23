@@ -103,6 +103,7 @@ public class CCDConfigConstant {
     public static final String ISSUE_DATE = "issueDate";
     public static final String FAST_TRACK_DECISION = "fastTrackDecision";
 
+    //contest courts
     public static final String HEARING_DATE = "hearingDate";
     public static final String CASE_ALLOCATED_TO = "caseAllocatedTo";
     public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMIAM";
@@ -112,6 +113,15 @@ public class CCDConfigConstant {
     public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
     public static final String ROLES = "roles";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
+    public static final String KENTFRC = "kentfrc";
+    public static final String REGION = "region";
+    public static final String NEWPORT = "newport";
+    public static final String SWANSEA = "swansea";
+    public static final String CLEAVELAND = "cleaveland";
+    public static final String NWYORKSHIRE = "nwyorkshire";
+    public static final String HSYORKSHIRE = "hsyorkshire";
+    public static final String NOTTINGHAM = "nottingham";
+    public static final String BIRMINGHAM = "birmingham";
 
     // Bulk Printing
     public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";

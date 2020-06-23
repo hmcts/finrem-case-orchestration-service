@@ -54,12 +54,21 @@ public class GeneralOrderServiceTest {
     }
 
     @Test
-    public void generateGeneralOrder() throws Exception {
+    public void generateGeneralOrderConsented() throws Exception {
         Map<String, Object> documentMap = generalOrderService.createGeneralOrder(AUTH_TOKEN, consentedCaseDetails());
 
         CaseDocument result = (CaseDocument) documentMap.get(GENERAL_ORDER_PREVIEW_DOCUMENT);
         doCaseDocumentAssert(result);
-        ((GeneralOrderServiceTest.TestDocumentClient) generatorClient).verifyAdditionalFields();
+        ((GeneralOrderServiceTest.TestDocumentClient) generatorClient).verifyAdditionalFieldsConsented();
+    }
+
+    @Test
+    public void generateGeneralOrderContested() throws Exception {
+        Map<String, Object> documentMap = generalOrderService.createGeneralOrder(AUTH_TOKEN, contestedCaseDetails());
+
+        CaseDocument result = (CaseDocument) documentMap.get(GENERAL_ORDER_PREVIEW_DOCUMENT);
+        doCaseDocumentAssert(result);
+        ((GeneralOrderServiceTest.TestDocumentClient) generatorClient).verifyAdditionalFieldsContested();
     }
 
     @Test
@@ -175,9 +184,30 @@ public class GeneralOrderServiceTest {
             throw new UnsupportedOperationException();
         }
 
-        void verifyAdditionalFields() {
+        void verifyAdditionalFieldsConsented() {
             Map<String, Object> data = data();
-            assertThat(data.get("ccdCaseNumber"), is(1234567890L));
+
+            assertThat(data.get("DivorceCaseNumber"), is("DD12D12345"));
+            assertThat(data.get("ApplicantName"), is("Consented Applicant Name"));
+            assertThat(data.get("RespondentName"), is("Consented Respondent Name"));
+            assertThat(data.get("GeneralOrderCourt"), is("Courts and Tribunal Service Centre"));
+            assertThat(data.get("GeneralOrderJudgeDetails"), is("His Honour Judge Consented"));
+            assertThat(data.get("GeneralOrderRecitals"), is("Consented Recitals"));
+            assertThat(data.get("GeneralOrderDate"), is("01/01/2020"));
+            assertThat(data.get("GeneralOrderBodyText"), is("Test is dummy text for consented"));
+        }
+
+        void verifyAdditionalFieldsContested() {
+            Map<String, Object> data = data();
+
+            assertThat(data.get("DivorceCaseNumber"), is("DD98D76543"));
+            assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
+            assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
+            assertThat(data.get("GeneralOrderCourt"),is("NOTTINGHAM COUNTY COURT AND FAMILY COURT"));
+            assertThat(data.get("GeneralOrderJudgeDetails"), is("Her Honour Judge Contested"));
+            assertThat(data.get("GeneralOrderRecitals"), is("Contested Recitals"));
+            assertThat(data.get("GeneralOrderDate"), is("01/06/2020"));
+            assertThat(data.get("GeneralOrderBodyText"), is("Test is dummy text for contested"));
         }
 
         private Map<String, Object> data() {
