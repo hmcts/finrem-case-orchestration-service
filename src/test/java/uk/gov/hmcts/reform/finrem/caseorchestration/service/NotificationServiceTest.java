@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
@@ -397,7 +397,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     public void sendContestedHwfSuccessfulNotificationEmailForKent() {
         HashMap<String, Object> courtList = new HashMap<>();
         courtList.put(REGION, SOUTHEAST);
-        courtList.put(SOUTHEAST_FRC_LIST, KENTFRC);
+        courtList.put(SOUTHEAST_FRC_LIST, KENT);
 
         callbackRequest = getContestedCallbackRequest(courtList);
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
@@ -499,7 +499,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     public void sendNoContestedHwfSuccessfulNotificationEmailForKent() {
         HashMap<String, Object> courtList = new HashMap<>();
         courtList.put(REGION, SOUTHEAST);
-        courtList.put(SOUTHEAST_FRC_LIST, KENTFRC);
+        courtList.put(SOUTHEAST_FRC_LIST, KENT);
 
         callbackRequest = getContestedCallbackRequest(courtList);
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))

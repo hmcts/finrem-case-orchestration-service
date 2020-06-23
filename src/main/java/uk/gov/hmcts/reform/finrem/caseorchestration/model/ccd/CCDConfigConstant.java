@@ -53,7 +53,7 @@ public class CCDConfigConstant {
     public static final String NEWPORT_COURT_LIST = "newportCourtListSL";
     public static final String MIDLANDS = "midlands";
     public static final String LONDON = "london";
-    public static final String LONDON_COURT_LIST = "londonCourtListSL";
+    public static final String CFC_COURT_LIST = "cfcCourtListSL";
     public static final String NORTHWEST = "northwest";
     public static final String NORTHEAST = "northeast";
     public static final String SOUTHEAST = "southeast";

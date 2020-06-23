@@ -15,7 +15,10 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.*;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addCourtFields;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addFastTrackFields;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
 
 @Service
 @RequiredArgsConstructor
