@@ -228,6 +228,7 @@ dependencyCheck {
 
 checkstyle.toolVersion = '8.32'
 checkstyle.configFile = new File(rootDir, "checkstyle.xml")
+checkstyle.maxWarnings(0)
 
 // make build fail on Checkstyle issues (https://github.com/gradle/gradle/issues/881)
 tasks.withType(Checkstyle).each { checkstyleTask ->
@@ -301,6 +302,10 @@ bootJar {
                 'Implementation-Version': project.version
     }
     archiveFileName = 'finrem-case-orchestration.jar'
+}
+
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
 }
 
 pact {
