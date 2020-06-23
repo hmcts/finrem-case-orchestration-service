@@ -15,9 +15,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addFastTrackFields;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +26,8 @@ public class HearingDocumentService {
     private final DocumentHelper documentHelper;
 
     public Map<String, Object> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
+        addCourtFields.apply(caseDetails);
+
         return Optional.of(Pair.of(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken))
             .filter(pair -> pair.getLeft().getData().get(FAST_TRACK_DECISION) != null)
             .map(this::courtCoverSheetDocuments)

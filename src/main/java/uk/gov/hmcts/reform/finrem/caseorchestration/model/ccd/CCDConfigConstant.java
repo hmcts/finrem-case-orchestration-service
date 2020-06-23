@@ -36,7 +36,7 @@ public class CCDConfigConstant {
     public static final String APPLICANT_REPRESENTED_PAPER = "applicantRepresentedPaper";
 
     //Court related
-    public static final String KENTFRC = "kentfrc";
+    public static final String KENT = "kentfrc";
     public static final String REGION = "regionFRCList";
     public static final String WALES_FRC_LIST = "walesFRCList";
     public static final String SOUTHEAST_FRC_LIST = "southEastFRCList";
@@ -45,21 +45,36 @@ public class CCDConfigConstant {
     public static final String LONDON_FRC_LIST = "londonFRCList";
     public static final String MIDLANDS_FRC_LIST = "midlandsFRCList";
     public static final String LIVERPOOL = "liverpool";
+    public static final String LIVERPOOL_COURT_LIST = "liverpoolCourtListSL";
     public static final String MANCHESTER = "manchester";
+    public static final String MANCHESTER_COURT_LIST = "manchesterCourtListSL";
     public static final String CFC = "cfc";
     public static final String NEWPORT = "newport";
+    public static final String NEWPORT_COURT_LIST = "newportCourtListSL";
     public static final String MIDLANDS = "midlands";
     public static final String LONDON = "london";
+    public static final String LONDON_COURT_LIST = "londonCourtListSL";
     public static final String NORTHWEST = "northwest";
     public static final String NORTHEAST = "northeast";
     public static final String SOUTHEAST = "southeast";
     public static final String WALES = "wales";
     public static final String SWANSEA = "swansea";
+    public static final String SWANSEA_COURT_LIST = "swanseaCourtListSL";
     public static final String CLEAVELAND = "cleaveland";
+    public static final String CLEAVELAND_COURT_LIST = "clevelandCourtListSL";
     public static final String NWYORKSHIRE = "nwyorkshire";
+    public static final String NWYORKSHIRE_COURT_LIST = "nwyorkshireCourtListSL";
     public static final String HSYORKSHIRE = "hsyorkshire";
     public static final String NOTTINGHAM = "nottingham";
+    public static final String NOTTINGHAM_COURT_LIST = "nottinghamCourtListSL";
     public static final String BIRMINGHAM = "birmingham";
+    public static final String BIRMINGHAM_COURT_LIST = "birminghamCourtListSL";
+    public static final String HUMBER_COURT_LIST = "humberCourtListSL";
+    public static final String KENT_SURREY_COURT_LIST = "kentSurreyCourtListSL";
+    public static final String COURT_DETAILS_NAME_KEY = "courtName";
+    public static final String COURT_DETAILS_ADDRESS_KEY = "courtAddress";
+    public static final String COURT_DETAILS_PHONE_KEY = "phoneNumber";
+    public static final String COURT_DETAILS_EMAIL_KEY = "email";
 
     //Respondent Solicitor Related
     public static final String RESPONDENT_REPRESENTED = "appRespondentRep";
