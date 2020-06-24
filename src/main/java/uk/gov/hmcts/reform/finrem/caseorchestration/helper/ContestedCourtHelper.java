@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
+import com.google.common.collect.ImmutableMap;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import java.util.HashMap;
@@ -25,6 +26,7 @@ public class ContestedCourtHelper {
         Object allocatedCourtList = caseData.get(ALLOCATED_COURT_LIST);
         HashMap<String, Object> allocatedCourtMap = (HashMap<String, Object>) allocatedCourtList;
         String region = (String) allocatedCourtMap.get(REGION);
+
         if ("midlands".equalsIgnoreCase(region)) {
             return getMidlandFRC(allocatedCourtMap);
         }
@@ -88,7 +90,7 @@ public class ContestedCourtHelper {
     private static String getLondonFRC(Map allocatedCourtMap) {
         String londonList = (String) allocatedCourtMap.get("londonList");
         if ("cfc".equalsIgnoreCase(londonList)) {
-            return getLondonCourtNames(allocatedCourtMap);
+            return getLondonCourt(allocatedCourtMap);
         }
         return EMPTY;
     }
@@ -96,68 +98,60 @@ public class ContestedCourtHelper {
     private static String getMidlandFRC(Map allocatedCourtMap) {
         String midlandsList = (String) allocatedCourtMap.get("midlandsList");
         if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
-            return getNottinghamCourtNames(allocatedCourtMap);
+            return getNottinghamCourt(allocatedCourtMap);
         } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
-            return getBirminghamCourtNames(allocatedCourtMap);
+            return getBirminghamCourt(allocatedCourtMap);
         }
         return EMPTY;
     }
 
-    private static String getNottinghamCourtNames(Map allocatedCourtMap) {
-        String courtItem = (String) allocatedCourtMap.get("nottinghamCourtList");
-        if (courtItem.equalsIgnoreCase("FR_s_NottinghamList_1")) {
-            return "NOTTINGHAM COUNTY COURT AND FAMILY COURT";
-        } else if (courtItem.equalsIgnoreCase("FR_s_NottinghamList_2")) {
-            return "DERBY COMBINED COURT CENTRE";
-        } else if (courtItem.equalsIgnoreCase("FR_s_NottinghamList_3")) {
-            return "LEICESTER COUNTY COURT AND FAMILY COURT";
-        } else if (courtItem.equalsIgnoreCase("FR_s_NottinghamList_4")) {
-            return "LINCOLN COUNTY COURT AND FAMILY COURT";
-        } else if (courtItem.equalsIgnoreCase("FR_s_NottinghamList_5")) {
-            return "NORTHAMPTON CROWN, COUNTY AND FAMILY COURT";
-        } else if (courtItem.equalsIgnoreCase("FR_s_NottinghamList_6")) {
-            return "CHESTERFIELD COUNTY COURT";
-        } else if (courtItem.equalsIgnoreCase("FR_s_NottinghamList_7")) {
-            return "MANSFIELD MAGISTRATES AND COUNTY COURT";
-        } else if (courtItem.equalsIgnoreCase("FR_s_NottinghamList_8")) {
-            return "BOSTON COUNTY COURT AND FAMILY COURT";
-        }
-        return EMPTY;
+    public static String getNottinghamCourt(Map allocatedCourtMap) {
+        return nottinghamMap.getOrDefault(allocatedCourtMap.get("nottinghamCourtList"), "");
     }
 
-    private static String getBirminghamCourtNames(Map allocatedCourtMap) {
-        String courtItem = (String) allocatedCourtMap.get("FR_birmingham_hc_list");
-        if (courtItem.equalsIgnoreCase("FR_birmingham_hc_list_1")) {
-            return "BIRMINGHAM CIVIL AND FAMILY JUSTICE CENTRE";
-        } else if (courtItem.equalsIgnoreCase("FR_birmingham_hc_list_2")) {
-            return "COVENTRY COMBINED COURT CENTRE";
-        } else if (courtItem.equalsIgnoreCase("FR_birmingham_hc_list_3")) {
-            return "TELFORD COUNTY COURT AND FAMILY COURT";
-        } else if (courtItem.equalsIgnoreCase("FR_birmingham_hc_list_4")) {
-            return "WOLVERHAMPTON COMBINED COURT CENTRE";
-        } else if (courtItem.equalsIgnoreCase("FR_birmingham_hc_list_5")) {
-            return "DUDLEY COUNTY COURT AND FAMILY COURT";
-        } else if (courtItem.equalsIgnoreCase("FR_birmingham_hc_list_6")) {
-            return "WALSALL COUNTY AND FAMILY COURT";
-        } else if (courtItem.equalsIgnoreCase("FR_birmingham_hc_list_7")) {
-            return "STOKE ON TRENT COMBINED COURT";
-        } else if (courtItem.equalsIgnoreCase("FR_birmingham_hc_list_8")) {
-            return "WORCESTER COMBINED COURT";
-        } else if (courtItem.equalsIgnoreCase("FR_birmingham_hc_list_9")) {
-            return "STAFFORD COMBINED COURT";
-        } else if (courtItem.equalsIgnoreCase("FR_birmingham_hc_list_10")) {
-            return "HEREFORD COUNTY COURT AND FAMILY COURT";
-        }
-        return EMPTY;
+    private static Map<String, String> nottinghamMap = ImmutableMap.<String, String>builder()
+        .put("FR_s_NottinghamList_1", "NOTTINGHAM COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_NottinghamList_2", "DERBY COMBINED COURT CENTRE")
+        .put("FR_s_NottinghamList_3", "LEICESTER COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_NottinghamList_4", "LINCOLN COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_NottinghamList_5", "NORTHAMPTON CROWN, COUNTY AND FAMILY COURT")
+        .put("FR_s_NottinghamList_6", "CHESTERFIELD COUNTY COURT")
+        .put("FR_s_NottinghamList_7", "MANSFIELD MAGISTRATES AND COUNTY COURT")
+        .put("FR_s_NottinghamList_8", "BOSTON COUNTY COURT AND FAMILY COURT")
+        .build();
+
+    public static String getBirminghamCourt(Map allocatedCourtMap) {
+        return birminghamMap.getOrDefault(allocatedCourtMap.get("birminghamhamCourtList"), "");
     }
 
-    private static String getLondonCourtNames(Map allocatedCourtMap) {
-        String courtItem = (String) allocatedCourtMap.get("FR_s_CFCList");
-        if (courtItem.equalsIgnoreCase("FR_s_CFCList_1")) {
-            return "BROMLEY COUNTY COURT AND FAMILY COURT";
-        } else if (courtItem.equalsIgnoreCase("FR_s_CFCList_2")) {
-            return "CROYDON COUNTY COURT AND FAMILY COURT";
-        }
-        return EMPTY;
+    private static Map<String, String> birminghamMap = ImmutableMap.<String, String>builder()
+        .put("FR_birmingham_hc_list_1", "BIRMINGHAM CIVIL AND FAMILY JUSTICE CENTRE")
+        .put("FR_birmingham_hc_list_2", "COVENTRY COMBINED COURT CENTRE")
+        .put("FR_birmingham_hc_list_3", "TELFORD COUNTY COURT AND FAMILY COURT")
+        .put("FR_birmingham_hc_list_4", "WOLVERHAMPTON COMBINED COURT CENTRE")
+        .put("FR_birmingham_hc_list_5", "DUDLEY COUNTY COURT AND FAMILY COURT")
+        .put("FR_birmingham_hc_list_6", "WALSALL COUNTY AND FAMILY COURT")
+        .put("FR_birmingham_hc_list_7", "STOKE ON TRENT COMBINED COURT")
+        .put("FR_birmingham_hc_list_8", "WORCESTER COMBINED COURT")
+        .put("FR_birmingham_hc_list_9", "STAFFORD COMBINED COURT")
+        .put("FR_birmingham_hc_list_10", "HEREFORD COUNTY COURT AND FAMILY COURT")
+        .build();
+
+    public static String getLondonCourt(Map allocatedCourtMap) {
+        return londonMap.getOrDefault(allocatedCourtMap.get(""), "");
     }
+
+    private static Map<String, String> londonMap = ImmutableMap.<String, String>builder()
+        .put("FR_birmingham_hc_list_1", "BIRMINGHAM CIVIL AND FAMILY JUSTICE CENTRE")
+        .put("FR_birmingham_hc_list_2", "COVENTRY COMBINED COURT CENTRE")
+        .put("FR_birmingham_hc_list_3", "TELFORD COUNTY COURT AND FAMILY COURT")
+        .put("FR_birmingham_hc_list_4", "WOLVERHAMPTON COMBINED COURT CENTRE")
+        .put("FR_birmingham_hc_list_5", "DUDLEY COUNTY COURT AND FAMILY COURT")
+        .put("FR_birmingham_hc_list_6", "WALSALL COUNTY AND FAMILY COURT")
+        .put("FR_birmingham_hc_list_7", "STOKE ON TRENT COMBINED COURT")
+        .put("FR_birmingham_hc_list_8", "WORCESTER COMBINED COURT")
+        .put("FR_birmingham_hc_list_9", "STAFFORD COMBINED COURT")
+        .put("FR_birmingham_hc_list_10", "HEREFORD COUNTY COURT AND FAMILY COURT")
+        .build();
+
 }
