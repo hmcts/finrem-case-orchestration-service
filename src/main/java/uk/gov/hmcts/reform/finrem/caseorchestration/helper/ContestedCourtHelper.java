@@ -80,7 +80,7 @@ public class ContestedCourtHelper {
     private static String getNorthWestFRC(Map allocatedCourtMap) {
         String northWestList = (String) allocatedCourtMap.get("northWestList");
         if ("liverpool".equalsIgnoreCase(northWestList)) {
-            return "liverpool";
+            return getLiverpoolCourt(allocatedCourtMap);
         } else if ("manchester".equalsIgnoreCase(northWestList)) {
             return "manchester";
         }
@@ -138,20 +138,33 @@ public class ContestedCourtHelper {
         .build();
 
     public static String getLondonCourt(Map allocatedCourtMap) {
-        return londonMap.getOrDefault(allocatedCourtMap.get(""), "");
+        return londonMap.getOrDefault(allocatedCourtMap.get("cfcCourtList"), "");
     }
 
     private static Map<String, String> londonMap = ImmutableMap.<String, String>builder()
-        .put("FR_birmingham_hc_list_1", "BIRMINGHAM CIVIL AND FAMILY JUSTICE CENTRE")
-        .put("FR_birmingham_hc_list_2", "COVENTRY COMBINED COURT CENTRE")
-        .put("FR_birmingham_hc_list_3", "TELFORD COUNTY COURT AND FAMILY COURT")
-        .put("FR_birmingham_hc_list_4", "WOLVERHAMPTON COMBINED COURT CENTRE")
-        .put("FR_birmingham_hc_list_5", "DUDLEY COUNTY COURT AND FAMILY COURT")
-        .put("FR_birmingham_hc_list_6", "WALSALL COUNTY AND FAMILY COURT")
-        .put("FR_birmingham_hc_list_7", "STOKE ON TRENT COMBINED COURT")
-        .put("FR_birmingham_hc_list_8", "WORCESTER COMBINED COURT")
-        .put("FR_birmingham_hc_list_9", "STAFFORD COMBINED COURT")
-        .put("FR_birmingham_hc_list_10", "HEREFORD COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_CFCList_1", "BROMLEY COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_CFCList_2", "CROYDON COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_CFCList_3", "EDMONTON COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_CFCList_4", "KINGSTON-UPON-THAMES COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_CFCList_5", "ROMFORD COUNTY AND FAMILY COURT")
+        .put("FR_s_CFCList_6", "BARNET CIVIL AND FAMILY COURTS CENTRE")
+        .put("FR_s_CFCList_8", "BRENTFORD COUNTY AND FAMILY COURT")
+        .put("FR_s_CFCList_9", "CENTRAL FAMILY COURT")
+        .put("FR_s_CFCList_11", "EAST LONDON FAMILY COURT")
+        .put("FR_s_CFCList_14", "UXBRIDGE COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_CFCList_16", "WILLESDEN COUNTY COURT AND FAMILY COURT")
+        .build();
+
+    public static String getLiverpoolCourt(Map allocatedCourtMap) {
+        return liverpoolMap.getOrDefault(allocatedCourtMap.get("liverpoolCourtList"), "");
+    }
+
+    private static Map<String, String> liverpoolMap = ImmutableMap.<String, String>builder()
+        .put("FR_liverpool_hc_list_1", "LIVERPOOL CIVIL AND FAMILY COURT")
+        .put("FR_liverpool_hc_list_2", "CHESTER CIVIL AND FAMILY JUSTICE CENTRE")
+        .put("FR_liverpool_hc_list_3", "CREWE COUNTY COURT AND FAMILY COURT ")
+        .put("FR_liverpool_hc_list_4", "ST. HELENS COUNTY COURT AND FAMILY COURT ")
+        .put("FR_liverpool_hc_list_5", "BIRKENHEAD COUNTY COURT AND FAMILY COURT")
         .build();
 
 }
