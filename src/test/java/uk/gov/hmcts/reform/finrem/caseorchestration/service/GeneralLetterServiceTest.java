@@ -22,11 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -122,6 +118,14 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         generalLetterService.previewGeneralLetter(AUTH_TOKEN, caseDetails);
 
         assertThat(caseDetails.getData(), hasKey(GENERAL_LETTER_PREVIEW));
+    }
+
+    @Test
+    public void givenAddressIsMissing_whenCaseDataErrorsFetched_ThereIsAnError() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter-missing-address.json", mapper);
+
+        List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
+        assertThat(errors, hasItem("Address is missing for recipient type respondent"));
     }
 
     private void assertNameUsedForGeneralLetterAddressTo(int invocation, String generalLetterAddressTo, String expectedName) {

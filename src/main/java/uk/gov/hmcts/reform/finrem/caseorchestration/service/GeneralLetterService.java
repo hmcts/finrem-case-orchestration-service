@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -15,25 +16,18 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_ADDRESS_TO;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_PREVIEW;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.*;
 
 @Service
 @RequiredArgsConstructor
@@ -93,7 +87,7 @@ public class GeneralLetterService {
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(RESPONDENT_ADDRESS)));
         } else if ("other".equalsIgnoreCase(generalLetterAddressTo)) {
             addresseeBuilder
-                .name((String) data.get("generalLetterRecipient"))
+                .name((String) data.get(GENERAL_LETTER_RECIPIENT))
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get("generalLetterRecipientAddress")));
         }
         data.put(ADDRESSEE, addresseeBuilder.build());
@@ -119,5 +113,21 @@ public class GeneralLetterService {
     private List<GeneralLetterData> convertToGeneralLetterData(Object object) {
         return objectMapper.convertValue(object, new TypeReference<List<GeneralLetterData>>() {
         });
+    }
+
+    public List<String> getCaseDataErrorsForCreatingPreviewOrFinalLetter(CaseDetails caseDetails) {
+        Map<String, String> generalLetterAddressToValueToAddressCcdFieldName = ImmutableMap.of(
+            "applicantSolicitor", SOLICITOR_ADDRESS,
+            "respondentSolicitor", RESP_SOLICITOR_ADDRESS,
+            "respondent", RESPONDENT_ADDRESS,
+            "other", "generalLetterRecipientAddress");
+
+        Map<String, Object> data = caseDetails.getData();
+        String generalLetterAddressTo = (String) data.get(GENERAL_LETTER_ADDRESS_TO);
+        if (data.get(generalLetterAddressToValueToAddressCcdFieldName.get(generalLetterAddressTo)) == null) {
+            return asList(String.format("Address is missing for recipient type %s", generalLetterAddressTo));
+        } else {
+            return emptyList();
+        }
     }
 }

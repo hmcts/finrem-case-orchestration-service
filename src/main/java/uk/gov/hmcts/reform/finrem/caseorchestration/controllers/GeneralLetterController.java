@@ -79,9 +79,14 @@ public class GeneralLetterController implements BaseController {
         log.info("Received request to preview general letter for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        generalLetterService.previewGeneralLetter(authorisationToken, caseDetails);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {
+            generalLetterService.previewGeneralLetter(authorisationToken, caseDetails);
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        } else {
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails))
+                .build());
+        }
     }
 
     @PostMapping(path = "/documents/general-letter", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -99,8 +104,13 @@ public class GeneralLetterController implements BaseController {
         log.info("Received request for generating general letter with Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        generalLetterService.createGeneralLetter(authorisationToken, caseDetails);
-
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        if (generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails).isEmpty()) {
+            generalLetterService.createGeneralLetter(authorisationToken, caseDetails);
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        } else {
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails))
+                .build());
+        }
     }
 }

@@ -64,6 +64,7 @@ public class CCDConfigConstant {
     public static final String ORDER_REFUSAL_COLLECTION = "orderRefusalCollection";
     public static final String ORDER_REFUSAL_PREVIEW_COLLECTION = "orderRefusalPreviewDocument";
     public static final String GENERAL_LETTER_ADDRESS_TO = "generalLetterAddressTo";
+    public static final String GENERAL_LETTER_RECIPIENT = "generalLetterRecipient";
     public static final String GENERAL_LETTER_PREVIEW = "generalLetterPreview";
 
     public static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
