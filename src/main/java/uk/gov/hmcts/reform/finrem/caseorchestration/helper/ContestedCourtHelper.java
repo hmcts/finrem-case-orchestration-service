@@ -206,14 +206,14 @@ public class ContestedCourtHelper {
     }
 
     private static Map<String, String> cleavelandMap = ImmutableMap.<String, String>builder()
-        .put("FR_s_NottinghamList_1", "NEWCASTLE UPON TYNE JUSTICE CENTRE")
-        .put("FR_s_NottinghamList_2", "DURHAM JUSTICE CENTRE")
-        .put("FR_s_NottinghamList_3", "SUNDERLAND COUNTY AND FAMILY COURT")
-        .put("FR_s_NottinghamList_4", "MIDDLESBROUGH COUNTY COURT AT TEESSIDE COMBINED COURT")
-        .put("FR_s_NottinghamList_5", "GATESHEAD COUNTY COURT AND FAMILY COURT")
-        .put("FR_s_NottinghamList_6", "SOUTH SHIELDS COUNTY COURT AND FAMILY COURT")
-        .put("FR_s_NottinghamList_7", "NORTH SHIELDS COUNTY COURT AND FAMILY COURT")
-        .put("FR_s_NottinghamList_8", "DARLINGTON COUNTY COURT AND FAMILY COURT")
+        .put("FR_cleaveland_hc_list_1", "NEWCASTLE UPON TYNE JUSTICE CENTRE")
+        .put("FR_cleaveland_hc_list_2", "DURHAM JUSTICE CENTRE")
+        .put("FR_cleaveland_hc_list_3", "SUNDERLAND COUNTY AND FAMILY COURT")
+        .put("FR_cleaveland_hc_list_4", "MIDDLESBROUGH COUNTY COURT AT TEESSIDE COMBINED COURT")
+        .put("FR_cleaveland_hc_list_5", "GATESHEAD COUNTY COURT AND FAMILY COURT")
+        .put("FR_cleaveland_hc_list_6", "SOUTH SHIELDS COUNTY COURT AND FAMILY COURT")
+        .put("FR_cleaveland_hc_list_7", "NORTH SHIELDS COUNTY COURT AND FAMILY COURT")
+        .put("FR_cleaveland_hc_list_8", "DARLINGTON COUNTY COURT AND FAMILY COURT")
         .build();
 
     public static String getNWYorkshireCourt(Map allocatedCourtMap) {
@@ -221,14 +221,14 @@ public class ContestedCourtHelper {
     }
 
     private static Map<String, String> yorkshireMap = ImmutableMap.<String, String>builder()
-        .put("FR_s_nw_yorkshire_hc_1", "HARROGATE JUSTICE CENTRE")
-        .put("FR_s_nw_yorkshire_hc_2", "BRADFORD COMBINED COURT CENTRE")
-        .put("FR_s_nw_yorkshire_hc_3", "HUDDERSFIELD COUNTY COURT AND FAMILY COURT")
-        .put("FR_s_nw_yorkshire_hc_4", "WAKEFIELD CIVIL AND FAMILY JUSTICE CENTRE")
-        .put("FR_s_nw_yorkshire_hc_5", "YORK COUNTY COURT AND FAMILY COURT")
-        .put("FR_s_nw_yorkshire_hc_6", "SCARBOROUGH JUSTICE CENTRE")
-        .put("FR_s_nw_yorkshire_hc_7", "SKIPTON COUNTY COURT AND FAMILY COURT")
-        .put("FR_s_nw_yorkshire_hc_8", "LEEDS COMBINED COURT CENTRE")
+        .put("FR_nw_yorkshire_hc_list_1", "HARROGATE JUSTICE CENTRE")
+        .put("FR_nw_yorkshire_hc_list_2", "BRADFORD COMBINED COURT CENTRE")
+        .put("FR_nw_yorkshire_hc_list_3", "HUDDERSFIELD COUNTY COURT AND FAMILY COURT")
+        .put("FR_nw_yorkshire_hc_list_4", "WAKEFIELD CIVIL AND FAMILY JUSTICE CENTRE")
+        .put("FR_nw_yorkshire_hc_list_5", "YORK COUNTY COURT AND FAMILY COURT")
+        .put("FR_nw_yorkshire_hc_list_6", "SCARBOROUGH JUSTICE CENTRE")
+        .put("FR_nw_yorkshire_hc_list_7", "SKIPTON COUNTY COURT AND FAMILY COURT")
+        .put("FR_nw_yorkshire_hc_list_8", "LEEDS COMBINED COURT CENTRE")
         .build();
 
 
