@@ -134,7 +134,8 @@ public class GeneralLetterService {
 
         Map<String, Object> data = caseDetails.getData();
         String generalLetterAddressTo = (String) data.get(GENERAL_LETTER_ADDRESS_TO);
-        if (data.get(generalLetterAddressToValueToAddressCcdFieldName.get(generalLetterAddressTo)) == null) {
+        Map<String, Object> recipientAddress = (Map) data.get(generalLetterAddressToValueToAddressCcdFieldName.get(generalLetterAddressTo));
+        if (recipientAddress == null || recipientAddress.isEmpty()) {
             return asList(String.format("Address is missing for recipient type %s", generalLetterAddressTo));
         } else {
             return emptyList();
