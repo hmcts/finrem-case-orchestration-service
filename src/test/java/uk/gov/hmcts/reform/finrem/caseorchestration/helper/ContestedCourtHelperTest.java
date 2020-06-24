@@ -51,89 +51,89 @@ public class ContestedCourtHelperTest {
 
     @Test
     public void newportCourts() {
-        verifyCorrectCourtReturned(WALES, WALESLIST, NEWPORT , NEWPORT_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, NEWPORT, NEWPORT_COURTLIST,
             "FR_newport_hc_list_1", "Newport Civil and Family Court");
 
-        verifyCorrectCourtReturned(WALES, WALESLIST, NEWPORT , NEWPORT_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, NEWPORT, NEWPORT_COURTLIST,
             "FR_newport_hc_list_2", "Cardiff Civil and Family Justice Centre");
 
-        verifyCorrectCourtReturned(WALES, WALESLIST, NEWPORT , NEWPORT_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, NEWPORT, NEWPORT_COURTLIST,
             "FR_newport_hc_list_3", "Merthyr Tydfil Combined Court Centre");
 
-        verifyCorrectCourtReturned(WALES, WALESLIST, NEWPORT , NEWPORT_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, NEWPORT, NEWPORT_COURTLIST,
             "FR_newport_hc_list_4", "Pontypridd County and Family Court");
 
-        verifyCorrectCourtReturned(WALES, WALESLIST, NEWPORT , NEWPORT_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, NEWPORT, NEWPORT_COURTLIST,
             "FR_newport_hc_list_5", "Blackwood Civil and Family Court");
 
-        verifyCorrectCourtReturned(WALES, WALESLIST, "invalid" , NEWPORT_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, "invalid", NEWPORT_COURTLIST,
             "FR_newport_hc_list_5", "");
 
-        verifyCorrectCourtReturned(WALES, WALESLIST, NEWPORT , NEWPORT_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, NEWPORT, NEWPORT_COURTLIST,
             "invalid", "");
     }
 
     @Test
     public void swanseaCourts() {
-        verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA , SWANSEA_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA, SWANSEA_COURTLIST,
             "FR_swansea_hc_list_1", "Swansea Civil and Family Justice Centre");
 
-        verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA , SWANSEA_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA, SWANSEA_COURTLIST,
             "FR_swansea_hc_list_2", "Aberystwyth Justice Centre");
 
-        verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA , SWANSEA_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA, SWANSEA_COURTLIST,
             "FR_swansea_hc_list_3", "Haverfordwest County and Family Court");
 
-        verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA , SWANSEA_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA, SWANSEA_COURTLIST,
             "FR_swansea_hc_list_4", "Carmarthen County and Family Court");
 
-        verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA , SWANSEA_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA, SWANSEA_COURTLIST,
             "FR_swansea_hc_list_5", "Llanelli Law Courts");
 
-        verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA , SWANSEA_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA, SWANSEA_COURTLIST,
             "FR_swansea_hc_list_6", "Port Talbot Justice Centre");
 
-        verifyCorrectCourtReturned(WALES, WALESLIST, "invalid" , SWANSEA_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, "invalid", SWANSEA_COURTLIST,
             "FR_swansea_hc_list_6", "");
 
-        verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA , SWANSEA_COURTLIST,
+        verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA, SWANSEA_COURTLIST,
             "invalid", "");
 
     }
 
     @Test
     public void kentCourts() {
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_1", "Canterbury Family Court Hearing Centre");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_2", "Maidstone Combined Court Centre");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_3", "Dartford County Court and Family Court");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_4", "Medway County Court and Family Court");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_5", "Guildford County Court and Family Court");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_6", "Staines County Court and Family Court");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_7", "Brighton County and Family Court");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_8", "Worthing County Court and Family Court");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_9", "Hastings County Court and Family Court Hearing Centre");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_10", "Horsham County Court and Family Court");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, "invalid" , KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, "invalid", KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_10", "");
 
 
@@ -209,7 +209,7 @@ public class ContestedCourtHelperTest {
     }
 
     @Test
-    public void HSYorkshireCourts() {
+    public void hsYorkshireCourts() {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEASTLIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST,
             "FR_humber_hc_list_1", "Sheffield Family Hearing Centre");
 
@@ -393,11 +393,12 @@ public class ContestedCourtHelperTest {
 
     private CaseDetails getCaseDetailsWithAllocatedValues(String region, String subRegionListName, String subRegion,
                                                           String courtListName, String court) {
-        CaseDetails details = defaultCaseDetails();
         HashMap allocatedCourtList = new HashMap<String, String>();
         allocatedCourtList.put(REGION, region);
         allocatedCourtList.put(subRegionListName, subRegion);
         allocatedCourtList.put(courtListName, court);
+
+        CaseDetails details = defaultCaseDetails();
         details.getData().put(ALLOCATED_COURT_LIST, allocatedCourtList);
         return details;
     }

@@ -87,7 +87,6 @@ public class CCDConfigConstant {
     public static final String GENERAL_EMAIL_CREATED_BY = "generalEmailCreatedBy";
     public static final String GENERAL_EMAIL_BODY = "generalEmailBody";
 
-
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
     public static final String FEES = "Fees";
@@ -148,8 +147,6 @@ public class CCDConfigConstant {
     public static final String SOUTHEASTLIST = "southEastList";
     public static final String WALES = "wales";
     public static final String WALESLIST = "walesList";
-
-
 
     // Bulk Printing
     public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";

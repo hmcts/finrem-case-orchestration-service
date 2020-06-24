@@ -94,7 +94,7 @@ public class ContestedCourtHelper {
         if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
             return getCleavelandCourt(allocatedCourtMap);
         } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
-            return getNWYorkshireCourt(allocatedCourtMap);
+            return getNwYorkshireCourt(allocatedCourtMap);
         } else if (HSYORKSHIRE.equalsIgnoreCase(northEastList)) {
             return getHumberCourt(allocatedCourtMap);
         }
@@ -216,7 +216,7 @@ public class ContestedCourtHelper {
         .put("FR_cleaveland_hc_list_8", "Darlington County Court and Family Court")
         .build();
 
-    public static String getNWYorkshireCourt(Map allocatedCourtMap) {
+    public static String getNwYorkshireCourt(Map allocatedCourtMap) {
         return yorkshireMap.getOrDefault(allocatedCourtMap.get(NWYORKSHIRE_COURTLIST), "");
     }
 
@@ -230,7 +230,6 @@ public class ContestedCourtHelper {
         .put("FR_nw_yorkshire_hc_list_7", "Skipton County Court and Family Court")
         .put("FR_nw_yorkshire_hc_list_8", "Leeds Combined Court Centre")
         .build();
-
 
     public static String getHumberCourt(Map allocatedCourtMap) {
         return humberMap.getOrDefault(allocatedCourtMap.get(HSYORKSHIRE_COURTLIST), "");
