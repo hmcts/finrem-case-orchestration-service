@@ -50,9 +50,9 @@ public class ContestedCourtHelper {
     private static String getWalesFRC(Map allocatedCourtMap) {
         String walesList = (String) allocatedCourtMap.get("walesList");
         if (NEWPORT.equalsIgnoreCase(walesList)) {
-            return NEWPORT;
+            return getNewportCourt(allocatedCourtMap);
         } else if (SWANSEA.equalsIgnoreCase(walesList)) {
-            return SWANSEA;
+            return getSwanseaCourt(allocatedCourtMap);
         }
         return EMPTY;
     }
@@ -60,7 +60,7 @@ public class ContestedCourtHelper {
     private static String getSouthEastFRC(Map allocatedCourtMap) {
         String southEastList = (String) allocatedCourtMap.get("southEastList");
         if (KENTFRC.equalsIgnoreCase(southEastList)) {
-            return KENTFRC;
+            return getKentCourt(allocatedCourtMap);
         }
         return EMPTY;
     }
@@ -68,11 +68,11 @@ public class ContestedCourtHelper {
     private static String getNorthEastFRC(Map allocatedCourtMap) {
         String northEastList = (String) allocatedCourtMap.get("northEastList");
         if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
-            return CLEAVELAND;
+            return getCleavelandCourt(allocatedCourtMap);
         } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
-            return NWYORKSHIRE;
+            return getNWYorkshireCourt(allocatedCourtMap);
         } else if (HSYORKSHIRE.equalsIgnoreCase(northEastList)) {
-            return HSYORKSHIRE;
+            return getHumberCourt(allocatedCourtMap);
         }
         return EMPTY;
     }
@@ -82,7 +82,7 @@ public class ContestedCourtHelper {
         if ("liverpool".equalsIgnoreCase(northWestList)) {
             return getLiverpoolCourt(allocatedCourtMap);
         } else if ("manchester".equalsIgnoreCase(northWestList)) {
-            return "manchester";
+            return getManchesterCourt(allocatedCourtMap);
         }
         return EMPTY;
     }
@@ -167,4 +167,98 @@ public class ContestedCourtHelper {
         .put("FR_liverpool_hc_list_5", "BIRKENHEAD COUNTY COURT AND FAMILY COURT")
         .build();
 
+    public static String getManchesterCourt(Map allocatedCourtMap) {
+        return manchesterMap.getOrDefault(allocatedCourtMap.get("manchesterCourtList"), "");
+    }
+
+    private static Map<String, String> manchesterMap = ImmutableMap.<String, String>builder()
+        .put("FR_manchester_hc_list_1", "MANCHESTER COUNTY AND FAMILY COURT ")
+        .put("FR_manchester_hc_list_2", "STOCKPORT COUNTY COURT AND FAMILY COURT")
+        .put("FR_manchester_hc_list_3", "WIGAN COUNTY COURT AND FAMILY COURT  ")
+        .build();
+
+    public static String getCleavelandCourt(Map allocatedCourtMap) {
+        return cleavelandMap.getOrDefault(allocatedCourtMap.get("cleavelandCourtList"), "");
+    }
+
+    private static Map<String, String> cleavelandMap = ImmutableMap.<String, String>builder()
+        .put("FR_s_NottinghamList_1", "NEWCASTLE UPON TYNE JUSTICE CENTRE")
+        .put("FR_s_NottinghamList_2", "DURHAM JUSTICE CENTRE")
+        .put("FR_s_NottinghamList_3", "SUNDERLAND COUNTY AND FAMILY COURT")
+        .put("FR_s_NottinghamList_4", "MIDDLESBROUGH COUNTY COURT AT TEESSIDE COMBINED COURT")
+        .put("FR_s_NottinghamList_5", "GATESHEAD COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_NottinghamList_6", "SOUTH SHIELDS COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_NottinghamList_7", "NORTH SHIELDS COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_NottinghamList_8", "DARLINGTON COUNTY COURT AND FAMILY COURT")
+        .build();
+
+    public static String getNWYorkshireCourt(Map allocatedCourtMap) {
+        return yorkshireMap.getOrDefault(allocatedCourtMap.get("nwyorkshireCourtList"), "");
+    }
+
+    private static Map<String, String> yorkshireMap = ImmutableMap.<String, String>builder()
+        .put("FR_s_nw_yorkshire_hc_1", "HARROGATE JUSTICE CENTRE")
+        .put("FR_s_nw_yorkshire_hc_2", "BRADFORD COMBINED COURT CENTRE")
+        .put("FR_s_nw_yorkshire_hc_3", "HUDDERSFIELD COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_nw_yorkshire_hc_4", "WAKEFIELD CIVIL AND FAMILY JUSTICE CENTRE")
+        .put("FR_s_nw_yorkshire_hc_5", "YORK COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_nw_yorkshire_hc_6", "SCARBOROUGH JUSTICE CENTRE")
+        .put("FR_s_nw_yorkshire_hc_7", "SKIPTON COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_nw_yorkshire_hc_8", "LEEDS COMBINED COURT CENTRE")
+        .build();
+
+
+    public static String getHumberCourt(Map allocatedCourtMap) {
+        return humberMap.getOrDefault(allocatedCourtMap.get("humberCourtList"), "");
+    }
+
+    private static Map<String, String> humberMap = ImmutableMap.<String, String>builder()
+        .put("FR_humber_hc_list_1", "SHEFFIELD FAMILY HEARING CENTRE")
+        .put("FR_humber_hc_list_2", "KINGSTON-UPON-HULL COMBINED COURT CENTRE")
+        .put("FR_humber_hc_list_3", "DONCASTER JUSTICE CENTRE NORTH")
+        .put("FR_humber_hc_list_4", "GREAT GRIMSBY COMBINED COURT CENTRE")
+        .put("FR_humber_hc_list_5", "BARNSLEY LAW COURTS")
+        .build();
+
+    public static String getKentCourt(Map allocatedCourtMap) {
+        return kentMap.getOrDefault(allocatedCourtMap.get("kentSurreyCourtList"), "");
+    }
+
+    private static Map<String, String> kentMap = ImmutableMap.<String, String>builder()
+        .put("FR_kent_surrey_hc_list_1", "CANTERBURY FAMILY COURT HEARING CENTRE")
+        .put("FR_kent_surrey_hc_list_2", "MAIDSTONE COMBINED COURT CENTRE")
+        .put("FR_kent_surrey_hc_list_3", "DARTFORD COUNTY COURT AND FAMILY COURT")
+        .put("FR_kent_surrey_hc_list_4", "MEDWAY COUNTY COURT AND FAMILY COURT")
+        .put("FR_kent_surrey_hc_list_5", "GUILDFORD COUNTY COURT AND FAMILY COURT")
+        .put("FR_kent_surrey_hc_list_6", "STAINES COUNTY COURT AND FAMILY COURT")
+        .put("FR_kent_surrey_hc_list_7", "BRIGHTON COUNTY AND FAMILY COURT")
+        .put("FR_kent_surrey_hc_list_8", "WORTHING COUNTY COURT AND FAMILY COURT")
+        .put("FR_kent_surrey_hc_list_9", "HASTINGS COUNTY COURT AND FAMILY COURT HEARING CENTRE")
+        .put("FR_kent_surrey_hc_list_10", "HORSHAM COUNTY COURT AND FAMILY COURT")
+        .build();
+
+    public static String getNewportCourt(Map allocatedCourtMap) {
+        return newportMap.getOrDefault(allocatedCourtMap.get("newportCourtList"), "");
+    }
+
+    private static Map<String, String> newportMap = ImmutableMap.<String, String>builder()
+        .put("FR_newport_hc_list_1", "NEWPORT CIVIL AND FAMILY COURT")
+        .put("FR_newport_hc_list_2", "CARDIFF CIVIL & FAMILY JUSTICE CENTRE")
+        .put("FR_newport_hc_list_3", "MERTHYR TYDFIL COMBINED COURT CENTRE")
+        .put("FR_newport_hc_list_4", "PONTYPRIDD COUNTY AND FAMILY COURT")
+        .put("FR_newport_hc_list_5", "BLACKWOOD CIVIL AND FAMILY COURT")
+        .build();
+
+    public static String getSwanseaCourt(Map allocatedCourtMap) {
+        return swanseaMap.getOrDefault(allocatedCourtMap.get("swanseaCourtList"), "");
+    }
+
+    private static Map<String, String> swanseaMap = ImmutableMap.<String, String>builder()
+        .put("FR_swansea_hc_list_1", "SWANSEA CIVIL & FAMILY JUSTICE CENTRE")
+        .put("FR_swansea_hc_list_2", "ABERYSTWYTH JUSTICE CENTRE")
+        .put("FR_swansea_hc_list_3", "HAVERFORDWEST COUNTY & FAMILY COURT")
+        .put("FR_swansea_hc_list_4", "CARMARTHEN COUNTY AND FAMILY COURT")
+        .put("FR_swansea_hc_list_5", "LLANELLI LAW COURTS")
+        .put("FR_swansea_hc_list_6", "PORT TALBOT JUSTICE CENTRE")
+        .build();
 }
