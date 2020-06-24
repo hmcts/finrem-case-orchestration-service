@@ -114,12 +114,18 @@ public class CCDConfigConstant {
     public static final String ROLES = "roles";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
     public static final String KENTFRC = "kentfrc";
+    public static final String KENTFRC_COURTLIST = "kentSurreyCourtList";
     public static final String REGION = "region";
     public static final String NEWPORT = "newport";
+    public static final String NEWPORT_COURTLIST = "newportCourtList";
     public static final String SWANSEA = "swansea";
+    public static final String SWANSEA_COURTLIST = "swanseaCourtList";
     public static final String CLEAVELAND = "cleaveland";
+    public static final String CLEAVELAND_COURTLIST = "cleavelandCourtList";
     public static final String NWYORKSHIRE = "nwyorkshire";
+    public static final String NWYORKSHIRE_COURTLIST = "nwyorkshireCourtList";
     public static final String HSYORKSHIRE = "hsyorkshire";
+    public static final String HSYORKSHIRE_COURTLIST = "humberCourtList";
     public static final String NOTTINGHAM = "nottingham";
     public static final String BIRMINGHAM = "birmingham";
     public static final String MIDLANDS = "midlands";
@@ -133,10 +139,15 @@ public class CCDConfigConstant {
     public static final String NORTHWEST = "northwest";
     public static final String NORTHWESTLIST = "northWestList";
     public static final String MANCHESTER = "manchester";
+    public static final String MANCHESTER_COURTLIST = "manchesterCourtList";
     public static final String LIVERPOOL = "liverpool";
     public static final String LIVERPOOL_COURTLIST = "liverpoolCourtList";
     public static final String NORTHEAST = "northeast";
     public static final String NORTHEASTLIST = "northEastList";
+    public static final String SOUTHEAST = "southeast";
+    public static final String SOUTHEASTLIST = "southEastList";
+    public static final String WALES = "wales";
+    public static final String WALESLIST = "walesList";
 
 
 

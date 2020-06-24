@@ -174,7 +174,7 @@ public class ContestedCourtHelper {
     private static Map<String, String> manchesterMap = ImmutableMap.<String, String>builder()
         .put("FR_manchester_hc_list_1", "MANCHESTER COUNTY AND FAMILY COURT ")
         .put("FR_manchester_hc_list_2", "STOCKPORT COUNTY COURT AND FAMILY COURT")
-        .put("FR_manchester_hc_list_3", "WIGAN COUNTY COURT AND FAMILY COURT  ")
+        .put("FR_manchester_hc_list_3", "WIGAN COUNTY COURT AND FAMILY COURT ")
         .build();
 
     public static String getCleavelandCourt(Map allocatedCourtMap) {
