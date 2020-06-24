@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -122,6 +124,22 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         generalLetterService.previewGeneralLetter(AUTH_TOKEN, caseDetails);
 
         assertThat(caseDetails.getData(), hasKey(GENERAL_LETTER_PREVIEW));
+    }
+
+    @Test
+    public void givenAddressIsMissing_whenCaseDataErrorsFetched_ThereIsAnError() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter-missing-address.json", mapper);
+
+        List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
+        assertThat(errors, hasItem("Address is missing for recipient type respondent"));
+    }
+
+    @Test
+    public void givenAddressIsPresent_whenCaseDataErrorsFetched_ThereIsNoError() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+
+        List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
+        assertThat(errors, is(empty()));
     }
 
     private void assertNameUsedForGeneralLetterAddressTo(int invocation, String generalLetterAddressTo, String expectedName) {
