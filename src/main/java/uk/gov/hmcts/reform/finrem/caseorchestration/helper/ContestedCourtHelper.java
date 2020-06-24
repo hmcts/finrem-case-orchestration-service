@@ -9,14 +9,37 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALLOCATED_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDSLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEASTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWESTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEASTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALESLIST;
 
 public class ContestedCourtHelper {
 
@@ -27,28 +50,29 @@ public class ContestedCourtHelper {
         HashMap<String, Object> allocatedCourtMap = (HashMap<String, Object>) allocatedCourtList;
         String region = (String) allocatedCourtMap.get(REGION);
 
-        if ("midlands".equalsIgnoreCase(region)) {
+        if (MIDLANDS.equalsIgnoreCase(region)) {
             return getMidlandFRC(allocatedCourtMap);
         }
-        if ("london".equalsIgnoreCase(region)) {
+        if (LONDON.equalsIgnoreCase(region)) {
             return getLondonFRC(allocatedCourtMap);
         }
-        if ("northwest".equalsIgnoreCase(region)) {
+        if (NORTHWEST.equalsIgnoreCase(region)) {
             return getNorthWestFRC(allocatedCourtMap);
         }
-        if ("northeast".equalsIgnoreCase(region)) {
+        if (NORTHEAST.equalsIgnoreCase(region)) {
             return getNorthEastFRC(allocatedCourtMap);
         }
-        if ("southeast".equalsIgnoreCase(region)) {
+        if (SOUTHEAST.equalsIgnoreCase(region)) {
             return getSouthEastFRC(allocatedCourtMap);
-        } else if ("wales".equalsIgnoreCase(region)) {
+        }
+        if (WALES.equalsIgnoreCase(region)) {
             return getWalesFRC(allocatedCourtMap);
         }
         return EMPTY;
     }
 
     private static String getWalesFRC(Map allocatedCourtMap) {
-        String walesList = (String) allocatedCourtMap.get("walesList");
+        String walesList = (String) allocatedCourtMap.get(WALESLIST);
         if (NEWPORT.equalsIgnoreCase(walesList)) {
             return getNewportCourt(allocatedCourtMap);
         } else if (SWANSEA.equalsIgnoreCase(walesList)) {
@@ -58,7 +82,7 @@ public class ContestedCourtHelper {
     }
 
     private static String getSouthEastFRC(Map allocatedCourtMap) {
-        String southEastList = (String) allocatedCourtMap.get("southEastList");
+        String southEastList = (String) allocatedCourtMap.get(SOUTHEASTLIST);
         if (KENTFRC.equalsIgnoreCase(southEastList)) {
             return getKentCourt(allocatedCourtMap);
         }
@@ -66,7 +90,7 @@ public class ContestedCourtHelper {
     }
 
     private static String getNorthEastFRC(Map allocatedCourtMap) {
-        String northEastList = (String) allocatedCourtMap.get("northEastList");
+        String northEastList = (String) allocatedCourtMap.get(NORTHEASTLIST);
         if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
             return getCleavelandCourt(allocatedCourtMap);
         } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
@@ -78,7 +102,7 @@ public class ContestedCourtHelper {
     }
 
     private static String getNorthWestFRC(Map allocatedCourtMap) {
-        String northWestList = (String) allocatedCourtMap.get("northWestList");
+        String northWestList = (String) allocatedCourtMap.get(NORTHWESTLIST);
         if ("liverpool".equalsIgnoreCase(northWestList)) {
             return getLiverpoolCourt(allocatedCourtMap);
         } else if ("manchester".equalsIgnoreCase(northWestList)) {
@@ -88,7 +112,7 @@ public class ContestedCourtHelper {
     }
 
     private static String getLondonFRC(Map allocatedCourtMap) {
-        String londonList = (String) allocatedCourtMap.get("londonList");
+        String londonList = (String) allocatedCourtMap.get(LONDON_LIST);
         if ("cfc".equalsIgnoreCase(londonList)) {
             return getLondonCourt(allocatedCourtMap);
         }
@@ -96,7 +120,7 @@ public class ContestedCourtHelper {
     }
 
     private static String getMidlandFRC(Map allocatedCourtMap) {
-        String midlandsList = (String) allocatedCourtMap.get("midlandsList");
+        String midlandsList = (String) allocatedCourtMap.get(MIDLANDSLIST);
         if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
             return getNottinghamCourt(allocatedCourtMap);
         } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
@@ -106,7 +130,7 @@ public class ContestedCourtHelper {
     }
 
     public static String getNottinghamCourt(Map allocatedCourtMap) {
-        return nottinghamMap.getOrDefault(allocatedCourtMap.get("nottinghamCourtList"), "");
+        return nottinghamMap.getOrDefault(allocatedCourtMap.get(NOTTINGHAM_COURTLIST), "");
     }
 
     private static Map<String, String> nottinghamMap = ImmutableMap.<String, String>builder()
@@ -121,7 +145,7 @@ public class ContestedCourtHelper {
         .build();
 
     public static String getBirminghamCourt(Map allocatedCourtMap) {
-        return birminghamMap.getOrDefault(allocatedCourtMap.get("birminghamhamCourtList"), "");
+        return birminghamMap.getOrDefault(allocatedCourtMap.get(BIRMINGHAM_COURTLIST), "");
     }
 
     private static Map<String, String> birminghamMap = ImmutableMap.<String, String>builder()
@@ -138,7 +162,7 @@ public class ContestedCourtHelper {
         .build();
 
     public static String getLondonCourt(Map allocatedCourtMap) {
-        return londonMap.getOrDefault(allocatedCourtMap.get("cfcCourtList"), "");
+        return londonMap.getOrDefault(allocatedCourtMap.get(LONDON_COURTLIST), "");
     }
 
     private static Map<String, String> londonMap = ImmutableMap.<String, String>builder()
@@ -156,7 +180,7 @@ public class ContestedCourtHelper {
         .build();
 
     public static String getLiverpoolCourt(Map allocatedCourtMap) {
-        return liverpoolMap.getOrDefault(allocatedCourtMap.get("liverpoolCourtList"), "");
+        return liverpoolMap.getOrDefault(allocatedCourtMap.get(LIVERPOOL_COURTLIST), "");
     }
 
     private static Map<String, String> liverpoolMap = ImmutableMap.<String, String>builder()
@@ -168,7 +192,7 @@ public class ContestedCourtHelper {
         .build();
 
     public static String getManchesterCourt(Map allocatedCourtMap) {
-        return manchesterMap.getOrDefault(allocatedCourtMap.get("manchesterCourtList"), "");
+        return manchesterMap.getOrDefault(allocatedCourtMap.get(MANCHESTER_COURTLIST), "");
     }
 
     private static Map<String, String> manchesterMap = ImmutableMap.<String, String>builder()
@@ -178,7 +202,7 @@ public class ContestedCourtHelper {
         .build();
 
     public static String getCleavelandCourt(Map allocatedCourtMap) {
-        return cleavelandMap.getOrDefault(allocatedCourtMap.get("cleavelandCourtList"), "");
+        return cleavelandMap.getOrDefault(allocatedCourtMap.get(CLEAVELAND_COURTLIST), "");
     }
 
     private static Map<String, String> cleavelandMap = ImmutableMap.<String, String>builder()
@@ -193,7 +217,7 @@ public class ContestedCourtHelper {
         .build();
 
     public static String getNWYorkshireCourt(Map allocatedCourtMap) {
-        return yorkshireMap.getOrDefault(allocatedCourtMap.get("nwyorkshireCourtList"), "");
+        return yorkshireMap.getOrDefault(allocatedCourtMap.get(NWYORKSHIRE_COURTLIST), "");
     }
 
     private static Map<String, String> yorkshireMap = ImmutableMap.<String, String>builder()
@@ -209,7 +233,7 @@ public class ContestedCourtHelper {
 
 
     public static String getHumberCourt(Map allocatedCourtMap) {
-        return humberMap.getOrDefault(allocatedCourtMap.get("humberCourtList"), "");
+        return humberMap.getOrDefault(allocatedCourtMap.get(HSYORKSHIRE_COURTLIST), "");
     }
 
     private static Map<String, String> humberMap = ImmutableMap.<String, String>builder()
@@ -221,7 +245,7 @@ public class ContestedCourtHelper {
         .build();
 
     public static String getKentCourt(Map allocatedCourtMap) {
-        return kentMap.getOrDefault(allocatedCourtMap.get("kentSurreyCourtList"), "");
+        return kentMap.getOrDefault(allocatedCourtMap.get(KENTFRC_COURTLIST), "");
     }
 
     private static Map<String, String> kentMap = ImmutableMap.<String, String>builder()
@@ -238,7 +262,7 @@ public class ContestedCourtHelper {
         .build();
 
     public static String getNewportCourt(Map allocatedCourtMap) {
-        return newportMap.getOrDefault(allocatedCourtMap.get("newportCourtList"), "");
+        return newportMap.getOrDefault(allocatedCourtMap.get(NEWPORT_COURTLIST), "");
     }
 
     private static Map<String, String> newportMap = ImmutableMap.<String, String>builder()
@@ -250,7 +274,7 @@ public class ContestedCourtHelper {
         .build();
 
     public static String getSwanseaCourt(Map allocatedCourtMap) {
-        return swanseaMap.getOrDefault(allocatedCourtMap.get("swanseaCourtList"), "");
+        return swanseaMap.getOrDefault(allocatedCourtMap.get(SWANSEA_COURTLIST), "");
     }
 
     private static Map<String, String> swanseaMap = ImmutableMap.<String, String>builder()
