@@ -221,10 +221,6 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
         ContactDetailsMapper.setupContactDetailsForApplicantAndRespondent(modifiedCaseData);
 
-        // TODO: Remove once triaged NPE in BSP SIT as it will log PII once in Production
-        log.info("Transformed case data is: ");
-        modifiedCaseData.forEach((key, value) -> log.info(key + " : " + value));
-
         return modifiedCaseData;
     }
 
