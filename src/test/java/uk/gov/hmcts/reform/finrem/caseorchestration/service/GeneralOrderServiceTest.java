@@ -203,7 +203,7 @@ public class GeneralOrderServiceTest {
             assertThat(data.get("DivorceCaseNumber"), is("DD98D76543"));
             assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
             assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
-            assertThat(data.get("GeneralOrderCourt"),is("NOTTINGHAM COUNTY COURT AND FAMILY COURT"));
+            assertThat(data.get("GeneralOrderCourt"),is("Nottingham County Court and Family Court"));
             assertThat(data.get("GeneralOrderJudgeDetails"), is("Her Honour Judge Contested"));
             assertThat(data.get("GeneralOrderRecitals"), is("Contested Recitals"));
             assertThat(data.get("GeneralOrderDate"), is("01/06/2020"));

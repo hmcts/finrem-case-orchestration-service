@@ -134,14 +134,14 @@ public class ContestedCourtHelper {
     }
 
     private static Map<String, String> nottinghamMap = ImmutableMap.<String, String>builder()
-        .put("FR_s_NottinghamList_1", "NOTTINGHAM COUNTY COURT AND FAMILY COURT")
-        .put("FR_s_NottinghamList_2", "DERBY COMBINED COURT CENTRE")
-        .put("FR_s_NottinghamList_3", "LEICESTER COUNTY COURT AND FAMILY COURT")
-        .put("FR_s_NottinghamList_4", "LINCOLN COUNTY COURT AND FAMILY COURT")
-        .put("FR_s_NottinghamList_5", "NORTHAMPTON CROWN, COUNTY AND FAMILY COURT")
-        .put("FR_s_NottinghamList_6", "CHESTERFIELD COUNTY COURT")
-        .put("FR_s_NottinghamList_7", "MANSFIELD MAGISTRATES AND COUNTY COURT")
-        .put("FR_s_NottinghamList_8", "BOSTON COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_NottinghamList_1", "Nottingham County Court and Family Court")
+        .put("FR_s_NottinghamList_2", "Derby Combined Court Centre")
+        .put("FR_s_NottinghamList_3", "Leicester County Court and Family Court")
+        .put("FR_s_NottinghamList_4", "Lincoln County Court and Family Court")
+        .put("FR_s_NottinghamList_5", "Northampton Crown, County and Family Court")
+        .put("FR_s_NottinghamList_6", "Chesterfield County Court")
+        .put("FR_s_NottinghamList_7", "Mansfield Magistrates and County Court")
+        .put("FR_s_NottinghamList_8", "Boston County Court and Family Court")
         .build();
 
     public static String getBirminghamCourt(Map allocatedCourtMap) {
@@ -149,16 +149,16 @@ public class ContestedCourtHelper {
     }
 
     private static Map<String, String> birminghamMap = ImmutableMap.<String, String>builder()
-        .put("FR_birmingham_hc_list_1", "BIRMINGHAM CIVIL AND FAMILY JUSTICE CENTRE")
-        .put("FR_birmingham_hc_list_2", "COVENTRY COMBINED COURT CENTRE")
-        .put("FR_birmingham_hc_list_3", "TELFORD COUNTY COURT AND FAMILY COURT")
-        .put("FR_birmingham_hc_list_4", "WOLVERHAMPTON COMBINED COURT CENTRE")
-        .put("FR_birmingham_hc_list_5", "DUDLEY COUNTY COURT AND FAMILY COURT")
-        .put("FR_birmingham_hc_list_6", "WALSALL COUNTY AND FAMILY COURT")
-        .put("FR_birmingham_hc_list_7", "STOKE ON TRENT COMBINED COURT")
-        .put("FR_birmingham_hc_list_8", "WORCESTER COMBINED COURT")
-        .put("FR_birmingham_hc_list_9", "STAFFORD COMBINED COURT")
-        .put("FR_birmingham_hc_list_10", "HEREFORD COUNTY COURT AND FAMILY COURT")
+        .put("FR_birmingham_hc_list_1", "Birmingham Civil and Family Justice Centre")
+        .put("FR_birmingham_hc_list_2", "Coventry Combined Court Centre")
+        .put("FR_birmingham_hc_list_3", "Telford County Court and Family Court")
+        .put("FR_birmingham_hc_list_4", "Wolverhampton Combined Court Centre")
+        .put("FR_birmingham_hc_list_5", "Dudley County Court and Family Court")
+        .put("FR_birmingham_hc_list_6", "Walsall County and Family Court")
+        .put("FR_birmingham_hc_list_7", "Stoke on Trent Combined Court")
+        .put("FR_birmingham_hc_list_8", "Worcester Combined Court")
+        .put("FR_birmingham_hc_list_9", "Stafford Combined Court")
+        .put("FR_birmingham_hc_list_10", "Hereford County Court and Family Court")
         .build();
 
     public static String getLondonCourt(Map allocatedCourtMap) {
@@ -166,17 +166,17 @@ public class ContestedCourtHelper {
     }
 
     private static Map<String, String> londonMap = ImmutableMap.<String, String>builder()
-        .put("FR_s_CFCList_1", "BROMLEY COUNTY COURT AND FAMILY COURT")
-        .put("FR_s_CFCList_2", "CROYDON COUNTY COURT AND FAMILY COURT")
-        .put("FR_s_CFCList_3", "EDMONTON COUNTY COURT AND FAMILY COURT")
-        .put("FR_s_CFCList_4", "KINGSTON-UPON-THAMES COUNTY COURT AND FAMILY COURT")
-        .put("FR_s_CFCList_5", "ROMFORD COUNTY AND FAMILY COURT")
-        .put("FR_s_CFCList_6", "BARNET CIVIL AND FAMILY COURTS CENTRE")
-        .put("FR_s_CFCList_8", "BRENTFORD COUNTY AND FAMILY COURT")
-        .put("FR_s_CFCList_9", "CENTRAL FAMILY COURT")
-        .put("FR_s_CFCList_11", "EAST LONDON FAMILY COURT")
-        .put("FR_s_CFCList_14", "UXBRIDGE COUNTY COURT AND FAMILY COURT")
-        .put("FR_s_CFCList_16", "WILLESDEN COUNTY COURT AND FAMILY COURT")
+        .put("FR_s_CFCList_1", "Bromley County Court and Family Court")
+        .put("FR_s_CFCList_2", "Croydon County Court and Family Court")
+        .put("FR_s_CFCList_3", "Edmonton County Court and Family Court")
+        .put("FR_s_CFCList_4", "Kingston-upon-thames County Court and Family Court")
+        .put("FR_s_CFCList_5", "Romford County and Family Court")
+        .put("FR_s_CFCList_6", "Barnet Civil and Family Courts Centre")
+        .put("FR_s_CFCList_8", "Brentford County and Family Court")
+        .put("FR_s_CFCList_9", "Central Family Court")
+        .put("FR_s_CFCList_11", "East London Family Court")
+        .put("FR_s_CFCList_14", "Uxbridge County Court and Family Court")
+        .put("FR_s_CFCList_16", "Willesden County Court and Family Court")
         .build();
 
     public static String getLiverpoolCourt(Map allocatedCourtMap) {
@@ -184,11 +184,11 @@ public class ContestedCourtHelper {
     }
 
     private static Map<String, String> liverpoolMap = ImmutableMap.<String, String>builder()
-        .put("FR_liverpool_hc_list_1", "LIVERPOOL CIVIL AND FAMILY COURT")
-        .put("FR_liverpool_hc_list_2", "CHESTER CIVIL AND FAMILY JUSTICE CENTRE")
-        .put("FR_liverpool_hc_list_3", "CREWE COUNTY COURT AND FAMILY COURT ")
-        .put("FR_liverpool_hc_list_4", "ST. HELENS COUNTY COURT AND FAMILY COURT ")
-        .put("FR_liverpool_hc_list_5", "BIRKENHEAD COUNTY COURT AND FAMILY COURT")
+        .put("FR_liverpool_hc_list_1", "Liverpool Civil and Family Court")
+        .put("FR_liverpool_hc_list_2", "Chester Civil and Family Justice Centre")
+        .put("FR_liverpool_hc_list_3", "Crewe County Court and Family Court")
+        .put("FR_liverpool_hc_list_4", "St. Helens County Court and Family Court")
+        .put("FR_liverpool_hc_list_5", "Birkenhead County Court and Family Court")
         .build();
 
     public static String getManchesterCourt(Map allocatedCourtMap) {
@@ -196,9 +196,9 @@ public class ContestedCourtHelper {
     }
 
     private static Map<String, String> manchesterMap = ImmutableMap.<String, String>builder()
-        .put("FR_manchester_hc_list_1", "MANCHESTER COUNTY AND FAMILY COURT ")
-        .put("FR_manchester_hc_list_2", "STOCKPORT COUNTY COURT AND FAMILY COURT")
-        .put("FR_manchester_hc_list_3", "WIGAN COUNTY COURT AND FAMILY COURT ")
+        .put("FR_manchester_hc_list_1", "Manchester County and Family Court")
+        .put("FR_manchester_hc_list_2", "Stockport County Court and Family Court")
+        .put("FR_manchester_hc_list_3", "Wigan County Court and Family Court")
         .build();
 
     public static String getCleavelandCourt(Map allocatedCourtMap) {
@@ -206,14 +206,14 @@ public class ContestedCourtHelper {
     }
 
     private static Map<String, String> cleavelandMap = ImmutableMap.<String, String>builder()
-        .put("FR_cleaveland_hc_list_1", "NEWCASTLE UPON TYNE JUSTICE CENTRE")
-        .put("FR_cleaveland_hc_list_2", "DURHAM JUSTICE CENTRE")
-        .put("FR_cleaveland_hc_list_3", "SUNDERLAND COUNTY AND FAMILY COURT")
-        .put("FR_cleaveland_hc_list_4", "MIDDLESBROUGH COUNTY COURT AT TEESSIDE COMBINED COURT")
-        .put("FR_cleaveland_hc_list_5", "GATESHEAD COUNTY COURT AND FAMILY COURT")
-        .put("FR_cleaveland_hc_list_6", "SOUTH SHIELDS COUNTY COURT AND FAMILY COURT")
-        .put("FR_cleaveland_hc_list_7", "NORTH SHIELDS COUNTY COURT AND FAMILY COURT")
-        .put("FR_cleaveland_hc_list_8", "DARLINGTON COUNTY COURT AND FAMILY COURT")
+        .put("FR_cleaveland_hc_list_1", "Newcastle upon Tyne Justice Centre")
+        .put("FR_cleaveland_hc_list_2", "Durham Justice Centre")
+        .put("FR_cleaveland_hc_list_3", "Sunderland County and Family Court")
+        .put("FR_cleaveland_hc_list_4", "Middlesbrough County Court at Teesside Combined Court")
+        .put("FR_cleaveland_hc_list_5", "Gateshead County Court and Family Court")
+        .put("FR_cleaveland_hc_list_6", "South Shields County Court and Family Court")
+        .put("FR_cleaveland_hc_list_7", "North Shields County Court and Family Court")
+        .put("FR_cleaveland_hc_list_8", "Darlington County Court and Family Court")
         .build();
 
     public static String getNWYorkshireCourt(Map allocatedCourtMap) {
@@ -221,14 +221,14 @@ public class ContestedCourtHelper {
     }
 
     private static Map<String, String> yorkshireMap = ImmutableMap.<String, String>builder()
-        .put("FR_nw_yorkshire_hc_list_1", "HARROGATE JUSTICE CENTRE")
-        .put("FR_nw_yorkshire_hc_list_2", "BRADFORD COMBINED COURT CENTRE")
-        .put("FR_nw_yorkshire_hc_list_3", "HUDDERSFIELD COUNTY COURT AND FAMILY COURT")
-        .put("FR_nw_yorkshire_hc_list_4", "WAKEFIELD CIVIL AND FAMILY JUSTICE CENTRE")
-        .put("FR_nw_yorkshire_hc_list_5", "YORK COUNTY COURT AND FAMILY COURT")
-        .put("FR_nw_yorkshire_hc_list_6", "SCARBOROUGH JUSTICE CENTRE")
-        .put("FR_nw_yorkshire_hc_list_7", "SKIPTON COUNTY COURT AND FAMILY COURT")
-        .put("FR_nw_yorkshire_hc_list_8", "LEEDS COMBINED COURT CENTRE")
+        .put("FR_nw_yorkshire_hc_list_1", "Harrogate Justice Centre")
+        .put("FR_nw_yorkshire_hc_list_2", "Bradford Combined Court Centre")
+        .put("FR_nw_yorkshire_hc_list_3", "Huddersfield County Court and Family Court")
+        .put("FR_nw_yorkshire_hc_list_4", "Wakefield Civil and Family Justice Centre")
+        .put("FR_nw_yorkshire_hc_list_5", "York County Court and Family Court")
+        .put("FR_nw_yorkshire_hc_list_6", "Scarborough Justice Centre")
+        .put("FR_nw_yorkshire_hc_list_7", "Skipton County Court and Family Court")
+        .put("FR_nw_yorkshire_hc_list_8", "Leeds Combined Court Centre")
         .build();
 
 
@@ -237,11 +237,11 @@ public class ContestedCourtHelper {
     }
 
     private static Map<String, String> humberMap = ImmutableMap.<String, String>builder()
-        .put("FR_humber_hc_list_1", "SHEFFIELD FAMILY HEARING CENTRE")
-        .put("FR_humber_hc_list_2", "KINGSTON-UPON-HULL COMBINED COURT CENTRE")
-        .put("FR_humber_hc_list_3", "DONCASTER JUSTICE CENTRE NORTH")
-        .put("FR_humber_hc_list_4", "GREAT GRIMSBY COMBINED COURT CENTRE")
-        .put("FR_humber_hc_list_5", "BARNSLEY LAW COURTS")
+        .put("FR_humber_hc_list_1", "Sheffield Family Hearing Centre")
+        .put("FR_humber_hc_list_2", "Kingston-upon-Hull Combined Court Centre")
+        .put("FR_humber_hc_list_3", "Doncaster Justice Centre North")
+        .put("FR_humber_hc_list_4", "Great Grimsby Combined Court Centre")
+        .put("FR_humber_hc_list_5", "Barnsley Law Courts")
         .build();
 
     public static String getKentCourt(Map allocatedCourtMap) {
@@ -249,16 +249,16 @@ public class ContestedCourtHelper {
     }
 
     private static Map<String, String> kentMap = ImmutableMap.<String, String>builder()
-        .put("FR_kent_surrey_hc_list_1", "CANTERBURY FAMILY COURT HEARING CENTRE")
-        .put("FR_kent_surrey_hc_list_2", "MAIDSTONE COMBINED COURT CENTRE")
-        .put("FR_kent_surrey_hc_list_3", "DARTFORD COUNTY COURT AND FAMILY COURT")
-        .put("FR_kent_surrey_hc_list_4", "MEDWAY COUNTY COURT AND FAMILY COURT")
-        .put("FR_kent_surrey_hc_list_5", "GUILDFORD COUNTY COURT AND FAMILY COURT")
-        .put("FR_kent_surrey_hc_list_6", "STAINES COUNTY COURT AND FAMILY COURT")
-        .put("FR_kent_surrey_hc_list_7", "BRIGHTON COUNTY AND FAMILY COURT")
-        .put("FR_kent_surrey_hc_list_8", "WORTHING COUNTY COURT AND FAMILY COURT")
-        .put("FR_kent_surrey_hc_list_9", "HASTINGS COUNTY COURT AND FAMILY COURT HEARING CENTRE")
-        .put("FR_kent_surrey_hc_list_10", "HORSHAM COUNTY COURT AND FAMILY COURT")
+        .put("FR_kent_surrey_hc_list_1", "Canterbury Family Court Hearing Centre")
+        .put("FR_kent_surrey_hc_list_2", "Maidstone Combined Court Centre")
+        .put("FR_kent_surrey_hc_list_3", "Dartford County Court and Family Court")
+        .put("FR_kent_surrey_hc_list_4", "Medway County Court and Family Court")
+        .put("FR_kent_surrey_hc_list_5", "Guildford County Court and Family Court")
+        .put("FR_kent_surrey_hc_list_6", "Staines County Court and Family Court")
+        .put("FR_kent_surrey_hc_list_7", "Brighton County and Family Court")
+        .put("FR_kent_surrey_hc_list_8", "Worthing County Court and Family Court")
+        .put("FR_kent_surrey_hc_list_9", "Hastings County Court and Family Court Hearing Centre")
+        .put("FR_kent_surrey_hc_list_10", "Horsham County Court and Family Court")
         .build();
 
     public static String getNewportCourt(Map allocatedCourtMap) {
@@ -266,11 +266,11 @@ public class ContestedCourtHelper {
     }
 
     private static Map<String, String> newportMap = ImmutableMap.<String, String>builder()
-        .put("FR_newport_hc_list_1", "NEWPORT CIVIL AND FAMILY COURT")
-        .put("FR_newport_hc_list_2", "CARDIFF CIVIL & FAMILY JUSTICE CENTRE")
-        .put("FR_newport_hc_list_3", "MERTHYR TYDFIL COMBINED COURT CENTRE")
-        .put("FR_newport_hc_list_4", "PONTYPRIDD COUNTY AND FAMILY COURT")
-        .put("FR_newport_hc_list_5", "BLACKWOOD CIVIL AND FAMILY COURT")
+        .put("FR_newport_hc_list_1", "Newport Civil and Family Court")
+        .put("FR_newport_hc_list_2", "Cardiff Civil and Family Justice Centre")
+        .put("FR_newport_hc_list_3", "Merthyr Tydfil Combined Court Centre")
+        .put("FR_newport_hc_list_4", "Pontypridd County and Family Court")
+        .put("FR_newport_hc_list_5", "Blackwood Civil and Family Court")
         .build();
 
     public static String getSwanseaCourt(Map allocatedCourtMap) {
@@ -278,11 +278,11 @@ public class ContestedCourtHelper {
     }
 
     private static Map<String, String> swanseaMap = ImmutableMap.<String, String>builder()
-        .put("FR_swansea_hc_list_1", "SWANSEA CIVIL & FAMILY JUSTICE CENTRE")
-        .put("FR_swansea_hc_list_2", "ABERYSTWYTH JUSTICE CENTRE")
-        .put("FR_swansea_hc_list_3", "HAVERFORDWEST COUNTY & FAMILY COURT")
-        .put("FR_swansea_hc_list_4", "CARMARTHEN COUNTY AND FAMILY COURT")
-        .put("FR_swansea_hc_list_5", "LLANELLI LAW COURTS")
-        .put("FR_swansea_hc_list_6", "PORT TALBOT JUSTICE CENTRE")
+        .put("FR_swansea_hc_list_1", "Swansea Civil and Family Justice Centre")
+        .put("FR_swansea_hc_list_2", "Aberystwyth Justice Centre")
+        .put("FR_swansea_hc_list_3", "Haverfordwest County and Family Court")
+        .put("FR_swansea_hc_list_4", "Carmarthen County and Family Court")
+        .put("FR_swansea_hc_list_5", "Llanelli Law Courts")
+        .put("FR_swansea_hc_list_6", "Port Talbot Justice Centre")
         .build();
 }

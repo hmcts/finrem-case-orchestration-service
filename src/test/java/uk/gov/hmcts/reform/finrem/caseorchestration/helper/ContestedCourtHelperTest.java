@@ -55,7 +55,7 @@ public class ContestedCourtHelperTest {
             "FR_newport_hc_list_1", "Newport Civil and Family Court");
 
         verifyCorrectCourtReturned(WALES, WALESLIST, NEWPORT , NEWPORT_COURTLIST,
-            "FR_newport_hc_list_2", "Cardiff Civil & Family Justice Centre");
+            "FR_newport_hc_list_2", "Cardiff Civil and Family Justice Centre");
 
         verifyCorrectCourtReturned(WALES, WALESLIST, NEWPORT , NEWPORT_COURTLIST,
             "FR_newport_hc_list_3", "Merthyr Tydfil Combined Court Centre");
@@ -76,13 +76,13 @@ public class ContestedCourtHelperTest {
     @Test
     public void swanseaCourts() {
         verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA , SWANSEA_COURTLIST,
-            "FR_swansea_hc_list_1", "Swansea Civil & Family Justice Centre");
+            "FR_swansea_hc_list_1", "Swansea Civil and Family Justice Centre");
 
         verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA , SWANSEA_COURTLIST,
             "FR_swansea_hc_list_2", "Aberystwyth Justice Centre");
 
         verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA , SWANSEA_COURTLIST,
-            "FR_swansea_hc_list_3", "Haverfordwest County & Family Court");
+            "FR_swansea_hc_list_3", "Haverfordwest County and Family Court");
 
         verifyCorrectCourtReturned(WALES, WALESLIST, SWANSEA , SWANSEA_COURTLIST,
             "FR_swansea_hc_list_4", "Carmarthen County and Family Court");
@@ -104,34 +104,34 @@ public class ContestedCourtHelperTest {
     @Test
     public void kentCourts() {
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
-            "FR_kent_surrey_hc_list_1", "CANTERBURY FAMILY COURT HEARING CENTRE");
+            "FR_kent_surrey_hc_list_1", "Canterbury Family Court Hearing Centre");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
-            "FR_kent_surrey_hc_list_2", "MAIDSTONE COMBINED COURT CENTRE");
+            "FR_kent_surrey_hc_list_2", "Maidstone Combined Court Centre");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
-            "FR_kent_surrey_hc_list_3", "DARTFORD COUNTY COURT AND FAMILY COURT");
+            "FR_kent_surrey_hc_list_3", "Dartford County Court and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
-            "FR_kent_surrey_hc_list_4", "MEDWAY COUNTY COURT AND FAMILY COURT");
+            "FR_kent_surrey_hc_list_4", "Medway County Court and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
-            "FR_kent_surrey_hc_list_5", "GUILDFORD COUNTY COURT AND FAMILY COURT");
+            "FR_kent_surrey_hc_list_5", "Guildford County Court and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
-            "FR_kent_surrey_hc_list_6", "STAINES COUNTY COURT AND FAMILY COURT");
+            "FR_kent_surrey_hc_list_6", "Staines County Court and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
-            "FR_kent_surrey_hc_list_7", "BRIGHTON COUNTY AND FAMILY COURT");
+            "FR_kent_surrey_hc_list_7", "Brighton County and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
-            "FR_kent_surrey_hc_list_8", "WORTHING COUNTY COURT AND FAMILY COURT");
+            "FR_kent_surrey_hc_list_8", "Worthing County Court and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
-            "FR_kent_surrey_hc_list_9", "HASTINGS COUNTY COURT AND FAMILY COURT HEARING CENTRE");
+            "FR_kent_surrey_hc_list_9", "Hastings County Court and Family Court Hearing Centre");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, KENTFRC , KENTFRC_COURTLIST,
-            "FR_kent_surrey_hc_list_10", "HORSHAM COUNTY COURT AND FAMILY COURT");
+            "FR_kent_surrey_hc_list_10", "Horsham County Court and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEASTLIST, "invalid" , KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_10", "");
@@ -144,13 +144,13 @@ public class ContestedCourtHelperTest {
     @Test
     public void cleavelandCourts() {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEASTLIST, CLEAVELAND, CLEAVELAND_COURTLIST,
-            "FR_cleaveland_hc_list_1", "NEWCASTLE UPON TYNE JUSTICE CENTRE");
+            "FR_cleaveland_hc_list_1", "Newcastle upon Tyne Justice Centre");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEASTLIST, CLEAVELAND, CLEAVELAND_COURTLIST,
-            "FR_cleaveland_hc_list_2", "DURHAM JUSTICE CENTRE");
+            "FR_cleaveland_hc_list_2", "Durham Justice Centre");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEASTLIST, CLEAVELAND, CLEAVELAND_COURTLIST,
-            "FR_cleaveland_hc_list_3", "SUNDERLAND COUNTY AND FAMILY COURT");
+            "FR_cleaveland_hc_list_3", "Sunderland County and Family Court");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEASTLIST, CLEAVELAND, CLEAVELAND_COURTLIST,
             "FR_cleaveland_hc_list_4", "Middlesbrough County Court at Teesside Combined Court");
@@ -178,7 +178,7 @@ public class ContestedCourtHelperTest {
     @Test
     public void nwYorkshireCourts() {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEASTLIST, NWYORKSHIRE, NWYORKSHIRE_COURTLIST,
-            "FR_nw_yorkshire_hc_list_1", "harrogate justice centre");
+            "FR_nw_yorkshire_hc_list_1", "Harrogate Justice Centre");
 
         verifyCorrectCourtReturned(NORTHEAST, NORTHEASTLIST, NWYORKSHIRE, NWYORKSHIRE_COURTLIST,
             "FR_nw_yorkshire_hc_list_2", "Bradford Combined Court Centre");
@@ -232,24 +232,22 @@ public class ContestedCourtHelperTest {
             "invalid", "");
     }
 
-
-
     @Test
     public void liverpoolCourtList() throws Exception {
         verifyCorrectCourtReturned(NORTHWEST, NORTHWESTLIST, LIVERPOOL, LIVERPOOL_COURTLIST,
-            "FR_liverpool_hc_list_1", "LIVERPOOL CIVIL AND FAMILY COURT");
+            "FR_liverpool_hc_list_1", "Liverpool Civil and Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWESTLIST, LIVERPOOL, LIVERPOOL_COURTLIST,
-            "FR_liverpool_hc_list_2", "CHESTER CIVIL AND FAMILY JUSTICE CENTRE");
+            "FR_liverpool_hc_list_2", "Chester Civil and Family Justice Centre");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWESTLIST, LIVERPOOL, LIVERPOOL_COURTLIST,
-            "FR_liverpool_hc_list_3", "CREWE COUNTY COURT AND FAMILY COURT ");
+            "FR_liverpool_hc_list_3", "Crewe County Court and Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWESTLIST, LIVERPOOL, LIVERPOOL_COURTLIST,
-            "FR_liverpool_hc_list_4", "ST. HELENS COUNTY COURT AND FAMILY COURT ");
+            "FR_liverpool_hc_list_4", "St. Helens County Court and Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWESTLIST, LIVERPOOL, LIVERPOOL_COURTLIST,
-            "FR_liverpool_hc_list_5", "BIRKENHEAD COUNTY COURT AND FAMILY COURT");
+            "FR_liverpool_hc_list_5", "Birkenhead County Court and Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWESTLIST, "invalid", LIVERPOOL_COURTLIST,
             "FR_liverpool_hc_list_1", "");
@@ -261,13 +259,13 @@ public class ContestedCourtHelperTest {
     @Test
     public void manchesterCourtList() throws Exception {
         verifyCorrectCourtReturned(NORTHWEST, NORTHWESTLIST, MANCHESTER, MANCHESTER_COURTLIST,
-            "FR_manchester_hc_list_1", "MANCHESTER COUNTY AND FAMILY COURT ");
+            "FR_manchester_hc_list_1", "Manchester County and Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWESTLIST, MANCHESTER, MANCHESTER_COURTLIST,
-            "FR_manchester_hc_list_2", "STOCKPORT COUNTY COURT AND FAMILY COURT");
+            "FR_manchester_hc_list_2", "Stockport County Court and Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWESTLIST, MANCHESTER, MANCHESTER_COURTLIST,
-            "FR_manchester_hc_list_3", "WIGAN COUNTY COURT AND FAMILY COURT ");
+            "FR_manchester_hc_list_3", "Wigan County Court and Family Court");
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWESTLIST, MANCHESTER, MANCHESTER_COURTLIST,
             "invalid", "");
@@ -279,37 +277,37 @@ public class ContestedCourtHelperTest {
     @Test
     public void londonCourtListTest() throws Exception {
         verifyCorrectCourtReturned(LONDON, LONDON_LIST, LONDON_CFC, LONDON_COURTLIST,
-            "FR_s_CFCList_1", "BROMLEY COUNTY COURT AND FAMILY COURT");
+            "FR_s_CFCList_1", "Bromley County Court and Family Court");
 
         verifyCorrectCourtReturned(LONDON, LONDON_LIST, LONDON_CFC, LONDON_COURTLIST,
-            "FR_s_CFCList_2", "CROYDON COUNTY COURT AND FAMILY COURT");
+            "FR_s_CFCList_2", "Croydon County Court and Family Court");
 
         verifyCorrectCourtReturned(LONDON, LONDON_LIST, LONDON_CFC, LONDON_COURTLIST,
-            "FR_s_CFCList_3", "EDMONTON COUNTY COURT AND FAMILY COURT");
+            "FR_s_CFCList_3", "Edmonton County Court and Family Court");
 
         verifyCorrectCourtReturned(LONDON, LONDON_LIST, LONDON_CFC, LONDON_COURTLIST,
-            "FR_s_CFCList_4", "KINGSTON-UPON-THAMES COUNTY COURT AND FAMILY COURT");
+            "FR_s_CFCList_4", "Kingston-upon-thames County Court and Family Court");
 
         verifyCorrectCourtReturned(LONDON, LONDON_LIST, LONDON_CFC, LONDON_COURTLIST,
-            "FR_s_CFCList_5", "ROMFORD COUNTY AND FAMILY COURT");
+            "FR_s_CFCList_5", "Romford County and Family Court");
 
         verifyCorrectCourtReturned(LONDON, LONDON_LIST, LONDON_CFC, LONDON_COURTLIST,
-            "FR_s_CFCList_6", "BARNET CIVIL AND FAMILY COURTS CENTRE");
+            "FR_s_CFCList_6", "Barnet Civil and Family Courts Centre");
 
         verifyCorrectCourtReturned(LONDON, LONDON_LIST, LONDON_CFC, LONDON_COURTLIST,
-            "FR_s_CFCList_8", "BRENTFORD COUNTY AND FAMILY COURT");
+            "FR_s_CFCList_8", "Brentford County and Family Court");
 
         verifyCorrectCourtReturned(LONDON, LONDON_LIST, LONDON_CFC, LONDON_COURTLIST,
-            "FR_s_CFCList_9", "CENTRAL FAMILY COURT");
+            "FR_s_CFCList_9", "Central Family Court");
 
         verifyCorrectCourtReturned(LONDON, LONDON_LIST, LONDON_CFC, LONDON_COURTLIST,
-            "FR_s_CFCList_11", "EAST LONDON FAMILY COURT");
+            "FR_s_CFCList_11", "East London Family Court");
 
         verifyCorrectCourtReturned(LONDON, LONDON_LIST, LONDON_CFC, LONDON_COURTLIST,
-            "FR_s_CFCList_14", "UXBRIDGE COUNTY COURT AND FAMILY COURT");
+            "FR_s_CFCList_14", "Uxbridge County Court and Family Court");
 
         verifyCorrectCourtReturned(LONDON, LONDON_LIST, LONDON_CFC, LONDON_COURTLIST,
-            "FR_s_CFCList_16", "WILLESDEN COUNTY COURT AND FAMILY COURT");
+            "FR_s_CFCList_16", "Willesden County Court and Family Court");
 
         verifyCorrectCourtReturned(LONDON, LONDON_LIST, "invalid", LONDON_COURTLIST,
             "FR_s_CFCList_1", "");
@@ -321,34 +319,34 @@ public class ContestedCourtHelperTest {
     @Test
     public void birminghamCourtListTest() throws Exception {
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
-            "FR_birmingham_hc_list_1", "BIRMINGHAM CIVIL AND FAMILY JUSTICE CENTRE");
+            "FR_birmingham_hc_list_1", "Birmingham Civil and Family Justice Centre");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
-            "FR_birmingham_hc_list_2", "COVENTRY COMBINED COURT CENTRE");
+            "FR_birmingham_hc_list_2", "Coventry Combined Court Centre");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
-            "FR_birmingham_hc_list_3", "TELFORD COUNTY COURT AND FAMILY COURT");
+            "FR_birmingham_hc_list_3", "Telford County Court and Family Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
-            "FR_birmingham_hc_list_4", "WOLVERHAMPTON COMBINED COURT CENTRE");
+            "FR_birmingham_hc_list_4", "Wolverhampton Combined Court Centre");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
-            "FR_birmingham_hc_list_5", "DUDLEY COUNTY COURT AND FAMILY COURT");
+            "FR_birmingham_hc_list_5", "Dudley County Court and Family Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
-            "FR_birmingham_hc_list_6", "WALSALL COUNTY AND FAMILY COURT");
+            "FR_birmingham_hc_list_6", "Walsall County and Family Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
-            "FR_birmingham_hc_list_7", "STOKE ON TRENT COMBINED COURT");
+            "FR_birmingham_hc_list_7", "Stoke on Trent Combined Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
-            "FR_birmingham_hc_list_8", "WORCESTER COMBINED COURT");
+            "FR_birmingham_hc_list_8", "Worcester Combined Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
-            "FR_birmingham_hc_list_9", "STAFFORD COMBINED COURT");
+            "FR_birmingham_hc_list_9", "Stafford Combined Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
-            "FR_birmingham_hc_list_10", "HEREFORD COUNTY COURT AND FAMILY COURT");
+            "FR_birmingham_hc_list_10", "Hereford County Court and Family Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, BIRMINGHAM, BIRMINGHAM_COURTLIST,
             "invalid", "");
@@ -362,28 +360,28 @@ public class ContestedCourtHelperTest {
     public void nottinghamCourtListTest() throws Exception {
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
-            "FR_s_NottinghamList_1", "NOTTINGHAM COUNTY COURT AND FAMILY COURT");
+            "FR_s_NottinghamList_1", "Nottingham County Court and Family Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
-            "FR_s_NottinghamList_2", "DERBY COMBINED COURT CENTRE");
+            "FR_s_NottinghamList_2", "Derby Combined Court Centre");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
-            "FR_s_NottinghamList_3", "LEICESTER COUNTY COURT AND FAMILY COURT");
+            "FR_s_NottinghamList_3", "Leicester County Court and Family Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
-            "FR_s_NottinghamList_4", "LINCOLN COUNTY COURT AND FAMILY COURT");
+            "FR_s_NottinghamList_4", "Lincoln County Court and Family Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
-            "FR_s_NottinghamList_5", "NORTHAMPTON CROWN, COUNTY AND FAMILY COURT");
+            "FR_s_NottinghamList_5", "Northampton Crown, County and Family Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
-            "FR_s_NottinghamList_6", "CHESTERFIELD COUNTY COURT");
+            "FR_s_NottinghamList_6", "Chesterfield County Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
-            "FR_s_NottinghamList_7", "MANSFIELD MAGISTRATES AND COUNTY COURT");
+            "FR_s_NottinghamList_7", "Mansfield Magistrates and County Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
-            "FR_s_NottinghamList_8", "BOSTON COUNTY COURT AND FAMILY COURT");
+            "FR_s_NottinghamList_8", "Boston County Court and Family Court");
 
         verifyCorrectCourtReturned(MIDLANDS, MIDLANDSLIST, NOTTINGHAM, NOTTINGHAM_COURTLIST,
             "INVALID", "");
