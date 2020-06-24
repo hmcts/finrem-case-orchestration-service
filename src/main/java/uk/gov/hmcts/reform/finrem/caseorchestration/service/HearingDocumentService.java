@@ -29,9 +29,10 @@ public class HearingDocumentService {
     private final DocumentHelper documentHelper;
 
     public Map<String, Object> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
-        addCourtFields.apply(caseDetails);
+        CaseDetails courtDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        addCourtFields.apply(courtDetailsCopy);
 
-        return Optional.of(Pair.of(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken))
+        return Optional.of(Pair.of(courtDetailsCopy, authorisationToken))
             .filter(pair -> pair.getLeft().getData().get(FAST_TRACK_DECISION) != null)
             .map(this::courtCoverSheetDocuments)
             .orElseThrow(() -> new IllegalArgumentException("missing fastTrackDecision"));

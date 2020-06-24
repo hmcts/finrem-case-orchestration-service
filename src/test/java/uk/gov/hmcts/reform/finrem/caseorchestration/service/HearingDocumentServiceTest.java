@@ -28,9 +28,46 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HUMBER_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT_SURREY_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA_COURT_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 
 public class HearingDocumentServiceTest {
 
@@ -88,6 +125,96 @@ public class HearingDocumentServiceTest {
         ((TestDocumentClient) generatorClient).verifyAdditionalNonFastTrackFields();
     }
 
+    @Test
+    public void verifySwanseaCourtDetails() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            WALES, WALES_FRC_LIST, SWANSEA, SWANSEA_COURT_LIST, "FR_swansea_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
+            "Swansea Civil & Family Justice Centre", "Carvella House, Quay West, Quay Parade, Swansea, SA1 1SD",
+            "01792 485 800", "FRCswansea@justice.gov.uk");
+    }
+
+    @Test
+    public void verifyKentCourtDetails() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENT_SURREY_COURT_LIST, "FR_kent_surrey_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
+            "Canterbury Family Court Hearing Centre", "The Law Courts, Chaucer Road, Canterbury, CT1 1ZA",
+            "01634 887900", "FRCKSS@justice.gov.uk");
+    }
+
+    @Test
+    public void verifyCleavelandCourtDetails() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURT_LIST, "FR_cleaveland_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
+            "Newcastle Upon Tyne Justice Centre", "The Law Courts, The Quayside, Newcastle-upon-Tyne, NE1 3LA",
+            "0191 2012000", "Family.newcastle.countycourt@justice.gov.uk");
+    }
+
+    @Test
+    public void verifyNwYorkshireCourtDetails() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            NORTHEAST, NORTHEAST_FRC_LIST, NWYORKSHIRE, NWYORKSHIRE_COURT_LIST, "FR_nw_yorkshire_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
+            "Harrogate Justice Centre", "The Court House, Victoria Avenue, Harrogate, HG1 1EL",
+            "0113 306 2501", "leedsfamily@justice.gov.uk");
+    }
+
+    @Test
+    public void verifyHumberCourtDetails() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HUMBER_COURT_LIST, "FR_humber_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
+            "Sheffield Family Hearing Centre", "The Law Courts, 50 West Bar, Sheffield, S3 8PH",
+            "0114 2812522", "FRCSheffield@justice.gov.uk");
+    }
+
+    @Test
+    public void verifyLiverpoolCourtDetails() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            NORTHWEST, NORTHWEST_FRC_LIST, LIVERPOOL, LIVERPOOL_COURT_LIST, "FR_liverpool_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
+            "Liverpool Civil And Family Court", "35 Vernon Street, Liverpool, L2 2BX",
+            "0151 296 2225", "FRCLiverpool@Justice.gov.uk");
+    }
+
+    @Test
+    public void verifyManchesterCourtDetails() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            NORTHWEST, NORTHWEST_FRC_LIST, MANCHESTER, MANCHESTER_COURT_LIST, "FR_manchester_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
+            "Manchester County And Family Court", "1 Bridge Street West, Manchester, M60 9DJ",
+            "0161 240 5430", "HMCTSFinancialRemedy@justice.gov.uk");
+    }
+
+    @Test
+    public void verifyCfcCourtDetails() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            LONDON, LONDON_FRC_LIST, CFC, CFC_COURT_LIST, "FR_s_CFCList_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
+            "Bromley County Court And Family Court", "Bromley County Court, College Road, Bromley, BR1 3PX",
+            "0208 290 9620", "family.bromley.countycourt@justice.gov.uk");
+    }
+
+    @Test
+    public void verifyNottinghamCourtDetails() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURT_LIST, "FR_s_NottinghamList_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
+            "Nottingham County Court And Family Court", "60 Canal Street, Nottingham NG1 7EJ",
+            "0115 910 3504", "FRCNottingham@justice.gov.uk");
+    }
+
+    @Test
+    public void verifyBirminghamCourtDetails() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURT_LIST, "FR_birmingham_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
+            "Birmingham Civil And Family Justice Centre", "Pipers Row, Wolverhampton, WV1 3LQ",
+            "0121 250 6794", "FRCBirmingham@justice.gov.uk");
+    }
+
     @Test(expected = CompletionException.class)
     public void unsuccessfulGenerateHearingDocuments() {
         ((TestDocumentClient) generatorClient).throwException();
@@ -111,7 +238,14 @@ public class HearingDocumentServiceTest {
 
     private CaseDetails caseDetails(String isFastTrackDecision) {
         Map<String, Object> caseData =
-                ImmutableMap.of(FAST_TRACK_DECISION, isFastTrackDecision, HEARING_DATE, DATE_OF_HEARING);
+                ImmutableMap.of(FAST_TRACK_DECISION, isFastTrackDecision, HEARING_DATE, DATE_OF_HEARING,
+                    REGION, MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURT_LIST, "FR_birmingham_hc_list_1");
+        return CaseDetails.builder().data(caseData).build();
+    }
+
+    private CaseDetails caseDetailsWithCourtDetails(String region, String frcList, String frc, String courtList, String court) {
+        Map<String, Object> caseData =
+            ImmutableMap.of(FAST_TRACK_DECISION, NO_VALUE, HEARING_DATE, DATE_OF_HEARING, REGION, region, frcList, frc, courtList, court);
         return CaseDetails.builder().data(caseData).build();
     }
 
@@ -171,6 +305,15 @@ public class HearingDocumentServiceTest {
             Map<String, Object> data = data();
             assertThat(data.get("formCCreatedDate"), is(notNullValue()));
             assertThat(data.get("eventDatePlus21Days"), is(notNullValue()));
+        }
+
+        void verifyCourtDetailsFields(String courtName, String courtAddress, String phone, String email) {
+            Map<String, Object> data = data();
+            Map<String, Object> courtDetails = (Map<String, Object>) data.get("courtDetails");
+            assertThat(courtDetails.get(COURT_DETAILS_NAME_KEY), is(courtName));
+            assertThat(courtDetails.get(COURT_DETAILS_ADDRESS_KEY), is(courtAddress));
+            assertThat(courtDetails.get(COURT_DETAILS_EMAIL_KEY), is(email));
+            assertThat(courtDetails.get(COURT_DETAILS_PHONE_KEY), is(phone));
         }
 
         private Map<String, Object> data() {
