@@ -106,7 +106,7 @@ configurations {
 }
 
 def versions = [
-        bspCommonLib            : '0.0.38',
+        bspCommonLib            : '0.0.43',
         ccdClient               : '4.6.4',
         commonsBeanUtils        : '1.9.4',
         commonsIo               : '2.6',
@@ -228,6 +228,7 @@ dependencyCheck {
 
 checkstyle.toolVersion = '8.32'
 checkstyle.configFile = new File(rootDir, "checkstyle.xml")
+checkstyle.maxWarnings(0)
 
 // make build fail on Checkstyle issues (https://github.com/gradle/gradle/issues/881)
 tasks.withType(Checkstyle).each { checkstyleTask ->
@@ -303,6 +304,10 @@ bootJar {
     archiveFileName = 'finrem-case-orchestration.jar'
 }
 
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+}
+
 pact {
     publish {
         pactDirectory = 'target/pacts'
@@ -319,8 +324,8 @@ task smoke(type: Test, description: 'Runs the smoke tests.', group: 'Verificatio
 }
 
 task bootRunAat(type: BootRun, description: 'Runs the app using AAT config', dependsOn: 'classes', group: 'Application') {
+    main = bootJar.mainClassName
     doFirst() {
-        main = bootJar.mainClassName
         classpath = sourceSets.main.runtimeClasspath
         systemProperties = System.properties
         systemProperty 'spring.profiles.active', 'aat'

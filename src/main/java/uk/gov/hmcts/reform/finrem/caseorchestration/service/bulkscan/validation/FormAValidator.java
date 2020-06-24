@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
@@ -68,6 +69,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.natureOfApplicationChecklistToCcdFieldNames;
 
+@Slf4j
 @Component
 public class FormAValidator extends BulkScanFormValidator {
 
@@ -138,7 +140,7 @@ public class FormAValidator extends BulkScanFormValidator {
                 "Litigation Friend",
                 "Applicant's solicitor"
         ));
-        final List<String> genderEnum = asList("male", "female", "notGiven");
+        final List<String> genderEnum = asList("Male", "Female", EMPTY);
         ALLOWED_VALUES_PER_FIELD.put(GENDER_CHILD_1, genderEnum);
         ALLOWED_VALUES_PER_FIELD.put(GENDER_CHILD_2, genderEnum);
     }
@@ -191,6 +193,8 @@ public class FormAValidator extends BulkScanFormValidator {
         validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_1).ifPresent(errorMessages::add);
         validateFormDate(fieldsMap, DATE_OF_BIRTH_CHILD_2).ifPresent(errorMessages::add);
 
+        log.info("Form A Validation (Post-processing) returned the following errors: {}", errorMessages);
+
         return errorMessages;
     }
 
@@ -215,6 +219,8 @@ public class FormAValidator extends BulkScanFormValidator {
             validationWarningMessages.add(
                     String.format("%s contains a value that is not accepted", commaSeparatedFieldKey)
             );
+            log.info("Form A Validation of non-mandatory comma separated fields: "
+                + "{} contains a value that is not accepted", commaSeparatedFieldKey);
         }
 
         return validationWarningMessages;
@@ -260,7 +266,6 @@ public class FormAValidator extends BulkScanFormValidator {
      */
     private List<String> produceErrorsForIncorrectNumberOfAttachedDocuments(List<InputScannedDoc> inputScannedDocs) {
 
-
         List<String> attachedDocumentsValidationErrorMessages = new ArrayList<>();
 
         long numberOfFormADocumentsAttached = inputScannedDocs.stream()
@@ -277,14 +282,20 @@ public class FormAValidator extends BulkScanFormValidator {
 
         if (numberOfFormADocumentsAttached != 1) {
             attachedDocumentsValidationErrorMessages.add("Must be only a single document with subtype of 'FormA'");
+            log.info("Form A Validation of Scanned Documents failed."
+                + " Expected 1 Form A attached, received {}", numberOfFormADocumentsAttached);
         }
 
         if (numberOfDraftConsentOrderDocumentsAttached != 1) {
             attachedDocumentsValidationErrorMessages.add("Must be only a single document with subtype of 'DraftConsentOrder'");
+            log.info("Form A Validation of Scanned Documents failed."
+                + " Expected 1 Draft Consent Order attached, received {}", numberOfDraftConsentOrderDocumentsAttached);
         }
 
         if (numberOfD81DocumentsAttached == 0) {
             attachedDocumentsValidationErrorMessages.add("Must be at least one document with subtype of 'D81'");
+            log.info("Form A Validation of Scanned Documents failed."
+                + " Expected at least 1 D81 attached, received {}", numberOfD81DocumentsAttached);
         }
 
         return attachedDocumentsValidationErrorMessages;
