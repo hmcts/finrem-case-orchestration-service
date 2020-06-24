@@ -37,7 +37,7 @@ public class CCDConfigConstant {
 
     //Court related
     public static final String KENT = "kentfrc";
-    public static final String REGION = "regionFRCList";
+    public static final String REGION = "regionList";
     public static final String WALES_FRC_LIST = "walesFRCList";
     public static final String SOUTHEAST_FRC_LIST = "southEastFRCList";
     public static final String NORTHEAST_FRC_LIST = "northEastFRCList";
