@@ -122,6 +122,23 @@ public class CCDConfigConstant {
     public static final String HSYORKSHIRE = "hsyorkshire";
     public static final String NOTTINGHAM = "nottingham";
     public static final String BIRMINGHAM = "birmingham";
+    public static final String MIDLANDS = "midlands";
+    public static final String MIDLANDSLIST = "midlandsList";
+    public static final String NOTTINGHAM_COURTLIST = "nottinghamCourtList";
+    public static final String BIRMINGHAM_COURTLIST = "birminghamhamCourtList";
+    public static final String LONDON = "london";
+    public static final String LONDON_LIST = "londonList";
+    public static final String LONDON_CFC = "cfc";
+    public static final String LONDON_COURTLIST = "cfcCourtList";
+    public static final String NORTHWEST = "northwest";
+    public static final String NORTHWESTLIST = "northWestList";
+    public static final String MANCHESTER = "manchester";
+    public static final String LIVERPOOL = "liverpool";
+    public static final String LIVERPOOL_COURTLIST = "liverpoolCourtList";
+    public static final String NORTHEAST = "northeast";
+    public static final String NORTHEASTLIST = "northEastList";
+
+
 
     // Bulk Printing
     public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
