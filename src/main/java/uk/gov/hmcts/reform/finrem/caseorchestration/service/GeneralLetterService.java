@@ -85,11 +85,14 @@ public class GeneralLetterService {
         String generalLetterAddressTo = (String) data.get(GENERAL_LETTER_ADDRESS_TO);
         boolean isConsentedApplication = isConsentedApplication(caseDetails);
 
+        log.info("Debugging, isConsentedApplication {}", isConsentedApplication);
+
         Addressee.AddresseeBuilder addresseeBuilder = Addressee.builder();
         if ("applicantSolicitor".equalsIgnoreCase(generalLetterAddressTo)) {
             data.put("reference", data.get(SOLICITOR_REFERENCE));
             String solicitorNameCcdField = isConsentedApplication ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME;
             String solicitorAddressCcdField = isConsentedApplication ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
+            log.info("Debugging, solicitorNameCcdField {}, solicitorAddressCcdField {}", solicitorNameCcdField, solicitorAddressCcdField);
             addresseeBuilder
                 .name((String) data.get(solicitorNameCcdField))
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(solicitorAddressCcdField)));
@@ -101,6 +104,7 @@ public class GeneralLetterService {
         } else if ("respondent".equalsIgnoreCase(generalLetterAddressTo)) {
             String respondentFmNameCcdField = isConsentedApplication ? APP_RESPONDENT_FIRST_MIDDLE_NAME : "respondentFMName";
             String respondentLastNameCcdField = isConsentedApplication ? APP_RESPONDENT_LAST_NAME : "respondentLName";
+            log.info("Debugging, respondentFmNameCcdField {}, respondentLastNameCcdField {}", respondentFmNameCcdField, respondentLastNameCcdField);
             addresseeBuilder
                 .name(StringUtils.joinWith(" ", data.get(respondentFmNameCcdField), data.get(respondentLastNameCcdField)))
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(RESPONDENT_ADDRESS)));
