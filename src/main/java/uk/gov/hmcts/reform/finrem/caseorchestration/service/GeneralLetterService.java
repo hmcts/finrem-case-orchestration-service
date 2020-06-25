@@ -93,6 +93,8 @@ public class GeneralLetterService {
             String solicitorNameCcdField = isConsentedApplication ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME;
             String solicitorAddressCcdField = isConsentedApplication ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
             log.info("Debugging, solicitorNameCcdField {}, solicitorAddressCcdField {}", solicitorNameCcdField, solicitorAddressCcdField);
+            log.info("Debugging, name {}", data.get(solicitorNameCcdField));
+            log.info("Debugging, formatted address {}", documentHelper.formatAddressForLetterPrinting((Map) data.get(solicitorAddressCcdField)));
             addresseeBuilder
                 .name((String) data.get(solicitorNameCcdField))
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(solicitorAddressCcdField)));
