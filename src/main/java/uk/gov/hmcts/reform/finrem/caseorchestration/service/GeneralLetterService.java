@@ -28,6 +28,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_ADDRESS_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_PREVIEW;
@@ -35,9 +39,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 
 @Service
 @RequiredArgsConstructor
@@ -80,20 +83,26 @@ public class GeneralLetterService {
     private void populateNameAddressAndReference(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         String generalLetterAddressTo = (String) data.get(GENERAL_LETTER_ADDRESS_TO);
+        boolean isConsentedApplication = isConsentedApplication(caseDetails);
+
         Addressee.AddresseeBuilder addresseeBuilder = Addressee.builder();
         if ("applicantSolicitor".equalsIgnoreCase(generalLetterAddressTo)) {
             data.put("reference", data.get(SOLICITOR_REFERENCE));
+            String solicitorNameCcdField = isConsentedApplication ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME;
+            String solicitorAddressCcdField = isConsentedApplication ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
             addresseeBuilder
-                .name((String) data.get(SOLICITOR_NAME))
-                .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(SOLICITOR_ADDRESS)));
+                .name((String) data.get(solicitorNameCcdField))
+                .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(solicitorAddressCcdField)));
         } else if ("respondentSolicitor".equalsIgnoreCase(generalLetterAddressTo)) {
             data.put("reference", data.get("rSolicitorReference"));
             addresseeBuilder
                 .name((String) data.get(RESP_SOLICITOR_NAME))
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(RESP_SOLICITOR_ADDRESS)));
         } else if ("respondent".equalsIgnoreCase(generalLetterAddressTo)) {
+            String respondentFmNameCcdField = isConsentedApplication ? APP_RESPONDENT_FIRST_MIDDLE_NAME : "respondentFMName";
+            String respondentLastNameCcdField = isConsentedApplication ? APP_RESPONDENT_LAST_NAME : "respondentLName";
             addresseeBuilder
-                .name(StringUtils.joinWith(" ", data.get(APP_RESPONDENT_FIRST_MIDDLE_NAME), data.get(APP_RESPONDENT_LAST_NAME)))
+                .name(StringUtils.joinWith(" ", data.get(respondentFmNameCcdField), data.get(respondentLastNameCcdField)))
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(RESPONDENT_ADDRESS)));
         } else if ("other".equalsIgnoreCase(generalLetterAddressTo)) {
             addresseeBuilder
@@ -126,8 +135,9 @@ public class GeneralLetterService {
     }
 
     public List<String> getCaseDataErrorsForCreatingPreviewOrFinalLetter(CaseDetails caseDetails) {
+        boolean isConsentedApplication = isConsentedApplication(caseDetails);
         Map<String, String> generalLetterAddressToValueToAddressCcdFieldName = ImmutableMap.of(
-            "applicantSolicitor", SOLICITOR_ADDRESS,
+            "applicantSolicitor", isConsentedApplication ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS,
             "respondentSolicitor", RESP_SOLICITOR_ADDRESS,
             "respondent", RESPONDENT_ADDRESS,
             "other", "generalLetterRecipientAddress");

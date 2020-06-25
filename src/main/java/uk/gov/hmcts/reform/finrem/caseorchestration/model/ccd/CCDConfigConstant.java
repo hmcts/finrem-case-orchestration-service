@@ -22,14 +22,14 @@ public class CCDConfigConstant {
 
     //Applicant Solicitor related
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
-    public static final String SOLICITOR_NAME = "solicitorName";
+    public static final String CONSENTED_SOLICITOR_NAME = "solicitorName";
     public static final String SOLICITOR_EMAIL = "solicitorEmail";
     public static final String SOLICITOR_PHONE = "solicitorPhone";
-    public static final String SOLICITOR_ADDRESS = "solicitorAddress";
+    public static final String CONSENTED_SOLICITOR_ADDRESS = "solicitorAddress";
+    public static final String CONTESTED_SOLICITOR_ADDRESS = "applicantSolicitorAddress";
     public static final String CONTESTED_SOLICITOR_EMAIL = "applicantSolicitorEmail";
     public static final String CONTESTED_SOLICITOR_NAME = "applicantSolicitorName";
     public static final String SOLICITOR_FIRM = "solicitorFirm";
-    public static final String APP_SOLICITOR_ADDRESS_CCD_FIELD = "solicitorAddress";
     public static final String APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED = "solicitorAgreeToReceiveEmails";
     public static final String APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED = "applicantSolicitorConsentForEmails";
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";

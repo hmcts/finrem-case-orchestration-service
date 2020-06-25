@@ -18,7 +18,7 @@ public class ContactDetailsMapper {
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class CcdFields {
         public static final String APPLICANT = CCDConfigConstant.APPLICANT_ADDRESS;
-        public static final String APPLICANT_SOLICITOR = CCDConfigConstant.SOLICITOR_ADDRESS;
+        public static final String APPLICANT_SOLICITOR = CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
         public static final String APPLICANT_PHONE = CCDConfigConstant.APPLICANT_PHONE;
         public static final String APPLICANT_EMAIL = CCDConfigConstant.APPLICANT_EMAIL;
         public static final String APPLICANT_SOLICITOR_EMAIL = CCDConfigConstant.SOLICITOR_EMAIL;
