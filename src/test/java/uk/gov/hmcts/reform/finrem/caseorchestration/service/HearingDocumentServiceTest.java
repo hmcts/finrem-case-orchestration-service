@@ -20,6 +20,7 @@ import java.util.concurrent.CompletionException;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -53,6 +54,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST;
@@ -93,7 +96,7 @@ public class HearingDocumentServiceTest {
 
         generatorClient = new TestDocumentClient();
         genericDocumentService = new GenericDocumentService(generatorClient);
-        hearingDocumentService = new HearingDocumentService(genericDocumentService, config, new DocumentHelper(mapper));
+        hearingDocumentService = new HearingDocumentService(genericDocumentService, config, new DocumentHelper(mapper), mapper);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -135,12 +138,35 @@ public class HearingDocumentServiceTest {
     }
 
     @Test
+    public void verifyNewportCourtDetails() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            WALES, WALES_FRC_LIST, NEWPORT, NEWPORT_COURT_LIST, "FR_newport_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
+            "Newport Civil and Family Court", "Clarence House, Clarence Place, Newport, NP19 7AA",
+            "01633 245 040", "FRCNewport@justice.gov.uk");
+    }
+
+    @Test
+    public void verifyNoWalesFrc() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            WALES, SOUTHEAST_FRC_LIST, SWANSEA, SWANSEA_COURT_LIST, "FR_swansea_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFieldsNotSet();
+    }
+
+    @Test
     public void verifyKentCourtDetails() {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
             SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENT_SURREY_COURT_LIST, "FR_kent_surrey_hc_list_1"));
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Canterbury Family Court Hearing Centre", "The Law Courts, Chaucer Road, Canterbury, CT1 1ZA",
             "01634 887900", "FRCKSS@justice.gov.uk");
+    }
+
+    @Test
+    public void verifyNoSouthEastFrc() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            SOUTHEAST, WALES_FRC_LIST, KENT, KENT_SURREY_COURT_LIST, "FR_kent_surrey_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFieldsNotSet();
     }
 
     @Test
@@ -171,6 +197,13 @@ public class HearingDocumentServiceTest {
     }
 
     @Test
+    public void verifyNoNorthEastFrc() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            NORTHEAST, NORTHWEST_FRC_LIST, HSYORKSHIRE, HUMBER_COURT_LIST, "FR_humber_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFieldsNotSet();
+    }
+
+    @Test
     public void verifyLiverpoolCourtDetails() {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
             NORTHWEST, NORTHWEST_FRC_LIST, LIVERPOOL, LIVERPOOL_COURT_LIST, "FR_liverpool_hc_list_1"));
@@ -189,12 +222,26 @@ public class HearingDocumentServiceTest {
     }
 
     @Test
+    public void verifyNoNorthWestFrc() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            NORTHWEST, NORTHEAST_FRC_LIST, MANCHESTER, MANCHESTER_COURT_LIST, "FR_manchester_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFieldsNotSet();
+    }
+
+    @Test
     public void verifyCfcCourtDetails() {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
             LONDON, LONDON_FRC_LIST, CFC, CFC_COURT_LIST, "FR_s_CFCList_1"));
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Bromley County Court And Family Court", "Bromley County Court, College Road, Bromley, BR1 3PX",
             "0208 290 9620", "family.bromley.countycourt@justice.gov.uk");
+    }
+
+    @Test
+    public void verifyNoLondonFrc() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            LONDON, MIDLANDS_FRC_LIST, CFC, CFC_COURT_LIST, "FR_s_CFCList_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFieldsNotSet();
     }
 
     @Test
@@ -213,6 +260,33 @@ public class HearingDocumentServiceTest {
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Birmingham Civil And Family Justice Centre", "Pipers Row, Wolverhampton, WV1 3LQ",
             "0121 250 6794", "FRCBirmingham@justice.gov.uk");
+    }
+
+    @Test
+    public void verifyNoMidlandsFrc() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            MIDLANDS, LONDON_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURT_LIST, "FR_birmingham_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFieldsNotSet();
+    }
+
+    @Test
+    public void verifyInvalidCourt() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURT_LIST, "invalid_court"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFieldsNotSet();
+    }
+
+    @Test
+    public void verifyInvalidCourtList() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, NEWPORT_COURT_LIST, "FR_birmingham_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFieldsNotSet();
+    }
+
+    @Test
+    public void verifyNoRegionProvided() {
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetails(NO_VALUE));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFieldsNotSet();
     }
 
     @Test(expected = CompletionException.class)
@@ -238,8 +312,7 @@ public class HearingDocumentServiceTest {
 
     private CaseDetails caseDetails(String isFastTrackDecision) {
         Map<String, Object> caseData =
-                ImmutableMap.of(FAST_TRACK_DECISION, isFastTrackDecision, HEARING_DATE, DATE_OF_HEARING,
-                    REGION, MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURT_LIST, "FR_birmingham_hc_list_1");
+                ImmutableMap.of(FAST_TRACK_DECISION, isFastTrackDecision, HEARING_DATE, DATE_OF_HEARING);
         return CaseDetails.builder().data(caseData).build();
     }
 
@@ -314,6 +387,11 @@ public class HearingDocumentServiceTest {
             assertThat(courtDetails.get(COURT_DETAILS_ADDRESS_KEY), is(courtAddress));
             assertThat(courtDetails.get(COURT_DETAILS_EMAIL_KEY), is(email));
             assertThat(courtDetails.get(COURT_DETAILS_PHONE_KEY), is(phone));
+        }
+
+        void verifyCourtDetailsFieldsNotSet() {
+            Map<String, Object> data = data();
+            assertThat(data.get("courtDetails"), is(nullValue()));
         }
 
         private Map<String, Object> data() {

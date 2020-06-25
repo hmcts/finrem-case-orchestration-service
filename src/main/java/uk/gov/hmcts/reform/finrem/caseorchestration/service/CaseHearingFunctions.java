@@ -1,8 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetails;
 
@@ -10,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -61,6 +62,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 
+@Component
+@RequiredArgsConstructor
+@Slf4j
 final class CaseHearingFunctions {
 
     public static final String COURT_DETAILS_JSON_PATH = "/json/court-details.json";
@@ -93,22 +97,6 @@ final class CaseHearingFunctions {
         return Optional.ofNullable(caseAllocatedTo)
                 .map(s -> s.equalsIgnoreCase("yes"))
                 .orElseGet(() -> fastTrackDecision.equalsIgnoreCase("yes"));
-    };
-
-    static UnaryOperator<CaseDetails> addCourtFields = caseDetails -> {
-        try {
-            Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> data = caseDetails.getData();
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourt(data)));
-            data.put("courtDetails", buildCourtDetails(courtDetails));
-            return caseDetails;
-        } catch (JsonProcessingException e) {
-            return caseDetails;
-        } catch (IOException e) {
-            return caseDetails;
-        } catch (NullPointerException e) {
-            return caseDetails;
-        }
     };
 
     static String getSelectedCourt(Map<String, Object> mapOfCaseData) {
@@ -188,7 +176,7 @@ final class CaseHearingFunctions {
         return null;
     }
 
-    private static Map<String, Object> buildCourtDetails(Map<String, Object> courtDetailsMap) {
+    static Map<String, Object> buildCourtDetails(Map<String, Object> courtDetailsMap) {
         return new ObjectMapper().convertValue(CourtDetails.builder()
             .courtName((String) courtDetailsMap.get(COURT_DETAILS_NAME_KEY))
             .courtAddress((String) courtDetailsMap.get(COURT_DETAILS_ADDRESS_KEY))
@@ -197,7 +185,7 @@ final class CaseHearingFunctions {
             .build(), Map.class);
     }
 
-    public static String getCourtDetailsString() throws IOException {
+    static String getCourtDetailsString() throws IOException {
         try (InputStream inputStream = CaseHearingFunctions.class.getResourceAsStream(COURT_DETAILS_JSON_PATH)) {
             return IOUtils.toString(inputStream, UTF_8);
         }
