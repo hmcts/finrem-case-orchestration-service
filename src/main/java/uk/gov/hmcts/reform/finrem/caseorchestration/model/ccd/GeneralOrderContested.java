@@ -13,4 +13,7 @@ import lombok.NoArgsConstructor;
 public class GeneralOrderContested {
     @JsonProperty("additionalDocument")
     private CaseDocument generalOrder;
+
+    @JsonProperty("generalOrder_addressTo")
+    private String addressTo;
 }

@@ -91,6 +91,8 @@ public class GeneralOrderServiceTest {
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
         assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrder().getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant"));
+
         CaseDocument latestGeneralOrder = (CaseDocument)documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
         assertThat(latestGeneralOrder.getDocumentUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
@@ -121,6 +123,7 @@ public class GeneralOrderServiceTest {
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
         assertThat(generalOrders.get(1).getGeneralOrder().getGeneralOrder().getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant"));
 
         CaseDocument latestGeneralOrder = (CaseDocument)documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
         assertThat(latestGeneralOrder.getDocumentUrl(),
