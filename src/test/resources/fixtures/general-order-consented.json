@@ -83,7 +83,7 @@
       "generalOrderRecitals": "Consented Recitals",
       "generalOrderDate": "01/01/2020",
       "generalOrderBodyText": "Test is dummy text for consented",
-      "generalOrderAddressTo": "Applicant",
+      "generalOrderAddressTo": "applicant",
       "generalOrderPreviewDocument": {
         "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",

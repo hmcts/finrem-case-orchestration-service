@@ -30,6 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_ADDRESS_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
@@ -132,6 +133,42 @@ public class GeneralOrderServiceTest {
             is("WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg"));
         assertThat(latestGeneralOrder.getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+    }
+
+    @Test
+    public void addressToFormattedCorrectlyForApplicant() throws Exception {
+        CaseDetails details = consentedCaseDetails();
+        details.getData().put(GENERAL_ORDER_ADDRESS_TO, "applicant");
+        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
+        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>)documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
+        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant"));
+    }
+
+    @Test
+    public void addressToFormattedCorrectlyForApplicantSolicitor() throws Exception {
+        CaseDetails details = consentedCaseDetails();
+        details.getData().put(GENERAL_ORDER_ADDRESS_TO, "applicantSolicitor");
+        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
+        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>)documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
+        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant Solicitor"));
+    }
+
+    @Test
+    public void addressToFormattedCorrectlyForRespondentSolicitor() throws Exception {
+        CaseDetails details = consentedCaseDetails();
+        details.getData().put(GENERAL_ORDER_ADDRESS_TO, "respondentSolicitor");
+        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
+        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>)documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
+        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Respondent Solicitor"));
+    }
+
+    @Test
+    public void addressToFormattedCorrectlyReturnsEmptyStringForInvalid() throws Exception {
+        CaseDetails details = consentedCaseDetails();
+        details.getData().put(GENERAL_ORDER_ADDRESS_TO, "invalid");
+        Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
+        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>)documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
+        assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is(""));
     }
 
     private CaseDetails consentedCaseDetails() throws Exception {

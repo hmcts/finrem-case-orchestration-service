@@ -113,7 +113,7 @@ public class GeneralOrderService {
 
         GeneralOrderConsented generalOrder =
             new GeneralOrderConsented(documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER_PREVIEW_DOCUMENT)),
-                String.valueOf(caseData.get(GENERAL_ORDER_ADDRESS_TO)));
+                getAddressToFormatted(caseData));
 
         GeneralOrderConsentedData consentedData = new GeneralOrderConsentedData(UUID.randomUUID().toString(), generalOrder);
 
@@ -132,7 +132,7 @@ public class GeneralOrderService {
 
         GeneralOrderContested generalOrder =
             new GeneralOrderContested(documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER_PREVIEW_DOCUMENT)),
-                String.valueOf(caseData.get(GENERAL_ORDER_ADDRESS_TO)));
+                getAddressToFormatted(caseData));
 
         GeneralOrderContestedData contestedData = new GeneralOrderContestedData(UUID.randomUUID().toString(), generalOrder);
 
@@ -153,5 +153,18 @@ public class GeneralOrderService {
     private List<GeneralOrderContestedData> convertToGeneralOrderContestedList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<List<GeneralOrderContestedData>>() {
         });
+    }
+
+    private String getAddressToFormatted(Map<String, Object> caseData) {
+        String storedValue = String.valueOf(caseData.get(GENERAL_ORDER_ADDRESS_TO));
+        if("applicant".equals(storedValue)) {
+            return "Applicant";
+        }else if ("applicantSolicitor".equals(storedValue)) {
+            return "Applicant Solicitor";
+        } else if("respondentSolicitor".equals(storedValue)) {
+            return "Respondent Solicitor";
+        } else {
+            return "";
+        }
     }
 }
