@@ -157,11 +157,11 @@ public class GeneralOrderService {
 
     private String getAddressToFormatted(Map<String, Object> caseData) {
         String storedValue = String.valueOf(caseData.get(GENERAL_ORDER_ADDRESS_TO));
-        if("applicant".equals(storedValue)) {
+        if ("applicant".equals(storedValue)) {
             return "Applicant";
-        }else if ("applicantSolicitor".equals(storedValue)) {
+        } else if ("applicantSolicitor".equals(storedValue)) {
             return "Applicant Solicitor";
-        } else if("respondentSolicitor".equals(storedValue)) {
+        } else if ("respondentSolicitor".equals(storedValue)) {
             return "Respondent Solicitor";
         } else {
             return "";
