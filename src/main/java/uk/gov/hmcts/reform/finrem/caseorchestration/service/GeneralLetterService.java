@@ -56,6 +56,7 @@ public class GeneralLetterService {
         log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());
         CaseDocument generalLetterDocument = generateGeneralLetterDocument(caseDetails, authorisationToken);
         caseDetails.getData().put(GENERAL_LETTER_PREVIEW, generalLetterDocument);
+        log.info("Debugging, general letter preview {}", caseDetails.getData().get(GENERAL_LETTER_PREVIEW));
     }
 
     public void createGeneralLetter(String authorisationToken, CaseDetails caseDetails) {
@@ -116,6 +117,7 @@ public class GeneralLetterService {
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get("generalLetterRecipientAddress")));
         }
         data.put(ADDRESSEE, addresseeBuilder.build());
+        log.info("Debugging, addressee {}", data.get(ADDRESSEE));
     }
 
     private void addGeneralLetterToCaseData(CaseDetails caseDetails, CaseDocument document) {
