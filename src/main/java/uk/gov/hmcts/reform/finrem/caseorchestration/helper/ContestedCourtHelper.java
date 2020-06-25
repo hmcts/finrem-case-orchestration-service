@@ -42,6 +42,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALESLIST;
 
 public class ContestedCourtHelper {
+    private ContestedCourtHelper(){
+    }
 
     public static String getSelectedCourt(CaseDetails caseDetails) {
 
@@ -71,7 +73,7 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    private static String getWalesFRC(Map allocatedCourtMap) {
+    private static String getWalesFRC(Map<String, Object> allocatedCourtMap) {
         String walesList = (String) allocatedCourtMap.get(WALESLIST);
         if (NEWPORT.equalsIgnoreCase(walesList)) {
             return getNewportCourt(allocatedCourtMap);
@@ -81,7 +83,7 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    private static String getSouthEastFRC(Map allocatedCourtMap) {
+    private static String getSouthEastFRC(Map<String, Object> allocatedCourtMap) {
         String southEastList = (String) allocatedCourtMap.get(SOUTHEASTLIST);
         if (KENTFRC.equalsIgnoreCase(southEastList)) {
             return getKentCourt(allocatedCourtMap);
@@ -89,7 +91,7 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    private static String getNorthEastFRC(Map allocatedCourtMap) {
+    private static String getNorthEastFRC(Map<String, Object> allocatedCourtMap) {
         String northEastList = (String) allocatedCourtMap.get(NORTHEASTLIST);
         if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
             return getCleavelandCourt(allocatedCourtMap);
@@ -101,7 +103,7 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    private static String getNorthWestFRC(Map allocatedCourtMap) {
+    private static String getNorthWestFRC(Map<String, Object> allocatedCourtMap) {
         String northWestList = (String) allocatedCourtMap.get(NORTHWESTLIST);
         if ("liverpool".equalsIgnoreCase(northWestList)) {
             return getLiverpoolCourt(allocatedCourtMap);
@@ -111,7 +113,7 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    private static String getLondonFRC(Map allocatedCourtMap) {
+    private static String getLondonFRC(Map<String, Object> allocatedCourtMap) {
         String londonList = (String) allocatedCourtMap.get(LONDON_LIST);
         if ("cfc".equalsIgnoreCase(londonList)) {
             return getLondonCourt(allocatedCourtMap);
@@ -119,7 +121,7 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    private static String getMidlandFRC(Map allocatedCourtMap) {
+    private static String getMidlandFRC(Map<String, Object> allocatedCourtMap) {
         String midlandsList = (String) allocatedCourtMap.get(MIDLANDSLIST);
         if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
             return getNottinghamCourt(allocatedCourtMap);
@@ -129,7 +131,7 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    public static String getNottinghamCourt(Map allocatedCourtMap) {
+    public static String getNottinghamCourt(Map<String, Object> allocatedCourtMap) {
         return nottinghamMap.getOrDefault(allocatedCourtMap.get(NOTTINGHAM_COURTLIST), "");
     }
 
@@ -144,7 +146,7 @@ public class ContestedCourtHelper {
         .put("FR_s_NottinghamList_8", "Boston County Court and Family Court")
         .build();
 
-    public static String getBirminghamCourt(Map allocatedCourtMap) {
+    public static String getBirminghamCourt(Map<String, Object> allocatedCourtMap) {
         return birminghamMap.getOrDefault(allocatedCourtMap.get(BIRMINGHAM_COURTLIST), "");
     }
 
@@ -161,7 +163,7 @@ public class ContestedCourtHelper {
         .put("FR_birmingham_hc_list_10", "Hereford County Court and Family Court")
         .build();
 
-    public static String getLondonCourt(Map allocatedCourtMap) {
+    public static String getLondonCourt(Map<String, Object> allocatedCourtMap) {
         return londonMap.getOrDefault(allocatedCourtMap.get(LONDON_COURTLIST), "");
     }
 
@@ -179,7 +181,7 @@ public class ContestedCourtHelper {
         .put("FR_s_CFCList_16", "Willesden County Court and Family Court")
         .build();
 
-    public static String getLiverpoolCourt(Map allocatedCourtMap) {
+    public static String getLiverpoolCourt(Map<String, Object> allocatedCourtMap) {
         return liverpoolMap.getOrDefault(allocatedCourtMap.get(LIVERPOOL_COURTLIST), "");
     }
 
@@ -191,7 +193,7 @@ public class ContestedCourtHelper {
         .put("FR_liverpool_hc_list_5", "Birkenhead County Court and Family Court")
         .build();
 
-    public static String getManchesterCourt(Map allocatedCourtMap) {
+    public static String getManchesterCourt(Map<String, Object> allocatedCourtMap) {
         return manchesterMap.getOrDefault(allocatedCourtMap.get(MANCHESTER_COURTLIST), "");
     }
 
@@ -201,7 +203,7 @@ public class ContestedCourtHelper {
         .put("FR_manchester_hc_list_3", "Wigan County Court and Family Court")
         .build();
 
-    public static String getCleavelandCourt(Map allocatedCourtMap) {
+    public static String getCleavelandCourt(Map<String, Object> allocatedCourtMap) {
         return cleavelandMap.getOrDefault(allocatedCourtMap.get(CLEAVELAND_COURTLIST), "");
     }
 
@@ -216,7 +218,7 @@ public class ContestedCourtHelper {
         .put("FR_cleaveland_hc_list_8", "Darlington County Court and Family Court")
         .build();
 
-    public static String getNwYorkshireCourt(Map allocatedCourtMap) {
+    public static String getNwYorkshireCourt(Map<String, Object> allocatedCourtMap) {
         return yorkshireMap.getOrDefault(allocatedCourtMap.get(NWYORKSHIRE_COURTLIST), "");
     }
 
@@ -231,7 +233,7 @@ public class ContestedCourtHelper {
         .put("FR_nw_yorkshire_hc_list_8", "Leeds Combined Court Centre")
         .build();
 
-    public static String getHumberCourt(Map allocatedCourtMap) {
+    public static String getHumberCourt(Map<String, Object> allocatedCourtMap) {
         return humberMap.getOrDefault(allocatedCourtMap.get(HSYORKSHIRE_COURTLIST), "");
     }
 
@@ -243,7 +245,7 @@ public class ContestedCourtHelper {
         .put("FR_humber_hc_list_5", "Barnsley Law Courts")
         .build();
 
-    public static String getKentCourt(Map allocatedCourtMap) {
+    public static String getKentCourt(Map<String, Object> allocatedCourtMap) {
         return kentMap.getOrDefault(allocatedCourtMap.get(KENTFRC_COURTLIST), "");
     }
 
@@ -260,7 +262,7 @@ public class ContestedCourtHelper {
         .put("FR_kent_surrey_hc_list_10", "Horsham County Court and Family Court")
         .build();
 
-    public static String getNewportCourt(Map allocatedCourtMap) {
+    public static String getNewportCourt(Map<String, Object> allocatedCourtMap) {
         return newportMap.getOrDefault(allocatedCourtMap.get(NEWPORT_COURTLIST), "");
     }
 
@@ -272,7 +274,7 @@ public class ContestedCourtHelper {
         .put("FR_newport_hc_list_5", "Blackwood Civil and Family Court")
         .build();
 
-    public static String getSwanseaCourt(Map allocatedCourtMap) {
+    public static String getSwanseaCourt(Map<String, Object> allocatedCourtMap) {
         return swanseaMap.getOrDefault(allocatedCourtMap.get(SWANSEA_COURTLIST), "");
     }
 
