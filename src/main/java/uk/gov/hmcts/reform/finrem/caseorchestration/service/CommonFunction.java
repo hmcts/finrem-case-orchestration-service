@@ -63,6 +63,7 @@ public class CommonFunction {
     public static String buildFullApplicantName(CaseDetails caseDetails) {
         return buildFullName(caseDetails.getData(), APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
     }
+
     public static String buildFullRespondentName(CaseDetails caseDetails) {
         boolean isConsentedApplication = isConsentedApplication(caseDetails);
         return buildFullName(caseDetails.getData(),
