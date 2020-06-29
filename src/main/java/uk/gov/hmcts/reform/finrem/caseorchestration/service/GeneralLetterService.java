@@ -40,6 +40,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullApplicantName;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullRespondentName;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 
 @Service
@@ -56,7 +58,6 @@ public class GeneralLetterService {
         log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());
         CaseDocument generalLetterDocument = generateGeneralLetterDocument(caseDetails, authorisationToken);
         caseDetails.getData().put(GENERAL_LETTER_PREVIEW, generalLetterDocument);
-        log.info("Debugging, general letter preview {}", caseDetails.getData().get(GENERAL_LETTER_PREVIEW));
     }
 
     public void createGeneralLetter(String authorisationToken, CaseDetails caseDetails) {
@@ -78,6 +79,8 @@ public class GeneralLetterService {
         caseData.put("generalLetterCreatedDate", new Date());
         caseData.put("ccdCaseNumber", caseDetails.getId());
         caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
+        caseData.put("applicantFullName", buildFullApplicantName(caseDetails));
+        caseData.put("respondentFullName", buildFullRespondentName(caseDetails));
         populateNameAddressAndReference(caseDetails);
     }
 
@@ -86,16 +89,11 @@ public class GeneralLetterService {
         String generalLetterAddressTo = (String) data.get(GENERAL_LETTER_ADDRESS_TO);
         boolean isConsentedApplication = isConsentedApplication(caseDetails);
 
-        log.info("Debugging, isConsentedApplication {}", isConsentedApplication);
-
         Addressee.AddresseeBuilder addresseeBuilder = Addressee.builder();
         if ("applicantSolicitor".equalsIgnoreCase(generalLetterAddressTo)) {
             data.put("reference", data.get(SOLICITOR_REFERENCE));
             String solicitorNameCcdField = isConsentedApplication ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME;
             String solicitorAddressCcdField = isConsentedApplication ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS;
-            log.info("Debugging, solicitorNameCcdField {}, solicitorAddressCcdField {}", solicitorNameCcdField, solicitorAddressCcdField);
-            log.info("Debugging, name {}", data.get(solicitorNameCcdField));
-            log.info("Debugging, formatted address {}", documentHelper.formatAddressForLetterPrinting((Map) data.get(solicitorAddressCcdField)));
             addresseeBuilder
                 .name((String) data.get(solicitorNameCcdField))
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(solicitorAddressCcdField)));
@@ -107,7 +105,6 @@ public class GeneralLetterService {
         } else if ("respondent".equalsIgnoreCase(generalLetterAddressTo)) {
             String respondentFmNameCcdField = isConsentedApplication ? APP_RESPONDENT_FIRST_MIDDLE_NAME : "respondentFMName";
             String respondentLastNameCcdField = isConsentedApplication ? APP_RESPONDENT_LAST_NAME : "respondentLName";
-            log.info("Debugging, respondentFmNameCcdField {}, respondentLastNameCcdField {}", respondentFmNameCcdField, respondentLastNameCcdField);
             addresseeBuilder
                 .name(StringUtils.joinWith(" ", data.get(respondentFmNameCcdField), data.get(respondentLastNameCcdField)))
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(RESPONDENT_ADDRESS)));
@@ -117,7 +114,6 @@ public class GeneralLetterService {
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get("generalLetterRecipientAddress")));
         }
         data.put(ADDRESSEE, addresseeBuilder.build());
-        log.info("Debugging, addressee {}", data.get(ADDRESSEE));
     }
 
     private void addGeneralLetterToCaseData(CaseDetails caseDetails, CaseDocument document) {

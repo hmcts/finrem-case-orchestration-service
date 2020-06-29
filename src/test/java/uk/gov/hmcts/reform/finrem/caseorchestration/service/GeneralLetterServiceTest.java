@@ -83,6 +83,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             + "Andhra Pradesh\n"
             + "SRIKALAHASTI\n"
             + "B1 1AB"));
+        assertThat(data.get("applicantFullName"), is("Poor Guy"));
+        assertThat(data.get("respondentFullName"), is("test Korivi"));
     }
 
     @Test
