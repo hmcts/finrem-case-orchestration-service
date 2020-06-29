@@ -27,8 +27,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assert
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 @ActiveProfiles("test-mock-document-client")
@@ -78,9 +78,9 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.replace(APPLICANT_REPRESENTED, YES_VALUE);
-        caseData.put(SOLICITOR_NAME, TEST_SOLICITOR_NAME);
+        caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
         caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(APP_SOLICITOR_ADDRESS_CCD_FIELD, solicitorAddress);
+        caseData.put(CONSENTED_SOLICITOR_ADDRESS, solicitorAddress);
 
         CaseDocument generatedAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN);

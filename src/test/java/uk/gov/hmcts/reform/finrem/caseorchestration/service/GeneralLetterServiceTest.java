@@ -1,64 +1,161 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_PREVIEW;
 
-public class GeneralLetterServiceTest {
+@ActiveProfiles("test-mock-document-client")
+public class GeneralLetterServiceTest extends BaseServiceTest {
 
-    private DocumentClient generatorClient;
-    private ObjectMapper mapper = new ObjectMapper();
+    @Autowired private GeneralLetterService generalLetterService;
+    @Autowired private ObjectMapper mapper;
+
+    @MockBean
     private GenericDocumentService genericDocumentService;
-    private GeneralLetterService generalLetterService;
+
+    @Captor
+    ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
 
     @Before
-    public void setUp() {
-        DocumentConfiguration config = new DocumentConfiguration();
-        config.setGeneralLetterTemplate("test_template");
-        config.setGeneralLetterFileName("test_file");
-
-        generatorClient = new TestDocumentClient();
-        genericDocumentService = new GenericDocumentService(generatorClient);
-        generalLetterService = new GeneralLetterService(genericDocumentService, config, new DocumentHelper(mapper), mapper);
+    public void setup() {
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
     }
 
     @Test
     public void generateGeneralLetter() throws Exception {
-        Map<String, Object> documentMap = generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails());
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
-        List<GeneralLetterData> result = (List<GeneralLetterData>) documentMap.get(GENERAL_LETTER);
-        assertThat(result, hasSize(2));
+        List<GeneralLetterData> generalLetterData = (List<GeneralLetterData>) caseDetails.getData().get(GENERAL_LETTER);
+        assertThat(generalLetterData, hasSize(2));
 
-        doCaseDocumentAssert(result.get(0).getGeneralLetter().getGeneratedLetter());
-        doCaseDocumentAssert(result.get(1).getGeneralLetter().getGeneratedLetter());
-        ((TestDocumentClient) generatorClient).verifyAdditionalFields();
+        doCaseDocumentAssert(generalLetterData.get(0).getGeneralLetter().getGeneratedLetter());
+        doCaseDocumentAssert(generalLetterData.get(1).getGeneralLetter().getGeneratedLetter());
+
+        verify(genericDocumentService, times(1)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
+
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
+        assertThat(data.get("ccdCaseNumber"), is(1234567890L));
+        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("House no: 6-354-2\n"
+            + "Gandhi Street\n"
+            + "Chittor District\n"
+            + "Andhra Pradesh\n"
+            + "SRIKALAHASTI\n"
+            + "B1 1AB"));
+    }
+
+    @Test
+    public void givenNoPreviousGeneralLettersGenerated_generateGeneralLetter() throws Exception {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter-empty-collection.json", mapper);
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
+
+        List<GeneralLetterData> generalLetterData = (List<GeneralLetterData>) caseDetails.getData().get(GENERAL_LETTER);
+        assertThat(generalLetterData, hasSize(1));
+
+        doCaseDocumentAssert(generalLetterData.get(0).getGeneralLetter().getGeneratedLetter());
+
+        verify(genericDocumentService, times(1)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
+
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
+        assertThat(data.get("ccdCaseNumber"), is(1234567891L));
+    }
+
+    @Test
+    public void whenGeneralLetterAddressToChanges_differentNamesAreUsed() {
+        AtomicInteger invocationCounter = new AtomicInteger(1);
+        ImmutableMap.of(
+            "applicantSolicitor", "Solictor",
+            "respondentSolicitor", "Ms Patel",
+            "respondent", "test Korivi",
+            "other", "Mr Rajesh Kuthrappali"
+        ).entrySet().stream()
+            .forEach(entry -> assertNameUsedForGeneralLetterAddressTo(invocationCounter.getAndIncrement(), entry.getKey(), entry.getValue()));
+    }
+
+    @Test
+    public void whenGeneralLetterPreviewCalled_thenPreviewDocumentIsAddedToCaseData() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+
+        assertThat(caseDetails.getData(), not(hasKey(GENERAL_LETTER_PREVIEW)));
+
+        generalLetterService.previewGeneralLetter(AUTH_TOKEN, caseDetails);
+
+        assertThat(caseDetails.getData(), hasKey(GENERAL_LETTER_PREVIEW));
+    }
+
+    @Test
+    public void givenAddressIsMissing_whenCaseDataErrorsFetched_ThereIsAnError() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter-missing-address.json", mapper);
+
+        List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
+        assertThat(errors, hasItem("Address is missing for recipient type respondent"));
+    }
+
+    @Test
+    public void givenAddressIsPresent_whenCaseDataErrorsFetched_ThereIsNoError() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+
+        List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
+        assertThat(errors, is(empty()));
+    }
+
+    private void assertNameUsedForGeneralLetterAddressTo(int invocation, String generalLetterAddressTo, String expectedName) {
+        CaseDetails caseDetails = null;
+        try {
+            caseDetails = caseDetails();
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e.getCause());
+        }
+        caseDetails.getData().put("generalLetterAddressTo", generalLetterAddressTo);
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
+
+        verify(genericDocumentService, times(invocation)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
+        Addressee addressee = (Addressee) documentGenerationRequestCaseDetailsCaptor.getValue().getData().get(ADDRESSEE);
+        assertThat(addressee.getName(), is(expectedName));
     }
 
     private CaseDetails caseDetails() throws Exception {
@@ -71,52 +168,5 @@ public class GeneralLetterServiceTest {
         assertThat(result.getDocumentFilename(), is(FILE_NAME));
         assertThat(result.getDocumentUrl(), is(DOC_URL));
         assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
-    }
-
-    private static class TestDocumentClient implements DocumentClient {
-
-        private Map<String, Object> value;
-
-        @Override
-        public Document generatePdf(DocumentGenerationRequest request, String authorizationToken) {
-            this.value = request.getValues();
-            return document();
-        }
-
-        @Override
-        public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void deleteDocument(String fileUrl, String authorizationToken) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public DocumentValidationResponse checkUploadedFileType(String authorizationToken, String fileUrl) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Document stampDocument(Document document, String authorizationToken) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Document annexStampDocument(Document document, String authorizationToken) {
-            throw new UnsupportedOperationException();
-        }
-
-        void verifyAdditionalFields() {
-            Map<String, Object> data = data();
-            assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
-            assertThat(data.get("ccdCaseNumber"), is(1234567890L));
-        }
-
-        private Map<String, Object> data() {
-            CaseDetails caseDetails = (CaseDetails) value.get("caseDetails");
-            return caseDetails.getData();
-        }
     }
 }
