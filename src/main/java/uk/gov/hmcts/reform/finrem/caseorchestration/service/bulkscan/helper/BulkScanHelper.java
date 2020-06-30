@@ -40,7 +40,7 @@ public class BulkScanHelper {
             new ImmutableMap.Builder<String, String>()
                     .put("a lump sum order", "lumpSumOrder")
                     .put("a property adjustment order", "propertyAdjustmentOrder")
-                    .put("a pens1ion sharing order", "pensionSharingOrder")
+                    .put("a pension sharing order", "pensionSharingOrder")
                     .put("a pension compensation sharing order", "pensionCompensationSharingOrder")
                     .build();
 
