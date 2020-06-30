@@ -4,14 +4,12 @@
   "case_details": {
     "id": "12345678",
     "jurisdiction": "DIVORCE",
-    "case_type_id": "FinancialRemedyMVP2",
+    "case_type_id": "FinancialRemedyContested",
     "state": "created",
     "case_data": {
-      "natureOfApplication2": [
-        "Property Adjustment Order",
-        "Pension Sharing Order",
-        "Lump Sum Order"
-      ]
+      "regionList": "wales",
+      "walesFRCList": "newport",
+      "newportCourtList": "FR_newport_hc_list_1"
     }
   }
 }

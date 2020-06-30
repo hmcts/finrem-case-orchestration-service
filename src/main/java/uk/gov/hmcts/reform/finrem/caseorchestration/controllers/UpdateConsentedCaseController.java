@@ -24,6 +24,7 @@ import static java.util.Objects.nonNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -155,7 +156,7 @@ public class UpdateConsentedCaseController implements BaseController {
     private void removeApplicantSolicitorAddress(Map<String, Object> caseData) {
         caseData.put("solicitorName", null);
         caseData.put("solicitorFirm", null);
-        caseData.put("solicitorReference", null);
+        caseData.put(SOLICITOR_REFERENCE, null);
         caseData.put("solicitorAddress", null);
         caseData.put("solicitorPhone", null);
         caseData.put("solicitorEmail", null);

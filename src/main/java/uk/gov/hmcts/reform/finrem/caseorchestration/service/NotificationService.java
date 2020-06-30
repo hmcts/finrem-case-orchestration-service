@@ -21,8 +21,10 @@ import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_BODY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
@@ -40,7 +42,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
@@ -67,73 +68,85 @@ public class NotificationService {
 
     public void sendConsentedHWFSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
-        sendNotificationEmail(callbackRequest, uri);
+        notificationRequest = createNotificationRequest(callbackRequest);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendAssignToJudgeConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getAssignToJudge());
-        sendNotificationEmail(callbackRequest, uri);
+        notificationRequest = createNotificationRequest(callbackRequest);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendConsentOrderMadeConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderMade());
-        sendNotificationEmail(callbackRequest, uri);
+        notificationRequest = createNotificationRequest(callbackRequest);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendConsentOrderNotApprovedEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderNotApproved());
-        sendNotificationEmail(callbackRequest, uri);
+        notificationRequest = createNotificationRequest(callbackRequest);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendConsentOrderAvailableEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailable());
-        sendNotificationEmail(callbackRequest, uri);
+        notificationRequest = createNotificationRequest(callbackRequest);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendContestedHwfSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedHwfSuccessful());
-        sendNotificationEmail(callbackRequest, uri);
+        notificationRequest = createNotificationRequest(callbackRequest);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendContestedApplicationIssuedEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedApplicationIssued());
-        sendNotificationEmail(callbackRequest, uri);
+        notificationRequest = createNotificationRequest(callbackRequest);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendContestOrderApprovedEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestOrderApproved());
-        sendNotificationEmail(callbackRequest, uri);
+        notificationRequest = createNotificationRequest(callbackRequest);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendPrepareForHearingEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getPrepareForHearing());
-        sendNotificationEmail(callbackRequest, uri);
+        notificationRequest = createNotificationRequest(callbackRequest);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendPrepareForHearingOrderSentEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getPrepareForHearingOrderSent());
-        sendNotificationEmail(callbackRequest, uri);
+        notificationRequest = createNotificationRequest(callbackRequest);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendSolicitorToDraftOrderEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedDraftOrder());
-        sendNotificationEmail(callbackRequest, uri);
+        notificationRequest = createNotificationRequest(callbackRequest);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
-    private void sendNotificationEmail(CallbackRequest callbackRequest, URI uri) {
-        try {
-            if (isConsentedApplication(callbackRequest.getCaseDetails())) {
-                notificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
-                        SOLICITOR_NAME, SOLICITOR_EMAIL, CONSENTED);
-            } else {
-                notificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
-                        CONTESTED_SOLICITOR_NAME, CONTESTED_SOLICITOR_EMAIL, CONTESTED);
-            }
-        } catch (IOException ex) {
-            log.error("Unable to create notification request for Case Id : {}, error message : {}",
-                    callbackRequest.getCaseDetails().getId(), ex.getMessage());
-        }
+    public void sendConsentGeneralEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getConsentGeneralEmail());
+        notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest.setNotificationEmail(Objects.toString(callbackRequest.getCaseDetails().getData().get("generalEmailRecipient")));
+        sendNotificationEmail(notificationRequest, uri);
+    }
 
+    public void sendContestedGeneralEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralEmail());
+        notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest.setNotificationEmail(Objects.toString(callbackRequest.getCaseDetails().getData().get("generalEmailRecipient")));
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+    private void sendNotificationEmail(NotificationRequest notificationRequest, URI uri) {
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders());
         try {
             restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
@@ -145,11 +158,28 @@ public class NotificationService {
         }
     }
 
+    private NotificationRequest createNotificationRequest(CallbackRequest callbackRequest) {
+        try {
+            if (isConsentedApplication(callbackRequest.getCaseDetails())) {
+                notificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
+                    CONSENTED_SOLICITOR_NAME, SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY);
+            } else {
+                notificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
+                    CONTESTED_SOLICITOR_NAME, CONTESTED_SOLICITOR_EMAIL, CONTESTED, GENERAL_EMAIL_BODY);
+            }
+        } catch (IOException ex) {
+            log.error("Unable to create notification request for Case Id : {}, error message : {}",
+                callbackRequest.getCaseDetails().getId(), ex.getMessage());
+        }
+        return notificationRequest;
+    }
+
     private NotificationRequest buildNotificationRequest(CallbackRequest callbackRequest,
                                                          String solicitorReference,
                                                          String solicitorName,
                                                          String solicitorEmail,
-                                                         String caseType) throws IOException {
+                                                         String caseType,
+                                                         String generalEmailBody) throws IOException {
         NotificationRequest notificationRequest = new NotificationRequest();
         Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
 
@@ -157,6 +187,7 @@ public class NotificationService {
         notificationRequest.setSolicitorReferenceNumber(Objects.toString(mapOfCaseData.get(solicitorReference)));
         notificationRequest.setName(Objects.toString(mapOfCaseData.get(solicitorName)));
         notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorEmail)));
+        notificationRequest.setGeneralEmailBody(Objects.toString(mapOfCaseData.get(generalEmailBody)));
         notificationRequest.setCaseType(caseType);
 
         if (CONTESTED.equalsIgnoreCase(caseType)) {
