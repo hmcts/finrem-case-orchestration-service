@@ -16,24 +16,30 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domai
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class BulkScanHelper {
 
+    private static final String ORDER_MAINTENANCE_PENDING = "an order for maintenance pending suit/outcome of proceedings";
+    private static final String LUMP_SUM_ORDER = "a lump sum order";
+    private static final String PROPERTY_ADJUSTMENT_ORDER = "a property adjustment order";
+    private static final String SETTLEMENT_TRANSFER_PROPERTY_FOR_CHILDREN = "a settlement or a transfer of property for the benefit of the child(ren)";
+    private static final String PERIODICAL_PAYMENTS_ORDER = "a periodical payments order together with other financial provision";
+    private static final String PENSION_SHARING_ORDER = "a pension Sharing Order";
+    private static final String PENSION_COMPENSATION_SHARING_ORDER = "a pension compensation sharing order";
+
     public static final Map<String, String> natureOfApplicationChecklistToCcdFieldNames =
         new ImmutableMap.Builder<String, String>()
-            .put("an order for maintenance pending suit/outcome of proceedings", "an order for maintenance pending suit/outcome of proceedings")
-            .put("a lump sum order", "a lump sum order")
-            .put("a property adjustment order", "a property adjustment order")
-            .put("a settlement or a transfer of property for the benefit of the child(ren)",
-                "a settlement or a transfer of property for the benefit of the child(ren)")
-            .put("a periodical payments order together with other financial provision",
-                "a periodical payments order together with other financial provision")
-            .put("a pension Sharing Order", "a pension Sharing Order")
-            .put("a pension compensation sharing order", "a pension compensation sharing order")
+            .put(ORDER_MAINTENANCE_PENDING, ORDER_MAINTENANCE_PENDING)
+            .put(LUMP_SUM_ORDER, LUMP_SUM_ORDER)
+            .put(PROPERTY_ADJUSTMENT_ORDER, PROPERTY_ADJUSTMENT_ORDER)
+            .put(SETTLEMENT_TRANSFER_PROPERTY_FOR_CHILDREN, SETTLEMENT_TRANSFER_PROPERTY_FOR_CHILDREN)
+            .put(PERIODICAL_PAYMENTS_ORDER, PERIODICAL_PAYMENTS_ORDER)
+            .put(PENSION_SHARING_ORDER, PENSION_SHARING_ORDER)
+            .put(PENSION_COMPENSATION_SHARING_ORDER, PENSION_COMPENSATION_SHARING_ORDER)
             .build();
 
     public static final Map<String, String> dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames =
             new ImmutableMap.Builder<String, String>()
                     .put("a lump sum order", "lumpSumOrder")
                     .put("a property adjustment order", "propertyAdjustmentOrder")
-                    .put("a pension sharing order", "pensionSharingOrder")
+                    .put("a pens1ion sharing order", "pensionSharingOrder")
                     .put("a pension compensation sharing order", "pensionCompensationSharingOrder")
                     .build();
 
