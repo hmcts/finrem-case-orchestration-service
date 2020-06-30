@@ -6,15 +6,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
+import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Addressee;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction;
 
 import java.io.IOException;
@@ -43,11 +43,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_ADDRESS_CCD_FIELD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
@@ -61,6 +61,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 public class DocumentHelper {
 
     public static final String DOCUMENT_BINARY_URL = "document_binary_url";
+    public static final String ADDRESSEE = "addressee";
+    public static final String CTSC_CONTACT_DETAILS = "ctscContactDetails";
+    public static final String CASE_NUMBER = "caseNumber";
 
     private final ObjectMapper objectMapper;
 
@@ -135,8 +138,8 @@ public class DocumentHelper {
         if (isApplicantRepresentedByASolicitor(caseData)) {
             log.info("Applicant is represented by a solicitor");
             reference = nullToEmpty((caseData.get(SOLICITOR_REFERENCE)));
-            addresseeName = nullToEmpty((caseData.get(SOLICITOR_NAME)));
-            addressToSendTo = (Map) caseData.get(APP_SOLICITOR_ADDRESS_CCD_FIELD);
+            addresseeName = nullToEmpty((caseData.get(CONSENTED_SOLICITOR_NAME)));
+            addressToSendTo = (Map) caseData.get(CONSENTED_SOLICITOR_ADDRESS);
         } else {
             log.info("Applicant is not represented by a solicitor");
             addresseeName = applicantName;
@@ -149,13 +152,13 @@ public class DocumentHelper {
                 .formattedAddress(formatAddressForLetterPrinting(addressToSendTo))
                 .build();
 
-            caseData.put("caseNumber", ccdNumber);
+            caseData.put(CASE_NUMBER, ccdNumber);
             caseData.put("reference", reference);
-            caseData.put("addressee",  addressee);
+            caseData.put(ADDRESSEE,  addressee);
             caseData.put("letterDate", String.valueOf(LocalDate.now()));
             caseData.put("applicantName", applicantName);
             caseData.put("respondentName", respondentName);
-            caseData.put("ctscContactDetails", buildCtscContactDetails());
+            caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
         } else {
             log.info("Failed to prepare template data as not all required address details were present");
             throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
@@ -164,7 +167,7 @@ public class DocumentHelper {
         return caseDetailsCopy;
     }
 
-    private static CtscContactDetails buildCtscContactDetails() {
+    public static CtscContactDetails buildCtscContactDetails() {
         return CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
             .careOf(CTSC_CARE_OF)

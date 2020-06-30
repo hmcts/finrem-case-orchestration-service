@@ -8,6 +8,7 @@ import feign.Request;
 import feign.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpServerErrorException;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.NoSuchFieldExistsException;
@@ -15,25 +16,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -45,7 +38,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
@@ -100,21 +92,6 @@ public class TestSetUpUtils {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(ORDER_REFUSAL_PREVIEW_COLLECTION, caseDocument());
         return caseData;
-    }
-
-    public static Map<String, Object> generalLetterDataMap() {
-        return ImmutableMap.of(GENERAL_LETTER, ImmutableList.of(generalLetterData()));
-    }
-
-    private static GeneralLetterData generalLetterData() {
-        GeneralLetter generalLetter = new GeneralLetter();
-        generalLetter.setGeneratedLetter(caseDocument());
-
-        GeneralLetterData generalLetterData = new GeneralLetterData();
-        generalLetterData.setId(UUID.randomUUID().toString());
-        generalLetterData.setGeneralLetter(generalLetter);
-
-        return generalLetterData;
     }
 
     private static ConsentOrderData consentOrderData(String id) {
@@ -198,21 +175,18 @@ public class TestSetUpUtils {
             .build();
     }
 
+    public static CaseDetails caseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
+        try (InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(resourcePath)) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception.getMessage(), exception);
+        }
+    }
+
     public static DocumentGenerationRequest matchDocumentGenerationRequestTemplateAndFilename(String template, String filename) {
         return argThat(
             documentGenerationRequest -> documentGenerationRequest != null
                 && template.equals(documentGenerationRequest.getTemplate())
                 && filename.equals(documentGenerationRequest.getFileName()));
-    }
-
-    public static <T> T mapJsonToObject(String jsonPath, Class<T> objectClass) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try (final InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(jsonPath)) {
-            return objectMapper.readValue(resourceAsStream, objectClass);
-        }
-    }
-
-    public static String fileContentAsString(String filePath) throws URISyntaxException, IOException {
-        return new String(Files.readAllBytes(Paths.get(TestSetUpUtils.class.getResource(filePath).toURI())), StandardCharsets.UTF_8);
     }
 }
