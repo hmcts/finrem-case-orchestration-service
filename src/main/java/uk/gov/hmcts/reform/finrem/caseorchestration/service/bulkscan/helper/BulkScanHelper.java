@@ -19,7 +19,8 @@ public class BulkScanHelper {
     private static final String ORDER_MAINTENANCE_PENDING = "an order for maintenance pending suit/outcome of proceedings";
     private static final String LUMP_SUM_ORDER = "a lump sum order";
     private static final String PROPERTY_ADJUSTMENT_ORDER = "a property adjustment order";
-    private static final String SETTLEMENT_TRANSFER_PROPERTY_FOR_CHILDREN = "a settlement or a transfer of property for the benefit of the child(ren)";
+    private static final String SETTLEMENT_TRANSFER_PROPERTY_FOR_CHILDREN =
+        "a settlement or a transfer of property for the benefit of the child(ren)";
     private static final String PERIODICAL_PAYMENTS_ORDER = "a periodical payments order together with other financial provision";
     private static final String PENSION_SHARING_ORDER = "a pension Sharing Order";
     private static final String PENSION_COMPENSATION_SHARING_ORDER = "a pension compensation sharing order";
