@@ -16,6 +16,7 @@
   "90022_Application Error Disclosure_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/general-email-start_POST": "ignore",
   "90022_Application Error Disclosure_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/general-email_POST": "ignore",
   "100000_A Server Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/general-email-start_POST": "ignore",
+  "100000_A Server Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/general-email_POST": "ignore",
   "100000_A Server Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/bulk-print_POST": "ignore",
   "100000_A Server Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/update-case_POST": "ignore",
   "100000_A Server Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/update-contested-case_POST": "ignore",
