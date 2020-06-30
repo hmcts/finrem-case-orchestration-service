@@ -97,7 +97,7 @@ public class FormAValidatorTest {
                 new OcrDataField(APPLICANT_FULL_NAME, "Peter Griffin"),
                 new OcrDataField(RESPONDENT_FULL_NAME, "Louis Griffin"),
                 new OcrDataField(PROVISION_MADE_FOR, "in connection with matrimonial or civil partnership proceedings"),
-                new OcrDataField(NATURE_OF_APPLICATION, "Periodical Payment Order, Pension Attachment Order"),
+                new OcrDataField(NATURE_OF_APPLICATION, "a lump sum order, a pension Sharing Order"),
                 new OcrDataField(APPLICANT_INTENDS_TO, "ApplyToCourtFor"),
                 new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "Yes"),
                 new OcrDataField(DIVORCE_STAGE_REACHED, "Decree Nisi"),

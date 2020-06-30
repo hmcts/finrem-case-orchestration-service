@@ -17,16 +17,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domai
 public class BulkScanHelper {
 
     public static final Map<String, String> natureOfApplicationChecklistToCcdFieldNames =
-            new ImmutableMap.Builder<String, String>()
-                    .put("Periodical Payment Order", "Periodical Payment Order")
-                    .put("Lump Sum Order", "Lump Sum Order")
-                    .put("Pension Sharing Order", "Pension Sharing Order")
-                    .put("Pension Attachment Order", "Pension Attachment Order")
-                    .put("Pension Compensation Sharing Order", "Pension Compensation Sharing Order")
-                    .put("Pension Compensation Attachment Order", "Pension Compensation Attachment Order")
-                    .put("A settlement or a transfer of property", "A settlement or a transfer of property")
-                    .put("Property Adjustment Order", "Property Adjustment Order")
-                    .build();
+        new ImmutableMap.Builder<String, String>()
+            .put("an order for maintenance pending suit/outcome of proceedings", "an order for maintenance pending suit/outcome of proceedings")
+            .put("a lump sum order", "a lump sum order")
+            .put("a property adjustment order", "a property adjustment order")
+            .put("a settlement or a transfer of property for the benefit of the child(ren)",
+                "a settlement or a transfer of property for the benefit of the child(ren)")
+            .put("a periodical payments order together with other financial provision",
+                "a periodical payments order together with other financial provision")
+            .put("a pension Sharing Order", "a pension Sharing Order")
+            .put("a pension compensation sharing order", "a pension compensation sharing order")
+            .build();
 
     public static final Map<String, String> dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames =
             new ImmutableMap.Builder<String, String>()
