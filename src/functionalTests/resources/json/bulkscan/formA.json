@@ -193,7 +193,7 @@
     { "name": "ApplicantFullName", "value": "Peter Griffin" },
     { "name": "RespondentFullName", "value": "Louis Griffin" },
     { "name": "ProvisionMadeFor", "value": "in connection with matrimonial or civil partnership proceedings" },
-    { "name": "natureOfApplication", "value": "Periodical Payment Order, Pension Attachment Order" },
+    { "name": "natureOfApplication", "value": "a periodical payments order together with other financial provision, a pension Sharing Order" },
     { "name": "ApplicantIntendsTo", "value": "ApplyToCourtFor" },
     { "name": "DischargePeriodicalPaymentSubstituteFor", "value": "a lump sum order,a pension sharing order" },
     { "name": "ApplyingForConsentOrder", "value": "Yes" },
