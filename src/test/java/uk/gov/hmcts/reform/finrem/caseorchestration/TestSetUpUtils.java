@@ -22,13 +22,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -193,16 +188,5 @@ public class TestSetUpUtils {
             documentGenerationRequest -> documentGenerationRequest != null
                 && template.equals(documentGenerationRequest.getTemplate())
                 && filename.equals(documentGenerationRequest.getFileName()));
-    }
-
-    public static <T> T mapJsonToObject(String jsonPath, Class<T> objectClass) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try (final InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(jsonPath)) {
-            return objectMapper.readValue(resourceAsStream, objectClass);
-        }
-    }
-
-    public static String fileContentAsString(String filePath) throws URISyntaxException, IOException {
-        return new String(Files.readAllBytes(Paths.get(TestSetUpUtils.class.getResource(filePath).toURI())), StandardCharsets.UTF_8);
     }
 }

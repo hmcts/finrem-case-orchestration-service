@@ -22,8 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_PREVIEW;
 
 @ActiveProfiles("test-mock-document-client")
 public class GeneralLetterServiceTest extends BaseServiceTest {
@@ -108,6 +113,33 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             "other", "Mr Rajesh Kuthrappali"
         ).entrySet().stream()
             .forEach(entry -> assertNameUsedForGeneralLetterAddressTo(invocationCounter.getAndIncrement(), entry.getKey(), entry.getValue()));
+    }
+
+    @Test
+    public void whenGeneralLetterPreviewCalled_thenPreviewDocumentIsAddedToCaseData() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+
+        assertThat(caseDetails.getData(), not(hasKey(GENERAL_LETTER_PREVIEW)));
+
+        generalLetterService.previewGeneralLetter(AUTH_TOKEN, caseDetails);
+
+        assertThat(caseDetails.getData(), hasKey(GENERAL_LETTER_PREVIEW));
+    }
+
+    @Test
+    public void givenAddressIsMissing_whenCaseDataErrorsFetched_ThereIsAnError() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter-missing-address.json", mapper);
+
+        List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
+        assertThat(errors, hasItem("Address is missing for recipient type respondent"));
+    }
+
+    @Test
+    public void givenAddressIsPresent_whenCaseDataErrorsFetched_ThereIsNoError() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+
+        List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
+        assertThat(errors, is(empty()));
     }
 
     private void assertNameUsedForGeneralLetterAddressTo(int invocation, String generalLetterAddressTo, String expectedName) {
