@@ -175,7 +175,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         mapFullNameToFirstAndLast(OcrFieldName.RESPONDENT_FULL_NAME, APP_RESPONDENT_FIRST_MIDDLE_NAME, "appRespondentLName",
             ocrDataFields, transformedCaseData);
 
-        commaSeparatedEntryTransformer(OcrFieldName.NATURE_OF_APPLICATION, "natureOfApplication2", natureOfApplicationChecklistToCcdFieldNames,
+        commaSeparatedEntryTransformer(OcrFieldName.NATURE_OF_APPLICATION, "natureOfApplication2b", natureOfApplicationChecklistToCcdFieldNames,
             ocrDataFields, transformedCaseData);
         commaSeparatedEntryTransformer(OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "dischargePeriodicalPaymentSubstituteFor",
             dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames, ocrDataFields, transformedCaseData);

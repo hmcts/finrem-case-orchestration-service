@@ -79,7 +79,8 @@ public class FormAToCaseTransformerTest {
             new OcrDataField(OcrFieldName.APPLICANT_FULL_NAME, "Peter Griffin"),
             new OcrDataField(OcrFieldName.RESPONDENT_FULL_NAME, "Louis Griffin"),
             new OcrDataField(OcrFieldName.PROVISION_MADE_FOR, "in connection with matrimonial or civil partnership proceedings"),
-            new OcrDataField(OcrFieldName.NATURE_OF_APPLICATION, "Periodical Payment Order, Pension Attachment Order"),
+            new OcrDataField(OcrFieldName.NATURE_OF_APPLICATION, "a lump sum order,"
+                + " a periodical payments order together with other financial provision"),
             new OcrDataField(OcrFieldName.APPLICANT_INTENDS_TO, "ApplyToCourtFor"),
             new OcrDataField(OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "a lump sum order, a pension sharing order"),
             new OcrDataField(OcrFieldName.APPLYING_FOR_CONSENT_ORDER, "Yes"),
@@ -163,7 +164,8 @@ public class FormAToCaseTransformerTest {
 
         assertChildrenInfo(transformedCaseData);
 
-        assertThat(transformedCaseData.get("natureOfApplication2"), is(asList("Periodical Payment Order", "Pension Attachment Order")));
+        assertThat(transformedCaseData.get("natureOfApplication2b"), is(asList("a lump sum order",
+            "a periodical payments order together with other financial provision")));
         assertThat(transformedCaseData.get("dischargePeriodicalPaymentSubstituteFor"), is(asList("lumpSumOrder", "pensionSharingOrder")));
         assertThat(transformedCaseData.get("natureOfApplication6"), is(singletonList("In addition to child support")));
     }
