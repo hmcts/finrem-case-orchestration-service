@@ -23,7 +23,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.fileContentAsString;
 
 @WebMvcTest(BulkPrintController.class)
 public class BulkPrintControllerTest extends BaseControllerTest {
@@ -52,7 +51,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
         mvc.perform(
                 post(BULK_PRINT_URI)
-                        .content(fileContentAsString(CONSENTED_BULK_PRINT_CONSENT_ORDER_NOT_APPROVED_JSON))
+                        .content(resourceContentAsString(CONSENTED_BULK_PRINT_CONSENT_ORDER_NOT_APPROVED_JSON))
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
@@ -75,7 +74,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
         mvc.perform(
                 post(BULK_PRINT_URI)
-                        .content(fileContentAsString(CONSENTED_BULK_PRINT_SIMPLE_JSON))
+                        .content(resourceContentAsString(CONSENTED_BULK_PRINT_SIMPLE_JSON))
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
@@ -96,7 +95,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
         mvc.perform(
                 post(BULK_PRINT_URI)
-                        .content(fileContentAsString(CONSENTED_BULK_PRINT_CONSENT_ORDER_APPROVED_JSON))
+                        .content(resourceContentAsString(CONSENTED_BULK_PRINT_CONSENT_ORDER_APPROVED_JSON))
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
@@ -113,7 +112,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
         when(coverSheetService.generateRespondentCoverSheet(any(), any())).thenThrow(feignError());
         mvc.perform(
                 post(BULK_PRINT_URI)
-                        .content(fileContentAsString(CONTESTED_HWF_JSON))
+                        .content(resourceContentAsString(CONTESTED_HWF_JSON))
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isInternalServerError());
@@ -127,7 +126,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
         when(bulkPrintService.sendOrderForBulkPrintRespondent(any(), any())).thenThrow(feignError());
         mvc.perform(
                 post(BULK_PRINT_URI)
-                        .content(fileContentAsString(CONTESTED_HWF_JSON))
+                        .content(resourceContentAsString(CONTESTED_HWF_JSON))
                         .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                         .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isInternalServerError());
@@ -145,7 +144,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
         mvc.perform(
             post(BULK_PRINT_URI)
-                .content(fileContentAsString(CONSENTED_BULK_PRINT_CONSENT_ORDER_APPROVED_JSON))
+                .content(resourceContentAsString(CONSENTED_BULK_PRINT_CONSENT_ORDER_APPROVED_JSON))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())

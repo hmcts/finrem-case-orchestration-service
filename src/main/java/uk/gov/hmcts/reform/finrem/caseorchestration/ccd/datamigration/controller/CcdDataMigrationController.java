@@ -19,6 +19,7 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 
 @RestController
 @RequiredArgsConstructor
@@ -139,13 +140,9 @@ public class CcdDataMigrationController {
 
     private boolean migrationRequired(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        boolean isContestedCase = isContestedCase(caseDetails);
+        boolean isContestedCase = isContestedApplication(caseDetails);
         boolean hasRegionList = hasRegionList(caseData);
         return isContestedCase && !hasRegionList;
-    }
-
-    private boolean isContestedCase(CaseDetails caseDetails) {
-        return caseDetails.getCaseTypeId().equals("FinancialRemedyContested");
     }
 
     private boolean hasRegionList(Map<String, Object> caseData) {

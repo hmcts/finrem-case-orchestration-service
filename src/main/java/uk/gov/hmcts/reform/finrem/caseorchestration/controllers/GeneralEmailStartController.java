@@ -23,38 +23,39 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_TEXT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_BODY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_CREATED_BY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-public class GeneralLetterStartController implements BaseController {
+public class GeneralEmailStartController implements BaseController {
 
     @Autowired
     private IdamService service;
 
-    @PostMapping(path = "/general-letter-start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Clears previous entered field values. Serves as a callback from CCD")
+    @PostMapping(path = "/general-email-start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Clears previous entered field values and prepopulates the created by name. Serves as a callback from CCD")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-                    response = AboutToStartOrSubmitCallbackResponse.class),
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> initialiseGeneralLetterProperties(
-            @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> initialiseGeneralEmailProperties(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to clear general letter fields for Case ID: {}", caseDetails.getId());
+        log.info("Received request to pre populate general email fields for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.put("generalLetterAddressTo", null);
-        caseData.put("generalLetterRecipient", null);
-        caseData.put("generalLetterRecipientAddress", null);
-        caseData.put("generalLetterCreatedBy", service.getIdamFullName(authorisationToken));
-        caseData.put(GENERAL_LETTER_TEXT, null);
+        caseData.put(GENERAL_EMAIL_RECIPIENT, null);
+        caseData.put(GENERAL_EMAIL_CREATED_BY, service.getIdamFullName(authorisationToken));
+        caseData.put(GENERAL_EMAIL_BODY, null);
+
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

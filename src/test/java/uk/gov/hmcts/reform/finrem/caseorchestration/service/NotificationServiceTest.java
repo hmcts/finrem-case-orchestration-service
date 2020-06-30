@@ -36,6 +36,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_CONTESTED_APPLICATION_ISSUED = "http://localhost:8086/notify/contested/application-issued";
     private static final String END_POINT_CONTEST_ORDER_APPROVED = "http://localhost:8086/notify/contested/order-approved";
     private static final String END_POINT_CONTESTED_DRAFT_ORDER = "http://localhost:8086/notify/contested/draft-order";
+    private static final String END_POINT_GENERAL_EMAIL_CONSENT = "http://localhost:8086/notify/general-email";
+    private static final String END_POINT_GENERAL_EMAIL_CONTESTED = "http://localhost:8086/notify/contested/general-email";
 
     private static final String ERROR_500_MESSAGE = "500 Internal Server Error";
 
@@ -528,6 +530,34 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
     }
 
+    @Test
+    public void sendGeneralEmailConsented() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_GENERAL_EMAIL_CONSENT))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendConsentGeneralEmail(callbackRequest);
+    }
+
+    @Test
+    public void sendGeneralEmailContested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_GENERAL_EMAIL_CONTESTED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedGeneralEmail(callbackRequest);
+    }
+
+    @Test
+    public void throwExceptionWhenGeneralEmailIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_GENERAL_EMAIL_CONSENT))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+        try {
+            notificationService.sendConsentGeneralEmail(callbackRequest);
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
+        }
+    }
+
     private CallbackRequest getContestedCallbackRequest(Object courtList) {
 
         Map<String, Object> caseData = new HashMap<>();
@@ -549,7 +579,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("solicitorEmail", "test@test.com");
         caseData.put("solicitorName", "solicitorName");
-        caseData.put("solicitorReference", "56789");
+        caseData.put(SOLICITOR_REFERENCE, "56789");
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
                 .caseTypeId("FinancialRemedyMVP2")

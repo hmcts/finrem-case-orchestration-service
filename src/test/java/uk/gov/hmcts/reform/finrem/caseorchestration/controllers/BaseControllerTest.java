@@ -57,4 +57,12 @@ public abstract class BaseControllerTest extends BaseTest {
         caseDocument.setDocumentFilename("doc1");
         return caseDocument;
     }
+
+    protected String resourceContentAsString(String resourcePath) {
+        try {
+            return objectMapper.readTree(new File(getClass().getResource(resourcePath).toURI())).toString();
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
 }

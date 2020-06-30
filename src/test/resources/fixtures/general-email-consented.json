@@ -55,13 +55,13 @@
         "document_binary_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
       },
       "solicitorAddress": {
-        "County": "Andhra Pradesh",
-        "Country": "India",
-        "PostCode": "B1 1AB",
+        "County": "test",
+        "Country": "United Kingdom",
+        "PostCode": "b1 1ab",
         "PostTown": "SRIKALAHASTI",
-        "AddressLine1": "House no: 6-354-2",
-        "AddressLine2": "Gandhi Street",
-        "AddressLine3": "Chittor District"
+        "AddressLine1": "House no: 6-354-2, Gandhi Street",
+        "AddressLine2": "Srikalahasti, Chittor District",
+        "AddressLine3": "test"
       },
       "authorisationFirm": "test",
       "authorisationName": "test",
@@ -75,38 +75,32 @@
         "AddressLine2": "AddressGlobalUK",
         "AddressLine3": "London"
       },
-      "rSolicitorName": "Ms Patel",
-      "rSolicitorReference": "RSP-LL01",
-      "rSolicitorAddress": {
-        "County": "test",
-        "Country": "United Kingdom",
-        "PostCode": "b1 1ab",
-        "PostTown": "SRIKALAHASTI",
-        "AddressLine1": "House no: 6-354-2, Gandhi Street",
-        "AddressLine2": "Srikalahasti, Chittor District",
-        "AddressLine3": "test"
-      },
       "solicitorDXnumber": null,
+      "appRespondentLName": "Korivi",
       "solicitorReference": "LL01",
       "appRespondentFMName": "test",
-      "appRespondentLName": "Korivi",
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "Yes",
       "generalLetterAddressTo": "applicantSolicitor",
-      "generalLetterRecipient": "Mr Rajesh Kuthrappali",
-      "generalLetterRecipientAddress": {
-        "County": "test",
-        "Country": "United Kingdom",
-        "PostCode": "b1 1ab",
-        "PostTown": "SRIKALAHASTI",
-        "AddressLine1": "House no: 6-354-2, Gandhi Street",
-        "AddressLine2": "Srikalahasti, Chittor District",
-        "AddressLine3": "test"
-      },
+      "generalLetterRecipient": "",
+      "generalLetterRecipientAddress": "",
       "generalLetterCreatedBy": "",
       "generalLetterBody": "Test content for the letter body",
+      "generalEmailRecipient": "b1@b.com",
+      "generalEmailCreatedBy": "Test user",
+      "generalEmailBody": "Test email body",
+      "generalEmailCollection": [
+        {
+          "id": "6261060a-b6de-4909-98de-9d34a912857c",
+          "value": {
+            "generalEmailRecipient": "a1@a.com",
+            "generalEmailCreatedBy": "first user",
+            "generalEmailBody": "original email body"
+          }
+        }
+      ],
       "generalLetterCollection": [
         {
           "id": "1",

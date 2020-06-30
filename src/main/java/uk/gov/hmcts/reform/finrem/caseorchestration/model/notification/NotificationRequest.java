@@ -23,4 +23,6 @@ public class NotificationRequest {
     private String selectedCourt;
     @JsonProperty("caseType")
     private String caseType;
+    @JsonProperty("generalEmailBody")
+    private String generalEmailBody;
 }

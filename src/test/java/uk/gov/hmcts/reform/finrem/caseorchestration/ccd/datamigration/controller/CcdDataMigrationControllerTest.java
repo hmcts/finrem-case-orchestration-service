@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controlle
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
@@ -16,7 +15,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.mapJsonToObject;
 
 @WebMvcTest(CcdDataMigrationController.class)
 public class CcdDataMigrationControllerTest extends BaseControllerTest {
@@ -26,8 +24,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_newport() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-newport.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-newport.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -45,8 +42,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_newport_ac() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-newport-ac.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-newport-ac.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -64,8 +60,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_swansea() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-swansea.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-swansea.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -83,8 +78,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_swansea_ac() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-swansea-ac.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-swansea-ac.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -102,8 +96,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_cfc() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-cfc.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-cfc.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -121,8 +114,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_cfc_ac() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-cfc-ac.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-cfc-ac.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -140,8 +132,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_nottingham() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-nottingham.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-nottingham.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -159,8 +150,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_nottingham_ac() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-nottingham-ac.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-nottingham-ac.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -178,8 +168,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_birmingham() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-birmingham.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-birmingham.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -197,8 +186,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_birmingham_ac() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-birmingham-ac.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-birmingham-ac.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -216,8 +204,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_liverpool() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-liverpool.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-liverpool.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -235,8 +222,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_liverpool_ac() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-liverpool-ac.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-liverpool-ac.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -254,8 +240,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_manchester() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-manchester.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-manchester.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -273,8 +258,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_manchester_ac() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-manchester-ac.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-manchester-ac.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -292,8 +276,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_cleaveland() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-cleaveland.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-cleaveland.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -311,8 +294,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_cleaveland_ac() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-cleaveland-ac.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-cleaveland-ac.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -330,8 +312,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_nwyorkshire() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-nwyorkshire.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-nwyorkshire.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -349,8 +330,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_nwyorkshire_ac() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-nwyorkshire-ac.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-nwyorkshire-ac.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -368,8 +348,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_hsyorkshire() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-hsyorkshire.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-hsyorkshire.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -387,8 +366,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_hsyorkshire_ac() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-hsyorkshire-ac.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-hsyorkshire-ac.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -406,8 +384,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_kent() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-kent.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-kent.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -425,8 +402,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldMigrateCase_kent_ac() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-migration-applicable-kent-ac.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-kent-ac.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
@@ -444,8 +420,7 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotMigrateCase() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(objectMapper.writeValueAsString(
-                mapJsonToObject("/fixtures/ccd-migrate-request-already-migrated.json", CallbackRequest.class)))
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-already-migrated.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
