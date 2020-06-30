@@ -58,7 +58,7 @@
   "10021_X-Content-Type-Options Header Missing_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/contest-order-approved_POST": "ignore",
   "10021_X-Content-Type-Options Header Missing_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/hearing_POST": "ignore",
   "10021_X-Content-Type-Options Header Missing_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/consent-order-not-approved_POST": "ignore",
-  "10021_X-Content-Type-Options Header Missing_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/general-letter_POST": "ignore"
+  "10021_X-Content-Type-Options Header Missing_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/general-letter_POST": "ignore",
   "90022_Application Error Disclosure_http://finrem-cos-aat.service.core-compute-aat.internal/v2/api-docs_GET": "ignore",
   "10023_Information Disclosure - Debug Error Messages_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/general-email-start_POST": "ignore",
   "10023_Information Disclosure - Debug Error Messages_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/general-email_POST": "ignore",
