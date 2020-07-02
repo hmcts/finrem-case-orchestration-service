@@ -142,22 +142,25 @@ public class CcdDataMigrationController {
 
     private boolean migrationRequired(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        boolean isContestedCase = isContestedApplication(caseDetails);
-        return isContestedCase && !hasRegionList(caseData) && hasCourtDetails(caseData);
+        return isContestedApplication(caseDetails) && !hasRegionList(caseData) && hasCourtDetails(caseData);
     }
 
     private boolean hasRegionList(Map<String, Object> caseData) {
         return caseData.containsKey(REGION);
     }
 
-    private static boolean hasCourtDetails(Map<String, Object> caseData) {
+    private boolean hasCourtDetails(Map<String, Object> caseData) {
         return caseData.containsKey(REGION_SL) || hasAllocatedCourtDetails(caseData);
     }
 
-    private static boolean hasAllocatedCourtDetails(Map<String, Object> caseData) {
+    private boolean hasAllocatedCourtDetails(Map<String, Object> caseData) {
         if (caseData.containsKey(ALLOCATED_COURT_LIST)) {
-            Map<String, Object> allocatedCourtList = (Map<String, Object>) caseData.getOrDefault(ALLOCATED_COURT_LIST, new HashMap<>());
-            return allocatedCourtList.containsKey(REGION_AC);
+            try {
+                Map<String, Object> allocatedCourtList = (Map<String, Object>) caseData.getOrDefault(ALLOCATED_COURT_LIST, new HashMap<>());
+                return allocatedCourtList.containsKey(REGION_AC);
+            } catch (ClassCastException e) {
+                return false;
+            }
         }
 
         return false;
