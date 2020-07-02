@@ -16,30 +16,12 @@ public class FeatureToggleServiceTest {
 
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
-        "feature.toggle.approved_consent_order_notification_letter=true",
-        "feature.toggle.hwf_successful_notification_letter=true",
-        "feature.toggle.assigned_to_judge_notification_letter=true",
         "feature.toggle.consent_order_not_approved_applicant_document_generation=true"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOn {
 
         @Autowired
         private FeatureToggleService featureToggleService;
-
-        @Test
-        public void isApprovedConsentOrderNotificationLetterEnabledReturnsTrue() {
-            assertThat(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled(), is(true));
-        }
-
-        @Test
-        public void isHwfSuccessfulNotificationLetterEnabledReturnTrue() {
-            assertThat(featureToggleService.isHwfSuccessfulNotificationLetterEnabled(), is(true));
-        }
-
-        @Test
-        public void isAssignedToJudgeNotificationLetterEnabledReturnTrue() {
-            assertThat(featureToggleService.isAssignedToJudgeNotificationLetterEnabled(), is(true));
-        }
 
         @Test
         public void isConsentOrderNotApprovedApplicantDocumentGenerationEnabledReturnTrue() {
@@ -54,30 +36,12 @@ public class FeatureToggleServiceTest {
 
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
-        "feature.toggle.approved_consent_order_notification_letter=false",
-        "feature.toggle.hwf_successful_notification_letter=false",
-        "feature.toggle.assigned_to_judge_notification_letter=false",
         "feature.toggle.consent_order_not_approved_applicant_document_generation=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff {
 
         @Autowired
         private FeatureToggleService featureToggleService;
-
-        @Test
-        public void isApprovedConsentOrderNotificationLetterEnabledReturnsFalse() {
-            assertThat(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled(), is(false));
-        }
-
-        @Test
-        public void isHwfSuccessfulNotificationLetterEnabledReturnFalse() {
-            assertThat(featureToggleService.isHwfSuccessfulNotificationLetterEnabled(), is(false));
-        }
-
-        @Test
-        public void isAssignedToJudgeNotificationLetterEnabledReturnFalse() {
-            assertThat(featureToggleService.isAssignedToJudgeNotificationLetterEnabled(), is(false));
-        }
 
         @Test
         public void isConsentOrderNotApprovedApplicantDocumentGenerationEnabledReturnFalse() {
