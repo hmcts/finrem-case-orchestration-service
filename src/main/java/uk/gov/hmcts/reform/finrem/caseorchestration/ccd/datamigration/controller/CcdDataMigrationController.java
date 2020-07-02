@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -31,6 +32,7 @@ public class CcdDataMigrationController {
     public static final String REGION_SL = "regionListSL";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
     public static final String REGION_AC = "region";
+    public static final String EMPTY_STRING = "";
 
     // regions
     public static final String WALES = "wales";
@@ -141,218 +143,230 @@ public class CcdDataMigrationController {
     private boolean migrationRequired(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         boolean isContestedCase = isContestedApplication(caseDetails);
-        boolean hasRegionList = hasRegionList(caseData);
-        return isContestedCase && !hasRegionList;
+        return isContestedCase && !hasRegionList(caseData) && hasCourtDetails(caseData);
     }
 
     private boolean hasRegionList(Map<String, Object> caseData) {
         return caseData.containsKey(REGION);
     }
 
+    private static boolean hasCourtDetails(Map<String, Object> caseData) {
+        return caseData.containsKey(REGION_SL) || hasAllocatedCourtDetails(caseData);
+    }
+
+    private static boolean hasAllocatedCourtDetails(Map<String, Object> caseData) {
+        if (caseData.containsKey(ALLOCATED_COURT_LIST)) {
+            Map<String, Object> allocatedCourtList = (Map<String, Object>) caseData.getOrDefault(ALLOCATED_COURT_LIST, new HashMap<>());
+            return allocatedCourtList.containsKey(REGION_AC);
+        }
+
+        return false;
+    }
 
     private Map<String, Object> migrateCaseData(Map<String, Object> caseData) {
         if (caseData.containsKey(REGION_SL)) {
-            caseData.remove(ALLOCATED_COURT_LIST);
-
-            String region = (String) caseData.get(REGION_SL);
+            String region = (String) caseData.getOrDefault(REGION_SL, EMPTY_STRING);
             caseData.put(REGION, region);
             caseData.remove(REGION_SL);
 
             switch (region) {
                 case WALES:
-                    caseData.put(WALES_FRC_LIST, caseData.get(WALES_FRC_LIST_SL));
+                    caseData.put(WALES_FRC_LIST, caseData.getOrDefault(WALES_FRC_LIST_SL, EMPTY_STRING));
                     caseData.remove(WALES_FRC_LIST_SL);
 
-                    switch ((String) caseData.get(WALES_FRC_LIST)) {
+                    switch ((String) caseData.getOrDefault(WALES_FRC_LIST, EMPTY_STRING)) {
                         case NEWPORT:
-                            caseData.put(NEWPORT_COURT_LIST, caseData.get(NEWPORT_COURT_LIST_SL));
+                            caseData.put(NEWPORT_COURT_LIST, caseData.getOrDefault(NEWPORT_COURT_LIST_SL, EMPTY_STRING));
                             caseData.remove(NEWPORT_COURT_LIST_SL);
                             break;
                         case SWANSEA:
-                            caseData.put(SWANSEA_COURT_LIST, caseData.get(SWANSEA_COURT_LIST_SL));
+                            caseData.put(SWANSEA_COURT_LIST, caseData.getOrDefault(SWANSEA_COURT_LIST_SL, EMPTY_STRING));
                             caseData.remove(SWANSEA_COURT_LIST_SL);
                             break;
                         default:
-                            break;
+                            return caseData;
                     }
                     break;
                 case LONDON:
-                    caseData.put(LONDON_FRC_LIST, caseData.get(LONDON_FRC_LIST_SL));
+                    caseData.put(LONDON_FRC_LIST, caseData.getOrDefault(LONDON_FRC_LIST_SL, EMPTY_STRING));
                     caseData.remove(LONDON_FRC_LIST_SL);
 
-                    switch ((String) caseData.get(LONDON_FRC_LIST)) {
+                    switch ((String) caseData.getOrDefault(LONDON_FRC_LIST, EMPTY_STRING)) {
                         case CFC:
-                            caseData.put(CFC_COURT_LIST, caseData.get(CFC_COURT_LIST_SL));
+                            caseData.put(CFC_COURT_LIST, caseData.getOrDefault(CFC_COURT_LIST_SL, EMPTY_STRING));
                             caseData.remove(CFC_COURT_LIST_SL);
                             break;
                         default:
-                            break;
+                            return caseData;
                     }
                     break;
                 case MIDLANDS:
-                    caseData.put(MIDLANDS_FRC_LIST, caseData.get(MIDLANDS_FRC_LIST_SL));
+                    caseData.put(MIDLANDS_FRC_LIST, caseData.getOrDefault(MIDLANDS_FRC_LIST_SL, EMPTY_STRING));
                     caseData.remove(MIDLANDS_FRC_LIST_SL);
 
-                    switch ((String) caseData.get(MIDLANDS_FRC_LIST)) {
+                    switch ((String) caseData.getOrDefault(MIDLANDS_FRC_LIST, EMPTY_STRING)) {
                         case NOTTINGHAM:
-                            caseData.put(NOTTINGHAM_COURT_LIST, caseData.get(NOTTINGHAM_COURT_LIST_SL));
+                            caseData.put(NOTTINGHAM_COURT_LIST, caseData.getOrDefault(NOTTINGHAM_COURT_LIST_SL, EMPTY_STRING));
                             caseData.remove(NOTTINGHAM_COURT_LIST_SL);
                             break;
                         case BIRMINGHAM:
-                            caseData.put(BIRMINGHAM_COURT_LIST, caseData.get(BIRMINGHAM_COURT_LIST_SL));
+                            caseData.put(BIRMINGHAM_COURT_LIST, caseData.getOrDefault(BIRMINGHAM_COURT_LIST_SL, EMPTY_STRING));
                             caseData.remove(BIRMINGHAM_COURT_LIST_SL);
                             break;
                         default:
-                            break;
+                            return caseData;
                     }
                     break;
                 case NORTHWEST:
-                    caseData.put(NORTHWEST_FRC_LIST, caseData.get(NORTHWEST_FRC_LIST_SL));
+                    caseData.put(NORTHWEST_FRC_LIST, caseData.getOrDefault(NORTHWEST_FRC_LIST_SL, EMPTY_STRING));
                     caseData.remove(NORTHWEST_FRC_LIST_SL);
 
-                    switch ((String) caseData.get(NORTHWEST_FRC_LIST)) {
+                    switch ((String) caseData.getOrDefault(NORTHWEST_FRC_LIST, EMPTY_STRING)) {
                         case LIVERPOOL:
-                            caseData.put(LIVERPOOL_COURT_LIST, caseData.get(LIVERPOOL_COURT_LIST_SL));
+                            caseData.put(LIVERPOOL_COURT_LIST, caseData.getOrDefault(LIVERPOOL_COURT_LIST_SL, EMPTY_STRING));
                             caseData.remove(LIVERPOOL_COURT_LIST_SL);
                             break;
                         case MANCHESTER:
-                            caseData.put(MANCHESTER_COURT_LIST, caseData.get(MANCHESTER_COURT_LIST_SL));
+                            caseData.put(MANCHESTER_COURT_LIST, caseData.getOrDefault(MANCHESTER_COURT_LIST_SL, EMPTY_STRING));
                             caseData.remove(MANCHESTER_COURT_LIST_SL);
                             break;
                         default:
-                            break;
+                            return caseData;
                     }
                     break;
                 case NORTHEAST:
-                    caseData.put(NORTHEAST_FRC_LIST, caseData.get(NORTHEAST_FRC_LIST_SL));
+                    caseData.put(NORTHEAST_FRC_LIST, caseData.getOrDefault(NORTHEAST_FRC_LIST_SL, EMPTY_STRING));
                     caseData.remove(NORTHEAST_FRC_LIST_SL);
 
-                    switch ((String) caseData.get(NORTHEAST_FRC_LIST)) {
+                    switch ((String) caseData.getOrDefault(NORTHEAST_FRC_LIST, EMPTY_STRING)) {
                         case CLEAVELAND:
-                            caseData.put(CLEAVELAND_COURT_LIST, caseData.get(CLEAVELAND_COURT_LIST_SL));
+                            caseData.put(CLEAVELAND_COURT_LIST, caseData.getOrDefault(CLEAVELAND_COURT_LIST_SL, EMPTY_STRING));
                             caseData.remove(CLEAVELAND_COURT_LIST_SL);
                             break;
                         case NWYORKSHIRE:
-                            caseData.put(NWYORKSHIRE_COURT_LIST, caseData.get(NWYORKSHIRE_COURT_LIST_SL));
+                            caseData.put(NWYORKSHIRE_COURT_LIST, caseData.getOrDefault(NWYORKSHIRE_COURT_LIST_SL, EMPTY_STRING));
                             caseData.remove(NWYORKSHIRE_COURT_LIST_SL);
                             break;
                         case HSYORKSHIRE:
-                            caseData.put(HUMBER_COURT_LIST, caseData.get(HUMBER_COURT_LIST_SL));
+                            caseData.put(HUMBER_COURT_LIST, caseData.getOrDefault(HUMBER_COURT_LIST_SL, EMPTY_STRING));
                             caseData.remove(HUMBER_COURT_LIST_SL);
                             break;
                         default:
-                            break;
+                            return caseData;
                     }
                     break;
                 case SOUTHEAST:
-                    caseData.put(SOUTHEAST_FRC_LIST, caseData.get(SOUTHEAST_FRC_LIST_SL));
+                    caseData.put(SOUTHEAST_FRC_LIST, caseData.getOrDefault(SOUTHEAST_FRC_LIST_SL, EMPTY_STRING));
                     caseData.remove(SOUTHEAST_FRC_LIST_SL);
 
-                    switch ((String) caseData.get(SOUTHEAST_FRC_LIST)) {
+                    switch ((String) caseData.getOrDefault(SOUTHEAST_FRC_LIST, EMPTY_STRING)) {
                         case KENT:
-                            caseData.put(KENT_SURREY_COURT_LIST, caseData.get(KENT_SURREY_COURT_LIST_SL));
+                            caseData.put(KENT_SURREY_COURT_LIST, caseData.getOrDefault(KENT_SURREY_COURT_LIST_SL, EMPTY_STRING));
                             caseData.remove(KENT_SURREY_COURT_LIST_SL);
                             break;
                         default:
-                            break;
+                            return caseData;
                     }
                     break;
                 default:
-                    break;
+                    return caseData;
             }
-        } else {
-            Map<String, Object> allocatedCourtList = (Map<String, Object>) caseData.get(ALLOCATED_COURT_LIST);
-            String region = (String) allocatedCourtList.get(REGION_AC);
+        } else if (caseData.containsKey(ALLOCATED_COURT_LIST)) {
+            Map<String, Object> allocatedCourtList = (Map<String, Object>) caseData.getOrDefault(ALLOCATED_COURT_LIST, new HashMap<>());
+            String region = (String) allocatedCourtList.getOrDefault(REGION_AC, EMPTY_STRING);
             caseData.put(REGION, region);
 
             switch (region) {
                 case WALES:
-                    caseData.put(WALES_FRC_LIST, allocatedCourtList.get(WALES_FRC_LIST_AC));
+                    caseData.put(WALES_FRC_LIST, allocatedCourtList.getOrDefault(WALES_FRC_LIST_AC, EMPTY_STRING));
 
-                    switch ((String) caseData.get(WALES_FRC_LIST)) {
+                    switch ((String) caseData.getOrDefault(WALES_FRC_LIST, EMPTY_STRING)) {
                         case NEWPORT:
-                            caseData.put(NEWPORT_COURT_LIST, allocatedCourtList.get(NEWPORT_COURT_LIST_AC));
+                            caseData.put(NEWPORT_COURT_LIST, allocatedCourtList.getOrDefault(NEWPORT_COURT_LIST_AC, EMPTY_STRING));
                             break;
                         case SWANSEA:
-                            caseData.put(SWANSEA_COURT_LIST, allocatedCourtList.get(SWANSEA_COURT_LIST_AC));
+                            caseData.put(SWANSEA_COURT_LIST, allocatedCourtList.getOrDefault(SWANSEA_COURT_LIST_AC, EMPTY_STRING));
                             break;
                         default:
-                            break;
+                            return caseData;
                     }
                     break;
                 case LONDON:
-                    caseData.put(LONDON_FRC_LIST, allocatedCourtList.get(LONDON_FRC_LIST_AC));
+                    caseData.put(LONDON_FRC_LIST, allocatedCourtList.getOrDefault(LONDON_FRC_LIST_AC, EMPTY_STRING));
 
-                    switch ((String) caseData.get(LONDON_FRC_LIST)) {
+                    switch ((String) caseData.getOrDefault(LONDON_FRC_LIST, EMPTY_STRING)) {
                         case CFC:
-                            caseData.put(CFC_COURT_LIST, allocatedCourtList.get(CFC_COURT_LIST_AC));
+                            caseData.put(CFC_COURT_LIST, allocatedCourtList.getOrDefault(CFC_COURT_LIST_AC, EMPTY_STRING));
                             break;
                         default:
-                            break;
+                            return caseData;
                     }
                     break;
                 case MIDLANDS:
-                    caseData.put(MIDLANDS_FRC_LIST, allocatedCourtList.get(MIDLANDS_FRC_LIST_AC));
+                    caseData.put(MIDLANDS_FRC_LIST, allocatedCourtList.getOrDefault(MIDLANDS_FRC_LIST_AC, EMPTY_STRING));
 
-                    switch ((String) caseData.get(MIDLANDS_FRC_LIST)) {
+                    switch ((String) caseData.getOrDefault(MIDLANDS_FRC_LIST, EMPTY_STRING)) {
                         case NOTTINGHAM:
-                            caseData.put(NOTTINGHAM_COURT_LIST, allocatedCourtList.get(NOTTINGHAM_COURT_LIST_AC));
+                            caseData.put(NOTTINGHAM_COURT_LIST, allocatedCourtList.getOrDefault(NOTTINGHAM_COURT_LIST_AC, EMPTY_STRING));
                             break;
                         case BIRMINGHAM:
-                            caseData.put(BIRMINGHAM_COURT_LIST, allocatedCourtList.get(BIRMINGHAM_COURT_LIST_AC));
+                            caseData.put(BIRMINGHAM_COURT_LIST, allocatedCourtList.getOrDefault(BIRMINGHAM_COURT_LIST_AC, EMPTY_STRING));
                             break;
                         default:
-                            break;
+                            return caseData;
                     }
                     break;
                 case NORTHWEST:
-                    caseData.put(NORTHWEST_FRC_LIST, allocatedCourtList.get(NORTHWEST_FRC_LIST_AC));
+                    caseData.put(NORTHWEST_FRC_LIST, allocatedCourtList.getOrDefault(NORTHWEST_FRC_LIST_AC, EMPTY_STRING));
 
-                    switch ((String) caseData.get(NORTHWEST_FRC_LIST)) {
+                    switch ((String) caseData.getOrDefault(NORTHWEST_FRC_LIST, EMPTY_STRING)) {
                         case LIVERPOOL:
-                            caseData.put(LIVERPOOL_COURT_LIST, allocatedCourtList.get(LIVERPOOL_COURT_LIST_AC));
+                            caseData.put(LIVERPOOL_COURT_LIST, allocatedCourtList.getOrDefault(LIVERPOOL_COURT_LIST_AC, EMPTY_STRING));
                             break;
                         case MANCHESTER:
-                            caseData.put(MANCHESTER_COURT_LIST, allocatedCourtList.get(MANCHESTER_COURT_LIST_AC));
+                            caseData.put(MANCHESTER_COURT_LIST, allocatedCourtList.getOrDefault(MANCHESTER_COURT_LIST_AC, EMPTY_STRING));
                             break;
                         default:
-                            break;
+                            return caseData;
                     }
                     break;
                 case NORTHEAST:
-                    caseData.put(NORTHEAST_FRC_LIST, allocatedCourtList.get(NORTHEAST_FRC_LIST_AC));
+                    caseData.put(NORTHEAST_FRC_LIST, allocatedCourtList.getOrDefault(NORTHEAST_FRC_LIST_AC, EMPTY_STRING));
 
-                    switch ((String) caseData.get(NORTHEAST_FRC_LIST)) {
+                    switch ((String) caseData.getOrDefault(NORTHEAST_FRC_LIST, EMPTY_STRING)) {
                         case CLEAVELAND:
-                            caseData.put(CLEAVELAND_COURT_LIST, allocatedCourtList.get(CLEAVELAND_COURT_LIST_AC));
+                            caseData.put(CLEAVELAND_COURT_LIST, allocatedCourtList.getOrDefault(CLEAVELAND_COURT_LIST_AC, EMPTY_STRING));
                             break;
                         case NWYORKSHIRE:
-                            caseData.put(NWYORKSHIRE_COURT_LIST, allocatedCourtList.get(NWYORKSHIRE_COURT_LIST_AC));
+                            caseData.put(NWYORKSHIRE_COURT_LIST, allocatedCourtList.getOrDefault(NWYORKSHIRE_COURT_LIST_AC, EMPTY_STRING));
                             break;
                         case HSYORKSHIRE:
-                            caseData.put(HUMBER_COURT_LIST, allocatedCourtList.get(HUMBER_COURT_LIST_AC));
+                            caseData.put(HUMBER_COURT_LIST, allocatedCourtList.getOrDefault(HUMBER_COURT_LIST_AC, EMPTY_STRING));
                             break;
                         default:
-                            break;
+                            return caseData;
                     }
                     break;
                 case SOUTHEAST:
-                    caseData.put(SOUTHEAST_FRC_LIST, allocatedCourtList.get(SOUTHEAST_FRC_LIST_AC));
+                    caseData.put(SOUTHEAST_FRC_LIST, allocatedCourtList.getOrDefault(SOUTHEAST_FRC_LIST_AC, EMPTY_STRING));
 
-                    switch ((String) caseData.get(SOUTHEAST_FRC_LIST)) {
+                    switch ((String) caseData.getOrDefault(SOUTHEAST_FRC_LIST, EMPTY_STRING)) {
                         case KENT:
-                            caseData.put(KENT_SURREY_COURT_LIST, allocatedCourtList.get(KENT_SURREY_COURT_LIST_AC));
+                            caseData.put(KENT_SURREY_COURT_LIST, allocatedCourtList.getOrDefault(KENT_SURREY_COURT_LIST_AC, EMPTY_STRING));
                             break;
                         default:
-                            break;
+                            return caseData;
                     }
                     break;
                 default:
-                    break;
+                    return caseData;
             }
+        }
 
+        if (caseData.containsKey(ALLOCATED_COURT_LIST)) {
             caseData.remove(ALLOCATED_COURT_LIST);
         }
+
         return caseData;
     }
 }
