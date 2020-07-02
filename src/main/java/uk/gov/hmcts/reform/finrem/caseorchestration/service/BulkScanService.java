@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bsp.common.error.InvalidDataException;
 import uk.gov.hmcts.reform.bsp.common.error.UnsupportedFormTypeException;
@@ -19,6 +20,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class BulkScanService {
 
     private final FinRemBulkScanFormValidatorFactory finRemBulkScanFormValidatorFactory;
@@ -45,9 +47,12 @@ public class BulkScanService {
             =  validateBulkScanForm(exceptionRecord.getFormType(), exceptionRecord.getOcrDataFields());
 
         if (!ocrDataFieldsValidationResult.getStatus().equals(ValidationStatus.SUCCESS)) {
+            String ocrValidationError = String.format("Validation of Exception Record %s finished with status %s",
+                exceptionRecord.getId(), ocrDataFieldsValidationResult.getStatus());
+
+            log.info(ocrValidationError);
             throw new InvalidDataException(
-                String.format("Validation of exception record %s finished with status %s",
-                    exceptionRecord.getId(), ocrDataFieldsValidationResult.getStatus()),
+                ocrValidationError,
                 ocrDataFieldsValidationResult.getWarnings(),
                 ocrDataFieldsValidationResult.getErrors()
             );
@@ -56,9 +61,11 @@ public class BulkScanService {
         OcrValidationResult bulkScanFormsValidationResult = formAValidator.validateFormAScannedDocuments(exceptionRecord);
 
         if (!bulkScanFormsValidationResult.getStatus().equals(ValidationStatus.SUCCESS)) {
-            throw new InvalidDataException(
-                String.format("Validation of exception record attached documents %s finished with status %s",
-                    exceptionRecord.getId(), bulkScanFormsValidationResult.getStatus()),
+            String docValidationError = String.format("Validation of Exception Record attached documents %s finished with status %s",
+                exceptionRecord.getId(), bulkScanFormsValidationResult.getStatus());
+
+            log.info(docValidationError);
+            throw new InvalidDataException(docValidationError,
                 bulkScanFormsValidationResult.getWarnings(),
                 bulkScanFormsValidationResult.getErrors()
             );

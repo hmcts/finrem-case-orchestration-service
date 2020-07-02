@@ -102,7 +102,7 @@ public class UpdateConsentedCaseController implements BaseController {
     private void updatePropertyDetails(Map<String, Object> caseData) {
         List natureOfApplication2 = (List) caseData.get("natureOfApplication2");
 
-        if (hasNotSelected(natureOfApplication2, "Property Adjustment  Order")) {
+        if (hasNotSelected(natureOfApplication2, "Property Adjustment Order")) {
             removePropertyAdjustmentDetails(caseData);
         }
     }

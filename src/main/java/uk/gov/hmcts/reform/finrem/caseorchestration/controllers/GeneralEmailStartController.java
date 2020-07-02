@@ -4,8 +4,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,11 +29,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
+@RequiredArgsConstructor
 @Slf4j
 public class GeneralEmailStartController implements BaseController {
 
-    @Autowired
-    private IdamService service;
+    private final IdamService idamService;
 
     @PostMapping(path = "/general-email-start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Clears previous entered field values and prepopulates the created by name. Serves as a callback from CCD")
@@ -53,9 +53,8 @@ public class GeneralEmailStartController implements BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(GENERAL_EMAIL_RECIPIENT, null);
-        caseData.put(GENERAL_EMAIL_CREATED_BY, service.getIdamFullName(authorisationToken));
+        caseData.put(GENERAL_EMAIL_CREATED_BY, idamService.getIdamFullName(authorisationToken));
         caseData.put(GENERAL_EMAIL_BODY, null);
-
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

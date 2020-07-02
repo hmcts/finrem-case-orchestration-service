@@ -53,13 +53,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED_PAPER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_FIRM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.ContactDetailsMapperTest.assertTransformationForAddressIsValid;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.ContactDetailsMapperTest.getOcrFieldsForAddresses;
@@ -108,13 +108,13 @@ public class FormAToCaseTransformerTest {
             new OcrDataField(OcrFieldName.AUTHORISATION_DATE, "12/03/2020"),
             new OcrDataField(OcrFieldName.AUTHORISATION_SOLICITOR_POSITION, "I'm the CEO"),
             new OcrDataField(OcrFieldName.NAME_CHILD_1, "Johny Bravo"),
-            new OcrDataField(OcrFieldName.GENDER_CHILD_1, "male"),
+            new OcrDataField(OcrFieldName.GENDER_CHILD_1, "Male"),
             new OcrDataField(OcrFieldName.DATE_OF_BIRTH_CHILD_1, "12/03/2000"),
             new OcrDataField(OcrFieldName.RELATIONSHIP_TO_APPLICANT_CHILD_1, "son"),
             new OcrDataField(OcrFieldName.RELATIONSHIP_TO_RESPONDENT_CHILD_1, "SON"),
             new OcrDataField(OcrFieldName.COUNTRY_CHILD_1, "New Zeeland"),
             new OcrDataField(OcrFieldName.NAME_CHILD_2, "Anne Shirley"),
-            new OcrDataField(OcrFieldName.GENDER_CHILD_2, "female"),
+            new OcrDataField(OcrFieldName.GENDER_CHILD_2, "Female"),
             new OcrDataField(OcrFieldName.DATE_OF_BIRTH_CHILD_2, "12/03/1895"),
             new OcrDataField(OcrFieldName.RELATIONSHIP_TO_APPLICANT_CHILD_2, "daughter"),
             new OcrDataField(OcrFieldName.RELATIONSHIP_TO_RESPONDENT_CHILD_2, "Daughter"),
@@ -137,7 +137,7 @@ public class FormAToCaseTransformerTest {
             hasEntry("applyingForConsentOrder", "Yes"),
             hasEntry("divorceStageReached", "Decree Nisi"),
             hasEntry(APPLICANT_REPRESENTED_PAPER, "FR_applicant_represented_1"),
-            hasEntry(SOLICITOR_NAME, "Saul Call"),
+            hasEntry(CONSENTED_SOLICITOR_NAME, "Saul Call"),
             hasEntry(SOLICITOR_FIRM, "Better Divorce Ltd"),
             hasEntry("solicitorDXnumber", "DX123"),
             hasEntry(SOLICITOR_REFERENCE, "SOL-RED"),
@@ -523,8 +523,8 @@ public class FormAToCaseTransformerTest {
     private void assertChildrenInfo(Map<String, Object> transformedCaseData) {
         ComplexTypeCollection<ChildInfo> children = (ComplexTypeCollection<ChildInfo>) transformedCaseData.get("childrenInfo");
 
-        assertChild(children.getItem(0), asList("Johny Bravo", "2000-03-12", "male", "son", "SON", "New Zeeland"));
-        assertChild(children.getItem(1), asList("Anne Shirley", "1895-03-12", "female", "daughter", "Daughter", "Canada"));
+        assertChild(children.getItem(0), asList("Johny Bravo", "2000-03-12", "Male", "son", "SON", "New Zeeland"));
+        assertChild(children.getItem(1), asList("Anne Shirley", "1895-03-12", "Female", "daughter", "Daughter", "Canada"));
     }
 
     private void assertChild(ChildInfo child, List<String> values) {
@@ -535,5 +535,4 @@ public class FormAToCaseTransformerTest {
         assertThat(child.getRelationshipToRespondent(), is(values.get(4)));
         assertThat(child.getCountryOfResidence(), is(values.get(5)));
     }
-
 }
