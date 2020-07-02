@@ -41,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF1_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF2_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PPF_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_LINE_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_ADDRESS_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
@@ -64,6 +65,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrF
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ORDER_FOR_CHILDREN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.ORDER_FOR_CHILDREN_NO_AGREEMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.PROVISION_MADE_FOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_ADDRESS_LINE_1;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_ADDRESS_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.RESPONDENT_FULL_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
@@ -88,7 +90,11 @@ public class FormAValidator extends BulkScanFormValidator {
             APPLICANT_REPRESENTED,
             AUTHORISATION_SIGNED,
             AUTHORISATION_SIGNED_BY,
-            AUTHORISATION_DATE
+            AUTHORISATION_DATE,
+            APPLICANT_ADDRESS_LINE_1,
+            APPLICANT_ADDRESS_POSTCODE,
+            RESPONDENT_ADDRESS_LINE_1,
+            RESPONDENT_ADDRESS_POSTCODE
     );
 
     protected List<String> getMandatoryFields() {
