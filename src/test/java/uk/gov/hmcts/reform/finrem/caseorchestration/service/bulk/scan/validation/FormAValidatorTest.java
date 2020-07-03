@@ -104,7 +104,11 @@ public class FormAValidatorTest {
                 new OcrDataField(APPLICANT_REPRESENTED, "I am not represented by a solicitor in these proceedings"),
                 new OcrDataField(AUTHORISATION_SIGNED, "Yes"),
                 new OcrDataField(AUTHORISATION_SIGNED_BY, "Applicant's solicitor"),
-                new OcrDataField(AUTHORISATION_DATE, "12/03/2020")
+                new OcrDataField(AUTHORISATION_DATE, "12/03/2020"),
+                new OcrDataField(APPLICANT_ADDRESS_LINE_1, "Road"),
+                new OcrDataField(APPLICANT_ADDRESS_POSTCODE, "SW9 9SD"),
+                new OcrDataField(RESPONDENT_ADDRESS_LINE_1, "Avenue"),
+                new OcrDataField(RESPONDENT_ADDRESS_POSTCODE, "SW1 9SD")
         );
 
         optionalFieldsWithValues = asList(
@@ -115,17 +119,13 @@ public class FormAValidatorTest {
                 new OcrDataField(APPLICANT_SOLICITOR_DX_NUMBER, "DX123"),
                 new OcrDataField(APPLICANT_SOLICITOR_REFERENCE, "SOL-RED"),
                 new OcrDataField(APPLICANT_PBA_NUMBER, "PBA123456"),
-                new OcrDataField(APPLICANT_ADDRESS_LINE_1, "Road"),
                 new OcrDataField(APPLICANT_ADDRESS_TOWN, "Manchester"),
                 new OcrDataField(APPLICANT_ADDRESS_COUNTY, "There"),
-                new OcrDataField(APPLICANT_ADDRESS_POSTCODE, "SW9 9SD"),
                 new OcrDataField(APPLICANT_ADDRESS_COUNTRY, "UK"),
                 new OcrDataField(APPLICANT_PHONE, "0712345654"),
                 new OcrDataField(APPLICANT_EMAIL, "applicant@divorcity.com"),
-                new OcrDataField(RESPONDENT_ADDRESS_LINE_1, "Avenue"),
                 new OcrDataField(RESPONDENT_ADDRESS_TOWN, "Bristol"),
                 new OcrDataField(RESPONDENT_ADDRESS_COUNTY, "Here"),
-                new OcrDataField(RESPONDENT_ADDRESS_POSTCODE, "SW1 9SD"),
                 new OcrDataField(RESPONDENT_ADDRESS_COUNTRY, "UK"),
                 new OcrDataField(ADDRESS_OF_PROPERTIES, "26 Westminster Avenue"),
                 new OcrDataField(MORTGAGE_DETAILS, "We paid for the house with our mortgage which we split"),
@@ -213,7 +213,7 @@ public class FormAValidatorTest {
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
         assertThat(validationResult.getErrors(), is(emptyList()));
-        assertThat(validationResult.getWarnings().size(), is(22));
+        assertThat(validationResult.getWarnings().size(), is(26));
         assertThat(validationResult.getWarnings(), hasItems(
                 mandatoryFieldIsMissing.apply(DIVORCE_CASE_NUMBER),
                 "HWFNumber is usually 6 digits",
@@ -258,7 +258,11 @@ public class FormAValidatorTest {
                 DATE_OF_BIRTH_CHILD_1 + " must be a valid date",
                 DATE_OF_BIRTH_CHILD_2 + " must be a valid date",
                 GENDER_CHILD_1 + " must be \"Male\", \"Female\" or left blank",
-                GENDER_CHILD_2 + " must be \"Male\", \"Female\" or left blank"
+                GENDER_CHILD_2 + " must be \"Male\", \"Female\" or left blank",
+                mandatoryFieldIsMissing.apply(APPLICANT_ADDRESS_LINE_1),
+                mandatoryFieldIsMissing.apply(APPLICANT_ADDRESS_POSTCODE),
+                mandatoryFieldIsMissing.apply(RESPONDENT_ADDRESS_LINE_1),
+                mandatoryFieldIsMissing.apply(RESPONDENT_ADDRESS_POSTCODE)
         ));
     }
 

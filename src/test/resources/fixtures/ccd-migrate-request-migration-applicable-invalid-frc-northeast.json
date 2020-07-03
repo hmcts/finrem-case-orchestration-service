@@ -1,0 +1,14 @@
+{
+  "token": "test_token",
+  "event_id": "FR_migrateCase",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "DIVORCE",
+    "case_type_id": "FinancialRemedyContested",
+    "state": "created",
+    "case_data": {
+      "regionListSL": "northeast",
+      "northEastFRCListSL": "birmingham"
+    }
+  }
+}
