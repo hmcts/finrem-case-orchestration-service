@@ -7,13 +7,8 @@
     "case_type_id": "FinancialRemedyContested",
     "state": "created",
     "case_data": {
-      "regionListSL": "midlands",
-      "allocatedCourtListSL": "birmingham",
-      "birminghamCourtListSL": "FR_birmingham_hc_list_1",
       "allocatedCourtList": {
-        "region": "wales",
-        "walesList": "swansea",
-        "swanseaCourtList": "FR_swansea_hc_list_6"
+        "region": "error"
       }
     }
   }
