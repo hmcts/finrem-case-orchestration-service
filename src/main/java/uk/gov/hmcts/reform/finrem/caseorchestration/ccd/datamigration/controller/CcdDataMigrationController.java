@@ -56,7 +56,7 @@ public class CcdDataMigrationController {
     public static final String NORTHEAST_FRC_LIST_SL = "northEastFRCListSL";
     public static final String NORTHWEST_FRC_LIST_SL = "northWestFRCListSL";
     public static final String LONDON_FRC_LIST_SL = "londonFRCListSL";
-    public static final String MIDLANDS_FRC_LIST_SL = "midlandsFRCListSL";
+    public static final String MIDLANDS_FRC_LIST_SL = "allocatedCourtListSL";
 
     // FRC lists AC
     public static final String WALES_FRC_LIST_AC = "walesList";

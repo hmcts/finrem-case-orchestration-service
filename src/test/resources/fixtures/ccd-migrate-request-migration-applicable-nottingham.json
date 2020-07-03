@@ -8,7 +8,7 @@
     "state": "created",
     "case_data": {
       "regionListSL": "midlands",
-      "midlandsFRCListSL": "nottingham",
+      "allocatedCourtListSL": "nottingham",
       "nottinghamCourtListSL": "FR_nottingham_hc_list_1",
       "allocatedCourtList": {
         "region": "wales",
