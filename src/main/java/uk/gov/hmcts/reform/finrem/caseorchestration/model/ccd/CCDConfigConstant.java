@@ -61,7 +61,7 @@ public class CCDConfigConstant {
     public static final String SWANSEA = "swansea";
     public static final String SWANSEA_COURT_LIST = "swanseaCourtList";
     public static final String CLEAVELAND = "cleaveland";
-    public static final String CLEAVELAND_COURT_LIST = "clevelandCourtList";
+    public static final String CLEAVELAND_COURT_LIST = "cleavelandCourtList";
     public static final String NWYORKSHIRE = "nwyorkshire";
     public static final String NWYORKSHIRE_COURT_LIST = "nwyorkshireCourtList";
     public static final String HSYORKSHIRE = "hsyorkshire";
