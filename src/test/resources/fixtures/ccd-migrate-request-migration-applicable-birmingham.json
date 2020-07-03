@@ -8,7 +8,7 @@
     "state": "created",
     "case_data": {
       "regionListSL": "midlands",
-      "midlandsFRCListSL": "birmingham",
+      "allocatedCourtListSL": "birmingham",
       "birminghamCourtListSL": "FR_birmingham_hc_list_1",
       "allocatedCourtList": {
         "region": "wales",

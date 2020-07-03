@@ -8,7 +8,7 @@
     "state": "created",
     "case_data": {
       "regionListSL": "midlands",
-      "midlandsFRCListSL": "london"
+      "allocatedCourtListSL": "london"
     }
   }
 }
