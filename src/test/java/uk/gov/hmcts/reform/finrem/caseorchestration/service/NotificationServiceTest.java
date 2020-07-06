@@ -307,6 +307,15 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void sendContestedHwfSuccessfulNotificationEmailForMidlandsEmpty() {
+        callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST, "empty");
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+    }
+
+    @Test
     public void sendContestedHwfSuccessfulNotificationEmailForBirmingham() {
         callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM);
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
@@ -325,8 +334,17 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForLiverPool() {
+    public void sendContestedHwfSuccessfulNotificationEmailForLiverpool() {
         callbackRequest = getContestedCallbackRequest(NORTHWEST, NORTHWEST_FRC_LIST, LIVERPOOL);
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+    }
+
+    @Test
+    public void sendContestedHwfSuccessfulNotificationEmailForNorthWestEmpty() {
+        callbackRequest = getContestedCallbackRequest(NORTHWEST, NORTHWEST_FRC_LIST, "empty");
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
@@ -397,6 +415,15 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void sendContestedHwfSuccessfulNotificationEmailForWalesEmpty() {
+        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST, "empty");
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+    }
+
+    @Test
     public void throwExceptionWhenContestedHwfSuccessfulNotificationEmail() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -427,6 +454,15 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void sendNoContestedHwfSuccessfulNotificationEmailForLondonEmpty() {
+        callbackRequest = getContestedCallbackRequest(LONDON, LONDON_FRC_LIST, "empty");
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+    }
+
+    @Test
     public void sendNoContestedHwfSuccessfulNotificationEmailForNoSelectedRegion() {
         callbackRequest = getContestedCallbackRequest(null, LONDON_FRC_LIST, null);
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
@@ -447,6 +483,15 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void sendNoContestedHwfSuccessfulNotificationEmailForKent() {
         callbackRequest = getContestedCallbackRequest(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT);
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+    }
+
+    @Test
+    public void sendNoContestedHwfSuccessfulNotificationEmailForSouthEastEmpty() {
+        callbackRequest = getContestedCallbackRequest(SOUTHEAST, SOUTHEAST_FRC_LIST, "empty");
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());

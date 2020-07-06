@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -162,18 +161,14 @@ public class NotificationService {
     }
 
     private NotificationRequest createNotificationRequest(CallbackRequest callbackRequest) {
-        try {
-            if (isConsentedApplication(callbackRequest.getCaseDetails())) {
-                notificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
-                    CONSENTED_SOLICITOR_NAME, SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY);
-            } else {
-                notificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
-                    CONTESTED_SOLICITOR_NAME, CONTESTED_SOLICITOR_EMAIL, CONTESTED, GENERAL_EMAIL_BODY);
-            }
-        } catch (IOException ex) {
-            log.error("Unable to create notification request for Case Id : {}, error message : {}",
-                callbackRequest.getCaseDetails().getId(), ex.getMessage());
+        if (isConsentedApplication(callbackRequest.getCaseDetails())) {
+            notificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
+                CONSENTED_SOLICITOR_NAME, SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY);
+        } else {
+            notificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
+                CONTESTED_SOLICITOR_NAME, CONTESTED_SOLICITOR_EMAIL, CONTESTED, GENERAL_EMAIL_BODY);
         }
+
         return notificationRequest;
     }
 
@@ -182,7 +177,7 @@ public class NotificationService {
                                                          String solicitorName,
                                                          String solicitorEmail,
                                                          String caseType,
-                                                         String generalEmailBody) throws IOException {
+                                                         String generalEmailBody) {
         NotificationRequest notificationRequest = new NotificationRequest();
         Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
 
@@ -300,7 +295,7 @@ public class NotificationService {
 
     private String getSelectedCourtAllocatedCourt(Object allocatedCourtList) {
         HashMap<String, Object> allocatedCourtMap = (HashMap<String, Object>) allocatedCourtList;
-        String region = (String) allocatedCourtMap.get(REGION);
+        String region = (String) allocatedCourtMap.get("region");
         if (MIDLANDS.equalsIgnoreCase(region)) {
             return getMidlandsFrcAllocatedCourt(allocatedCourtMap);
         }
