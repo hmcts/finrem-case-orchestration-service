@@ -903,6 +903,19 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void shouldNotMigrateCaseInvalidCourtDataGA() throws Exception {
+        mvc.perform(post(MIGRATE_URL)
+            .content(resourceContentAsString("/fixtures/ccd-migrate-request-invalid-court-data-ga.json"))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+    }
+
+    @Test
     public void shouldNotMigrateCaseNoCourtData() throws Exception {
         mvc.perform(post(MIGRATE_URL)
             .content(resourceContentAsString("/fixtures/ccd-migrate-request-no-court-data.json"))
