@@ -31,6 +31,7 @@ public class CcdDataMigrationController {
     public static final String REGION = "regionList";
     public static final String REGION_SL = "regionListSL";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
+    public static final String ALLOCATED_COURT_LIST_GA = "allocatedCourtListGA";
     public static final String REGION_AC = "region";
     public static final String EMPTY_STRING = "";
 
@@ -150,13 +151,26 @@ public class CcdDataMigrationController {
     }
 
     private boolean hasCourtDetails(Map<String, Object> caseData) {
-        return caseData.containsKey(REGION_SL) || hasAllocatedCourtDetails(caseData);
+        return caseData.containsKey(REGION_SL) || hasAllocatedCourtDetails(caseData) || hasAllocatedCourtDetailsGA(caseData);
     }
 
     private boolean hasAllocatedCourtDetails(Map<String, Object> caseData) {
         if (caseData.containsKey(ALLOCATED_COURT_LIST)) {
             try {
                 Map<String, Object> allocatedCourtList = (Map<String, Object>) caseData.getOrDefault(ALLOCATED_COURT_LIST, new HashMap<>());
+                return allocatedCourtList.containsKey(REGION_AC);
+            } catch (ClassCastException e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean hasAllocatedCourtDetailsGA(Map<String, Object> caseData) {
+        if (caseData.containsKey(ALLOCATED_COURT_LIST_GA)) {
+            try {
+                Map<String, Object> allocatedCourtList = (Map<String, Object>) caseData.getOrDefault(ALLOCATED_COURT_LIST_GA, new HashMap<>());
                 return allocatedCourtList.containsKey(REGION_AC);
             } catch (ClassCastException e) {
                 return false;
@@ -274,8 +288,9 @@ public class CcdDataMigrationController {
                 default:
                     return caseData;
             }
-        } else if (caseData.containsKey(ALLOCATED_COURT_LIST)) {
-            Map<String, Object> allocatedCourtList = (Map<String, Object>) caseData.getOrDefault(ALLOCATED_COURT_LIST, new HashMap<>());
+        } else if (caseData.containsKey(ALLOCATED_COURT_LIST) || caseData.containsKey(ALLOCATED_COURT_LIST_GA)) {
+            String allocatedListKey = caseData.containsKey(ALLOCATED_COURT_LIST_GA) ? ALLOCATED_COURT_LIST_GA : ALLOCATED_COURT_LIST;
+            Map<String, Object> allocatedCourtList = (Map<String, Object>) caseData.getOrDefault(allocatedListKey, new HashMap<>());
             String region = (String) allocatedCourtList.getOrDefault(REGION_AC, EMPTY_STRING);
             caseData.put(REGION, region);
 
@@ -368,6 +383,10 @@ public class CcdDataMigrationController {
 
         if (caseData.containsKey(ALLOCATED_COURT_LIST)) {
             caseData.remove(ALLOCATED_COURT_LIST);
+        }
+
+        if (caseData.containsKey(ALLOCATED_COURT_LIST_GA)) {
+            caseData.remove(ALLOCATED_COURT_LIST_GA);
         }
 
         return caseData;
