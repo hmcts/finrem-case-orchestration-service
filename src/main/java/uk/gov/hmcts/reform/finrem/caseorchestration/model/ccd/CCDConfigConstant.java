@@ -75,6 +75,7 @@ public class CCDConfigConstant {
     public static final String COURT_DETAILS_ADDRESS_KEY = "courtAddress";
     public static final String COURT_DETAILS_PHONE_KEY = "phoneNumber";
     public static final String COURT_DETAILS_EMAIL_KEY = "email";
+    public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
 
     //Respondent Solicitor Related
     public static final String RESPONDENT_REPRESENTED = "appRespondentRep";

@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -22,6 +25,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -72,6 +77,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 
+@RunWith(MockitoJUnitRunner.class)
 public class HearingDocumentServiceTest {
 
     private DocumentClient generatorClient;
@@ -79,6 +85,9 @@ public class HearingDocumentServiceTest {
 
     private GenericDocumentService genericDocumentService;
     private HearingDocumentService hearingDocumentService;
+
+    @MockBean
+    FeatureToggleService featureToggleService;
 
     private static final String DATE_OF_HEARING = "2019-01-01";
     private static final String FORM_C = "formC";
@@ -94,9 +103,12 @@ public class HearingDocumentServiceTest {
         config.setFormGFileName("Form-G.pdf");
         config.setMiniFormFileName("file_name");
 
+        featureToggleService = mock(FeatureToggleService.class);
+        when(featureToggleService.isContestedCourtDetailsMigrationEnabled()).thenReturn(true);
+
         generatorClient = new TestDocumentClient();
         genericDocumentService = new GenericDocumentService(generatorClient);
-        hearingDocumentService = new HearingDocumentService(genericDocumentService, config, new DocumentHelper(mapper), mapper);
+        hearingDocumentService = new HearingDocumentService(genericDocumentService, config, new DocumentHelper(mapper), mapper, featureToggleService);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -260,6 +272,14 @@ public class HearingDocumentServiceTest {
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Birmingham Civil And Family Justice Centre", "Pipers Row, Wolverhampton, WV1 3LQ",
             "0121 250 6794", "FRCBirmingham@justice.gov.uk");
+    }
+
+    @Test
+    public void verifyIsContestedCourtDetailsMigrationEnabledFalse() {
+        when(featureToggleService.isContestedCourtDetailsMigrationEnabled()).thenReturn(false);
+        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
+            MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURT_LIST, "FR_birmingham_hc_list_1"));
+        ((TestDocumentClient) generatorClient).verifyCourtDetailsFieldsNotSet();
     }
 
     @Test
