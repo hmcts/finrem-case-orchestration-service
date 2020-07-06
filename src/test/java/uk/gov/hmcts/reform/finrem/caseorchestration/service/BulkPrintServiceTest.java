@@ -107,6 +107,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(printedDocuments.get(1).getBinaryFileUrl(), is("http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8/binary"));
     }
 
+
+
     private CaseDetails caseDetails() {
         return TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
     }
