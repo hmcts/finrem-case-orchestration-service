@@ -151,13 +151,26 @@ public class CcdDataMigrationController {
     }
 
     private boolean hasCourtDetails(Map<String, Object> caseData) {
-        return caseData.containsKey(REGION_SL) || hasAllocatedCourtDetails(caseData);
+        return caseData.containsKey(REGION_SL) || hasAllocatedCourtDetails(caseData) || hasAllocatedCourtDetailsGA(caseData);
     }
 
     private boolean hasAllocatedCourtDetails(Map<String, Object> caseData) {
         if (caseData.containsKey(ALLOCATED_COURT_LIST)) {
             try {
                 Map<String, Object> allocatedCourtList = (Map<String, Object>) caseData.getOrDefault(ALLOCATED_COURT_LIST, new HashMap<>());
+                return allocatedCourtList.containsKey(REGION_AC);
+            } catch (ClassCastException e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean hasAllocatedCourtDetailsGA(Map<String, Object> caseData) {
+        if (caseData.containsKey(ALLOCATED_COURT_LIST_GA)) {
+            try {
+                Map<String, Object> allocatedCourtList = (Map<String, Object>) caseData.getOrDefault(ALLOCATED_COURT_LIST_GA, new HashMap<>());
                 return allocatedCourtList.containsKey(REGION_AC);
             } catch (ClassCastException e) {
                 return false;

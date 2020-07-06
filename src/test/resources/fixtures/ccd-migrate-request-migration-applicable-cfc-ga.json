@@ -11,11 +11,6 @@
         "region": "london",
         "londonList": "cfc",
         "cfcCourtList": "FR_s_CFCList_9"
-      },
-      "allocatedCourtList": {
-        "region": "midlands",
-        "midlandsList": "birmingham",
-        "birminghamCourtList": "FR_birmingham_hc_list_1"
       }
     }
   }
