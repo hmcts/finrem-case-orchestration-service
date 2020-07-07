@@ -76,7 +76,7 @@ public class BulkPrintService {
 
     public UUID printLatestGeneralLetter(CaseDetails caseDetails) {
         List<GeneralLetterData> generalLettersData = documentHelper.convertToGeneralLetterData(caseDetails.getData().get(GENERAL_LETTER));
-        GeneralLetterData latestGeneralLetterData = generalLettersData.get(generalLettersData.size()-1);
+        GeneralLetterData latestGeneralLetterData = generalLettersData.get(generalLettersData.size() - 1);
         BulkPrintDocument latestGeneralLetter = BulkPrintDocument.builder()
             .binaryFileUrl(latestGeneralLetterData.getGeneralLetter().getGeneratedLetter().getDocumentBinaryUrl())
             .build();
@@ -127,7 +127,7 @@ public class BulkPrintService {
                 .bulkPrintDocuments(documents)
                 .build());
 
-        log.info("Letter ID {} for {} document(s) sent to bulk print: {}", letterId, documents.size(), documents);
+        log.info("Letter ID {} for {} document(s) of type {} sent to bulk print: {}", letterId, documents.size(), letterType, documents);
 
         return letterId;
     }
