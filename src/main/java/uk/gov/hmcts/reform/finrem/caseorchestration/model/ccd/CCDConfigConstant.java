@@ -35,6 +35,48 @@ public class CCDConfigConstant {
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";
     public static final String APPLICANT_REPRESENTED_PAPER = "applicantRepresentedPaper";
 
+    //Court related
+    public static final String KENT = "kentfrc";
+    public static final String REGION = "regionList";
+    public static final String WALES_FRC_LIST = "walesFRCList";
+    public static final String SOUTHEAST_FRC_LIST = "southEastFRCList";
+    public static final String NORTHEAST_FRC_LIST = "northEastFRCList";
+    public static final String NORTHWEST_FRC_LIST = "northWestFRCList";
+    public static final String LONDON_FRC_LIST = "londonFRCList";
+    public static final String MIDLANDS_FRC_LIST = "midlandsFRCList";
+    public static final String LIVERPOOL = "liverpool";
+    public static final String LIVERPOOL_COURT_LIST = "liverpoolCourtList";
+    public static final String MANCHESTER = "manchester";
+    public static final String MANCHESTER_COURT_LIST = "manchesterCourtList";
+    public static final String CFC = "cfc";
+    public static final String NEWPORT = "newport";
+    public static final String NEWPORT_COURT_LIST = "newportCourtList";
+    public static final String MIDLANDS = "midlands";
+    public static final String LONDON = "london";
+    public static final String CFC_COURT_LIST = "cfcCourtList";
+    public static final String NORTHWEST = "northwest";
+    public static final String NORTHEAST = "northeast";
+    public static final String SOUTHEAST = "southeast";
+    public static final String WALES = "wales";
+    public static final String SWANSEA = "swansea";
+    public static final String SWANSEA_COURT_LIST = "swanseaCourtList";
+    public static final String CLEAVELAND = "cleaveland";
+    public static final String CLEAVELAND_COURT_LIST = "cleavelandCourtList";
+    public static final String NWYORKSHIRE = "nwyorkshire";
+    public static final String NWYORKSHIRE_COURT_LIST = "nwyorkshireCourtList";
+    public static final String HSYORKSHIRE = "hsyorkshire";
+    public static final String NOTTINGHAM = "nottingham";
+    public static final String NOTTINGHAM_COURT_LIST = "nottinghamCourtList";
+    public static final String BIRMINGHAM = "birmingham";
+    public static final String BIRMINGHAM_COURT_LIST = "birminghamCourtList";
+    public static final String HUMBER_COURT_LIST = "humberCourtList";
+    public static final String KENT_SURREY_COURT_LIST = "kentSurreyCourtList";
+    public static final String COURT_DETAILS_NAME_KEY = "courtName";
+    public static final String COURT_DETAILS_ADDRESS_KEY = "courtAddress";
+    public static final String COURT_DETAILS_PHONE_KEY = "phoneNumber";
+    public static final String COURT_DETAILS_EMAIL_KEY = "email";
+    public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
+
     //Respondent Solicitor Related
     public static final String RESPONDENT_REPRESENTED = "appRespondentRep";
     public static final String RESP_SOLICITOR_NAME = "rSolicitorName";
@@ -100,7 +142,6 @@ public class CCDConfigConstant {
     public static final String IS_ADMIN = "isAdmin";
     public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
     public static final String ROLES = "roles";
-    public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
 
     // Bulk Printing
     public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";

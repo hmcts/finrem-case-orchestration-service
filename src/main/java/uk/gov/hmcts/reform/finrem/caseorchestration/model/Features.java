@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum Features {
 
-    CONSENT_ORDER_NOT_APPROVED_APPLICANT_DOCUMENT_GENERATION("consent_order_not_approved_applicant_document_generation");
+    CONSENT_ORDER_NOT_APPROVED_APPLICANT_DOCUMENT_GENERATION("consent_order_not_approved_applicant_document_generation"),
+    CONTESTED_COURT_DETAILS_MIGRATION("contested_court_details_migration");
 
     private final String name;
 }

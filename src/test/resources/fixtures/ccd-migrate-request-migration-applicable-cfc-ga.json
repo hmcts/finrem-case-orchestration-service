@@ -7,8 +7,11 @@
     "case_type_id": "FinancialRemedyContested",
     "state": "created",
     "case_data": {
-      "regionListSL": "midlands",
-      "allocatedCourtListSL": "london"
+      "allocatedCourtListGA": {
+        "region": "london",
+        "londonList": "cfc",
+        "cfcCourtList": "FR_s_CFCList_9"
+      }
     }
   }
 }
