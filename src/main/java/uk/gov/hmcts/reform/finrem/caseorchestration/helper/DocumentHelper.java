@@ -108,6 +108,11 @@ public class DocumentHelper {
         });
     }
 
+    public List<Map<String, Object>> convertToGenericList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<List<Map<String, Object>>>() {
+        });
+    }
+
     public Optional<CaseDocument> getLatestRespondToOrderDocuments(Map<String, Object> caseData) {
         Optional<RespondToOrderData> respondToOrderData = ofNullable(caseData.get(RESPOND_TO_ORDER_DOCUMENTS))
                 .map(this::convertToRespondToOrderDataList)

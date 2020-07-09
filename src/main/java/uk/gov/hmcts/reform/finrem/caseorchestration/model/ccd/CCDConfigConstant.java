@@ -118,7 +118,6 @@ public class CCDConfigConstant {
     public static final String GENERAL_EMAIL_CREATED_BY = "generalEmailCreatedBy";
     public static final String GENERAL_EMAIL_BODY = "generalEmailBody";
 
-
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
     public static final String FEES = "Fees";
@@ -146,10 +145,13 @@ public class CCDConfigConstant {
     // Bulk Printing
     public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
     public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
-    public static final String BULK_PRINT_LETTER_ID = "bulkPrintLetterId";
     public static final String BULK_PRINT_LETTER_ID_APP = "bulkPrintLetterIdApp";
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
     public static final String UPLOAD_ORDER = "uploadOrder";
 
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
+
+    // Contested application not approved
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED = "applicationNotApproved";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_DOCUMENT_PREVIEW = "applicationNotApprovedDocumentPreview";
 }
