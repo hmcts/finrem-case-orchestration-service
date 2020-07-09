@@ -63,9 +63,10 @@ public class BulkPrintService {
         bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(coverSheet.getDocumentBinaryUrl()).build());
 
         Map<String, Object> caseData = caseDetails.getData();
+
         List<BulkPrintDocument> orderDocuments = isOrderApprovedDocumentCollectionPresent(caseData)
             ? approvedOrderCollection(caseData)
-            : asList(consentOrderNotApprovedDocumentService.generalOrder(caseData));
+            : asList(consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseData));
 
         bulkPrintDocuments.addAll(orderDocuments);
 
