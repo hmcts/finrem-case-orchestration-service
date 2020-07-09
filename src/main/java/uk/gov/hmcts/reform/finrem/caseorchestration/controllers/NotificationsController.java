@@ -149,12 +149,14 @@ public class NotificationsController implements BaseController {
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
-        if (isConsentedApplication(callbackRequest.getCaseDetails()) && isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
-            log.info("Sending email notification to Solicitor for 'Consent Order Not Approved'");
-            notificationService.sendConsentOrderNotApprovedEmail(callbackRequest);
-        } else if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
-            log.info("Sending email notification to Solicitor for 'Contest Order Not Approved'");
-            notificationService.sendContestOrderNotApprovedEmail(callbackRequest);
+        if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
+            if (isConsentedApplication(callbackRequest.getCaseDetails())) {
+                log.info("Sending email notification to Solicitor for 'Consent Order Not Approved'");
+                notificationService.sendConsentOrderNotApprovedEmail(callbackRequest);
+            } else {
+                log.info("Sending email notification to Solicitor for 'Contest Order Not Approved'");
+                notificationService.sendContestOrderNotApprovedEmail(callbackRequest);
+            }
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
