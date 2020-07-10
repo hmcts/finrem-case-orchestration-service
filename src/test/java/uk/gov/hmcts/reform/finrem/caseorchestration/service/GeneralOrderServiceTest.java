@@ -38,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 
 public class GeneralOrderServiceTest {
+
     private DocumentClient generatorClient;
     private ObjectMapper mapper = new ObjectMapper();
     private GenericDocumentService genericDocumentService;

@@ -46,7 +46,6 @@ public class ContestedCourtHelper {
     }
 
     public static String getSelectedCourt(CaseDetails caseDetails) {
-
         Map<String, Object> caseData = caseDetails.getData();
         Object allocatedCourtList = caseData.get(ALLOCATED_COURT_LIST);
         HashMap<String, Object> allocatedCourtMap = (HashMap<String, Object>) allocatedCourtList;

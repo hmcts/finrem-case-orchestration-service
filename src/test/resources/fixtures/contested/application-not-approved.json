@@ -60,11 +60,8 @@
       "helpWithFeesQuestion": "No",
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "Yes",
-      "regionListSL": "wales",
-      "walesFRCListSL": "newport",
-      "newportCourtListSL": "FR_newport_hc_list_1",
       "allocatedCourtList": {
-        "region": "wales",
+        "regionList": "wales",
         "walesList": "swansea",
         "swanseaCourtList": "FR_swansea_hc_list_6"
       },

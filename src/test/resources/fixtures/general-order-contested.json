@@ -71,7 +71,7 @@
         "AddressLine3": "London"
       },
       "allocatedCourtList": {
-        "region": "midlands",
+        "regionList": "midlands",
         "midlandsList": "nottingham",
         "nottinghamCourtList": "FR_s_NottinghamList_1"
       },
