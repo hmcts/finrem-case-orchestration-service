@@ -107,6 +107,17 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(printedDocuments.get(1).getBinaryFileUrl(), is("http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8/binary"));
     }
 
+    @Test
+    public void whenPrintingGeneralLetter_thenLatestGeneralLetterIsSentToPrinting() {
+        when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
+
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+        bulkPrintService.printLatestGeneralLetter(caseDetails);
+
+        List<BulkPrintDocument> printedDocuments = bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments();
+        assertThat(printedDocuments.get(0).getBinaryFileUrl(), is("http://dm-store/lhjbyuivu87y989hijbb/binary"));
+    }
+
     private CaseDetails caseDetails() {
         return TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
     }
