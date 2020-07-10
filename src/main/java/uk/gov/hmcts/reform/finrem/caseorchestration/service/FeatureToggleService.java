@@ -17,6 +17,7 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONSENT_ORDER_NOT_APPROVED_APPLICANT_DOCUMENT_GENERATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_COURT_DETAILS_MIGRATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.HWF_SUCCESSFUL_NOTIFICATION_LETTER;
 
 @Service
@@ -48,6 +49,10 @@ public class FeatureToggleService {
 
     public boolean isConsentOrderNotApprovedApplicantDocumentGenerationEnabled() {
         return isFeatureEnabled(CONSENT_ORDER_NOT_APPROVED_APPLICANT_DOCUMENT_GENERATION);
+    }
+
+    public boolean isContestedCourtDetailsMigrationEnabled() {
+        return isFeatureEnabled(CONTESTED_COURT_DETAILS_MIGRATION);
     }
 
     /**
