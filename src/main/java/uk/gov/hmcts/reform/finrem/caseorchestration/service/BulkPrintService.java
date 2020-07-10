@@ -30,7 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 public class BulkPrintService {
 
     private static final String FINANCIAL_REMEDY_PACK_LETTER_TYPE = "FINANCIAL_REMEDY_PACK";
-    private static final String FINANCIAL_REMEDY_GENERAL_LETTER = "FINANCIAL_REMEDY_GENERAL_LETTER";
+    private static final String FINANCIAL_REMEDY_GENERAL_LETTER = "FINREM002";
     static final String DOCUMENT_FILENAME = "document_filename";
 
     private final GenericDocumentService genericDocumentService;
