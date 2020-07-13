@@ -83,6 +83,35 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             + "Andhra Pradesh\n"
             + "SRIKALAHASTI\n"
             + "B1 1AB"));
+        assertThat(data.get("applicantFullName"), is("Poor Guy"));
+        assertThat(data.get("respondentFullName"), is("test Korivi"));
+    }
+
+    @Test
+    public void generateContestedGeneralLetter() throws Exception {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/contested/general-letter-contested.json", mapper);
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
+
+        List<GeneralLetterData> generalLetterData = (List<GeneralLetterData>) caseDetails.getData().get(GENERAL_LETTER);
+        assertThat(generalLetterData, hasSize(2));
+
+        doCaseDocumentAssert(generalLetterData.get(0).getGeneralLetter().getGeneratedLetter());
+        doCaseDocumentAssert(generalLetterData.get(1).getGeneralLetter().getGeneratedLetter());
+
+        verify(genericDocumentService, times(1)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
+
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
+        assertThat(data.get("ccdCaseNumber"), is(1234567890L));
+        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("House no: 6-354-2\n"
+            + "Gandhi Street\n"
+            + "Chittor District\n"
+            + "Andhra Pradesh\n"
+            + "SRIKALAHASTI\n"
+            + "B1 1AB"));
+        assertThat(data.get("applicantFullName"), is("Poor Guy"));
+        assertThat(data.get("respondentFullName"), is("Sarah Beatrice Korivi"));
     }
 
     @Test

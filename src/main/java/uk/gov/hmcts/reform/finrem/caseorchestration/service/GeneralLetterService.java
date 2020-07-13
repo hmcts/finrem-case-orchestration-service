@@ -40,6 +40,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullApplicantName;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullRespondentName;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 
 @Service
@@ -77,6 +79,8 @@ public class GeneralLetterService {
         caseData.put("generalLetterCreatedDate", new Date());
         caseData.put("ccdCaseNumber", caseDetails.getId());
         caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
+        caseData.put("applicantFullName", buildFullApplicantName(caseDetails));
+        caseData.put("respondentFullName", buildFullRespondentName(caseDetails));
         populateNameAddressAndReference(caseDetails);
     }
 
