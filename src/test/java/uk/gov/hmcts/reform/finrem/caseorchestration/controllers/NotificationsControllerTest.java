@@ -119,10 +119,9 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void sendHwfSuccessfulNotificationLetterIfIsConsentedAndIsPaperApplication_AndToggledOn() throws Exception {
+    public void sendHwfSuccessfulNotificationLetterIfIsConsentedAndIsPaperApplication() throws Exception {
         buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
 
-        when(featureToggleService.isHwfSuccessfulNotificationLetterEnabled()).thenReturn(true);
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .content(requestContent.toString())
@@ -133,22 +132,6 @@ public class NotificationsControllerTest {
             .generateHwfSuccessfulNotificationLetter(any(CaseDetails.class),any());
         verify(bulkPrintService, times(1))
             .sendNotificationLetterForBulkPrint(any(),any());
-        verifyNoInteractions(notificationService);
-    }
-
-    @Test
-    public void shouldNotSendHwfSuccessfulNotificationLetterIfIsConsentedAndIsPaperApplication_AndToggledOff() throws Exception {
-        buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
-
-        when(featureToggleService.isHwfSuccessfulNotificationLetterEnabled()).thenReturn(false);
-        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
-
-        verifyNoInteractions(helpWithFeesDocumentService);
-        verifyNoInteractions(bulkPrintService);
         verifyNoInteractions(notificationService);
     }
 
@@ -180,10 +163,9 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void sendAssignToJudgeNotificationLetterIfIsPaperApplication_AndToggledOn() throws Exception {
+    public void sendAssignToJudgeNotificationLetterIfIsPaperApplication() throws Exception {
         buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
 
-        when(featureToggleService.isAssignedToJudgeNotificationLetterEnabled()).thenReturn(true);
         mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .content(requestContent.toString())
@@ -194,22 +176,6 @@ public class NotificationsControllerTest {
             .generateAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
         verify(bulkPrintService, times(1))
             .sendNotificationLetterForBulkPrint(any(),any());
-        verifyNoInteractions(notificationService);
-    }
-
-    @Test
-    public void shouldNotSendAssignToJudgeNotificationLetterIfIsPaperApplication_AndToggledOff() throws Exception {
-        buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
-
-        when(featureToggleService.isAssignedToJudgeNotificationLetterEnabled()).thenReturn(false);
-        mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
-
-        verifyNoInteractions(assignedToJudgeDocumentService);
-        verifyNoInteractions(bulkPrintService);
         verifyNoInteractions(notificationService);
     }
 
