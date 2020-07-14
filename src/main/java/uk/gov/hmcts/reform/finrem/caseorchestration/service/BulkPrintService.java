@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 
@@ -19,6 +20,7 @@ import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderApprovedDocumentCollectionPresent;
@@ -28,6 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 public class BulkPrintService {
 
     private static final String FINANCIAL_REMEDY_PACK_LETTER_TYPE = "FINANCIAL_REMEDY_PACK";
+    private static final String FINANCIAL_REMEDY_GENERAL_LETTER = "FINREM002";
     static final String DOCUMENT_FILENAME = "document_filename";
 
     private final GenericDocumentService genericDocumentService;
@@ -45,7 +48,6 @@ public class BulkPrintService {
         this.documentHelper = documentHelper;
     }
 
-
     public UUID sendNotificationLetterForBulkPrint(final CaseDocument notificationLetter, final CaseDetails caseDetails) {
         List<BulkPrintDocument> notificationLetterList = Collections.singletonList(
             BulkPrintDocument.builder().binaryFileUrl(notificationLetter.getDocumentBinaryUrl()).build());
@@ -53,7 +55,7 @@ public class BulkPrintService {
         Long caseId = caseDetails.getId();
         log.info("Notification letter sent to Bulk Print: {} for Case ID: {}", notificationLetterList, caseId);
 
-        return bulkPrintDocuments(caseId, notificationLetterList);
+        return bulkPrintFinancialRemedyLetterPack(caseId, notificationLetterList);
     }
 
     public UUID sendOrderForBulkPrintRespondent(final CaseDocument coverSheet, final CaseDetails caseDetails) {
@@ -69,7 +71,16 @@ public class BulkPrintService {
 
         bulkPrintDocuments.addAll(orderDocuments);
 
-        return bulkPrintDocuments(caseDetails.getId(), bulkPrintDocuments);
+        return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), bulkPrintDocuments);
+    }
+
+    public UUID printLatestGeneralLetter(CaseDetails caseDetails) {
+        List<GeneralLetterData> generalLettersData = documentHelper.convertToGeneralLetterData(caseDetails.getData().get(GENERAL_LETTER));
+        GeneralLetterData latestGeneralLetterData = generalLettersData.get(generalLettersData.size() - 1);
+        BulkPrintDocument latestGeneralLetter = BulkPrintDocument.builder()
+            .binaryFileUrl(latestGeneralLetterData.getGeneralLetter().getGeneratedLetter().getDocumentBinaryUrl())
+            .build();
+        return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, asList(latestGeneralLetter));
     }
 
     List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
@@ -95,24 +106,28 @@ public class BulkPrintService {
     public UUID printApplicantConsentOrderNotApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> applicantDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, authorisationToken);
-        return bulkPrintDocuments(caseDetails.getId(), applicantDocuments);
+        return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), applicantDocuments);
     }
 
     public UUID printApplicantConsentOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> applicantDocuments = consentOrderApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, authorisationToken);
-        return bulkPrintDocuments(caseDetails.getId(), applicantDocuments);
+        return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), applicantDocuments);
     }
 
-    private UUID bulkPrintDocuments(Long caseId, List<BulkPrintDocument> documents) {
+    private UUID bulkPrintFinancialRemedyLetterPack(Long caseId, List<BulkPrintDocument> documents) {
+        return bulkPrintDocuments(caseId, FINANCIAL_REMEDY_PACK_LETTER_TYPE, documents);
+    }
+
+    private UUID bulkPrintDocuments(Long caseId, String letterType, List<BulkPrintDocument> documents) {
         UUID letterId = genericDocumentService.bulkPrint(
             BulkPrintRequest.builder()
                 .caseId(String.valueOf(caseId))
-                .letterType(FINANCIAL_REMEDY_PACK_LETTER_TYPE)
+                .letterType(letterType)
                 .bulkPrintDocuments(documents)
                 .build());
 
-        log.info("Letter ID {} for {} document(s) sent to bulk print: {}", letterId, documents.size(), documents);
+        log.info("Letter ID {} for {} document(s) of type {} sent to bulk print: {}", letterId, documents.size(), letterType, documents);
 
         return letterId;
     }
