@@ -19,7 +19,8 @@ public class FeatureToggleServiceTest {
         "feature.toggle.approved_consent_order_notification_letter=true",
         "feature.toggle.hwf_successful_notification_letter=true",
         "feature.toggle.assigned_to_judge_notification_letter=true",
-        "feature.toggle.consent_order_not_approved_applicant_document_generation=true"
+        "feature.toggle.consent_order_not_approved_applicant_document_generation=true",
+        "feature.toggle.print_general_letter=true"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOn {
 
@@ -47,6 +48,11 @@ public class FeatureToggleServiceTest {
         }
 
         @Test
+        public void isPrintGeneralLetterEnabledReturnTrue() {
+            assertThat(featureToggleService.isPrintGeneralLetterEnabled(), is(true));
+        }
+
+        @Test
         public void getFieldsIgnoredDuringSerialisationEmptyWhenFeaturesEnabled() {
             assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
         }
@@ -57,7 +63,8 @@ public class FeatureToggleServiceTest {
         "feature.toggle.approved_consent_order_notification_letter=false",
         "feature.toggle.hwf_successful_notification_letter=false",
         "feature.toggle.assigned_to_judge_notification_letter=false",
-        "feature.toggle.consent_order_not_approved_applicant_document_generation=false"
+        "feature.toggle.consent_order_not_approved_applicant_document_generation=false",
+        "feature.toggle.print_general_letter=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff {
 
@@ -82,6 +89,11 @@ public class FeatureToggleServiceTest {
         @Test
         public void isConsentOrderNotApprovedApplicantDocumentGenerationEnabledReturnFalse() {
             assertThat(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled(), is(false));
+        }
+
+        @Test
+        public void isPrintGeneralLetterEnabledReturnTrue() {
+            assertThat(featureToggleService.isPrintGeneralLetterEnabled(), is(false));
         }
 
         @Test

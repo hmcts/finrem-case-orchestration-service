@@ -51,6 +51,7 @@ public class GeneralLetterService {
     private final BulkPrintService bulkPrintService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
+    private final FeatureToggleService featureToggleService;
 
     public void previewGeneralLetter(String authorisationToken, CaseDetails caseDetails) {
         log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());
@@ -62,7 +63,9 @@ public class GeneralLetterService {
         log.info("Generating General letter for Case ID: {}", caseDetails.getId());
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
         addGeneralLetterToCaseData(caseDetails, document);
-        bulkPrintService.printLatestGeneralLetter(caseDetails);
+        if (featureToggleService.isPrintGeneralLetterEnabled()) {
+            bulkPrintService.printLatestGeneralLetter(caseDetails);
+        }
     }
 
     private CaseDocument generateGeneralLetterDocument(CaseDetails caseDetails, String authorisationToken) {
