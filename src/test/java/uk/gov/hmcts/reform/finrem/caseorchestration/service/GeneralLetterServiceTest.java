@@ -49,8 +49,8 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     @Autowired private GeneralLetterService generalLetterService;
     @Autowired private ObjectMapper mapper;
 
-    @MockBean
-    private GenericDocumentService genericDocumentService;
+    @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean private BulkPrintService bulkPrintService;
 
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
@@ -169,6 +169,13 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
         List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
         assertThat(errors, is(empty()));
+    }
+
+    @Test
+    public void whenGeneralLetterIsCreated_thenItGetsSentToBulkPrint() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
+        verify(bulkPrintService, times(1)).printLatestGeneralLetter(caseDetails);
     }
 
     private void assertNameUsedForGeneralLetterAddressTo(int invocation, String generalLetterAddressTo, String expectedName) {
