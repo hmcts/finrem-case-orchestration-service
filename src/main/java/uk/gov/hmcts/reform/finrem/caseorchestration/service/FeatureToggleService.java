@@ -14,11 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONSENT_ORDER_NOT_APPROVED_APPLICANT_DOCUMENT_GENERATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_COURT_DETAILS_MIGRATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.HWF_SUCCESSFUL_NOTIFICATION_LETTER;
 
 @Service
 @ConfigurationProperties(prefix = "feature")
@@ -33,18 +30,6 @@ public class FeatureToggleService {
         return Optional.ofNullable(toggle.get(feature.getName()))
             .map(Boolean::parseBoolean)
             .orElse(false);
-    }
-
-    public boolean isApprovedConsentOrderNotificationLetterEnabled() {
-        return isFeatureEnabled(APPROVED_CONSENT_ORDER_NOTIFICATION_LETTER);
-    }
-
-    public boolean isHwfSuccessfulNotificationLetterEnabled() {
-        return isFeatureEnabled(HWF_SUCCESSFUL_NOTIFICATION_LETTER);
-    }
-
-    public boolean isAssignedToJudgeNotificationLetterEnabled() {
-        return isFeatureEnabled(ASSIGNED_TO_JUDGE_NOTIFICATION_LETTER);
     }
 
     public boolean isConsentOrderNotApprovedApplicantDocumentGenerationEnabled() {
