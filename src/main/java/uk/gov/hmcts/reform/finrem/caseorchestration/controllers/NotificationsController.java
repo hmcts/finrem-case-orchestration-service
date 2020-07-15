@@ -64,7 +64,6 @@ public class NotificationsController implements BaseController {
         if (isConsentedApplication(callbackRequest.getCaseDetails())) {
             if (isPaperApplication(caseData)) {
                 log.info("Case is paper application");
-                log.info("isHwfSuccessfulNotificationLetterEnabled is toggled on");
                 log.info("Sending Consented HWF Successful notification letter for bulk print");
 
                 CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -100,7 +99,7 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         if (isConsentedApplication(callbackRequest.getCaseDetails())) {
-            populateAssignToJudgeFields(caseData);
+            caseData = populateAssignToJudgeFields(caseData);
         }
 
         if (isPaperApplication(caseData)) {
@@ -123,7 +122,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    private void populateAssignToJudgeFields(Map<String, Object> caseData) {
+    private Map<String, Object> populateAssignToJudgeFields(Map<String, Object> caseData) {
         if (!caseData.containsKey(assignedToJudge)) {
             caseData.put(assignedToJudge, assignedToJudgeDefault);
         }
@@ -139,6 +138,8 @@ public class NotificationsController implements BaseController {
         if (!caseData.containsKey(referToJudgeText)) {
             caseData.put(referToJudgeText, referToJudgeTextDefault);
         }
+
+        return caseData;
     }
 
     @PostMapping(value = "/case-orchestration/notify/consent-order-made", consumes = APPLICATION_JSON_VALUE)
