@@ -8,7 +8,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -43,14 +42,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_PREVIEW;
 
-@ActiveProfiles("test-mock-document-client")
 public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Autowired private GeneralLetterService generalLetterService;
     @Autowired private ObjectMapper mapper;
 
-    @MockBean
-    private GenericDocumentService genericDocumentService;
+    @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean private BulkPrintService bulkPrintService;
 
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
@@ -83,6 +81,35 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
             + "Andhra Pradesh\n"
             + "SRIKALAHASTI\n"
             + "B1 1AB"));
+        assertThat(data.get("applicantFullName"), is("Poor Guy"));
+        assertThat(data.get("respondentFullName"), is("test Korivi"));
+    }
+
+    @Test
+    public void generateContestedGeneralLetter() throws Exception {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/contested/general-letter-contested.json", mapper);
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
+
+        List<GeneralLetterData> generalLetterData = (List<GeneralLetterData>) caseDetails.getData().get(GENERAL_LETTER);
+        assertThat(generalLetterData, hasSize(2));
+
+        doCaseDocumentAssert(generalLetterData.get(0).getGeneralLetter().getGeneratedLetter());
+        doCaseDocumentAssert(generalLetterData.get(1).getGeneralLetter().getGeneratedLetter());
+
+        verify(genericDocumentService, times(1)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
+
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
+        assertThat(data.get("ccdCaseNumber"), is(1234567890L));
+        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("House no: 6-354-2\n"
+            + "Gandhi Street\n"
+            + "Chittor District\n"
+            + "Andhra Pradesh\n"
+            + "SRIKALAHASTI\n"
+            + "B1 1AB"));
+        assertThat(data.get("applicantFullName"), is("Poor Guy"));
+        assertThat(data.get("respondentFullName"), is("Sarah Beatrice Korivi"));
     }
 
     @Test
@@ -140,6 +167,13 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
         List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
         assertThat(errors, is(empty()));
+    }
+
+    @Test
+    public void whenGeneralLetterIsCreated_thenItGetsSentToBulkPrint() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
+        verify(bulkPrintService, times(1)).printLatestGeneralLetter(caseDetails);
     }
 
     private void assertNameUsedForGeneralLetterAddressTo(int invocation, String generalLetterAddressTo, String expectedName) {

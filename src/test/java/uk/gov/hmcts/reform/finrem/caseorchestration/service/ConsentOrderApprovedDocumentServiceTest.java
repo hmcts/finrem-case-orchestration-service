@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -56,9 +55,6 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Autowired
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
-
-    @MockBean
-    private FeatureToggleService featureToggleService;
 
     @Autowired
     private DocumentClient documentClientMock;
@@ -153,22 +149,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenCoverLetterFeatureTurnedOff_whenPreparingApplicantLetterPack_thenCoversheetAndOrderIsPresent() {
-        when(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()).thenReturn(false);
-        preparePaperCaseConsentOrderApprovedCaseData();
-
-        List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN);
-
-        assertThat(documents, hasSize(4));
-        assertThat(documents.get(0).getBinaryFileUrl(), is(DEFAULT_COVERSHEET_URL));
-        assertThat(documents.get(1).getBinaryFileUrl(), is(ORDER_LETTER_URL));
-        assertThat(documents.get(2).getBinaryFileUrl(), is(CONSENT_ORDER_URL));
-        assertThat(documents.get(3).getBinaryFileUrl(), is(PENSION_DOCUMENT_URL));
-    }
-
-    @Test
-    public void givenCoverLetterFeatureTurnedOn_whenPreparingApplicantLetterPack_thenCoversheetAndOrderIsPresent() {
-        when(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()).thenReturn(true);
+    public void whenPreparingApplicantLetterPack_thenCoversheetAndOrderIsPresent() {
         preparePaperCaseConsentOrderApprovedCaseData();
 
         List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN);

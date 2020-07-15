@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -29,7 +28,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.docume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchDocumentGenerationRequestTemplateAndFilename;
 
 @ActiveProfiles("test-mock-document-client")
-@SpringBootTest(properties = {"feature.toggle.approved_consent_order_notification_letter=true"})
 public class BulkPrintServiceTest extends BaseServiceTest {
 
     @Autowired private DocumentClient documentClient;
@@ -105,6 +103,17 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         List<BulkPrintDocument> printedDocuments = bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments();
         assertThat(printedDocuments.get(1).getBinaryFileUrl(), is("http://localhost:4506/documents/d4c4c071-3f14-4cff-a9c4-243f787a9fb8/binary"));
+    }
+
+    @Test
+    public void whenPrintingGeneralLetter_thenLatestGeneralLetterIsSentToPrinting() {
+        when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
+
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+        bulkPrintService.printLatestGeneralLetter(caseDetails);
+
+        List<BulkPrintDocument> printedDocuments = bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments();
+        assertThat(printedDocuments.get(0).getBinaryFileUrl(), is("http://dm-store/lhjbyuivu87y989hijbb/binary"));
     }
 
     private CaseDetails caseDetails() {

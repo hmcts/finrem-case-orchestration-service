@@ -46,7 +46,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     private static final String CONSENT_ORDER_NOT_APPROVED_REPLY_COVERSHEET_TEMPLATE = "FL-FRM-LET-ENG-00320.docx";
     private static final String CONSENT_ORDER_NOT_APPROVED_REPLY_COVERSHEET_FILENAME = "consentOrderNotApprovedReplyCoversheet.pdf";
 
-    private static final String BULK_PRINT_TEMPLATE = "FL-FRM-LET-ENG-00070.docx";
+    private static final String BULK_PRINT_TEMPLATE = "FL-FRM-LET-ENG-00522.docx";
     private static final String BULK_PRINT_FILENAME = "BulkPrintCoverSheet.pdf";
 
     @Autowired
