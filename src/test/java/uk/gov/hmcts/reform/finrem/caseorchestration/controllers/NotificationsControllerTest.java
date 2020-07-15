@@ -55,6 +55,7 @@ public class NotificationsControllerTest {
     //JSON Data
     private static final String CCD_REQUEST_JSON = "/fixtures/model/ccd-request.json";
     private static final String CCD_REQUEST_WITH_SOL_EMAIL_CONSENT_JSON = "/fixtures/ccd-request-with-solicitor-email-consent.json";
+    private static final String CCD_REQUEST_WITHOUT_JUDGE_DETAILS = "/fixtures/ccd-request-without-judge-details.json";
     private static final String BULK_PRINT_PAPER_APPLICATION_JSON = "/fixtures/bulkprint/bulk-print-paper-application.json";
     private static final String DRAFT_ORDER_SUCCESSFUL_APPLICANT_SOL = "/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json";
     private static final String DRAFT_ORDER_UNSUCCESSFUL_APPLICANT_SOL = "/fixtures/applicant-solicitor-to-draft-order-without-email-consent.json";
