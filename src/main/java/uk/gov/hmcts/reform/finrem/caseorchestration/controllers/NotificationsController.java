@@ -42,7 +42,7 @@ public class NotificationsController implements BaseController {
     private final GeneralEmailService generalEmailService;
 
     public static final String assignedToJudgeReason = "assignedToJudgeReason";
-    public static final String assignedToJudgeReasonDefault = "draft consent order";
+    public static final String assignedToJudgeReasonDefault = "Draft consent order";
     public static final String assignedToJudge = "assignedToJudge";
     public static final String assignedToJudgeDefault = "new_application@mailinator.com";
     public static final String referToJudgeDate = "referToJudgeDate";
