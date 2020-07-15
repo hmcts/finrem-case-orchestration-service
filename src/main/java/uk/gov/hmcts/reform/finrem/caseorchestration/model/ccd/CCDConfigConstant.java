@@ -77,6 +77,29 @@ public class CCDConfigConstant {
     public static final String COURT_DETAILS_EMAIL_KEY = "email";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
 
+    //contest courts
+    public static final String HEARING_DATE = "hearingDate";
+    public static final String CASE_ALLOCATED_TO = "caseAllocatedTo";
+    public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMIAM";
+    public static final String FAMILY_MEDIATOR_MIAM = "familyMediatorMIAM";
+    public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMIAM";
+    public static final String IS_ADMIN = "isAdmin";
+    public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
+    public static final String ROLES = "roles";
+    public static final String KENTFRC = "kentfrc";
+    public static final String KENTFRC_COURTLIST = "kentSurreyCourtList";
+    public static final String NEWPORT_COURTLIST = "newportCourtList";
+    public static final String SWANSEA_COURTLIST = "swanseaCourtList";
+    public static final String CLEAVELAND_COURTLIST = "cleavelandCourtList";
+    public static final String NWYORKSHIRE_COURTLIST = "nwyorkshireCourtList";
+    public static final String HSYORKSHIRE_COURTLIST = "humberCourtList";
+    public static final String NOTTINGHAM_COURTLIST = "nottinghamCourtList";
+    public static final String BIRMINGHAM_COURTLIST = "birminghamhamCourtList";
+    public static final String LONDON_CFC = "cfc";
+    public static final String LONDON_COURTLIST = "cfcCourtList";
+    public static final String MANCHESTER_COURTLIST = "manchesterCourtList";
+    public static final String LIVERPOOL_COURTLIST = "liverpoolCourtList";
+
     //Respondent Solicitor Related
     public static final String RESPONDENT_REPRESENTED = "appRespondentRep";
     public static final String RESP_SOLICITOR_NAME = "rSolicitorName";
@@ -145,35 +168,6 @@ public class CCDConfigConstant {
     public static final String AMOUNT_TO_PAY = "amountToPay";
     public static final String ISSUE_DATE = "issueDate";
     public static final String FAST_TRACK_DECISION = "fastTrackDecision";
-
-    //contest courts
-    public static final String HEARING_DATE = "hearingDate";
-    public static final String CASE_ALLOCATED_TO = "caseAllocatedTo";
-    public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMIAM";
-    public static final String FAMILY_MEDIATOR_MIAM = "familyMediatorMIAM";
-    public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMIAM";
-    public static final String IS_ADMIN = "isAdmin";
-    public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
-    public static final String ROLES = "roles";
-    public static final String KENTFRC = "kentfrc";
-    public static final String KENTFRC_COURTLIST = "kentSurreyCourtList";
-    public static final String NEWPORT_COURTLIST = "newportCourtList";
-    public static final String SWANSEA_COURTLIST = "swanseaCourtList";
-    public static final String CLEAVELAND_COURTLIST = "cleavelandCourtList";
-    public static final String NWYORKSHIRE_COURTLIST = "nwyorkshireCourtList";
-    public static final String HSYORKSHIRE_COURTLIST = "humberCourtList";
-    public static final String MIDLANDSLIST = "midlandsList";
-    public static final String NOTTINGHAM_COURTLIST = "nottinghamCourtList";
-    public static final String BIRMINGHAM_COURTLIST = "birminghamhamCourtList";
-    public static final String LONDON_LIST = "londonList";
-    public static final String LONDON_CFC = "cfc";
-    public static final String LONDON_COURTLIST = "cfcCourtList";
-    public static final String NORTHWESTLIST = "northWestList";
-    public static final String MANCHESTER_COURTLIST = "manchesterCourtList";
-    public static final String LIVERPOOL_COURTLIST = "liverpoolCourtList";
-    public static final String NORTHEASTLIST = "northEastList";
-    public static final String SOUTHEASTLIST = "southEastList";
-    public static final String WALESLIST = "walesList";
 
     // Bulk Printing
     public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
