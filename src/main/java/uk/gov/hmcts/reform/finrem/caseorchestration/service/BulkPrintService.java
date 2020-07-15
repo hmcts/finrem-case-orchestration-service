@@ -48,6 +48,7 @@ public class BulkPrintService {
         this.documentHelper = documentHelper;
     }
 
+    
     public UUID sendNotificationLetterForBulkPrint(final CaseDocument notificationLetter, final CaseDetails caseDetails) {
         List<BulkPrintDocument> notificationLetterList = Collections.singletonList(
             BulkPrintDocument.builder().binaryFileUrl(notificationLetter.getDocumentBinaryUrl()).build());
