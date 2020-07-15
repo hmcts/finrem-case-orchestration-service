@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -29,7 +28,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.docume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchDocumentGenerationRequestTemplateAndFilename;
 
 @ActiveProfiles("test-mock-document-client")
-@SpringBootTest(properties = {"feature.toggle.approved_consent_order_notification_letter=true"})
 public class BulkPrintServiceTest extends BaseServiceTest {
 
     @Autowired private DocumentClient documentClient;

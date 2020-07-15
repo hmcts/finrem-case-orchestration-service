@@ -29,7 +29,6 @@ public class ConsentOrderApprovedDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final BulkPrintService bulkPrintService;
     private final DocumentHelper documentHelper;
-    private final FeatureToggleService featureToggleService;
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         log.info("Generating Approved Consent Order Letter {} from {} for bulk print",
@@ -75,7 +74,7 @@ public class ConsentOrderApprovedDocumentService {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(caseDocumentToBulkPrintDocument(applicantCoverSheet));
 
-        if (isPaperApplication(caseData) && featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()) {
+        if (isPaperApplication(caseData)) {
             CaseDocument coverLetter = generateApprovedConsentOrderCoverLetter(caseDetails, authorisationToken);
             bulkPrintDocuments.add(caseDocumentToBulkPrintDocument(coverLetter));
         }

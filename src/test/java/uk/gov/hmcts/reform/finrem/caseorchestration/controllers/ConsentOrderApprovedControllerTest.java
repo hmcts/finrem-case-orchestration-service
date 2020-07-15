@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.util.List;
@@ -48,9 +47,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     @MockBean
     private GenericDocumentService genericDocumentService;
-
-    @MockBean
-    private FeatureToggleService featureToggleService;
 
     public String endpoint() {
         return "/case-orchestration/documents/consent-order-approved";
@@ -146,7 +142,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
-        when(featureToggleService.isApprovedConsentOrderNotificationLetterEnabled()).thenReturn(true);
 
         ResultActions result = mvc.perform(post(endpoint())
             .content(requestContent.toString())
