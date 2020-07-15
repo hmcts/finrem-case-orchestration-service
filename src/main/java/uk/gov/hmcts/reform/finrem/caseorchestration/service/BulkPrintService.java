@@ -53,7 +53,7 @@ public class BulkPrintService {
             BulkPrintDocument.builder().binaryFileUrl(notificationLetter.getDocumentBinaryUrl()).build());
 
         Long caseId = caseDetails.getId();
-        log.info("Notification letter sent to Bulk Print: {} for Case ID: {}", notificationLetterList, caseId);
+        log.info("Notification letter sent to Bulk Print: {} for Case id: {}", notificationLetterList, caseId);
 
         return bulkPrintFinancialRemedyLetterPack(caseId, notificationLetterList);
     }
