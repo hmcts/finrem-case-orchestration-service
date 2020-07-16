@@ -24,12 +24,9 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.NotificationsController;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
-import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -154,41 +151,10 @@ public class NotificationsTest {
             .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE)));
     }
 
-    @Test
-    public void notifyAssignToJudgeWithoutJudgeDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/ccd-request-without-judge-details.json")) {
-            request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
-        }
-
-        stubForNotification(NOTIFY_ASSIGN_TO_JUDGE_CONTEXT_PATH, HttpStatus.OK.value());
-        webClient.perform(MockMvcRequestBuilders.post(ASSIGNED_TO_JUDGE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(content().json(expectedCaseDataDefaultJudge()));
-        verify(postRequestedFor(urlEqualTo(NOTIFY_ASSIGN_TO_JUDGE_CONTEXT_PATH))
-            .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE)));
-    }
-
     private String expectedCaseData() throws JsonProcessingException {
         CaseDetails caseDetails = request.getCaseDetails();
         return objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDetails.getData()).build());
-    }
-
-    private String expectedCaseDataDefaultJudge() throws JsonProcessingException {
-        CaseDetails caseDetails = request.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.put(NotificationsController.assignedToJudge, NotificationsController.assignedToJudgeDefault);
-        caseData.put(NotificationsController.assignedToJudgeReason, NotificationsController.assignedToJudgeReasonDefault);
-        caseData.put(NotificationsController.referToJudgeText, NotificationsController.referToJudgeTextDefault);
-        caseData.put(NotificationsController.referToJudgeDate, LocalDate.now());
-        return objectMapper.writeValueAsString(AboutToStartOrSubmitCallbackResponse
-            .builder()
-            .data(caseData)
-            .build());
     }
 
     private void stubForNotification(String url, int value) {

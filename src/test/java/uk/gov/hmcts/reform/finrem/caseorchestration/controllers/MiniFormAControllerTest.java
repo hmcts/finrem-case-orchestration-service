@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentSe
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
@@ -85,6 +86,10 @@ public class MiniFormAControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
                 .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
                 .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BINARY_URL)))
+                .andExpect(jsonPath("$.data.assignedToJudge", is(MiniFormAController.assignedToJudgeDefault)))
+                .andExpect(jsonPath("$.data.assignedToJudgeReason", is(MiniFormAController.assignedToJudgeReasonDefault)))
+                .andExpect(jsonPath("$.data.referToJudgeText", is(MiniFormAController.referToJudgeTextDefault)))
+                .andExpect(jsonPath("$.data.referToJudgeDate", is(LocalDate.now().toString())))
                 .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }

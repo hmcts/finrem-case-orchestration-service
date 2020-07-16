@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
-import java.time.LocalDate;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -41,14 +40,6 @@ public class NotificationsController implements BaseController {
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     private final HelpWithFeesDocumentService helpWithFeesDocumentService;
     private final GeneralEmailService generalEmailService;
-
-    public static final String assignedToJudgeReason = "assignedToJudgeReason";
-    public static final String assignedToJudgeReasonDefault = "Draft consent order";
-    public static final String assignedToJudge = "assignedToJudge";
-    public static final String assignedToJudgeDefault = "new_application@mailinator.com";
-    public static final String referToJudgeDate = "referToJudgeDate";
-    public static final String referToJudgeText = "referToJudgeText";
-    public static final String referToJudgeTextDefault = "consent for approval";
 
     @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
@@ -99,12 +90,6 @@ public class NotificationsController implements BaseController {
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
-        if (isConsentedApplication(callbackRequest.getCaseDetails())) {
-            log.info("Defaulting AssignedToJudge properties where appropriate for Case ID: {}",
-                callbackRequest.getCaseDetails().getId());
-            populateAssignToJudgeFields(caseData);
-        }
-
         if (isPaperApplication(caseData)) {
             log.info("Sending AssignedToJudge notification letter for bulk print for Case ID: {}",
                 callbackRequest.getCaseDetails().getId());
@@ -123,28 +108,6 @@ public class NotificationsController implements BaseController {
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
-    }
-
-    private void populateAssignToJudgeFields(Map<String, Object> caseData) {
-        if (!caseData.containsKey(assignedToJudge)) {
-            log.info("Defaulting assignedToJudge");
-            caseData.put(assignedToJudge, assignedToJudgeDefault);
-        }
-
-        if (!caseData.containsKey(assignedToJudgeReason)) {
-            log.info("Defaulting assignedToJudgeReason");
-            caseData.put(assignedToJudgeReason, assignedToJudgeReasonDefault);
-        }
-
-        if (!caseData.containsKey(referToJudgeDate)) {
-            log.info("Defaulting referToJudgeDate");
-            caseData.put(referToJudgeDate, LocalDate.now());
-        }
-
-        if (!caseData.containsKey(referToJudgeText)) {
-            log.info("Defaulting referToJudgeText");
-            caseData.put(referToJudgeText, referToJudgeTextDefault);
-        }
     }
 
     @PostMapping(value = "/case-orchestration/notify/consent-order-made", consumes = APPLICATION_JSON_VALUE)

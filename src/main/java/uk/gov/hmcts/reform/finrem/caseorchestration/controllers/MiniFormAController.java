@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentSe
 
 import javax.validation.constraints.NotNull;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -32,6 +33,14 @@ public class MiniFormAController implements BaseController {
 
     @Autowired
     private OnlineFormDocumentService service;
+
+    public static final String assignedToJudgeReason = "assignedToJudgeReason";
+    public static final String assignedToJudgeReasonDefault = "Draft consent order";
+    public static final String assignedToJudge = "assignedToJudge";
+    public static final String assignedToJudgeDefault = "new_application@mailinator.com";
+    public static final String referToJudgeDate = "referToJudgeDate";
+    public static final String referToJudgeText = "referToJudgeText";
+    public static final String referToJudgeTextDefault = "consent for approval";
 
     @PostMapping(path = "/documents/generate-mini-form-a", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consented Mini Form A generation. Serves as a callback from CCD")
@@ -49,6 +58,18 @@ public class MiniFormAController implements BaseController {
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         CaseDocument document = service.generateMiniFormA(authorisationToken, callback.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
+
+        log.info("Defaulting AssignedToJudge fields for Case ID: {}",
+            callback.getCaseDetails().getId());
+        populateAssignToJudgeFields(caseData);
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    private void populateAssignToJudgeFields(Map<String, Object> caseData) {
+        caseData.put(assignedToJudge, assignedToJudgeDefault);
+        caseData.put(assignedToJudgeReason, assignedToJudgeReasonDefault);
+        caseData.put(referToJudgeDate, LocalDate.now());
+        caseData.put(referToJudgeText, referToJudgeTextDefault);
     }
 }
