@@ -99,7 +99,9 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         if (isConsentedApplication(callbackRequest.getCaseDetails())) {
-            caseData = populateAssignToJudgeFields(caseData);
+            log.info("Defaulting AssignedToJudge properties where appropriate for Case ID: {}",
+                callbackRequest.getCaseDetails().getId());
+            populateAssignToJudgeFields(caseData);
         }
 
         if (isPaperApplication(caseData)) {
@@ -122,7 +124,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    private Map<String, Object> populateAssignToJudgeFields(Map<String, Object> caseData) {
+    private void populateAssignToJudgeFields(Map<String, Object> caseData) {
         if (!caseData.containsKey(assignedToJudge)) {
             caseData.put(assignedToJudge, assignedToJudgeDefault);
         }
@@ -138,8 +140,6 @@ public class NotificationsController implements BaseController {
         if (!caseData.containsKey(referToJudgeText)) {
             caseData.put(referToJudgeText, referToJudgeTextDefault);
         }
-
-        return caseData;
     }
 
     @PostMapping(value = "/case-orchestration/notify/consent-order-made", consumes = APPLICATION_JSON_VALUE)
