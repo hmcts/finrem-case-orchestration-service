@@ -70,11 +70,9 @@
         "AddressLine2": "AddressGlobalUK",
         "AddressLine3": "London"
       },
-      "allocatedCourtList": {
-        "regionList": "midlands",
-        "midlandsList": "nottingham",
-        "nottinghamCourtList": "FR_s_NottinghamList_1"
-      },
+      "regionList": "midlands",
+      "midlandsFRCList": "nottingham",
+      "nottinghamCourtList": "FR_s_NottinghamList_1",
       "solicitorDXnumber": null,
       "appRespondentLName": "Korivi",
       "solicitorReference": "LL01",
