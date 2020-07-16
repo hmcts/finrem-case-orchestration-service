@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -85,7 +86,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/assign-to-judge", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/case-orchestration/notify/assign-to-judge", consumes = APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify solicitor when Judge assigned to case via email or letter")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Case assigned to Judge notification sent successfully",
@@ -126,18 +127,22 @@ public class NotificationsController implements BaseController {
 
     private void populateAssignToJudgeFields(Map<String, Object> caseData) {
         if (!caseData.containsKey(assignedToJudge)) {
+            log.info("Defaulting assignedToJudge");
             caseData.put(assignedToJudge, assignedToJudgeDefault);
         }
 
         if (!caseData.containsKey(assignedToJudgeReason)) {
+            log.info("Defaulting assignedToJudgeReason");
             caseData.put(assignedToJudgeReason, assignedToJudgeReasonDefault);
         }
 
         if (!caseData.containsKey(referToJudgeDate)) {
+            log.info("Defaulting referToJudgeDate");
             caseData.put(referToJudgeDate, LocalDate.now());
         }
 
         if (!caseData.containsKey(referToJudgeText)) {
+            log.info("Defaulting referToJudgeText");
             caseData.put(referToJudgeText, referToJudgeTextDefault);
         }
     }
