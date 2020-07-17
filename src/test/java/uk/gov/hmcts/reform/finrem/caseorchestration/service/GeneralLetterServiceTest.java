@@ -8,7 +8,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -43,14 +42,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_PREVIEW;
 
-@ActiveProfiles("test-mock-document-client")
 public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Autowired private GeneralLetterService generalLetterService;
     @Autowired private ObjectMapper mapper;
 
-    @MockBean
-    private GenericDocumentService genericDocumentService;
+    @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean private BulkPrintService bulkPrintService;
 
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
@@ -169,6 +167,13 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
 
         List<String> errors = generalLetterService.getCaseDataErrorsForCreatingPreviewOrFinalLetter(caseDetails);
         assertThat(errors, is(empty()));
+    }
+
+    @Test
+    public void whenGeneralLetterIsCreated_thenItGetsSentToBulkPrint() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
+        generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
+        verify(bulkPrintService, times(1)).printLatestGeneralLetter(caseDetails);
     }
 
     private void assertNameUsedForGeneralLetterAddressTo(int invocation, String generalLetterAddressTo, String expectedName) {

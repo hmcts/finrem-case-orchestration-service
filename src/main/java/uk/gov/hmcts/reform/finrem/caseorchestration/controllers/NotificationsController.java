@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -37,7 +36,6 @@ public class NotificationsController implements BaseController {
 
     private final NotificationService notificationService;
     private final BulkPrintService bulkPrintService;
-    private final FeatureToggleService featureToggleService;
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     private final HelpWithFeesDocumentService helpWithFeesDocumentService;
     private final GeneralEmailService generalEmailService;
@@ -53,11 +51,9 @@ public class NotificationsController implements BaseController {
         log.info("Received request to send email for HWF Successful for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        log.info("isHwfSuccessfulNotificationLetterEnabled is toggled to: {}",
-            featureToggleService.isHwfSuccessfulNotificationLetterEnabled());
 
         if (isConsentedApplication(callbackRequest.getCaseDetails())) {
-            if (isPaperApplication(caseData) && featureToggleService.isHwfSuccessfulNotificationLetterEnabled()) {
+            if (isPaperApplication(caseData)) {
                 log.info("Case is paper application");
                 log.info("isHwfSuccessfulNotificationLetterEnabled is toggled on");
                 log.info("Sending Consented HWF Successful notification letter for bulk print");
@@ -93,25 +89,20 @@ public class NotificationsController implements BaseController {
             callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        log.info("isAssignedToJudgeNotificationLetterEnabled is toggled to: {}",
-            featureToggleService.isAssignedToJudgeNotificationLetterEnabled());
 
         if (isPaperApplication(caseData)) {
-            if (featureToggleService.isAssignedToJudgeNotificationLetterEnabled()) {
-                log.info("isAssignedToJudgeNotificationLetterEnabled is toggled on");
-                log.info("Sending AssignedToJudge notification letter for bulk print for Case ID: {}",
-                    callbackRequest.getCaseDetails().getId());
+            log.info("isAssignedToJudgeNotificationLetterEnabled is toggled on");
+            log.info("Sending AssignedToJudge notification letter for bulk print for Case ID: {}",
+                callbackRequest.getCaseDetails().getId());
 
-                CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-                // Generate PDF notification letter
-                CaseDocument assignedToJudgeNotificationLetter =
-                    assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, authToken);
+            // Generate PDF notification letter
+            CaseDocument assignedToJudgeNotificationLetter =
+                assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, authToken);
 
-                // Send notification letter to Bulk Print
-                bulkPrintService.sendNotificationLetterForBulkPrint(assignedToJudgeNotificationLetter, caseDetails);
-            }
-            log.info("Case is paper application but 'AssignedToJudgeNotificationLetter' feature is not enabled");
+            // Send notification letter to Bulk Print
+            bulkPrintService.sendNotificationLetterForBulkPrint(assignedToJudgeNotificationLetter, caseDetails);
         } else if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
             log.info("Sending email notification to Solicitor for Judge successfully assigned to case");
             notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);

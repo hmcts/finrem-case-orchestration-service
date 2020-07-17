@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,9 +48,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 public class GeneralLetterService {
 
     private final GenericDocumentService genericDocumentService;
+    private final BulkPrintService bulkPrintService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
-    private final ObjectMapper objectMapper;
+    private final FeatureToggleService featureToggleService;
 
     public void previewGeneralLetter(String authorisationToken, CaseDetails caseDetails) {
         log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());
@@ -64,6 +63,9 @@ public class GeneralLetterService {
         log.info("Generating General letter for Case ID: {}", caseDetails.getId());
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
         addGeneralLetterToCaseData(caseDetails, document);
+        if (featureToggleService.isPrintGeneralLetterEnabled()) {
+            bulkPrintService.printLatestGeneralLetter(caseDetails);
+        }
     }
 
     private CaseDocument generateGeneralLetterDocument(CaseDetails caseDetails, String authorisationToken) {
@@ -125,17 +127,12 @@ public class GeneralLetterService {
 
         Map<String, Object> caseData = caseDetails.getData();
         List<GeneralLetterData> generalLetterDataList = Optional.ofNullable(caseData.get(GENERAL_LETTER))
-            .map(this::convertToGeneralLetterData)
+            .map(documentHelper::convertToGeneralLetterData)
             .orElse(new ArrayList<>(1));
 
         generalLetterDataList.add(generatedLetterData);
 
         caseData.put(GENERAL_LETTER, generalLetterDataList);
-    }
-
-    private List<GeneralLetterData> convertToGeneralLetterData(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<GeneralLetterData>>() {
-        });
     }
 
     public List<String> getCaseDataErrorsForCreatingPreviewOrFinalLetter(CaseDetails caseDetails) {

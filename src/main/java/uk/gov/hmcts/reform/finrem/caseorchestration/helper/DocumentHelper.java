@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
@@ -105,6 +106,11 @@ public class DocumentHelper {
 
     private List<RespondToOrderData> convertToRespondToOrderDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<List<RespondToOrderData>>() {
+        });
+    }
+
+    public List<GeneralLetterData> convertToGeneralLetterData(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<List<GeneralLetterData>>() {
         });
     }
 
