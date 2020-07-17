@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
@@ -34,9 +35,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_UR
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.PENSION_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 
 @WebMvcTest(ConsentOrderApprovedController.class)
@@ -47,6 +50,10 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     @MockBean
     private GenericDocumentService genericDocumentService;
+
+    @MockBean
+    private BulkPrintService bulkPrintService;
+
 
     public String endpoint() {
         return "/case-orchestration/documents/consent-order-approved";
@@ -134,6 +141,27 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void shouldUpdateStateToConsentOrderMadeAndBulkPrint() throws Exception {
+        doValidCaseDataSetUpNoPensionCollection();
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
+        whenAnnexStampingDocument().thenReturn(caseDocument());
+        whenStampingDocument().thenReturn(caseDocument());
+        whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
+        when(bulkPrintService.sendToBulkPrint(any(), any())).thenReturn(defaultCaseDetails().getData());
+
+        ResultActions result = mvc.perform(post(endpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        result.andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
+
+        verify(bulkPrintService).sendToBulkPrint(any(), any());
+    }
+
+    @Test
     public void shouldNotTriggerConsentOrderApprovedNotificationLetterIfIsNotPaperApplication() throws Exception {
         doValidCaseDataSetUp();
 
@@ -177,13 +205,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     private void assertLetter(ResultActions result) throws Exception {
         String path = "$.data.approvedOrderCollection[0].value.orderLetter.";
-        result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
-            .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
-            .andExpect(jsonPath(path + DOCUMENT_BINARY_URL, is(BINARY_URL)));
-    }
-
-    private void assertConsentOrderNotificationLetter(ResultActions result) throws Exception {
-        String path = "$.data.consentOrderApprovedNotificationLetter.";
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
             .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
             .andExpect(jsonPath(path + DOCUMENT_BINARY_URL, is(BINARY_URL)));

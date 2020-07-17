@@ -45,6 +45,11 @@ public abstract class BaseControllerTest extends BaseTest {
             .getResource("/fixtures/bulkprint/bulk-print-paper-application.json").toURI()));
     }
 
+    void doValidCaseDataSetUpNoPensionCollection() throws IOException, URISyntaxException {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/bulkprint/bulk-print-no-pension-collection.json").toURI()));
+    }
+
     void doMissingLatestConsentOrder() throws IOException, URISyntaxException {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/hwf.json").toURI()));

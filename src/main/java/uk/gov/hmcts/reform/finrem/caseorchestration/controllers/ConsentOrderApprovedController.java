@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
@@ -35,9 +36,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.hasPensionCollection;
 
 @Slf4j
 @RestController
@@ -48,6 +52,7 @@ public class ConsentOrderApprovedController implements BaseController {
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final GenericDocumentService genericDocumentService;
     private final ObjectMapper mapper;
+    private final BulkPrintService bulkPrintService;
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "'Consent Order Approved' callback handler. Generates relevant Consent Order Approved documents")
@@ -70,6 +75,12 @@ public class ConsentOrderApprovedController implements BaseController {
             generateAndPrepareDocuments(authToken, caseDetails);
         } else {
             log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty");
+        }
+
+        if (!hasPensionCollection(caseData)) {
+            log.info("Case has no pension documents, updating status to {} and sending for bulk print", CONSENT_ORDER_MADE.toString());
+            caseData = bulkPrintService.sendToBulkPrint(caseDetails, authToken);
+            caseData.put(STATE, CONSENT_ORDER_MADE.toString());
         }
 
         return ResponseEntity.ok(
