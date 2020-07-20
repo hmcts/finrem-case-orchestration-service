@@ -32,6 +32,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class ContestedNotApprovedService {
 
+    public static final String REASON_FOR_REFUSAL = "reasonForRefusal";
+    public static final String REASON_FOR_REFUSAL_OTHERS = "FR_ms_refusalReason_1";
+    public static final String OTHERS_TEXT_ORDERS = "othersTextOrders";
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final DocumentConfiguration documentConfiguration;
@@ -91,7 +94,7 @@ public class ContestedNotApprovedService {
     }
 
     private String formatRefusalReasons(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
+        Map<String, Object> caseData = documentHelper.deepCopy(caseDetails, CaseDetails.class).getData();
         List<String> refusalReasons = (List<String>) caseData.get(CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL);
         Collections.reverse(refusalReasons);
 
@@ -101,7 +104,7 @@ public class ContestedNotApprovedService {
                 formattedRefusalReasons.append('\n');
             }
             formattedRefusalReasons.append("    \u2022 ");       // add bullet point prefix
-            if ("FR_ms_refusalReason_1".equals(reason)) {
+            if (REASON_FOR_REFUSAL_OTHERS.equals(reason)) {
                 formattedRefusalReasons.append(caseData.get(CONTESTED_APPLICATION_NOT_APPROVED_OTHER_TEXT));
             } else {
                 formattedRefusalReasons.append(reasonCodeToText.get(reason));
@@ -122,8 +125,8 @@ public class ContestedNotApprovedService {
 
     private ContestedApplicationNotApprovedListEntry buildApplicationNotApprovedEntry(CaseDetails caseDetails) {
         Map<String, Object> caseDataMappedToApplicationNotApproved = new ImmutableMap.Builder<String, String>()
-            .put(CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL, "reasonForRefusal")
-            .put(CONTESTED_APPLICATION_NOT_APPROVED_OTHER_TEXT, "othersTextOrders")
+            .put(CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL, REASON_FOR_REFUSAL)
+            .put(CONTESTED_APPLICATION_NOT_APPROVED_OTHER_TEXT, OTHERS_TEXT_ORDERS)
             .put("applicationNotApprovedJudgeType", "judgeType")
             .put("applicationNotApprovedJudgeName", "judgeName")
             .put("applicationNotApprovedDateOfOrder", "dateOfOrder")
@@ -133,10 +136,19 @@ public class ContestedNotApprovedService {
             .stream()
             .collect(Collectors.toMap(Map.Entry::getValue, entry -> caseDetails.getData().get(entry.getKey())));
 
+        removeOthersTextOrdersIfReasonOthersIsNotSelected(caseDataMappedToApplicationNotApproved);
+
         return ContestedApplicationNotApprovedListEntry.builder()
             .id(UUID.randomUUID().toString())
             .contestedApplicationNotApproved(
                 objectMapper.convertValue(caseDataMappedToApplicationNotApproved, ContestedApplicationNotApproved.class))
             .build();
+    }
+
+    private void removeOthersTextOrdersIfReasonOthersIsNotSelected(Map<String, Object> applicationNotApprovedData) {
+        List<String> refusalReasons = (List<String>) applicationNotApprovedData.get(REASON_FOR_REFUSAL);
+        if (!refusalReasons.contains(REASON_FOR_REFUSAL_OTHERS)) {
+            applicationNotApprovedData.remove(OTHERS_TEXT_ORDERS);
+        }
     }
 }
