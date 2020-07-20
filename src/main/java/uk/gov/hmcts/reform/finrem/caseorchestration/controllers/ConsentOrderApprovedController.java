@@ -23,7 +23,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import javax.validation.constraints.NotNull;
@@ -48,7 +47,6 @@ public class ConsentOrderApprovedController implements BaseController {
 
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final GenericDocumentService genericDocumentService;
-    private final FeatureToggleService featureToggleService;
     private final ObjectMapper mapper;
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)

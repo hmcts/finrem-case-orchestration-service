@@ -8,7 +8,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -43,7 +42,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER_PREVIEW;
 
-@ActiveProfiles("test-mock-document-client")
 public class GeneralLetterServiceTest extends BaseServiceTest {
 
     @Autowired private GeneralLetterService generalLetterService;
@@ -61,7 +59,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void generateGeneralLetter() throws Exception {
+    public void generateGeneralLetter() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
@@ -77,18 +75,17 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
         assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
         assertThat(data.get("ccdCaseNumber"), is(1234567890L));
-        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("House no: 6-354-2\n"
-            + "Gandhi Street\n"
-            + "Chittor District\n"
-            + "Andhra Pradesh\n"
-            + "SRIKALAHASTI\n"
-            + "B1 1AB"));
+        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Applicant Solicitor Street\n"
+            + "Second Address Line\n"
+            + "Greater London\n"
+            + "London\n"
+            + "SE12 9SE"));
         assertThat(data.get("applicantFullName"), is("Poor Guy"));
         assertThat(data.get("respondentFullName"), is("test Korivi"));
     }
 
     @Test
-    public void generateContestedGeneralLetter() throws Exception {
+    public void generateContestedGeneralLetter() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/contested/general-letter-contested.json", mapper);
         generalLetterService.createGeneralLetter(AUTH_TOKEN, caseDetails);
 
@@ -104,12 +101,11 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
         assertThat(data.get("generalLetterCreatedDate"), is(notNullValue()));
         assertThat(data.get("ccdCaseNumber"), is(1234567890L));
-        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("House no: 6-354-2\n"
-            + "Gandhi Street\n"
-            + "Chittor District\n"
-            + "Andhra Pradesh\n"
-            + "SRIKALAHASTI\n"
-            + "B1 1AB"));
+        assertThat(((Addressee) data.get(ADDRESSEE)).getFormattedAddress(), is("50 Applicant Solicitor Street\n"
+            + "Second Address Line\n"
+            + "Greater London\n"
+            + "London\n"
+            + "SW1V 4FG"));
         assertThat(data.get("applicantFullName"), is("Poor Guy"));
         assertThat(data.get("respondentFullName"), is("Sarah Beatrice Korivi"));
     }
@@ -151,7 +147,6 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
         assertThat(caseDetails.getData(), not(hasKey(GENERAL_LETTER_PREVIEW)));
 
         generalLetterService.previewGeneralLetter(AUTH_TOKEN, caseDetails);
-
         assertThat(caseDetails.getData(), hasKey(GENERAL_LETTER_PREVIEW));
     }
 
