@@ -140,7 +140,7 @@ public class BulkPrintService {
         return letterId;
     }
 
-    public Map<String, Object> sendToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
+    public void sendToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (!isApplicantRepresentedByASolicitor(caseData) || isApplicantSolicitorAgreeToReceiveEmails(caseData)
@@ -154,8 +154,6 @@ public class BulkPrintService {
         generateCoversheetForRespondentAndSendOrders(caseDetails, authorisationToken);
 
         log.info("Bulk print is successful");
-
-        return caseData;
     }
 
     private void generateCoversheetForRespondentAndSendOrders(CaseDetails caseDetails, String authToken) {

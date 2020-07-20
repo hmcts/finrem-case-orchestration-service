@@ -43,7 +43,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.hasPensionCollection;
 
 @Slf4j
@@ -91,7 +90,7 @@ public class ConsentOrderApprovedController implements BaseController {
 
         if (!hasPensionCollection(caseData)) {
             log.info("Case has no pension documents, updating status to {} and sending for bulk print", CONSENT_ORDER_MADE.toString());
-            caseData = bulkPrintService.sendToBulkPrint(caseDetails, authToken);
+            bulkPrintService.sendToBulkPrint(caseDetails, authToken);
             caseData.put(STATE, CONSENT_ORDER_MADE.toString());
         }
 
@@ -103,7 +102,7 @@ public class ConsentOrderApprovedController implements BaseController {
                 .build());
     }
 
-    private Map<String, Object> generateAndPrepareDocuments(@RequestHeader(AUTHORIZATION_HEADER) String authToken, CaseDetails caseDetails) {
+    private void generateAndPrepareDocuments(@RequestHeader(AUTHORIZATION_HEADER) String authToken, CaseDetails caseDetails) {
         log.info("Generating and preparing documents for latest consent order");
 
         Map<String, Object> caseData = caseDetails.getData();
@@ -136,7 +135,6 @@ public class ConsentOrderApprovedController implements BaseController {
         caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
         log.info("Successfully generated documents for 'Consent Order Approved'");
-        return caseData;
     }
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {
