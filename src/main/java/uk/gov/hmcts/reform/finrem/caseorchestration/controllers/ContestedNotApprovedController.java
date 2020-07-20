@@ -23,6 +23,9 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_DOCUMENT_PREVIEW;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_OTHER_TEXT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -48,11 +51,12 @@ public class ContestedNotApprovedController implements BaseController {
         validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.put("applicationNotApprovedReasonForRefusal", null);
+        caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL, null);
         caseData.put("applicationNotApprovedJudgeType", null);
         caseData.put("applicationNotApprovedJudgeName", null);
         caseData.put("applicationNotApprovedDateOfOrder", null);
-        caseData.remove("applicationNotApprovedDocumentPreview");
+        caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_OTHER_TEXT, null);
+        caseData.remove(CONTESTED_APPLICATION_NOT_APPROVED_DOCUMENT_PREVIEW);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
