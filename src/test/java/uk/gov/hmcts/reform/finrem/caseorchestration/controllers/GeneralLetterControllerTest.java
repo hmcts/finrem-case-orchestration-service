@@ -29,9 +29,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 @WebMvcTest(GeneralLetterController.class)
 public class GeneralLetterControllerTest extends BaseControllerTest {
 
-    public static final String GENERAL_LETTER_URL = "/case-orchestration/documents/general-letter";
-    public static final String PREVIEW_GENERAL_LETTER_URL = "/case-orchestration/documents/preview-general-letter";
-    public static final String START_GENERAL_LETTER_URL = "/case-orchestration/general-letter-start";
+    private static final String GENERAL_LETTER_URL = "/case-orchestration/documents/general-letter";
+    private static final String PREVIEW_GENERAL_LETTER_URL = "/case-orchestration/documents/preview-general-letter";
+    private static final String START_GENERAL_LETTER_URL = "/case-orchestration/general-letter-start";
 
     @MockBean
     private GeneralLetterService generalLetterService;

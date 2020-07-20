@@ -77,6 +77,29 @@ public class CCDConfigConstant {
     public static final String COURT_DETAILS_EMAIL_KEY = "email";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
 
+    //contest courts
+    public static final String HEARING_DATE = "hearingDate";
+    public static final String CASE_ALLOCATED_TO = "caseAllocatedTo";
+    public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMIAM";
+    public static final String FAMILY_MEDIATOR_MIAM = "familyMediatorMIAM";
+    public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMIAM";
+    public static final String IS_ADMIN = "isAdmin";
+    public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
+    public static final String ROLES = "roles";
+    public static final String KENTFRC = "kentfrc";
+    public static final String KENTFRC_COURTLIST = "kentSurreyCourtList";
+    public static final String NEWPORT_COURTLIST = "newportCourtList";
+    public static final String SWANSEA_COURTLIST = "swanseaCourtList";
+    public static final String CLEAVELAND_COURTLIST = "cleavelandCourtList";
+    public static final String NWYORKSHIRE_COURTLIST = "nwyorkshireCourtList";
+    public static final String HSYORKSHIRE_COURTLIST = "humberCourtList";
+    public static final String NOTTINGHAM_COURTLIST = "nottinghamCourtList";
+    public static final String BIRMINGHAM_COURTLIST = "birminghamhamCourtList";
+    public static final String LONDON_CFC = "cfc";
+    public static final String LONDON_COURTLIST = "cfcCourtList";
+    public static final String MANCHESTER_COURTLIST = "manchesterCourtList";
+    public static final String LIVERPOOL_COURTLIST = "liverpoolCourtList";
+
     //Respondent Solicitor Related
     public static final String RESPONDENT_REPRESENTED = "appRespondentRep";
     public static final String RESP_SOLICITOR_NAME = "rSolicitorName";
@@ -96,6 +119,19 @@ public class CCDConfigConstant {
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_BODY = "generalLetterBody";
+    public static final String GENERAL_ORDER_PREVIEW_DOCUMENT = "generalOrderPreviewDocument";
+    public static final String GENERAL_ORDER_CREATED_BY = "generalOrderCreatedBy";
+    public static final String GENERAL_ORDER_BODY_TEXT = "generalOrderBodyText";
+    public static final String GENERAL_ORDER_DATE = "generalOrderDate";
+    public static final String GENERAL_ORDER_ADDRESS_TO = "generalOrderAddressTo";
+    public static final String GENERAL_ORDER_JUDGE_TYPE = "generalOrderJudgeType";
+    public static final String GENERAL_ORDER_RECITALS = "generalOrderRecitals";
+    public static final String GENERAL_ORDER_JUDGE_NAME = "generalOrderJudgeName";
+    public static final String GENERAL_ORDER_LATEST_DOCUMENT = "generalOrderLatestDocument";
+    public static final String GENERAL_ORDER_COLLECTION_CONTESTED = "generalOrders";
+    public static final String GENERAL_ORDER_COLLECTION_CONTESTED_DOCUMENT = "additionalDocument";
+    public static final String GENERAL_ORDER_COLLECTION_CONSENTED = "generalOrderCollection";
+    public static final String GENERAL_ORDER_COLLECTION_CONSENTED_DOCUMENT = "generalOrder_documentUpload";
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
@@ -118,7 +154,6 @@ public class CCDConfigConstant {
     public static final String GENERAL_EMAIL_CREATED_BY = "generalEmailCreatedBy";
     public static final String GENERAL_EMAIL_BODY = "generalEmailBody";
 
-
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
     public static final String FEES = "Fees";
@@ -134,22 +169,18 @@ public class CCDConfigConstant {
     public static final String ISSUE_DATE = "issueDate";
     public static final String FAST_TRACK_DECISION = "fastTrackDecision";
 
-    public static final String HEARING_DATE = "hearingDate";
-    public static final String CASE_ALLOCATED_TO = "caseAllocatedTo";
-    public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMIAM";
-    public static final String FAMILY_MEDIATOR_MIAM = "familyMediatorMIAM";
-    public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMIAM";
-    public static final String IS_ADMIN = "isAdmin";
-    public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
-    public static final String ROLES = "roles";
-
     // Bulk Printing
     public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";
     public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
-    public static final String BULK_PRINT_LETTER_ID = "bulkPrintLetterId";
     public static final String BULK_PRINT_LETTER_ID_APP = "bulkPrintLetterIdApp";
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
     public static final String UPLOAD_ORDER = "uploadOrder";
 
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
+
+    // Contested application not approved
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED = "applicationNotApproved";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_DOCUMENT_PREVIEW = "applicationNotApprovedDocumentPreview";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL = "applicationNotApprovedReasonForRefusal";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_OTHER_TEXT = "applicationNotApprovedOthersTextOrders";
 }
