@@ -91,7 +91,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = caseDetailsWithSolicitors();
         generateCoverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
 
-        assertCoversheetAddress("123 Applicant Solicitor Street\nSecond Address Line\nThird Address Line\nGreater London\nLondon\nSE1");
+        assertCoversheetAddress("123 Applicant Solicitor Street\nSecond Address Line\nGreater London\nLondon\nSE1");
     }
 
     @Test
