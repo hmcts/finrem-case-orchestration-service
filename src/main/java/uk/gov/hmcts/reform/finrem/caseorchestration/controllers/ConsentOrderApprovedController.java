@@ -72,7 +72,7 @@ public class ConsentOrderApprovedController implements BaseController {
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
 
         if (!isEmpty(latestConsentOrder)) {
-            generateAndPrepareDocuments(authToken, caseDetails);
+            caseData = generateAndPrepareDocuments(authToken, caseDetails);
         } else {
             log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty");
         }
@@ -91,7 +91,7 @@ public class ConsentOrderApprovedController implements BaseController {
                 .build());
     }
 
-    private void generateAndPrepareDocuments(@RequestHeader(AUTHORIZATION_HEADER) String authToken, CaseDetails caseDetails) {
+    private Map<String, Object> generateAndPrepareDocuments(@RequestHeader(AUTHORIZATION_HEADER) String authToken, CaseDetails caseDetails) {
         log.info("Generating and preparing documents for latest consent order");
 
         Map<String, Object> caseData = caseDetails.getData();
@@ -124,6 +124,7 @@ public class ConsentOrderApprovedController implements BaseController {
         caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
         log.info("Successfully generated documents for 'Consent Order Approved'");
+        return caseData;
     }
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {
