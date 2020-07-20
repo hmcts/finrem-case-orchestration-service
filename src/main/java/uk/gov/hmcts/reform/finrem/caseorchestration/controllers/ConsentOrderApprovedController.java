@@ -74,7 +74,7 @@ public class ConsentOrderApprovedController implements BaseController {
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
 
         if (!isEmpty(latestConsentOrder)) {
-            generateAndPrepareDocuments(authToken, caseDetails);
+            caseData = generateAndPrepareDocuments(authToken, caseDetails);
         } else {
             log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty");
         }
@@ -87,7 +87,7 @@ public class ConsentOrderApprovedController implements BaseController {
                 .build());
     }
 
-    private void generateAndPrepareDocuments(@RequestHeader(AUTHORIZATION_HEADER) String authToken, CaseDetails caseDetails) {
+    private Map<String, Object> generateAndPrepareDocuments(@RequestHeader(AUTHORIZATION_HEADER) String authToken, CaseDetails caseDetails) {
         log.info("Generating and preparing documents for latest consent order");
 
         Map<String, Object> caseData = caseDetails.getData();
@@ -127,13 +127,15 @@ public class ConsentOrderApprovedController implements BaseController {
             // Used to render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
             try {
                 caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
+                log.info("TO REMOVE caseData after mapping: {}", caseData);
+                caseData = bulkPrintService.sendToBulkPrint(caseDetails, authToken);
+                caseData.put(STATE, CONSENT_ORDER_MADE.toString());
             } catch (JsonProcessingException e) {
                 log.error(e.getMessage());
             }
-            log.info("TO REMOVE caseData after mapping: {}", caseData);
-            caseData = bulkPrintService.sendToBulkPrint(caseDetails, authToken);
-            caseData.put(STATE, CONSENT_ORDER_MADE.toString());
         }
+
+        return caseData;
     }
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {
