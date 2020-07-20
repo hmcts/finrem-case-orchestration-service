@@ -79,20 +79,6 @@ public class ConsentOrderApprovedController implements BaseController {
             log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty");
         }
 
-        if (!hasPensionCollection(caseData)) {
-            log.info("Case has no pension documents, updating status to {} and sending for bulk print", CONSENT_ORDER_MADE.toString());
-            log.info("TO REMOVE caseData before mapping: {}", caseData);
-            // Used to render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
-            try {
-                caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
-            } catch (JsonProcessingException e) {
-                log.error(e.getMessage());
-            }
-            log.info("TO REMOVE caseData after mapping: {}", caseData);
-            caseData = bulkPrintService.sendToBulkPrint(caseDetails, authToken);
-            caseData.put(STATE, CONSENT_ORDER_MADE.toString());
-        }
-
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseData)
@@ -134,6 +120,20 @@ public class ConsentOrderApprovedController implements BaseController {
         caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
         log.info("Successfully generated documents for 'Consent Order Approved'");
+
+        if (!hasPensionCollection(caseData)) {
+            log.info("Case has no pension documents, updating status to {} and sending for bulk print", CONSENT_ORDER_MADE.toString());
+            log.info("TO REMOVE caseData before mapping: {}", caseData);
+            // Used to render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
+            try {
+                caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
+            } catch (JsonProcessingException e) {
+                log.error(e.getMessage());
+            }
+            log.info("TO REMOVE caseData after mapping: {}", caseData);
+            caseData = bulkPrintService.sendToBulkPrint(caseDetails, authToken);
+            caseData.put(STATE, CONSENT_ORDER_MADE.toString());
+        }
     }
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {

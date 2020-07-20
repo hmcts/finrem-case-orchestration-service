@@ -98,8 +98,8 @@ public class BulkPrintService {
             .orElse(new ArrayList<>());
 
         if (!documentList.isEmpty()) {
-            log.info("Extracting 'approvedOrderCollection' from case data for bulk print.");
-            Map<String, Object> value = (Map<String, Object>) getFirstMapValue.apply(documentList).get(VALUE);
+            log.info("Extracting 'approvedOrderCollection' from case data for bulk print: {}", data);
+            Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get(VALUE));
             documentHelper.getDocumentLinkAsBulkPrintDocument(value, "orderLetter").ifPresent(bulkPrintDocuments::add);
             documentHelper.getDocumentLinkAsBulkPrintDocument(value, CONSENT_ORDER).ifPresent(bulkPrintDocuments::add);
             bulkPrintDocuments.addAll(documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(value,
