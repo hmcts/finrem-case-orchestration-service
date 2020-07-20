@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 
 import javax.validation.constraints.NotNull;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.hasPensionCollection;
 
 @Slf4j
@@ -72,10 +75,19 @@ public class ConsentOrderApprovedController implements BaseController {
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
 
         if (!isEmpty(latestConsentOrder)) {
-            caseData = generateAndPrepareDocuments(authToken, caseDetails);
+            generateAndPrepareDocuments(authToken, caseDetails);
         } else {
             log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty");
         }
+
+        log.info("TO REMOVE caseData before mapping: {}", caseData);
+        // Used to render Case Data with @JSONProperty names
+        try {
+            caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
+        }
+        log.info("TO REMOVE caseData after mapping: {}", caseData);
 
         if (!hasPensionCollection(caseData)) {
             log.info("Case has no pension documents, updating status to {} and sending for bulk print", CONSENT_ORDER_MADE.toString());
