@@ -93,9 +93,14 @@ public class BulkPrintService {
 
     List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+
+        log.info("TO REMOVE APPROVED_ORDER_COLLECTION: {}", data.get(APPROVED_ORDER_COLLECTION));
+
         List<Map> documentList = ofNullable(data.get(APPROVED_ORDER_COLLECTION))
             .map(i -> (List<Map>) i)
             .orElse(new ArrayList<>());
+
+        log.info("TO REMOVE documentList: {}", documentList);
 
         if (!documentList.isEmpty()) {
             log.info("Extracting 'approvedOrderCollection' from case data for bulk print.");
