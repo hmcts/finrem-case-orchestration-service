@@ -132,7 +132,7 @@ public class NotificationsController implements BaseController {
     @PostMapping(value = "/case-orchestration/notify/order-not-approved", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for consent/contest order not approved.")
     @ApiResponses(value = {
-       @ApiResponse(code = 204, message = "Consent/Contest order not approved e-mail sent successfully",
+         @ApiResponse(code = 204, message = "Consent/Contest order not approved e-mail sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderNotApprovedEmail(
         @RequestBody CallbackRequest callbackRequest) {
