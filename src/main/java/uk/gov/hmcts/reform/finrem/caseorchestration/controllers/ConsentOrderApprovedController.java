@@ -128,6 +128,7 @@ public class ConsentOrderApprovedController implements BaseController {
             try {
                 caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
                 log.info("TO REMOVE caseData after mapping: {}", caseData);
+                caseDetails.setData(caseData);
                 caseData = bulkPrintService.sendToBulkPrint(caseDetails, authToken);
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
             } catch (JsonProcessingException e) {
