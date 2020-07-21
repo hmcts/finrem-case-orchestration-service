@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedApplicationNotApproved;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedApplicationNotApprovedListEntry;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedApplicationNotApprovedData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -119,11 +119,14 @@ public class ContestedNotApprovedService {
             .map(documentHelper::convertToGenericList)
             .orElse(new ArrayList<>(1));
 
-        applicationNotApprovedEntries.add(buildApplicationNotApprovedEntry(caseDetails));
+        ContestedApplicationNotApprovedData contestedApplicationNotApprovedData = buildApplicationNotApprovedEntry(caseDetails);
+        caseData.put("latestApplicationNotApproved", contestedApplicationNotApprovedData);
+        applicationNotApprovedEntries.add(contestedApplicationNotApprovedData);
+
         caseData.put(CONTESTED_APPLICATION_NOT_APPROVED, applicationNotApprovedEntries);
     }
 
-    private ContestedApplicationNotApprovedListEntry buildApplicationNotApprovedEntry(CaseDetails caseDetails) {
+    private ContestedApplicationNotApprovedData buildApplicationNotApprovedEntry(CaseDetails caseDetails) {
         Map<String, Object> caseDataMappedToApplicationNotApproved = new ImmutableMap.Builder<String, String>()
             .put(CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL, REASON_FOR_REFUSAL)
             .put(CONTESTED_APPLICATION_NOT_APPROVED_OTHER_TEXT, OTHERS_TEXT_ORDERS)
@@ -138,7 +141,7 @@ public class ContestedNotApprovedService {
 
         removeOthersTextOrdersIfReasonOthersIsNotSelected(caseDataMappedToApplicationNotApproved);
 
-        return ContestedApplicationNotApprovedListEntry.builder()
+        return ContestedApplicationNotApprovedData.builder()
             .id(UUID.randomUUID().toString())
             .contestedApplicationNotApproved(
                 objectMapper.convertValue(caseDataMappedToApplicationNotApproved, ContestedApplicationNotApproved.class))

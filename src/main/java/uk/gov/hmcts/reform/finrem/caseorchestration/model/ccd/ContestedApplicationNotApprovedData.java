@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ContestedApplicationNotApprovedListEntry {
+public class ContestedApplicationNotApprovedData {
     @JsonProperty("id")
     private String id;
     @JsonProperty("value")

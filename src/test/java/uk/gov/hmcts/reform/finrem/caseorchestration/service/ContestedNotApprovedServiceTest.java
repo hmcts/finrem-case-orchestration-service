@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedApplicationNotApproved;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedApplicationNotApprovedListEntry;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedApplicationNotApprovedData;
 
 import java.util.List;
 import java.util.Map;
@@ -66,7 +66,7 @@ public class ContestedNotApprovedServiceTest extends BaseServiceTest {
 
         assertThat(applicationNotApprovedList, hasSize(2));
 
-        ContestedApplicationNotApproved entryAdded = ((ContestedApplicationNotApprovedListEntry) applicationNotApprovedList.get(1))
+        ContestedApplicationNotApproved entryAdded = ((ContestedApplicationNotApprovedData) applicationNotApprovedList.get(1))
             .getContestedApplicationNotApproved();
         assertThat(entryAdded.getReasonForRefusal(), hasItems("FR_ms_refusalReason_12", "FR_ms_refusalReason_8", "FR_ms_refusalReason_1"));
         assertThat(entryAdded.getOthersTextOrders(), is("other reason for not approving the application"));
