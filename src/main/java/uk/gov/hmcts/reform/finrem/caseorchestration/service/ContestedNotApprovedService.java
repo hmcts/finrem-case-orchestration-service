@@ -119,14 +119,17 @@ public class ContestedNotApprovedService {
             .map(documentHelper::convertToGenericList)
             .orElse(new ArrayList<>(1));
 
-        ContestedApplicationNotApprovedData contestedApplicationNotApprovedData = buildApplicationNotApprovedEntry(caseDetails);
-        caseData.put("latestApplicationNotApproved", contestedApplicationNotApprovedData);
-        applicationNotApprovedEntries.add(contestedApplicationNotApprovedData);
+        ContestedApplicationNotApproved contestedApplicationNotApproved = buildApplicationNotApproved(caseDetails);
+        caseData.put("latestApplicationNotApproved", contestedApplicationNotApproved);
+        applicationNotApprovedEntries.add(ContestedApplicationNotApprovedData.builder()
+            .id(UUID.randomUUID().toString())
+            .contestedApplicationNotApproved(contestedApplicationNotApproved)
+            .build());
 
         caseData.put(CONTESTED_APPLICATION_NOT_APPROVED, applicationNotApprovedEntries);
     }
 
-    private ContestedApplicationNotApprovedData buildApplicationNotApprovedEntry(CaseDetails caseDetails) {
+    private ContestedApplicationNotApproved buildApplicationNotApproved(CaseDetails caseDetails) {
         Map<String, Object> caseDataMappedToApplicationNotApproved = new ImmutableMap.Builder<String, String>()
             .put(CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL, REASON_FOR_REFUSAL)
             .put(CONTESTED_APPLICATION_NOT_APPROVED_OTHER_TEXT, OTHERS_TEXT_ORDERS)
@@ -140,12 +143,8 @@ public class ContestedNotApprovedService {
             .collect(Collectors.toMap(Map.Entry::getValue, entry -> caseDetails.getData().get(entry.getKey())));
 
         removeOthersTextOrdersIfReasonOthersIsNotSelected(caseDataMappedToApplicationNotApproved);
-
-        return ContestedApplicationNotApprovedData.builder()
-            .id(UUID.randomUUID().toString())
-            .contestedApplicationNotApproved(
-                objectMapper.convertValue(caseDataMappedToApplicationNotApproved, ContestedApplicationNotApproved.class))
-            .build();
+        
+        return objectMapper.convertValue(caseDataMappedToApplicationNotApproved, ContestedApplicationNotApproved.class);
     }
 
     private void removeOthersTextOrdersIfReasonOthersIsNotSelected(Map<String, Object> applicationNotApprovedData) {
