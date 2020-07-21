@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import javax.validation.constraints.NotNull;
@@ -33,6 +34,9 @@ public class MiniFormAController implements BaseController {
 
     @Autowired
     private OnlineFormDocumentService service;
+
+    @Autowired
+    private FeatureToggleService featureToggleService;
 
     public static final String assignedToJudgeReason = "assignedToJudgeReason";
     public static final String assignedToJudgeReasonDefault = "Draft consent order";
@@ -59,9 +63,10 @@ public class MiniFormAController implements BaseController {
         CaseDocument document = service.generateMiniFormA(authorisationToken, callback.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
 
-        log.info("Defaulting AssignedToJudge fields for Case ID: {}",
-            callback.getCaseDetails().getId());
-        populateAssignToJudgeFields(caseData);
+        if (featureToggleService.isAutomateAssignJudgeEnabled()) {
+            log.info("Defaulting AssignedToJudge fields for Case ID: {}", callback.getCaseDetails().getId());
+            populateAssignToJudgeFields(caseData);
+        }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

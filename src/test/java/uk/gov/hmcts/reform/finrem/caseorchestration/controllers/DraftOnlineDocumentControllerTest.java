@@ -1,13 +1,25 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -20,21 +32,44 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
 
 @WebMvcTest(DraftOnlineDocumentController.class)
-public class DraftOnlineDocumentControllerTest extends MiniFormAControllerTest {
+public class DraftOnlineDocumentControllerTest extends BaseControllerTest {
 
-    @Override
+    protected JsonNode requestContent;
+
+    @MockBean
+    protected OnlineFormDocumentService documentService;
+
+    @MockBean
+    protected IdamService idamService;
+
+    @Before
+    public void setUp()  {
+        super.setUp();
+        try {
+            doRequestSetUp();
+        } catch (Exception e) {
+            fail(e.getMessage());
+        }
+    }
+
+    private void doRequestSetUp() throws IOException, URISyntaxException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource(jsonFixture()).toURI()));
+    }
+
     public String endpoint() {
         return "/case-orchestration/documents/draft-contested-mini-form-a";
     }
 
-    @Override
     public OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
         return when(documentService.generateDraftContestedMiniFormA(eq(AUTH_TOKEN), isA(CaseDetails.class)));
     }
 
-    @Override
+    @Test
     public void generateMiniFormA() throws Exception {
         whenServiceGeneratesDocument().thenReturn(caseDocument());
 
@@ -50,7 +85,26 @@ public class DraftOnlineDocumentControllerTest extends MiniFormAControllerTest {
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
-    @Override
+    @Test
+    public void generateMiniFormAHttpError400() throws Exception {
+        mvc.perform(post(endpoint())
+            .content("kwuilebge")
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void generateMiniFormAHttpError500() throws Exception {
+        whenServiceGeneratesDocument().thenThrow(feignError());
+
+        mvc.perform(post(endpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isInternalServerError());
+    }
+
     String jsonFixture() {
         return "/fixtures/contested/validate-hearing-with-fastTrackDecision.json";
     }
