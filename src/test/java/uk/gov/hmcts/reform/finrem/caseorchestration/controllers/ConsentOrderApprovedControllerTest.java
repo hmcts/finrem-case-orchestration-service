@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.util.List;
@@ -54,6 +55,8 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @MockBean
     private BulkPrintService bulkPrintService;
 
+    @MockBean
+    private FeatureToggleService featureToggleService;
 
     public String endpoint() {
         return "/case-orchestration/documents/consent-order-approved";
@@ -149,16 +152,38 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
         when(bulkPrintService.sendToBulkPrint(any(), any())).thenReturn(defaultCaseDetails().getData());
+        when(featureToggleService.isAutomateSendOrderEnabled()).thenReturn(true);
 
         ResultActions result = mvc.perform(post(endpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE));
 
-        result.andExpect(status().isOk());
-        result.andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
+        result.andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
 
         verify(bulkPrintService).sendToBulkPrint(any(), any());
+    }
+
+    @Test
+    public void shouldNotUpdateStateToConsentOrderMadeAndBulkPrint() throws Exception {
+        doValidCaseDataSetUpNoPensionCollection();
+        whenServiceGeneratesDocument().thenReturn(caseDocument());
+        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
+        whenAnnexStampingDocument().thenReturn(caseDocument());
+        whenStampingDocument().thenReturn(caseDocument());
+        whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
+        when(featureToggleService.isAutomateSendOrderEnabled()).thenReturn(false);
+
+        ResultActions result = mvc.perform(post(endpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.state", is("applicationDrafted")));
+
+        verify(bulkPrintService, never()).sendToBulkPrint(any(), any());
     }
 
     @Test

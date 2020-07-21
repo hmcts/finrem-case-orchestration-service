@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import javax.validation.constraints.NotNull;
@@ -43,7 +44,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.hasPensionCollection;
 
 @Slf4j
 @RestController
@@ -55,6 +55,7 @@ public class ConsentOrderApprovedController implements BaseController {
     private final GenericDocumentService genericDocumentService;
     private final ObjectMapper mapper;
     private final BulkPrintService bulkPrintService;
+    private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "'Consent Order Approved' callback handler. Generates relevant Consent Order Approved documents")
@@ -121,7 +122,7 @@ public class ConsentOrderApprovedController implements BaseController {
 
         log.info("Successfully generated documents for 'Consent Order Approved'");
 
-        if (!hasPensionCollection(caseData)) {
+        if (featureToggleService.isAutomateSendOrderEnabled() && isEmpty(pensionDocs)) {
             log.info("Case has no pension documents, updating status to {} and sending for bulk print", CONSENT_ORDER_MADE.toString());
             try {
                 // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
