@@ -114,6 +114,11 @@ public class DocumentHelper {
         });
     }
 
+    public List<Map<String, Object>> convertToGenericList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<List<Map<String, Object>>>() {
+        });
+    }
+
     public Optional<CaseDocument> getLatestRespondToOrderDocuments(Map<String, Object> caseData) {
         Optional<RespondToOrderData> respondToOrderData = ofNullable(caseData.get(RESPOND_TO_ORDER_DOCUMENTS))
                 .map(this::convertToRespondToOrderDataList)
@@ -230,6 +235,18 @@ public class DocumentHelper {
             }
         }
         return bulkPrintDocuments;
+    }
+
+    public static String getApplicantFullName(CaseDetails caseDetails) {
+        return buildFullName(caseDetails.getData(),"applicantFMName", "applicantLName");
+    }
+
+    public static String getRespondentFullNameConsented(CaseDetails caseDetails) {
+        return buildFullName(caseDetails.getData(),"appRespondentFMName", "appRespondentLName");
+    }
+
+    public static String getRespondentFullNameContested(CaseDetails caseDetails) {
+        return buildFullName(caseDetails.getData(),"respondentFMName", "respondentLName");
     }
 
     public static BulkPrintDocument caseDocumentToBulkPrintDocument(CaseDocument document) {

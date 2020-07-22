@@ -16,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -27,6 +29,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -38,6 +41,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
@@ -92,6 +97,27 @@ public class TestSetUpUtils {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(ORDER_REFUSAL_PREVIEW_COLLECTION, caseDocument());
         return caseData;
+    }
+
+    public static Map<String, Object> generalLetterDataMap() {
+        return ImmutableMap.of(GENERAL_LETTER, ImmutableList.of(generalLetterData()));
+    }
+
+    public static Map<String, Object> caseDataWithGeneralOrder() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(GENERAL_ORDER_PREVIEW_DOCUMENT, caseDocument());
+        return caseData;
+    }
+
+    private static GeneralLetterData generalLetterData() {
+        GeneralLetter generalLetter = new GeneralLetter(caseDocument());
+
+        GeneralLetterData generalLetterData = GeneralLetterData.builder()
+            .id(UUID.randomUUID().toString())
+            .generalLetter(generalLetter)
+            .build();
+
+        return generalLetterData;
     }
 
     private static ConsentOrderData consentOrderData(String id) {
