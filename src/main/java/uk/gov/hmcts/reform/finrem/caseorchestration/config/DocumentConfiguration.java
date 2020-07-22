@@ -41,6 +41,4 @@ public class DocumentConfiguration {
     private String consentOrderNotApprovedReplyCoversheetFileName;
     private String generalOrderTemplate;
     private String generalOrderFileName;
-    private String contestedApplicationNotApprovedTemplate;
-    private String contestedApplicationNotApprovedFileName;
 }
