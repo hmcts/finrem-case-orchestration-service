@@ -177,10 +177,4 @@ public class CCDConfigConstant {
     public static final String UPLOAD_ORDER = "uploadOrder";
 
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
-
-    // Contested application not approved
-    public static final String CONTESTED_APPLICATION_NOT_APPROVED = "applicationNotApproved";
-    public static final String CONTESTED_APPLICATION_NOT_APPROVED_DOCUMENT_PREVIEW = "applicationNotApprovedDocumentPreview";
-    public static final String CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL = "applicationNotApprovedReasonForRefusal";
-    public static final String CONTESTED_APPLICATION_NOT_APPROVED_OTHER_TEXT = "applicationNotApprovedOthersTextOrders";
 }
