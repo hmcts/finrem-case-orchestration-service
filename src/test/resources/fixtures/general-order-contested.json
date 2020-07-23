@@ -5,16 +5,11 @@
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
-    "case_type_id": "FinancialRemedyMVP2",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "PBANumber": "PBA123456",
       "d81Question": "No",
       "PBAreference": "ABCD",
-      "consentOrder": {
-        "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
-      },
       "d81Applicant": {
         "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
@@ -27,11 +22,11 @@
       },
       "solicitorFirm": "Mr",
       "solicitorName": "Solictor",
-      "applicantLName": "Guy",
       "authorisation3": "2010-01-01",
       "solicitorEmail": "test@admin.com",
       "solicitorPhone": "9963472494",
-      "applicantFMName": "Poor",
+      "applicantFMName": "Contested Applicant",
+      "applicantLName": "Name",
       "authorisation2b": "test",
       "otherCollection": [
         {
@@ -55,63 +50,54 @@
         "document_binary_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
       },
       "solicitorAddress": {
-        "County": "Greater London",
+        "County": "test",
         "Country": "United Kingdom",
-        "PostCode": "SE12 9SE",
-        "PostTown": "London",
-        "AddressLine1": "50 Applicant Solicitor Street",
-        "AddressLine2": "Second Address Line",
-        "AddressLine3": "Third Address Line"
+        "PostCode": "b1 1ab",
+        "PostTown": "SRIKALAHASTI",
+        "AddressLine1": "House no: 6-354-2, Gandhi Street",
+        "AddressLine2": "Srikalahasti, Chittor District",
+        "AddressLine3": "test"
       },
       "authorisationFirm": "test",
       "authorisationName": "test",
-      "divorceCaseNumber": "DD12D12345",
+      "divorceCaseNumber": "DD98D76543",
       "respondentAddress": {
-        "County": "Greater London",
+        "County": "Essex",
         "Country": "United Kingdom",
         "PostCode": "SE12 9SE",
         "PostTown": "London",
-        "AddressLine1": "50 Respondent Street",
-        "AddressLine2": "Second Address Line",
-        "AddressLine3": "Third Address Line"
+        "AddressLine1": "252 Marvels Lane",
+        "AddressLine2": "AddressGlobalUK",
+        "AddressLine3": "London"
       },
-      "rSolicitorName": "Ms Patel",
-      "rSolicitorReference": "RSP-LL01",
-      "rSolicitorAddress": {
-        "County": "Greater London",
-        "Country": "United Kingdom",
-        "PostCode": "SE12 9SE",
-        "PostTown": "London",
-        "AddressLine1": "50 Respondent Solicitor Street",
-        "AddressLine2": "Second Address Line",
-        "AddressLine3": "Third Address Line"
-      },
+      "regionList": "midlands",
+      "midlandsFRCList": "nottingham",
+      "nottinghamCourtList": "FR_s_NottinghamList_1",
       "solicitorDXnumber": null,
-      "solicitorReference": "LL01",
-      "appRespondentFMName": "test",
       "appRespondentLName": "Korivi",
+      "solicitorReference": "LL01",
+      "respondentFMName": "Contested Respondent",
+      "respondentLName": "Name",
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "Yes",
-      "generalLetterAddressTo": "applicantSolicitor",
-      "generalLetterRecipient": "Mr Rajesh Kuthrappali",
-      "generalLetterRecipientAddress": {
-        "County": "Greater London",
-        "Country": "United Kingdom",
-        "PostCode": "SE12 9SE",
-        "PostTown": "London",
-        "AddressLine1": "50 Applicant Solicitor Street",
-        "AddressLine2": "Second Address Line",
-        "AddressLine3": "Third Address Line"
+      "generalOrderJudgeType": "Her Honour Judge",
+      "generalOrderJudgeName": "Contested",
+      "generalOrderRecitals": "Contested Recitals",
+      "generalOrderDate": "01/06/2020",
+      "generalOrderBodyText": "Test is dummy text for contested",
+      "generalOrderAddressTo": "applicant",
+      "generalOrderPreviewDocument": {
+        "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
       },
-      "generalLetterCreatedBy": "",
-      "generalLetterBody": "Test content for the letter body",
-      "generalLetterCollection": [
+      "generalOrders": [
         {
-          "id": "1",
+          "id": "1234",
           "value": {
-            "generatedLetter": {
+            "additionalDocument": {
               "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
               "document_filename": "app_docs.pdf",
               "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
