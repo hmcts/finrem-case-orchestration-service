@@ -78,6 +78,10 @@ public class BulkPrintService {
 
         bulkPrintDocuments.addAll(orderDocuments);
 
+        if (featureToggleService.isPrintGeneralOrderEnabled() && !isOrderApprovedDocumentCollectionPresent(caseDetails.getData())) {
+            bulkPrintDocuments.addAll(generalOrderService.getGeneralOrdersForPrintingConsented(caseDetails.getData()));
+        }
+
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), bulkPrintDocuments);
     }
 
@@ -114,9 +118,6 @@ public class BulkPrintService {
         List<BulkPrintDocument> applicantDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, authorisationToken);
 
-        if (featureToggleService.isPrintGeneralOrderEnabled() && !isOrderApprovedDocumentCollectionPresent(caseDetails.getData())) {
-            applicantDocuments.addAll(generalOrderService.getGeneralOrdersForPrintingConsented(caseDetails.getData()));
-        }
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), applicantDocuments);
     }
 

@@ -132,7 +132,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(any(CaseDetails.class), anyString())).thenReturn(bulkPrintDocuments);
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
-        UUID uuid = bulkPrintService.printApplicantConsentOrderNotApprovedDocuments(caseDetails, AUTH_TOKEN);
+        UUID uuid = bulkPrintService.sendOrderForBulkPrintRespondent(new CaseDocument(), caseDetails);
         assertThat(uuid, is(letterId));
         verify(generalOrderService).getGeneralOrdersForPrintingConsented(caseDetails.getData());
     }
@@ -148,11 +148,25 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN)).thenReturn(bulkPrintDocuments);
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
-        UUID uuid = bulkPrintService.printApplicantConsentOrderNotApprovedDocuments(caseDetails, AUTH_TOKEN);
+        UUID uuid = bulkPrintService.sendOrderForBulkPrintRespondent(new CaseDocument(), caseDetails);
 
         assertThat(uuid, is(letterId));
 
         verify(generalOrderService, times(0)).getGeneralOrdersForPrintingConsented(caseDetails.getData());
+    }
+
+    @Test
+    public void shouldPrintLettersForApplicant() {
+        final String consentedBulkPrintConsentOrderNotApprovedJson
+            = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+        List<BulkPrintDocument> bulkPrintDocuments = Collections.emptyList();
+
+        when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN)).thenReturn(bulkPrintDocuments);
+        when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
+
+        UUID uuid = bulkPrintService.printApplicantConsentOrderNotApprovedDocuments(caseDetails, AUTH_TOKEN);
+        assertThat(uuid, is(letterId));
     }
 
     private CaseDetails caseDetails() {
