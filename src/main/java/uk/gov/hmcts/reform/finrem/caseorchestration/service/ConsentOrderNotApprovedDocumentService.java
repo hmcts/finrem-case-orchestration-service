@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.Streams;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
@@ -21,6 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService.DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getLastMapValue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,7 @@ public class ConsentOrderNotApprovedDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final GenerateCoverSheetService generateCoverSheetService;
     private final FeatureToggleService featureToggleService;
+    private final GeneralOrderService generalOrderService;
 
     public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
@@ -44,10 +48,20 @@ public class ConsentOrderNotApprovedDocumentService {
                 coverLetter(caseDetails, authorisationToken),
                 notApprovedConsentOrder(caseData),
                 applicantReplyCoversheet(caseDetails, authorisationToken));
+
+            if (featureToggleService.isPrintGeneralOrderEnabled() && isPaperApplication(caseData)) {
+                documents = Streams.concat(documents.stream(),
+                    generalOrderService.getGeneralOrdersForPrintingConsented(caseData).stream()).collect(Collectors.toList());
+            }
         } else {
             documents = asList(
                 defaultCoversheet(caseDetails, authorisationToken),
                 notApprovedConsentOrder(caseData));
+
+            if (featureToggleService.isPrintGeneralOrderEnabled() && isPaperApplication(caseData)) {
+                documents = Streams.concat(documents.stream(),
+                    generalOrderService.getGeneralOrdersForPrintingConsented(caseData).stream()).collect(Collectors.toList());
+            }
         }
 
         return documents;

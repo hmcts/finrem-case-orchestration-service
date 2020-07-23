@@ -18,6 +18,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.AUTOMA
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONSENT_ORDER_NOT_APPROVED_APPLICANT_DOCUMENT_GENERATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_COURT_DETAILS_MIGRATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PRINT_GENERAL_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PRINT_GENERAL_ORDER;
 
 /**
  * To add a feature toggle flag:
@@ -58,6 +59,10 @@ public class FeatureToggleService {
 
     public boolean isPrintGeneralLetterEnabled() {
         return isFeatureEnabled(PRINT_GENERAL_LETTER);
+    }
+
+    public boolean isPrintGeneralOrderEnabled() {
+        return isFeatureEnabled(PRINT_GENERAL_ORDER);
     }
 
     /**

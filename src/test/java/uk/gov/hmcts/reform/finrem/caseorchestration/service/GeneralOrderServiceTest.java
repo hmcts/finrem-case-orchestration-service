@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
@@ -170,6 +171,21 @@ public class GeneralOrderServiceTest {
         Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
         List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>)documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
         assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is(""));
+    }
+
+    @Test
+    public void getsCorrectGeneralOrdersForPrintingConsented() throws Exception {
+        CaseDetails details = consentedCaseDetails();
+        List<BulkPrintDocument> generalOrdersToPrint = generalOrderService.getGeneralOrdersForPrintingConsented(details.getData());
+        assertThat(generalOrdersToPrint, hasSize(1));
+    }
+
+    @Test
+    public void getsZeroGeneralOrdersForPrintingWhenNoneConsented() throws Exception {
+        CaseDetails details = consentedCaseDetails();
+        details.getData().put("generalOrderCollection", null);
+        List<BulkPrintDocument> generalOrdersToPrint = generalOrderService.getGeneralOrdersForPrintingConsented(details.getData());
+        assertThat(generalOrdersToPrint, hasSize(0));
     }
 
     private CaseDetails consentedCaseDetails() throws Exception {

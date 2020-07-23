@@ -8,10 +8,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsented;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -25,11 +29,13 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchDocumentGenerationRequestTemplateAndFilename;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
 @ActiveProfiles("test-mock-document-client")
@@ -71,6 +77,12 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
                 "DocumentLink", ImmutableMap.of(
                     DOCUMENT_BINARY_URL, GENERAL_ORDER_URL)))));
 
+        List<GeneralOrderConsentedData> generalOrders = new ArrayList<>();
+        GeneralOrderConsented generalOrder = new GeneralOrderConsented();
+        generalOrder.setGeneralOrder(caseDocument());
+        generalOrders.add(new GeneralOrderConsentedData("123", generalOrder));
+        caseData.put(GENERAL_ORDER_COLLECTION_CONSENTED, generalOrders);
+
         mockDocumentClientToReturnUrlForDocumentGenerationRequest(CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_TEMPLATE,
             CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_FILENAME, COVER_LETTER_URL);
         mockDocumentClientToReturnUrlForDocumentGenerationRequest(CONSENT_ORDER_NOT_APPROVED_REPLY_COVERSHEET_TEMPLATE,
@@ -89,6 +101,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     @Test
     public void givenFeatureIsEnabled_whenApplicantLetterPackIsPrepared_thenItHasExpectedDocuments_and_caseDataIsUpdated() {
         when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(true);
+        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(false);
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, AUTH_TOKEN);
 
@@ -103,6 +116,8 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     @Test
     public void givenFeatureIsDisabled_whenApplicantLetterPackIsPrepared_thenItHasExpectedDocuments_and_caseDataIsUpdated() {
         when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(false);
+        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(false);
+
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, AUTH_TOKEN);
 
@@ -111,5 +126,44 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(GENERAL_ORDER_URL));
 
         assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
+    }
+
+    @Test
+    public void givenGeneralOrderToggleIsEnabled_thenItPrintsTheCorrectDocuments() {
+        when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(false);
+        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
+        List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
+            caseDetails, AUTH_TOKEN);
+
+        assertThat(generatedDocuments, hasSize(3));
+        assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(DEFAULT_COVERSHEET_URL));
+        assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(GENERAL_ORDER_URL));
+        assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
+
+        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
+    }
+
+    @Test
+    public void givenGeneralOrderToggleIsEnabled_andGeneralLetterToggle_thenItPrintsTheCorrectDocuments() {
+        when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(true);
+        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
+        List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
+            caseDetails, AUTH_TOKEN);
+
+        assertThat(generatedDocuments, hasSize(4));
+        assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
+        assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(GENERAL_ORDER_URL));
+        assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(REPLY_COVERSHEET_URL));
+        assertThat(generatedDocuments.get(3).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
+
+        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void givenNoNotApprovedConsentOrderIsFound_thenAnExceptionIsThrown() {
+        CaseDetails caseDetails = defaultCaseDetails();
+        caseDetails.getData().put(UPLOAD_ORDER, null);
+        List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
+            caseDetails, AUTH_TOKEN);
     }
 }

@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsen
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +55,17 @@ public class GeneralOrderService {
             .andThen(createGeneralOrderData)
             .andThen(data -> previewGeneralOrderData(data, caseDetails))
             .apply(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken);
+    }
+
+    public List<BulkPrintDocument> getGeneralOrdersForPrintingConsented(Map<String, Object> caseData) {
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        List<GeneralOrderConsentedData> generalOrderList = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONSENTED))
+            .map(this::convertToGeneralOrderConsentedList)
+            .orElse(new ArrayList<>());
+        generalOrderList.forEach(order -> bulkPrintDocuments.add(
+            BulkPrintDocument.builder().binaryFileUrl(
+                order.getGeneralOrder().getGeneralOrder().getDocumentBinaryUrl()).build()));
+        return bulkPrintDocuments;
     }
 
     private CaseDocument applyGenerateDocument(CaseDetails caseDetails, String authorisationToken) {

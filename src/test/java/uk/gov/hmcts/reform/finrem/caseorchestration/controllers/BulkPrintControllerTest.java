@@ -1,16 +1,24 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenerateCoverSheetService;
 
+import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 
 @WebMvcTest(BulkPrintController.class)
 public class BulkPrintControllerTest extends BaseControllerTest {
@@ -34,6 +43,9 @@ public class BulkPrintControllerTest extends BaseControllerTest {
         = "/fixtures/contested/bulk_print_consent_order_approved.json";
     private static final String CONSENTED_BULK_PRINT_CONSENT_ORDER_NOT_APPROVED_JSON
         = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
+
+    @Autowired
+    private ObjectMapper mapper;
 
     @MockBean
     private BulkPrintService bulkPrintService;
@@ -155,5 +167,18 @@ public class BulkPrintControllerTest extends BaseControllerTest {
         verify(bulkPrintService, times(0)).printApplicantConsentOrderNotApprovedDocuments(any(), any());
         verify(bulkPrintService, times(1)).printApplicantConsentOrderApprovedDocuments(any(), any());
         verify(bulkPrintService, times(1)).sendOrderForBulkPrintRespondent(any(), any());
+    }
+
+    @Test
+    public void shouldNotErrorIfApprovedOrderCollectionIsEmpty() {
+        CaseDetails details = caseDetails();
+        details.getData().put(APPROVED_ORDER_COLLECTION, null);
+        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.approvedOrderCollection(details.getData());
+
+        assertThat(bulkPrintDocuments, hasSize(0));
+    }
+
+    private CaseDetails caseDetails() {
+        return TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
     }
 }

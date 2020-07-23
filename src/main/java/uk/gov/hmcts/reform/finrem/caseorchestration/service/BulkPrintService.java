@@ -37,15 +37,21 @@ public class BulkPrintService {
     private final ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final DocumentHelper documentHelper;
+    private final GeneralOrderService generalOrderService;
+    private final FeatureToggleService featureToggleService;
+
 
     public BulkPrintService(GenericDocumentService genericDocumentService,
                             ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService,
                             @Lazy ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
-                            DocumentHelper documentHelper) {
+                            DocumentHelper documentHelper, GeneralOrderService generalOrderService,
+                            FeatureToggleService featureToggleService) {
         this.genericDocumentService = genericDocumentService;
         this.consentOrderNotApprovedDocumentService = consentOrderNotApprovedDocumentService;
         this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
         this.documentHelper = documentHelper;
+        this.generalOrderService = generalOrderService;
+        this.featureToggleService = featureToggleService;
     }
 
     public UUID sendNotificationLetterForBulkPrint(final CaseDocument notificationLetter, final CaseDetails caseDetails) {
@@ -84,7 +90,7 @@ public class BulkPrintService {
         return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, asList(latestGeneralLetter));
     }
 
-    List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
+    public List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         List<Map> documentList = ofNullable(data.get(APPROVED_ORDER_COLLECTION))
             .map(i -> (List<Map>) i)
@@ -107,6 +113,10 @@ public class BulkPrintService {
     public UUID printApplicantConsentOrderNotApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> applicantDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, authorisationToken);
+
+        if (featureToggleService.isPrintGeneralOrderEnabled() && !isOrderApprovedDocumentCollectionPresent(caseDetails.getData())) {
+            applicantDocuments.addAll(generalOrderService.getGeneralOrdersForPrintingConsented(caseDetails.getData()));
+        }
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), applicantDocuments);
     }
 
