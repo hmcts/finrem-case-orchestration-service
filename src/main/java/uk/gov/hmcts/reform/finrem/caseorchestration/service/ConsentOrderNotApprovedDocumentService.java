@@ -40,7 +40,7 @@ public class ConsentOrderNotApprovedDocumentService {
     public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
         log.info("Generating consent order not approved documents for applicant, case ID {}", caseDetails.getId());
-
+        log.info("isPrintGeneralOrder feature toggle set to: {} and ispaperless set to {}", featureToggleService.isPrintGeneralOrderEnabled(), isPaperApplication(caseData));
         List<BulkPrintDocument> documents;
 
         if (featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()) {
