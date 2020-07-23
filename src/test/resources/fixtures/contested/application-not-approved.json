@@ -1,0 +1,104 @@
+{
+  "token": "token_test",
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": 1234567890,
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "PBANumber": "PBA123456",
+      "d81Question": "No",
+      "PBAreference": "ABCD",
+      "d81Applicant": {
+        "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b/binary"
+      },
+      "d81Respondent": {
+        "document_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
+      },
+      "solicitorFirm": "Mr",
+      "solicitorName": "Solictor",
+      "applicantLName": "Guy",
+      "authorisation3": "2010-01-01",
+      "solicitorEmail": "test@admin.com",
+      "solicitorPhone": "9963472494",
+      "applicantFMName": "Poor",
+      "authorisation2b": "test",
+      "respondentEmail": null,
+      "respondentPhone": "9963472494",
+      "appRespondentRep": "No",
+      "solicitorAddress": {
+        "County": "test",
+        "Country": "United Kingdom",
+        "PostCode": "b1 1ab",
+        "PostTown": "SRIKALAHASTI",
+        "AddressLine1": "House no: 6-354-2, Gandhi Street",
+        "AddressLine2": "Srikalahasti, Chittor District",
+        "AddressLine3": "test"
+      },
+      "authorisationFirm": "test",
+      "authorisationName": "test",
+      "divorceCaseNumber": "DD12D12345",
+      "respondentAddress": {
+        "County": "Essex",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "252 Marvels Lane",
+        "AddressLine2": "AddressGlobalUK",
+        "AddressLine3": "London"
+      },
+      "solicitorDXnumber": null,
+      "appRespondentLName": "Korivi",
+      "solicitorReference": "LL01",
+      "appRespondentFMName": "test",
+      "divorceStageReached": "Decree Nisi",
+      "helpWithFeesQuestion": "No",
+      "orderForChildrenQuestion1": "Yes",
+      "solicitorAgreeToReceiveEmails": "Yes",
+      "allocatedCourtList": {
+        "regionList": "wales",
+        "walesList": "swansea",
+        "swanseaCourtList": "FR_swansea_hc_list_6"
+      },
+      "applicationNotApproved": [
+        {
+          "id": "acdfd900-5976-4c8a-a518-9e972c5acc81",
+          "value": {
+            "andAfter": "test",
+            "dateOfOrder": "2019-06-15",
+            "selectJudge": "nasim_fr_judge@mailinator.com",
+            "othersTextOrders": "testing",
+            "reasonForRefusal": [
+              "FR_ms_refusalReason_14",
+              "FR_ms_refusalReason_13",
+              "FR_ms_refusalReason_12",
+              "FR_ms_refusalReason_11",
+              "FR_ms_refusalReason_10",
+              "FR_ms_refusalReason_9"
+            ],
+            "additionalComments": "test"
+          }
+        }
+      ],
+      "applicationNotApprovedReasonForRefusal": [
+        "FR_ms_refusalReason_12",
+        "FR_ms_refusalReason_8",
+        "FR_ms_refusalReason_1"
+      ],
+      "applicationNotApprovedOthersTextOrders": "other reason for not approving the application",
+      "applicationNotApprovedJudgeType": "District Judge",
+      "applicationNotApprovedJudgeName": "Her Justice",
+      "applicationNotApprovedDateOfOrder": "2020-07-09",
+      "applicationNotApprovedDocumentPreview": {
+        "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0631e",
+        "document_filename": "contestedApplicationNotApproved.pdf",
+        "document_binary_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0631e/binary"
+      }
+    }
+  }
+}

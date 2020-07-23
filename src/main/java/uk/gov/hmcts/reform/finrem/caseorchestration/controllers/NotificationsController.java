@@ -55,7 +55,6 @@ public class NotificationsController implements BaseController {
         if (isConsentedApplication(callbackRequest.getCaseDetails())) {
             if (isPaperApplication(caseData)) {
                 log.info("Case is paper application");
-                log.info("isHwfSuccessfulNotificationLetterEnabled is toggled on");
                 log.info("Sending Consented HWF Successful notification letter for bulk print");
 
                 CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -91,7 +90,6 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         if (isPaperApplication(caseData)) {
-            log.info("isAssignedToJudgeNotificationLetterEnabled is toggled on");
             log.info("Sending AssignedToJudge notification letter for bulk print for Case ID: {}",
                 callbackRequest.getCaseDetails().getId());
 
@@ -129,20 +127,25 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/consent-order-not-approved", consumes = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "send e-mail for Consent order not approved.")
+    @PostMapping(value = "/case-orchestration/notify/order-not-approved", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send e-mail for consent/contest order not approved.")
     @ApiResponses(value = {
-        @ApiResponse(code = 204, message = "Consent order not approved e-mail sent successfully",
+        @ApiResponse(code = 204, message = "Consent/Contest order not approved e-mail sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderNotApprovedEmail(
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to send email for 'Consent Order Not Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to send email for 'Consent/Contest Order Not Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
-            log.info("Sending email notification to Solicitor for 'Consent Order Not Approved'");
-            notificationService.sendConsentOrderNotApprovedEmail(callbackRequest);
+            if (isConsentedApplication(callbackRequest.getCaseDetails())) {
+                log.info("Sending email notification to Solicitor for 'Consent Order Not Approved'");
+                notificationService.sendConsentOrderNotApprovedEmail(callbackRequest);
+            } else {
+                log.info("Sending email notification to Solicitor for 'Contest Order Not Approved'");
+                notificationService.sendContestOrderNotApprovedEmail(callbackRequest);
+            }
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

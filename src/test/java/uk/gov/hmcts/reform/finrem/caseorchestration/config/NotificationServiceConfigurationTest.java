@@ -24,6 +24,7 @@ public class NotificationServiceConfigurationTest extends BaseServiceTest {
         assertEquals("/consent-order-available", underTest.getConsentOrderAvailable());
         assertEquals("/prepare-for-hearing", underTest.getPrepareForHearing());
         assertEquals("/contested/draft-order", underTest.getContestedDraftOrder());
+        assertEquals("/contested/order-not-approved", underTest.getContestedOrderNotApproved());
         assertEquals("http://localhost:8086/", underTest.getUrl());
     }
 }

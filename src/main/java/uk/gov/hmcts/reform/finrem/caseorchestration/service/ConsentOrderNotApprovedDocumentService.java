@@ -42,12 +42,12 @@ public class ConsentOrderNotApprovedDocumentService {
         if (featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()) {
             documents = asList(
                 coverLetter(caseDetails, authorisationToken),
-                generalOrder(caseData),
+                notApprovedConsentOrder(caseData),
                 applicantReplyCoversheet(caseDetails, authorisationToken));
         } else {
             documents = asList(
                 defaultCoversheet(caseDetails, authorisationToken),
-                generalOrder(caseData));
+                notApprovedConsentOrder(caseData));
         }
 
         return documents;
@@ -63,7 +63,7 @@ public class ConsentOrderNotApprovedDocumentService {
         return BulkPrintDocument.builder().binaryFileUrl(coverLetter.getDocumentBinaryUrl()).build();
     }
 
-    public BulkPrintDocument generalOrder(Map<String, Object> caseData) {
+    public BulkPrintDocument notApprovedConsentOrder(Map<String, Object> caseData) {
         log.info("Extracting 'uploadOrder' from case data for bulk print.");
         List<Map> documentList = ofNullable(caseData.get(UPLOAD_ORDER))
             .map(i -> (List<Map>) i)
@@ -82,7 +82,7 @@ public class ConsentOrderNotApprovedDocumentService {
             }
         }
 
-        throw new IllegalStateException("General order not found in application not approved case");
+        throw new IllegalStateException("not approved consent order not found in application not approved case");
     }
 
     private BulkPrintDocument applicantReplyCoversheet(CaseDetails caseDetails, String authorisationToken) {

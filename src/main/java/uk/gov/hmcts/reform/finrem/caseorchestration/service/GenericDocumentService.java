@@ -25,7 +25,6 @@ public class GenericDocumentService {
                                           String template, String fileName) {
 
         Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails);
-
         Document generatedPdf = documentClient.generatePdf(
             DocumentGenerationRequest.builder()
                 .template(template)
