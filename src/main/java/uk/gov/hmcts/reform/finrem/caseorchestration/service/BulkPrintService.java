@@ -19,11 +19,17 @@ import java.util.UUID;
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderApprovedDocumentCollectionPresent;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Service
 @Slf4j
@@ -39,19 +45,20 @@ public class BulkPrintService {
     private final DocumentHelper documentHelper;
     private final GeneralOrderService generalOrderService;
     private final FeatureToggleService featureToggleService;
-
+    private final GenerateCoverSheetService coverSheetService;
 
     public BulkPrintService(GenericDocumentService genericDocumentService,
                             ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService,
                             @Lazy ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
                             DocumentHelper documentHelper, GeneralOrderService generalOrderService,
-                            FeatureToggleService featureToggleService) {
+                            FeatureToggleService featureToggleService, GenerateCoverSheetService coverSheetService) {
         this.genericDocumentService = genericDocumentService;
         this.consentOrderNotApprovedDocumentService = consentOrderNotApprovedDocumentService;
         this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
         this.documentHelper = documentHelper;
         this.generalOrderService = generalOrderService;
         this.featureToggleService = featureToggleService;
+        this.coverSheetService = coverSheetService;
     }
 
     public UUID sendNotificationLetterForBulkPrint(final CaseDocument notificationLetter, final CaseDetails caseDetails) {
@@ -101,7 +108,7 @@ public class BulkPrintService {
             .orElse(new ArrayList<>());
 
         if (!documentList.isEmpty()) {
-            log.info("Extracting 'approvedOrderCollection' from case data for bulk print.");
+            log.info("Extracting 'approvedOrderCollection' from case data for bulk print: {}", data);
             Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get(VALUE));
             documentHelper.getDocumentLinkAsBulkPrintDocument(value, "orderLetter").ifPresent(bulkPrintDocuments::add);
             documentHelper.getDocumentLinkAsBulkPrintDocument(value, CONSENT_ORDER).ifPresent(bulkPrintDocuments::add);
@@ -117,11 +124,10 @@ public class BulkPrintService {
     public UUID printApplicantConsentOrderNotApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> applicantDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, authorisationToken);
-
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), applicantDocuments);
     }
 
-    public UUID printApplicantConsentOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
+    private UUID printApplicantConsentOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> applicantDocuments = consentOrderApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, authorisationToken);
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), applicantDocuments);
@@ -142,5 +148,34 @@ public class BulkPrintService {
         log.info("Letter ID {} for {} document(s) of type {} sent to bulk print: {}", letterId, documents.size(), letterType, documents);
 
         return letterId;
+    }
+
+    public Map<String, Object> sendToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
+        Map<String, Object> caseData = caseDetails.getData();
+
+        if (!isApplicantRepresentedByASolicitor(caseData) || isApplicantSolicitorAgreeToReceiveEmails(caseData)
+            || isPaperApplication(caseData)) {
+            UUID applicantLetterId = isOrderApprovedDocumentCollectionPresent(caseData)
+                ? printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken)
+                : printApplicantConsentOrderNotApprovedDocuments(caseDetails, authorisationToken);
+            caseData.put(BULK_PRINT_LETTER_ID_APP, applicantLetterId);
+        }
+
+        generateCoversheetForRespondentAndSendOrders(caseDetails, authorisationToken);
+
+        log.info("Bulk print is successful");
+
+        return caseData;
+    }
+
+    private void generateCoversheetForRespondentAndSendOrders(CaseDetails caseDetails, String authToken) {
+        CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authToken);
+        UUID respondentLetterId = sendOrderForBulkPrintRespondent(respondentCoverSheet, caseDetails);
+
+        Map<String, Object> caseData = caseDetails.getData();
+        caseData.put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
+        caseData.put(BULK_PRINT_LETTER_ID_RES, respondentLetterId);
+
+        log.info("Generated Respondent CoverSheet for bulk print. coversheet: {}, letterId : {}", respondentCoverSheet, respondentLetterId);
     }
 }

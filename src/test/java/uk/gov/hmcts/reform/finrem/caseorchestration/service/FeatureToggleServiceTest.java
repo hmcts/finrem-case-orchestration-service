@@ -18,7 +18,8 @@ public class FeatureToggleServiceTest {
     @SpringBootTest(properties = {
         "feature.toggle.consent_order_not_approved_applicant_document_generation=true",
         "feature.toggle.print_general_letter=true",
-        "feature.toggle.print_general_order=true"
+        "feature.toggle.print_general_order=true",
+        "feature.toggle.automate_send_order=true"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOn {
 
@@ -36,6 +37,11 @@ public class FeatureToggleServiceTest {
         }
 
         @Test
+        public void isAutomateSendOrderEnabledReturnTrue() {
+            assertThat(featureToggleService.isAutomateSendOrderEnabled(), is(true));
+        }
+
+        @Test
         public void getFieldsIgnoredDuringSerialisationEmptyWhenFeaturesEnabled() {
             assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
         }
@@ -50,7 +56,8 @@ public class FeatureToggleServiceTest {
     @SpringBootTest(properties = {
         "feature.toggle.consent_order_not_approved_applicant_document_generation=false",
         "feature.toggle.print_general_letter=false",
-        "feature.toggle.print_general_order=false"
+        "feature.toggle.print_general_order=false",
+        "feature.toggle.automate_send_order=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff {
 
@@ -70,6 +77,11 @@ public class FeatureToggleServiceTest {
         @Test
         public void getFieldsIgnoredDuringSerialisationContainsElementsWhenFeaturesDisabled() {
             assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
+        }
+
+        @Test
+        public void isAutomateSendOrderEnabledReturnFalse() {
+            assertThat(featureToggleService.isAutomateSendOrderEnabled(), is(false));
         }
 
         @Test
