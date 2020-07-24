@@ -66,10 +66,6 @@ public class BulkPrintService {
 
     public UUID sendOrderForBulkPrintRespondent(final CaseDocument coverSheet, final CaseDetails caseDetails) {
         log.info("Sending order documents to recipient / solicitor for Bulk Print");
-        log.info("GeneralOrder feature toggle is enabled: {}",
-            featureToggleService.isPrintGeneralOrderEnabled());
-        log.info("isOrderApprovedDocumentCollectionPresent: {}",
-            isOrderApprovedDocumentCollectionPresent(caseDetails.getData()));
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(coverSheet.getDocumentBinaryUrl()).build());
