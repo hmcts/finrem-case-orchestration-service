@@ -49,22 +49,24 @@ public class ConsentOrderNotApprovedDocumentService {
                 notApprovedConsentOrder(caseData),
                 applicantReplyCoversheet(caseDetails, authorisationToken));
 
-            if (featureToggleService.isPrintGeneralOrderEnabled() && isPaperApplication(caseData)) {
-                documents = Streams.concat(documents.stream(),
-                    generalOrderService.getGeneralOrdersForPrintingConsented(caseData).stream()).collect(Collectors.toList());
-            }
+            documents = addGeneralOrdersIfApplicable(caseData, documents);
         } else {
             documents = asList(
                 defaultCoversheet(caseDetails, authorisationToken),
                 notApprovedConsentOrder(caseData));
 
-            if (featureToggleService.isPrintGeneralOrderEnabled() && isPaperApplication(caseData)) {
-                documents = Streams.concat(documents.stream(),
-                    generalOrderService.getGeneralOrdersForPrintingConsented(caseData).stream()).collect(Collectors.toList());
-            }
+            documents = addGeneralOrdersIfApplicable(caseData, documents);
         }
 
         return documents;
+    }
+
+    private List<BulkPrintDocument> addGeneralOrdersIfApplicable(Map<String, Object> caseData, List<BulkPrintDocument> existingList) {
+        if (featureToggleService.isPrintGeneralOrderEnabled() && isPaperApplication(caseData)) {
+            return Streams.concat(existingList.stream(),
+                generalOrderService.getGeneralOrdersForPrintingConsented(caseData).stream()).collect(Collectors.toList());
+        }
+        return existingList;
     }
 
     private BulkPrintDocument coverLetter(CaseDetails caseDetails, String authorisationToken) {
