@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
@@ -22,11 +23,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,9 +39,11 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 
 @Slf4j
 @RestController
@@ -48,6 +54,8 @@ public class ConsentOrderApprovedController implements BaseController {
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final GenericDocumentService genericDocumentService;
     private final ObjectMapper mapper;
+    private final BulkPrintService bulkPrintService;
+    private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "'Consent Order Approved' callback handler. Generates relevant Consent Order Approved documents")
@@ -67,7 +75,7 @@ public class ConsentOrderApprovedController implements BaseController {
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
 
         if (!isEmpty(latestConsentOrder)) {
-            generateAndPrepareDocuments(authToken, caseDetails);
+            caseData = generateAndPrepareDocuments(authToken, caseDetails);
         } else {
             log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty");
         }
@@ -80,7 +88,7 @@ public class ConsentOrderApprovedController implements BaseController {
                 .build());
     }
 
-    private void generateAndPrepareDocuments(@RequestHeader(AUTHORIZATION_HEADER) String authToken, CaseDetails caseDetails) {
+    private Map<String, Object> generateAndPrepareDocuments(@RequestHeader(AUTHORIZATION_HEADER) String authToken, CaseDetails caseDetails) {
         log.info("Generating and preparing documents for latest consent order");
 
         Map<String, Object> caseData = caseDetails.getData();
@@ -113,6 +121,21 @@ public class ConsentOrderApprovedController implements BaseController {
         caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
         log.info("Successfully generated documents for 'Consent Order Approved'");
+
+        if (featureToggleService.isAutomateSendOrderEnabled() && isEmpty(pensionDocs)) {
+            log.info("Case has no pension documents, updating status to {} and sending for bulk print", CONSENT_ORDER_MADE.toString());
+            try {
+                // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
+                caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
+                caseDetails.setData(caseData);
+                caseData = bulkPrintService.sendToBulkPrint(caseDetails, authToken);
+                caseData.put(STATE, CONSENT_ORDER_MADE.toString());
+            } catch (JsonProcessingException e) {
+                log.error(e.getMessage());
+            }
+        }
+
+        return caseData;
     }
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {

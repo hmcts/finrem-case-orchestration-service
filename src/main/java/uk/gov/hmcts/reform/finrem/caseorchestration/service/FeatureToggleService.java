@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.AUTOMATE_ASSIGN_JUDGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.AUTOMATE_SEND_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONSENT_ORDER_NOT_APPROVED_APPLICANT_DOCUMENT_GENERATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_COURT_DETAILS_MIGRATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PRINT_GENERAL_LETTER;
@@ -54,6 +55,10 @@ public class FeatureToggleService {
 
     public boolean isContestedCourtDetailsMigrationEnabled() {
         return isFeatureEnabled(CONTESTED_COURT_DETAILS_MIGRATION);
+    }
+
+    public boolean isAutomateSendOrderEnabled() {
+        return isFeatureEnabled(AUTOMATE_SEND_ORDER);
     }
 
     public boolean isPrintGeneralLetterEnabled() {
