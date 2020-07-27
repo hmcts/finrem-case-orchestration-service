@@ -55,7 +55,6 @@ public class NotificationsController implements BaseController {
         if (isConsentedApplication(callbackRequest.getCaseDetails())) {
             if (isPaperApplication(caseData)) {
                 log.info("Case is paper application");
-                log.info("isHwfSuccessfulNotificationLetterEnabled is toggled on");
                 log.info("Sending Consented HWF Successful notification letter for bulk print");
 
                 CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -91,7 +90,6 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
         if (isPaperApplication(caseData)) {
-            log.info("isAssignedToJudgeNotificationLetterEnabled is toggled on");
             log.info("Sending AssignedToJudge notification letter for bulk print for Case ID: {}",
                 callbackRequest.getCaseDetails().getId());
 
