@@ -34,6 +34,8 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
 
     @Autowired
     private IdamService idamService;
+
+    @Autowired
     private final ContestedDraftOrderNotApprovedService contestedNotApprovedService;
 
     @PostMapping(path = "/contested-application-not-approved-start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
