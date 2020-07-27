@@ -191,6 +191,23 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldPrintRespondentOrdersIfNotApprovedOrderMissing() {
+        final String consentedBulkPrintConsentOrderNotApprovedJson
+            = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+
+        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(false);
+        when(consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails.getData())).thenReturn(Collections.emptyList());
+        when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
+
+        UUID uuid = bulkPrintService.sendOrderForBulkPrintRespondent(new CaseDocument(), caseDetails);
+
+        assertThat(uuid, is(letterId));
+
+        verify(generalOrderService, times(0)).getGeneralOrdersForPrintingConsented(caseDetails.getData());
+    }
+
+    @Test
     public void shouldPrintLettersForApplicant() {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";

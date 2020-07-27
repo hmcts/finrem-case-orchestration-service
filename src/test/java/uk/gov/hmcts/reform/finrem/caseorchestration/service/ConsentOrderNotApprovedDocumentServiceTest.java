@@ -153,17 +153,28 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         assertThat(generatedDocuments, hasSize(4));
         assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
         assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(GENERAL_ORDER_URL));
-        assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(REPLY_COVERSHEET_URL));
-        assertThat(generatedDocuments.get(3).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
+        assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
+        assertThat(generatedDocuments.get(3).getBinaryFileUrl(), is(REPLY_COVERSHEET_URL));
+
 
         assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void givenNoNotApprovedConsentOrderIsFound_thenAnExceptionIsThrown() {
-        CaseDetails caseDetails = defaultCaseDetails();
+    @Test
+    public void givenNoNotApprovedConsentOrderIsFound_thenApplicantPackPrintsWithoutIt() {
         caseDetails.getData().put(UPLOAD_ORDER, null);
+        when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(true);
+        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
+
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, AUTH_TOKEN);
+
+        assertThat(generatedDocuments, hasSize(3));
+        assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
+        assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
+        assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(REPLY_COVERSHEET_URL));
+
+
+        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
     }
 }

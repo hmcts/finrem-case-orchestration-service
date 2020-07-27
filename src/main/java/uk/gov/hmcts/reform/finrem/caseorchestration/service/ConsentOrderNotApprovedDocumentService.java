@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -41,20 +42,17 @@ public class ConsentOrderNotApprovedDocumentService {
         Map<String, Object> caseData = caseDetails.getData();
         log.info("Generating consent order not approved documents for applicant, case ID {}", caseDetails.getId());
 
-        List<BulkPrintDocument> documents;
+        List<BulkPrintDocument> documents = new ArrayList<>();
 
         if (featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()) {
-            documents = asList(
-                coverLetter(caseDetails, authorisationToken),
-                notApprovedConsentOrder(caseData),
-                applicantReplyCoversheet(caseDetails, authorisationToken));
-
+            documents.add(coverLetter(caseDetails, authorisationToken));
+            documents.addAll(notApprovedConsentOrder(caseData));
             documents = addGeneralOrdersIfApplicable(caseData, documents);
-        } else {
-            documents = asList(
-                defaultCoversheet(caseDetails, authorisationToken),
-                notApprovedConsentOrder(caseData));
+            documents.add(applicantReplyCoversheet(caseDetails, authorisationToken));
 
+        } else {
+            documents.add(defaultCoversheet(caseDetails, authorisationToken));
+            documents.addAll(notApprovedConsentOrder(caseData));
             documents = addGeneralOrdersIfApplicable(caseData, documents);
         }
 
@@ -79,7 +77,7 @@ public class ConsentOrderNotApprovedDocumentService {
         return BulkPrintDocument.builder().binaryFileUrl(coverLetter.getDocumentBinaryUrl()).build();
     }
 
-    public BulkPrintDocument notApprovedConsentOrder(Map<String, Object> caseData) {
+    public List<BulkPrintDocument> notApprovedConsentOrder(Map<String, Object> caseData) {
         log.info("Extracting 'uploadOrder' from case data for bulk print.");
         List<Map> documentList = ofNullable(caseData.get(UPLOAD_ORDER))
             .map(i -> (List<Map>) i)
@@ -94,11 +92,10 @@ public class ConsentOrderNotApprovedDocumentService {
                     .binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL).toString())
                     .build();
                 log.info("Sending general order ({}) for bulk print.", documentLink.get(DOCUMENT_FILENAME));
-                return generalOrder;
+                return asList(generalOrder);
             }
         }
-
-        throw new IllegalStateException("not approved consent order not found in application not approved case");
+        return Collections.emptyList();
     }
 
     private BulkPrintDocument applicantReplyCoversheet(CaseDetails caseDetails, String authorisationToken) {
