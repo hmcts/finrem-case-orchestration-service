@@ -2,11 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpServerErrorException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.io.File;
@@ -28,10 +29,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @WebMvcTest(ContestedDraftOrderNotApprovedController.class)
 public class ContestedDraftOrderNotApprovedControllerTest extends BaseControllerTest {
 
-    @Autowired
+    @MockBean
     private IdamService idamService;
 
-    public String startEndpoint() { return "/contested-application-not-approved-start"; }
+    @MockBean
+    private ContestedDraftOrderNotApprovedService contestedDraftOrderNotApprovedService;
+
+    public String startEndpoint() { return "/case-orchestration/contested-application-not-approved-start"; }
     public String previewEndpoint() {
         return "/case-orchestration/documents/preview-general-order";
     }
