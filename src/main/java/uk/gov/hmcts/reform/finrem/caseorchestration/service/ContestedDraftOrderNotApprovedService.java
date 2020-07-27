@@ -14,8 +14,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedRefusalOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedRefusalOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedRefusalOrderPreviewDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RefusalReasons;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
 
 @Service
 @RequiredArgsConstructor
@@ -76,8 +80,8 @@ public class ContestedDraftOrderNotApprovedService {
         caseData.put("Court", ContestedCourtHelper.getSelectedCourt(caseDetails));
         caseData.put("JudgeDetails",
             StringUtils.joinWith(" ",
-                caseDetails.getData().get("applicationNotApprovedJudgeType"),
-                caseDetails.getData().get("applicationNotApprovedJudgeName")));
+                caseDetails.getData().get("refusalOrderJudgeType"),
+                caseDetails.getData().get("refusalOrderJudgeName")));
         caseData.put("ContestOrderNotApprovedRefusalReasonsFormatted", formatRefusalReasons(caseDetails));
 
         return caseDetails;
@@ -85,7 +89,8 @@ public class ContestedDraftOrderNotApprovedService {
 
     private String formatRefusalReasons(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        List<String> refusalReasons = (List<String>) caseData.get(CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL);
+        //List<Object> refusalReasons = (List<Object>) caseData.get(CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL);
+         List<RefusalReasons> refusalReasons = (List<RefusalReasons>) caseData.get(CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL);
         Collections.reverse(refusalReasons);
 
         StringBuilder formattedRefusalReasons = new StringBuilder();
@@ -93,10 +98,9 @@ public class ContestedDraftOrderNotApprovedService {
             if (formattedRefusalReasons.length() > 0) {
                 formattedRefusalReasons.append('\n');
             }
-            //add bullet point prefix
-            //formattedRefusalReasons.append("    \u2022 ");
             formattedRefusalReasons.append("- ");
-            formattedRefusalReasons.append(caseData.get(reason));
+            //formattedRefusalReasons.append(caseData.get(reason));
+            formattedRefusalReasons.append(caseData.get(reason.getJudgeNotApprovedReasons()));
         });
         return formattedRefusalReasons.toString();
     }
