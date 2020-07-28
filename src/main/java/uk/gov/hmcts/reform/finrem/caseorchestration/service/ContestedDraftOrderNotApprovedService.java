@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedRefusalOr
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -88,7 +89,6 @@ public class ContestedDraftOrderNotApprovedService {
     private String formatRefusalReasons(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         List<Object> refusalReasons = (List<Object>) caseData.get(CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL);
-        Collections.reverse(refusalReasons);
 
         StringBuilder formattedRefusalReasons = new StringBuilder();
         refusalReasons.forEach(reason -> {
@@ -96,7 +96,7 @@ public class ContestedDraftOrderNotApprovedService {
                 formattedRefusalReasons.append('\n');
             }
             formattedRefusalReasons.append("- ");
-            formattedRefusalReasons.append((JSONObject)reason.getAsString("value").get("judgeNotApprovedReasons"));
+            formattedRefusalReasons.append( ((LinkedHashMap<String, LinkedHashMap>)reason).get("value").get("judgeNotApprovedReasons") );
         });
         return formattedRefusalReasons.toString();
     }

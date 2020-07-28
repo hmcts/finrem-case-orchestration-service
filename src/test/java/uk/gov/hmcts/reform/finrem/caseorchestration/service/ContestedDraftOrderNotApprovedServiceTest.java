@@ -147,7 +147,7 @@ public class ContestedDraftOrderNotApprovedServiceTest {
             assertThat(data.get("Court"),is("Nottingham County Court and Family Court"));
             assertThat(data.get("JudgeDetails"), is("Her Honour Judge Contested"));
             assertThat(data.get("ContestOrderNotApprovedRefusalReasonsFormatted"),
-                is("- Test Reason 1+ \n- Test Reason 2"));
+                is("- Test Reason 1\n- Test Reason 2"));
         }
 
         private Map<String, Object> data() {
