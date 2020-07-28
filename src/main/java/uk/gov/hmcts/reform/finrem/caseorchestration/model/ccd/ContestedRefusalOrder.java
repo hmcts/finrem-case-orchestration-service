@@ -11,21 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ContestedRefusalOrder {
-
-    /*
-    @JsonProperty("reasonForRefusal")
-    private List<String> reasonForRefusal;
-
-    @JsonProperty("judgeType")
-    private String judgeType;
-
-    @JsonProperty("judgeName")
-    private String judgeName;
-
-    @JsonProperty("dateOfOrder")
-    private Date dateOfOrder;
-     */
-
     @JsonProperty("notApprovedDocument")
     private CaseDocument notApprovedDocument;
 }
