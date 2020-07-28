@@ -4,9 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.minidev.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
@@ -18,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedRefusalOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedRefusalOrderPreviewDocument;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +93,7 @@ public class ContestedDraftOrderNotApprovedService {
                 formattedRefusalReasons.append('\n');
             }
             formattedRefusalReasons.append("- ");
-            formattedRefusalReasons.append( ((LinkedHashMap<String, LinkedHashMap>)reason).get("value").get("judgeNotApprovedReasons") );
+            formattedRefusalReasons.append(((LinkedHashMap<String, LinkedHashMap>)reason).get("value").get("judgeNotApprovedReasons"));
         });
         return formattedRefusalReasons.toString();
     }
@@ -127,5 +124,4 @@ public class ContestedDraftOrderNotApprovedService {
     private List<ContestedRefusalOrderData> convertToRefusalOrderContestedList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<List<ContestedRefusalOrderData>>() {});
     }
-
 }

@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class ContestedDraftOrderNotApprovedServiceTest {
 
- private DocumentClient generatorClient;
+    private DocumentClient generatorClient;
     private ObjectMapper mapper = new ObjectMapper();
     private GenericDocumentService genericDocumentService;
     private ContestedDraftOrderNotApprovedService refusalOrderService;
