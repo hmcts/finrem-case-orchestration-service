@@ -69,18 +69,18 @@ public class ContestedDraftOrderNotApprovedServiceTest {
 
         assertThat(refusalOrders, hasSize(2));
         assertThat(refusalOrders.get(0).getId(), is("1234"));
-        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getNotApprovedDocument().getDocumentUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
-        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getNotApprovedDocument().getDocumentFilename(),
+        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
+        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentFilename(),
             is("app_docs.pdf"));
-        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getNotApprovedDocument().getDocumentBinaryUrl(),
+        assertThat(refusalOrders.get(0).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentBinaryUrl(),
             is("http://dm-store/lhjbyuivu87y989hijbb/binary"));
 
         assertThat(refusalOrders.get(1).getId(), notNullValue());
-        assertThat(refusalOrders.get(1).getContestedRefusalOrder().getNotApprovedDocument().getDocumentUrl(),
+        assertThat(refusalOrders.get(1).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
-        assertThat(refusalOrders.get(1).getContestedRefusalOrder().getNotApprovedDocument().getDocumentFilename(),
+        assertThat(refusalOrders.get(1).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentFilename(),
             is("refusalOrderTestFilename.pdf"));
-        assertThat(refusalOrders.get(1).getContestedRefusalOrder().getNotApprovedDocument().getDocumentBinaryUrl(),
+        assertThat(refusalOrders.get(1).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
 
         CaseDocument latestRefusalOrder = (CaseDocument)documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT);

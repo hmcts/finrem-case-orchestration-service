@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ContestedRefusalOrder {
     @JsonProperty("refusalOrderAdditionalDocument")
-    private CaseDocument notApprovedDocument;
+    private CaseDocument refusalOrderAdditionalDocument;
 }

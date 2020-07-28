@@ -108,7 +108,7 @@
         {
           "id": "1234",
           "value": {
-            "notApprovedDocument": {
+            "refusalOrderAdditionalDocument": {
               "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
               "document_filename": "app_docs.pdf",
               "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
