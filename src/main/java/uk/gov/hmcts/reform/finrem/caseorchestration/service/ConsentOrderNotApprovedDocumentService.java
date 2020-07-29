@@ -50,10 +50,20 @@ public class ConsentOrderNotApprovedDocumentService {
             documents = addGeneralOrdersIfApplicable(caseData, documents);
             documents.add(applicantReplyCoversheet(caseDetails, authorisationToken));
 
+            //if only coversheet and reply sheet then print nothing
+            if(documents.size() == 2) {
+                return new ArrayList<>();
+            }
+
         } else {
             documents.add(defaultCoversheet(caseDetails, authorisationToken));
             documents.addAll(notApprovedConsentOrder(caseData));
             documents = addGeneralOrdersIfApplicable(caseData, documents);
+
+            //if only coversheet then print nothing
+            if(documents.size() == 1) {
+                return new ArrayList<>();
+            }
         }
 
         return documents;

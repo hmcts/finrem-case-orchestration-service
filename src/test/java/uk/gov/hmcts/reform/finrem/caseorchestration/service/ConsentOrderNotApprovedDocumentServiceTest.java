@@ -177,4 +177,34 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
 
         assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
     }
+
+    @Test
+    public void getApplicantLetterPackWithNoConsentOrderAndNoGeneralOrdersReturnsEmptyList_withConsentDocGenOn() {
+        CaseDetails caseDetails = defaultCaseDetails();
+        caseDetails.getData().put(UPLOAD_ORDER, null);
+        when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(true);
+        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
+
+        List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
+            caseDetails, AUTH_TOKEN);
+
+        assertThat(generatedDocuments, hasSize(0));
+
+        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
+    }
+
+    @Test
+    public void getApplicantLetterPackWithNoConsentOrderAndNoGeneralOrdersReturnsEmptyList_withConsentDocGenOff() {
+        CaseDetails caseDetails = defaultCaseDetails();
+        caseDetails.getData().put(UPLOAD_ORDER, null);
+        when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(false);
+        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
+
+        List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
+            caseDetails, AUTH_TOKEN);
+
+        assertThat(generatedDocuments, hasSize(0));
+
+        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
+    }
 }
