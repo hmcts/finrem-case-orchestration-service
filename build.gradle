@@ -115,7 +115,7 @@ def versions = [
         lombok                  : '1.18.12',
         mockito                 : '3.3.3',
         nimbus                  : '5.1',
-        pact_version            : '3.5.24',
+        pact_version            : '3.6.15',
         pdfbox                  : '2.0.8',
         pitest                  : '1.5.2',
         powerMock               : '1.7.3',
@@ -127,7 +127,7 @@ def versions = [
         springfoxSwagger        : '2.9.2',
         sonarPitest             : '0.5',
         tomcat                  : '9.0.37',
-        wiremock                : '2.26.3'
+        wiremock                : '2.27.1'
 ]
 
 dependencyManagement {
