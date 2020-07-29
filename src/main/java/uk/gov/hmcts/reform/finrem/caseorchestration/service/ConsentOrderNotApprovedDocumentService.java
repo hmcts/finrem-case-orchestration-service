@@ -51,7 +51,7 @@ public class ConsentOrderNotApprovedDocumentService {
             documents.add(applicantReplyCoversheet(caseDetails, authorisationToken));
 
             //if only coversheet and reply sheet then print nothing
-            if(documents.size() == 2) {
+            if (documents.size() == 2) {
                 return new ArrayList<>();
             }
 
@@ -61,7 +61,7 @@ public class ConsentOrderNotApprovedDocumentService {
             documents = addGeneralOrdersIfApplicable(caseData, documents);
 
             //if only coversheet then print nothing
-            if(documents.size() == 1) {
+            if (documents.size() == 1) {
                 return new ArrayList<>();
             }
         }
