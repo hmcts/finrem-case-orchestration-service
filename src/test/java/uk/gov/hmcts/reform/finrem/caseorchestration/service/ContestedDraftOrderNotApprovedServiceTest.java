@@ -52,17 +52,26 @@ public class ContestedDraftOrderNotApprovedServiceTest {
     }
 
     @Test
-    public void generateRefusalOrder() throws Exception {
-        Map<String, Object> documentMap = refusalOrderService.createRefusalOrder(AUTH_TOKEN, contestedCaseDetails());
+    public void generateRefusalOrderWithOneReason() throws Exception {
+        Map<String, Object> documentMap = refusalOrderService.createRefusalOrder(AUTH_TOKEN, contestedCaseDetails(false));
 
         CaseDocument result = (CaseDocument) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT);
         doCaseDocumentAssert(result);
-        ((ContestedDraftOrderNotApprovedServiceTest.TestDocumentClient) generatorClient).verifyAdditionalFieldsContested();
+        ((ContestedDraftOrderNotApprovedServiceTest.TestDocumentClient) generatorClient).verifyAdditionalFieldsWithSingularReason();
+    }
+
+    @Test
+    public void generateRefusalOrderWithMultipleReasons() throws Exception {
+        Map<String, Object> documentMap = refusalOrderService.createRefusalOrder(AUTH_TOKEN, contestedCaseDetails(true));
+
+        CaseDocument result = (CaseDocument) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT);
+        doCaseDocumentAssert(result);
+        ((ContestedDraftOrderNotApprovedServiceTest.TestDocumentClient) generatorClient).verifyAdditionalFieldsWithMultipleReasons();
     }
 
     @Test
     public void submitContestedGeneralOrder() throws Exception {
-        Map<String, Object> documentMap = refusalOrderService.populateRefusalOrderCollection(contestedCaseDetails());
+        Map<String, Object> documentMap = refusalOrderService.populateRefusalOrderCollection(contestedCaseDetails(true));
 
         List<ContestedRefusalOrderData> refusalOrders =
             (List<ContestedRefusalOrderData>)documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION);
@@ -92,9 +101,15 @@ public class ContestedDraftOrderNotApprovedServiceTest {
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
 
-    private CaseDetails contestedCaseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/refusal-order-contested.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+    private CaseDetails contestedCaseDetails(boolean multipleReasons) throws Exception {
+        if (multipleReasons) {
+            try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/refusal-order-contested.json")) {
+                return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            }
+        } else {
+            try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/refusal-order-singular-contested.json")) {
+                return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+            }
         }
     }
 
@@ -139,7 +154,7 @@ public class ContestedDraftOrderNotApprovedServiceTest {
             throw new UnsupportedOperationException();
         }
 
-        void verifyAdditionalFieldsContested() {
+        void verifyAdditionalFieldsWithMultipleReasons() {
             Map<String, Object> data = data();
 
             assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
@@ -148,6 +163,17 @@ public class ContestedDraftOrderNotApprovedServiceTest {
             assertThat(data.get("JudgeDetails"), is("Her Honour Judge Contested"));
             assertThat(data.get("ContestOrderNotApprovedRefusalReasonsFormatted"),
                 is("- Test Reason 1\n- Test Reason 2"));
+        }
+
+        void verifyAdditionalFieldsWithSingularReason() {
+            Map<String, Object> data = data();
+
+            assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
+            assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
+            assertThat(data.get("Court"),is("Nottingham County Court and Family Court"));
+            assertThat(data.get("JudgeDetails"), is("Her Honour Judge Contested"));
+            assertThat(data.get("ContestOrderNotApprovedRefusalReasonsFormatted"),
+                is("- Draft order is not sufficient, signature is required"));
         }
 
         private Map<String, Object> data() {
