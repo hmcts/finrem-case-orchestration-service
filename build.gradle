@@ -23,7 +23,6 @@ plugins {
     id 'org.owasp.dependencycheck' version '5.3.2.1'
     id 'org.sonarqube' version '3.0'
     id 'org.springframework.boot' version '2.2.6.RELEASE'
-    id "nebula.lint" version "16.9.1"
     id 'net.ltgt.apt' version '0.21'
 }
 
@@ -47,8 +46,6 @@ repositories {
     maven { url "https://dl.bintray.com/hmcts/hmcts-maven" }
     maven { url 'https://repo.spring.io/libs-milestone' }
 }
-
-gradleLint.rules = ['all-dependency'] // add as many rules here as you'd like
 
 sourceSets {
     testSmoke {
@@ -156,7 +153,6 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
     implementation group: 'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
     implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
@@ -167,15 +163,11 @@ dependencies {
     implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
     implementation group: 'uk.gov.hmcts.reform', name: 'logging-httpcomponents', version: versions.reformLogging
     implementation group: 'uk.gov.hmcts.reform', name: 'logging-spring', version: versions.reformLogging
-    implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.1.0'
     implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
 
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
-
-    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
-        exclude(module: 'commons-logging')
-        exclude(module: 'android-json')
-    }
+    runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+    runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-web'
 
     testImplementation group: 'au.com.dius', name: 'pact-jvm-provider-spring_2.12', version: versions.pact_version
     testImplementation group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremock
@@ -197,7 +189,6 @@ dependencies {
     functionalImplementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
     functionalImplementation group: 'org.mockito', name: 'mockito-core', version: versions.mockito
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     functionalImplementation group: 'org.pdfbox', name: 'com.springsource.org.pdfbox', version: '0.7.3'
     functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalImplementation group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
