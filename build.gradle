@@ -23,6 +23,7 @@ plugins {
     id 'org.owasp.dependencycheck' version '5.3.2.1'
     id 'org.sonarqube' version '3.0'
     id 'org.springframework.boot' version '2.2.6.RELEASE'
+    id "nebula.lint" version "16.9.1"
     id 'net.ltgt.apt' version '0.21'
 }
 
@@ -46,6 +47,8 @@ repositories {
     maven { url "https://dl.bintray.com/hmcts/hmcts-maven" }
     maven { url 'https://repo.spring.io/libs-milestone' }
 }
+
+gradleLint.rules = ['all-dependency'] // add as many rules here as you'd like
 
 sourceSets {
     testSmoke {
@@ -120,7 +123,7 @@ def versions = [
         pitest                  : '1.5.2',
         powerMock               : '1.7.3',
         reformLogging           : '5.1.6',
-        restAssured             : '4.3.1',
+        restAssured             : '3.0.3',
         serenity                : '2.2.12',
         serenityCucumber        : '1.9.51',
         serviceTokenGenerator   : '3.1.1',
