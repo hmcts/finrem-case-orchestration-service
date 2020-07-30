@@ -6,17 +6,17 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath("net.serenity-bdd:serenity-gradle-plugin:2.2.8")
-        classpath group: 'org.sonarsource.scanner.gradle', name: 'sonarqube-gradle-plugin', version: '2.8.0.1969'
+        classpath("net.serenity-bdd:serenity-gradle-plugin:2.2.12")
+        classpath group: 'org.sonarsource.scanner.gradle', name: 'sonarqube-gradle-plugin', version: '3.0'
     }
 }
 
 plugins {
-    id 'au.com.dius.pact' version '3.6.15'
+    id 'au.com.dius.pact' version '4.1.6'
     id 'application'
     id 'checkstyle'
-    id 'com.github.ben-manes.versions' version '0.28.0'
-    id 'io.franzbecker.gradle-lombok' version '1.14'
+    id 'com.github.ben-manes.versions' version '0.29.0'
+    id 'io.franzbecker.gradle-lombok' version '4.0.0'
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id "info.solidsoft.pitest" version "1.5.1"
     id 'jacoco'
@@ -71,7 +71,6 @@ sourceSets {
         resources {
             srcDirs = ['src/functionalTests/resources']
         }
-
     }
 
     contract {
@@ -83,7 +82,6 @@ sourceSets {
         resources {
             srcDirs = ['src/contractTests/resources']
         }
-
     }
 }
 
@@ -107,29 +105,29 @@ configurations {
 
 def versions = [
         bspCommonLib            : '0.0.43',
-        ccdClient               : '4.6.4',
+        ccdClient               : '4.7.2',
         commonsBeanUtils        : '1.9.4',
-        commonsIo               : '2.6',
-        commonsLang3            : '3.9',
+        commonsIo               : '2.7',
+        commonsLang3            : '3.11',
         gradlePitest            : '1.5.1',
         jsonAssert              : '1.2.3',
         junit                   : '4.13',
-        lombok                  : '1.16.18',
-        mockito                 : '3.3.3',
+        lombok                  : '1.18.12',
+        mockito                 : '3.4.4',
         nimbus                  : '5.1',
-        pact_version            : '3.5.24',
+        pact_version            : '3.6.15',
         pdfbox                  : '2.0.8',
         pitest                  : '1.5.2',
         powerMock               : '1.7.3',
-        reformLogging           : '5.1.5',
+        reformLogging           : '5.1.6',
         restAssured             : '3.0.3',
-        serenity                : '2.0.90',
+        serenity                : '2.2.12',
         serenityCucumber        : '1.9.51',
         serviceTokenGenerator   : '3.1.1',
         springfoxSwagger        : '2.9.2',
         sonarPitest             : '0.5',
         tomcat                  : '9.0.37',
-        wiremock                : '2.26.3'
+        wiremock                : '2.27.1'
 ]
 
 dependencyManagement {
@@ -155,7 +153,6 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
     implementation group: 'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
     implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
@@ -166,15 +163,11 @@ dependencies {
     implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
     implementation group: 'uk.gov.hmcts.reform', name: 'logging-httpcomponents', version: versions.reformLogging
     implementation group: 'uk.gov.hmcts.reform', name: 'logging-spring', version: versions.reformLogging
-    implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version:'0.0.4'
     implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
 
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
-
-    testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test') {
-        exclude(module: 'commons-logging')
-        exclude(module: 'android-json')
-    }
+    runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+    runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-web'
 
     testImplementation group: 'au.com.dius', name: 'pact-jvm-provider-spring_2.12', version: versions.pact_version
     testImplementation group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremock
@@ -196,7 +189,6 @@ dependencies {
     functionalImplementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
     functionalImplementation group: 'org.mockito', name: 'mockito-core', version: versions.mockito
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     functionalImplementation group: 'org.pdfbox', name: 'com.springsource.org.pdfbox', version: '0.7.3'
     functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalImplementation group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
