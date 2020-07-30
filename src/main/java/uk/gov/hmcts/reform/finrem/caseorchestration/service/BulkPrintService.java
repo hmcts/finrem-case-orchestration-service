@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
+import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
@@ -24,6 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
@@ -85,8 +87,9 @@ public class BulkPrintService {
 
         bulkPrintDocuments.addAll(orderDocuments);
 
-        if (featureToggleService.isPrintGeneralOrderEnabled() && !isOrderApprovedDocumentCollectionPresent(caseDetails.getData())) {
-            bulkPrintDocuments.addAll(generalOrderService.getGeneralOrdersForPrintingConsented(caseDetails.getData()));
+        if (featureToggleService.isPrintGeneralOrderEnabled() && !isOrderApprovedDocumentCollectionPresent(caseDetails.getData())
+            && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
+            bulkPrintDocuments.add(generalOrderService.getLatestGeneralOrderForPrintingConsented(caseDetails.getData()));
         }
 
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), bulkPrintDocuments);

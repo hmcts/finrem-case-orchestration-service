@@ -17,9 +17,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
+import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService.DOCUMENT_FILENAME;
@@ -70,9 +72,10 @@ public class ConsentOrderNotApprovedDocumentService {
     }
 
     private List<BulkPrintDocument> addGeneralOrdersIfApplicable(Map<String, Object> caseData, List<BulkPrintDocument> existingList) {
-        if (featureToggleService.isPrintGeneralOrderEnabled() && isPaperApplication(caseData)) {
+        if (featureToggleService.isPrintGeneralOrderEnabled() && isPaperApplication(caseData)
+            && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
             return Streams.concat(existingList.stream(),
-                generalOrderService.getGeneralOrdersForPrintingConsented(caseData).stream()).collect(Collectors.toList());
+                asList(generalOrderService.getLatestGeneralOrderForPrintingConsented(caseData)).stream()).collect(Collectors.toList());
         }
         return existingList;
     }

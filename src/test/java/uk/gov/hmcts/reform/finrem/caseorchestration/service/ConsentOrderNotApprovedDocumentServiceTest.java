@@ -36,6 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchD
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
 @ActiveProfiles("test-mock-document-client")
@@ -71,6 +72,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         caseDetails = defaultCaseDetails();
 
         Map<String, Object> caseData = caseDetails.getData();
+        caseData.put(GENERAL_ORDER_LATEST_DOCUMENT, caseDocument());
         caseData.put(PAPER_APPLICATION, YES_VALUE);
         caseData.put(UPLOAD_ORDER, Collections.singletonList(
             ImmutableMap.of("value", ImmutableMap.of(

@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
@@ -176,16 +177,16 @@ public class GeneralOrderServiceTest {
     @Test
     public void getsCorrectGeneralOrdersForPrintingConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
-        List<BulkPrintDocument> generalOrdersToPrint = generalOrderService.getGeneralOrdersForPrintingConsented(details.getData());
-        assertThat(generalOrdersToPrint, hasSize(1));
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderForPrintingConsented(details.getData());
+        assertThat(latestGeneralOrder.getBinaryFileUrl(), is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
 
     @Test
     public void getsZeroGeneralOrdersForPrintingWhenNoneConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
-        details.getData().put("generalOrderCollection", null);
-        List<BulkPrintDocument> generalOrdersToPrint = generalOrderService.getGeneralOrdersForPrintingConsented(details.getData());
-        assertThat(generalOrdersToPrint, hasSize(0));
+        details.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, null);
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderForPrintingConsented(details.getData());
+        assertTrue(latestGeneralOrder == null);
     }
 
     private CaseDetails consentedCaseDetails() throws Exception {
