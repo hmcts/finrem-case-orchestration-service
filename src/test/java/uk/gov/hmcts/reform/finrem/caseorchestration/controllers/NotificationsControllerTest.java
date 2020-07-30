@@ -49,6 +49,7 @@ public class NotificationsControllerTest {
     private static final String PREPARE_FOR_HEARING_ORDER_SENT_CALLBACK_URL = "/case-orchestration/notify/prepare-for-hearing-order-sent";
     private static final String CONTESTED_APPLICATION_ISSUED_CALLBACK_URL = "/case-orchestration/notify/contest-application-issued";
     private static final String CONTEST_ORDER_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contest-order-approved";
+    private static final String CONTESTED_CONSENT_ORDER_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contested-consent-order-approved";
     private static final String CONTESTED_DRAFT_ORDER_URL = "/case-orchestration/notify/draft-order";
     private static final String GENERAL_EMAIL_URL = "/case-orchestration/notify/general-email";
 
@@ -455,6 +456,19 @@ public class NotificationsControllerTest {
 
         verify(notificationService, times(1))
             .sendContestOrderNotApprovedEmail(any(CallbackRequest.class));
+    }
+
+    @Test
+    public void sendContestedConsentOrderApprovedEmail() throws Exception {
+        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
+        mockMvc.perform(post(CONTESTED_CONSENT_ORDER_APPROVED_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+            .sendContestedConsentOrderApprovedEmail(any(CallbackRequest.class));
     }
 
     @Test
