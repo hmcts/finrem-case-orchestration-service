@@ -6,7 +6,7 @@ This application orchestrates a workflow based on the requested business require
 
 ### Prerequisites
 
-- [JDK 8](https://www.oracle.com/java)
+- [JDK 11](https://www.oracle.com/java)
 
 ### Building
 
