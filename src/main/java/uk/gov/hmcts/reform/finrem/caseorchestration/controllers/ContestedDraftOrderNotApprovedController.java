@@ -81,8 +81,8 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
         log.info("Received request to preview application not approved document for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        Map<String, Object> generalOrder = contestedNotApprovedService.createRefusalOrder(authorisationToken, caseDetails);
-        caseData.putAll(generalOrder);
+        Map<String, Object> refusalOrder = contestedNotApprovedService.createRefusalOrder(authorisationToken, caseDetails);
+        caseData.putAll(refusalOrder);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
