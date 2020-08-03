@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedRefusalOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedRefusalOrderPreviewDocument;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -93,7 +92,7 @@ public class ContestedDraftOrderNotApprovedService {
                 formattedRefusalReasons.append('\n');
             }
             formattedRefusalReasons.append("- ");
-            formattedRefusalReasons.append(((LinkedHashMap<String, LinkedHashMap>)reason).get("value").get("judgeNotApprovedReasons"));
+            formattedRefusalReasons.append(((Map<String, Map>)reason).get("value").get("judgeNotApprovedReasons"));
         });
         return formattedRefusalReasons.toString();
     }
