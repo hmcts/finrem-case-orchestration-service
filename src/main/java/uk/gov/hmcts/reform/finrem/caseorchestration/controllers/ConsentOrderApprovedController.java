@@ -180,7 +180,7 @@ public class ConsentOrderApprovedController implements BaseController {
     }
 
     private List<PensionCollectionData> getContestedConsentPensionDocuments(Map<String, Object> caseData) {
-        if(StringUtils.isEmpty(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION))) {
+        if (StringUtils.isEmpty(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION))) {
             return new ArrayList<>();
         }
 
