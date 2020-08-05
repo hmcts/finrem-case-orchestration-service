@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
@@ -42,11 +43,10 @@ public class RefusalOrderDocumentService {
 
     private Function<Pair<CaseDetails, String>, CaseDocument> generateDocument = this::applyGenerateRefusalOrder;
     private Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
+    private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
 
     public Map<String, Object> generateConsentOrderNotApproved(
         String authorisationToken, final CaseDetails caseDetails) {
-        applyAddExtraFields(caseDetails);
-
         translateOrderRefusalCollection
             .andThen(generateDocument)
             .andThen(createConsentOrderData)
@@ -57,8 +57,6 @@ public class RefusalOrderDocumentService {
 
     public Map<String, Object> previewConsentOrderNotApproved(
         String authorisationToken, final CaseDetails caseDetails) {
-        applyAddExtraFields(caseDetails);
-
         return translateOrderRefusalCollection
             .andThen(generateDocument)
             .andThen(caseDocument -> populateConsentOrderNotApproved(caseDocument, caseDetails))
@@ -93,7 +91,7 @@ public class RefusalOrderDocumentService {
     }
 
     private CaseDocument applyGenerateRefusalOrder(Pair<CaseDetails, String> data) {
-        return genericDocumentService.generateDocument(data.getRight(), data.getLeft(),
+        return genericDocumentService.generateDocument(data.getRight(), addExtraFields.apply(data.getLeft()),
             documentConfiguration.getRejectedOrderTemplate(),
             documentConfiguration.getRejectedOrderFileName());
     }

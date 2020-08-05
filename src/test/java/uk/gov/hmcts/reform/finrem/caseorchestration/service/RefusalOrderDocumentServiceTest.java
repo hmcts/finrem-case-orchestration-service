@@ -5,16 +5,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.io.InputStream;
 import java.util.List;
@@ -24,25 +26,30 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.REJECTED_ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
-public class RefusalOrderDocumentServiceTest {
+@ActiveProfiles("test-mock-document-client")
+public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    @Autowired private ObjectMapper mapper = new ObjectMapper();
+    @Autowired private RefusalOrderDocumentService refusalOrderDocumentService;
+
+    @MockBean
     private GenericDocumentService genericDocumentService;
-    private RefusalOrderDocumentService refusalOrderDocumentService;
+
+    @Captor
+    private ArgumentCaptor<CaseDetails> generateDocumentCaseDetailsCaptor;
 
     @Before
     public void setUp() {
@@ -51,15 +58,8 @@ public class RefusalOrderDocumentServiceTest {
         config.setRejectedOrderFileName("test_file");
         config.setRejectedOrderDocType(REJECTED_ORDER_TYPE);
 
-        Document document = new Document();
-        document.setBinaryUrl(BINARY_URL);
-        document.setFileName(FILE_NAME);
-        document.setUrl(DOC_URL);
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
-        DocumentClient generatorClient = Mockito.mock(DocumentClient.class);
-        when(generatorClient.generatePdf(isA(DocumentGenerationRequest.class), eq(AUTH_TOKEN))).thenReturn(document);
-
-        genericDocumentService = new GenericDocumentService(generatorClient);
         refusalOrderDocumentService = new RefusalOrderDocumentService(genericDocumentService, config, new DocumentHelper(mapper), mapper);
     }
 
@@ -75,7 +75,7 @@ public class RefusalOrderDocumentServiceTest {
         assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));
         assertThat(consentOrderData.getConsentOrder().getDocumentComment(), is(equalTo("System Generated")));
 
-        assertCaseDataExtraFields(caseData);
+        assertCaseDataExtraFields();
         assertCaseDocument(consentOrderData.getConsentOrder().getDocumentLink());
     }
 
@@ -91,7 +91,7 @@ public class RefusalOrderDocumentServiceTest {
         assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));
         assertThat(consentOrderData.getConsentOrder().getDocumentComment(), is(equalTo("System Generated")));
 
-        assertCaseDataExtraFields(caseData);
+        assertCaseDataExtraFields();
         assertCaseDocument(consentOrderData.getConsentOrder().getDocumentLink());
     }
 
@@ -120,11 +120,15 @@ public class RefusalOrderDocumentServiceTest {
         Map<String, Object> caseData = refusalOrderDocumentService.previewConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
         CaseDocument caseDocument = getCaseDocument(caseData);
 
-        assertCaseDataExtraFields(caseData);
+        assertCaseDataExtraFields();
         assertCaseDocument(caseDocument);
     }
 
-    private void assertCaseDataExtraFields(Map<String, Object> caseData) {
+    private void assertCaseDataExtraFields() {
+        verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
+            any(), any());
+        Map<String, Object> caseData = generateDocumentCaseDetailsCaptor.getValue().getData();
+
         assertThat(caseData.get("ApplicantName"), is("Poor Guy"));
         assertThat(caseData.get("RespondentName"), is("john smith"));
         assertThat(caseData.get("CourtName"), is("Birmingham Civil and Family Justice Centre"));
