@@ -110,6 +110,15 @@ public class CCDConfigConstant {
     public static final String APPLICANT_SOLICITOR = "applicantSolicitor";
     public static final String RESPONDENT_SOLICITOR = "respondentSolicitor";
 
+    //Refusal Order / Application Not Approved (Contested)
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL = "judgeNotApprovedReasons";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT = "refusalOrderPreviewDocument";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION = "refusalOrderCollection";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT = "latestRefusalOrder";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME = "refusalOrderJudgeName";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE = "refusalOrderJudgeType";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_DATE = "refusalOrderDate";
+
     //Application Type related
     public static final String D81_QUESTION = "d81Question";
 
