@@ -74,6 +74,7 @@ public class RefusalOrderDocumentServiceTest {
         assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));
         assertThat(consentOrderData.getConsentOrder().getDocumentComment(), is(equalTo("System Generated")));
 
+        assertCaseDataExtraFields(caseData);
         assertCaseDocument(consentOrderData.getConsentOrder().getDocumentLink());
     }
 
@@ -102,7 +103,14 @@ public class RefusalOrderDocumentServiceTest {
         Map<String, Object> caseData = refusalOrderDocumentService.previewConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
         CaseDocument caseDocument = getCaseDocument(caseData);
 
+        assertCaseDataExtraFields(caseData);
         assertCaseDocument(caseDocument);
+    }
+
+    private void assertCaseDataExtraFields(Map<String, Object> caseData) {
+        assertThat(caseData.get("ApplicantName"), is("Poor Guy"));
+        assertThat(caseData.get("RespondentName"), is("john smith"));
+        assertThat(caseData.get("CourtName"), is("Birmingham Civil and Family Justice Centre"));
     }
 
     private CaseDocument getCaseDocument(Map<String, Object> caseData) {

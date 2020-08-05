@@ -27,6 +27,9 @@
          "document_filename": "file1",
          "document_binary_url": "http://file1.binary"
       },
+      "regionList": "midlands",
+      "midlandsFRCList": "birmingham",
+      "birminghamCourtList": "FR_birmingham_hc_list_1",
       "solicitorFirm": "FirmA",
       "solicitorName": "Solictor",
       "applicantLName": "Guy",

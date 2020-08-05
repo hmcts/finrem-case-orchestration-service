@@ -94,7 +94,7 @@ public class CCDConfigConstant {
     public static final String NWYORKSHIRE_COURTLIST = "nwyorkshireCourtList";
     public static final String HSYORKSHIRE_COURTLIST = "humberCourtList";
     public static final String NOTTINGHAM_COURTLIST = "nottinghamCourtList";
-    public static final String BIRMINGHAM_COURTLIST = "birminghamhamCourtList";
+    public static final String BIRMINGHAM_COURTLIST = "birminghamCourtList";
     public static final String LONDON_CFC = "cfc";
     public static final String LONDON_COURTLIST = "cfcCourtList";
     public static final String MANCHESTER_COURTLIST = "manchesterCourtList";
