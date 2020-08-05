@@ -145,7 +145,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_LETTER_ADDRESS_TO = "generalLetterAddressTo";
     public static final String GENERAL_LETTER_RECIPIENT = "generalLetterRecipient";
     public static final String GENERAL_LETTER_PREVIEW = "generalLetterPreview";
-    public static final String CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION = "Contested_ConsentedNotApprovedOrders";
+    public static final String CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION = "consentedNotApprovedOrders";
 
     public static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
     public static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
