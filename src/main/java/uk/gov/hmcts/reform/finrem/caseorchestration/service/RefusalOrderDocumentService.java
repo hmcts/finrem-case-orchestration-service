@@ -21,9 +21,11 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.copyToOrderRefusalCollection;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.translateOrderRefusalCollection;
 
@@ -73,11 +75,20 @@ public class RefusalOrderDocumentService {
     private Map<String, Object> populateConsentOrderData(ConsentOrderData consentOrderData, CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        List<ConsentOrderData> uploadOrder = Optional.ofNullable(caseData.get(UPLOAD_ORDER))
-            .map(this::convertToUploadOrderList)
-            .orElse(new ArrayList<>());
-        uploadOrder.add(consentOrderData);
-        caseData.put(UPLOAD_ORDER, uploadOrder);
+        if (isConsentedInContestedCase(caseDetails)) {
+            List<ConsentOrderData> uploadOrder = Optional.ofNullable(caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION))
+                .map(this::convertToUploadOrderList)
+                .orElse(new ArrayList<>());
+            uploadOrder.add(consentOrderData);
+            caseData.put(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION, uploadOrder);
+        } else {
+            List<ConsentOrderData> uploadOrder = Optional.ofNullable(caseData.get(UPLOAD_ORDER))
+                .map(this::convertToUploadOrderList)
+                .orElse(new ArrayList<>());
+            uploadOrder.add(consentOrderData);
+            caseData.put(UPLOAD_ORDER, uploadOrder);
+        }
+
         return caseData;
     }
 

@@ -33,6 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_UR
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.REJECTED_ORDER_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
@@ -68,6 +69,22 @@ public class RefusalOrderDocumentServiceTest {
 
         Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
         ConsentOrderData consentOrderData = consentOrderData(caseData);
+
+        assertThat(consentOrderData.getId(), is(notNullValue()));
+        assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(REJECTED_ORDER_TYPE));
+        assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));
+        assertThat(consentOrderData.getConsentOrder().getDocumentComment(), is(equalTo("System Generated")));
+
+        assertCaseDataExtraFields(caseData);
+        assertCaseDocument(consentOrderData.getConsentOrder().getDocumentLink());
+    }
+
+    @Test
+    public void generateConsentOrderNotApprovedConsentInContested() throws Exception {
+        CaseDetails caseDetails = caseDetails("/fixtures/refusal-order-consent-in-contested.json");
+
+        Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        ConsentOrderData consentOrderData = consentInContestedOrderData(caseData);
 
         assertThat(consentOrderData.getId(), is(notNullValue()));
         assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(REJECTED_ORDER_TYPE));
@@ -128,6 +145,17 @@ public class RefusalOrderDocumentServiceTest {
                 .stream()
                 .filter(cd -> cd.getConsentOrder().getDocumentType().equals(REJECTED_ORDER_TYPE))
                 .findFirst().orElseThrow(() -> new IllegalStateException(REJECTED_ORDER_TYPE + " missing"));
+    }
+
+    private ConsentOrderData consentInContestedOrderData(Map<String, Object> caseData) {
+        List<ConsentOrderData> list =
+            mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION), new TypeReference<List<ConsentOrderData>>() {
+            });
+
+        return list
+            .stream()
+            .filter(cd -> cd.getConsentOrder().getDocumentType().equals(REJECTED_ORDER_TYPE))
+            .findFirst().orElseThrow(() -> new IllegalStateException(REJECTED_ORDER_TYPE + " missing"));
     }
 
     private CaseDetails caseDetails(String name) throws Exception {

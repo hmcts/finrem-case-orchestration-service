@@ -112,6 +112,7 @@ public class CCDConfigConstant {
 
     //Application Type related
     public static final String D81_QUESTION = "d81Question";
+    public static final String CONSENT_D81_QUESTION = "consentD81Question";
 
     //Document related
     public static final String MINI_FORM_A = "miniFormA";
@@ -144,6 +145,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_LETTER_ADDRESS_TO = "generalLetterAddressTo";
     public static final String GENERAL_LETTER_RECIPIENT = "generalLetterRecipient";
     public static final String GENERAL_LETTER_PREVIEW = "generalLetterPreview";
+    public static final String CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION = "Contested_ConsentedNotApprovedOrders";
 
     public static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
     public static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
