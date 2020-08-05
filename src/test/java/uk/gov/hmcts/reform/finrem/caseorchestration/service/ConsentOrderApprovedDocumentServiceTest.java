@@ -176,6 +176,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @Test
     public void stampsAndPopulatesCaseDataForContestedConsentOrder() {
         when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
+        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
         CaseDetails caseDetails = defaultCaseDetails();
         caseDetails.getData().put(CONSENT_ORDER, caseDocument());
         Map<String, Object> data = consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(caseDetails, AUTH_TOKEN);
