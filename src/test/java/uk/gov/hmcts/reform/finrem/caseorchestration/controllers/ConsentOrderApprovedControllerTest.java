@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -224,7 +225,24 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
+        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentOrderToCollection(any(), anyString());
+        verify(consentOrderApprovedDocumentService, times(1)).stampPensionDocuments(any(), anyString());
+    }
 
+    @Test
+    public void consentInContestedConsentOrderApprovedShouldProcessPensionDocs() throws Exception {
+        doValidConsentInContestWithPensionData();
+        when(consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(any(), anyString()))
+            .thenAnswer(i -> i.getArgument(0, CaseDetails.class).getData());
+
+        ResultActions result = mvc.perform(post(contestedConsentOrderApprovedEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentOrderToCollection(any(), anyString());
+        verify(consentOrderApprovedDocumentService, times(1)).stampPensionDocuments(any(), anyString());
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
