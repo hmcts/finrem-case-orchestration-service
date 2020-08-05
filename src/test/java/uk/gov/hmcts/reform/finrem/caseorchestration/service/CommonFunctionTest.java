@@ -33,6 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorResponsibleToDraftOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresentedByASolicitor;
@@ -177,6 +178,30 @@ public class CommonFunctionTest {
         asList("", null)
             .forEach(value -> assertThat(
                 isRespondentRepresentedByASolicitor(createCaseDataRespRepresented(value)), is(false)));
+    }
+
+    @Test
+    public void isConsentedInContestedCaseShouldReturnTrueWhenIsContestedCaseAndConsentD81QuestionIsPopulated() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/general-order-consented-in-contested.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isConsentedInContestedCase(caseDetails), is(true));
+    }
+
+    @Test
+    public void isConsentedInContestedCaseShouldReturnFalseWhenIsContestedCaseAndConsentD81QuestionIsNull() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/general-order-contested.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isConsentedInContestedCase(caseDetails), is(false));
+    }
+
+    @Test
+    public void isConsentedInContestedCaseShouldReturnFalseWhenIsConsentedCaseAndConsentD81QuestionIsNull() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/general-order-consented.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isConsentedInContestedCase(caseDetails), is(false));
     }
 
     @Test
