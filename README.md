@@ -44,6 +44,10 @@ API documentation is provided with Swagger. This is available locally at: `http:
 
 Build the docker image
 
+
+
+
+
 ```bash
     docker build . -t hmcts/finrem-case-orchestration:latest
 ```
