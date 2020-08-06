@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalData;
 
 import java.io.InputStream;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -84,15 +86,20 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = caseDetails("/fixtures/refusal-order-consent-in-contested.json");
 
         Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
-        ConsentOrderData consentOrderData = consentInContestedOrderData(caseData);
 
-        assertThat(consentOrderData.getId(), is(notNullValue()));
-        assertThat(consentOrderData.getConsentOrder().getDocumentType(), is(REJECTED_ORDER_TYPE));
-        assertThat(consentOrderData.getConsentOrder().getDocumentDateAdded(), is(notNullValue()));
-        assertThat(consentOrderData.getConsentOrder().getDocumentComment(), is(equalTo("System Generated")));
-
+        assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION), hasSize(1));
         assertCaseDataExtraFields();
-        assertCaseDocument(consentOrderData.getConsentOrder().getDocumentLink());
+    }
+
+    @Test
+    public void multipleConsentOrderNotApprovedConsentInContested() throws Exception {
+        CaseDetails caseDetails = caseDetails("/fixtures/refusal-order-consent-in-contested.json");
+
+
+        Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION), hasSize(1));
+        caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+        assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION), hasSize(2));
     }
 
     @Test
@@ -124,6 +131,12 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(caseDocument);
     }
 
+    private List<CaseDocument> getDocumentList(Map<String, Object> data, String field) {
+        return mapper.convertValue(data.get(field),
+            new TypeReference<List<CaseDocument>>() {
+            });
+    }
+
     private void assertCaseDataExtraFields() {
         verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
             any(), any());
@@ -151,14 +164,13 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
                 .findFirst().orElseThrow(() -> new IllegalStateException(REJECTED_ORDER_TYPE + " missing"));
     }
 
-    private ConsentOrderData consentInContestedOrderData(Map<String, Object> caseData) {
-        List<ConsentOrderData> list =
-            mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION), new TypeReference<List<ConsentOrderData>>() {
+    private ContestedConsentOrderData consentInContestedOrderData(Map<String, Object> caseData) {
+        List<ContestedConsentOrderData> list =
+            mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION), new TypeReference<List<ContestedConsentOrderData>>() {
             });
 
         return list
             .stream()
-            .filter(cd -> cd.getConsentOrder().getDocumentType().equals(REJECTED_ORDER_TYPE))
             .findFirst().orElseThrow(() -> new IllegalStateException(REJECTED_ORDER_TYPE + " missing"));
     }
 

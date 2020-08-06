@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,18 +75,20 @@ public class RefusalOrderDocumentService {
     private Map<String, Object> populateConsentOrderData(ConsentOrderData consentOrderData, CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
+        List<ConsentOrderData> uploadOrder = Optional.ofNullable(caseData.get(UPLOAD_ORDER))
+            .map(this::convertToUploadOrderList)
+            .orElse(new ArrayList<>());
+        uploadOrder.add(consentOrderData);
+        caseData.put(UPLOAD_ORDER, uploadOrder);
+
         if (isConsentedInContestedCase(caseDetails)) {
-            List<ConsentOrderData> uploadOrder = Optional.ofNullable(caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION))
-                .map(this::convertToUploadOrderList)
-                .orElse(new ArrayList<>());
-            uploadOrder.add(consentOrderData);
-            caseData.put(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION, uploadOrder);
-        } else {
-            List<ConsentOrderData> uploadOrder = Optional.ofNullable(caseData.get(UPLOAD_ORDER))
-                .map(this::convertToUploadOrderList)
-                .orElse(new ArrayList<>());
-            uploadOrder.add(consentOrderData);
-            caseData.put(UPLOAD_ORDER, uploadOrder);
+            ContestedConsentOrder consentOrder = new ContestedConsentOrder(consentOrderData.getConsentOrder().getDocumentLink());
+            ContestedConsentOrderData contestedConsentOrderData = new ContestedConsentOrderData(UUID.randomUUID().toString(), consentOrder);
+            List<ContestedConsentOrderData> consentOrders = Optional.ofNullable(caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION))
+                .map(documentHelper::convertToContestedConsentOrderData)
+                .orElse(new ArrayList<>(1));
+            consentOrders.add(contestedConsentOrderData);
+            caseData.put(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION, consentOrders);
         }
 
         return caseData;
