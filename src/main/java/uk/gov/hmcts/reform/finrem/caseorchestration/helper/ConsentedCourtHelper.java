@@ -56,38 +56,26 @@ public class ConsentedCourtHelper {
         Map<String, Object> caseData = caseDetails.getData();
         String region = (String) caseData.get(REGION);
 
+        if (SOUTHWEST.equalsIgnoreCase(region)) {
+            return getSouthWestFRC(caseData);
+        }
         if (MIDLANDS.equalsIgnoreCase(region)) {
             return getMidlandFRC(caseData);
-        }
-        if (LONDON.equalsIgnoreCase(region)) {
-            return getLondonFRC(caseData);
         }
         if (NORTHWEST.equalsIgnoreCase(region)) {
             return getNorthWestFRC(caseData);
         }
+        if (LONDON.equalsIgnoreCase(region)) {
+            return getLondonFRC(caseData);
+        }
         if (NORTHEAST.equalsIgnoreCase(region)) {
             return getNorthEastFRC(caseData);
-        }
-        if (SOUTHEAST.equalsIgnoreCase(region)) {
-            return getSouthEastFRC(caseData);
-        }
-        if (SOUTHWEST.equalsIgnoreCase(region)) {
-            return getSouthWestFRC(caseData);
         }
         if (WALES.equalsIgnoreCase(region)) {
             return getWalesFRC(caseData);
         }
-        return EMPTY;
-    }
-
-    private static String getWalesFRC(Map<String, Object> caseData) {
-        String walesList = (String) caseData.get(WALES_FRC_LIST);
-        if (NEWPORT.equalsIgnoreCase(walesList)) {
-            return getNewportCourt(caseData);
-        } else if (SWANSEA.equalsIgnoreCase(walesList)) {
-            return getSwanseaCourt(caseData);
-        } else if (OTHER.equalsIgnoreCase(walesList)) {
-            return getWalesOtherCourt(caseData);
+        if (SOUTHEAST.equalsIgnoreCase(region)) {
+            return getSouthEastFRC(caseData);
         }
         return EMPTY;
     }
@@ -110,14 +98,14 @@ public class ConsentedCourtHelper {
         return EMPTY;
     }
 
-    private static String getNorthEastFRC(Map<String, Object> caseData) {
-        String northEastList = (String) caseData.get(NORTHEAST_FRC_LIST);
-        if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
-            return getCleavelandCourt(caseData);
-        } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
-            return getNwYorkshireCourt(caseData);
-        } else if (HSYORKSHIRE.equalsIgnoreCase(northEastList)) {
-            return getHumberCourt(caseData);
+    private static String getWalesFRC(Map<String, Object> caseData) {
+        String walesList = (String) caseData.get(WALES_FRC_LIST);
+        if (NEWPORT.equalsIgnoreCase(walesList)) {
+            return getNewportCourt(caseData);
+        } else if (SWANSEA.equalsIgnoreCase(walesList)) {
+            return getSwanseaCourt(caseData);
+        } else if (OTHER.equalsIgnoreCase(walesList)) {
+            return getWalesOtherCourt(caseData);
         }
         return EMPTY;
     }
@@ -142,6 +130,18 @@ public class ConsentedCourtHelper {
         return EMPTY;
     }
 
+    private static String getNorthEastFRC(Map<String, Object> caseData) {
+        String northEastList = (String) caseData.get(NORTHEAST_FRC_LIST);
+        if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
+            return getCleavelandCourt(caseData);
+        } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
+            return getNwYorkshireCourt(caseData);
+        } else if (HSYORKSHIRE.equalsIgnoreCase(northEastList)) {
+            return getHumberCourt(caseData);
+        }
+        return EMPTY;
+    }
+
     private static String getMidlandFRC(Map<String, Object> caseData) {
         String midlandsList = (String) caseData.get(MIDLANDS_FRC_LIST);
         if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
@@ -151,21 +151,6 @@ public class ConsentedCourtHelper {
         }
         return EMPTY;
     }
-
-    public static String getNottinghamCourt(Map<String, Object> caseData) {
-        return nottinghamMap.getOrDefault(caseData.get(NOTTINGHAM_COURTLIST), "");
-    }
-
-    private static Map<String, String> nottinghamMap = ImmutableMap.<String, String>builder()
-        .put("FR_nottinghamList_1", "Nottingham County Court and Family Court")
-        .put("FR_nottinghamList_2", "Derby Combined Court Centre")
-        .put("FR_nottinghamList_3", "Leicester County Court and Family Court")
-        .put("FR_nottinghamList_4", "Lincoln County Court and Family Court")
-        .put("FR_nottinghamList_5", "Northampton Crown, County and Family Court")
-        .put("FR_nottinghamList_6", "Chesterfield County Court")
-        .put("FR_nottinghamList_7", "Mansfield Magistrates and County Court")
-        .put("FR_nottinghamList_8", "Boston County Court and Family Court")
-        .build();
 
     public static String getBirminghamCourt(Map<String, Object> caseData) {
         return birminghamMap.getOrDefault(caseData.get(BIRMINGHAM_COURTLIST), "");
@@ -202,6 +187,21 @@ public class ConsentedCourtHelper {
         .put("FR_londonList_2", "Willesden County Court and Family Court")
         .build();
 
+    public static String getNottinghamCourt(Map<String, Object> caseData) {
+        return nottinghamMap.getOrDefault(caseData.get(NOTTINGHAM_COURTLIST), "");
+    }
+
+    private static Map<String, String> nottinghamMap = ImmutableMap.<String, String>builder()
+        .put("FR_nottinghamList_1", "Nottingham County Court and Family Court")
+        .put("FR_nottinghamList_2", "Derby Combined Court Centre")
+        .put("FR_nottinghamList_3", "Leicester County Court and Family Court")
+        .put("FR_nottinghamList_4", "Lincoln County Court and Family Court")
+        .put("FR_nottinghamList_5", "Northampton Crown, County and Family Court")
+        .put("FR_nottinghamList_6", "Chesterfield County Court")
+        .put("FR_nottinghamList_7", "Mansfield Magistrates and County Court")
+        .put("FR_nottinghamList_8", "Boston County Court and Family Court")
+        .build();
+
     public static String getLiverpoolCourt(Map<String, Object> caseData) {
         return liverpoolMap.getOrDefault(caseData.get(LIVERPOOL_COURTLIST), "");
     }
@@ -212,16 +212,6 @@ public class ConsentedCourtHelper {
         .put("FR_liverpoolList_3", "Crewe County Court and Family Court")
         .put("FR_liverpoolList_4", "St. Helens County Court and Family Court")
         .put("FR_liverpoolList_5", "Birkenhead County Court and Family Court")
-        .build();
-
-    public static String getManchesterCourt(Map<String, Object> caseData) {
-        return manchesterMap.getOrDefault(caseData.get(MANCHESTER_COURTLIST), "");
-    }
-
-    private static Map<String, String> manchesterMap = ImmutableMap.<String, String>builder()
-        .put("FR_manchesterList_1", "Manchester County and Family Court")
-        .put("FR_manchesterList_2", "Stockport County Court and Family Court")
-        .put("FR_manchesterList_3", "Wigan County Court and Family Court")
         .build();
 
     public static String getNwOtherCourt(Map<String, Object> caseData) {
@@ -254,6 +244,16 @@ public class ConsentedCourtHelper {
         .put("FR_clevelandList_8", "Darlington County Court and Family Court")
         .build();
 
+    public static String getManchesterCourt(Map<String, Object> caseData) {
+        return manchesterMap.getOrDefault(caseData.get(MANCHESTER_COURTLIST), "");
+    }
+
+    private static Map<String, String> manchesterMap = ImmutableMap.<String, String>builder()
+        .put("FR_manchesterList_1", "Manchester County and Family Court")
+        .put("FR_manchesterList_2", "Stockport County Court and Family Court")
+        .put("FR_manchesterList_3", "Wigan County Court and Family Court")
+        .build();
+
     public static String getNwYorkshireCourt(Map<String, Object> caseData) {
         return yorkshireMap.getOrDefault(caseData.get(NWYORKSHIRE_COURTLIST), "");
     }
@@ -267,18 +267,6 @@ public class ConsentedCourtHelper {
         .put("FR_nw_yorkshireList_6", "Scarborough Justice Centre")
         .put("FR_nw_yorkshireList_7", "Skipton County Court and Family Court")
         .put("FR_nw_yorkshireList_8", "Leeds Combined Court Centre")
-        .build();
-
-    public static String getHumberCourt(Map<String, Object> caseData) {
-        return humberMap.getOrDefault(caseData.get(HSYORKSHIRE_COURTLIST), "");
-    }
-
-    private static Map<String, String> humberMap = ImmutableMap.<String, String>builder()
-        .put("FR_humberList_1", "Sheffield Family Hearing Centre")
-        .put("FR_humberList_2", "Kingston-upon-Hull Combined Court Centre")
-        .put("FR_humberList_3", "Doncaster Justice Centre North")
-        .put("FR_humberList_4", "Great Grimsby Combined Court Centre")
-        .put("FR_humberList_5", "Barnsley Law Courts")
         .build();
 
     public static String getKentCourt(Map<String, Object> caseData) {
@@ -365,6 +353,18 @@ public class ConsentedCourtHelper {
         .put("FR_newportList_3", "Merthyr Tydfil Combined Court Centre")
         .put("FR_newportList_4", "Pontypridd County and Family Court")
         .put("FR_newportList_5", "Blackwood Civil and Family Court")
+        .build();
+
+    public static String getHumberCourt(Map<String, Object> caseData) {
+        return humberMap.getOrDefault(caseData.get(HSYORKSHIRE_COURTLIST), "");
+    }
+
+    private static Map<String, String> humberMap = ImmutableMap.<String, String>builder()
+        .put("FR_humberList_1", "Sheffield Family Hearing Centre")
+        .put("FR_humberList_2", "Kingston-upon-Hull Combined Court Centre")
+        .put("FR_humberList_3", "Doncaster Justice Centre North")
+        .put("FR_humberList_4", "Great Grimsby Combined Court Centre")
+        .put("FR_humberList_5", "Barnsley Law Courts")
         .build();
 
     public static String getSwanseaCourt(Map<String, Object> caseData) {
