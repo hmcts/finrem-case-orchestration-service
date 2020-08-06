@@ -96,16 +96,17 @@ public class ConsentOrderApprovedDocumentService {
 
     public Map<String, Object> stampAndPopulateContestedConsentOrderToCollection(CaseDetails caseDetails, String authToken) {
         Map<String, Object> caseData = caseDetails.getData();
-        CaseDocument stampedDoc = stampContestedConsentOrder(caseData, authToken);
-        caseData = populateContestedConsentOrderCaseDetails(caseData, stampedDoc);
+        CaseDocument stampedAndAnnexedDoc = stampAndAnnexContestedConsentOrder(caseData, authToken);
+        caseData = populateContestedConsentOrderCaseDetails(caseData, stampedAndAnnexedDoc);
         return caseData;
     }
 
-    private CaseDocument stampContestedConsentOrder(Map<String, Object> caseData, String authToken) {
+    private CaseDocument stampAndAnnexContestedConsentOrder(Map<String, Object> caseData, String authToken) {
         CaseDocument latestConsentOrder = getLatestConsentInContestedConsentOrder(caseData);
         CaseDocument stampedDoc = genericDocumentService.stampDocument(latestConsentOrder, authToken);
-        log.info("Stamped Documents = {}", stampedDoc);
-        return stampedDoc;
+        CaseDocument stampedAndAnnexedDoc = genericDocumentService.annexStampDocument(stampedDoc, authToken);
+        log.info("Stamped Document and Annex doc = {}", stampedAndAnnexedDoc);
+        return stampedAndAnnexedDoc;
     }
 
     private Map<String, Object> populateContestedConsentOrderCaseDetails(Map<String, Object> caseData, CaseDocument stampedDoc) {
