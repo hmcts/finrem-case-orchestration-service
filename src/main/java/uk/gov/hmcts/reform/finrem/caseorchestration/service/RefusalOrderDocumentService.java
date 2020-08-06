@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -126,7 +127,9 @@ public class RefusalOrderDocumentService {
         caseData.put("RespondentName", isConsentedApplication(caseDetails)
             ? DocumentHelper.getRespondentFullNameConsented(caseDetails) :
             DocumentHelper.getRespondentFullNameContested(caseDetails));
-        caseData.put("CourtName", ContestedCourtHelper.getSelectedCourt(caseDetails));
+        caseData.put("CourtName", isConsentedApplication(caseDetails)
+            ? ConsentedCourtHelper.getSelectedCourt(caseDetails) :
+            ContestedCourtHelper.getSelectedCourt(caseDetails));
 
         return caseDetails;
     }
