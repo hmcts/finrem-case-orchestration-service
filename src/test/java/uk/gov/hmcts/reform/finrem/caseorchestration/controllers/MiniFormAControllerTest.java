@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -23,7 +22,6 @@ import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -52,16 +50,6 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     @MockBean
     protected FeatureToggleService featureToggleService;
 
-    @Before
-    public void setUp()  {
-        super.setUp();
-        try {
-            doRequestSetUp();
-        } catch (Exception e) {
-            fail(e.getMessage());
-        }
-    }
-
     protected String endpoint() {
         return "/case-orchestration/documents/generate-mini-form-a";
     }
@@ -70,18 +58,23 @@ public class MiniFormAControllerTest extends BaseControllerTest {
         return when(documentService.generateMiniFormA(eq(AUTH_TOKEN), isA(CaseDetails.class)));
     }
 
-    private void doRequestSetUp() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        requestContent = objectMapper.readTree(new File(getClass()
-                .getResource(jsonFixture()).toURI()));
+    protected OngoingStubbing<CaseDocument> whenServiceGeneratesConsentedInContestedMiniFormA() {
+        return when(documentService.generateConsentedInContestedMiniFormA(isA(CaseDetails.class), eq(AUTH_TOKEN)));
     }
 
-    String jsonFixture() {
-        return "/fixtures/fee-lookup.json";
+    private void doRequestSetUpConsented() throws IOException, URISyntaxException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass().getResource("/fixtures/fee-lookup.json").toURI()));
+    }
+
+    private void doRequestSetUpContested() throws IOException, URISyntaxException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        requestContent = objectMapper.readTree(new File(getClass().getResource("/fixtures/mini-form-a-consent-in-contested.json").toURI()));
     }
 
     @Test
     public void generateMiniFormA_isAutomateAssignJudgeEnabledTrue() throws Exception {
+        doRequestSetUpConsented();
         whenServiceGeneratesDocument().thenReturn(caseDocument());
         when(featureToggleService.isAutomateAssignJudgeEnabled()).thenReturn(true);
 
@@ -103,6 +96,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
 
     @Test
     public void generateMiniFormA_isAutomateAssignJudgeEnabledFalse() throws Exception {
+        doRequestSetUpConsented();
         whenServiceGeneratesDocument().thenReturn(caseDocument());
         when(featureToggleService.isAutomateAssignJudgeEnabled()).thenReturn(false);
 
@@ -124,6 +118,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
 
     @Test
     public void generateMiniFormAHttpError400() throws Exception {
+        doRequestSetUpConsented();
         mvc.perform(post(endpoint())
                 .content("kwuilebge")
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -133,6 +128,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
 
     @Test
     public void generateMiniFormAHttpError500() throws Exception {
+        doRequestSetUpConsented();
         whenServiceGeneratesDocument().thenThrow(feignError());
 
         mvc.perform(post(endpoint())
@@ -140,5 +136,20 @@ public class MiniFormAControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void generateMiniFormAWhenConsentedInContested() throws Exception {
+        doRequestSetUpContested();
+        whenServiceGeneratesConsentedInContestedMiniFormA().thenReturn(caseDocument());
+
+        mvc.perform(post(endpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.consentMiniFormA.document_url", is(DOC_URL)))
+            .andExpect(jsonPath("$.data.consentMiniFormA.document_filename", is(FILE_NAME)))
+            .andExpect(jsonPath("$.data.consentMiniFormA.document_binary_url", is(BINARY_URL)));
     }
 }

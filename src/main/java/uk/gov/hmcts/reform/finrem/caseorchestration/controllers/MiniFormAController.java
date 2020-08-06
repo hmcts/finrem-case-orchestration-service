@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
@@ -26,6 +27,8 @@ import java.util.Map;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A_CONSENTED_IN_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -59,16 +62,23 @@ public class MiniFormAController implements BaseController {
 
         log.info("Received request to generate Consented Mini Form A for Case ID : {}", callback.getCaseDetails().getId());
 
-        Map<String, Object> caseData = callback.getCaseDetails().getData();
-        CaseDocument document = service.generateMiniFormA(authorisationToken, callback.getCaseDetails());
-        caseData.put(MINI_FORM_A, document);
+        CaseDetails caseDetails = callback.getCaseDetails();
+        Map<String, Object> caseData =  caseDetails.getData();
 
-        if (featureToggleService.isAutomateAssignJudgeEnabled()) {
-            log.info("Defaulting AssignedToJudge fields for Case ID: {}", callback.getCaseDetails().getId());
-            populateAssignToJudgeFields(caseData);
+        if (!isConsentedInContestedCase(caseDetails)) {
+            CaseDocument document = service.generateMiniFormA(authorisationToken, callback.getCaseDetails());
+            caseData.put(MINI_FORM_A, document);
+
+            if (featureToggleService.isAutomateAssignJudgeEnabled()) {
+                log.info("Defaulting AssignedToJudge fields for Case ID: {}", callback.getCaseDetails().getId());
+                populateAssignToJudgeFields(caseData);
+            }
+        } else {
+            CaseDocument document = service.generateConsentedInContestedMiniFormA(callback.getCaseDetails(), authorisationToken);
+            caseData.put(MINI_FORM_A_CONSENTED_IN_CONTESTED, document);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
     private void populateAssignToJudgeFields(Map<String, Object> caseData) {

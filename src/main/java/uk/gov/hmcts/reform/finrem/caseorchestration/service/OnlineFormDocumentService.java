@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +27,7 @@ public class OnlineFormDocumentService {
 
     public CaseDocument generateMiniFormA(String authorisationToken, CaseDetails caseDetails) {
 
-        log.info("Generating Mini Form A for Case ID : {}", caseDetails.getId());
+        log.info("Generating Consented Mini Form A for Case ID : {}", caseDetails.getId());
         return genericDocumentService.generateDocument(authorisationToken, caseDetails,
             documentConfiguration.getMiniFormTemplate(),
             documentConfiguration.getMiniFormFileName());
@@ -34,7 +35,7 @@ public class OnlineFormDocumentService {
 
     public CaseDocument generateContestedMiniFormA(String authorisationToken, CaseDetails caseDetails) {
 
-        log.info("Generating Mini Form A for Case ID : {}", caseDetails.getId());
+        log.info("Generating Contested Mini Form A for Case ID : {}", caseDetails.getId());
         return genericDocumentService.generateDocument(authorisationToken, translateOptions(caseDetails),
             documentConfiguration.getContestedMiniFormTemplate(),
             documentConfiguration.getContestedMiniFormFileName());
@@ -71,5 +72,43 @@ public class OnlineFormDocumentService {
                 log.info("Failed to delete existing mini-form-a. Error occurred: {}", e.getMessage());
             }
         });
+    }
+
+    public CaseDocument generateConsentedInContestedMiniFormA(CaseDetails caseDetails, String authorisationToken) {
+
+        log.info("Generating 'Consented in Contested' Mini Form A for Case ID : {}", caseDetails.getId());
+
+        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        prepareMiniFormFields(caseDetailsCopy);
+
+        return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
+            documentConfiguration.getMiniFormTemplate(),
+            documentConfiguration.getMiniFormFileName());
+    }
+
+    private void prepareMiniFormFields(CaseDetails caseDetails) {
+
+        Map<String, Object> caseData = caseDetails.getData();
+
+        //Solicitor Details
+        caseData.put("solicitorName", nullToEmpty(caseData.get("applicantSolicitorName")));
+        caseData.put("solicitorFirm", nullToEmpty(caseData.get("applicantSolicitorFirm")));
+        caseData.put("solicitorAddress", nullToEmpty(caseData.get("applicantSolicitorAddress")));
+
+        //Respondent Details
+        caseData.put("appRespondentFMName", nullToEmpty(caseData.get("respondentFMName")));
+        caseData.put("appRespondentLName", nullToEmpty(caseData.get("respondentLName")));
+        caseData.put("appRespondentRep", nullToEmpty(caseData.get("respondentRepresented")));
+
+        //Checklist
+        caseData.put("natureOfApplicationChecklist", nullToEmpty(caseData.get("consentNatureOfApplicationChecklist")));
+        caseData.put("natureOfApplication3a", nullToEmpty(caseData.get("consentNatureOfApplicationAddress")));
+        caseData.put("natureOfApplication3b", nullToEmpty(caseData.get("consentNatureOfApplicationMortgage")));
+
+        //Order For Children Reasons
+        caseData.put("orderForChildrenQuestion1", nullToEmpty(caseData.get("consentOrderForChildrenQuestion1")));
+        caseData.put("natureOfApplication5", nullToEmpty(caseData.get("consentNatureOfApplication5")));
+        caseData.put("natureOfApplication6", nullToEmpty(caseData.get("consentNatureOfApplication6")));
+        caseData.put("natureOfApplication7", nullToEmpty(caseData.get("consentNatureOfApplication7")));
     }
 }
