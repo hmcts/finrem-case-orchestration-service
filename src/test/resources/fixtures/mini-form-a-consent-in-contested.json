@@ -29,6 +29,13 @@
       "applicantFMName": "Poor",
       "applicantLName": "Guy",
       "authorisation2b": "test",
+      "consentNatureOfApplicationChecklist": [
+        "Periodical Payment Order",
+        "Lump Sum Order",
+        "Property Adjustment Order"
+      ],
+      "consentNatureOfApplicationAddress": "test",
+      "consentNatureOfApplicationMortgage": "test",
       "otherCollection": [
         {
           "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
@@ -77,6 +84,7 @@
       "solicitorReference": "LL01",
       "respondentFMName": "john",
       "respondentLName": "smith",
+      "respondentRepresented": "No",
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
       "orderForChildrenQuestion1": "Yes",

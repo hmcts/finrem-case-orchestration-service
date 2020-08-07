@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
@@ -69,13 +68,11 @@ public class OnlineFormDocumentServiceTest {
 
     @Test
     public void generateConsentedInContestedMiniFormA() throws Exception {
-        CaseDetails caseDetails = consentedInContestedCaseDetails();
-
-        //genericDocumentService = mock(GenericDocumentService.class);
-
-        genericDocumentService = new GenericDocumentService(new DocumentClientStub(new CountDownLatch(1)));
+        generatorClient = new TestDocumentClient();
+        genericDocumentService = new GenericDocumentService(generatorClient);
         onlineFormDocumentService = new OnlineFormDocumentService(genericDocumentService, config, translator, new DocumentHelper(mapper));
 
+        CaseDetails caseDetails = consentedInContestedCaseDetails();
         CaseDocument miniFormA = onlineFormDocumentService.generateConsentedInContestedMiniFormA(caseDetails, AUTH_TOKEN);
         doCaseDocumentAssert(miniFormA);
 
@@ -206,14 +203,15 @@ public class OnlineFormDocumentServiceTest {
             assertThat(data.get("solicitorAddress"), is(""));
 
             //Respondent Details
-            assertThat(data.get("appRespondentFMName"), is(""));
-            assertThat(data.get("appRespondentLName"), is(""));
-            assertThat(data.get("appRespondentRep"), is(""));
+            assertThat(data.get("appRespondentFMName"), is("john"));
+            assertThat(data.get("appRespondentLName"), is("smith"));
+            assertThat(data.get("appRespondentRep"), is("No"));
 
             //Checklist
-            assertThat(data.get("natureOfApplicationChecklist"), is(""));
-            assertThat(data.get("natureOfApplication3a"), is(""));
-            assertThat(data.get("natureOfApplication3b"), is(""));
+            assertThat(data.get("natureOfApplicationChecklist"),
+                is("[Periodical Payment Order, Lump Sum Order, Property Adjustment Order]"));
+            assertThat(data.get("natureOfApplication3a"), is("test"));
+            assertThat(data.get("natureOfApplication3b"), is("test"));
 
             //Order For Children Reasons
             assertThat(data.get("orderForChildrenQuestion1"), is(""));
