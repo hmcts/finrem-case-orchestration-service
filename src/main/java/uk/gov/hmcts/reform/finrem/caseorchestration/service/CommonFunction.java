@@ -89,6 +89,10 @@ public class CommonFunction {
         return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.get(PAPER_APPLICATION)));
     }
 
+    public static boolean isConsentedInContestedCase(CaseDetails caseDetails) {
+        return isContestedApplication(caseDetails) && caseDetails.getData().get(CONSENT_D81_QUESTION) != null;
+    }
+
     public static boolean isNotEmpty(String field, Map<String, Object> caseData) {
         return StringUtils.isNotEmpty(nullToEmpty(caseData.get(field)));
     }

@@ -136,6 +136,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_ORDER_LATEST_DOCUMENT = "generalOrderLatestDocument";
     public static final String GENERAL_ORDER_COLLECTION_CONTESTED = "generalOrders";
     public static final String GENERAL_ORDER_COLLECTION_CONTESTED_DOCUMENT = "additionalDocument";
+    public static final String GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED = "generalOrdersConsent";
     public static final String GENERAL_ORDER_COLLECTION_CONSENTED = "generalOrderCollection";
     public static final String GENERAL_ORDER_COLLECTION_CONSENTED_DOCUMENT = "generalOrder_documentUpload";
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
