@@ -78,7 +78,7 @@ public class MiniFormAController implements BaseController {
             caseData.put(MINI_FORM_A_CONSENTED_IN_CONTESTED, document);
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     private void populateAssignToJudgeFields(Map<String, Object> caseData) {

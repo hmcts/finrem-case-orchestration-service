@@ -16,8 +16,10 @@ public class CCDConfigConstant {
     public static final String APPLICANT_PHONE = "applicantPhone";
     public static final String APPLICANT_EMAIL = "applicantEmail";
 
-    public static final String APP_RESPONDENT_FIRST_MIDDLE_NAME = "appRespondentFMName";
-    public static final String APP_RESPONDENT_LAST_NAME = "appRespondentLName";
+    public static final String CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME = "appRespondentFMName";
+    public static final String CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME = "respondentFMName";
+    public static final String CONSENTED_RESPONDENT_LAST_NAME = "appRespondentLName";
+    public static final String CONTESTED_RESPONDENT_LAST_NAME = "respondentLName";
     public static final String RESPONDENT_ADDRESS = "respondentAddress";
 
     //Applicant Solicitor related
@@ -29,7 +31,8 @@ public class CCDConfigConstant {
     public static final String CONTESTED_SOLICITOR_ADDRESS = "applicantSolicitorAddress";
     public static final String CONTESTED_SOLICITOR_EMAIL = "applicantSolicitorEmail";
     public static final String CONTESTED_SOLICITOR_NAME = "applicantSolicitorName";
-    public static final String SOLICITOR_FIRM = "solicitorFirm";
+    public static final String CONSENTED_SOLICITOR_FIRM = "solicitorFirm";
+    public static final String CONTESTED_SOLICITOR_FIRM = "applicantSolicitorFirm";
     public static final String APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED = "solicitorAgreeToReceiveEmails";
     public static final String APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED = "applicantSolicitorConsentForEmails";
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";
@@ -101,7 +104,8 @@ public class CCDConfigConstant {
     public static final String LIVERPOOL_COURTLIST = "liverpoolCourtList";
 
     //Respondent Solicitor Related
-    public static final String RESPONDENT_REPRESENTED = "appRespondentRep";
+    public static final String CONSENTED_RESPONDENT_REPRESENTED = "appRespondentRep";
+    public static final String CONTESTED_RESPONDENT_REPRESENTED = "respondentRepresented";
     public static final String RESP_SOLICITOR_NAME = "rSolicitorName";
     public static final String RESP_SOLICITOR_ADDRESS = "rSolicitorAddress";
 
@@ -122,6 +126,22 @@ public class CCDConfigConstant {
     //Application Type related
     public static final String D81_QUESTION = "d81Question";
     public static final String CONSENT_D81_QUESTION = "consentD81Question";
+
+    //Nature of Application
+    public static final String CONSENTED_NATURE_OF_APPLICATION = "natureOfApplicationChecklist";
+    public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION = "consentNatureOfApplicationChecklist";
+    public static final String CONSENTED_NATURE_OF_APPLICATION_3A = "natureOfApplication3a";
+    public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3A = "consentNatureOfApplicationAddress";
+    public static final String CONSENTED_NATURE_OF_APPLICATION_3B = "natureOfApplication3b";
+    public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3B = "consentNatureOfApplicationMortgage";
+    public static final String CONSENTED_ORDER_FOR_CHILDREN = "orderForChildrenQuestion1";
+    public static final String CONSENT_IN_CONTESTED_ORDER_FOR_CHILDREN = "consentOrderForChildrenQuestion1";
+    public static final String CONSENTED_NATURE_OF_APPLICATION_5 = "natureOfApplication5";
+    public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_5 = "consentNatureOfApplication5";
+    public static final String CONSENTED_NATURE_OF_APPLICATION_6 = "natureOfApplication6";
+    public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_6 = "consentNatureOfApplication6";
+    public static final String CONSENTED_NATURE_OF_APPLICATION_7 = "natureOfApplication7";
+    public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_7 = "consentNatureOfApplication7";
 
     //Document related
     public static final String MINI_FORM_A = "miniFormA";

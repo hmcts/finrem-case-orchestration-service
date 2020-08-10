@@ -21,10 +21,18 @@
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
         "document_binary_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
       },
-      "solicitorFirm": "Mr",
-      "solicitorName": "Solictor",
-      "authorisation3": "2010-01-01",
-      "solicitorEmail": "test@admin.com",
+      "applicantSolicitorFirm": "Awesome Firm",
+      "applicantSolicitorName": "Solicitor",
+      "applicantSolicitorEmail": "test@test.com",
+      "applicantSolicitorAddress": {
+        "County": "County",
+        "Country": "UK",
+        "PostCode": "SW1A 1AA",
+        "PostTown": "London",
+        "AddressLine1": "Buckingham Palace",
+        "AddressLine2": "null",
+        "AddressLine3": null
+      },
       "solicitorPhone": "9963472494",
       "applicantFMName": "Poor",
       "applicantLName": "Guy",
@@ -87,7 +95,13 @@
       "respondentRepresented": "No",
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
-      "orderForChildrenQuestion1": "Yes",
+      "consentOrderForChildrenQuestion1": "Yes",
+      "consentNatureOfApplication5": "No",
+      "consentNatureOfApplication6": [
+        "item1",
+        "item2"
+      ],
+      "consentNatureOfApplication7": "test",
       "solicitorAgreeToReceiveEmails": "Yes"
     }
   }

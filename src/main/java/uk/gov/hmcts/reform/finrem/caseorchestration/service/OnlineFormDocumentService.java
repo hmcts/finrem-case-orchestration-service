@@ -12,6 +12,32 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_3A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_3B;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_5;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_6;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_7;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_FOR_CHILDREN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3B;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_5;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_6;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_7;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_ORDER_FOR_CHILDREN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
@@ -91,24 +117,24 @@ public class OnlineFormDocumentService {
         Map<String, Object> caseData = caseDetails.getData();
 
         //Solicitor Details
-        caseData.put("solicitorName", nullToEmpty(caseData.get("applicantSolicitorName")));
-        caseData.put("solicitorFirm", nullToEmpty(caseData.get("applicantSolicitorFirm")));
-        caseData.put("solicitorAddress", nullToEmpty(caseData.get("applicantSolicitorAddress")));
+        caseData.put(CONSENTED_SOLICITOR_NAME, nullToEmpty(caseData.get(CONTESTED_SOLICITOR_NAME)));
+        caseData.put(CONSENTED_SOLICITOR_FIRM, nullToEmpty(caseData.get(CONTESTED_SOLICITOR_FIRM)));
+        caseData.put(CONSENTED_SOLICITOR_ADDRESS, nullToEmpty(caseData.get(CONTESTED_SOLICITOR_ADDRESS)));
 
         //Respondent Details
-        caseData.put("appRespondentFMName", nullToEmpty(caseData.get("respondentFMName")));
-        caseData.put("appRespondentLName", nullToEmpty(caseData.get("respondentLName")));
-        caseData.put("appRespondentRep", nullToEmpty(caseData.get("respondentRepresented")));
+        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, nullToEmpty(caseData.get(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME)));
+        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, nullToEmpty(caseData.get(CONTESTED_RESPONDENT_LAST_NAME)));
+        caseData.put(CONSENTED_RESPONDENT_REPRESENTED, nullToEmpty(caseData.get(CONTESTED_RESPONDENT_REPRESENTED)));
 
         //Checklist
-        caseData.put("natureOfApplicationChecklist", nullToEmpty(caseData.get("consentNatureOfApplicationChecklist")));
-        caseData.put("natureOfApplication3a", nullToEmpty(caseData.get("consentNatureOfApplicationAddress")));
-        caseData.put("natureOfApplication3b", nullToEmpty(caseData.get("consentNatureOfApplicationMortgage")));
+        caseData.put(CONSENTED_NATURE_OF_APPLICATION, nullToEmpty(caseData.get(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION)));
+        caseData.put(CONSENTED_NATURE_OF_APPLICATION_3A, nullToEmpty(caseData.get(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3A)));
+        caseData.put(CONSENTED_NATURE_OF_APPLICATION_3B, nullToEmpty(caseData.get(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3B)));
 
         //Order For Children Reasons
-        caseData.put("orderForChildrenQuestion1", nullToEmpty(caseData.get("consentOrderForChildrenQuestion1")));
-        caseData.put("natureOfApplication5", nullToEmpty(caseData.get("consentNatureOfApplication5")));
-        caseData.put("natureOfApplication6", nullToEmpty(caseData.get("consentNatureOfApplication6")));
-        caseData.put("natureOfApplication7", nullToEmpty(caseData.get("consentNatureOfApplication7")));
+        caseData.put(CONSENTED_ORDER_FOR_CHILDREN, nullToEmpty(caseData.get(CONSENT_IN_CONTESTED_ORDER_FOR_CHILDREN)));
+        caseData.put(CONSENTED_NATURE_OF_APPLICATION_5, nullToEmpty(caseData.get(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_5)));
+        caseData.put(CONSENTED_NATURE_OF_APPLICATION_6, nullToEmpty(caseData.get(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_6)));
+        caseData.put(CONSENTED_NATURE_OF_APPLICATION_7, nullToEmpty(caseData.get(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_7)));
     }
 }

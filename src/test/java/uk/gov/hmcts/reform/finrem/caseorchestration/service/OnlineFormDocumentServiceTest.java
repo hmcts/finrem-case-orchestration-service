@@ -29,6 +29,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_UR
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_3A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_3B;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_5;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_6;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_7;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_FOR_CHILDREN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
 public class OnlineFormDocumentServiceTest {
@@ -198,26 +211,28 @@ public class OnlineFormDocumentServiceTest {
             Map<String, Object> data = data();
 
             //Solicitor Details
-            assertThat(data.get("solicitorName"), is(""));
-            assertThat(data.get("solicitorFirm"), is(""));
-            assertThat(data.get("solicitorAddress"), is(""));
+            assertThat(data.get(CONSENTED_SOLICITOR_NAME), is("Solicitor"));
+            assertThat(data.get(CONSENTED_SOLICITOR_FIRM), is("Awesome Firm"));
+            assertThat(data.get(CONSENTED_SOLICITOR_ADDRESS),
+                is("{County=County, Country=UK, PostCode=SW1A 1AA, PostTown=London,"
+                    + " AddressLine1=Buckingham Palace, AddressLine2=null, AddressLine3=null}"));
 
             //Respondent Details
-            assertThat(data.get("appRespondentFMName"), is("john"));
-            assertThat(data.get("appRespondentLName"), is("smith"));
-            assertThat(data.get("appRespondentRep"), is("No"));
+            assertThat(data.get(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME), is("john"));
+            assertThat(data.get(CONSENTED_RESPONDENT_LAST_NAME), is("smith"));
+            assertThat(data.get(CONSENTED_RESPONDENT_REPRESENTED), is("No"));
 
             //Checklist
-            assertThat(data.get("natureOfApplicationChecklist"),
+            assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION),
                 is("[Periodical Payment Order, Lump Sum Order, Property Adjustment Order]"));
-            assertThat(data.get("natureOfApplication3a"), is("test"));
-            assertThat(data.get("natureOfApplication3b"), is("test"));
+            assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_3A), is("test"));
+            assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_3B), is("test"));
 
             //Order For Children Reasons
-            assertThat(data.get("orderForChildrenQuestion1"), is(""));
-            assertThat(data.get("natureOfApplication5"), is(""));
-            assertThat(data.get("natureOfApplication6"), is(""));
-            assertThat(data.get("natureOfApplication7"), is(""));
+            assertThat(data.get(CONSENTED_ORDER_FOR_CHILDREN), is("Yes"));
+            assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_5), is("No"));
+            assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_6), is("[item1, item2]"));
+            assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_7), is("test"));
         }
     }
 }
