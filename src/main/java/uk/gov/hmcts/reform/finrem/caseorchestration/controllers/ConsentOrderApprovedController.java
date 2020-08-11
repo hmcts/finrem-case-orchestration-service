@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import javax.validation.constraints.NotNull;
 
@@ -56,6 +57,7 @@ public class ConsentOrderApprovedController implements BaseController {
     private final ObjectMapper mapper;
     private final BulkPrintService bulkPrintService;
     private final FeatureToggleService featureToggleService;
+    private final NotificationService notificationService;
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "'Consent Order Approved' callback handler. Generates relevant Consent Order Approved documents")
@@ -130,6 +132,7 @@ public class ConsentOrderApprovedController implements BaseController {
                 caseDetails.setData(caseData);
                 caseData = bulkPrintService.sendToBulkPrint(caseDetails, authToken);
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
+                notificationService.sendCTSCNotificationOfAutomatedSendOrder(caseDetails);
             } catch (JsonProcessingException e) {
                 log.error(e.getMessage());
             }
