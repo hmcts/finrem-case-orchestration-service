@@ -73,8 +73,8 @@
         "AddressLine1": "Houses of Parliment",
         "AddressLine2": "Westminster"
       },
-      "authorisationFirm": "test",
       "authorisationName": "test",
+      "solicitorFirm": "Authorised Firm",
       "divorceCaseNumber": "DD12D12345",
       "respondentAddress": {
         "County": "Essex",

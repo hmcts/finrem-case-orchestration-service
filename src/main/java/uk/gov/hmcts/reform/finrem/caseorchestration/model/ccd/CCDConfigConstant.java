@@ -128,7 +128,7 @@ public class CCDConfigConstant {
     public static final String CONSENT_D81_QUESTION = "consentD81Question";
 
     //Nature of Application
-    public static final String CONSENTED_NATURE_OF_APPLICATION = "natureOfApplicationChecklist";
+    public static final String CONSENTED_NATURE_OF_APPLICATION = "natureOfApplication2";
     public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION = "consentNatureOfApplicationChecklist";
     public static final String CONSENTED_NATURE_OF_APPLICATION_3A = "natureOfApplication3a";
     public static final String CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3A = "consentNatureOfApplicationAddress";
@@ -200,6 +200,8 @@ public class CCDConfigConstant {
     public static final String AMOUNT_TO_PAY = "amountToPay";
     public static final String ISSUE_DATE = "issueDate";
     public static final String FAST_TRACK_DECISION = "fastTrackDecision";
+    public static final String CONSENTED_AUTHORISATION_FIRM = "authorisationFirm";
+    public static final String CONTESTED_AUTHORISATION_FIRM = "solicitorFirm";
 
     // Bulk Printing
     public static final String BULK_PRINT_COVER_SHEET_APP = "bulkPrintCoverSheetApp";

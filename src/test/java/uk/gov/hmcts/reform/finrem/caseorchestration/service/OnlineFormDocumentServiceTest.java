@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_UR
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_AUTHORISATION_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_3A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_3B;
@@ -233,6 +234,8 @@ public class OnlineFormDocumentServiceTest {
             assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_5), is("No"));
             assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_6), is("[item1, item2]"));
             assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_7), is("test"));
+
+            assertThat(data.get(CONSENTED_AUTHORISATION_FIRM), is("Authorised Firm"));
         }
     }
 }

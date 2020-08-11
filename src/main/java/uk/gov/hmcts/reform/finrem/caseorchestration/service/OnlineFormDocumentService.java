@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_AUTHORISATION_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_3A;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_NATURE_OF_APPLICATION_3B;
@@ -32,6 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_6;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_7;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_IN_CONTESTED_ORDER_FOR_CHILDREN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_AUTHORISATION_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
@@ -118,6 +120,7 @@ public class OnlineFormDocumentService {
 
         //Solicitor Details
         caseData.put(CONSENTED_SOLICITOR_NAME, nullToEmpty(caseData.get(CONTESTED_SOLICITOR_NAME)));
+        caseData.put(CONSENTED_AUTHORISATION_FIRM, nullToEmpty(caseData.get(CONTESTED_AUTHORISATION_FIRM)));
         caseData.put(CONSENTED_SOLICITOR_FIRM, nullToEmpty(caseData.get(CONTESTED_SOLICITOR_FIRM)));
         caseData.put(CONSENTED_SOLICITOR_ADDRESS, nullToEmpty(caseData.get(CONTESTED_SOLICITOR_ADDRESS)));
 
