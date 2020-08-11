@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_AMENDED_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_RESPOND_TO_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_COLLECTION_CONSENTED_IN_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 
 @Service
@@ -51,6 +52,12 @@ public class DocumentValidationService {
             return validateLatestConsentOrderDocument(authToken, caseData);
         } else if (respondToOrderDocument(callbackRequest)) {
             return validateRespondToOrderDocument(authToken, caseData);
+        } else if (CommonFunction.isConsentedInContestedCase(caseDetails)) {
+            if (consentOrder(field)) {
+                return validateConsentOrderDocument(authToken, caseData);
+            } else if (consentInContestedPensionDocuments(field)) {
+                return validateConsentedInContestedPensionDocuments(authToken, caseData);
+            }
         }
         log.info("Invalid request with caseField = {} , event = {}", field, callbackRequest.getEventId());
         return DocumentValidationResponse.builder()
@@ -64,6 +71,15 @@ public class DocumentValidationService {
     private DocumentValidationResponse validatePensionDocuments(String authorizationToken, Map<String, Object> caseData) {
 
         List<CaseDocument> caseDocuments = documentHelper.getPensionDocumentsData(caseData);
+        if (!caseDocuments.isEmpty()) {
+            return validateDocuments(authorizationToken, caseDocuments);
+        }
+        return DocumentValidationResponse.builder().build();
+    }
+
+    private DocumentValidationResponse validateConsentedInContestedPensionDocuments(String authorizationToken, Map<String, Object> caseData) {
+
+        List<CaseDocument> caseDocuments = documentHelper.getConsentedInContestedPensionDocumentsData(caseData);
         if (!caseDocuments.isEmpty()) {
             return validateDocuments(authorizationToken, caseDocuments);
         }
@@ -85,6 +101,10 @@ public class DocumentValidationService {
 
     private boolean consentOrder(String field) {
         return CONSENT_ORDER.equalsIgnoreCase(field);
+    }
+
+    private boolean consentInContestedPensionDocuments(String field) {
+        return PENSION_COLLECTION_CONSENTED_IN_CONTESTED.equalsIgnoreCase(field);
     }
 
     private DocumentValidationResponse validateRespondToOrderDocument(String authToken, Map<String, Object> caseData) {

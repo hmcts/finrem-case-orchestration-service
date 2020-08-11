@@ -60,6 +60,14 @@ public class DocumentHelperTest {
     }
 
     @Test
+    public void shouldGetConsentedInContestedPensionDocuments() throws Exception {
+        CallbackRequest callbackRequest = prepareCallbackRequest("consented-in-consented.json");
+        List<CaseDocument> pensionDocuments = documentHelper.getConsentedInContestedPensionDocumentsData(
+            callbackRequest.getCaseDetails().getData());
+        assertThat(pensionDocuments.size(), is(2));
+    }
+
+    @Test
     public void shouldGetRespondToOrderDocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequest("respond-to-order-solicitor.json");
         Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
