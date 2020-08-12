@@ -162,7 +162,7 @@ public class NotificationService {
     }
 
     public void sendCTSCNotificationOfAutomatedSendOrder(CaseDetails caseDetails) {
-        URI uri = buildUri(notificationServiceConfiguration.getCTSCSendOrderNotification());
+        URI uri = buildUri(notificationServiceConfiguration.getConsentedNotifyCTSCSendOrder());
         notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
