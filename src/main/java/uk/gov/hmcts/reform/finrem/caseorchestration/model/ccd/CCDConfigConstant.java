@@ -110,8 +110,18 @@ public class CCDConfigConstant {
     public static final String APPLICANT_SOLICITOR = "applicantSolicitor";
     public static final String RESPONDENT_SOLICITOR = "respondentSolicitor";
 
+    //Refusal Order / Application Not Approved (Contested)
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL = "judgeNotApprovedReasons";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT = "refusalOrderPreviewDocument";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION = "refusalOrderCollection";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT = "latestRefusalOrder";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME = "refusalOrderJudgeName";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE = "refusalOrderJudgeType";
+    public static final String CONTESTED_APPLICATION_NOT_APPROVED_DATE = "refusalOrderDate";
+
     //Application Type related
     public static final String D81_QUESTION = "d81Question";
+    public static final String CONSENT_D81_QUESTION = "consentD81Question";
 
     //Document related
     public static final String MINI_FORM_A = "miniFormA";
@@ -130,6 +140,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_ORDER_LATEST_DOCUMENT = "generalOrderLatestDocument";
     public static final String GENERAL_ORDER_COLLECTION_CONTESTED = "generalOrders";
     public static final String GENERAL_ORDER_COLLECTION_CONTESTED_DOCUMENT = "additionalDocument";
+    public static final String GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED = "generalOrdersConsent";
     public static final String GENERAL_ORDER_COLLECTION_CONSENTED = "generalOrderCollection";
     public static final String GENERAL_ORDER_COLLECTION_CONSENTED_DOCUMENT = "generalOrder_documentUpload";
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
