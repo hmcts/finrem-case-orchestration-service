@@ -20,6 +20,8 @@ import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_AMENDED_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_RESPOND_TO_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FR_RESPOND_TO_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_COLLECTION_CONSENTED_IN_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
@@ -52,7 +54,7 @@ public class DocumentValidationService {
             return validateLatestConsentOrderDocument(authToken, caseData);
         } else if (respondToOrderDocument(callbackRequest)) {
             return validateRespondToOrderDocument(authToken, caseData);
-        } else if (CommonFunction.isConsentedInContestedCase(caseDetails)) {
+        } else if (consentInContestedEvent(callbackRequest)) {
             if (consentOrder(field)) {
                 return validateConsentOrderDocument(authToken, caseData);
             } else if (consentInContestedPensionDocuments(field)) {
@@ -92,6 +94,11 @@ public class DocumentValidationService {
 
     private boolean amendConsentOrder(CallbackRequest callbackRequest) {
         return FR_AMENDED_CONSENT_ORDER.equalsIgnoreCase(callbackRequest.getEventId());
+    }
+
+    private boolean consentInContestedEvent(CallbackRequest callbackRequest) {
+        return FR_CONSENT_ORDER.equalsIgnoreCase(callbackRequest.getEventId())
+            || FR_RESPOND_TO_CONSENT_ORDER.equalsIgnoreCase(callbackRequest.getEventId());
     }
 
     private boolean createOrAmendApplication(CallbackRequest callbackRequest) {
