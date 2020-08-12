@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-public class  NotificationsController implements BaseController {
+public class NotificationsController implements BaseController {
 
     private final NotificationService notificationService;
     private final BulkPrintService bulkPrintService;

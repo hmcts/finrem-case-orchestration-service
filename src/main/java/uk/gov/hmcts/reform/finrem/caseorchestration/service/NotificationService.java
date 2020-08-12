@@ -8,7 +8,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 
@@ -99,6 +98,13 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
+    public void sendConsentOrderAvailableCtscEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailableCtsc());
+        notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest.setNotificationEmail(notificationServiceConfiguration.getCtscEmail());
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
     public void sendContestedHwfSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedHwfSuccessful());
         notificationRequest = createNotificationRequest(callbackRequest);
@@ -157,12 +163,6 @@ public class NotificationService {
 
     public void sendContestedConsentOrderApprovedEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedConsentOrderApproved());
-        notificationRequest = createNotificationRequest(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
-    }
-
-    public void sendCTSCNotificationOfAutomatedSendOrder(CaseDetails caseDetails) {
-        URI uri = buildUri(notificationServiceConfiguration.getConsentedNotifyCTSCSendOrder());
         notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }

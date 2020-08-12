@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.List;
 
@@ -57,6 +58,9 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     @MockBean
     private FeatureToggleService featureToggleService;
+
+    @MockBean
+    private NotificationService notificationService;
 
     public String endpoint() {
         return "/case-orchestration/documents/consent-order-approved";
@@ -163,6 +167,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
 
         verify(bulkPrintService).sendToBulkPrint(any(), any());
+        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
     }
 
     @Test
@@ -184,6 +189,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.state", is("applicationDrafted")));
 
         verify(bulkPrintService, never()).sendToBulkPrint(any(), any());
+        verify(notificationService, never()).sendConsentOrderAvailableCtscEmail(any());
     }
 
     @Test
