@@ -106,6 +106,10 @@ public class OnlineFormDocumentService {
 
         log.info("Generating 'Consented in Contested' Mini Form A for Case ID : {}", caseDetails.getId());
 
+        //translation is required to map the natureOfApplication2 values from contested to the consented equivalent
+        // i.e. periodicalPaymentOrder + propertyAdjustmentOrder
+        optionIdToValueTranslator.translateOptionsValues.accept(caseDetails);
+
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         prepareMiniFormFields(caseDetailsCopy);
 

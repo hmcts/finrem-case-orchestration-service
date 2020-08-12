@@ -38,9 +38,9 @@
       "applicantLName": "Guy",
       "authorisation2b": "test",
       "consentNatureOfApplicationChecklist": [
-        "Periodical Payment Order",
+        "periodicalPaymentOrder",
         "Lump Sum Order",
-        "Property Adjustment Order"
+        "propertyAdjustmentOrder"
       ],
       "consentNatureOfApplicationAddress": "test",
       "consentNatureOfApplicationMortgage": "test",

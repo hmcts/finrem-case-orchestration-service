@@ -1,5 +1,4 @@
 {
-
   "MIAMExemptionsChecklist": {
     "domesticViolence": "Domestic violence",
     "urgency": "Urgency",
@@ -89,5 +88,14 @@
     "potentialAllegationChecklist_13": "There is likely to be a need for the involvement of Intervenors",
     "potentialAllegationChecklist_14": "The case involves an insolvency issue",
     "notApplicable": "Not applicable"
+  },
+  "consentNatureOfApplicationChecklist": {
+    "periodicalPaymentOrder": "Periodical Payment Order",
+    "Lump Sum Order": "Lump Sum Order",
+    "Pension Sharing Order": "Pension Sharing Order",
+    "Pension Attachment Order": "Pension Attachment Order",
+    "Pension Compensation Sharing Order": "Pension Compensation Sharing Order",
+    "Pension Compensation Attachment Order": "Pension Compensation Attachment Order",
+    "propertyAdjustmentOrder": "Property Adjustment Order"
   }
 }
