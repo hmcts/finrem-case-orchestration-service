@@ -8,17 +8,17 @@ import static org.hamcrest.Matchers.is;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_CFC;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER_COURTLIST;
@@ -100,41 +100,41 @@ public class ContestedCourtHelperTest {
 
     @Test
     public void kentCourts() {
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENTFRC, KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_1", "Canterbury Family Court Hearing Centre");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENTFRC, KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_2", "Maidstone Combined Court Centre");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENTFRC, KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_3", "Dartford County Court and Family Court");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENTFRC, KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_4", "Medway County Court and Family Court");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENTFRC, KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_5", "Guildford County Court and Family Court");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENTFRC, KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_6", "Staines County Court and Family Court");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENTFRC, KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_7", "Brighton County and Family Court");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENTFRC, KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_8", "Worthing County Court and Family Court");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENTFRC, KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_9", "Hastings County Court and Family Court Hearing Centre");
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENTFRC, KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_10", "Horsham County Court and Family Court");
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, "invalid", KENTFRC_COURTLIST,
             "FR_kent_surrey_hc_list_10", "");
 
 
-        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENTFRC, KENTFRC_COURTLIST,
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "invalid", "");
     }
 
@@ -273,43 +273,43 @@ public class ContestedCourtHelperTest {
 
     @Test
     public void londonCourtListTest() {
-        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, LONDON_COURTLIST,
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "FR_s_CFCList_1", "Bromley County Court and Family Court");
 
-        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, LONDON_COURTLIST,
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "FR_s_CFCList_2", "Croydon County Court and Family Court");
 
-        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, LONDON_COURTLIST,
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "FR_s_CFCList_3", "Edmonton County Court and Family Court");
 
-        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, LONDON_COURTLIST,
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "FR_s_CFCList_4", "Kingston-upon-thames County Court and Family Court");
 
-        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, LONDON_COURTLIST,
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "FR_s_CFCList_5", "Romford County and Family Court");
 
-        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, LONDON_COURTLIST,
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "FR_s_CFCList_6", "Barnet Civil and Family Courts Centre");
 
-        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, LONDON_COURTLIST,
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "FR_s_CFCList_8", "Brentford County and Family Court");
 
-        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, LONDON_COURTLIST,
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "FR_s_CFCList_9", "Central Family Court");
 
-        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, LONDON_COURTLIST,
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "FR_s_CFCList_11", "East London Family Court");
 
-        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, LONDON_COURTLIST,
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "FR_s_CFCList_14", "Uxbridge County Court and Family Court");
 
-        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, LONDON_COURTLIST,
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "FR_s_CFCList_16", "Willesden County Court and Family Court");
 
-        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, "invalid", LONDON_COURTLIST,
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, "invalid", CFC_COURTLIST,
             "FR_s_CFCList_1", "");
 
-        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, LONDON_COURTLIST,
+        verifyCorrectCourtReturned(LONDON, LONDON_FRC_LIST, LONDON_CFC, CFC_COURTLIST,
             "invalid", "");
     }
 
