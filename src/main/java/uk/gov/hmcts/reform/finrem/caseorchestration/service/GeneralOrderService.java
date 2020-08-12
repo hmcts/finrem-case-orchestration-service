@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsen
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +27,21 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import static java.util.Objects.isNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_ADDRESS_TO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_BODY_TEXT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_JUDGE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_RECITALS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +66,16 @@ public class GeneralOrderService {
             .apply(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken);
     }
 
+    public BulkPrintDocument getLatestGeneralOrderForPrintingConsented(Map<String, Object> caseData) {
+        if (isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
+            log.warn("Latest general order not found for printing for case");
+            return null;
+        }
+
+        CaseDocument generalOrder = documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
+        return BulkPrintDocument.builder().binaryFileUrl(generalOrder.getDocumentBinaryUrl()).build();
+    }
+
     private CaseDocument applyGenerateDocument(CaseDetails caseDetails, String authorisationToken) {
         return genericDocumentService.generateDocument(authorisationToken, addExtraFields.apply(caseDetails),
             documentConfiguration.getGeneralOrderTemplate(),
@@ -69,7 +89,7 @@ public class GeneralOrderService {
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        caseData.put("DivorceCaseNumber", caseDetails.getData().get("divorceCaseNumber"));
+        caseData.put("DivorceCaseNumber", caseDetails.getData().get(DIVORCE_CASE_NUMBER));
         caseData.put("ApplicantName", DocumentHelper.getApplicantFullName(caseDetails));
 
         if (isConsentedApplication(caseDetails)) {
@@ -82,12 +102,12 @@ public class GeneralOrderService {
 
         caseData.put("GeneralOrderJudgeDetails",
             StringUtils.joinWith(" ",
-            caseDetails.getData().get("generalOrderJudgeType"),
-            caseDetails.getData().get("generalOrderJudgeName")));
+                caseDetails.getData().get(GENERAL_ORDER_JUDGE_TYPE),
+                caseDetails.getData().get(GENERAL_ORDER_JUDGE_NAME)));
 
-        caseData.put("GeneralOrderRecitals", caseDetails.getData().get("generalOrderRecitals"));
-        caseData.put("GeneralOrderDate", caseDetails.getData().get("generalOrderDate"));
-        caseData.put("GeneralOrderBodyText", caseDetails.getData().get("generalOrderBodyText"));
+        caseData.put("GeneralOrderRecitals", caseDetails.getData().get(GENERAL_ORDER_RECITALS));
+        caseData.put("GeneralOrderDate", caseDetails.getData().get(GENERAL_ORDER_DATE));
+        caseData.put("GeneralOrderBodyText", caseDetails.getData().get(GENERAL_ORDER_BODY_TEXT));
 
         return caseDetails;
     }
@@ -136,12 +156,23 @@ public class GeneralOrderService {
 
         GeneralOrderContestedData contestedData = new GeneralOrderContestedData(UUID.randomUUID().toString(), generalOrder);
 
-        List<GeneralOrderContestedData> generalOrderList = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONTESTED))
-            .map(this::convertToGeneralOrderContestedList)
-            .orElse(new ArrayList<>());
-        generalOrderList.add(contestedData);
+        if (isConsentedInContestedCase(caseDetails)) {
+            List<GeneralOrderContestedData> generalOrderList = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED))
+                .map(this::convertToGeneralOrderContestedList)
+                .orElse(new ArrayList<>());
+            generalOrderList.add(contestedData);
 
-        caseData.put(GENERAL_ORDER_COLLECTION_CONTESTED, generalOrderList);
+            caseData.put(GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED, generalOrderList);
+
+        } else {
+            List<GeneralOrderContestedData> generalOrderList = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONTESTED))
+                .map(this::convertToGeneralOrderContestedList)
+                .orElse(new ArrayList<>());
+            generalOrderList.add(contestedData);
+
+            caseData.put(GENERAL_ORDER_COLLECTION_CONTESTED, generalOrderList);
+        }
+
         return caseData;
     }
 

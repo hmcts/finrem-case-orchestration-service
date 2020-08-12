@@ -257,4 +257,8 @@ public class DocumentHelper {
     public static BulkPrintDocument caseDocumentToBulkPrintDocument(CaseDocument document) {
         return BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl()).build();
     }
+
+    public List<ContestedConsentOrderData> convertToContestedConsentOrderData(Object object) {
+        return (List<ContestedConsentOrderData>)object;
+    }
 }
