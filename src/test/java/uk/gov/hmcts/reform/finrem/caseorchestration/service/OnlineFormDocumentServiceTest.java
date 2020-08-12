@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.collection.IsMapContaining;
 import org.junit.Before;
 import org.junit.Test;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -22,6 +24,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
@@ -214,9 +217,16 @@ public class OnlineFormDocumentServiceTest {
             //Solicitor Details
             assertThat(data.get(CONSENTED_SOLICITOR_NAME), is("Solicitor"));
             assertThat(data.get(CONSENTED_SOLICITOR_FIRM), is("Awesome Firm"));
-            assertThat(data.get(CONSENTED_SOLICITOR_ADDRESS),
-                is("{County=County, Country=UK, PostCode=SW1A 1AA, PostTown=London,"
-                    + " AddressLine1=Buckingham Palace, AddressLine2=null, AddressLine3=null}"));
+
+            assertThat(data, IsMapContaining.hasKey(CONSENTED_SOLICITOR_ADDRESS));
+            Map<String, Object> addressObject = (Map<String, Object>)data.get(CONSENTED_SOLICITOR_ADDRESS);
+            assertThat(addressObject.get("County").toString(), is("County"));
+            assertThat(addressObject.get("Country").toString(), is("UK"));
+            assertThat(addressObject.get("PostCode").toString(), is("SW1A 1AA"));
+            assertThat(addressObject.get("PostTown").toString(), is("London"));
+            assertThat(addressObject.get("AddressLine1").toString(), is("Buckingham Palace"));
+            assertThat(addressObject.get("AddressLine2").toString(), is("null"));
+            assertNull(addressObject.get("AddressLine3"));
 
             //Respondent Details
             assertThat(data.get(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME), is("john"));
@@ -224,15 +234,22 @@ public class OnlineFormDocumentServiceTest {
             assertThat(data.get(CONSENTED_RESPONDENT_REPRESENTED), is("No"));
 
             //Checklist
-            assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION),
-                is("[Periodical Payment Order, Lump Sum Order, Property Adjustment Order]"));
+            assertThat(data, IsMapContaining.hasKey(CONSENTED_NATURE_OF_APPLICATION));
+            assertThat(((ArrayList) data.get(CONSENTED_NATURE_OF_APPLICATION)).get(0).toString(), is("Periodical Payment Order"));
+            assertThat(((ArrayList) data.get(CONSENTED_NATURE_OF_APPLICATION)).get(1).toString(), is("Lump Sum Order"));
+            assertThat(((ArrayList) data.get(CONSENTED_NATURE_OF_APPLICATION)).get(2).toString(), is("Property Adjustment Order"));
+
             assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_3A), is("test"));
             assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_3B), is("test"));
 
             //Order For Children Reasons
             assertThat(data.get(CONSENTED_ORDER_FOR_CHILDREN), is("Yes"));
             assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_5), is("No"));
-            assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_6), is("[item1, item2]"));
+
+            assertThat(data, IsMapContaining.hasKey(CONSENTED_NATURE_OF_APPLICATION_6));
+            assertThat(((ArrayList) data.get(CONSENTED_NATURE_OF_APPLICATION_6)).get(0).toString(), is("item1"));
+            assertThat(((ArrayList) data.get(CONSENTED_NATURE_OF_APPLICATION_6)).get(1).toString(), is("item2"));
+
             assertThat(data.get(CONSENTED_NATURE_OF_APPLICATION_7), is("test"));
 
             assertThat(data.get(CONSENTED_AUTHORISATION_FIRM), is("Authorised Firm"));

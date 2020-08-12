@@ -122,7 +122,7 @@ public class OnlineFormDocumentService {
         caseData.put(CONSENTED_SOLICITOR_NAME, nullToEmpty(caseData.get(CONTESTED_SOLICITOR_NAME)));
         caseData.put(CONSENTED_AUTHORISATION_FIRM, nullToEmpty(caseData.get(CONTESTED_AUTHORISATION_FIRM)));
         caseData.put(CONSENTED_SOLICITOR_FIRM, nullToEmpty(caseData.get(CONTESTED_SOLICITOR_FIRM)));
-        caseData.put(CONSENTED_SOLICITOR_ADDRESS, nullToEmpty(caseData.get(CONTESTED_SOLICITOR_ADDRESS)));
+        caseData.put(CONSENTED_SOLICITOR_ADDRESS, caseData.remove(CONTESTED_SOLICITOR_ADDRESS));
 
         //Respondent Details
         caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, nullToEmpty(caseData.get(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME)));
@@ -130,14 +130,14 @@ public class OnlineFormDocumentService {
         caseData.put(CONSENTED_RESPONDENT_REPRESENTED, nullToEmpty(caseData.get(CONTESTED_RESPONDENT_REPRESENTED)));
 
         //Checklist
-        caseData.put(CONSENTED_NATURE_OF_APPLICATION, nullToEmpty(caseData.get(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION)));
+        caseData.put(CONSENTED_NATURE_OF_APPLICATION, caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION));
         caseData.put(CONSENTED_NATURE_OF_APPLICATION_3A, nullToEmpty(caseData.get(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3A)));
         caseData.put(CONSENTED_NATURE_OF_APPLICATION_3B, nullToEmpty(caseData.get(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3B)));
 
         //Order For Children Reasons
         caseData.put(CONSENTED_ORDER_FOR_CHILDREN, nullToEmpty(caseData.get(CONSENT_IN_CONTESTED_ORDER_FOR_CHILDREN)));
         caseData.put(CONSENTED_NATURE_OF_APPLICATION_5, nullToEmpty(caseData.get(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_5)));
-        caseData.put(CONSENTED_NATURE_OF_APPLICATION_6, nullToEmpty(caseData.get(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_6)));
+        caseData.put(CONSENTED_NATURE_OF_APPLICATION_6, caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_6));
         caseData.put(CONSENTED_NATURE_OF_APPLICATION_7, nullToEmpty(caseData.get(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_7)));
     }
 }
