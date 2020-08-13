@@ -115,10 +115,6 @@ public class DocumentHelper {
         });
     }
 
-    public List<ContestedConsentOrderData> convertToContestedConsentOrderData(Object object) {
-        return (List<ContestedConsentOrderData>)object;
-    }
-
     public List<Map<String, Object>> convertToGenericList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<List<Map<String, Object>>>() {
         });
