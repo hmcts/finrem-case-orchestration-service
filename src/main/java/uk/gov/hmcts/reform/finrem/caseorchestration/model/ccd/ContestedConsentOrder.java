@@ -13,4 +13,3 @@ public class ContestedConsentOrder {
     @JsonProperty("consentOrder")
     private CaseDocument consentOrder;
 }
-

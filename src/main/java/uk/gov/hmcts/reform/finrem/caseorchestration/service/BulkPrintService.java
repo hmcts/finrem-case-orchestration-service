@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Arrays.asList;
+import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
@@ -24,6 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
@@ -43,16 +45,21 @@ public class BulkPrintService {
     private final ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final DocumentHelper documentHelper;
+    private final GeneralOrderService generalOrderService;
+    private final FeatureToggleService featureToggleService;
     private final GenerateCoverSheetService coverSheetService;
 
     public BulkPrintService(GenericDocumentService genericDocumentService,
                             ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService,
                             @Lazy ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
-                            DocumentHelper documentHelper, GenerateCoverSheetService coverSheetService) {
+                            DocumentHelper documentHelper, GeneralOrderService generalOrderService,
+                            FeatureToggleService featureToggleService, GenerateCoverSheetService coverSheetService) {
         this.genericDocumentService = genericDocumentService;
         this.consentOrderNotApprovedDocumentService = consentOrderNotApprovedDocumentService;
         this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
         this.documentHelper = documentHelper;
+        this.generalOrderService = generalOrderService;
+        this.featureToggleService = featureToggleService;
         this.coverSheetService = coverSheetService;
     }
 
@@ -66,7 +73,7 @@ public class BulkPrintService {
         return bulkPrintFinancialRemedyLetterPack(caseId, notificationLetterList);
     }
 
-    private UUID sendOrderForBulkPrintRespondent(final CaseDocument coverSheet, final CaseDetails caseDetails) {
+    public UUID sendOrderForBulkPrintRespondent(final CaseDocument coverSheet, final CaseDetails caseDetails) {
         log.info("Sending order documents to recipient / solicitor for Bulk Print");
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
@@ -76,9 +83,14 @@ public class BulkPrintService {
 
         List<BulkPrintDocument> orderDocuments = isOrderApprovedDocumentCollectionPresent(caseData)
             ? approvedOrderCollection(caseData)
-            : asList(consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseData));
+            : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseData);
 
         bulkPrintDocuments.addAll(orderDocuments);
+
+        if (featureToggleService.isPrintGeneralOrderEnabled() && !isOrderApprovedDocumentCollectionPresent(caseDetails.getData())
+            && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
+            bulkPrintDocuments.add(generalOrderService.getLatestGeneralOrderForPrintingConsented(caseDetails.getData()));
+        }
 
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), bulkPrintDocuments);
     }
@@ -92,7 +104,7 @@ public class BulkPrintService {
         return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, asList(latestGeneralLetter));
     }
 
-    List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
+    public List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         List<Map> documentList = ofNullable(data.get(APPROVED_ORDER_COLLECTION))
             .map(i -> (List<Map>) i)
@@ -112,9 +124,13 @@ public class BulkPrintService {
         return bulkPrintDocuments;
     }
 
-    private UUID printApplicantConsentOrderNotApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
+    public UUID printApplicantConsentOrderNotApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> applicantDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, authorisationToken);
+
+        if (applicantDocuments.isEmpty()) {
+            return null;
+        }
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), applicantDocuments);
     }
 

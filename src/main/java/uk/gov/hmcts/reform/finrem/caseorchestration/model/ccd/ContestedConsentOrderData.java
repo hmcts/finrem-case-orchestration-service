@@ -14,4 +14,3 @@ public class ContestedConsentOrderData {
     @JsonProperty("value")
     private ContestedConsentOrder consentOrder;
 }
-
