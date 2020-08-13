@@ -11,6 +11,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 
 import javax.validation.constraints.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +43,7 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_PENSION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
@@ -104,6 +107,7 @@ public class ConsentOrderApprovedController implements BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
 
         Map<String, Object> caseData = consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(caseDetails, authToken);
+        caseData = consentInContestedStampPensionDocuments(caseData, authToken);
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
@@ -173,5 +177,22 @@ public class ConsentOrderApprovedController implements BaseController {
         return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION),
             new TypeReference<List<PensionCollectionData>>() {
             });
+    }
+
+    private List<PensionCollectionData> getContestedConsentPensionDocuments(Map<String, Object> caseData) {
+        if (StringUtils.isEmpty(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION))) {
+            return new ArrayList<>();
+        }
+
+        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION),
+            new TypeReference<List<PensionCollectionData>>() {
+            });
+    }
+
+    private Map<String, Object> consentInContestedStampPensionDocuments(Map<String, Object> caseData, String authToken) {
+        List<PensionCollectionData> pensionDocs = getContestedConsentPensionDocuments(caseData);
+        List<PensionCollectionData> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocs, authToken);
+        caseData.put(CONTESTED_CONSENT_PENSION_COLLECTION, stampedPensionDocs);
+        return caseData;
     }
 }
