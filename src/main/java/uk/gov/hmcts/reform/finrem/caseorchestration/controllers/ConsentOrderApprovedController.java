@@ -88,6 +88,31 @@ public class ConsentOrderApprovedController implements BaseController {
                 .build());
     }
 
+    @PostMapping(path = "/consent-in-contested/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "'Consent Order Approved' callback handler for consent in contetested. Stamps Consent Order Approved documents"
+        + "and adds them to a collection")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedConsentOrderApproved(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        validateCaseData(callback);
+        CaseDetails caseDetails = callback.getCaseDetails();
+
+        Map<String, Object> caseData = consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(caseDetails, authToken);
+
+        return ResponseEntity.ok(
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseData)
+                .errors(ImmutableList.of())
+                .warnings(ImmutableList.of())
+                .build());
+    }
+
     private Map<String, Object> generateAndPrepareDocuments(@RequestHeader(AUTHORIZATION_HEADER) String authToken, CaseDetails caseDetails) {
         log.info("Generating and preparing documents for latest consent order");
 
