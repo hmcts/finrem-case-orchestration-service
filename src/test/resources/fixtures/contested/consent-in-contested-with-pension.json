@@ -1,0 +1,336 @@
+{
+  "token": "test_token",
+  "event_id": "event1",
+  "case_details": {
+  "id": 1596638099618923,
+  "jurisdiction": "DIVORCE",
+  "state": "consentedOrderSubmitted",
+  "version": 1,
+  "case_type_id": "FinancialRemedyContested",
+  "created_date": "2020-08-05T14:34:59.683",
+  "last_modified": "2020-08-05T14:37:15.69",
+  "last_state_modified_date": "2020-08-05T14:37:15.69",
+  "security_classification": "PUBLIC",
+  "case_data": {
+    "rSolicitorAddress": {
+      "County": "County",
+      "Country": "UK",
+      "PostCode": "SW1A 1AA",
+      "PostTown": "London",
+      "AddressLine1": "10 test street",
+      "AddressLine2": null,
+      "AddressLine3": null
+    },
+    "divorceUploadEvidence2": {
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/93abd15f-a4fa-4d6d-8db8-dbbd15a5fbdb",
+      "document_filename": "divorceevidence.pdf",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/93abd15f-a4fa-4d6d-8db8-dbbd15a5fbdb/binary"
+    },
+    "divorcePetitionIssuedDate": "2020-01-01",
+    "rSolicitorName": null,
+    "consentD81Question": "Yes",
+    "divorceStageReached": "Decree Absolute",
+    "southEastFRCList": "kentfrc",
+    "applicantFMName": "Joe",
+    "fastTrackDecision": "No",
+    "potentialAllegationChecklist": [
+      "notApplicable"
+    ],
+    "applicantSolicitorAddress": {
+      "County": "county",
+      "Country": "united kingdom",
+      "PostCode": "SW1A 1AA",
+      "PostTown": "London",
+      "AddressLine1": "20 test street",
+      "AddressLine2": "",
+      "AddressLine3": ""
+    },
+    "applicantSolicitorFirm": "solicitor firm",
+    "nameOfCourtDivorceCentre": "court name",
+    "rSolicitorDXnumber": null,
+    "netValueOfHome": "100000",
+    "consentD81Joint": {
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/9d6fc2b8-fd0c-4e6f-8b75-5ab7aae40cab",
+      "document_filename": "consentorderpdf.pdf",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/9d6fc2b8-fd0c-4e6f-8b75-5ab7aae40cab/binary"
+    },
+    "dateOfSepration": null,
+    "consentPensionCollection": [
+      {
+        "id": "d8aaa526-f6b8-40f6-a054-1372b8c4e2df",
+        "value": {
+          "typeOfDocument": "Form PPF1",
+          "uploadedDocument": {
+            "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/c55e4ad5-6a45-4e46-a1c1-10b239f04135",
+            "document_filename": "pension1.pdf",
+            "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/c55e4ad5-6a45-4e46-a1c1-10b239f04135/binary"
+          }
+        }
+      },
+      {
+        "id": "c63d9c2a-9e3b-4a55-9e9a-e817124fd8fa",
+        "value": {
+          "typeOfDocument": "Form P2",
+          "uploadedDocument": {
+            "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a101188e-e230-4b3e-b24e-46d516af64bf",
+            "document_filename": "pension2.pdf",
+            "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a101188e-e230-4b3e-b24e-46d516af64bf/binary"
+          }
+        }
+      }
+    ],
+    "promptForAnyDocument": "No",
+    "applicantLName": "Bloggs",
+    "rSolicitorEmail": null,
+    "natureOfApplicationChecklist": [
+      "Lump Sum Order"
+    ],
+    "applicantSolicitorConsentForEmails": "Yes",
+    "applicantSolicitorDXnumber": null,
+    "isAdmin": "Yes",
+    "applicantSolicitorName": "solicitor firm",
+    "applicantSolicitorEmail": "test@email.com",
+    "consentOrder": {
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/fa1cd5a3-b8dd-4c5c-b5e8-64cbb5b106b7",
+      "document_filename": "consentorderpdf.pdf",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/fa1cd5a3-b8dd-4c5c-b5e8-64cbb5b106b7/binary"
+    },
+    "familyMediatorServiceName": "mediation service",
+    "specificArrangementsRequired": null,
+    "respondentRepresented": "Yes",
+    "miniFormA": {
+      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/163c24c2-8598-4ab7-9457-a558c1539731",
+      "document_filename": "DraftOnlineForm.pdf",
+      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/163c24c2-8598-4ab7-9457-a558c1539731/binary"
+    },
+    "consentNatureOfApplicationChecklist": [
+      "Pension Compensation Sharing Order"
+    ],
+    "respondentLName": "Bloggs",
+    "applicantRepresented": "Yes",
+    "kentSurreyCourtList": "FR_kent_surrey_hc_list_9",
+    "rSolicitorPhone": null,
+    "rSolicitorReference": null,
+    "applicantAttendedMIAM": "Yes",
+    "specialAssistanceRequired": null,
+    "rSolicitorFirm": "solicitor firm",
+    "isApplicantsHomeCourt": "No",
+    "applicantSolicitorPhone": "028 90 341232",
+    "solicitorReference": "12345",
+    "soleTraderName": "sole name",
+    "mediatorRegistrationNumber": "123456",
+    "regionList": "southeast",
+    "dateOfMarriage": "2000-01-01",
+    "divorceCaseNumber": "LV12D81234",
+    "divorceDecreeAbsoluteDate": "2000-01-01",
+    "consentOtherCollection": [],
+    "estimatedAssetsChecklist": [
+      "estimatedAssetsChecklist_2"
+    ],
+    "respondentFMName": "Joe",
+    "addToComplexityListOfCourts": "falseNo"
+  },
+  "data_classification": {
+    "rSolicitorAddress": {
+      "value": {
+        "County": "PUBLIC",
+        "Country": "PUBLIC",
+        "PostCode": "PUBLIC",
+        "PostTown": "PUBLIC",
+        "AddressLine1": "PUBLIC",
+        "AddressLine2": "PUBLIC",
+        "AddressLine3": "PUBLIC"
+      },
+      "classification": "PUBLIC"
+    },
+    "divorceUploadEvidence2": "PUBLIC",
+    "divorcePetitionIssuedDate": "PUBLIC",
+    "rSolicitorName": "PUBLIC",
+    "consentD81Question": "PUBLIC",
+    "divorceStageReached": "PUBLIC",
+    "southEastFRCList": "PUBLIC",
+    "applicantFMName": "PUBLIC",
+    "fastTrackDecision": "PUBLIC",
+    "potentialAllegationChecklist": "PUBLIC",
+    "applicantSolicitorAddress": {
+      "value": {
+        "County": "PUBLIC",
+        "Country": "PUBLIC",
+        "PostCode": "PUBLIC",
+        "PostTown": "PUBLIC",
+        "AddressLine1": "PUBLIC",
+        "AddressLine2": "PUBLIC",
+        "AddressLine3": "PUBLIC"
+      },
+      "classification": "PUBLIC"
+    },
+    "applicantSolicitorFirm": "PUBLIC",
+    "nameOfCourtDivorceCentre": "PUBLIC",
+    "rSolicitorDXnumber": "PUBLIC",
+    "netValueOfHome": "PUBLIC",
+    "consentD81Joint": "PUBLIC",
+    "dateOfSepration": "PUBLIC",
+    "consentPensionCollection": {
+      "value": [
+        {
+          "id": "d8aaa526-f6b8-40f6-a054-1372b8c4e2df",
+          "value": {
+            "typeOfDocument": "PUBLIC",
+            "uploadedDocument": "PUBLIC"
+          }
+        },
+        {
+          "id": "c63d9c2a-9e3b-4a55-9e9a-e817124fd8fa",
+          "value": {
+            "typeOfDocument": "PUBLIC",
+            "uploadedDocument": "PUBLIC"
+          }
+        }
+      ],
+      "classification": "PUBLIC"
+    },
+    "promptForAnyDocument": "PUBLIC",
+    "applicantLName": "PUBLIC",
+    "rSolicitorEmail": "PUBLIC",
+    "natureOfApplicationChecklist": "PUBLIC",
+    "applicantSolicitorConsentForEmails": "PUBLIC",
+    "applicantSolicitorDXnumber": "PUBLIC",
+    "isAdmin": "PUBLIC",
+    "applicantSolicitorName": "PUBLIC",
+    "applicantSolicitorEmail": "PUBLIC",
+    "consentOrder": "PUBLIC",
+    "familyMediatorServiceName": "PUBLIC",
+    "specificArrangementsRequired": "PUBLIC",
+    "respondentRepresented": "PUBLIC",
+    "miniFormA": "PUBLIC",
+    "consentNatureOfApplicationChecklist": "PUBLIC",
+    "respondentLName": "PUBLIC",
+    "applicantRepresented": "PUBLIC",
+    "kentSurreyCourtList": "PUBLIC",
+    "rSolicitorPhone": "PUBLIC",
+    "rSolicitorReference": "PUBLIC",
+    "applicantAttendedMIAM": "PUBLIC",
+    "specialAssistanceRequired": "PUBLIC",
+    "rSolicitorFirm": "PUBLIC",
+    "isApplicantsHomeCourt": "PUBLIC",
+    "applicantSolicitorPhone": "PUBLIC",
+    "solicitorReference": "PUBLIC",
+    "soleTraderName": "PUBLIC",
+    "mediatorRegistrationNumber": "PUBLIC",
+    "regionList": "PUBLIC",
+    "dateOfMarriage": "PUBLIC",
+    "divorceCaseNumber": "PUBLIC",
+    "divorceDecreeAbsoluteDate": "PUBLIC",
+    "consentOtherCollection": {
+      "value": [],
+      "classification": "PUBLIC"
+    },
+    "estimatedAssetsChecklist": "PUBLIC",
+    "respondentFMName": "PUBLIC",
+    "addToComplexityListOfCourts": "PUBLIC"
+  },
+  "after_submit_callback_response": null,
+  "callback_response_status_code": null,
+  "callback_response_status": null,
+  "delete_draft_response_status_code": null,
+  "delete_draft_response_status": null,
+  "security_classifications": {
+    "rSolicitorAddress": {
+      "value": {
+        "County": "PUBLIC",
+        "Country": "PUBLIC",
+        "PostCode": "PUBLIC",
+        "PostTown": "PUBLIC",
+        "AddressLine1": "PUBLIC",
+        "AddressLine2": "PUBLIC",
+        "AddressLine3": "PUBLIC"
+      },
+      "classification": "PUBLIC"
+    },
+    "divorceUploadEvidence2": "PUBLIC",
+    "divorcePetitionIssuedDate": "PUBLIC",
+    "rSolicitorName": "PUBLIC",
+    "consentD81Question": "PUBLIC",
+    "divorceStageReached": "PUBLIC",
+    "southEastFRCList": "PUBLIC",
+    "applicantFMName": "PUBLIC",
+    "fastTrackDecision": "PUBLIC",
+    "potentialAllegationChecklist": "PUBLIC",
+    "applicantSolicitorAddress": {
+      "value": {
+        "County": "PUBLIC",
+        "Country": "PUBLIC",
+        "PostCode": "PUBLIC",
+        "PostTown": "PUBLIC",
+        "AddressLine1": "PUBLIC",
+        "AddressLine2": "PUBLIC",
+        "AddressLine3": "PUBLIC"
+      },
+      "classification": "PUBLIC"
+    },
+    "applicantSolicitorFirm": "PUBLIC",
+    "nameOfCourtDivorceCentre": "PUBLIC",
+    "rSolicitorDXnumber": "PUBLIC",
+    "netValueOfHome": "PUBLIC",
+    "consentD81Joint": "PUBLIC",
+    "dateOfSepration": "PUBLIC",
+    "consentPensionCollection": {
+      "value": [
+        {
+          "id": "d8aaa526-f6b8-40f6-a054-1372b8c4e2df",
+          "value": {
+            "typeOfDocument": "PUBLIC",
+            "uploadedDocument": "PUBLIC"
+          }
+        },
+        {
+          "id": "c63d9c2a-9e3b-4a55-9e9a-e817124fd8fa",
+          "value": {
+            "typeOfDocument": "PUBLIC",
+            "uploadedDocument": "PUBLIC"
+          }
+        }
+      ],
+      "classification": "PUBLIC"
+    },
+    "promptForAnyDocument": "PUBLIC",
+    "applicantLName": "PUBLIC",
+    "rSolicitorEmail": "PUBLIC",
+    "natureOfApplicationChecklist": "PUBLIC",
+    "applicantSolicitorConsentForEmails": "PUBLIC",
+    "applicantSolicitorDXnumber": "PUBLIC",
+    "isAdmin": "PUBLIC",
+    "applicantSolicitorName": "PUBLIC",
+    "applicantSolicitorEmail": "PUBLIC",
+    "consentOrder": "PUBLIC",
+    "familyMediatorServiceName": "PUBLIC",
+    "specificArrangementsRequired": "PUBLIC",
+    "respondentRepresented": "PUBLIC",
+    "miniFormA": "PUBLIC",
+    "consentNatureOfApplicationChecklist": "PUBLIC",
+    "respondentLName": "PUBLIC",
+    "applicantRepresented": "PUBLIC",
+    "kentSurreyCourtList": "PUBLIC",
+    "rSolicitorPhone": "PUBLIC",
+    "rSolicitorReference": "PUBLIC",
+    "applicantAttendedMIAM": "PUBLIC",
+    "specialAssistanceRequired": "PUBLIC",
+    "rSolicitorFirm": "PUBLIC",
+    "isApplicantsHomeCourt": "PUBLIC",
+    "applicantSolicitorPhone": "PUBLIC",
+    "solicitorReference": "PUBLIC",
+    "soleTraderName": "PUBLIC",
+    "mediatorRegistrationNumber": "PUBLIC",
+    "regionList": "PUBLIC",
+    "dateOfMarriage": "PUBLIC",
+    "divorceCaseNumber": "PUBLIC",
+    "divorceDecreeAbsoluteDate": "PUBLIC",
+    "consentOtherCollection": {
+      "value": [],
+      "classification": "PUBLIC"
+    },
+    "estimatedAssetsChecklist": "PUBLIC",
+    "respondentFMName": "PUBLIC",
+    "addToComplexityListOfCourts": "PUBLIC"
+  }
+}}

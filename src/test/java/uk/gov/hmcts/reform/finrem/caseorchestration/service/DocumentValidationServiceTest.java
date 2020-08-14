@@ -32,6 +32,8 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     private static final String VALIDATE_PENSION_COLLECTION_JSON = "validate-pension-collection.json";
     private static final String VALIDATE_PENSION_COLLECTION_WITHOUT_DATA_JSON = "validate-pension-collection-without-pension-data.json";
     private static final String RESPOND_TO_ORDER_SOL_JSON = "respond-to-order-solicitor.json";
+    private static final String CONSENT_IN_CONTESTED = "consented-in-consented.json";
+    private static final String CONSENT_IN_CONTESTED_NO_PENSION_COLLECTION = "consented-in-consented-no-pension-collection.json";
 
     @Autowired
     private DocumentValidationService documentValidationService;
@@ -174,6 +176,78 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         setUpCaseDetails(RESPOND_TO_ORDER_SOL_JSON);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
                 "ssss", AUTH_TOKEN);
+        assertThat(response.getErrors(), nullValue());
+    }
+
+    @Test
+    public void shouldValidateConsentInContestedConsentOrder() throws Exception {
+        setUpCaseDetails(CONSENT_IN_CONTESTED);
+        DocumentValidationResponse documentValidationResponse1 = builder().mimeType(APPLICATION_PDF).build();
+        when(documentClient.checkUploadedFileType(AUTH_TOKEN,
+            "http://file1.binary"))
+            .thenReturn(documentValidationResponse1);
+        DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
+            "consentOrder", AUTH_TOKEN);
+        assertThat(response.getErrors(), nullValue());
+    }
+
+    @Test
+    public void shouldReturnErrorInConsentInContestedConsentOrderWhenInvalidType() throws Exception {
+        setUpCaseDetails(CONSENT_IN_CONTESTED);
+        DocumentValidationResponse documentValidationResponse1 = builder()
+            .errors(singletonList("Invalid file type")).build();;
+        when(documentClient.checkUploadedFileType(AUTH_TOKEN,
+            "http://file1.binary"))
+            .thenReturn(documentValidationResponse1);
+        DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
+            "consentOrder", AUTH_TOKEN);
+        assertThat(response.getErrors(), hasItem("Invalid file type"));
+    }
+
+    @Test
+    public void shouldValidateConsentInContestedPensionCollection() throws Exception {
+        setUpCaseDetails(CONSENT_IN_CONTESTED);
+
+        DocumentValidationResponse documentValidationResponse1 = builder().mimeType(APPLICATION_PDF).build();
+        when(documentClient.checkUploadedFileType(AUTH_TOKEN,
+            "http://file1.binary"))
+            .thenReturn(documentValidationResponse1);
+        DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
+            "consentPensionCollection", AUTH_TOKEN);
+        assertThat(response.getErrors(), nullValue());
+    }
+
+    @Test
+    public void shouldReturnErrorInConsentInContestedPensionCollectionWhenInvalidtype() throws Exception {
+        setUpCaseDetails(CONSENT_IN_CONTESTED);
+        DocumentValidationResponse documentValidationResponse1 = builder()
+            .errors(singletonList("Invalid file type")).build();
+        DocumentValidationResponse documentValidationResponse2 = builder().mimeType(APPLICATION_PDF).build();
+
+        when(documentClient.checkUploadedFileType(AUTH_TOKEN,
+            "http://file1.binary"))
+            .thenReturn(documentValidationResponse1);
+        when(documentClient.checkUploadedFileType(AUTH_TOKEN,
+            "http://file2.binary"))
+            .thenReturn(documentValidationResponse2);
+        DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
+            "consentPensionCollection", AUTH_TOKEN);
+        assertThat(response.getErrors(), hasItem("Invalid file type"));
+    }
+
+    @Test
+    public void shouldReturnValidForConsentInContestedPensionCollectionWhenNonePresent() throws Exception {
+        setUpCaseDetails(CONSENT_IN_CONTESTED_NO_PENSION_COLLECTION);
+        DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
+            "consentPensionCollection", AUTH_TOKEN);
+        assertThat(response.getErrors(), nullValue());
+    }
+
+    @Test
+    public void shouldNotValidateWhenFieldNotPresent() throws Exception {
+        setUpCaseDetails(CONSENT_IN_CONTESTED_NO_PENSION_COLLECTION);
+        DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
+            "ssss", AUTH_TOKEN);
         assertThat(response.getErrors(), nullValue());
     }
 }

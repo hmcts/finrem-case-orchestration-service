@@ -13,7 +13,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import java.util.HashMap;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -24,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -58,15 +61,22 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @MockBean
     private FeatureToggleService featureToggleService;
 
-    public String endpoint() {
+    @MockBean
+    private NotificationService notificationService;
+
+    public String consentOrderApprovedEndpoint() {
         return "/case-orchestration/documents/consent-order-approved";
+    }
+
+    public String contestedConsentOrderApprovedEndpoint() {
+        return "/case-orchestration/consent-in-contested/consent-order-approved";
     }
 
     @Test
     public void consentOrderApproved400Error() throws Exception {
         doEmptyCaseDataSetUp();
 
-        mvc.perform(post(endpoint())
+        mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -78,7 +88,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         doValidCaseDataSetUp();
         whenServiceGeneratesDocument().thenThrow(feignError());
 
-        mvc.perform(post(endpoint())
+        mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -94,7 +104,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
 
-        ResultActions result = mvc.perform(post(endpoint())
+        ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE));
@@ -112,7 +122,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
 
-        ResultActions result = mvc.perform(post(endpoint())
+        ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE));
@@ -132,7 +142,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
 
-        ResultActions result = mvc.perform(post(endpoint())
+        ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE));
@@ -154,7 +164,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         when(bulkPrintService.sendToBulkPrint(any(), any())).thenReturn(defaultCaseDetails().getData());
         when(featureToggleService.isAutomateSendOrderEnabled()).thenReturn(true);
 
-        ResultActions result = mvc.perform(post(endpoint())
+        ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE));
@@ -163,6 +173,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
 
         verify(bulkPrintService).sendToBulkPrint(any(), any());
+        verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
     }
 
     @Test
@@ -175,7 +186,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
         when(featureToggleService.isAutomateSendOrderEnabled()).thenReturn(false);
 
-        ResultActions result = mvc.perform(post(endpoint())
+        ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE));
@@ -184,6 +195,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.state", is("applicationDrafted")));
 
         verify(bulkPrintService, never()).sendToBulkPrint(any(), any());
+        verify(notificationService, never()).sendConsentOrderAvailableCtscEmail(any());
     }
 
     @Test
@@ -196,7 +208,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
 
-        ResultActions result = mvc.perform(post(endpoint())
+        ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE));
@@ -206,6 +218,37 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         assertConsentOrder(result);
         assertPensionDocs(result);
         verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderCoverLetter(any(), any());
+    }
+
+    @Test
+    public void consentInContestedConsentOrderApprovedShouldProcessDocuments() throws Exception {
+        doValidCaseDataSetUp();
+        when(consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(any(), anyString()))
+            .thenReturn(new HashMap<String, Object>());
+        ResultActions result = mvc.perform(post(contestedConsentOrderApprovedEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentOrderToCollection(any(), anyString());
+        verify(consentOrderApprovedDocumentService, times(1)).stampPensionDocuments(any(), anyString());
+    }
+
+    @Test
+    public void consentInContestedConsentOrderApprovedShouldProcessPensionDocs() throws Exception {
+        doValidConsentInContestWithPensionData();
+        when(consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(any(), anyString()))
+            .thenAnswer(i -> i.getArgument(0, CaseDetails.class).getData());
+
+        ResultActions result = mvc.perform(post(contestedConsentOrderApprovedEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentOrderToCollection(any(), anyString());
+        verify(consentOrderApprovedDocumentService, times(1)).stampPensionDocuments(any(), anyString());
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {

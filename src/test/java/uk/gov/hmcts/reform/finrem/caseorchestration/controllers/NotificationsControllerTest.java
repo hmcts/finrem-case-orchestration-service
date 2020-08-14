@@ -51,6 +51,7 @@ public class NotificationsControllerTest {
     private static final String CONTEST_ORDER_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contest-order-approved";
     private static final String CONTESTED_CONSENT_ORDER_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contested-consent-order-approved";
     private static final String CONTESTED_CONSENT_GENERAL_ORDER_CALLBACK_URL = "/case-orchestration/notify/contested-consent-general-order";
+    private static final String CONTESTED_CONSENT_ORDER_NOT_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contested-consent-order-not-approved";
     private static final String CONTESTED_DRAFT_ORDER_URL = "/case-orchestration/notify/draft-order";
     private static final String GENERAL_EMAIL_URL = "/case-orchestration/notify/general-email";
 
@@ -460,6 +461,18 @@ public class NotificationsControllerTest {
     }
 
     @Test
+    public void shouldNotSendContestOrderNotApprovedEmail() throws Exception {
+        buildCcdRequest(CCD_REQUEST_JSON);
+        mockMvc.perform(post(ORDER_NOT_APPROVED_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
     public void sendContestedConsentOrderApprovedEmail() throws Exception {
         buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
         mockMvc.perform(post(CONTESTED_CONSENT_ORDER_APPROVED_CALLBACK_URL)
@@ -484,11 +497,11 @@ public class NotificationsControllerTest {
         verify(notificationService, times(1))
             .sendContestedConsentGeneralOrderEmail(any(CallbackRequest.class));
     }
-
-    @Test
-    public void shouldNotSendContestOrderNotApprovedEmail() throws Exception {
+  
+  @Test
+    public void shouldNotSendContestedConsentOrderApprovedEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(ORDER_NOT_APPROVED_URL)
+        mockMvc.perform(post(CONTESTED_CONSENT_ORDER_APPROVED_CALLBACK_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .content(requestContent.toString())
             .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -497,6 +510,30 @@ public class NotificationsControllerTest {
         verifyNoInteractions(notificationService);
     }
 
+    @Test
+    public void sendContestedConsentOrderNotApprovedEmail() throws Exception {
+        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
+        mockMvc.perform(post(CONTESTED_CONSENT_ORDER_NOT_APPROVED_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+            .sendContestedConsentOrderNotApprovedEmail(any(CallbackRequest.class));
+    }
+
+    @Test
+    public void shouldNotSendContestedConsentOrderNotApprovedEmail() throws Exception {
+        buildCcdRequest(CCD_REQUEST_JSON);
+        mockMvc.perform(post(CONTESTED_CONSENT_ORDER_NOT_APPROVED_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verifyNoInteractions(notificationService);
+    }
 
     private void buildCcdRequest(String fileName) throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();

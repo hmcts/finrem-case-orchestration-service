@@ -167,15 +167,16 @@ public class NotificationsController implements BaseController {
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
-
-    @PostMapping(value = "/case-orchestration/notify/contested-consent-general-order", consumes = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "send e-mail for contested consent general order.")
+   
+    @PostMapping(value = "/case-orchestration/notify/contested-consent-order-not-approved", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send e-mail for contested consent order not approved.")
     @ApiResponses(value = {
-        @ApiResponse(code = 204, message = "Contested consent general order e-mail sent successfully",
+        @ApiResponse(code = 204, message = "Contested consent order not approved e-mail sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedConsentGeneralOrderEmail(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedConsentOrderNotApprovedEmail(
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to send email for 'Contested Consent General Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to send email for 'Contested Consent Order Not Approved' for Case ID: {}",
+            callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
@@ -184,7 +185,27 @@ public class NotificationsController implements BaseController {
             notificationService.sendContestedConsentGeneralOrderEmail(callbackRequest);
         }
 
+            log.info("Sending email notification to Solicitor for 'Contested Consent Order Not Approved'");
+            notificationService.sendContestedConsentOrderNotApprovedEmail(callbackRequest);
+        }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+  
+    @PostMapping(value = "/case-orchestration/notify/contested-consent-general-order", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send e-mail for contested consent general order.")
+    @ApiResponses(value = {
+      @ApiResponse(code = 204, message = "Contested consent general order e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedConsentGeneralOrderEmail(
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("Received request to send email for 'Contested Consent General Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
+            log.info("Sending email notification to Solicitor for 'Contested Consent General Order'");
+            notificationService.sendContestedConsentGeneralOrderEmail(callbackRequest);
+        }
+      return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(value = "/case-orchestration/notify/consent-order-available", consumes = APPLICATION_JSON_VALUE)

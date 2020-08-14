@@ -1,8 +1,11 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
@@ -35,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchDocumentGenerationRequestTemplateAndFilename;
@@ -44,6 +48,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 
@@ -52,6 +58,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     private static final String DEFAULT_COVERSHEET_URL = "defaultCoversheetUrl";
     private static final String CONSENT_ORDER_APPROVED_COVER_LETTER_URL = "consentOrderApprovedCoverLetterUrl";
+
+    @Autowired
+    private ObjectMapper mapper;
 
     @Autowired
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
@@ -139,6 +148,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldStampPensionDocuments() {
+        Mockito.reset(documentClientMock);
         when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
 
         List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
@@ -163,6 +173,26 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertThat(documents.get(4).getBinaryFileUrl(), is(PENSION_DOCUMENT_URL));
     }
 
+    @Test
+    public void stampsAndPopulatesCaseDataForContestedConsentOrder() {
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
+        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
+        CaseDetails caseDetails = defaultCaseDetails();
+        caseDetails.getData().put(CONSENT_ORDER, caseDocument());
+        Map<String, Object> data = consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(caseDetails, AUTH_TOKEN);
+        assertThat(getDocumentList(data, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(1));
+
+        caseDetails.setData(data);
+        data = consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(caseDetails, AUTH_TOKEN);
+        assertThat(getDocumentList(data, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(2));
+    }
+
+    private List<CaseDocument> getDocumentList(Map<String, Object> data, String field) {
+        return mapper.convertValue(data.get(field),
+            new TypeReference<List<CaseDocument>>() {
+            });
+    }
+
     private void preparePaperCaseConsentOrderApprovedCaseData() {
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(APPROVED_ORDER_COLLECTION, asList(ImmutableMap.of(VALUE, ImmutableMap.of(
@@ -172,5 +202,12 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
                 VALUE, ImmutableMap.of("uploadedDocument", ImmutableMap.of(
                     DOCUMENT_BINARY_URL, PENSION_DOCUMENT_URL))))))));
         caseData.put(PAPER_APPLICATION, YES_VALUE);
+    }
+
+    private CaseDetails prepareDefaultCaseWithGeneralOrder() {
+        CaseDetails caseDetails = defaultCaseDetails();
+        caseDetails.getData().put(CONSENT_ORDER, caseDocument());
+        return caseDetails;
+
     }
 }

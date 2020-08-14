@@ -4,11 +4,12 @@
   "case_details": {
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
-    "state": "applicationDrafted",
-    "case_type_id": "FinancialRemedyMVP2",
+    "state": "consentedOrderSubmitted",
+    "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "PBANumber": "PBA123456",
       "d81Question": "No",
+      "consentD81Question": "No",
       "PBAreference": "ABCD",
       "d81Applicant": {
         "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
@@ -20,14 +21,29 @@
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
         "document_binary_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
       },
-      "solicitorFirm": "Mr",
-      "solicitorName": "Solictor",
-      "authorisation3": "2010-01-01",
-      "solicitorEmail": "test@admin.com",
+      "applicantSolicitorFirm": "Awesome Firm",
+      "applicantSolicitorName": "Solicitor",
+      "applicantSolicitorEmail": "test@test.com",
+      "applicantSolicitorAddress": {
+        "County": "County",
+        "Country": "UK",
+        "PostCode": "SW1A 1AA",
+        "PostTown": "London",
+        "AddressLine1": "Buckingham Palace",
+        "AddressLine2": "null",
+        "AddressLine3": null
+      },
       "solicitorPhone": "9963472494",
-      "applicantFMName": "Consented Applicant",
-      "applicantLName": "Name",
+      "applicantFMName": "Poor",
+      "applicantLName": "Guy",
       "authorisation2b": "test",
+      "consentNatureOfApplicationChecklist": [
+        "periodicalPaymentOrder",
+        "Lump Sum Order",
+        "propertyAdjustmentOrder"
+      ],
+      "consentNatureOfApplicationAddress": "test",
+      "consentNatureOfApplicationMortgage": "test",
       "otherCollection": [
         {
           "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
@@ -50,16 +66,15 @@
         "document_binary_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
       },
       "solicitorAddress": {
-        "County": "test",
+        "County": "Greater London",
         "Country": "United Kingdom",
-        "PostCode": "b1 1ab",
-        "PostTown": "SRIKALAHASTI",
-        "AddressLine1": "House no: 6-354-2, Gandhi Street",
-        "AddressLine2": "Srikalahasti, Chittor District",
-        "AddressLine3": "test"
+        "PostCode": "SW1V 3LL",
+        "PostTown": "London",
+        "AddressLine1": "Houses of Parliment",
+        "AddressLine2": "Westminster"
       },
-      "authorisationFirm": "test",
       "authorisationName": "test",
+      "solicitorFirm": "Authorised Firm",
       "divorceCaseNumber": "DD12D12345",
       "respondentAddress": {
         "County": "Essex",
@@ -70,42 +85,24 @@
         "AddressLine2": "AddressGlobalUK",
         "AddressLine3": "London"
       },
+      "regionList": "midlands",
+      "midlandsFRCList": "birmingham",
+      "birminghamCourtList": "FR_birmingham_hc_list_1",
       "solicitorDXnumber": null,
       "solicitorReference": "LL01",
-      "appRespondentFMName": "Consented Respondent",
-      "appRespondentLName": "Name",
+      "respondentFMName": "john",
+      "respondentLName": "smith",
+      "respondentRepresented": "No",
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
-      "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "Yes",
-      "generalOrderLatestDocument": {
-        "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
-      },
-      "generalOrderJudgeType": "His Honour Judge",
-      "generalOrderJudgeName": "Consented",
-      "generalOrderRecitals": "Consented Recitals",
-      "generalOrderDate": "01/01/2020",
-      "generalOrderBodyText": "Test is dummy text for consented",
-      "generalOrderAddressTo": "applicant",
-      "generalOrderPreviewDocument": {
-        "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
-        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-        "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
-      },
-      "generalOrderCollection": [
-        {
-          "id": "1234",
-          "value": {
-            "generalOrder_documentUpload": {
-              "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
-              "document_filename": "app_docs.pdf",
-              "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
-            }
-          }
-        }
-      ]
+      "consentOrderForChildrenQuestion1": "Yes",
+      "consentNatureOfApplication5": "No",
+      "consentNatureOfApplication6": [
+        "item1",
+        "item2"
+      ],
+      "consentNatureOfApplication7": "test",
+      "solicitorAgreeToReceiveEmails": "Yes"
     }
   }
 }
