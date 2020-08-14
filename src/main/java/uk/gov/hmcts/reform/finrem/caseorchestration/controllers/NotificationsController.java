@@ -184,10 +184,7 @@ public class NotificationsController implements BaseController {
             log.info("Sending email notification to Solicitor for 'Contested Consent General Order'");
             notificationService.sendContestedConsentGeneralOrderEmail(callbackRequest);
         }
-
-            log.info("Sending email notification to Solicitor for 'Contested Consent Order Not Approved'");
-            notificationService.sendContestedConsentOrderNotApprovedEmail(callbackRequest);
-        }
+        
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
   
