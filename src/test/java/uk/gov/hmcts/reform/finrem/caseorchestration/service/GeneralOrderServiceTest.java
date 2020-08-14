@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
@@ -25,6 +26,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
@@ -211,6 +213,21 @@ public class GeneralOrderServiceTest {
         Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
         List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>)documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
         assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is(""));
+    }
+
+    @Test
+    public void getsCorrectGeneralOrdersForPrintingConsented() throws Exception {
+        CaseDetails details = consentedCaseDetails();
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderForPrintingConsented(details.getData());
+        assertThat(latestGeneralOrder.getBinaryFileUrl(), is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+    }
+
+    @Test
+    public void getsZeroGeneralOrdersForPrintingWhenNoneConsented() throws Exception {
+        CaseDetails details = consentedCaseDetails();
+        details.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, null);
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderForPrintingConsented(details.getData());
+        assertTrue(latestGeneralOrder == null);
     }
 
     private CaseDetails consentedCaseDetails() throws Exception {

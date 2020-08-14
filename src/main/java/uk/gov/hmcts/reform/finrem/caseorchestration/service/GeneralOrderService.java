@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsen
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContested;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderContestedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderPreviewDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_ADDRESS_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_BODY_TEXT;
@@ -62,6 +64,16 @@ public class GeneralOrderService {
             .andThen(createGeneralOrderData)
             .andThen(data -> previewGeneralOrderData(data, caseDetails))
             .apply(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken);
+    }
+
+    public BulkPrintDocument getLatestGeneralOrderForPrintingConsented(Map<String, Object> caseData) {
+        if (isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
+            log.warn("Latest general order not found for printing for case");
+            return null;
+        }
+
+        CaseDocument generalOrder = documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
+        return BulkPrintDocument.builder().binaryFileUrl(generalOrder.getDocumentBinaryUrl()).build();
     }
 
     private CaseDocument applyGenerateDocument(CaseDetails caseDetails, String authorisationToken) {
