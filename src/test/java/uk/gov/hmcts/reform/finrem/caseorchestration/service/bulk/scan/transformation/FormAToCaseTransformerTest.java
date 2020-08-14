@@ -53,13 +53,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED_PAPER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.ContactDetailsMapperTest.assertTransformationForAddressIsValid;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.ContactDetailsMapperTest.getOcrFieldsForAddresses;
@@ -138,7 +138,7 @@ public class FormAToCaseTransformerTest {
             hasEntry("divorceStageReached", "Decree Nisi"),
             hasEntry(APPLICANT_REPRESENTED_PAPER, "FR_applicant_represented_1"),
             hasEntry(CONSENTED_SOLICITOR_NAME, "Saul Call"),
-            hasEntry(SOLICITOR_FIRM, "Better Divorce Ltd"),
+            hasEntry(CONSENTED_SOLICITOR_FIRM, "Better Divorce Ltd"),
             hasEntry("solicitorDXnumber", "DX123"),
             hasEntry(SOLICITOR_REFERENCE, "SOL-RED"),
             hasEntry(PBA_NUMBER, "PBA123456"),
@@ -316,7 +316,7 @@ public class FormAToCaseTransformerTest {
             hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
             hasEntry(PAPER_APPLICATION, YES_VALUE),
             hasEntry(RESP_SOLICITOR_NAME, TEST_SOLICITOR_NAME),
-            hasEntry(RESPONDENT_REPRESENTED, YES_VALUE)
+            hasEntry(CONSENTED_RESPONDENT_REPRESENTED, YES_VALUE)
         ));
     }
 
@@ -332,7 +332,7 @@ public class FormAToCaseTransformerTest {
             hasEntry(BULK_SCAN_CASE_REFERENCE, TEST_CASE_ID),
             hasEntry(PAPER_APPLICATION, YES_VALUE),
             hasEntry(RESP_SOLICITOR_NAME, ""),
-            hasEntry(RESPONDENT_REPRESENTED, NO_VALUE)
+            hasEntry(CONSENTED_RESPONDENT_REPRESENTED, NO_VALUE)
         ));
     }
 

@@ -25,6 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_BODY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
@@ -95,6 +96,13 @@ public class NotificationService {
     public void sendConsentOrderAvailableEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailable());
         notificationRequest = createNotificationRequest(callbackRequest);
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+    public void sendConsentOrderAvailableCtscEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailableCtsc());
+        notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest.setNotificationEmail(notificationServiceConfiguration.getCtscEmail());
         sendNotificationEmail(notificationRequest, uri);
     }
 
@@ -181,10 +189,10 @@ public class NotificationService {
     private NotificationRequest createNotificationRequest(CallbackRequest callbackRequest) {
         if (isConsentedApplication(callbackRequest.getCaseDetails())) {
             notificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
-                CONSENTED_SOLICITOR_NAME, SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY);
+                CONSENTED_SOLICITOR_NAME, SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER);
         } else {
             notificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
-                CONTESTED_SOLICITOR_NAME, CONTESTED_SOLICITOR_EMAIL, CONTESTED, GENERAL_EMAIL_BODY);
+                CONTESTED_SOLICITOR_NAME, CONTESTED_SOLICITOR_EMAIL, CONTESTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER);
         }
 
         return notificationRequest;
@@ -195,12 +203,14 @@ public class NotificationService {
                                                          String solicitorName,
                                                          String solicitorEmail,
                                                          String caseType,
-                                                         String generalEmailBody) {
+                                                         String generalEmailBody,
+                                                         String divorceCaseNumber) {
         NotificationRequest notificationRequest = new NotificationRequest();
         Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
 
         notificationRequest.setCaseReferenceNumber(Objects.toString(callbackRequest.getCaseDetails().getId()));
         notificationRequest.setSolicitorReferenceNumber(Objects.toString(mapOfCaseData.get(solicitorReference)));
+        notificationRequest.setDivorceCaseNumber(Objects.toString(mapOfCaseData.get(divorceCaseNumber)));
         notificationRequest.setName(Objects.toString(mapOfCaseData.get(solicitorName)));
         notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorEmail)));
         notificationRequest.setGeneralEmailBody(Objects.toString(mapOfCaseData.get(generalEmailBody)));
