@@ -182,7 +182,7 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
             log.info("Sending email notification to Solicitor for 'Contested Consent General Order'");
-            notificationService.sendContestedConsentGeneralOrderEmail(callbackRequest);
+            notificationService.sendContestedConsentOrderNotApprovedEmail(callbackRequest);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
