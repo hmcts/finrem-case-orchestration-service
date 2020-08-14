@@ -108,7 +108,8 @@ public class GeneralLetterService {
                 .name((String) data.get(RESP_SOLICITOR_NAME))
                 .formattedAddress(documentHelper.formatAddressForLetterPrinting((Map) data.get(RESP_SOLICITOR_ADDRESS)));
         } else if ("respondent".equalsIgnoreCase(generalLetterAddressTo)) {
-            String respondentFmNameCcdField = isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
+            String respondentFmNameCcdField =
+                isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
             String respondentLastNameCcdField = isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME;
             addresseeBuilder
                 .name(StringUtils.joinWith(" ", data.get(respondentFmNameCcdField), data.get(respondentLastNameCcdField)))
