@@ -15,6 +15,8 @@ public class NotificationRequest {
     private String caseReferenceNumber;
     @JsonProperty("solicitorReferenceNumber")
     private String solicitorReferenceNumber;
+    @JsonProperty("divorceCaseNumber")
+    private String divorceCaseNumber;
     @JsonProperty("name")
     private String name;
     @JsonProperty("notificationEmail")
