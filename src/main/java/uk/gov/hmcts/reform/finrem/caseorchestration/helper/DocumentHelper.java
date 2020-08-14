@@ -47,6 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_PENSION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
@@ -89,6 +90,17 @@ public class DocumentHelper {
                 .map(TypedCaseDocument::getPensionDocument)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    public List<CaseDocument> getConsentedInContestedPensionDocumentsData(Map<String, Object> caseData) {
+        return ofNullable(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION))
+            .map(this::convertToPensionCollectionDataList)
+            .orElse(emptyList())
+            .stream()
+            .map(PensionCollectionData::getTypedCaseDocument)
+            .map(TypedCaseDocument::getPensionDocument)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 
     public CaseDocument convertToCaseDocument(Object object) {
