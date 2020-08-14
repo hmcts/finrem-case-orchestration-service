@@ -48,13 +48,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.bulk.scan.domai
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED_PAPER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OTHER_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
@@ -172,7 +172,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
 
         mapFullNameToFirstAndLast(OcrFieldName.APPLICANT_FULL_NAME, "applicantFMName", "applicantLName",
             ocrDataFields, transformedCaseData);
-        mapFullNameToFirstAndLast(OcrFieldName.RESPONDENT_FULL_NAME, APP_RESPONDENT_FIRST_MIDDLE_NAME, "appRespondentLName",
+        mapFullNameToFirstAndLast(OcrFieldName.RESPONDENT_FULL_NAME, CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "appRespondentLName",
             ocrDataFields, transformedCaseData);
 
         commaSeparatedEntryTransformer(OcrFieldName.NATURE_OF_APPLICATION, "natureOfApplication2", natureOfApplicationChecklistToCcdFieldNames,
@@ -212,7 +212,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         modifiedCaseData.put(PAPER_APPLICATION, YES_VALUE);
         modifiedCaseData.put(APPLICANT_REPRESENTED, getValueForIsRepresented(modifiedCaseData));
         modifiedCaseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, getSolicitorAgreeToReceiveEmailsField(modifiedCaseData));
-        modifiedCaseData.put(RESPONDENT_REPRESENTED, getRespondentRepresentedField(modifiedCaseData));
+        modifiedCaseData.put(CONSENTED_RESPONDENT_REPRESENTED, getRespondentRepresentedField(modifiedCaseData));
 
         // If OrderForChildren is populated then set orderForChildrenQuestion1 to Yes
         if (isNotEmpty("natureOfApplication5b", modifiedCaseData)) {

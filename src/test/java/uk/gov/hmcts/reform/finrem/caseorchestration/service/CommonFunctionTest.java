@@ -204,7 +204,6 @@ public class CommonFunctionTest {
         assertThat(isConsentedInContestedCase(caseDetails), is(false));
     }
 
-
     @Test
     public void isNotEmptyShouldReturnTrueWhenPopulated() {
         asList(
