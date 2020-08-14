@@ -498,7 +498,7 @@ public class NotificationsControllerTest {
             .sendContestedConsentGeneralOrderEmail(any(CallbackRequest.class));
     }
   
-  @Test
+    @Test
     public void shouldNotSendContestedConsentOrderApprovedEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(CONTESTED_CONSENT_ORDER_APPROVED_CALLBACK_URL)
