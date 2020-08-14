@@ -107,8 +107,6 @@ public class OnlineFormDocumentService {
 
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
-        //translation is required to map the natureOfApplication2 values from contested to the consented equivalent
-        // i.e. periodicalPaymentOrder + propertyAdjustmentOrder
         optionIdToValueTranslator.translateOptionsValues.accept(caseDetailsCopy);
         prepareMiniFormFields(caseDetailsCopy);
 

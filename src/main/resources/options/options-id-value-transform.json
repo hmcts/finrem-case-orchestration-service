@@ -91,11 +91,6 @@
   },
   "consentNatureOfApplicationChecklist": {
     "periodicalPaymentOrder": "Periodical Payment Order",
-    "Lump Sum Order": "Lump Sum Order",
-    "Pension Sharing Order": "Pension Sharing Order",
-    "Pension Attachment Order": "Pension Attachment Order",
-    "Pension Compensation Sharing Order": "Pension Compensation Sharing Order",
-    "Pension Compensation Attachment Order": "Pension Compensation Attachment Order",
     "propertyAdjustmentOrder": "Property Adjustment Order"
   }
 }

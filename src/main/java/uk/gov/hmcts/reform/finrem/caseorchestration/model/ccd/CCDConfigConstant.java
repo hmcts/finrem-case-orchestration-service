@@ -171,6 +171,7 @@ public class CCDConfigConstant {
     public static final String ORDER_REFUSAL_PREVIEW_COLLECTION = "orderRefusalPreviewDocument";
     public static final String GENERAL_LETTER_ADDRESS_TO = "generalLetterAddressTo";
     public static final String GENERAL_LETTER_RECIPIENT = "generalLetterRecipient";
+    public static final String GENERAL_LETTER_RECIPIENT_ADDRESS = "generalLetterRecipientAddress";
     public static final String GENERAL_LETTER_PREVIEW = "generalLetterPreview";
     public static final String CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION = "consentedNotApprovedOrders";
 
