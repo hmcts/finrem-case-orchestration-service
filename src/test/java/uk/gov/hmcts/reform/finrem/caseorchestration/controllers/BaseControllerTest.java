@@ -55,6 +55,11 @@ public abstract class BaseControllerTest extends BaseTest {
                 .getResource("/fixtures/hwf.json").toURI()));
     }
 
+    void doValidConsentInContestWithPensionData() throws IOException, URISyntaxException {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/consent-in-contested-with-pension.json").toURI()));
+    }
+
     CaseDocument getCaseDocument() {
         CaseDocument caseDocument = new CaseDocument();
         caseDocument.setDocumentUrl("http://doc1");
