@@ -109,7 +109,8 @@ public class ConsentOrderApprovedController implements BaseController {
         validateCaseData(callback);
         CaseDetails caseDetails = callback.getCaseDetails();
 
-        Map<String, Object> caseData = consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseDetails.getData(), authToken);
+        Map<String, Object> caseData = consentOrderApprovedDocumentService
+            .stampAndPopulateContestedConsentApprovedOrderCollection(caseDetails.getData(), authToken);
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
@@ -120,8 +121,8 @@ public class ConsentOrderApprovedController implements BaseController {
     }
 
     @PostMapping(path = "/consent-in-contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "'Consent Order Approved' callback handler for consent in contetested. Checks state and if approved generates docs else puts" +
-        "latest general order into uploadORder fields. Then sends the data to bulk print")
+    @ApiOperation(value = "'Consent Order Approved' callback handler for consent in contetested. Checks state and if "
+        + "approved generates docs else puts latest general order into uploadORder fields. Then sends the data to bulk print")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),

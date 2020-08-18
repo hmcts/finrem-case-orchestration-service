@@ -108,8 +108,8 @@ public class BulkPrintService {
     public List<BulkPrintDocument> approvedOrderCollection(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        Object collection = CommonFunction.isConsentedInContestedCase(caseDetails) ?
-            data.get(APPROVED_ORDER_COLLECTION) : data.get(CONTESTED_CONSENT_ORDER_COLLECTION);
+        Object collection = CommonFunction.isConsentedInContestedCase(caseDetails)
+            ? data.get(CONTESTED_CONSENT_ORDER_COLLECTION) : data.get(APPROVED_ORDER_COLLECTION);
 
         List<Map> documentList = ofNullable(collection)
             .map(i -> (List<Map>) i)

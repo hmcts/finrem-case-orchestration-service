@@ -73,7 +73,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldConvertCollectionDocument() {
-        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.approvedOrderCollection(caseDetails().getData());
+        List<BulkPrintDocument> bulkPrintDocuments = bulkPrintService.approvedOrderCollection(caseDetails());
 
         assertThat(bulkPrintDocuments, hasSize(4));
     }

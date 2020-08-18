@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -232,14 +233,13 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
         result.andExpect(status().isOk());
         verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentApprovedOrderCollection(any(), anyString());
-        verify(consentOrderApprovedDocumentService, times(1)).stampPensionDocuments(any(), anyString());
     }
 
     @Test
     public void consentInContestedConsentOrderApprovedShouldProcessPensionDocs() throws Exception {
         doValidConsentInContestWithPensionData();
         when(consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(any(), anyString()))
-            .thenAnswer(i -> i.getArgument(0, CaseDetails.class).getData());
+            .thenAnswer(i -> i.getArgument(0, LinkedHashMap.class));
 
         ResultActions result = mvc.perform(post(contestedConsentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -248,7 +248,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
         result.andExpect(status().isOk());
         verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentApprovedOrderCollection(any(), anyString());
-        verify(consentOrderApprovedDocumentService, times(1)).stampPensionDocuments(any(), anyString());
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {

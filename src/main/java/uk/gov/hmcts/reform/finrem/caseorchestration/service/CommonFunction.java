@@ -118,6 +118,7 @@ public class CommonFunction {
 
     public static boolean isOrderApprovedDocumentCollectionPresent(Map<String, Object> caseData) {
         return (caseData.get(APPROVED_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(APPROVED_ORDER_COLLECTION)).isEmpty())
-            || (caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION)).isEmpty());
+            || (caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION) != null
+            && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION)).isEmpty());
     }
 }

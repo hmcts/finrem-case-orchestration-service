@@ -16,9 +16,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.caseDocumentToBulkPrintDocument;
@@ -110,7 +110,8 @@ public class ConsentOrderApprovedDocumentService {
         return stampedAndAnnexedDoc;
     }
 
-    private Map<String, Object> populateContestedConsentOrderCaseDetails(Map<String, Object> caseData, CaseDocument stampedDoc, List<PensionCollectionData> pensionDocs) {
+    private Map<String, Object> populateContestedConsentOrderCaseDetails(Map<String, Object> caseData,
+                                                                         CaseDocument stampedDoc, List<PensionCollectionData> pensionDocs) {
         caseData.put(CONSENT_ORDER, stampedDoc);
         caseData.put(CONTESTED_CONSENT_PENSION_COLLECTION, pensionDocs);
 
@@ -121,7 +122,10 @@ public class ConsentOrderApprovedDocumentService {
         ApprovedOrderData.ApprovedOrderDataBuilder approvedOrderData = ApprovedOrderData.builder()
             .approvedOrder(approvedOrderBuilder.build());
 
-        caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, Arrays.asList(approvedOrderData.build()));
+        List<ApprovedOrderData> approvedOrderDataList = Optional.ofNullable((List<ApprovedOrderData>)caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION))
+            .orElse(new ArrayList<ApprovedOrderData>());
+        approvedOrderDataList.add(approvedOrderData.build());
+        caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderDataList);
         return caseData;
     }
 
