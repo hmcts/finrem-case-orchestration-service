@@ -223,7 +223,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @Test
     public void consentInContestedConsentOrderApprovedShouldProcessDocuments() throws Exception {
         doValidCaseDataSetUp();
-        when(consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(any(), anyString()))
+        when(consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(any(), anyString()))
             .thenReturn(new HashMap<String, Object>());
         ResultActions result = mvc.perform(post(contestedConsentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -231,14 +231,14 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
-        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentOrderToCollection(any(), anyString());
+        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentApprovedOrderCollection(any(), anyString());
         verify(consentOrderApprovedDocumentService, times(1)).stampPensionDocuments(any(), anyString());
     }
 
     @Test
     public void consentInContestedConsentOrderApprovedShouldProcessPensionDocs() throws Exception {
         doValidConsentInContestWithPensionData();
-        when(consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(any(), anyString()))
+        when(consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(any(), anyString()))
             .thenAnswer(i -> i.getArgument(0, CaseDetails.class).getData());
 
         ResultActions result = mvc.perform(post(contestedConsentOrderApprovedEndpoint())
@@ -247,7 +247,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
-        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentOrderToCollection(any(), anyString());
+        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentApprovedOrderCollection(any(), anyString());
         verify(consentOrderApprovedDocumentService, times(1)).stampPensionDocuments(any(), anyString());
     }
 

@@ -24,6 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
@@ -82,7 +83,7 @@ public class BulkPrintService {
         Map<String, Object> caseData = caseDetails.getData();
 
         List<BulkPrintDocument> orderDocuments = isOrderApprovedDocumentCollectionPresent(caseData)
-            ? approvedOrderCollection(caseData)
+            ? approvedOrderCollection(caseDetails)
             : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseData);
 
         bulkPrintDocuments.addAll(orderDocuments);
@@ -104,9 +105,13 @@ public class BulkPrintService {
         return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, asList(latestGeneralLetter));
     }
 
-    public List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
+    public List<BulkPrintDocument> approvedOrderCollection(CaseDetails caseDetails) {
+        Map<String, Object> data = caseDetails.getData();
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        List<Map> documentList = ofNullable(data.get(APPROVED_ORDER_COLLECTION))
+        Object collection = CommonFunction.isConsentedInContestedCase(caseDetails) ?
+            data.get(APPROVED_ORDER_COLLECTION) : data.get(CONTESTED_CONSENT_ORDER_COLLECTION);
+
+        List<Map> documentList = ofNullable(collection)
             .map(i -> (List<Map>) i)
             .orElse(new ArrayList<>());
 

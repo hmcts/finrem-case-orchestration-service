@@ -213,4 +213,7 @@ public class CCDConfigConstant {
     public static final String UPLOAD_ORDER = "uploadOrder";
 
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
+
+    //states
+    public static final String CONSENTED_ORDER_APPROVED = "consentedOrderApproved";
 }

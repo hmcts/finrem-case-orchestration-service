@@ -179,11 +179,11 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
         CaseDetails caseDetails = defaultCaseDetails();
         caseDetails.getData().put(CONSENT_ORDER, caseDocument());
-        Map<String, Object> data = consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(caseDetails, AUTH_TOKEN);
+        Map<String, Object> data = consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseDetails, AUTH_TOKEN);
         assertThat(getDocumentList(data, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(1));
 
         caseDetails.setData(data);
-        data = consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(caseDetails, AUTH_TOKEN);
+        data = consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseDetails, AUTH_TOKEN);
         assertThat(getDocumentList(data, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(2));
     }
 

@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_D81_QUESTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
@@ -116,6 +117,7 @@ public class CommonFunction {
     }
 
     public static boolean isOrderApprovedDocumentCollectionPresent(Map<String, Object> caseData) {
-        return caseData.get(APPROVED_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(APPROVED_ORDER_COLLECTION)).isEmpty();
+        return (caseData.get(APPROVED_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(APPROVED_ORDER_COLLECTION)).isEmpty())
+            || (caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION)).isEmpty());
     }
 }
