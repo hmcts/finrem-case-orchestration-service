@@ -26,9 +26,6 @@ plugins {
     id 'net.ltgt.apt' version '0.21'
 }
 
-apply plugin: 'application'
-applicationDefaultJvmArgs = ["-Xint"]
-
 apply plugin: 'au.com.dius.pact'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'jacoco'
