@@ -73,6 +73,10 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         return "/case-orchestration/consent-in-contested/consent-order-approved";
     }
 
+    public String contestedConsentSendOrderEndpoint() {
+        return "/case-orchestration/consent-in-contested/send-order";
+    }
+
     @Test
     public void consentOrderApproved400Error() throws Exception {
         doEmptyCaseDataSetUp();
@@ -248,6 +252,36 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
         result.andExpect(status().isOk());
         verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentApprovedOrderCollection(any(), anyString());
+    }
+
+    @Test
+    public void consentInContestedSendOrderShouldPrintDocsWhenNotApproved() throws Exception {
+        doValidCaseDataSetUp();
+        when(consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(any(), anyString()))
+            .thenReturn(new HashMap<String, Object>());
+        ResultActions result = mvc.perform(post(contestedConsentSendOrderEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderLetter(any(), anyString());
+        verify(bulkPrintService, times(1)).sendToBulkPrint(any(), anyString());
+    }
+
+    @Test
+    public void consentInContestedSendOrderShouldPrintDocsWhenApproved() throws Exception {
+        doValidConsentOrderApprovedSetup();
+        when(consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(any(), anyString()))
+            .thenReturn(caseDocument());
+        ResultActions result = mvc.perform(post(contestedConsentSendOrderEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        verify(consentOrderApprovedDocumentService, times(1)).generateApprovedConsentOrderLetter(any(), anyString());
+        verify(bulkPrintService, times(1)).sendToBulkPrint(any(), anyString());
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {

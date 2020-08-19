@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
@@ -140,10 +141,12 @@ public class ConsentOrderApprovedController implements BaseController {
             CaseDocument orderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
 
             //add generated doc to case data
-            List<ApprovedOrderData> approvedOrderList = (List<ApprovedOrderData>) caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION);
-            ApprovedOrder approvedOrder = approvedOrderList.get(0).getApprovedOrder();
-            approvedOrder.setOrderLetter(orderLetter);
-            caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, asList(ApprovedOrderData.builder().approvedOrder(approvedOrder).build()));
+            List<ApprovedOrderData> approvedOrderList = getConsentInContestedApprovedOrderCollection(caseData);
+            if (approvedOrderList != null && !approvedOrderList.isEmpty()) {
+                ApprovedOrder approvedOrder = approvedOrderList.get(0).getApprovedOrder();
+                approvedOrder.setOrderLetter(orderLetter);
+                caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderList);
+            }
         } else {
             caseData.put(UPLOAD_ORDER, caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
         }
@@ -220,5 +223,10 @@ public class ConsentOrderApprovedController implements BaseController {
         return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION),
             new TypeReference<List<PensionCollectionData>>() {
             });
+    }
+
+    private List<ApprovedOrderData> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
+        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<List<ApprovedOrderData>>() {
+        });
     }
 }

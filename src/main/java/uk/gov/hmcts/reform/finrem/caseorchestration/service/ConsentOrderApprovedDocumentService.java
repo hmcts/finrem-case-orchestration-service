@@ -122,8 +122,8 @@ public class ConsentOrderApprovedDocumentService {
         ApprovedOrderData.ApprovedOrderDataBuilder approvedOrderData = ApprovedOrderData.builder()
             .approvedOrder(approvedOrderBuilder.build());
 
-        List<ApprovedOrderData> approvedOrderDataList = Optional.ofNullable((List<ApprovedOrderData>)caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION))
-            .orElse(new ArrayList<ApprovedOrderData>());
+        List<ApprovedOrderData> approvedOrderDataList = Optional.ofNullable(getConsentInContestedApprovedOrderCollection(caseData))
+            .orElse(new ArrayList<>());
         approvedOrderDataList.add(approvedOrderData.build());
         caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderDataList);
         return caseData;
@@ -148,5 +148,10 @@ public class ConsentOrderApprovedDocumentService {
         return mapper.convertValue(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION),
             new TypeReference<List<PensionCollectionData>>() {
             });
+    }
+
+    private List<ApprovedOrderData> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
+        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<List<ApprovedOrderData>>() {
+        });
     }
 }

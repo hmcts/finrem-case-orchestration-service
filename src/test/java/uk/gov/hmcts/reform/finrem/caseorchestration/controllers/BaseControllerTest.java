@@ -40,6 +40,11 @@ public abstract class BaseControllerTest extends BaseTest {
                 .getResource("/fixtures/pba-validate.json").toURI()));
     }
 
+    void doValidConsentOrderApprovedSetup() throws IOException, URISyntaxException {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/consent-in-contested-application-approved.json").toURI()));
+    }
+
     void doValidCaseDataSetUpForPaperApplication() throws IOException, URISyntaxException {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/bulkprint/bulk-print-paper-application.json").toURI()));
