@@ -1,8 +1,8 @@
 java:
   aadIdentityName: finrem
   ingressHost: "finrem-cos-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
-  applicationPort: '9000'
-  image: 'hmctspublic.azurecr.io/finrem-cos:latest'
+  applicationPort: 9000
+  readinessPath: '/health/readiness'
   environment:
     AUTH_PROVIDER_SERVICE_CLIENT_BASEURL : "http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     IDAM_API_URL: "https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net"
@@ -18,3 +18,4 @@ java:
         - username-solicitor
         - password-solicitor
         - AppInsightsInstrumentationKey
+  image: 'https://hmctspublic.azurecr.io/finrem-cos:latest'
