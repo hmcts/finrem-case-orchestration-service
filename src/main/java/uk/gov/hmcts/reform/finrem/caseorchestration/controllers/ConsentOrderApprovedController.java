@@ -34,6 +34,7 @@ import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -144,7 +145,8 @@ public class ConsentOrderApprovedController implements BaseController {
             if (approvedOrderList != null && !approvedOrderList.isEmpty()) {
                 ApprovedOrder approvedOrder = approvedOrderList.get(0).getApprovedOrder();
                 approvedOrder.setOrderLetter(orderLetter);
-                caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderList);
+                caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderList.stream().map(order ->
+                    mapper.convertValue(order, Map.class)).collect(Collectors.toList()));
             }
         } else {
             caseData.put(UPLOAD_ORDER, caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));

@@ -238,6 +238,26 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertTrue(uuid == null);
     }
 
+    @Test
+    public void shouldSendForBulkPrintPackForConsentInContestedApprovedOrder() {
+        final String consentedBulkPrintConsentOrderNotApprovedJson
+            = "/fixtures/contested/consent-in-contested-application-approved.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+
+        when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN)).thenReturn(bulkPrintDocumentList());
+        when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(new CaseDocument());
+        when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(new CaseDocument());
+
+        Map<String, Object> caseData = bulkPrintService.sendToBulkPrint(caseDetails, AUTH_TOKEN);
+
+        assertThat(caseData.containsKey("bulkPrintCoverSheetRes"), is(true));
+        assertThat(caseData.get("bulkPrintLetterIdRes"), is(letterId));
+        assertThat(caseData.get("bulkPrintLetterIdApp"), is(letterId));
+
+        verify(coverSheetService).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
+        verify(genericDocumentService, times(2)).bulkPrint(any());
+    }
+
     private CaseDetails caseDetails() {
         return TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
     }
