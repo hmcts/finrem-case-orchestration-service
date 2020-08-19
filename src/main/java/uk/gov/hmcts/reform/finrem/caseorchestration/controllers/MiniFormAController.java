@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DefaultsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
@@ -41,10 +42,12 @@ public class MiniFormAController implements BaseController {
     @Autowired
     private FeatureToggleService featureToggleService;
 
+    @Autowired
+    private DefaultsConfiguration defaultsConfiguration;
+
     public static final String assignedToJudgeReason = "assignedToJudgeReason";
     public static final String assignedToJudgeReasonDefault = "Draft consent order";
     public static final String assignedToJudge = "assignedToJudge";
-    public static final String assignedToJudgeDefault = "new_application@mailinator.com";
     public static final String referToJudgeDate = "referToJudgeDate";
     public static final String referToJudgeText = "referToJudgeText";
     public static final String referToJudgeTextDefault = "consent for approval";
@@ -82,7 +85,7 @@ public class MiniFormAController implements BaseController {
     }
 
     private void populateAssignToJudgeFields(Map<String, Object> caseData) {
-        caseData.put(assignedToJudge, assignedToJudgeDefault);
+        caseData.put(assignedToJudge, defaultsConfiguration.getAssignedToJudgeDefault());
         caseData.put(assignedToJudgeReason, assignedToJudgeReasonDefault);
         caseData.put(referToJudgeDate, LocalDate.now());
         caseData.put(referToJudgeText, referToJudgeTextDefault);
