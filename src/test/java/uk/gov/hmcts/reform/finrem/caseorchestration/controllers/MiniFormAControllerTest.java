@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.DefaultsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -50,6 +51,9 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     @MockBean
     protected FeatureToggleService featureToggleService;
 
+    @MockBean
+    protected DefaultsConfiguration defaultsConfiguration;
+
     protected String endpoint() {
         return "/case-orchestration/documents/generate-mini-form-a";
     }
@@ -86,7 +90,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
                 .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
                 .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BINARY_URL)))
-                .andExpect(jsonPath("$.data.assignedToJudge", is(MiniFormAController.assignedToJudgeDefault)))
+                .andExpect(jsonPath("$.data.assignedToJudge", is(defaultsConfiguration.getAssignedToJudgeDefault())))
                 .andExpect(jsonPath("$.data.assignedToJudgeReason", is(MiniFormAController.assignedToJudgeReasonDefault)))
                 .andExpect(jsonPath("$.data.referToJudgeText", is(MiniFormAController.referToJudgeTextDefault)))
                 .andExpect(jsonPath("$.data.referToJudgeDate", is(LocalDate.now().toString())))
