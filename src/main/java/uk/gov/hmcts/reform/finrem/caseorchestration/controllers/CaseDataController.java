@@ -22,6 +22,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_ADMIN;
@@ -55,6 +56,21 @@ public class CaseDataController implements BaseController {
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    @PostMapping(path = "/contested/set-paper-case-defaults",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Set default values for contested paper case journey")
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedPaperCaseDefaultValues(
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
+        @RequestBody final CallbackRequest callbackRequest) {
+        log.info("Setting default values for contested paper case journey.");
+        validateCaseData(callbackRequest);
+        final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        setData(authToken, caseData);
+        setPaperCaseData(caseData);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -92,5 +108,9 @@ public class CaseDataController implements BaseController {
             caseData.put(IS_ADMIN, NO_VALUE);
             caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
         }
+    }
+
+    private void setPaperCaseData(Map<String, Object> caseData) {
+        caseData.put(PAPER_APPLICATION, YES_VALUE);
     }
 }
