@@ -98,10 +98,10 @@ public class GeneralOrderService {
             caseData.put("GeneralOrderHeader", "Sitting in the Family Court");
         } else {
             caseData.put("RespondentName", DocumentHelper.getRespondentFullNameContested(caseDetails));
-            caseData.put("GeneralOrderCourt", "SITTING AT the Family Court at the" +
-                ContestedCourtHelper.getSelectedCourt(caseDetails));
-            caseData.put("GeneralOrderHeader", "In the Family Court sitting in the" +
-                ContestedCourtHelper.getSelectedCourt(caseDetails));
+            caseData.put("GeneralOrderCourt", "SITTING AT the Family Court at the "
+                + ContestedCourtHelper.getSelectedCourt(caseDetails));
+            caseData.put("GeneralOrderHeader", "In the Family Court sitting in the "
+                + ContestedCourtHelper.getSelectedCourt(caseDetails));
         }
 
         caseData.put("GeneralOrderJudgeDetails",
