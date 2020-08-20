@@ -139,21 +139,22 @@ public class ConsentOrderApprovedController implements BaseController {
         if (caseDetails.getState().equals(CONSENTED_ORDER_APPROVED)) {
             //generate consent in contested approval document
             CaseDocument orderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-
+            log.warn("generated letter binary url: {}", orderLetter.getDocumentBinaryUrl());
             //add generated doc to case data
             List<ApprovedOrderData> approvedOrderList = getConsentInContestedApprovedOrderCollection(caseData);
+            log.warn("order list size {}", approvedOrderList.size());
             if (approvedOrderList != null && !approvedOrderList.isEmpty()) {
                 ApprovedOrder approvedOrder = approvedOrderList.get(0).getApprovedOrder();
                 approvedOrder.setOrderLetter(orderLetter);
                 caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderList.stream().map(order ->
                     mapper.convertValue(order, Map.class)).collect(Collectors.toList()));
+                log.warn("set CONTESTED_CONSENT_ORDER_COLLECTION");
             }
         } else {
             caseData.put(UPLOAD_ORDER, caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
         }
         caseDetails.setData(caseData);
         caseData = bulkPrintService.sendToBulkPrint(caseDetails, authToken);
-
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseData)
