@@ -212,5 +212,10 @@ public class CCDConfigConstant {
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
     public static final String UPLOAD_ORDER = "uploadOrder";
 
+    //Contested Case Documents
+    public static final String CONTESTED_UPLOADED_DOCUMENTS = "uploadCaseDocument";
+    public static final String APPLICANT_CASE_DOCUMENTS = "applicantDocumentCollection";
+    public static final String RESPONDENT_CASE_DOCUMENTS = "respondentDocumentCollection";
+
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
 }
