@@ -25,17 +25,17 @@ public class UploadContestedCaseDocumentsService {
     public void filterDocumentsToRelevantParty(Map<String, Object> caseData) {
 
         List<ContestedUploadedDocument> uploadedDocuments = getUploadedDocuments(caseData);
-        List<ContestedUploadedDocument> applicantDocuments = getApplicantDocuments(caseData);
+        List<ContestedUploadedDocument> applicantUploadedDocuments = getApplicantDocuments(caseData);
 
         for (ContestedUploadedDocument item : uploadedDocuments) {
             if (item.getCaseDocumentParty().equals("Applicant")) {
                 uploadedDocuments.remove(item);
-                applicantDocuments.add(item);
+                applicantUploadedDocuments.add(item);
             }
         }
 
         ApplicantUploadedDocumentData applicantCaseDocuments = ApplicantUploadedDocumentData.builder()
-            .applicantCaseDocuments(applicantDocuments)
+            .applicantCaseDocuments(applicantUploadedDocuments)
             .build();
 
         log.info("Generated ApplicantCaseDocuments Collection = {}", applicantCaseDocuments);
