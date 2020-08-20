@@ -119,7 +119,7 @@ def versions = [
         pdfbox                  : '2.0.8',
         pitest                  : '1.5.2',
         powerMock               : '1.7.3',
-        reformLogging           : '5.1.6',
+        reformLogging           : '5.1.5',
         restAssured             : '3.0.3',
         serenity                : '2.2.12',
         serenityCucumber        : '1.9.51',
