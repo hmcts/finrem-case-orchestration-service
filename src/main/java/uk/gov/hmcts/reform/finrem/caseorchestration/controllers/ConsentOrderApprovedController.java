@@ -122,7 +122,7 @@ public class ConsentOrderApprovedController implements BaseController {
     }
 
     @PostMapping(path = "/consent-in-contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "'Consent Order Approved' callback handler for consent in contetested. Checks state and if "
+    @ApiOperation(value = "'Consent Order Approved' callback handler for consent in contested. Checks state and if "
         + "approved generates docs else puts latest general order into uploadORder fields. Then sends the data to bulk print")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
@@ -156,10 +156,14 @@ public class ConsentOrderApprovedController implements BaseController {
         bulkPrintService.sendToBulkPrint(caseDetails, authToken);
 
         log.warn("DETAILS DATA {}", caseDetails);
-        return ResponseEntity.ok(
-            AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDetails.getData())
-                .build());
+
+        AboutToStartOrSubmitCallbackResponse response = AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDetails.getData())
+            .build();
+
+        log.warn("RESPONSE DATA {}", response.getData());
+
+        return ResponseEntity.ok(response);
     }
 
     private Map<String, Object> generateAndPrepareDocuments(@RequestHeader(AUTHORIZATION_HEADER) String authToken, CallbackRequest callback) {

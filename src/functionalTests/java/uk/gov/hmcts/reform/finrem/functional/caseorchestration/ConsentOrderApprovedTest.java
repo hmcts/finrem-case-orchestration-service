@@ -85,21 +85,4 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
         Response response = functionalTestUtils.getResponseData(consentOrderApprovedUrl,callbackRequest);
         assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
     }
-
-    @Test
-    public void verifyConsentInContestedApplicationApproved() {
-        CallbackRequest callbackRequest = null;
-        InputStream resourceAsStream = getClass().getResourceAsStream(
-            "/json/contested/consent-in-contested-approved-order.json");
-
-
-        DocumentContext documentContext = JsonPath.parse(resourceAsStream);
-        try {
-            callbackRequest = objectMapper.readValue(documentContext.jsonString(), CallbackRequest.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Response response = functionalTestUtils.getResponseData(consentInContestedSendOrder,callbackRequest);
-        assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
-    }
 }
