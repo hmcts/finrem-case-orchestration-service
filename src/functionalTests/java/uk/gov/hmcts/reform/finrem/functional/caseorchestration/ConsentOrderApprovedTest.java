@@ -33,6 +33,9 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
     @Value("${cos.consentOrder.approved}")
     private String consentOrderApprovedUrl;
 
+    @Value("${cos.consentOrder.consentInContestedApproved}")
+    private String consentInContestedSendOrder;
+
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
@@ -80,6 +83,23 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
             e.printStackTrace();
         }
         Response response = functionalTestUtils.getResponseData(consentOrderApprovedUrl,callbackRequest);
+        assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
+    }
+
+    @Test
+    public void verifyConsentInContestedApplicationApproved() {
+        CallbackRequest callbackRequest = null;
+        InputStream resourceAsStream = getClass().getResourceAsStream(
+            "/json/contested/consent-in-contested-approved-order.json");
+
+
+        DocumentContext documentContext = JsonPath.parse(resourceAsStream);
+        try {
+            callbackRequest = objectMapper.readValue(documentContext.jsonString(), CallbackRequest.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Response response = functionalTestUtils.getResponseData(consentInContestedSendOrder,callbackRequest);
         assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
     }
 }
