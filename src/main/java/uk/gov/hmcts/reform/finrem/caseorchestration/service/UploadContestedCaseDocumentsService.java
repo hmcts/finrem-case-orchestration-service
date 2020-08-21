@@ -42,6 +42,7 @@ public class UploadContestedCaseDocumentsService {
 
         List<ApplicantUploadedDocumentData> applicantDocuments = asList(applicantCaseDocuments);
         caseData.put(APPLICANT_CASE_DOCUMENTS, applicantDocuments);
+        caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
     }
 
     private List<ContestedUploadedDocument> getUploadedDocuments(Map<String, Object> caseData) {
