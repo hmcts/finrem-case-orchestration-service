@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
