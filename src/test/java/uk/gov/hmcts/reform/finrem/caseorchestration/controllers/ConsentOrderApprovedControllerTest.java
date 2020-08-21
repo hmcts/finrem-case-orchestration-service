@@ -274,6 +274,8 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         doValidConsentOrderApprovedSetup();
         when(consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(any(), anyString()))
             .thenReturn(caseDocument());
+        when(bulkPrintService.sendToBulkPrint(any(), anyString()))
+            .thenAnswer(i -> i.getArgument(0, CaseDetails.class).getData());
         ResultActions result = mvc.perform(post(contestedConsentSendOrderEndpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
