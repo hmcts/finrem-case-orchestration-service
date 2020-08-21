@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -274,6 +275,8 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         doValidConsentOrderApprovedSetup();
         when(consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(any(), anyString()))
             .thenReturn(caseDocument());
+        when(bulkPrintService.sendToBulkPrint(any(), anyString()))
+            .thenAnswer(i -> i.getArgument(0, CaseDetails.class).getData());
         ResultActions result = mvc.perform(post(contestedConsentSendOrderEndpoint())
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
