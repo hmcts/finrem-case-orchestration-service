@@ -132,7 +132,7 @@ public class ConsentOrderApprovedController implements BaseController {
     })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedSendOrder(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) throws JsonProcessingException {
         CaseDetails caseDetails = callback.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -146,8 +146,8 @@ public class ConsentOrderApprovedController implements BaseController {
             if (approvedOrderList != null && !approvedOrderList.isEmpty()) {
                 ApprovedOrder approvedOrder = approvedOrderList.get(0).getApprovedOrder();
                 approvedOrder.setOrderLetter(orderLetter);
-                caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderList.stream().map(order ->
-                    mapper.convertValue(order, Map.class)).collect(Collectors.toList()));
+                caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderList);
+                caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
                 log.warn("set CONTESTED_CONSENT_ORDER_COLLECTION");
             }
         } else {
