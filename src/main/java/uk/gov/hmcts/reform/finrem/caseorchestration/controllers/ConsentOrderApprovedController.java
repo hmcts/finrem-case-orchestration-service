@@ -147,6 +147,7 @@ public class ConsentOrderApprovedController implements BaseController {
                 approvedOrder.setOrderLetter(orderLetter);
                 caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderList);
                 caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
+                caseDetails.setData(caseData);
                 log.warn("set CONTESTED_CONSENT_ORDER_COLLECTION");
             }
         } else {
