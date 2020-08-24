@@ -147,29 +147,40 @@
       ],
       "uploadCaseDocument": [
         {
-          "id": "1",
+          "id": "b8d6716b-7f3b-46c8-861f-7bdd69b53fe7",
           "value": {
             "caseDocuments": {
-              "document_url": "http://doc1",
-              "document_filename": "doc1",
-              "document_binary_url": "http://doc1.binary"
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d7e52169-f858-4dac-8e27-1fff6443cf6a",
+              "document_filename": "FakeDocumentUpload.docx",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d7e52169-f858-4dac-8e27-1fff6443cf6a/binary"
             },
             "caseDocumentType": "Letter from Applicant",
-            "caseDocumentParty": "Applicant",
-            "caseDocumentOther": null
+            "caseDocumentParty": "applicant"
           }
         },
         {
-          "id": "2",
+          "id": "566259c7-ef2b-471a-9165-8f9eb7a0fe27",
           "value": {
             "caseDocuments": {
-              "document_url": "http://doc2",
-              "document_filename": "doc2",
-              "document_binary_url": "http://doc2.binary"
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0a28e2e2-e691-4e44-99e1-ce213355a5fe",
+              "document_filename": "FakeDocumentUpload.docx",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0a28e2e2-e691-4e44-99e1-ce213355a5fe/binary"
             },
             "caseDocumentType": "Letter from Applicant",
-            "caseDocumentParty": "Applicant",
-            "caseDocumentOther": null
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "98c441bb-ec16-4adc-9fd2-7c8968a19020",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/28f6e883-e270-4705-afec-ff1a73d7d959",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/28f6e883-e270-4705-afec-ff1a73d7d959/binary"
+            },
+            "caseDocumentType": "other",
+            "caseDocumentOther": "This is a test example for \"Other\"",
+            "caseDocumentParty": "respondent"
           }
         }
       ]
