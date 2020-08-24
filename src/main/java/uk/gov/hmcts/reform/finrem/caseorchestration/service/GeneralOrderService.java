@@ -94,10 +94,14 @@ public class GeneralOrderService {
 
         if (isConsentedApplication(caseDetails)) {
             caseData.put("RespondentName", DocumentHelper.getRespondentFullNameConsented(caseDetails));
-            caseData.put("GeneralOrderCourt", "Courts and Tribunal Service Centre");
+            caseData.put("GeneralOrderCourt", "SITTING in private");
+            caseData.put("GeneralOrderHeaderOne", "Sitting in the Family Court");
         } else {
             caseData.put("RespondentName", DocumentHelper.getRespondentFullNameContested(caseDetails));
+            caseData.put("GeneralOrderCourtSitting", "SITTING AT the Family Court at the ");
             caseData.put("GeneralOrderCourt", ContestedCourtHelper.getSelectedCourt(caseDetails));
+            caseData.put("GeneralOrderHeaderOne", "In the Family Court");
+            caseData.put("GeneralOrderHeaderTwo", "sitting in the");
         }
 
         caseData.put("GeneralOrderJudgeDetails",
