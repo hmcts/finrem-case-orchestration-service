@@ -22,15 +22,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 public class UploadContestedCaseDocumentsService {
 
+    private static final String APPLICANT = "Applicant";
+
     private final ObjectMapper mapper;
 
-    public void filterDocumentsToRelevantParty(Map<String, Object> caseData) {
+    public Map<String, Object> filterDocumentsToRelevantParty(Map<String, Object> caseData) {
 
         List<ContestedUploadedDocument> uploadedDocuments = getUploadedDocuments(caseData);
         List<ContestedUploadedDocument> applicantUploadedDocuments = getApplicantDocuments(caseData);
 
         for (ContestedUploadedDocument item : uploadedDocuments) {
-            if (item.getCaseDocumentParty().equals("Applicant")) {
+            if (item.getCaseDocumentParty().equals(APPLICANT)) {
                 uploadedDocuments.remove(item);
                 applicantUploadedDocuments.add(item);
             }
@@ -45,6 +47,8 @@ public class UploadContestedCaseDocumentsService {
         List<ApplicantUploadedDocumentData> applicantDocuments = asList(applicantCaseDocuments);
         caseData.put(APPLICANT_CASE_DOCUMENTS, applicantDocuments);
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
+
+        return caseData;
     }
 
     private List<ContestedUploadedDocument> getUploadedDocuments(Map<String, Object> caseData) {

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.google.common.collect.ImmutableList;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -46,9 +47,14 @@ public class UploadContestedCaseDocumentController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
         log.info("Received request to upload Contested case documents for Case ID: {}", caseDetails.getId());
 
-        service.filterDocumentsToRelevantParty(caseData);
+        caseData = service.filterDocumentsToRelevantParty(caseData);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(
+            AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseData)
+                .errors(ImmutableList.of())
+                .warnings(ImmutableList.of())
+                .build());
     }
 
 }
