@@ -177,11 +177,15 @@ dependencies {
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 
     testSmokeImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
+    testSmokeImplementation group: 'io.rest-assured', name: 'json-path', version: versions.restAssured
+    testSmokeImplementation group: 'io.rest-assured', name: 'xml-path', version: versions.restAssured
     testSmokeImplementation sourceSets.main.runtimeClasspath
     testSmokeImplementation sourceSets.test.runtimeClasspath
 
     functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
     functionalImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
+    functionalImplementation group: 'io.rest-assured', name: 'json-path', version: versions.restAssured
+    functionalImplementation group: 'io.rest-assured', name: 'xml-path', version: versions.restAssured
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: versions.serenity
     functionalImplementation group: 'net.serenity-bdd', name: 'serenity-cucumber', version: versions.serenityCucumber
