@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -62,9 +61,6 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     @Autowired
     private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
 
-    @MockBean
-    private FeatureToggleService featureToggleService;
-
     private CaseDetails caseDetails;
 
     @Before
@@ -101,54 +97,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     }
 
     @Test
-    public void givenFeatureIsEnabled_whenApplicantLetterPackIsPrepared_thenItHasExpectedDocuments_and_caseDataIsUpdated() {
-        when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(true);
-        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(false);
-        List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN);
-
-        assertThat(generatedDocuments, hasSize(3));
-        assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
-        assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(GENERAL_ORDER_URL));
-        assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(REPLY_COVERSHEET_URL));
-
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
-    }
-
-    @Test
-    public void givenFeatureIsDisabled_whenApplicantLetterPackIsPrepared_thenItHasExpectedDocuments_and_caseDataIsUpdated() {
-        when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(false);
-        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(false);
-
-        List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN);
-
-        assertThat(generatedDocuments, hasSize(2));
-        assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(DEFAULT_COVERSHEET_URL));
-        assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(GENERAL_ORDER_URL));
-
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
-    }
-
-    @Test
-    public void givenGeneralOrderToggleIsEnabled_thenItPrintsTheCorrectDocuments() {
-        when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(false);
-        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
-        List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN);
-
-        assertThat(generatedDocuments, hasSize(3));
-        assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(DEFAULT_COVERSHEET_URL));
-        assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(GENERAL_ORDER_URL));
-        assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
-
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
-    }
-
-    @Test
-    public void givenGeneralOrderToggleIsEnabled_andGeneralLetterToggle_thenItPrintsTheCorrectDocuments() {
-        when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(true);
-        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
+    public void whenApplicantLetterPackIsPrepared_thenItHasExpectedDocuments_and_caseDataIsUpdated() {
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, AUTH_TOKEN);
 
@@ -158,15 +107,12 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
         assertThat(generatedDocuments.get(3).getBinaryFileUrl(), is(REPLY_COVERSHEET_URL));
 
-
         assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
     }
 
     @Test
     public void givenNoNotApprovedConsentOrderIsFound_thenApplicantPackPrintsWithoutIt() {
         caseDetails.getData().put(UPLOAD_ORDER, null);
-        when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(true);
-        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, AUTH_TOKEN);
@@ -184,23 +130,6 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     public void getApplicantLetterPackWithNoConsentOrderAndNoGeneralOrdersReturnsEmptyList_withConsentDocGenOn() {
         CaseDetails caseDetails = defaultCaseDetails();
         caseDetails.getData().put(UPLOAD_ORDER, null);
-        when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(true);
-        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
-
-        List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN);
-
-        assertThat(generatedDocuments, hasSize(0));
-
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
-    }
-
-    @Test
-    public void getApplicantLetterPackWithNoConsentOrderAndNoGeneralOrdersReturnsEmptyList_withConsentDocGenOff() {
-        CaseDetails caseDetails = defaultCaseDetails();
-        caseDetails.getData().put(UPLOAD_ORDER, null);
-        when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(false);
-        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, AUTH_TOKEN);
