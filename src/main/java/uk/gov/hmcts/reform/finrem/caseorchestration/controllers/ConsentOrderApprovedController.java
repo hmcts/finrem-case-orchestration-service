@@ -162,7 +162,6 @@ public class ConsentOrderApprovedController implements BaseController {
             .build();
 
         log.warn("RESPONSE DATA {}", response.getData());
-
         return ResponseEntity.ok(response);
     }
 
