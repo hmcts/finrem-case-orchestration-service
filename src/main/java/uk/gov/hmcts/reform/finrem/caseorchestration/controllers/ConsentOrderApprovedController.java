@@ -162,6 +162,7 @@ public class ConsentOrderApprovedController implements BaseController {
             .build();
 
         log.warn("RESPONSE DATA {}", response.getData());
+        log.warn("MAPPER DATA {}", mapper.readValue(mapper.writeValueAsString(response.getData()), HashMap.class));
         return ResponseEntity.ok(response);
     }
 
