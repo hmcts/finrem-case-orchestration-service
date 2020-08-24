@@ -7,7 +7,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ConsentedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -124,12 +123,17 @@ public class RefusalOrderDocumentService {
         Map<String, Object> caseData = caseDetails.getData();
 
         caseData.put("ApplicantName", DocumentHelper.getApplicantFullName(caseDetails));
-        caseData.put("RespondentName", isConsentedApplication(caseDetails)
-            ? DocumentHelper.getRespondentFullNameConsented(caseDetails) :
-            DocumentHelper.getRespondentFullNameContested(caseDetails));
-        caseData.put("CourtName", isConsentedApplication(caseDetails)
-            ? ConsentedCourtHelper.getSelectedCourt(caseDetails) :
-            ContestedCourtHelper.getSelectedCourt(caseDetails));
+        caseData.put("RefusalOrderHeader", "Sitting in the Family Court");
+
+        if (isConsentedApplication(caseDetails)) {
+            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameConsented(caseDetails));
+            caseData.put("CourtName", "SITTING in private");
+
+        } else {
+            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameContested(caseDetails));
+            caseData.put("CourtName", "SITTING AT the Family Court at the "
+                + ContestedCourtHelper.getSelectedCourt(caseDetails));
+        }
 
         return caseDetails;
     }
