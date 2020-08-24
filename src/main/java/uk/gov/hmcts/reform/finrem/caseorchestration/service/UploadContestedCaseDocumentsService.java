@@ -7,17 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CASE_DOCUMENTS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_PENSION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
 @Slf4j
@@ -25,7 +22,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 public class UploadContestedCaseDocumentsService {
 
-    private static final String APPLICANT = "Applicant";
+    private static final String APPLICANT = "applicant";
 
     private final ObjectMapper mapper;
 
@@ -42,7 +39,6 @@ public class UploadContestedCaseDocumentsService {
                     .applicantCaseDocument(document)
                     .build();
 
-                uploadedDocuments.remove(item);
                 applicantUploadedDocuments.add(applicantCaseDocuments);
             }
         }
@@ -76,4 +72,14 @@ public class UploadContestedCaseDocumentsService {
             new TypeReference<List<ApplicantUploadedDocumentData>>() {
             });
     }
+
+    //  public void cleanupUploadCollection(Map<String, Object> caseData) {
+    //      List<ContestedUploadedDocumentData> uploadedDocuments = getUploadedDocuments(caseData);
+    //
+    //      for (ContestedUploadedDocumentData item : uploadedDocuments) {
+    //           if (item.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT)) {
+    //             uploadedDocuments.remove(item);
+    //           }
+    //      }
+    //  }
 }
