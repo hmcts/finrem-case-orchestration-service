@@ -93,6 +93,7 @@
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/fee-lookup_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/check-latest-consent-order_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/preview-general-order_POST": "ignore",
+  "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/contest-order-approved_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/consented/set-defaults_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/payment-confirmation_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/move-collection/source/to/destination_POST": "ignore",
