@@ -91,6 +91,7 @@
   "10023_Information Disclosure - Debug Error Messages_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/consented/set-defaults_POST": "ignore",
   "10023_Information Disclosure - Debug Error Messages_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/update-latest-consent-order_POST": "ignore",
   "10023_Information Disclosure - Debug Error Messages_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/remove-details_POST": "ignore",
+  "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/v2/api-docs_GET": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/contested-consent-order-not-approved_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/prepare-for-hearing-order-sent_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/general-letter_POST": "ignore",
