@@ -66,9 +66,7 @@ public class GeneralLetterService {
         log.info("Generating General letter for Case ID: {}", caseDetails.getId());
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
         addGeneralLetterToCaseData(caseDetails, document);
-        if (featureToggleService.isPrintGeneralLetterEnabled()) {
-            bulkPrintService.printLatestGeneralLetter(caseDetails);
-        }
+        bulkPrintService.printLatestGeneralLetter(caseDetails);
     }
 
     private CaseDocument generateGeneralLetterDocument(CaseDetails caseDetails, String authorisationToken) {

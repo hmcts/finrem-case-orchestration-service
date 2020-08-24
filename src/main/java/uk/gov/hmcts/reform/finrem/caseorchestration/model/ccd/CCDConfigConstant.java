@@ -216,4 +216,5 @@ public class CCDConfigConstant {
 
     //states
     public static final String CONSENTED_ORDER_APPROVED = "consentedOrderApproved";
+    public static final String CONSENTED_ORDER_NOT_APPROVED = "consentedOrderNotApproved";
 }

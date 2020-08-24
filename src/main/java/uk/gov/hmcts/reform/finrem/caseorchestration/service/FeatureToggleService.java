@@ -16,10 +16,7 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.AUTOMATE_ASSIGN_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.AUTOMATE_SEND_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONSENT_ORDER_NOT_APPROVED_APPLICANT_DOCUMENT_GENERATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_COURT_DETAILS_MIGRATION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PRINT_GENERAL_LETTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PRINT_GENERAL_ORDER;
 
 /**
  * To add a feature toggle flag:
@@ -46,10 +43,6 @@ public class FeatureToggleService {
             .orElse(false);
     }
 
-    public boolean isConsentOrderNotApprovedApplicantDocumentGenerationEnabled() {
-        return isFeatureEnabled(CONSENT_ORDER_NOT_APPROVED_APPLICANT_DOCUMENT_GENERATION);
-    }
-
     public boolean isAutomateAssignJudgeEnabled() {
         return isFeatureEnabled(AUTOMATE_ASSIGN_JUDGE);
     }
@@ -60,14 +53,6 @@ public class FeatureToggleService {
 
     public boolean isAutomateSendOrderEnabled() {
         return isFeatureEnabled(AUTOMATE_SEND_ORDER);
-    }
-
-    public boolean isPrintGeneralLetterEnabled() {
-        return isFeatureEnabled(PRINT_GENERAL_LETTER);
-    }
-
-    public boolean isPrintGeneralOrderEnabled() {
-        return isFeatureEnabled(PRINT_GENERAL_ORDER);
     }
 
     /**

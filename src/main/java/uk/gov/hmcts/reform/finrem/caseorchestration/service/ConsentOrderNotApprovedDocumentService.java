@@ -36,8 +36,6 @@ public class ConsentOrderNotApprovedDocumentService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final DocumentConfiguration documentConfiguration;
-    private final GenerateCoverSheetService generateCoverSheetService;
-    private final FeatureToggleService featureToggleService;
     private final GeneralOrderService generalOrderService;
 
     public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken) {
@@ -46,34 +44,21 @@ public class ConsentOrderNotApprovedDocumentService {
 
         List<BulkPrintDocument> documents = new ArrayList<>();
 
-        if (featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()) {
-            documents.add(coverLetter(caseDetails, authorisationToken));
-            documents.addAll(notApprovedConsentOrder(caseData));
-            documents = addGeneralOrdersIfApplicable(caseData, documents);
-            documents.add(applicantReplyCoversheet(caseDetails, authorisationToken));
+        documents.add(coverLetter(caseDetails, authorisationToken));
+        documents.addAll(notApprovedConsentOrder(caseData));
+        documents = addGeneralOrdersIfApplicable(caseData, documents);
+        documents.add(applicantReplyCoversheet(caseDetails, authorisationToken));
 
-            //if only coversheet and reply sheet then print nothing
-            if (documents.size() == 2) {
-                return new ArrayList<>();
-            }
-
-        } else {
-            documents.add(defaultCoversheet(caseDetails, authorisationToken));
-            documents.addAll(notApprovedConsentOrder(caseData));
-            documents = addGeneralOrdersIfApplicable(caseData, documents);
-
-            //if only coversheet then print nothing
-            if (documents.size() == 1) {
-                return new ArrayList<>();
-            }
+        //if only coversheet and reply sheet then print nothing
+        if (documents.size() == 2) {
+            return new ArrayList<>();
         }
 
         return documents;
     }
 
     private List<BulkPrintDocument> addGeneralOrdersIfApplicable(Map<String, Object> caseData, List<BulkPrintDocument> existingList) {
-        if (featureToggleService.isPrintGeneralOrderEnabled() && isPaperApplication(caseData)
-            && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
+        if (isPaperApplication(caseData) && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
             return Streams.concat(existingList.stream(),
                 asList(generalOrderService.getLatestGeneralOrderForPrintingConsented(caseData)).stream()).collect(Collectors.toList());
         }
@@ -119,12 +104,6 @@ public class ConsentOrderNotApprovedDocumentService {
             documentConfiguration.getConsentOrderNotApprovedReplyCoversheetTemplate(),
             documentConfiguration.getConsentOrderNotApprovedReplyCoversheetFileName());
         caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoversheet);
-        return BulkPrintDocument.builder().binaryFileUrl(applicantCoversheet.getDocumentBinaryUrl()).build();
-    }
-
-    private BulkPrintDocument defaultCoversheet(CaseDetails caseDetails, String authorisationToken) {
-        CaseDocument applicantCoverSheet = generateCoverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
-        caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
-        return BulkPrintDocument.builder().binaryFileUrl(applicantCoverSheet.getDocumentBinaryUrl()).build();
+        return documentHelper.getCaseDocumentAsBulkPrintDocument(applicantCoversheet);
     }
 }

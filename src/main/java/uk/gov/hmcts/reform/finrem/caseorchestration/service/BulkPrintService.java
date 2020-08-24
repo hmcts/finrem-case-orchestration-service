@@ -47,26 +47,24 @@ public class BulkPrintService {
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final DocumentHelper documentHelper;
     private final GeneralOrderService generalOrderService;
-    private final FeatureToggleService featureToggleService;
     private final GenerateCoverSheetService coverSheetService;
 
     public BulkPrintService(GenericDocumentService genericDocumentService,
                             ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService,
                             @Lazy ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
                             DocumentHelper documentHelper, GeneralOrderService generalOrderService,
-                            FeatureToggleService featureToggleService, GenerateCoverSheetService coverSheetService) {
+                            GenerateCoverSheetService coverSheetService) {
         this.genericDocumentService = genericDocumentService;
         this.consentOrderNotApprovedDocumentService = consentOrderNotApprovedDocumentService;
         this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
         this.documentHelper = documentHelper;
         this.generalOrderService = generalOrderService;
-        this.featureToggleService = featureToggleService;
         this.coverSheetService = coverSheetService;
     }
 
     public UUID sendNotificationLetterForBulkPrint(final CaseDocument notificationLetter, final CaseDetails caseDetails) {
         List<BulkPrintDocument> notificationLetterList = Collections.singletonList(
-            BulkPrintDocument.builder().binaryFileUrl(notificationLetter.getDocumentBinaryUrl()).build());
+            documentHelper.getCaseDocumentAsBulkPrintDocument(notificationLetter));
 
         Long caseId = caseDetails.getId();
         log.info("Notification letter sent to Bulk Print: {} for Case ID: {}", notificationLetterList, caseId);
@@ -88,8 +86,7 @@ public class BulkPrintService {
 
         bulkPrintDocuments.addAll(orderDocuments);
 
-        if (featureToggleService.isPrintGeneralOrderEnabled() && !isOrderApprovedDocumentCollectionPresent(caseDetails.getData())
-            && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
+        if (!isOrderApprovedDocumentCollectionPresent(caseDetails.getData()) && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
             bulkPrintDocuments.add(generalOrderService.getLatestGeneralOrderForPrintingConsented(caseDetails.getData()));
         }
 
@@ -145,7 +142,7 @@ public class BulkPrintService {
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), applicantDocuments);
     }
 
-    private UUID bulkPrintFinancialRemedyLetterPack(Long caseId, List<BulkPrintDocument> documents) {
+    public UUID bulkPrintFinancialRemedyLetterPack(Long caseId, List<BulkPrintDocument> documents) {
         return bulkPrintDocuments(caseId, FINANCIAL_REMEDY_PACK_LETTER_TYPE, documents);
     }
 

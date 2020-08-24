@@ -222,6 +222,10 @@ public class DocumentHelper {
             .collect(Collectors.joining("\n"));
     }
 
+    public BulkPrintDocument getCaseDocumentAsBulkPrintDocument(CaseDocument caseDocument) {
+        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
+    }
+
     public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {
         Map<String, Object> documentLink = (Map) data.get(documentName);
 
