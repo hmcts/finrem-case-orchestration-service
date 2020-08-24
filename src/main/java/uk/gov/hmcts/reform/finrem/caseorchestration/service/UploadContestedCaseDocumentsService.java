@@ -36,8 +36,8 @@ public class UploadContestedCaseDocumentsService {
                 //we need to build ApplicantUploadedDocumentData, and add the "Applicant" marked doc to the collection
                 ContestedUploadedDocument document = item.getUploadedCaseDocument();
                 ApplicantUploadedDocumentData applicantCaseDocuments = ApplicantUploadedDocumentData.builder()
-                .applicantCaseDocument(document)
-                .build();
+                    .applicantCaseDocument(document)
+                    .build();
 
                 uploadedDocuments.remove(item);
                 applicantUploadedDocuments.add(applicantCaseDocuments);

@@ -14,7 +14,6 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CASE_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
@@ -35,7 +34,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void documentsAreFilteredBasedOnPartySpecified(){
+    public void documentsAreFilteredBasedOnPartySpecified() {
         Map<String, Object> caseData = caseDetails.getData();
         service.filterDocumentsToRelevantParty(caseData);
 
