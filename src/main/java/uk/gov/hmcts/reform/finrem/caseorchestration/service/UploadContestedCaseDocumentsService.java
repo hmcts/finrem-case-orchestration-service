@@ -8,12 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Arrays.asList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CASE_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
@@ -28,48 +28,49 @@ public class UploadContestedCaseDocumentsService {
 
     public Map<String, Object> filterDocumentsToRelevantParty(Map<String, Object> caseData) {
 
-        List<ContestedUploadedDocument> uploadedDocuments = getUploadedDocuments(caseData);
-        List<ContestedUploadedDocument> applicantUploadedDocuments = getApplicantDocuments(caseData);
+        List<ContestedUploadedDocumentData> uploadedDocuments = getUploadedDocuments(caseData);
+        List<ApplicantUploadedDocumentData> applicantUploadedDocuments = getApplicantDocuments(caseData);
 
-        for (ContestedUploadedDocument item : uploadedDocuments) {
-            if (item.getCaseDocumentParty().equals(APPLICANT)) {
+        for (ContestedUploadedDocumentData item : uploadedDocuments) {
+            if (item.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT)) {
+                //we need to build ApplicantUploadedDocumentData, and add the "Applicant" marked doc to the collection
+                ContestedUploadedDocument document = item.getUploadedCaseDocument();
+                ApplicantUploadedDocumentData applicantCaseDocuments = ApplicantUploadedDocumentData.builder()
+                .applicantCaseDocument(document)
+                .build();
+
                 uploadedDocuments.remove(item);
-                applicantUploadedDocuments.add(item);
+                applicantUploadedDocuments.add(applicantCaseDocuments);
             }
         }
 
-        ApplicantUploadedDocumentData applicantCaseDocuments = ApplicantUploadedDocumentData.builder()
-            .applicantCaseDocuments(applicantUploadedDocuments)
-            .build();
+        log.info("Generated ApplicantCaseDocuments Collection = {}", applicantUploadedDocuments);
 
-        log.info("Generated ApplicantCaseDocuments Collection = {}", applicantCaseDocuments);
-
-        List<ApplicantUploadedDocumentData> applicantDocuments = asList(applicantCaseDocuments);
-        caseData.put(APPLICANT_CASE_DOCUMENTS, applicantDocuments);
+        caseData.put(APPLICANT_CASE_DOCUMENTS, applicantUploadedDocuments);
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
 
         return caseData;
     }
 
-    private List<ContestedUploadedDocument> getUploadedDocuments(Map<String, Object> caseData) {
+    private List<ContestedUploadedDocumentData> getUploadedDocuments(Map<String, Object> caseData) {
 
         if (StringUtils.isEmpty(caseData.get(CONTESTED_UPLOADED_DOCUMENTS))) {
             return new ArrayList<>();
         }
 
         return mapper.convertValue(caseData.get(CONTESTED_UPLOADED_DOCUMENTS),
-            new TypeReference<List<ContestedUploadedDocument>>() {
+            new TypeReference<List<ContestedUploadedDocumentData>>() {
             });
     }
 
-    private List<ContestedUploadedDocument> getApplicantDocuments(Map<String, Object> caseData) {
+    private List<ApplicantUploadedDocumentData> getApplicantDocuments(Map<String, Object> caseData) {
 
         if (StringUtils.isEmpty(caseData.get(APPLICANT_CASE_DOCUMENTS))) {
             return new ArrayList<>();
         }
 
         return mapper.convertValue(caseData.get(APPLICANT_CASE_DOCUMENTS),
-            new TypeReference<List<ContestedUploadedDocument>>() {
+            new TypeReference<List<ApplicantUploadedDocumentData>>() {
             });
     }
 }

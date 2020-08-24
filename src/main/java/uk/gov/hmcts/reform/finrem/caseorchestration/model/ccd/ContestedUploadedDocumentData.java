@@ -12,9 +12,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ApplicantUploadedDocumentData {
+public class ContestedUploadedDocumentData {
     @JsonProperty("id")
     private String id;
-    @JsonProperty("applicantDocumentCollection")
-    private ContestedUploadedDocument applicantCaseDocument;
+    @JsonProperty("uploadCaseDocument")
+    private ContestedUploadedDocument uploadedCaseDocument;
 }
+
