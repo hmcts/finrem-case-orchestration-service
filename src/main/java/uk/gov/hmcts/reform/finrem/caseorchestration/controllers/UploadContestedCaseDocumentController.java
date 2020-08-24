@@ -49,6 +49,8 @@ public class UploadContestedCaseDocumentController implements BaseController {
 
         caseData = service.filterDocumentsToRelevantParty(caseData);
 
+        //service.cleanupUploadCollection(caseData);
+
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseData)
