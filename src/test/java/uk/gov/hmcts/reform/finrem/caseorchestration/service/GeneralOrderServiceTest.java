@@ -295,11 +295,12 @@ public class GeneralOrderServiceTest {
             assertThat(data.get("DivorceCaseNumber"), is("DD12D12345"));
             assertThat(data.get("ApplicantName"), is("Consented Applicant Name"));
             assertThat(data.get("RespondentName"), is("Consented Respondent Name"));
-            assertThat(data.get("GeneralOrderCourt"), is("Courts and Tribunal Service Centre"));
+            assertThat(data.get("GeneralOrderCourt"), is("SITTING in private"));
             assertThat(data.get("GeneralOrderJudgeDetails"), is("His Honour Judge Consented"));
             assertThat(data.get("GeneralOrderRecitals"), is("Consented Recitals"));
             assertThat(data.get("GeneralOrderDate"), is("01/01/2020"));
             assertThat(data.get("GeneralOrderBodyText"), is("Test is dummy text for consented"));
+            assertThat(data.get("GeneralOrderHeaderOne"), is("Sitting in the Family Court"));
         }
 
         void verifyAdditionalFieldsContested() {
@@ -313,6 +314,10 @@ public class GeneralOrderServiceTest {
             assertThat(data.get("GeneralOrderRecitals"), is("Contested Recitals"));
             assertThat(data.get("GeneralOrderDate"), is("01/06/2020"));
             assertThat(data.get("GeneralOrderBodyText"), is("Test is dummy text for contested"));
+            assertThat(data.get("GeneralOrderHeaderOne"), is("In the Family Court"));
+            assertThat(data.get("GeneralOrderHeaderTwo"), is("sitting in the"));
+            assertThat(data.get("GeneralOrderCourtSitting"), is("SITTING AT the Family Court at the "));
+
         }
 
         private Map<String, Object> data() {
