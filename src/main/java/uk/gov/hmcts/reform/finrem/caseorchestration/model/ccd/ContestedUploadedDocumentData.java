@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class ContestedUploadedDocumentData {
     @JsonProperty("id")
     private String id;
-    @JsonProperty("uploadCaseDocument")
+    @JsonProperty("value")
     private ContestedUploadedDocument uploadedCaseDocument;
 }
 
