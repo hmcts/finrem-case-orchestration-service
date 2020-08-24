@@ -60,10 +60,10 @@ public class ConsentOrderApprovedController implements BaseController {
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final GenericDocumentService genericDocumentService;
     private final ConsentInContestedOrderService consentInContestedOrderService;
-    private final ObjectMapper mapper;
     private final BulkPrintService bulkPrintService;
-    private final FeatureToggleService featureToggleService;
     private final NotificationService notificationService;
+    private final FeatureToggleService featureToggleService;
+    private final ObjectMapper mapper;
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "'Consent Order Approved' callback handler. Generates relevant Consent Order Approved documents")
