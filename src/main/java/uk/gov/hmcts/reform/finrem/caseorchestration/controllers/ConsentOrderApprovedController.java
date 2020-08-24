@@ -138,33 +138,23 @@ public class ConsentOrderApprovedController implements BaseController {
         if (caseDetails.getState().equals(CONSENTED_ORDER_APPROVED)) {
             //generate consent in contested approval document
             CaseDocument orderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-            log.warn("generated letter binary url: {}", orderLetter.getDocumentBinaryUrl());
             //add generated doc to case data
             List<ApprovedOrderData> approvedOrderList = getConsentInContestedApprovedOrderCollection(caseData);
-            log.warn("order list size {}", approvedOrderList.size());
             if (approvedOrderList != null && !approvedOrderList.isEmpty()) {
                 ApprovedOrder approvedOrder = approvedOrderList.get(0).getApprovedOrder();
                 approvedOrder.setOrderLetter(orderLetter);
                 caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderList);
                 caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
                 caseDetails.setData(caseData);
-                log.warn("set CONTESTED_CONSENT_ORDER_COLLECTION");
             }
         } else {
             caseData.put(UPLOAD_ORDER, caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
         }
         bulkPrintService.sendToBulkPrint(caseDetails, authToken);
-
-        log.warn("DETAILS DATA {}", caseDetails);
-
-        AboutToStartOrSubmitCallbackResponse response = AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDetails.getData())
-            .build();
-
-        log.warn("RESPONSE DATA {}", response.getData());
         
-        log.warn("MAPPER DATA {}", mapper.readValue(mapper.writeValueAsString(response.getData()), HashMap.class));
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDetails.getData())
+            .build());
     }
 
     private Map<String, Object> generateAndPrepareDocuments(@RequestHeader(AUTHORIZATION_HEADER) String authToken, CallbackRequest callback) {

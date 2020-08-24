@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
@@ -26,6 +27,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_PENSION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Service
@@ -45,7 +48,7 @@ public class ConsentOrderApprovedDocumentService {
             documentConfiguration.getApprovedConsentOrderFileName(),
             documentConfiguration.getApprovedConsentOrderTemplate());
 
-        return genericDocumentService.generateDocument(authToken, caseDetails,
+        return genericDocumentService.generateDocument(authToken, applyAddExtraFields(caseDetails),
             documentConfiguration.getApprovedConsentOrderTemplate(),
             documentConfiguration.getApprovedConsentOrderFileName());
     }
@@ -153,5 +156,21 @@ public class ConsentOrderApprovedDocumentService {
     private List<ApprovedOrderData> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<List<ApprovedOrderData>>() {
         });
+    }
+
+    private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+
+        caseData.put("DivorceCaseNumber", caseDetails.getData().get(DIVORCE_CASE_NUMBER));
+        caseData.put("ApplicantName", DocumentHelper.getApplicantFullName(caseDetails));
+
+        if (isConsentedApplication(caseDetails)) {
+            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameConsented(caseDetails));
+            caseData.put("GeneralOrderCourt", "Courts and Tribunal Service Centre");
+        } else {
+            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameContested(caseDetails));
+            caseData.put("GeneralOrderCourt", ContestedCourtHelper.getSelectedCourt(caseDetails));
+        }
+        return caseDetails;
     }
 }
