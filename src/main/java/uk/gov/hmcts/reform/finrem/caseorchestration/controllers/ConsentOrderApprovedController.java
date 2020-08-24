@@ -151,7 +151,7 @@ public class ConsentOrderApprovedController implements BaseController {
             caseData.put(UPLOAD_ORDER, caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
         }
         bulkPrintService.sendToBulkPrint(caseDetails, authToken);
-        
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDetails.getData())
             .build());

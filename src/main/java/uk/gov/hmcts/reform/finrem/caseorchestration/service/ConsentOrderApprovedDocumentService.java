@@ -159,18 +159,19 @@ public class ConsentOrderApprovedDocumentService {
     }
 
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
+        CaseDetails detailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        Map<String, Object> caseData = detailsCopy.getData();
 
-        caseData.put("DivorceCaseNumber", caseDetails.getData().get(DIVORCE_CASE_NUMBER));
-        caseData.put("ApplicantName", DocumentHelper.getApplicantFullName(caseDetails));
+        caseData.put("DivorceCaseNumber", detailsCopy.getData().get(DIVORCE_CASE_NUMBER));
+        caseData.put("ApplicantName", DocumentHelper.getApplicantFullName(detailsCopy));
 
-        if (isConsentedApplication(caseDetails)) {
-            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameConsented(caseDetails));
+        if (isConsentedApplication(detailsCopy)) {
+            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameConsented(detailsCopy));
             caseData.put("GeneralOrderCourt", "Courts and Tribunal Service Centre");
         } else {
-            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameContested(caseDetails));
-            caseData.put("GeneralOrderCourt", ContestedCourtHelper.getSelectedCourt(caseDetails));
+            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameContested(detailsCopy));
+            caseData.put("GeneralOrderCourt", ContestedCourtHelper.getSelectedCourt(detailsCopy));
         }
-        return caseDetails;
+        return detailsCopy;
     }
 }
