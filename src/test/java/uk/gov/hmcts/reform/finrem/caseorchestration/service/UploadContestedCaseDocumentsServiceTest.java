@@ -46,14 +46,6 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(2));
     }
 
-    //  @Test
-    //  public void uploadedDocumentCollectionIsCleanedUp() {
-    //      Map<String, Object> caseData = caseDetails.getData();
-    //  service.cleanupUploadCollection(caseData);
-    //
-    //  assertThat(getUploadedCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(1));
-    //  }
-
     private CaseDetails contestedCaseDetails() throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/contested/contested-upload-case-documents.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
