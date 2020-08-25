@@ -271,6 +271,6 @@ public class DocumentHelper {
     }
 
     public List<ContestedConsentOrderData> convertToContestedConsentOrderData(Object object) {
-        return (List<ContestedConsentOrderData>)object;
+        return objectMapper.convertValue(object, new TypeReference<>() {});
     }
 }
