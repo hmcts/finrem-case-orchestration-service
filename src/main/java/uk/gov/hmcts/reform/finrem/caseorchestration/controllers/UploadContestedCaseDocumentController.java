@@ -39,7 +39,7 @@ public class UploadContestedCaseDocumentController implements BaseController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> uploadCaseDocuments(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @RequestBody CallbackRequest ccdRequest) {
+        @RequestBody CallbackRequest ccdRequest) throws Exception {
 
         validateCaseData(ccdRequest);
 
