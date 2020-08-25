@@ -178,8 +178,8 @@ public class CCDConfigConstant {
     public static final String CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION = "consentedNotApprovedOrders";
     public static final String CONSENTED_ORDER_DIRECTION_JUDGE_TITLE = "orderDirectionJudge";
     public static final String CONTESTED_ORDER_DIRECTION_JUDGE_TITLE = "consentSelectJudge";
-    public static final String CONSENTED_ORDER_DIRECTION_JUDGE_NAME = "orderDirectionJudge";
-    public static final String CONTESTED_ORDER_DIRECTION_JUDGE_NAME = "orderDirectionJudge";
+    public static final String CONSENTED_ORDER_DIRECTION_JUDGE_NAME = "orderDirectionJudgeName";
+    public static final String CONTESTED_ORDER_DIRECTION_JUDGE_NAME = "consentJudgeName";
     public static final String CONSENTED_ORDER_DIRECTION_DATE = "orderDirectionDate";
     public static final String CONTESTED_ORDER_DIRECTION_DATE = "consentDateOfOrder";
 
