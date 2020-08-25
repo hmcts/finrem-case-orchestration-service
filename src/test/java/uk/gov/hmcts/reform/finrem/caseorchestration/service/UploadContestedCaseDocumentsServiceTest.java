@@ -45,12 +45,11 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         Map<String, Object> caseData = caseDetails.getData();
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getUploadedCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(4));
+        assertThat(getUploadedCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(21));
         assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(1));
-        assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_FR_FORM_COLLECTION), hasSize(1));
-        assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_EVIDENCE_COLLECTION), hasSize(1));
+        assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_FR_FORM_COLLECTION), hasSize(5));
+        assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_EVIDENCE_COLLECTION), hasSize(14));
         assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
-
     }
 
     private CaseDetails contestedCaseDetails() throws Exception {
