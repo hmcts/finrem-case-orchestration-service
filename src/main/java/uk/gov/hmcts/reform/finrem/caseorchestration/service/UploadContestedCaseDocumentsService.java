@@ -54,19 +54,19 @@ public class UploadContestedCaseDocumentsService {
 
                 documentType = findDocumentType(item);
                 switch (documentType) {
-                    case "Correspondence":
+                    case CORRESPONDENCE:
                         applicantCorrespondenceCollection.add(applicantCaseDocuments);
                         log.info("Adding item: {}, to Applicant Correspondence Collection", applicantCaseDocuments);
                         break;
-                    case "FR Forms":
+                    case FR_FORMS:
                         applicantFormCollection.add(applicantCaseDocuments);
                         log.info("Adding item: {}, to Applicant FR Forms Collection", applicantCaseDocuments);
                         break;
-                    case "Evidence In Support":
+                    case EVIDENCE_IN_SUPPORT:
                         applicantEvidenceCollection.add(applicantCaseDocuments);
                         log.info("Adding item: {}, to Applicant Evidence In Support Collection", applicantCaseDocuments);
                         break;
-                    case "Trial Bundle":
+                    case TRIAL_BUNDLE:
                         applicantTrialBundleCollection.add(applicantCaseDocuments);
                         log.info("Adding item: {}, to Applicant Trial Bundle Collection", applicantCaseDocuments);
                         break;
