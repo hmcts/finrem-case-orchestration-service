@@ -166,7 +166,7 @@
               "document_filename": "FakeDocumentUpload.docx",
               "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0a28e2e2-e691-4e44-99e1-ce213355a5fe/binary"
             },
-            "caseDocumentType": "Letter from Applicant",
+            "caseDocumentType": "Trial Bundle",
             "caseDocumentParty": "applicant"
           }
         },
@@ -180,7 +180,19 @@
             },
             "caseDocumentType": "other",
             "caseDocumentOther": "This is a test example for \"Other\"",
-            "caseDocumentParty": "respondent"
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "566259c7-ef2b-471a-9165-8f9eb7a0du18",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0a28e2e2-e691-4e44-99e1-ce213355a5fe",
+              "document_filename": "FakeDocumentUpload.docx",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0a28e2e2-e691-4e44-99e1-ce213355a5fe/binary"
+            },
+            "caseDocumentType": "Form B",
+            "caseDocumentParty": "applicant"
           }
         }
       ]

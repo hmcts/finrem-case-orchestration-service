@@ -132,7 +132,7 @@ public class UploadContestedCaseDocumentsService {
         .put("Witness Statement/Affidavit", EVIDENCE_IN_SUPPORT)
         .put("Care Plan", EVIDENCE_IN_SUPPORT)
         .put("Offers", EVIDENCE_IN_SUPPORT)
-        .put("Other", EVIDENCE_IN_SUPPORT)
+        .put("other", EVIDENCE_IN_SUPPORT)
         .put("Trial Bundle", TRIAL_BUNDLE)
         .build();
 }
