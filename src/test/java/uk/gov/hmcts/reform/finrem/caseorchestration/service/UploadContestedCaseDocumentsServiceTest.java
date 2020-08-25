@@ -18,7 +18,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CASE_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
 public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
@@ -38,12 +38,12 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void documentsAreFilteredBasedOnPartySpecified() {
+    public void documentsAreFilteredBasedOnPartySpecified() throws Exception {
         Map<String, Object> caseData = caseDetails.getData();
         service.filterDocumentsToRelevantParty(caseData);
 
         assertThat(getUploadedCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(3));
-        assertThat(getApplicantCollection(caseData, APPLICANT_CASE_DOCUMENTS), hasSize(2));
+        assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(2));
     }
 
     //  @Test
@@ -66,7 +66,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
             });
     }
 
-    private List<ApplicantUploadedDocumentData> getApplicantCollection(Map<String, Object> data, String field) {
+    private List<ApplicantUploadedDocumentData> getApplicantCorrespondenceCollection(Map<String, Object> data, String field) {
         return mapper.convertValue(data.get(field),
             new TypeReference<List<ApplicantUploadedDocumentData>>() {
             });
