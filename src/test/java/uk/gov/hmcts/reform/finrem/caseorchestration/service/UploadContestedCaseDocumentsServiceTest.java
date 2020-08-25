@@ -19,6 +19,9 @@ import java.util.Map;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CORRESPONDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EVIDENCE_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FR_FORM_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_TRIAL_BUNDLE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
 
 public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
@@ -42,8 +45,12 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         Map<String, Object> caseData = caseDetails.getData();
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getUploadedCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(3));
-        assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(2));
+        assertThat(getUploadedCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(4));
+        assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(1));
+        assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_FR_FORM_COLLECTION), hasSize(1));
+        assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_EVIDENCE_COLLECTION), hasSize(1));
+        assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
+
     }
 
     private CaseDetails contestedCaseDetails() throws Exception {
