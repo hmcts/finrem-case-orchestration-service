@@ -183,4 +183,71 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)));
     }
+
+    @Test
+    public void shouldSuccessfullyReturnAsAdminConsentedPaperCase() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
+
+        requestContent = objectMapper.readTree(
+            new File(getClass()
+                .getResource(CONTESTED_HWF_JSON).toURI()));
+        mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)))
+            .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)));
+    }
+
+    @Test
+    public void shouldSuccessfullyReturnNotAsAdminConsentedPaperCase() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
+        mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
+            .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)))
+            .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)));
+    }
+
+    @Test
+    public void shouldSuccessfullyReturnAsAdminContestedPaperCase() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource(CONTESTED_HWF_JSON).toURI()));
+        mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)))
+            .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)));
+    }
+
+    @Test
+    public void shouldSuccessfullyReturnNotAsAdminContestedPaperCase() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
+        mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
+            .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)))
+            .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)));
+    }
 }
