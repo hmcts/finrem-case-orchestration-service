@@ -78,6 +78,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         assertThat(consentOrderData.getConsentOrder().getDocumentComment(), is(equalTo("System Generated")));
 
         assertCaseDataExtraFields();
+        assertConsentedCaseDataExtraFields();
         assertCaseDocument(consentOrderData.getConsentOrder().getDocumentLink());
     }
 
@@ -89,6 +90,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
         assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION), hasSize(1));
         assertCaseDataExtraFields();
+        assertContestedCaseDataExtraFields();
     }
 
     @Test
@@ -128,6 +130,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         CaseDocument caseDocument = getCaseDocument(caseData);
 
         assertCaseDataExtraFields();
+        assertConsentedCaseDataExtraFields();
         assertCaseDocument(caseDocument);
     }
 
@@ -144,7 +147,23 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
         assertThat(caseData.get("ApplicantName"), is("Poor Guy"));
         assertThat(caseData.get("RespondentName"), is("john smith"));
-        assertThat(caseData.get("CourtName"), is("Birmingham Civil and Family Justice Centre"));
+        assertThat(caseData.get("RefusalOrderHeader"), is("Sitting in the Family Court"));
+    }
+
+    private void assertConsentedCaseDataExtraFields() {
+        verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
+            any(), any());
+        Map<String, Object> caseData = generateDocumentCaseDetailsCaptor.getValue().getData();
+
+        assertThat(caseData.get("CourtName"), is("SITTING in private"));
+    }
+
+    private void assertContestedCaseDataExtraFields() {
+        verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
+            any(), any());
+        Map<String, Object> caseData = generateDocumentCaseDetailsCaptor.getValue().getData();
+
+        assertThat(caseData.get("CourtName"), is("SITTING AT the Family Court at the Birmingham Civil and Family Justice Centre"));
     }
 
     private CaseDocument getCaseDocument(Map<String, Object> caseData) {
