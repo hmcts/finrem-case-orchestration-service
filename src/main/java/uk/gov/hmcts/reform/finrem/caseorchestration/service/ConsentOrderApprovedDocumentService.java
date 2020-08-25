@@ -24,10 +24,19 @@ import java.util.Optional;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.caseDocumentToBulkPrintDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_TITLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_PENSION_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_JUDGE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_JUDGE_TITLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
@@ -48,7 +57,9 @@ public class ConsentOrderApprovedDocumentService {
             documentConfiguration.getApprovedConsentOrderFileName(),
             documentConfiguration.getApprovedConsentOrderTemplate());
 
-        return genericDocumentService.generateDocument(authToken, applyAddExtraFields(caseDetails),
+        return genericDocumentService.generateDocument(authToken,
+            CommonFunction.isConsentedApplication(caseDetails)
+                ? applyAddExtraFields(caseDetails) : caseDetails,
             documentConfiguration.getApprovedConsentOrderTemplate(),
             documentConfiguration.getApprovedConsentOrderFileName());
     }
@@ -162,14 +173,16 @@ public class ConsentOrderApprovedDocumentService {
         CaseDetails detailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = detailsCopy.getData();
 
-        caseData.put("DivorceCaseNumber", detailsCopy.getData().get(DIVORCE_CASE_NUMBER));
-        caseData.put("ApplicantName", DocumentHelper.getApplicantFullName(detailsCopy));
+        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, caseData.get(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME));
+        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, caseData.get(CONTESTED_RESPONDENT_LAST_NAME));
+
+        caseData.put(CONSENTED_ORDER_DIRECTION_JUDGE_TITLE, caseData.get(CONTESTED_ORDER_DIRECTION_JUDGE_TITLE));
+        caseData.put(CONSENTED_ORDER_DIRECTION_JUDGE_NAME, caseData.get(CONTESTED_ORDER_DIRECTION_JUDGE_NAME));
+        caseData.put(CONSENTED_ORDER_DIRECTION_DATE, caseData.get(CONTESTED_ORDER_DIRECTION_DATE));
 
         if (isConsentedApplication(detailsCopy)) {
-            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameConsented(detailsCopy));
             caseData.put("GeneralOrderCourt", "Courts and Tribunal Service Centre");
         } else {
-            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameContested(detailsCopy));
             caseData.put("GeneralOrderCourt", ContestedCourtHelper.getSelectedCourt(detailsCopy));
         }
         return detailsCopy;
