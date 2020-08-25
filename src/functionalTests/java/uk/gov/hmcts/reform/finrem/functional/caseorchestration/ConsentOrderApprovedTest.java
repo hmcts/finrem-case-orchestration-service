@@ -33,6 +33,9 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
     @Value("${cos.consentOrder.approved}")
     private String consentOrderApprovedUrl;
 
+    @Value("${cos.consentOrder.consentInContestedApproved}")
+    private String consentInContestedSendOrder;
+
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test

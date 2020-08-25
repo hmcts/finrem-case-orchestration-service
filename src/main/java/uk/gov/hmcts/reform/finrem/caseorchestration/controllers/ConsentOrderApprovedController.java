@@ -35,7 +35,6 @@ import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -133,34 +132,30 @@ public class ConsentOrderApprovedController implements BaseController {
     })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedSendOrder(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) throws JsonProcessingException {
         CaseDetails caseDetails = callback.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
         if (caseDetails.getState().equals(CONSENTED_ORDER_APPROVED)) {
             //generate consent in contested approval document
             CaseDocument orderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-            log.warn("generated letter binary url: {}", orderLetter.getDocumentBinaryUrl());
             //add generated doc to case data
             List<ApprovedOrderData> approvedOrderList = getConsentInContestedApprovedOrderCollection(caseData);
-            log.warn("order list size {}", approvedOrderList.size());
             if (approvedOrderList != null && !approvedOrderList.isEmpty()) {
                 ApprovedOrder approvedOrder = approvedOrderList.get(0).getApprovedOrder();
                 approvedOrder.setOrderLetter(orderLetter);
-                caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderList.stream().map(order ->
-                    mapper.convertValue(order, Map.class)).collect(Collectors.toList()));
-                log.warn("set CONTESTED_CONSENT_ORDER_COLLECTION");
+                caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderList);
+                caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
+                caseDetails.setData(caseData);
             }
         } else if (CONSENTED_ORDER_NOT_APPROVED.equals(caseDetails.getState())) {
             consentInContestedOrderService.sendConsentOrderNotApproved(caseDetails, authToken);
         }
         bulkPrintService.sendToBulkPrint(caseDetails, authToken);
 
-        log.warn("DETAILS DATA {}", caseDetails);
-        return ResponseEntity.ok(
-            AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDetails.getData())
-                .build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDetails.getData())
+            .build());
     }
 
     private Map<String, Object> generateAndPrepareDocuments(@RequestHeader(AUTHORIZATION_HEADER) String authToken, CallbackRequest callback) {

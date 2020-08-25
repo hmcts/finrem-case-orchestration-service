@@ -23,9 +23,19 @@ import java.util.Optional;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.caseDocumentToBulkPrintDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_TITLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_PENSION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_JUDGE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_JUDGE_TITLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Service
@@ -45,7 +55,9 @@ public class ConsentOrderApprovedDocumentService {
             documentConfiguration.getApprovedConsentOrderFileName(),
             documentConfiguration.getApprovedConsentOrderTemplate());
 
-        return genericDocumentService.generateDocument(authToken, caseDetails,
+        return genericDocumentService.generateDocument(authToken,
+            CommonFunction.isContestedApplication(caseDetails)
+                ? applyAddExtraFields(caseDetails) : caseDetails,
             documentConfiguration.getApprovedConsentOrderTemplate(),
             documentConfiguration.getApprovedConsentOrderFileName());
     }
@@ -98,8 +110,7 @@ public class ConsentOrderApprovedDocumentService {
     public Map<String, Object> stampAndPopulateContestedConsentApprovedOrderCollection(Map<String, Object> caseData, String authToken) {
         CaseDocument stampedAndAnnexedDoc = stampAndAnnexContestedConsentOrder(caseData, authToken);
         List<PensionCollectionData> pensionDocs = consentInContestedStampPensionDocuments(caseData, authToken);
-        caseData = populateContestedConsentOrderCaseDetails(caseData, stampedAndAnnexedDoc, pensionDocs);
-        return caseData;
+        return populateContestedConsentOrderCaseDetails(caseData, stampedAndAnnexedDoc, pensionDocs);
     }
 
     private CaseDocument stampAndAnnexContestedConsentOrder(Map<String, Object> caseData, String authToken) {
@@ -153,5 +164,19 @@ public class ConsentOrderApprovedDocumentService {
     private List<ApprovedOrderData> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<List<ApprovedOrderData>>() {
         });
+    }
+
+    private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
+        CaseDetails detailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        Map<String, Object> caseData = detailsCopy.getData();
+
+        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, caseData.get(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME));
+        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, caseData.get(CONTESTED_RESPONDENT_LAST_NAME));
+
+        caseData.put(CONSENTED_ORDER_DIRECTION_JUDGE_TITLE, caseData.get(CONTESTED_ORDER_DIRECTION_JUDGE_TITLE));
+        caseData.put(CONSENTED_ORDER_DIRECTION_JUDGE_NAME, caseData.get(CONTESTED_ORDER_DIRECTION_JUDGE_NAME));
+        caseData.put(CONSENTED_ORDER_DIRECTION_DATE, caseData.get(CONTESTED_ORDER_DIRECTION_DATE));
+
+        return detailsCopy;
     }
 }

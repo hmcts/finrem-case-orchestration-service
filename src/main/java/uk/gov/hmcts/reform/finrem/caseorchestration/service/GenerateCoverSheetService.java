@@ -23,6 +23,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
@@ -44,8 +46,13 @@ public class GenerateCoverSheetService {
         log.info("Generating Applicant cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
 
-        return generateCoverSheet(caseDetails, authorisationToken, APPLICANT_ADDRESS, CONSENTED_SOLICITOR_ADDRESS, CONSENTED_SOLICITOR_NAME,
+        if (CommonFunction.isContestedApplication(caseDetails)) {
+            return generateCoverSheet(caseDetails, authorisationToken, APPLICANT_ADDRESS, CONTESTED_SOLICITOR_ADDRESS, CONTESTED_SOLICITOR_NAME,
+                APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
+        } else {
+            return generateCoverSheet(caseDetails, authorisationToken, APPLICANT_ADDRESS, CONSENTED_SOLICITOR_ADDRESS, CONSENTED_SOLICITOR_NAME,
             APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
+        }
     }
 
     public CaseDocument generateRespondentCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
@@ -53,7 +60,7 @@ public class GenerateCoverSheetService {
             documentConfiguration.getBulkPrintTemplate());
 
         return generateCoverSheet(caseDetails, authorisationToken, RESPONDENT_ADDRESS, RESP_SOLICITOR_ADDRESS, RESP_SOLICITOR_NAME,
-            CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, CONSENTED_RESPONDENT_LAST_NAME);
+                CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, CONSENTED_RESPONDENT_LAST_NAME);
     }
 
     private CaseDocument generateCoverSheet(CaseDetails caseDetails, String authorisationToken, String partyAddressCcdFieldName,

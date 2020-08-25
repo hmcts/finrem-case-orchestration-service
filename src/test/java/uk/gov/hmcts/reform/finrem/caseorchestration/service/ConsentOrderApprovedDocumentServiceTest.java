@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,6 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
@@ -103,11 +105,22 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldGenerateApprovedConsentOrderLetter() {
+    public void shouldGenerateApprovedConsentOrderLetterForConsented() {
         CaseDocument caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(caseDocument);
-        verify(documentClientMock, times(1)).generatePdf(
+        verify(documentClientMock, atLeastOnce()).generatePdf(
+            matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, documentApprovedConsentOrderFileName),
+            anyString());
+    }
+
+    @Test
+    public void shouldGenerateApprovedConsentOrderLetterForContested() {
+        CaseDetails contestedDetails = caseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
+        CaseDocument caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(contestedDetails, AUTH_TOKEN);
+
+        assertCaseDocument(caseDocument);
+        verify(documentClientMock, atLeastOnce()).generatePdf(
             matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, documentApprovedConsentOrderFileName),
             anyString());
     }
