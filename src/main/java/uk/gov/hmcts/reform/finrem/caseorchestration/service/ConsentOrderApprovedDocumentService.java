@@ -58,7 +58,7 @@ public class ConsentOrderApprovedDocumentService {
             documentConfiguration.getApprovedConsentOrderTemplate());
 
         return genericDocumentService.generateDocument(authToken,
-            CommonFunction.isConsentedApplication(caseDetails)
+            CommonFunction.isContestedApplication(caseDetails)
                 ? applyAddExtraFields(caseDetails) : caseDetails,
             documentConfiguration.getApprovedConsentOrderTemplate(),
             documentConfiguration.getApprovedConsentOrderFileName());
@@ -112,8 +112,7 @@ public class ConsentOrderApprovedDocumentService {
     public Map<String, Object> stampAndPopulateContestedConsentApprovedOrderCollection(Map<String, Object> caseData, String authToken) {
         CaseDocument stampedAndAnnexedDoc = stampAndAnnexContestedConsentOrder(caseData, authToken);
         List<PensionCollectionData> pensionDocs = consentInContestedStampPensionDocuments(caseData, authToken);
-        caseData = populateContestedConsentOrderCaseDetails(caseData, stampedAndAnnexedDoc, pensionDocs);
-        return caseData;
+        return populateContestedConsentOrderCaseDetails(caseData, stampedAndAnnexedDoc, pensionDocs);
     }
 
     private CaseDocument stampAndAnnexContestedConsentOrder(Map<String, Object> caseData, String authToken) {
@@ -179,12 +178,7 @@ public class ConsentOrderApprovedDocumentService {
         caseData.put(CONSENTED_ORDER_DIRECTION_JUDGE_TITLE, caseData.get(CONTESTED_ORDER_DIRECTION_JUDGE_TITLE));
         caseData.put(CONSENTED_ORDER_DIRECTION_JUDGE_NAME, caseData.get(CONTESTED_ORDER_DIRECTION_JUDGE_NAME));
         caseData.put(CONSENTED_ORDER_DIRECTION_DATE, caseData.get(CONTESTED_ORDER_DIRECTION_DATE));
-
-        if (isConsentedApplication(detailsCopy)) {
-            caseData.put("GeneralOrderCourt", "Courts and Tribunal Service Centre");
-        } else {
-            caseData.put("GeneralOrderCourt", ContestedCourtHelper.getSelectedCourt(detailsCopy));
-        }
+        
         return detailsCopy;
     }
 }
