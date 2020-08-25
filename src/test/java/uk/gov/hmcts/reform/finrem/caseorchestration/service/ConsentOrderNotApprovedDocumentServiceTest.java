@@ -66,6 +66,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     private FeatureToggleService featureToggleService;
 
     private CaseDetails caseDetails;
+    private BulkPrintDocument coverLetterDocument = BulkPrintDocument.builder().binaryFileUrl(COVER_LETTER_URL).build();
 
     @Before
     public void setup() {
@@ -105,7 +106,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(true);
         when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(false);
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN);
+            caseDetails, AUTH_TOKEN, coverLetterDocument);
 
         assertThat(generatedDocuments, hasSize(3));
         assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
@@ -121,28 +122,25 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(false);
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN);
+            caseDetails, AUTH_TOKEN, coverLetterDocument);
 
         assertThat(generatedDocuments, hasSize(2));
-        assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(DEFAULT_COVERSHEET_URL));
+        assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
         assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(GENERAL_ORDER_URL));
-
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
     }
 
     @Test
     public void givenGeneralOrderToggleIsEnabled_thenItPrintsTheCorrectDocuments() {
         when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(false);
         when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
+
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN);
+            caseDetails, AUTH_TOKEN, coverLetterDocument);
 
         assertThat(generatedDocuments, hasSize(3));
-        assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(DEFAULT_COVERSHEET_URL));
+        assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
         assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(GENERAL_ORDER_URL));
         assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
-
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
     }
 
     @Test
@@ -150,7 +148,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         when(featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()).thenReturn(true);
         when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN);
+            caseDetails, AUTH_TOKEN, coverLetterDocument);
 
         assertThat(generatedDocuments, hasSize(4));
         assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
@@ -169,13 +167,12 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN);
+            caseDetails, AUTH_TOKEN, coverLetterDocument);
 
         assertThat(generatedDocuments, hasSize(3));
         assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
         assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
         assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(REPLY_COVERSHEET_URL));
-
 
         assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
     }
@@ -188,7 +185,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN);
+            caseDetails, AUTH_TOKEN, coverLetterDocument);
 
         assertThat(generatedDocuments, hasSize(0));
 
@@ -203,10 +200,8 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN);
+            caseDetails, AUTH_TOKEN, coverLetterDocument);
 
         assertThat(generatedDocuments, hasSize(0));
-
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
     }
 }

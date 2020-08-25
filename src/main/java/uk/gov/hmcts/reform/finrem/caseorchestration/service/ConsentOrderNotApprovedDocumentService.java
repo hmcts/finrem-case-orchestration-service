@@ -36,11 +36,11 @@ public class ConsentOrderNotApprovedDocumentService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final DocumentConfiguration documentConfiguration;
-    private final GenerateCoverSheetService generateCoverSheetService;
     private final FeatureToggleService featureToggleService;
     private final GeneralOrderService generalOrderService;
 
-    public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken) {
+    public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken,
+                                                              BulkPrintDocument applicantCoverSheet) {
         Map<String, Object> caseData = caseDetails.getData();
         log.info("Generating consent order not approved documents for applicant, case ID {}", caseDetails.getId());
 
@@ -58,7 +58,7 @@ public class ConsentOrderNotApprovedDocumentService {
             }
 
         } else {
-            documents.add(defaultCoversheet(caseDetails, authorisationToken));
+            documents.add(applicantCoverSheet);
             documents.addAll(notApprovedConsentOrder(caseData));
             documents = addGeneralOrdersIfApplicable(caseData, documents);
 
@@ -120,11 +120,5 @@ public class ConsentOrderNotApprovedDocumentService {
             documentConfiguration.getConsentOrderNotApprovedReplyCoversheetFileName());
         caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoversheet);
         return BulkPrintDocument.builder().binaryFileUrl(applicantCoversheet.getDocumentBinaryUrl()).build();
-    }
-
-    private BulkPrintDocument defaultCoversheet(CaseDetails caseDetails, String authorisationToken) {
-        CaseDocument applicantCoverSheet = generateCoverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
-        caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
-        return BulkPrintDocument.builder().binaryFileUrl(applicantCoverSheet.getDocumentBinaryUrl()).build();
     }
 }

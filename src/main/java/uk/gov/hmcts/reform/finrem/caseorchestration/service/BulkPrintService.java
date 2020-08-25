@@ -19,7 +19,9 @@ import java.util.UUID;
 import static java.util.Arrays.asList;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.caseDocumentToBulkPrintDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
@@ -126,7 +128,7 @@ public class BulkPrintService {
 
     public UUID printApplicantConsentOrderNotApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> applicantDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, authorisationToken);
+            caseDetails, authorisationToken, generateApplicantCoverSheet(caseDetails, authorisationToken));
 
         if (applicantDocuments.isEmpty()) {
             return null;
@@ -135,8 +137,10 @@ public class BulkPrintService {
     }
 
     private UUID printApplicantConsentOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
-        List<BulkPrintDocument> applicantDocuments = consentOrderApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, authorisationToken);
+        List<BulkPrintDocument> applicantDocuments = new ArrayList<>();
+        applicantDocuments.add(generateApplicantCoverSheet(caseDetails, authorisationToken));
+        applicantDocuments.addAll(consentOrderApprovedDocumentService.prepareApplicantLetterPack(
+            caseDetails, authorisationToken));
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), applicantDocuments);
     }
 
@@ -157,7 +161,7 @@ public class BulkPrintService {
         return letterId;
     }
 
-    public Map<String, Object> sendToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
+    public Map<String, Object> sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (!isApplicantRepresentedByASolicitor(caseData) || isApplicantSolicitorAgreeToReceiveEmails(caseData)
@@ -175,6 +179,24 @@ public class BulkPrintService {
         return caseData;
     }
 
+    public UUID printApplicantDocuments(CaseDetails caseDetails, String authorisationToken,
+                                        List<BulkPrintDocument> caseDocuments) {
+        return printDocuments(caseDetails, generateApplicantCoverSheet(caseDetails, authorisationToken), caseDocuments);
+    }
+
+    public UUID printRespondentDocuments(CaseDetails caseDetails, String authorisationToken,
+                                         List<BulkPrintDocument> caseDocuments) {
+        return printDocuments(caseDetails, generateRespondentCoverSheet(caseDetails, authorisationToken), caseDocuments);
+    }
+
+    private UUID printDocuments(CaseDetails caseDetails, BulkPrintDocument coverSheet,
+                                List<BulkPrintDocument> caseDocuments) {
+        List<BulkPrintDocument> documents = new ArrayList<>();
+        documents.add(coverSheet);
+        documents.addAll(caseDocuments);
+        return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), documents);
+    }
+
     private void generateCoversheetForRespondentAndSendOrders(CaseDetails caseDetails, String authToken) {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authToken);
         UUID respondentLetterId = sendOrderForBulkPrintRespondent(respondentCoverSheet, caseDetails);
@@ -184,5 +206,17 @@ public class BulkPrintService {
         caseData.put(BULK_PRINT_LETTER_ID_RES, respondentLetterId);
 
         log.info("Generated Respondent CoverSheet for bulk print. coversheet: {}, letterId : {}", respondentCoverSheet, respondentLetterId);
+    }
+
+    public BulkPrintDocument generateApplicantCoverSheet(CaseDetails caseDetails, String authorisationToken) {
+        CaseDocument applicantCoverSheet = coverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
+        caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
+        return caseDocumentToBulkPrintDocument(applicantCoverSheet);
+    }
+
+    private BulkPrintDocument generateRespondentCoverSheet(CaseDetails caseDetails, String authorisationToken) {
+        CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
+        caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, respondentCoverSheet);
+        return caseDocumentToBulkPrintDocument(respondentCoverSheet);
     }
 }

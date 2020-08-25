@@ -2,12 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,15 +44,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaul
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchDocumentGenerationRequestTemplateAndFilename;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 
 @ActiveProfiles("test-mock-document-client")
 public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
@@ -67,6 +65,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Autowired
     private DocumentClient documentClientMock;
+
+    @MockBean
+    private BulkPrintService bulkPrintService;
 
     @Value("${document.bulkPrintTemplate}") private String documentBulkPrintTemplate;
     @Value("${document.bulkPrintFileName}") private String documentBulkPrintFileName;
@@ -159,18 +160,31 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenPreparingApplicantLetterPack_thenCoversheetAndOrderIsPresent() {
-        preparePaperCaseConsentOrderApprovedCaseData();
+    public void whenPreparingApplicantLetterPack() {
+        when(bulkPrintService.approvedOrderCollection(caseDetails.getData())).thenReturn(preparePaperCaseConsentOrderApprovedCaseData());
 
         List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN);
 
         System.out.println(documents);
-        assertThat(documents, hasSize(5));
-        assertThat(documents.get(0).getBinaryFileUrl(), is(DEFAULT_COVERSHEET_URL));
-        assertThat(documents.get(1).getBinaryFileUrl(), is(CONSENT_ORDER_APPROVED_COVER_LETTER_URL));
-        assertThat(documents.get(2).getBinaryFileUrl(), is(ORDER_LETTER_URL));
-        assertThat(documents.get(3).getBinaryFileUrl(), is(CONSENT_ORDER_URL));
-        assertThat(documents.get(4).getBinaryFileUrl(), is(PENSION_DOCUMENT_URL));
+        assertThat(documents, hasSize(3));
+        assertThat(documents.get(0).getBinaryFileUrl(), is(ORDER_LETTER_URL));
+        assertThat(documents.get(1).getBinaryFileUrl(), is(CONSENT_ORDER_URL));
+        assertThat(documents.get(2).getBinaryFileUrl(), is(PENSION_DOCUMENT_URL));
+    }
+
+    @Test
+    public void whenPreparingApplicantLetterPack_paperApplication() {
+        caseDetails.getData().put(PAPER_APPLICATION, YES_VALUE);
+        when(bulkPrintService.approvedOrderCollection(caseDetails.getData())).thenReturn(preparePaperCaseConsentOrderApprovedCaseData());
+
+        List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN);
+
+        System.out.println(documents);
+        assertThat(documents, hasSize(4));
+        assertThat(documents.get(0).getBinaryFileUrl(), is(CONSENT_ORDER_APPROVED_COVER_LETTER_URL));
+        assertThat(documents.get(1).getBinaryFileUrl(), is(ORDER_LETTER_URL));
+        assertThat(documents.get(2).getBinaryFileUrl(), is(CONSENT_ORDER_URL));
+        assertThat(documents.get(3).getBinaryFileUrl(), is(PENSION_DOCUMENT_URL));
     }
 
     @Test
@@ -193,21 +207,13 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
             });
     }
 
-    private void preparePaperCaseConsentOrderApprovedCaseData() {
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.put(APPROVED_ORDER_COLLECTION, asList(ImmutableMap.of(VALUE, ImmutableMap.of(
-            "orderLetter", ImmutableMap.of(DOCUMENT_BINARY_URL, ORDER_LETTER_URL),
-            "consentOrder", ImmutableMap.of(DOCUMENT_BINARY_URL, CONSENT_ORDER_URL),
-            "pensionDocuments", asList(ImmutableMap.of(
-                VALUE, ImmutableMap.of("uploadedDocument", ImmutableMap.of(
-                    DOCUMENT_BINARY_URL, PENSION_DOCUMENT_URL))))))));
-        caseData.put(PAPER_APPLICATION, YES_VALUE);
-    }
+    private List<BulkPrintDocument> preparePaperCaseConsentOrderApprovedCaseData() {
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
 
-    private CaseDetails prepareDefaultCaseWithGeneralOrder() {
-        CaseDetails caseDetails = defaultCaseDetails();
-        caseDetails.getData().put(CONSENT_ORDER, caseDocument());
-        return caseDetails;
+        bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(ORDER_LETTER_URL).build());
+        bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(CONSENT_ORDER_URL).build());
+        bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(PENSION_DOCUMENT_URL).build());
 
+        return bulkPrintDocuments;
     }
 }

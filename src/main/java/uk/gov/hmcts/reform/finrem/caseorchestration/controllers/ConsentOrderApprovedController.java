@@ -160,7 +160,7 @@ public class ConsentOrderApprovedController implements BaseController {
                 // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
                 caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
                 caseDetails.setData(caseData);
-                caseData = bulkPrintService.sendToBulkPrint(caseDetails, authToken);
+                caseData = bulkPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
                 notificationService.sendConsentOrderAvailableCtscEmail(callback);
             } catch (JsonProcessingException e) {

@@ -161,7 +161,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
-        when(bulkPrintService.sendToBulkPrint(any(), any())).thenReturn(defaultCaseDetails().getData());
+        when(bulkPrintService.sendConsentOrderToBulkPrint(any(), any())).thenReturn(defaultCaseDetails().getData());
         when(featureToggleService.isAutomateSendOrderEnabled()).thenReturn(true);
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
@@ -172,7 +172,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk())
             .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
 
-        verify(bulkPrintService).sendToBulkPrint(any(), any());
+        verify(bulkPrintService).sendConsentOrderToBulkPrint(any(), any());
         verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
     }
 
@@ -194,7 +194,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk())
             .andExpect(jsonPath("$.data.state", is("applicationDrafted")));
 
-        verify(bulkPrintService, never()).sendToBulkPrint(any(), any());
+        verify(bulkPrintService, never()).sendConsentOrderToBulkPrint(any(), any());
         verify(notificationService, never()).sendConsentOrderAvailableCtscEmail(any());
     }
 
