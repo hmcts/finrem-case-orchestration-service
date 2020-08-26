@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantUploadedDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
 import java.io.InputStream;
@@ -45,11 +44,11 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         Map<String, Object> caseData = caseDetails.getData();
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getUploadedCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(0));
-        assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(1));
-        assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_FR_FORM_COLLECTION), hasSize(5));
-        assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_EVIDENCE_COLLECTION), hasSize(14));
-        assertThat(getApplicantCorrespondenceCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(0));
+        assertThat(getDocumentCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, APPLICANT_FR_FORM_COLLECTION), hasSize(5));
+        assertThat(getDocumentCollection(caseData, APPLICANT_EVIDENCE_COLLECTION), hasSize(14));
+        assertThat(getDocumentCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
     }
 
     private CaseDetails contestedCaseDetails() throws Exception {
@@ -58,15 +57,9 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         }
     }
 
-    private List<ContestedUploadedDocumentData> getUploadedCollection(Map<String, Object> data, String field) {
+    private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> data, String field) {
         return mapper.convertValue(data.get(field),
             new TypeReference<List<ContestedUploadedDocumentData>>() {
-            });
-    }
-
-    private List<ApplicantUploadedDocumentData> getApplicantCorrespondenceCollection(Map<String, Object> data, String field) {
-        return mapper.convertValue(data.get(field),
-            new TypeReference<List<ApplicantUploadedDocumentData>>() {
             });
     }
 }
