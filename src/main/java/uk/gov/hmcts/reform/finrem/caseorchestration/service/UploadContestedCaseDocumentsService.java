@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantUploadedD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,13 +38,15 @@ public class UploadContestedCaseDocumentsService {
     public Map<String, Object> filterDocumentsToRelevantParty(Map<String, Object> caseData) throws Exception {
 
         List<ContestedUploadedDocumentData> uploadedDocuments = getUploadedDocuments(caseData);
+        List<ContestedUploadedDocumentData> uploadedDocumentsCopy = deepCopy(uploadedDocuments);
+
         List<ApplicantUploadedDocumentData> applicantCorrespondenceCollection = getDocumentCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION);
         List<ApplicantUploadedDocumentData> applicantFormCollection = getDocumentCollection(caseData, APPLICANT_FR_FORM_COLLECTION);
         List<ApplicantUploadedDocumentData> applicantEvidenceCollection = getDocumentCollection(caseData, APPLICANT_EVIDENCE_COLLECTION);
         List<ApplicantUploadedDocumentData> applicantTrialBundleCollection = getDocumentCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION);
         String documentType;
 
-        for (ContestedUploadedDocumentData item : uploadedDocuments) {
+        for (ContestedUploadedDocumentData item : uploadedDocumentsCopy) {
             if (item.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT)) {
 
                 //we need to build ApplicantUploadedDocumentData, and add the "Applicant" marked doc a collection
@@ -56,18 +59,22 @@ public class UploadContestedCaseDocumentsService {
                 switch (documentType) {
                     case CORRESPONDENCE:
                         applicantCorrespondenceCollection.add(applicantCaseDocuments);
+                        uploadedDocuments.remove(item);
                         log.info("Adding item: {}, to Applicant Correspondence Collection", applicantCaseDocuments);
                         break;
                     case FR_FORMS:
                         applicantFormCollection.add(applicantCaseDocuments);
+                        uploadedDocuments.remove(item);
                         log.info("Adding item: {}, to Applicant FR Forms Collection", applicantCaseDocuments);
                         break;
                     case EVIDENCE_IN_SUPPORT:
                         applicantEvidenceCollection.add(applicantCaseDocuments);
+                        uploadedDocuments.remove(item);
                         log.info("Adding item: {}, to Applicant Evidence In Support Collection", applicantCaseDocuments);
                         break;
                     case TRIAL_BUNDLE:
                         applicantTrialBundleCollection.add(applicantCaseDocuments);
+                        uploadedDocuments.remove(item);
                         log.info("Adding item: {}, to Applicant Trial Bundle Collection", applicantCaseDocuments);
                         break;
                     default:
