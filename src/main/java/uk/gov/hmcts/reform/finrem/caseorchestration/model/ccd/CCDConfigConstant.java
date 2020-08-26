@@ -218,6 +218,10 @@ public class CCDConfigConstant {
     public static final String APPLICANT_FR_FORM_COLLECTION = "applicantFRFormsCollection";
     public static final String APPLICANT_EVIDENCE_COLLECTION = "applicantEvidenceCollection";
     public static final String APPLICANT_TRIAL_BUNDLE_COLLECTION = "applicantTrialBundleCollection";
+    public static final String RESPONDENT_CORRESPONDENCE_COLLECTION = "respondentCorrespondenceCollection";
+    public static final String RESPONDENT_FR_FORM_COLLECTION = "respondentFRFormsCollection";
+    public static final String RESPONDENT_EVIDENCE_COLLECTION = "respondentEvidenceCollection";
+    public static final String RESPONDENT_TRIAL_BUNDLE_COLLECTION = "respondentTrialBundleCollection";
 
     //public static final String RESPONDENT_CASE_DOCUMENTS = "PLACEHOLDER";
 
