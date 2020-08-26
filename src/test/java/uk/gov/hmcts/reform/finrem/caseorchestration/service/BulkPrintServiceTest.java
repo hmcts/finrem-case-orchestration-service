@@ -22,6 +22,7 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -228,6 +229,26 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         verify(coverSheetService).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         verify(genericDocumentService, times(2)).bulkPrint(any());
+    }
+
+    @Test
+    public void shouldNotSendApplicantPackForPrintingIfConsentedForEmail() {
+        final String consentedBulkPrintConsentOrderNotApprovedJson
+            = "/fixtures/contested/consent-in-contested-application-approved.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
+        caseDetails.getData().put("applicantSolicitorConsentForEmails", "YES");
+        when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN)).thenReturn(bulkPrintDocumentList());
+        when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(new CaseDocument());
+        when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(new CaseDocument());
+
+        Map<String, Object> caseData = bulkPrintService.sendToBulkPrint(caseDetails, AUTH_TOKEN);
+
+        assertThat(caseData.containsKey("bulkPrintCoverSheetRes"), is(true));
+        assertThat(caseData.get("bulkPrintLetterIdRes"), is(letterId));
+        assertThat(caseData.get("bulkPrintLetterIdApp"), nullValue());
+
+        verify(coverSheetService).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
+        verify(genericDocumentService, times(1)).bulkPrint(any());
     }
 
     private CaseDetails caseDetails() {

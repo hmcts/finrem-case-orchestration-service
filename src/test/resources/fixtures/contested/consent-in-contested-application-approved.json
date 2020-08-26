@@ -85,7 +85,7 @@
     "natureOfApplicationChecklist": [
       "Lump Sum Order"
     ],
-    "applicantSolicitorConsentForEmails": "Yes",
+    "applicantSolicitorConsentForEmails": "No",
     "applicantSolicitorDXnumber": null,
     "isAdmin": "Yes",
     "applicantSolicitorName": "solicitor firm",
