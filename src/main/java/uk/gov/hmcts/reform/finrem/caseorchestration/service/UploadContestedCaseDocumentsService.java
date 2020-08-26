@@ -2,13 +2,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApplicantUploadedDocumentData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
 import java.util.ArrayList;
@@ -28,49 +25,60 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class UploadContestedCaseDocumentsService {
 
     private static final String APPLICANT = "applicant";
-    private static final String CORRESPONDENCE = "Correspondence";
-    private static final String FR_FORMS = "FR Forms";
-    private static final String EVIDENCE_IN_SUPPORT = "Evidence In Support";
-    private static final String TRIAL_BUNDLE = "Trial Bundle";
 
     private final ObjectMapper mapper;
 
     public Map<String, Object> filterDocumentsToRelevantParty(Map<String, Object> caseData) throws Exception {
 
-        List<ContestedUploadedDocumentData> uploadedDocuments = getUploadedDocuments(caseData);
-
-        List<ContestedUploadedDocumentData> applicantCorrespondenceCollection = getDocumentCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION);
-        List<ContestedUploadedDocumentData> applicantFormCollection = getDocumentCollection(caseData, APPLICANT_FR_FORM_COLLECTION);
-        List<ContestedUploadedDocumentData> applicantEvidenceCollection = getDocumentCollection(caseData, APPLICANT_EVIDENCE_COLLECTION);
-        List<ContestedUploadedDocumentData> applicantTrialBundleCollection = getDocumentCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION);
+        List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS);
 
         //we need to build ApplicantUploadedDocumentData, and add the "Applicant" marked doc a collection
-
         List<ContestedUploadedDocumentData> correspondenceFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
-            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType().equals(CORRESPONDENCE))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType().equals("Letter from Applicant"))
             .collect(Collectors.toList());
+        List<ContestedUploadedDocumentData> applicantCorrespondenceCollection = getDocumentCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION);
         applicantCorrespondenceCollection.addAll(correspondenceFiltered);
         log.info("Adding item: {}, to Applicant Correspondence Collection", correspondenceFiltered);
 
         List<ContestedUploadedDocumentData> frFormsFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
-            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType().equals(FR_FORMS))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType().equals("Form B")
+                    || d.getUploadedCaseDocument().getCaseDocumentType().equals("Applicant - Form E")
+                    || d.getUploadedCaseDocument().getCaseDocumentType().equals("Form F")
+                    || d.getUploadedCaseDocument().getCaseDocumentType().equals("Form G")
+                    || d.getUploadedCaseDocument().getCaseDocumentType().equals("Form H"))
             .collect(Collectors.toList());
+        List<ContestedUploadedDocumentData> applicantFormCollection = getDocumentCollection(caseData, APPLICANT_FR_FORM_COLLECTION);
         applicantFormCollection.addAll(frFormsFiltered);
         log.info("Adding item: {}, to Applicant FR Forms Collection", frFormsFiltered);
 
         List<ContestedUploadedDocumentData> evidenceInSupportFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
-            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType().equals(EVIDENCE_IN_SUPPORT))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType().equals("Statement of Issues")
+                    || d.getUploadedCaseDocument().getCaseDocumentType().equals("Chronology")
+                || d.getUploadedCaseDocument().getCaseDocumentType().equals("Case Summary")
+                || d.getUploadedCaseDocument().getCaseDocumentType().equals("Questionnaire")
+                || d.getUploadedCaseDocument().getCaseDocumentType().equals("Reply to Questionnaire")
+                || d.getUploadedCaseDocument().getCaseDocumentType().equals("Valuation Report")
+                || d.getUploadedCaseDocument().getCaseDocumentType().equals("Pension Plan")
+                || d.getUploadedCaseDocument().getCaseDocumentType().equals("Position Statement")
+                || d.getUploadedCaseDocument().getCaseDocumentType().equals("Skeleton Argument")
+                || d.getUploadedCaseDocument().getCaseDocumentType().equals("Expert Evidence")
+                || d.getUploadedCaseDocument().getCaseDocumentType().equals("Witness Statement/Affidavit")
+                || d.getUploadedCaseDocument().getCaseDocumentType().equals("Care Plan")
+                || d.getUploadedCaseDocument().getCaseDocumentType().equals("Offers")
+                || d.getUploadedCaseDocument().getCaseDocumentType().equals("other"))
             .collect(Collectors.toList());
+        List<ContestedUploadedDocumentData> applicantEvidenceCollection = getDocumentCollection(caseData, APPLICANT_EVIDENCE_COLLECTION);
         applicantEvidenceCollection.addAll(evidenceInSupportFiltered);
         log.info("Adding item: {}, to Applicant Evidence In Support Collection", evidenceInSupportFiltered);
 
         List<ContestedUploadedDocumentData> trialBundleFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
-            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType().equals(TRIAL_BUNDLE))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType().equals("Trial Bundle"))
             .collect(Collectors.toList());
+        List<ContestedUploadedDocumentData> applicantTrialBundleCollection = getDocumentCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION);
         applicantTrialBundleCollection.addAll(trialBundleFiltered);
         log.info("Adding item: {}, to Applicant Trial Bundle Collection", trialBundleFiltered);
 
@@ -88,17 +96,6 @@ public class UploadContestedCaseDocumentsService {
         return caseData;
     }
 
-    private List<ContestedUploadedDocumentData> getUploadedDocuments(Map<String, Object> caseData) {
-
-        if (StringUtils.isEmpty(caseData.get(CONTESTED_UPLOADED_DOCUMENTS))) {
-            return new ArrayList<>();
-        }
-
-        return mapper.convertValue(caseData.get(CONTESTED_UPLOADED_DOCUMENTS),
-            new TypeReference<List<ContestedUploadedDocumentData>>() {
-            });
-    }
-
     private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData, String collection) {
 
         if (StringUtils.isEmpty(caseData.get(collection))) {
@@ -109,33 +106,4 @@ public class UploadContestedCaseDocumentsService {
             new TypeReference<List<ContestedUploadedDocumentData>>() {
             });
     }
-
-    private String findDocumentType(ContestedUploadedDocumentData item) {
-        String documentType = item.getUploadedCaseDocument().getCaseDocumentType();
-        return documentTypesMap.getOrDefault(documentType, "");
-    }
-
-    private Map<String, String> documentTypesMap = ImmutableMap.<String, String>builder()
-        .put("Letter from Applicant", CORRESPONDENCE)
-        .put("Form B", FR_FORMS)
-        .put("Applicant - Form E", FR_FORMS)
-        .put("Form F", FR_FORMS)
-        .put("Form G", FR_FORMS)
-        .put("Form H", FR_FORMS)
-        .put("Statement of Issues", EVIDENCE_IN_SUPPORT)
-        .put("Chronology", EVIDENCE_IN_SUPPORT)
-        .put("Case Summary", EVIDENCE_IN_SUPPORT)
-        .put("Questionnaire", EVIDENCE_IN_SUPPORT)
-        .put("Reply to Questionnaire", EVIDENCE_IN_SUPPORT)
-        .put("Valuation Report", EVIDENCE_IN_SUPPORT)
-        .put("Pension Plan", EVIDENCE_IN_SUPPORT)
-        .put("Position Statement", EVIDENCE_IN_SUPPORT)
-        .put("Skeleton Argument", EVIDENCE_IN_SUPPORT)
-        .put("Expert Evidence", EVIDENCE_IN_SUPPORT)
-        .put("Witness Statement/Affidavit", EVIDENCE_IN_SUPPORT)
-        .put("Care Plan", EVIDENCE_IN_SUPPORT)
-        .put("Offers", EVIDENCE_IN_SUPPORT)
-        .put("other", EVIDENCE_IN_SUPPORT)
-        .put("Trial Bundle", TRIAL_BUNDLE)
-        .build();
 }
