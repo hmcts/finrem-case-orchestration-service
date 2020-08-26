@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApproved
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.order.ConsentInContestedOrderService;
 
 import javax.validation.constraints.NotNull;
 
@@ -44,7 +43,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_APPROVED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
@@ -58,7 +56,6 @@ public class ConsentOrderApprovedController implements BaseController {
 
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final GenericDocumentService genericDocumentService;
-    private final ConsentInContestedOrderService consentInContestedOrderService;
     private final BulkPrintService bulkPrintService;
     private final NotificationService notificationService;
     private final FeatureToggleService featureToggleService;
@@ -146,9 +143,8 @@ public class ConsentOrderApprovedController implements BaseController {
                 caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
                 caseDetails.setData(caseData);
             }
-        } else if (CONSENTED_ORDER_NOT_APPROVED.equals(caseDetails.getState())) {
-            consentInContestedOrderService.sendConsentOrderNotApproved(caseDetails, authToken);
         }
+
         bulkPrintService.sendToBulkPrint(caseDetails, authToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()

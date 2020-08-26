@@ -260,7 +260,6 @@ def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/*
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/error/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/**',    // SKIP SONAR TEMPORARILY
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication']
 
 sonarqube {

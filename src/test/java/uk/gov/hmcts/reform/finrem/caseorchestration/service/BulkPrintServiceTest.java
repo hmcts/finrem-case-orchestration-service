@@ -173,7 +173,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
 
-        when(consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails.getData())).thenReturn(Collections.emptyList());
+        when(consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails)).thenReturn(Collections.emptyList());
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID uuid = bulkPrintService.sendOrderForBulkPrintRespondent(new CaseDocument(), caseDetails);

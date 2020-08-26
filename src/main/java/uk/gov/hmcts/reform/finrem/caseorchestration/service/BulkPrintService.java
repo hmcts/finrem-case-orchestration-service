@@ -82,7 +82,7 @@ public class BulkPrintService {
 
         List<BulkPrintDocument> orderDocuments = isOrderApprovedDocumentCollectionPresent(caseData)
             ? approvedOrderCollection(caseDetails)
-            : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseData);
+            : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails);
 
         bulkPrintDocuments.addAll(orderDocuments);
 

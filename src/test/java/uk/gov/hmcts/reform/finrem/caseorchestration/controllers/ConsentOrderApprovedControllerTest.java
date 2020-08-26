@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApproved
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.order.ConsentInContestedOrderService;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -65,9 +64,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     @MockBean
     private NotificationService notificationService;
-
-    @MockBean
-    private ConsentInContestedOrderService consentInContestedOrderService;
 
     public String consentOrderApprovedEndpoint() {
         return "/case-orchestration/documents/consent-order-approved";
