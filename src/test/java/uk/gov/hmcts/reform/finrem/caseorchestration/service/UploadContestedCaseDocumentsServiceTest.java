@@ -44,7 +44,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         Map<String, Object> caseData = caseDetails.getData();
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(0));
+        assertThat(getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(1));
         assertThat(getDocumentCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(1));
         assertThat(getDocumentCollection(caseData, APPLICANT_FR_FORM_COLLECTION), hasSize(5));
         assertThat(getDocumentCollection(caseData, APPLICANT_EVIDENCE_COLLECTION), hasSize(14));
