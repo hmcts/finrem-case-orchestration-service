@@ -96,7 +96,7 @@ public class UploadContestedCaseDocumentsService {
         return caseDocumentType.equals("Trial Bundle");
     }
 
-    private void filterApplicantCorrespondence(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData){
+    private void filterApplicantCorrespondence(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData) {
         List<ContestedUploadedDocumentData> correspondenceFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
@@ -112,7 +112,7 @@ public class UploadContestedCaseDocumentsService {
         caseData.put(APPLICANT_CORRESPONDENCE_COLLECTION, applicantCorrespondenceCollection);
     }
 
-    private void filterApplicantForms(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData){
+    private void filterApplicantForms(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData) {
         List<ContestedUploadedDocumentData> frFormsFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
@@ -127,7 +127,7 @@ public class UploadContestedCaseDocumentsService {
         caseData.put(APPLICANT_FR_FORM_COLLECTION, applicantFormCollection);
     }
 
-    private void filterApplicantEvidence(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData){
+    private void filterApplicantEvidence(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData) {
         List<ContestedUploadedDocumentData> evidenceInSupportFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
@@ -142,7 +142,7 @@ public class UploadContestedCaseDocumentsService {
         caseData.put(APPLICANT_EVIDENCE_COLLECTION, applicantEvidenceCollection);
     }
 
-    private void filterApplicantTrialBundle(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData){
+    private void filterApplicantTrialBundle(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData) {
         List<ContestedUploadedDocumentData> trialBundleFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
@@ -157,13 +157,14 @@ public class UploadContestedCaseDocumentsService {
         caseData.put(APPLICANT_TRIAL_BUNDLE_COLLECTION, applicantTrialBundleCollection);
     }
 
-    private void filterRespondentCorrespondence(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData){
+    private void filterRespondentCorrespondence(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData) {
         List<ContestedUploadedDocumentData> respondentCorrespondenceFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty().equals(RESPONDENT))
             .filter(d -> isTypeValidForCorrespondence(d.getUploadedCaseDocument().getCaseDocumentType()))
             .collect(Collectors.toList());
-        List<ContestedUploadedDocumentData> respondentCorrespondenceCollection = getDocumentCollection(caseData, RESPONDENT_CORRESPONDENCE_COLLECTION);
+        List<ContestedUploadedDocumentData> respondentCorrespondenceCollection =
+            getDocumentCollection(caseData, RESPONDENT_CORRESPONDENCE_COLLECTION);
 
         respondentCorrespondenceCollection.addAll(respondentCorrespondenceFiltered);
         log.info("Adding items: {}, to Applicant Correspondence Collection", respondentCorrespondenceFiltered);
@@ -173,7 +174,7 @@ public class UploadContestedCaseDocumentsService {
         caseData.put(RESPONDENT_CORRESPONDENCE_COLLECTION, respondentCorrespondenceCollection);
     }
 
-    private void filterRespondentForms(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData){
+    private void filterRespondentForms(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData) {
         List<ContestedUploadedDocumentData> frFormsFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty().equals(RESPONDENT))
@@ -188,7 +189,7 @@ public class UploadContestedCaseDocumentsService {
         caseData.put(RESPONDENT_FR_FORM_COLLECTION, respondentFormCollection);
     }
 
-    private void filterRespondentEvidence(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData){
+    private void filterRespondentEvidence(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData) {
         List<ContestedUploadedDocumentData> evidenceInSupportFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty().equals(RESPONDENT))
@@ -203,7 +204,7 @@ public class UploadContestedCaseDocumentsService {
         caseData.put(RESPONDENT_EVIDENCE_COLLECTION, respondentEvidenceCollection);
     }
 
-    private void filterRespondentTrialBundle(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData){
+    private void filterRespondentTrialBundle(List<ContestedUploadedDocumentData> uploadedDocuments, Map<String, Object> caseData) {
         List<ContestedUploadedDocumentData> trialBundleFiltered = uploadedDocuments.stream()
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty().equals(RESPONDENT))
