@@ -136,9 +136,7 @@ public class ConsentOrderApprovedController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (caseDetails.getState().equals(CONSENTED_ORDER_APPROVED)) {
-            //generate consent in contested approval document
             CaseDocument orderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-            //add generated doc to case data
             List<ApprovedOrderData> approvedOrderList = getConsentInContestedApprovedOrderCollection(caseData);
             if (approvedOrderList != null && !approvedOrderList.isEmpty()) {
                 ApprovedOrder approvedOrder = approvedOrderList.get(0).getApprovedOrder();
