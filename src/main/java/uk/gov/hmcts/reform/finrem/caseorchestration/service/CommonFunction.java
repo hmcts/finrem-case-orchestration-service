@@ -116,9 +116,16 @@ public class CommonFunction {
         return CASE_TYPE_ID_CONTESTED.equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
     }
 
-    public static boolean isOrderApprovedDocumentCollectionPresent(Map<String, Object> caseData) {
-        return (caseData.get(APPROVED_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(APPROVED_ORDER_COLLECTION)).isEmpty())
-            || (caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION) != null
-            && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION)).isEmpty());
+    public static boolean isOrderApprovedCollectionPresent(Map<String, Object> caseData) {
+        return isConsentedApprovedOrderCollectionPresent(caseData)
+            || isContestedApprovedOrderCollectionPresent(caseData);
+    }
+
+    private static boolean isConsentedApprovedOrderCollectionPresent(Map<String, Object> caseData) {
+        return caseData.get(APPROVED_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(APPROVED_ORDER_COLLECTION)).isEmpty();
+    }
+
+    private static boolean isContestedApprovedOrderCollectionPresent(Map<String, Object> caseData) {
+        return caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION)).isEmpty();
     }
 }

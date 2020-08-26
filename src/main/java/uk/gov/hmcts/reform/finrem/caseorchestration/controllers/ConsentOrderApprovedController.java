@@ -136,18 +136,11 @@ public class ConsentOrderApprovedController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (caseDetails.getState().equals(CONSENTED_ORDER_APPROVED)) {
-            CaseDocument orderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-            List<ApprovedOrderData> approvedOrderList = getConsentInContestedApprovedOrderCollection(caseData);
-            if (approvedOrderList != null && !approvedOrderList.isEmpty()) {
-                ApprovedOrder approvedOrder = approvedOrderList.get(0).getApprovedOrder();
-                approvedOrder.setOrderLetter(orderLetter);
-                caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderList);
-                caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
-                caseDetails.setData(caseData);
-            }
+            consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
         } else {
             caseData.put(UPLOAD_ORDER, caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
         }
+
         bulkPrintService.sendToBulkPrint(caseDetails, authToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
