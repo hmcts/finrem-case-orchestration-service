@@ -398,6 +398,18 @@
             "caseDocumentOther": "Other Example",
             "caseDocumentParty": "applicant"
           }
+        },
+        {
+          "id": "342137af-9862-49dc-9c35-6a600a73e7a4",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5e",
+              "document_filename": "FakeDocumentUpload.docx",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5e/binary"
+            },
+            "caseDocumentType": "other",
+            "caseDocumentOther": "Party Not Specified"
+          }
         }
       ]
     }
