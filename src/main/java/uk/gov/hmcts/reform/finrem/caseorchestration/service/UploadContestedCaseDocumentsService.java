@@ -37,7 +37,8 @@ public class UploadContestedCaseDocumentsService {
 
         //we need to build ApplicantUploadedDocumentData, and add the "Applicant" marked doc a collection
         List<ContestedUploadedDocumentData> correspondenceFiltered = uploadedDocuments.stream()
-            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType().equals("Letter from Applicant"))
             .collect(Collectors.toList());
         List<ContestedUploadedDocumentData> applicantCorrespondenceCollection = getDocumentCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION);
@@ -45,7 +46,8 @@ public class UploadContestedCaseDocumentsService {
         log.info("Adding item: {}, to Applicant Correspondence Collection", correspondenceFiltered);
 
         List<ContestedUploadedDocumentData> frFormsFiltered = uploadedDocuments.stream()
-            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType().equals("Form B")
                     || d.getUploadedCaseDocument().getCaseDocumentType().equals("Applicant - Form E")
                     || d.getUploadedCaseDocument().getCaseDocumentType().equals("Form F")
@@ -57,7 +59,8 @@ public class UploadContestedCaseDocumentsService {
         log.info("Adding item: {}, to Applicant FR Forms Collection", frFormsFiltered);
 
         List<ContestedUploadedDocumentData> evidenceInSupportFiltered = uploadedDocuments.stream()
-            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType().equals("Statement of Issues")
                     || d.getUploadedCaseDocument().getCaseDocumentType().equals("Chronology")
                 || d.getUploadedCaseDocument().getCaseDocumentType().equals("Case Summary")
@@ -78,7 +81,8 @@ public class UploadContestedCaseDocumentsService {
         log.info("Adding item: {}, to Applicant Evidence In Support Collection", evidenceInSupportFiltered);
 
         List<ContestedUploadedDocumentData> trialBundleFiltered = uploadedDocuments.stream()
-            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty().equals(APPLICANT))
             .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType().equals("Trial Bundle"))
             .collect(Collectors.toList());
         List<ContestedUploadedDocumentData> applicantTrialBundleCollection = getDocumentCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION);
