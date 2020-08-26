@@ -407,6 +407,7 @@
               "document_filename": "FakeDocumentUpload.docx",
               "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5e/binary"
             },
+            "caseDocumentParty": null,
             "caseDocumentType": "other",
             "caseDocumentOther": "Party Not Specified"
           }
