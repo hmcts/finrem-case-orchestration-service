@@ -15,15 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -39,8 +35,6 @@ public class HearingDocumentController implements BaseController {
 
     private final HearingDocumentService service;
     private final ValidateHearingService validateHearingService;
-    private final BulkPrintService bulkPrintService;
-    private final DocumentHelper documentHelper;
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
@@ -69,21 +63,11 @@ public class HearingDocumentController implements BaseController {
         caseData.putAll(service.generateHearingDocuments(authorisationToken, caseDetails));
 
         if (isContestedPaperApplication(caseDetails)) {
-            List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseData);
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
+            service.sendToBulkPrint(caseDetails, authorisationToken);
         }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
         return ResponseEntity.ok(
                 AboutToStartOrSubmitCallbackResponse.builder().data(caseData).warnings(warnings).build());
-    }
-
-    private List<BulkPrintDocument> getHearingCaseDocuments(Map<String, Object> caseData) {
-        List<BulkPrintDocument> caseDocuments = new ArrayList<>();
-        caseDocuments.addAll(documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(caseData, "copyOfPaperFormA", "uploadedDocument"));
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, "formC").ifPresent(caseDocuments::add);
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, "formG").ifPresent(caseDocuments::add);
-        return caseDocuments;
     }
 }

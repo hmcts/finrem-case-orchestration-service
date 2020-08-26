@@ -60,6 +60,14 @@ public class DocumentHelperTest {
     }
 
     @Test
+    public void shouldGetFormADocuments() throws Exception {
+        CallbackRequest callbackRequest = prepareCallbackRequest("validate-form-a-collection.json");
+        List<CaseDocument> pensionDocuments = documentHelper.getFormADocumentsData(
+            callbackRequest.getCaseDetails().getData());
+        assertThat(pensionDocuments.size(), is(2));
+    }
+
+    @Test
     public void shouldGetConsentedInContestedPensionDocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequest("consented-in-consented.json");
         List<CaseDocument> pensionDocuments = documentHelper.getConsentedInContestedPensionDocumentsData(

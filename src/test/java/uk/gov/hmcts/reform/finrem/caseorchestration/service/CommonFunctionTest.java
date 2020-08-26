@@ -35,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
@@ -325,6 +326,46 @@ public class CommonFunctionTest {
             "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
 
         assertThat(isContestedApplication(caseDetails), is(false));
+    }
+
+    @Test
+    public void isContestedPaperApplicationShouldReturnTrueWhenCaseTypeIsSetToContestedAndIsPaperCase() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isContestedPaperApplication(caseDetails), is(true));
+    }
+
+    @Test
+    public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToConsentedAndIsPaperCase() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/bulkprint/bulk-print-paper-application.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isContestedPaperApplication(caseDetails), is(false));
+    }
+
+    @Test
+    public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToContestedAndNotPaperCase() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isContestedPaperApplication(caseDetails), is(false));
+    }
+
+    @Test
+    public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToConsented() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/valid-latest-consent-order.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isContestedPaperApplication(caseDetails), is(false));
+    }
+
+    @Test
+    public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToNull() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isContestedPaperApplication(caseDetails), is(false));
     }
 
     private static RespondToOrderData getRespondToOrderData(String s) {

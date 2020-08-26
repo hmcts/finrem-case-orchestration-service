@@ -39,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 public class BulkPrintService {
 
-    private static final String FINANCIAL_REMEDY_PACK_LETTER_TYPE = "FINANCIAL_REMEDY_PACK";
+    public static final String FINANCIAL_REMEDY_PACK_LETTER_TYPE = "FINANCIAL_REMEDY_PACK";
     private static final String FINANCIAL_REMEDY_GENERAL_LETTER = "FINREM002";
     static final String DOCUMENT_FILENAME = "document_filename";
 
@@ -208,7 +208,7 @@ public class BulkPrintService {
         log.info("Generated Respondent CoverSheet for bulk print. coversheet: {}, letterId : {}", respondentCoverSheet, respondentLetterId);
     }
 
-    public BulkPrintDocument generateApplicantCoverSheet(CaseDetails caseDetails, String authorisationToken) {
+    private BulkPrintDocument generateApplicantCoverSheet(CaseDetails caseDetails, String authorisationToken) {
         CaseDocument applicantCoverSheet = coverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
         caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
         return caseDocumentToBulkPrintDocument(applicantCoverSheet);

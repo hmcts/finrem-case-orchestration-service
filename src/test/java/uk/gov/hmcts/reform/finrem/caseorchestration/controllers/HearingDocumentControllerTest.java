@@ -9,8 +9,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
@@ -48,12 +46,6 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @MockBean
     private ValidateHearingService validateHearingService;
-
-    @MockBean
-    private DocumentHelper documentHelper;
-
-    @MockBean
-    private BulkPrintService bulkPrintService;
 
     @Before
     public void setUp()  {
@@ -96,8 +88,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
                 .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
 
-        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
+        verify(service, never()).sendToBulkPrint(any(), any());
     }
 
     @Test
@@ -117,8 +108,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
             .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
 
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
+        verify(service, times(1)).sendToBulkPrint(isA(CaseDetails.class), eq(AUTH_TOKEN));
     }
 
     @Test
