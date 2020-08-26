@@ -95,6 +95,7 @@
   "10023_Information Disclosure - Debug Error Messages_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/update-latest-consent-order_POST": "ignore",
   "10023_Information Disclosure - Debug Error Messages_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/remove-details_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/v2/api-docs_GET": "ignore",
+  "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested/set-paper-case-defaults_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/contested-consent-order-not-approved_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/prepare-for-hearing-order-sent_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/general-letter_POST": "ignore",
@@ -244,5 +245,6 @@
   "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/draft-contested-mini-form-a_POST": "ignore",
   "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/generate-mini-form-a_POST": "ignore",
   "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/bulk-print_POST": "ignore",
+  "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested-application-not-approved-submit_POST": "ignore",
   "10021_X-Content-Type-Options Header Missing_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/general-email_POST": "ignore"
 }
