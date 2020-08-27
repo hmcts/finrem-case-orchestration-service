@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,11 +24,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 public class UploadContestedCaseDocumentController implements BaseController {
 
-    @Autowired
-    UploadContestedCaseDocumentsService service;
+    private final UploadContestedCaseDocumentsService service;
 
     @PostMapping(path = "/upload-contested-case-documents", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles update Contested Case details and cleans up the data fields based on the options chosen for Contested Cases")

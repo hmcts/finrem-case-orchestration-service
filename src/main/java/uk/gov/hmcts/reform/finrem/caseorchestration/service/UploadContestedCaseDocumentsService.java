@@ -111,7 +111,10 @@ public class UploadContestedCaseDocumentsService {
         correspondenceCollection.addAll(correspondenceFiltered);
         log.info("Adding items: {}, to Applicant Correspondence Collection", correspondenceFiltered);
         uploadedDocuments.removeAll(correspondenceFiltered);
-        caseData.put(collection, correspondenceCollection);
+
+        if (!correspondenceCollection.isEmpty()) {
+            caseData.put(collection, correspondenceCollection);
+        }
     }
 
     private void filterForms(List<ContestedUploadedDocumentData> uploadedDocuments,
@@ -129,7 +132,10 @@ public class UploadContestedCaseDocumentsService {
         formCollection.addAll(frFormsFiltered);
         log.info("Adding items: {}, to Applicant FR Forms Collection", frFormsFiltered);
         uploadedDocuments.removeAll(frFormsFiltered);
-        caseData.put(collection, formCollection);
+
+        if (!formCollection.isEmpty()) {
+            caseData.put(collection, formCollection);
+        }
     }
 
     private void filterEvidence(List<ContestedUploadedDocumentData> uploadedDocuments,
@@ -147,7 +153,10 @@ public class UploadContestedCaseDocumentsService {
         evidenceCollection.addAll(evidenceInSupportFiltered);
         log.info("Adding items: {}, to Applicant Evidence In Support Collection", evidenceInSupportFiltered);
         uploadedDocuments.removeAll(evidenceInSupportFiltered);
-        caseData.put(collection, evidenceCollection);
+
+        if (!evidenceCollection.isEmpty()) {
+            caseData.put(collection, evidenceCollection);
+        }
     }
 
     private void filterTrialBundle(List<ContestedUploadedDocumentData> uploadedDocuments,
@@ -165,6 +174,9 @@ public class UploadContestedCaseDocumentsService {
         trialBundleCollection.addAll(trialBundleFiltered);
         log.info("Adding items: {}, to Applicant Trial Bundle Collection", trialBundleFiltered);
         uploadedDocuments.removeAll(trialBundleFiltered);
-        caseData.put(collection, trialBundleCollection);
+
+        if (!trialBundleCollection.isEmpty()) {
+            caseData.put(collection, trialBundleCollection);
+        }
     }
 }

@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EVIDENCE_COLLECTION;
@@ -60,8 +61,33 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         assertThat(getDocumentCollection(caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
     }
 
+    @Test
+    public void emptyRespondentDocumentsCollectionIsNotAddedToCaseData() throws Exception {
+        CaseDetails caseDetails = onlyApplicantCaseDocumentsUploaded();
+        Map<String, Object> caseData = caseDetails.getData();
+        service.filterDocumentsToRelevantParty(caseData);
+
+        assertThat(getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(1));
+        assertThat(getDocumentCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, APPLICANT_FR_FORM_COLLECTION), hasSize(5));
+        assertThat(getDocumentCollection(caseData, APPLICANT_EVIDENCE_COLLECTION), hasSize(14));
+        assertThat(getDocumentCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
+
+        assertNull(getDocumentCollection(caseData, RESPONDENT_CORRESPONDENCE_COLLECTION));
+        assertNull(getDocumentCollection(caseData, RESPONDENT_FR_FORM_COLLECTION));
+        assertNull(getDocumentCollection(caseData, RESPONDENT_EVIDENCE_COLLECTION));
+        assertNull(getDocumentCollection(caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION));
+    }
+
     private CaseDetails contestedCaseDetails() throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/contested/contested-upload-case-documents.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
+    }
+
+    private CaseDetails onlyApplicantCaseDocumentsUploaded() throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(
+            "/fixtures/contested/contested-upload-case-documents-no-empty-collection.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }
