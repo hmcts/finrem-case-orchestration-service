@@ -677,6 +677,24 @@
             "caseDocumentType": "other",
             "caseDocumentOther": "Party Not Specified"
           }
+        },
+                {
+        "id": "c9628ff0-268e-4f8d-b491-7d2bda5e67b0",
+          "value": {
+            "caseDocuments": null,
+            "caseDocumentType": "Form B",
+            "caseDocumentOther": null,
+            "caseDocumentParty": "applicant"
+          }
+        },
+                {
+        "id": "c9628ff0-268e-4f8d-b491-7d2bda5e66a2",
+          "value": {
+            "caseDocuments": null,
+            "caseDocumentType": "Form B",
+            "caseDocumentOther": null,
+            "caseDocumentParty": "respondent"
+          }
         }
       ]
     }
