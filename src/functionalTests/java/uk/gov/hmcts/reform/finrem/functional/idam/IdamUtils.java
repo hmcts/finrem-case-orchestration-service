@@ -48,10 +48,15 @@ public class IdamUtils {
         String userLoginDetails = String.join(":", username, password);
         final String authHeader = "Basic " + new String(Base64.getEncoder().encode(userLoginDetails.getBytes()));
 
-        Response response = RestAssured.given()
-            .header(AUTHORIZATION_HEADER, authHeader)
-            .relaxedHTTPSValidation()
-            .post(idamCodeUrl());
+        int retryCount = 0;
+        Response response = null;
+        do {
+            response = RestAssured.given()
+                .header(AUTHORIZATION_HEADER, authHeader)
+                .relaxedHTTPSValidation()
+                .post(idamCodeUrl());
+            retryCount++;
+        } while (response.getStatusCode() > 300 && retryCount <= 3);
 
         assert response.getStatusCode() < 300
             : String.format("Code generation failed with code: %d, body: %s", response.getStatusCode(), response.getBody().prettyPrint());
