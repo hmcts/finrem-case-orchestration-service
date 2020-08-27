@@ -214,14 +214,14 @@ public class CCDConfigConstant {
 
     //Contested Case Documents
     public static final String CONTESTED_UPLOADED_DOCUMENTS = "uploadCaseDocument";
-    public static final String APPLICANT_CORRESPONDENCE_COLLECTION = "applicantCorrespondenceCollection";
-    public static final String APPLICANT_FR_FORM_COLLECTION = "applicantFRFormsCollection";
-    public static final String APPLICANT_EVIDENCE_COLLECTION = "applicantEvidenceCollection";
-    public static final String APPLICANT_TRIAL_BUNDLE_COLLECTION = "applicantTrialBundleCollection";
-    public static final String RESPONDENT_CORRESPONDENCE_COLLECTION = "respondentCorrespondenceCollection";
-    public static final String RESPONDENT_FR_FORM_COLLECTION = "respondentFRFormsCollection";
-    public static final String RESPONDENT_EVIDENCE_COLLECTION = "respondentEvidenceCollection";
-    public static final String RESPONDENT_TRIAL_BUNDLE_COLLECTION = "respondentTrialBundleCollection";
+    public static final String APPLICANT_CORRESPONDENCE_COLLECTION = "appCorrespondenceCollection";
+    public static final String APPLICANT_FR_FORM_COLLECTION = "appFRFormsCollection";
+    public static final String APPLICANT_EVIDENCE_COLLECTION = "appEvidenceCollection";
+    public static final String APPLICANT_TRIAL_BUNDLE_COLLECTION = "appTrialBundleCollection";
+    public static final String RESPONDENT_CORRESPONDENCE_COLLECTION = "respCorrespondenceCollection";
+    public static final String RESPONDENT_FR_FORM_COLLECTION = "respFRFormsCollection";
+    public static final String RESPONDENT_EVIDENCE_COLLECTION = "respEvidenceCollection";
+    public static final String RESPONDENT_TRIAL_BUNDLE_COLLECTION = "respTrialBundleCollection";
 
     //public static final String RESPONDENT_CASE_DOCUMENTS = "PLACEHOLDER";
 
