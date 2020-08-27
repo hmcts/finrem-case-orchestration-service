@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -31,6 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class HearingDocumentService {
 
@@ -118,11 +120,15 @@ public class HearingDocumentService {
             return caseDocuments;
         }
 
+        log.info("Fetching Contested Paper Case bulk print document from Case Data: {}", caseData);
+
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, formCDataKey).ifPresent(caseDocuments::add);
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, formGDataKey).ifPresent(caseDocuments::add);
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
         caseDocuments.addAll(formACaseDocuments.stream().map(e -> documentHelper.caseDocumentToBulkPrintDocument(e)).collect(Collectors.toList()));
+
+        log.info("Sending Contested Paper Case bulk print documents: {}", caseDocuments);
 
         return caseDocuments;
     }

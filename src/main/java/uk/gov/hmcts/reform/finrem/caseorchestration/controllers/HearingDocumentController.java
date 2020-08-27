@@ -63,6 +63,7 @@ public class HearingDocumentController implements BaseController {
         caseData.putAll(service.generateHearingDocuments(authorisationToken, caseDetails));
 
         if (isContestedPaperApplication(caseDetails)) {
+            log.info("Sending Contested Paper Case to bulk print Case ID: {}", caseDetails.getId());
             service.sendToBulkPrint(caseDetails, authorisationToken);
         }
 
