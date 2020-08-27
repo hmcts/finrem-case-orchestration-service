@@ -56,7 +56,7 @@ public class ContactDetailsMapperTest {
         data.put(ContactDetailsMapper.CcdFields.APPLICANT_EMAIL, TEST_EMAIL);
         data.put(ContactDetailsMapper.CcdFields.APPLICANT_PHONE, TEST_PHONE);
         data.put(CCDConfigConstant.APPLICANT_REPRESENTED, YES_VALUE);
-        data.put(CCDConfigConstant.RESP_SOLICITOR_NAME, "I represent respondent");
+        data.put(CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED, YES_VALUE);
 
         ContactDetailsMapper.setupContactDetailsForApplicantAndRespondent(data);
 
@@ -103,7 +103,7 @@ public class ContactDetailsMapperTest {
         data.put(ContactDetailsMapper.CcdFields.APPLICANT_EMAIL, "solicitor@mail.com");
         data.put(ContactDetailsMapper.CcdFields.APPLICANT_PHONE, "077654567");
         data.put(CCDConfigConstant.APPLICANT_REPRESENTED, NO_VALUE);
-        data.put(CCDConfigConstant.RESP_SOLICITOR_NAME, "I represent respondent");
+        data.put(CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED, YES_VALUE);
 
         ContactDetailsMapper.setupContactDetailsForApplicantAndRespondent(data);
 

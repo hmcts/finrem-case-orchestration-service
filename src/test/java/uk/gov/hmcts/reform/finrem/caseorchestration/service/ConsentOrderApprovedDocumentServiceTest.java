@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
@@ -13,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -109,6 +111,17 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         CaseDocument caseDocument = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(caseDocument);
+        verify(documentClientMock, atLeastOnce()).generatePdf(
+            matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, documentApprovedConsentOrderFileName),
+            anyString());
+    }
+
+    @Test
+    public void shouldGenerateAndPopulateApprovedConsentOrderLetterForConsentInContested() throws JsonProcessingException {
+        Map<String, Object> data = consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(
+            caseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper), AUTH_TOKEN);
+        List<ApprovedOrderData> approvedOrders = getConsentInContestedApprovedOrderCollection(data);
+        assertCaseDocument(approvedOrders.get(0).getApprovedOrder().getOrderLetter());
         verify(documentClientMock, atLeastOnce()).generatePdf(
             matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, documentApprovedConsentOrderFileName),
             anyString());
@@ -222,6 +235,10 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = defaultCaseDetails();
         caseDetails.getData().put(CONSENT_ORDER, caseDocument());
         return caseDetails;
+    }
 
+    private List<ApprovedOrderData> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
+        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<List<ApprovedOrderData>>() {
+        });
     }
 }

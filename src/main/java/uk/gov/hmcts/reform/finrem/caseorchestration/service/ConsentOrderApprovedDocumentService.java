@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -112,6 +114,21 @@ public class ConsentOrderApprovedDocumentService {
         List<PensionCollectionData> pensionDocs = consentInContestedStampPensionDocuments(caseData, authToken);
         return populateContestedConsentOrderCaseDetails(caseData, stampedAndAnnexedDoc, pensionDocs);
     }
+
+    public Map<String, Object> generateAndPopulateConsentOrderLetter(CaseDetails caseDetails, String authToken) throws JsonProcessingException {
+        Map<String, Object> caseData = caseDetails.getData();
+        CaseDocument orderLetter = generateApprovedConsentOrderLetter(caseDetails, authToken);
+        List<ApprovedOrderData> approvedOrderList = getConsentInContestedApprovedOrderCollection(caseData);
+        if (approvedOrderList != null && !approvedOrderList.isEmpty()) {
+            ApprovedOrder approvedOrder = approvedOrderList.get(0).getApprovedOrder();
+            approvedOrder.setOrderLetter(orderLetter);
+            caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderList);
+            caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
+            caseDetails.setData(caseData);
+        }
+        return caseData;
+    }
+
 
     private CaseDocument stampAndAnnexContestedConsentOrder(Map<String, Object> caseData, String authToken) {
         CaseDocument latestConsentOrder = getLatestConsentInContestedConsentOrder(caseData);

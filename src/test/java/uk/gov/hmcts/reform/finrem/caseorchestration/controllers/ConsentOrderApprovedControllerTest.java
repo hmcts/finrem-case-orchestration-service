@@ -282,7 +282,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
-        verify(consentOrderApprovedDocumentService, times(1)).generateApprovedConsentOrderLetter(any(), anyString());
+        verify(consentOrderApprovedDocumentService, times(1)).generateAndPopulateConsentOrderLetter(any(), anyString());
         verify(bulkPrintService, times(1)).sendToBulkPrint(any(), anyString());
     }
 
