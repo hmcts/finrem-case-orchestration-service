@@ -48,10 +48,10 @@ public class GenerateCoverSheetService {
 
         if (CommonFunction.isContestedApplication(caseDetails)) {
             return generateCoverSheet(caseDetails, authorisationToken, APPLICANT_ADDRESS, CONTESTED_SOLICITOR_ADDRESS, CONTESTED_SOLICITOR_NAME,
-                APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
+                APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME, CommonFunction.isApplicantRepresentedByASolicitor(caseDetails.getData()));
         } else {
             return generateCoverSheet(caseDetails, authorisationToken, APPLICANT_ADDRESS, CONSENTED_SOLICITOR_ADDRESS, CONSENTED_SOLICITOR_NAME,
-            APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
+            APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME, CommonFunction.isApplicantRepresentedByASolicitor(caseDetails.getData()));
         }
     }
 
@@ -60,16 +60,18 @@ public class GenerateCoverSheetService {
             documentConfiguration.getBulkPrintTemplate());
 
         return generateCoverSheet(caseDetails, authorisationToken, RESPONDENT_ADDRESS, RESP_SOLICITOR_ADDRESS, RESP_SOLICITOR_NAME,
-                CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, CONSENTED_RESPONDENT_LAST_NAME);
+                CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, CONSENTED_RESPONDENT_LAST_NAME,
+                CommonFunction.isRespondentRepresentedByASolicitor(caseDetails.getData()));
     }
 
     private CaseDocument generateCoverSheet(CaseDetails caseDetails, String authorisationToken, String partyAddressCcdFieldName,
                                             String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
-                                            String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName) {
+                                            String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,
+                                            boolean isRepresentedByASolicitor) {
 
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         prepareCoverSheet(caseDetailsCopy, partyAddressCcdFieldName, solicitorAddressCcdFieldName, solicitorNameCcdFieldName,
-            partyFirstMiddleNameCcdFieldName, partyLastNameCcdFieldName);
+            partyFirstMiddleNameCcdFieldName, partyLastNameCcdFieldName, isRepresentedByASolicitor);
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy, documentConfiguration.getBulkPrintTemplate(),
             documentConfiguration.getBulkPrintFileName());
@@ -77,9 +79,11 @@ public class GenerateCoverSheetService {
 
     private void prepareCoverSheet(CaseDetails caseDetails, String partyAddressCcdFieldName,
                                    String solicitorAddressCcdFieldName, String solicitorNameCcdFieldName,
-                                   String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName) {
+                                   String partyFirstMiddleNameCcdFieldName, String partyLastNameCcdFieldName,
+                                   boolean isRepresentedByASolicitor) {
         Map<String, Object> caseData = caseDetails.getData();
-        AddressFoundInCaseData addressFoundInCaseData = checkAddress(caseData, partyAddressCcdFieldName, solicitorAddressCcdFieldName);
+        AddressFoundInCaseData addressFoundInCaseData = checkAddress(caseData, partyAddressCcdFieldName, solicitorAddressCcdFieldName,
+            isRepresentedByASolicitor);
 
         if (addressFoundInCaseData != AddressFoundInCaseData.NONE) {
             boolean sendToSolicitor = addressFoundInCaseData == AddressFoundInCaseData.SOLICITOR;
@@ -99,8 +103,9 @@ public class GenerateCoverSheetService {
     }
 
     private AddressFoundInCaseData checkAddress(Map<String, Object> caseData, String partyAddressCcdFieldName,
-                                                String solicitorAddressCcdFieldName) {
-        return addressLineOneAndPostCodeAreBothNotEmpty((Map) caseData.get(solicitorAddressCcdFieldName)) ? AddressFoundInCaseData.SOLICITOR
+                                                String solicitorAddressCcdFieldName, boolean isRepresentedByASolicitor) {
+        return isRepresentedByASolicitor && addressLineOneAndPostCodeAreBothNotEmpty((Map) caseData.get(solicitorAddressCcdFieldName))
+            ? AddressFoundInCaseData.SOLICITOR
             : addressLineOneAndPostCodeAreBothNotEmpty((Map) caseData.get(partyAddressCcdFieldName)) ? AddressFoundInCaseData.PARTY
             : AddressFoundInCaseData.NONE;
     }
