@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -24,8 +23,8 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -43,16 +42,9 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
     @MockBean private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
     @MockBean private GeneralOrderService generalOrderService;
-    @MockBean private FeatureToggleService featureToggleService;
     @MockBean private GenerateCoverSheetService coverSheetService;
     @MockBean private GenericDocumentService genericDocumentService;
     @MockBean private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
-
-    @Value("${document.bulkPrintTemplate}") private String documentBulkPrintTemplate;
-    @Value("${document.bulkPrintFileName}") private String documentBulkPrintFileName;
-
-    @Value("${document.approvedConsentOrderNotificationTemplate}") private String documentApprovedConsentOrderNotificationTemplate;
-    @Value("${document.approvedConsentOrderNotificationFileName}") private String documentApprovedConsentOrderNotificationFileName;
 
     private UUID letterId;
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor;
@@ -161,13 +153,12 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldAddGeneralOrdersIfToggleOn() {
+    public void shouldAddGeneralOrders() {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
         List<BulkPrintDocument> bulkPrintDocuments = Collections.emptyList();
 
-        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(true);
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(any(CaseDetails.class), anyString())).thenReturn(bulkPrintDocuments);
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
@@ -177,38 +168,19 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldNotAddGeneralOrdersIfToggleOff() {
-        final String consentedBulkPrintConsentOrderNotApprovedJson
-            = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
-        List<BulkPrintDocument> bulkPrintDocuments = Collections.emptyList();
-
-        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(false);
-        when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN)).thenReturn(bulkPrintDocuments);
-        when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
-
-        UUID uuid = bulkPrintService.sendOrderForBulkPrintRespondent(new CaseDocument(), caseDetails);
-
-        assertThat(uuid, is(letterId));
-
-        verify(generalOrderService, times(0)).getLatestGeneralOrderForPrintingConsented(caseDetails.getData());
-    }
-
-    @Test
     public void shouldPrintRespondentOrdersIfNotApprovedOrderMissing() {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(consentedBulkPrintConsentOrderNotApprovedJson, mapper);
 
-        when(featureToggleService.isPrintGeneralOrderEnabled()).thenReturn(false);
-        when(consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails.getData())).thenReturn(Collections.emptyList());
+        when(consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails)).thenReturn(Collections.emptyList());
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID uuid = bulkPrintService.sendOrderForBulkPrintRespondent(new CaseDocument(), caseDetails);
 
         assertThat(uuid, is(letterId));
 
-        verify(generalOrderService, times(0)).getLatestGeneralOrderForPrintingConsented(caseDetails.getData());
+        verify(generalOrderService, times(1)).getLatestGeneralOrderForPrintingConsented(caseDetails.getData());
     }
 
     @Test
@@ -236,7 +208,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
         UUID uuid = bulkPrintService.printApplicantConsentOrderNotApprovedDocuments(caseDetails, AUTH_TOKEN);
-        assertTrue(uuid == null);
+        assertNull(uuid);
     }
 
     @Test

@@ -104,30 +104,30 @@ configurations {
 }
 
 def versions = [
-        bspCommonLib            : '0.0.44',
-        ccdClient               : '4.7.2',
-        commonsBeanUtils        : '1.9.4',
-        commonsIo               : '2.7',
-        commonsLang3            : '3.11',
-        gradlePitest            : '1.5.1',
-        jsonAssert              : '1.2.3',
-        junit                   : '4.13',
-        lombok                  : '1.18.12',
-        mockito                 : '3.4.4',
-        nimbus                  : '5.1',
-        pact_version            : '3.6.15',
-        pdfbox                  : '2.0.8',
-        pitest                  : '1.5.2',
-        powerMock               : '1.7.3',
-        reformLogging           : '5.1.5',
-        restAssured             : '3.0.3',
-        serenity                : '2.2.12',
-        serenityCucumber        : '1.9.51',
-        serviceTokenGenerator   : '3.1.1',
-        springfoxSwagger        : '2.9.2',
-        sonarPitest             : '0.5',
-        tomcat                  : '9.0.37',
-        wiremock                : '2.27.1'
+    bspCommonLib            : '0.0.44',
+    ccdClient               : '4.7.2',
+    commonsBeanUtils        : '1.9.4',
+    commonsIo               : '2.7',
+    commonsLang3            : '3.11',
+    gradlePitest            : '1.5.1',
+    jsonAssert              : '1.2.3',
+    junit                   : '4.13',
+    lombok                  : '1.18.12',
+    mockito                 : '3.4.4',
+    nimbus                  : '5.1',
+    pact_version            : '3.6.15',
+    pdfbox                  : '2.0.8',
+    pitest                  : '1.5.2',
+    powerMock               : '1.7.3',
+    reformLogging           : '5.1.5',
+    restAssured             : '3.0.3',
+    serenity                : '2.2.12',
+    serenityCucumber        : '1.9.51',
+    serviceTokenGenerator   : '3.1.1',
+    springfoxSwagger        : '2.9.2',
+    sonarPitest             : '0.5',
+    tomcat                  : '9.0.37',
+    wiremock                : '2.27.1'
 ]
 
 dependencyManagement {
@@ -276,9 +276,9 @@ sonarqube {
 pitest {
     targetClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.*'])
     excludedClasses.set(['uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication',
-                       'uk.gov.hmcts.reform.finrem.caseorchestration.model.*',
-                       'uk.gov.hmcts.reform.finrem.caseorchestration.config.*',
-                       'uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PaymentByAccountStub'])
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.model.*',
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.config.*',
+                         'uk.gov.hmcts.reform.finrem.caseorchestration.controllers.PaymentByAccountStub'])
     threads.set(4)
     outputFormats.set(['XML', 'HTML'])
     timestampedReports.set(false)
@@ -291,7 +291,7 @@ build.dependsOn jacocoTestReport
 bootJar {
     manifest {
         attributes 'Implementation-Title': project.name,
-                'Implementation-Version': project.version
+            'Implementation-Version': project.version
     }
     archiveFileName = 'finrem-case-orchestration.jar'
 }

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.validation;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation;
 
 import org.hamcrest.Matcher;
 import org.junit.Before;

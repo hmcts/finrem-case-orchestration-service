@@ -38,6 +38,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
@@ -188,7 +189,33 @@ public class TestSetUpUtils {
         assertThat(caseDocument.getDocumentBinaryUrl(), is(binaryUrl));
     }
 
-    public static CaseDetails defaultCaseDetails() {
+    public static CaseDetails defaultConsentedCaseDetails() {
+        Map<String, Object> caseData = new HashMap<>();
+        populateApplicantNameAndAddress(caseData);
+        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "Jane");
+        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, "Doe");
+
+        return CaseDetails.builder()
+            .caseTypeId(CASE_TYPE_ID_CONSENTED)
+            .id(123456789L)
+            .data(caseData)
+            .build();
+    }
+
+    public static CaseDetails defaultContestedCaseDetails() {
+        Map<String, Object> caseData = new HashMap<>();
+        populateApplicantNameAndAddress(caseData);
+        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "Jane");
+        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, "Doe");
+
+        return CaseDetails.builder()
+            .caseTypeId(CASE_TYPE_ID_CONTESTED)
+            .id(987654321L)
+            .data(caseData)
+            .build();
+    }
+
+    private static void populateApplicantNameAndAddress(Map<String, Object> caseData) {
         Map<String, Object> applicantAddress = new HashMap<>();
         applicantAddress.put("AddressLine1", "50 Applicant Street");
         applicantAddress.put("AddressLine2", "Second Address Line");
@@ -198,19 +225,10 @@ public class TestSetUpUtils {
         applicantAddress.put("PostTown", "London");
         applicantAddress.put("PostCode", "SW1");
 
-        Map<String, Object> caseData = new HashMap<>();
         caseData.put(APPLICANT_FIRST_MIDDLE_NAME, "James");
         caseData.put(APPLICANT_LAST_NAME, "Joyce");
         caseData.put(APPLICANT_ADDRESS, applicantAddress);
         caseData.put(APPLICANT_REPRESENTED, null);
-        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "Jane");
-        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, "Doe");
-
-        return CaseDetails.builder()
-            .caseTypeId(CASE_TYPE_ID_CONSENTED)
-            .id(123456789L)
-            .data(caseData)
-            .build();
     }
 
     public static CaseDetails caseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
