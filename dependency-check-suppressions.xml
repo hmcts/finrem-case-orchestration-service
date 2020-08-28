@@ -27,4 +27,10 @@
         <packageUrl regex="true">^pkg:javascript/jquery@.*$</packageUrl>
         <vulnerabilityName>Regex in its jQuery.htmlPrefilter  sometimes may introduce XSS</vulnerabilityName>
     </suppress>
+    <suppress>
+        <notes>YAML 1.1 parser and emitter for Java</notes>
+        <packageUrl regex="true">^pkg:maven/org.yaml/snakeyaml@.*$</packageUrl>
+        <cve>CVE-2017-18640</cve>
+        <vulnerabilityName>The Alias feature in SnakeYAML 1.18 allows entity expansion during a load operation, a related issue to CVE-2003-1564.</vulnerabilityName>
+    </suppress>
 </suppressions>
