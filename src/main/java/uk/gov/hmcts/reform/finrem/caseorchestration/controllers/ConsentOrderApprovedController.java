@@ -43,7 +43,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_APPROVED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
@@ -131,7 +130,6 @@ public class ConsentOrderApprovedController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) throws JsonProcessingException {
         CaseDetails caseDetails = callback.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
 
         if (caseDetails.getState().equals(CONSENTED_ORDER_APPROVED)) {
             consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
@@ -206,10 +204,5 @@ public class ConsentOrderApprovedController implements BaseController {
         return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION),
             new TypeReference<List<PensionCollectionData>>() {
             });
-    }
-
-    private List<ApprovedOrderData> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<List<ApprovedOrderData>>() {
-        });
     }
 }
