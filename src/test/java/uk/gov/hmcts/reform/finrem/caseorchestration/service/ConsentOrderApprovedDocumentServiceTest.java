@@ -44,7 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchDocumentGenerationRequestTemplateAndFilename;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
@@ -89,7 +89,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Before
     public void setUp() {
-        caseDetails = defaultCaseDetails();
+        caseDetails = defaultConsentedCaseDetails();
 
         Document defaultCoversheet = document();
         defaultCoversheet.setBinaryUrl(DEFAULT_COVERSHEET_URL);
@@ -217,7 +217,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void stampsAndPopulatesCaseDataForContestedConsentOrder() {
         when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
         when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
-        CaseDetails caseDetails = defaultCaseDetails();
+        CaseDetails caseDetails = defaultConsentedCaseDetails();
         caseDetails.getData().put(CONSENT_ORDER, caseDocument());
         Map<String, Object> data = consentOrderApprovedDocumentService
             .stampAndPopulateContestedConsentApprovedOrderCollection(caseDetails.getData(), AUTH_TOKEN);

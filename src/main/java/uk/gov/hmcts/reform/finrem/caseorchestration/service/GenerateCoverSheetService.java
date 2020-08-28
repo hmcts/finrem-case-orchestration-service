@@ -31,6 +31,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
@@ -48,13 +49,10 @@ public class GenerateCoverSheetService {
         log.info("Generating Applicant cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
 
-        if (CommonFunction.isContestedApplication(caseDetails)) {
-            return generateCoverSheet(caseDetails, authorisationToken, APPLICANT_ADDRESS, CONTESTED_SOLICITOR_ADDRESS, CONTESTED_SOLICITOR_NAME,
-                APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME, CommonFunction.isApplicantRepresentedByASolicitor(caseDetails.getData()));
-        } else {
-            return generateCoverSheet(caseDetails, authorisationToken, APPLICANT_ADDRESS, CONSENTED_SOLICITOR_ADDRESS, CONSENTED_SOLICITOR_NAME,
+        return generateCoverSheet(caseDetails, authorisationToken, APPLICANT_ADDRESS,
+            isConsentedApplication(caseDetails) ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS,
+            isConsentedApplication(caseDetails) ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME,
             APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME, CommonFunction.isApplicantRepresentedByASolicitor(caseDetails.getData()));
-        }
     }
 
     public CaseDocument generateRespondentCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {

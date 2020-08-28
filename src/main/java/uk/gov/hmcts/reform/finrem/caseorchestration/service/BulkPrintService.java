@@ -19,7 +19,6 @@ import java.util.UUID;
 import static java.util.Arrays.asList;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.caseDocumentToBulkPrintDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
@@ -49,26 +48,24 @@ public class BulkPrintService {
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final DocumentHelper documentHelper;
     private final GeneralOrderService generalOrderService;
-    private final FeatureToggleService featureToggleService;
     private final GenerateCoverSheetService coverSheetService;
 
     public BulkPrintService(GenericDocumentService genericDocumentService,
                             ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService,
                             @Lazy ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
                             DocumentHelper documentHelper, GeneralOrderService generalOrderService,
-                            FeatureToggleService featureToggleService, GenerateCoverSheetService coverSheetService) {
+                            GenerateCoverSheetService coverSheetService) {
         this.genericDocumentService = genericDocumentService;
         this.consentOrderNotApprovedDocumentService = consentOrderNotApprovedDocumentService;
         this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
         this.documentHelper = documentHelper;
         this.generalOrderService = generalOrderService;
-        this.featureToggleService = featureToggleService;
         this.coverSheetService = coverSheetService;
     }
 
     public UUID sendNotificationLetterForBulkPrint(final CaseDocument notificationLetter, final CaseDetails caseDetails) {
         List<BulkPrintDocument> notificationLetterList = Collections.singletonList(
-            BulkPrintDocument.builder().binaryFileUrl(notificationLetter.getDocumentBinaryUrl()).build());
+            documentHelper.getCaseDocumentAsBulkPrintDocument(notificationLetter));
 
         Long caseId = caseDetails.getId();
         log.info("Notification letter sent to Bulk Print: {} for Case ID: {}", notificationLetterList, caseId);
@@ -86,12 +83,11 @@ public class BulkPrintService {
 
         List<BulkPrintDocument> orderDocuments = isOrderApprovedCollectionPresent(caseData)
             ? approvedOrderCollection(caseDetails)
-            : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseData);
+            : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails);
 
         bulkPrintDocuments.addAll(orderDocuments);
 
-        if (featureToggleService.isPrintGeneralOrderEnabled() && !isOrderApprovedCollectionPresent(caseDetails.getData())
-            && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
+        if (!isOrderApprovedCollectionPresent(caseDetails.getData()) && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
             bulkPrintDocuments.add(generalOrderService.getLatestGeneralOrderForPrintingConsented(caseDetails.getData()));
         }
 
@@ -217,12 +213,12 @@ public class BulkPrintService {
     private BulkPrintDocument generateApplicantCoverSheet(CaseDetails caseDetails, String authorisationToken) {
         CaseDocument applicantCoverSheet = coverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
         caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
-        return caseDocumentToBulkPrintDocument(applicantCoverSheet);
+        return documentHelper.getCaseDocumentAsBulkPrintDocument(applicantCoverSheet);
     }
 
     private BulkPrintDocument generateRespondentCoverSheet(CaseDetails caseDetails, String authorisationToken) {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
         caseDetails.getData().put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
-        return caseDocumentToBulkPrintDocument(respondentCoverSheet);
+        return documentHelper.getCaseDocumentAsBulkPrintDocument(respondentCoverSheet);
     }
 }

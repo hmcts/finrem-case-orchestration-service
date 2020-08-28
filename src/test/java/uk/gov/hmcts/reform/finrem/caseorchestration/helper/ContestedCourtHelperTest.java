@@ -5,7 +5,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC_COURTLIST;
@@ -390,7 +390,7 @@ public class ContestedCourtHelperTest {
 
     private CaseDetails getCaseDetailsWithAllocatedValues(String region, String subRegionListName, String subRegion,
                                                           String courtListName, String court) {
-        CaseDetails details = defaultCaseDetails();
+        CaseDetails details = defaultConsentedCaseDetails();
         details.getData().put(REGION, region);
         details.getData().put(subRegionListName, subRegion);
         details.getData().put(courtListName, court);

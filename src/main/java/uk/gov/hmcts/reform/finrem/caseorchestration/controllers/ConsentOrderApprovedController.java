@@ -43,12 +43,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_APPROVED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
 @Slf4j
 @RestController
@@ -58,10 +55,10 @@ public class ConsentOrderApprovedController implements BaseController {
 
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final GenericDocumentService genericDocumentService;
-    private final ObjectMapper mapper;
     private final BulkPrintService bulkPrintService;
-    private final FeatureToggleService featureToggleService;
     private final NotificationService notificationService;
+    private final FeatureToggleService featureToggleService;
+    private final ObjectMapper mapper;
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "'Consent Order Approved' callback handler. Generates relevant Consent Order Approved documents")
@@ -133,12 +130,9 @@ public class ConsentOrderApprovedController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) throws JsonProcessingException {
         CaseDetails caseDetails = callback.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
 
         if (caseDetails.getState().equals(CONSENTED_ORDER_APPROVED)) {
             consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
-        } else {
-            caseData.put(UPLOAD_ORDER, caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
         }
 
         bulkPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
@@ -210,10 +204,5 @@ public class ConsentOrderApprovedController implements BaseController {
         return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION),
             new TypeReference<List<PensionCollectionData>>() {
             });
-    }
-
-    private List<ApprovedOrderData> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<List<ApprovedOrderData>>() {
-        });
     }
 }

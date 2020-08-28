@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.google.common.collect.Streams;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -8,24 +7,27 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService.DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getLastMapValue;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Service
@@ -41,41 +43,34 @@ public class ConsentOrderNotApprovedDocumentService {
 
     public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken,
                                                               BulkPrintDocument applicantCoverSheet) {
-        Map<String, Object> caseData = caseDetails.getData();
         log.info("Generating consent order not approved documents for applicant, case ID {}", caseDetails.getId());
 
         List<BulkPrintDocument> documents = new ArrayList<>();
 
-        if (featureToggleService.isConsentOrderNotApprovedApplicantDocumentGenerationEnabled()) {
-            documents.add(coverLetter(caseDetails, authorisationToken));
-            documents.addAll(notApprovedConsentOrder(caseData));
-            documents = addGeneralOrdersIfApplicable(caseData, documents);
-            documents.add(applicantReplyCoversheet(caseDetails, authorisationToken));
+        documents.add(coverLetter(caseDetails, authorisationToken));
+        documents.addAll(notApprovedConsentOrder(caseDetails));
+        documents = addGeneralOrderIfApplicable(caseDetails, documents);
+        documents.add(applicantReplyCoversheet(caseDetails, authorisationToken));
 
-            //if only coversheet and reply sheet then print nothing
-            if (documents.size() == 2) {
-                return new ArrayList<>();
-            }
-
-        } else {
-            documents.add(applicantCoverSheet);
-            documents.addAll(notApprovedConsentOrder(caseData));
-            documents = addGeneralOrdersIfApplicable(caseData, documents);
-
-            //if only coversheet then print nothing
-            if (documents.size() == 1) {
-                return new ArrayList<>();
-            }
+        //if only coversheet and reply sheet then print nothing
+        if (documents.size() == 2) {
+            return new ArrayList<>();
         }
 
         return documents;
     }
 
-    private List<BulkPrintDocument> addGeneralOrdersIfApplicable(Map<String, Object> caseData, List<BulkPrintDocument> existingList) {
-        if (featureToggleService.isPrintGeneralOrderEnabled() && isPaperApplication(caseData)
-            && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
-            return Streams.concat(existingList.stream(),
-                asList(generalOrderService.getLatestGeneralOrderForPrintingConsented(caseData)).stream()).collect(Collectors.toList());
+    private List<BulkPrintDocument> addGeneralOrderIfApplicable(CaseDetails caseDetails, List<BulkPrintDocument> existingList) {
+        Map<String, Object> caseData = caseDetails.getData();
+
+        boolean isContestedCaseWithNoConsentOrders = isContestedApplication(caseDetails)
+            && consentOrderInContestedNotApprovedList(caseData).isEmpty();
+
+        if ((isPaperApplication(caseData) || isContestedCaseWithNoConsentOrders) && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
+            BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderForPrintingConsented(caseData);
+            if (generalOrder != null) {
+                existingList.add(generalOrder);
+            }
         }
         return existingList;
     }
@@ -90,25 +85,42 @@ public class ConsentOrderNotApprovedDocumentService {
         return BulkPrintDocument.builder().binaryFileUrl(coverLetter.getDocumentBinaryUrl()).build();
     }
 
-    public List<BulkPrintDocument> notApprovedConsentOrder(Map<String, Object> caseData) {
-        log.info("Extracting 'uploadOrder' from case data for bulk print.");
-        List<Map> documentList = ofNullable(caseData.get(UPLOAD_ORDER))
-            .map(i -> (List<Map>) i)
-            .orElse(Collections.emptyList());
+    public List<BulkPrintDocument> notApprovedConsentOrder(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
 
-        if (!documentList.isEmpty()) {
-            Map<String, Object> value = ((Map) getLastMapValue.apply(documentList).get(VALUE));
-            Object documentLinkObj = value.get("DocumentLink");
-            if (documentLinkObj != null) {
-                Map documentLink = (Map) documentLinkObj;
-                BulkPrintDocument generalOrder = BulkPrintDocument.builder()
-                    .binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL).toString())
-                    .build();
-                log.info("Sending general order ({}) for bulk print.", documentLink.get(DOCUMENT_FILENAME));
-                return asList(generalOrder);
+        if (isContestedApplication(caseDetails)) {
+            List<ContestedConsentOrderData> consentOrders = consentOrderInContestedNotApprovedList(caseData);
+            if (!consentOrders.isEmpty()) {
+                ContestedConsentOrderData contestedConsentOrderData = consentOrders.get(consentOrders.size() - 1);
+                return asList(documentHelper.getCaseDocumentAsBulkPrintDocument(contestedConsentOrderData.getConsentOrder().getConsentOrder()));
+            }
+        } else {
+            log.info("Extracting 'uploadOrder' from case data for bulk print.");
+            List<Map> documentList = ofNullable(caseData.get(UPLOAD_ORDER))
+                .map(i -> (List<Map>) i)
+                .orElse(Collections.emptyList());
+
+            if (!documentList.isEmpty()) {
+                Map<String, Object> value = ((Map) getLastMapValue.apply(documentList).get(VALUE));
+                Object documentLinkObj = value.get("DocumentLink");
+                if (documentLinkObj != null) {
+                    Map documentLink = (Map) documentLinkObj;
+                    BulkPrintDocument generalOrder = BulkPrintDocument.builder()
+                        .binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL).toString())
+                        .build();
+                    log.info("Sending general order ({}) for bulk print.", documentLink.get(DOCUMENT_FILENAME));
+                    return asList(generalOrder);
+                }
             }
         }
+
         return Collections.emptyList();
+    }
+
+    private List<ContestedConsentOrderData> consentOrderInContestedNotApprovedList(Map<String, Object> caseData) {
+        return Optional.ofNullable(caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION))
+            .map(documentHelper::convertToContestedConsentOrderData)
+            .orElse(new ArrayList<>(1));
     }
 
     private BulkPrintDocument applicantReplyCoversheet(CaseDetails caseDetails, String authorisationToken) {
@@ -119,6 +131,7 @@ public class ConsentOrderNotApprovedDocumentService {
             documentConfiguration.getConsentOrderNotApprovedReplyCoversheetTemplate(),
             documentConfiguration.getConsentOrderNotApprovedReplyCoversheetFileName());
         caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoversheet);
-        return BulkPrintDocument.builder().binaryFileUrl(applicantCoversheet.getDocumentBinaryUrl()).build();
+
+        return documentHelper.getCaseDocumentAsBulkPrintDocument(applicantCoversheet);
     }
 }
