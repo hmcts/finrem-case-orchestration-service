@@ -130,7 +130,7 @@ public class BulkPrintService {
 
     public UUID printApplicantConsentOrderNotApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> applicantDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, authorisationToken, generateApplicantCoverSheet(caseDetails, authorisationToken));
+            caseDetails, authorisationToken);
 
         if (applicantDocuments.isEmpty()) {
             return null;
@@ -139,10 +139,8 @@ public class BulkPrintService {
     }
 
     private UUID printApplicantConsentOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
-        List<BulkPrintDocument> applicantDocuments = new ArrayList<>();
-        applicantDocuments.add(generateApplicantCoverSheet(caseDetails, authorisationToken));
-        applicantDocuments.addAll(consentOrderApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, authorisationToken));
+        List<BulkPrintDocument> applicantDocuments = consentOrderApprovedDocumentService.prepareApplicantLetterPack(
+            caseDetails, authorisationToken);
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), applicantDocuments);
     }
 

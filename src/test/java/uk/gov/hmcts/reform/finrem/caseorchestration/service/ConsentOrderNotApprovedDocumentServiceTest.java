@@ -66,7 +66,6 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
 
     private CaseDetails caseDetails;
-    private BulkPrintDocument coverLetterDocument = BulkPrintDocument.builder().binaryFileUrl(COVER_LETTER_URL).build();
 
     @Before
     public void setupDocumentGenerationMocks() {
@@ -108,7 +107,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         setupConsentedCase();
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN, coverLetterDocument);
+            caseDetails, AUTH_TOKEN);
 
         assertThat(generatedDocuments, hasSize(4));
         assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
@@ -125,7 +124,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         caseDetails.getData().put(UPLOAD_ORDER, null);
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN, coverLetterDocument);
+            caseDetails, AUTH_TOKEN);
 
         assertThat(generatedDocuments, hasSize(3));
         assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
@@ -141,7 +140,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         caseDetails.getData().put(UPLOAD_ORDER, null);
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN, coverLetterDocument);
+            caseDetails, AUTH_TOKEN);
 
         assertThat(generatedDocuments, hasSize(0));
 
@@ -154,7 +153,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         addConsentedInContestedConsentOrderNotApproved();
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
-            caseDetails, AUTH_TOKEN, coverLetterDocument);
+            caseDetails, AUTH_TOKEN);
 
         assertThat(generatedDocuments, hasSize(3));
         assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));

@@ -38,11 +38,9 @@ public class ConsentOrderNotApprovedDocumentService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final DocumentConfiguration documentConfiguration;
-    private final FeatureToggleService featureToggleService;
     private final GeneralOrderService generalOrderService;
 
-    public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken,
-                                                              BulkPrintDocument applicantCoverSheet) {
+    public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken) {
         log.info("Generating consent order not approved documents for applicant, case ID {}", caseDetails.getId());
 
         List<BulkPrintDocument> documents = new ArrayList<>();
@@ -82,7 +80,7 @@ public class ConsentOrderNotApprovedDocumentService {
             caseDetailsWithTemplateData,
             documentConfiguration.getConsentOrderNotApprovedCoverLetterTemplate(),
             documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName());
-        return BulkPrintDocument.builder().binaryFileUrl(coverLetter.getDocumentBinaryUrl()).build();
+        return documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter);
     }
 
     public List<BulkPrintDocument> notApprovedConsentOrder(CaseDetails caseDetails) {
