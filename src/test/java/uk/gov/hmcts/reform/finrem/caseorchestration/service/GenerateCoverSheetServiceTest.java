@@ -49,8 +49,19 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldGenerateApplicantCoverSheet() throws Exception {
+    public void shouldGenerateApplicantCoverSheetForConsented() throws Exception {
         CaseDocument caseDocument = generateCoverSheetService.generateApplicantCoverSheet(caseDetails(), AUTH_TOKEN);
+
+        assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
+        assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
+        assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
+
+        assertCoversheetCalledWithRequiredData();
+    }
+
+    @Test
+    public void shouldGenerateApplicantCoverSheetForContested() throws Exception {
+        CaseDocument caseDocument = generateCoverSheetService.generateApplicantCoverSheet(caseDetailsContested(), AUTH_TOKEN);
 
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
@@ -127,6 +138,13 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
     private CaseDetails caseDetails() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
+    }
+
+    private CaseDetails caseDetailsContested() throws Exception {
+        try (InputStream resourceAsStream =
+                 getClass().getResourceAsStream("/fixtures/contested/consent-in-contested-application-approved.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }

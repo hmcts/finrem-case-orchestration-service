@@ -11,7 +11,6 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -32,7 +31,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,10 +42,13 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_PENSION_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
 @Slf4j
 @RestController
@@ -108,8 +109,8 @@ public class ConsentOrderApprovedController implements BaseController {
         validateCaseData(callback);
         CaseDetails caseDetails = callback.getCaseDetails();
 
-        Map<String, Object> caseData = consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(caseDetails, authToken);
-        caseData = consentInContestedStampPensionDocuments(caseData, authToken);
+        Map<String, Object> caseData = consentOrderApprovedDocumentService
+            .stampAndPopulateContestedConsentApprovedOrderCollection(caseDetails.getData(), authToken);
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
@@ -117,6 +118,34 @@ public class ConsentOrderApprovedController implements BaseController {
                 .errors(ImmutableList.of())
                 .warnings(ImmutableList.of())
                 .build());
+    }
+
+    @PostMapping(path = "/consent-in-contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "'Consent Order Approved' callback handler for consent in contested. Checks state and if "
+        + "approved generates docs else puts latest general order into uploadORder fields. Then sends the data to bulk print")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedSendOrder(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) throws JsonProcessingException {
+        CaseDetails caseDetails = callback.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
+
+        if (caseDetails.getState().equals(CONSENTED_ORDER_APPROVED)) {
+            consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
+        } else {
+            caseData.put(UPLOAD_ORDER, caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
+        }
+
+        bulkPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDetails.getData())
+            .build());
     }
 
     private Map<String, Object> generateAndPrepareDocuments(@RequestHeader(AUTHORIZATION_HEADER) String authToken, CallbackRequest callback) {
@@ -183,20 +212,8 @@ public class ConsentOrderApprovedController implements BaseController {
             });
     }
 
-    private List<PensionCollectionData> getContestedConsentPensionDocuments(Map<String, Object> caseData) {
-        if (StringUtils.isEmpty(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION))) {
-            return new ArrayList<>();
-        }
-
-        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION),
-            new TypeReference<List<PensionCollectionData>>() {
-            });
-    }
-
-    private Map<String, Object> consentInContestedStampPensionDocuments(Map<String, Object> caseData, String authToken) {
-        List<PensionCollectionData> pensionDocs = getContestedConsentPensionDocuments(caseData);
-        List<PensionCollectionData> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocs, authToken);
-        caseData.put(CONTESTED_CONSENT_PENSION_COLLECTION, stampedPensionDocs);
-        return caseData;
+    private List<ApprovedOrderData> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
+        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<List<ApprovedOrderData>>() {
+        });
     }
 }

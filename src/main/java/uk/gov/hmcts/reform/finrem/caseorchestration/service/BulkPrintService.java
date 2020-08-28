@@ -26,13 +26,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderApprovedDocumentCollectionPresent;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderApprovedCollectionPresent;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Service
@@ -83,13 +84,13 @@ public class BulkPrintService {
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        List<BulkPrintDocument> orderDocuments = isOrderApprovedDocumentCollectionPresent(caseData)
-            ? approvedOrderCollection(caseData)
+        List<BulkPrintDocument> orderDocuments = isOrderApprovedCollectionPresent(caseData)
+            ? approvedOrderCollection(caseDetails)
             : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseData);
 
         bulkPrintDocuments.addAll(orderDocuments);
 
-        if (featureToggleService.isPrintGeneralOrderEnabled() && !isOrderApprovedDocumentCollectionPresent(caseDetails.getData())
+        if (featureToggleService.isPrintGeneralOrderEnabled() && !isOrderApprovedCollectionPresent(caseDetails.getData())
             && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
             bulkPrintDocuments.add(generalOrderService.getLatestGeneralOrderForPrintingConsented(caseDetails.getData()));
         }
@@ -106,9 +107,14 @@ public class BulkPrintService {
         return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, asList(latestGeneralLetter));
     }
 
-    public List<BulkPrintDocument> approvedOrderCollection(Map<String, Object> data) {
+    public List<BulkPrintDocument> approvedOrderCollection(CaseDetails caseDetails) {
+        Map<String, Object> data = caseDetails.getData();
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        List<Map> documentList = ofNullable(data.get(APPROVED_ORDER_COLLECTION))
+        List collection = CommonFunction.isConsentedInContestedCase(caseDetails)
+            ? (List)data.get(CONTESTED_CONSENT_ORDER_COLLECTION)
+            : (List)data.get(APPROVED_ORDER_COLLECTION);
+
+        List<Map> documentList = ofNullable(collection)
             .map(i -> (List<Map>) i)
             .orElse(new ArrayList<>());
 
@@ -164,9 +170,9 @@ public class BulkPrintService {
     public Map<String, Object> sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (!isApplicantRepresentedByASolicitor(caseData) || isApplicantSolicitorAgreeToReceiveEmails(caseData)
+        if (!isApplicantRepresentedByASolicitor(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseData)
             || isPaperApplication(caseData)) {
-            UUID applicantLetterId = isOrderApprovedDocumentCollectionPresent(caseData)
+            UUID applicantLetterId = isOrderApprovedCollectionPresent(caseData)
                 ? printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken)
                 : printApplicantConsentOrderNotApprovedDocuments(caseDetails, authorisationToken);
             caseData.put(BULK_PRINT_LETTER_ID_APP, applicantLetterId);

@@ -28,10 +28,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_D81_QUESTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -84,7 +86,8 @@ public class CommonFunction {
     }
 
     public static boolean isRespondentRepresentedByASolicitor(Map<String, Object> caseData) {
-        return isNotEmpty(RESP_SOLICITOR_NAME, caseData);
+        return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONSENTED_RESPONDENT_REPRESENTED)))
+            || YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(CONTESTED_RESPONDENT_REPRESENTED)));
     }
 
     public static boolean isPaperApplication(Map<String, Object> caseData) {
@@ -119,7 +122,16 @@ public class CommonFunction {
         return isContestedApplication(caseDetails) && isPaperApplication(caseDetails.getData());
     }
 
-    public static boolean isOrderApprovedDocumentCollectionPresent(Map<String, Object> caseData) {
+    public static boolean isOrderApprovedCollectionPresent(Map<String, Object> caseData) {
+        return isConsentedApprovedOrderCollectionPresent(caseData)
+            || isContestedApprovedOrderCollectionPresent(caseData);
+    }
+
+    private static boolean isConsentedApprovedOrderCollectionPresent(Map<String, Object> caseData) {
         return caseData.get(APPROVED_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(APPROVED_ORDER_COLLECTION)).isEmpty();
+    }
+
+    private static boolean isContestedApprovedOrderCollectionPresent(Map<String, Object> caseData) {
+        return caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION)).isEmpty();
     }
 }
