@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
@@ -20,6 +19,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -56,7 +59,6 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json").toURI()));
     }
@@ -83,6 +85,28 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.formC.document_url", is(DOC_URL)))
                 .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
                 .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
+
+        verify(service, never()).sendToBulkPrint(any(), any());
+    }
+
+    @Test
+    public void generateHearingDocumentPaperApplication() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json").toURI()));
+
+        when(service.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
+            .thenReturn(ImmutableMap.of("formC", caseDocument()));
+
+        mvc.perform(post(GEN_DOC_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.formC.document_url", is(DOC_URL)))
+            .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
+            .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
+
+        verify(service, times(1)).sendToBulkPrint(isA(CaseDetails.class), eq(AUTH_TOKEN));
     }
 
     @Test

@@ -118,6 +118,10 @@ public class CommonFunction {
         return CASE_TYPE_ID_CONTESTED.equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
     }
 
+    public static boolean isContestedPaperApplication(CaseDetails caseDetails) {
+        return isContestedApplication(caseDetails) && isPaperApplication(caseDetails.getData());
+    }
+
     public static boolean isOrderApprovedCollectionPresent(Map<String, Object> caseData) {
         return isConsentedApprovedOrderCollectionPresent(caseData)
             || isContestedApprovedOrderCollectionPresent(caseData);

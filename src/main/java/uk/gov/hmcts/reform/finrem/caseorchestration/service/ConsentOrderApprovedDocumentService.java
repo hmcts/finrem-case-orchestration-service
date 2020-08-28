@@ -23,8 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.caseDocumentToBulkPrintDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_TITLE;
@@ -46,7 +44,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 public class ConsentOrderApprovedDocumentService {
 
     private final GenericDocumentService genericDocumentService;
-    private final GenerateCoverSheetService generateCoverSheetService;
     private final DocumentConfiguration documentConfiguration;
     private final BulkPrintService bulkPrintService;
     private final DocumentHelper documentHelper;
@@ -92,15 +89,12 @@ public class ConsentOrderApprovedDocumentService {
     public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken) {
         log.info("Sending Approved Consent Order to applicant / solicitor for Bulk Print");
         Map<String, Object> caseData = caseDetails.getData();
-        CaseDocument applicantCoverSheet = generateCoverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
-        caseData.put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        bulkPrintDocuments.add(caseDocumentToBulkPrintDocument(applicantCoverSheet));
 
         if (isPaperApplication(caseData)) {
             CaseDocument coverLetter = generateApprovedConsentOrderCoverLetter(caseDetails, authorisationToken);
-            bulkPrintDocuments.add(caseDocumentToBulkPrintDocument(coverLetter));
+            bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter));
         }
 
         List<BulkPrintDocument> approvedOrderCollection = bulkPrintService.approvedOrderCollection(caseDetails);

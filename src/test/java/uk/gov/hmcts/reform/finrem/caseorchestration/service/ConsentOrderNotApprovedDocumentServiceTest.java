@@ -156,7 +156,6 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
             caseDetails, AUTH_TOKEN);
 
         assertThat(generatedDocuments, hasSize(3));
-
         assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
     }
 

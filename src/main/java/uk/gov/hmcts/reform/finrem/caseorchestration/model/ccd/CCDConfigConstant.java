@@ -143,6 +143,7 @@ public class CCDConfigConstant {
     public static final String MINI_FORM_A = "miniFormA";
     public static final String MINI_FORM_A_CONSENTED_IN_CONTESTED = "consentMiniFormA";
     public static final String PENSION_DOCS_COLLECTION = "pensionCollection";
+    public static final String FORM_A_COLLECTION = "copyOfPaperFormA";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_BODY = "generalLetterBody";

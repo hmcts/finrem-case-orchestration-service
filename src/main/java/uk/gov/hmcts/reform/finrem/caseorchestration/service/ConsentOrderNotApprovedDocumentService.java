@@ -80,7 +80,7 @@ public class ConsentOrderNotApprovedDocumentService {
             caseDetailsWithTemplateData,
             documentConfiguration.getConsentOrderNotApprovedCoverLetterTemplate(),
             documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName());
-        return BulkPrintDocument.builder().binaryFileUrl(coverLetter.getDocumentBinaryUrl()).build();
+        return documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter);
     }
 
     public List<BulkPrintDocument> notApprovedConsentOrder(CaseDetails caseDetails) {
@@ -129,6 +129,7 @@ public class ConsentOrderNotApprovedDocumentService {
             documentConfiguration.getConsentOrderNotApprovedReplyCoversheetTemplate(),
             documentConfiguration.getConsentOrderNotApprovedReplyCoversheetFileName());
         caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoversheet);
+
         return documentHelper.getCaseDocumentAsBulkPrintDocument(applicantCoversheet);
     }
 }
