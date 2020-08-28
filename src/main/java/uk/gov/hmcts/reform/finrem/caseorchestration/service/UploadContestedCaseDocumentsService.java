@@ -104,7 +104,8 @@ public class UploadContestedCaseDocumentsService {
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty().equals(party))
-            .filter(d -> isTypeValidForCorrespondence(d.getUploadedCaseDocument().getCaseDocumentType()))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null
+                && isTypeValidForCorrespondence(d.getUploadedCaseDocument().getCaseDocumentType()))
             .collect(Collectors.toList());
 
         List<ContestedUploadedDocumentData> correspondenceCollection = getDocumentCollection(caseData, collection);
@@ -125,7 +126,8 @@ public class UploadContestedCaseDocumentsService {
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty().equals(party))
-            .filter(d -> isTypeValidForForms(d.getUploadedCaseDocument().getCaseDocumentType()))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null
+                && isTypeValidForForms(d.getUploadedCaseDocument().getCaseDocumentType()))
             .collect(Collectors.toList());
 
         List<ContestedUploadedDocumentData> formCollection = getDocumentCollection(caseData, collection);
@@ -146,7 +148,8 @@ public class UploadContestedCaseDocumentsService {
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty().equals(party))
-            .filter(d -> isTypeValidForEvidence(d.getUploadedCaseDocument().getCaseDocumentType()))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null
+                && isTypeValidForEvidence(d.getUploadedCaseDocument().getCaseDocumentType()))
             .collect(Collectors.toList());
 
         List<ContestedUploadedDocumentData> evidenceCollection = getDocumentCollection(caseData, collection);
@@ -167,7 +170,8 @@ public class UploadContestedCaseDocumentsService {
             .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty() != null
                 && d.getUploadedCaseDocument().getCaseDocumentParty().equals(party))
-            .filter(d -> isTypeValidForTrialBundle(d.getUploadedCaseDocument().getCaseDocumentType()))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null
+                && isTypeValidForTrialBundle(d.getUploadedCaseDocument().getCaseDocumentType()))
             .collect(Collectors.toList());
 
         List<ContestedUploadedDocumentData> trialBundleCollection = getDocumentCollection(caseData, collection);
