@@ -222,7 +222,7 @@ public class BulkPrintService {
 
     private BulkPrintDocument generateRespondentCoverSheet(CaseDetails caseDetails, String authorisationToken) {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
-        caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, respondentCoverSheet);
+        caseDetails.getData().put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
         return caseDocumentToBulkPrintDocument(respondentCoverSheet);
     }
 }
