@@ -198,6 +198,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)))
+            .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)));
     }
 
@@ -214,6 +215,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
+            .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)))
             .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)));
     }
@@ -231,6 +233,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)))
+            .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)));
     }
 
@@ -247,6 +250,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
+            .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)))
             .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)));
     }

@@ -25,6 +25,7 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 
 @RestController
 @RequiredArgsConstructor
@@ -60,6 +61,11 @@ public class HearingDocumentController implements BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.putAll(service.generateHearingDocuments(authorisationToken, caseDetails));
+
+        if (isContestedPaperApplication(caseDetails)) {
+            log.info("Sending Contested Paper Case to bulk print Case ID: {}", caseDetails.getId());
+            service.sendToBulkPrint(caseDetails, authorisationToken);
+        }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
         return ResponseEntity.ok(

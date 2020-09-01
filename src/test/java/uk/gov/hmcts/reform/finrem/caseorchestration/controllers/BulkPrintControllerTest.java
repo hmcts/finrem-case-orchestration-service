@@ -41,7 +41,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSendForBulkPrint() throws Exception {
-        when(bulkPrintService.sendToBulkPrint(any(), any())).thenReturn(caseData());
+        when(bulkPrintService.sendConsentOrderToBulkPrint(any(), any())).thenReturn(caseData());
 
         mvc.perform(
             post(BULK_PRINT_URI)
@@ -53,19 +53,19 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes", is(1)))
                 .andExpect(jsonPath("$.data.bulkPrintLetterIdRes", is(1)))
                 .andExpect(jsonPath("$.data.bulkPrintLetterIdApp", is(1)));
-        verify(bulkPrintService, times(1)).sendToBulkPrint(any(), any());
+        verify(bulkPrintService, times(1)).sendConsentOrderToBulkPrint(any(), any());
     }
 
     @Test
     public void shouldThrowExceptionOnSendForBulkPrint() throws Exception {
-        when(bulkPrintService.sendToBulkPrint(any(), any())).thenThrow(feignError());
+        when(bulkPrintService.sendConsentOrderToBulkPrint(any(), any())).thenThrow(feignError());
         mvc.perform(
             post(BULK_PRINT_URI)
                 .content(resourceContentAsString(CONTESTED_HWF_JSON))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isInternalServerError());
-        verify(bulkPrintService).sendToBulkPrint(any(), any());
+        verify(bulkPrintService).sendConsentOrderToBulkPrint(any(), any());
     }
 
     private Map<String, Object> caseData() {

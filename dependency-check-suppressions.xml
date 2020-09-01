@@ -27,4 +27,9 @@
         <packageUrl regex="true">^pkg:javascript/jquery@.*$</packageUrl>
         <vulnerabilityName>Regex in its jQuery.htmlPrefilter  sometimes may introduce XSS</vulnerabilityName>
     </suppress>
+    <suppress>
+        <notes>Snakeyaml</notes>
+        <packageUrl regex="true">^pkg:maven/org.yaml/snakeyaml@.*$</packageUrl>
+        <cve>CVE-2017-18640</cve>
+    </suppress>
 </suppressions>

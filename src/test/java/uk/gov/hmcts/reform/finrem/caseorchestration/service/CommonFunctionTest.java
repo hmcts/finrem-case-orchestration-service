@@ -23,8 +23,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullName;
@@ -35,6 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
@@ -167,17 +169,23 @@ public class CommonFunctionTest {
     }
 
     @Test
-    public void isRespondentRepresentedByASolicitorShouldReturnTrueWhenRepresentedSolicitorIsNotEmpty() {
-        asList("John Wayne", "     ", "234@#$@$@#REWF#@REWFR@#")
-            .forEach(value -> assertThat(
-                isRespondentRepresentedByASolicitor(createCaseDataRespRepresented(value)), is(true)));
+    public void isConsentedRespondentRepresentedByASolicitorShouldReturnTrueWhenRepresentedSolicitorIsYes() {
+        assertThat(isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(YES_VALUE)), is(true));
     }
 
     @Test
-    public void isRespondentRepresentedByASolicitorShouldReturnFalse() {
-        asList("", null)
-            .forEach(value -> assertThat(
-                isRespondentRepresentedByASolicitor(createCaseDataRespRepresented(value)), is(false)));
+    public void isContestedRespondentRepresentedByASolicitorShouldReturnTrueWhenRepresentedSolicitorIsYes() {
+        assertThat(isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(YES_VALUE)), is(true));
+    }
+
+    @Test
+    public void isConsentedRespondentRepresentedByASolicitorShouldReturnFalseWhenRepresentedSolicitorIsNo() {
+        assertThat(isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedConsented(NO_VALUE)), is(false));
+    }
+
+    @Test
+    public void isContestedRespondentRepresentedByASolicitorShouldReturnFalseWhenRepresentedSolicitorIsNo() {
+        assertThat(isRespondentRepresentedByASolicitor(createCaseDataRespRepresentedContested(NO_VALUE)), is(false));
     }
 
     @Test
@@ -327,6 +335,46 @@ public class CommonFunctionTest {
         assertThat(isContestedApplication(caseDetails), is(false));
     }
 
+    @Test
+    public void isContestedPaperApplicationShouldReturnTrueWhenCaseTypeIsSetToContestedAndIsPaperCase() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isContestedPaperApplication(caseDetails), is(true));
+    }
+
+    @Test
+    public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToConsentedAndIsPaperCase() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/bulkprint/bulk-print-paper-application.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isContestedPaperApplication(caseDetails), is(false));
+    }
+
+    @Test
+    public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToContestedAndNotPaperCase() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/contested/contested-hwf-without-solicitor-consent.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isContestedPaperApplication(caseDetails), is(false));
+    }
+
+    @Test
+    public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToConsented() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/valid-latest-consent-order.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isContestedPaperApplication(caseDetails), is(false));
+    }
+
+    @Test
+    public void isContestedPaperApplicationShouldReturnFalseWhenCaseTypeIsSetToNull() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
+
+        assertThat(isContestedPaperApplication(caseDetails), is(false));
+    }
+
     private static RespondToOrderData getRespondToOrderData(String s) {
         RespondToOrderData data = new RespondToOrderData();
         RespondToOrder respondToOrder = new RespondToOrder();
@@ -343,9 +391,16 @@ public class CommonFunctionTest {
         return data;
     }
 
-    private static Map<String, Object> createCaseDataRespRepresented(String value) {
+    private static Map<String, Object> createCaseDataRespRepresentedConsented(String value) {
         Map<String, Object> data = new HashMap<>();
-        data.put(RESP_SOLICITOR_NAME, value);
+        data.put(CONSENTED_RESPONDENT_REPRESENTED, value);
+
+        return data;
+    }
+
+    private static Map<String, Object> createCaseDataRespRepresentedContested(String value) {
+        Map<String, Object> data = new HashMap<>();
+        data.put(CONTESTED_RESPONDENT_REPRESENTED, value);
 
         return data;
     }
