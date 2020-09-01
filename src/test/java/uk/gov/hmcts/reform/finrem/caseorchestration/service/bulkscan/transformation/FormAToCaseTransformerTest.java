@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
 import org.junit.Test;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChildInfo;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ComplexTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FormAToCaseTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapperTest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,9 +61,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.ContactDetailsMapperTest.assertTransformationForAddressIsValid;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.ContactDetailsMapperTest.getOcrFieldsForAddresses;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation.mappers.ContactDetailsMapperTest.ocrDataFieldIndicatingApplicantIsRepresented;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.APPLICANT_FULL_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName.DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE;
 
@@ -199,13 +196,13 @@ public class FormAToCaseTransformerTest {
 
     @Test
     public void shouldTransformAddressesWhenCitizensRepresented() {
-        List<OcrDataField> ocrFields = getOcrFieldsForAddresses();
+        List<OcrDataField> ocrFields = ContactDetailsMapperTest.getOcrFieldsForAddresses();
         ocrFields.add(new OcrDataField(OcrFieldName.RESPONDENT_SOLICITOR_NAME, "Mr John Solicitor"));
-        ocrFields.add(ocrDataFieldIndicatingApplicantIsRepresented());
+        ocrFields.add(ContactDetailsMapperTest.ocrDataFieldIndicatingApplicantIsRepresented());
 
         ExceptionRecord incomingExceptionRecord = createExceptionRecord(ocrFields);
 
-        assertTransformationForAddressIsValid(
+        ContactDetailsMapperTest.assertTransformationForAddressIsValid(
             formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord),
             ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR,
             ContactDetailsMapper.CcdFields.RESPONDENT_SOLICITOR,
@@ -216,9 +213,9 @@ public class FormAToCaseTransformerTest {
 
     @Test
     public void shouldTransformAddressesWhenCitizensNotRepresented() {
-        ExceptionRecord incomingExceptionRecord = createExceptionRecord(getOcrFieldsForAddresses());
+        ExceptionRecord incomingExceptionRecord = createExceptionRecord(ContactDetailsMapperTest.getOcrFieldsForAddresses());
 
-        assertTransformationForAddressIsValid(
+        ContactDetailsMapperTest.assertTransformationForAddressIsValid(
             formAToCaseTransformer.transformIntoCaseData(incomingExceptionRecord),
             ContactDetailsMapper.CcdFields.APPLICANT,
             ContactDetailsMapper.CcdFields.RESPONDENT,
@@ -280,7 +277,7 @@ public class FormAToCaseTransformerTest {
         Map<String, Object> convertedCcdData = formAToCaseTransformer.transformIntoCaseData(createExceptionRecord(
             asList(
                 new OcrDataField("ApplicantEmail", TEST_SOLICITOR_EMAIL),
-                ocrDataFieldIndicatingApplicantIsRepresented()
+                ContactDetailsMapperTest.ocrDataFieldIndicatingApplicantIsRepresented()
             )
         ));
 

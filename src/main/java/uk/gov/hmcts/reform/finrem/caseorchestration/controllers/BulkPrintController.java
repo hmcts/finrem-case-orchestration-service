@@ -50,7 +50,7 @@ public class BulkPrintController implements BaseController {
         log.info("Received request for Bulk Print for Case ID {}", caseDetails.getId());
         validateCaseData(callback);
 
-        Map<String, Object> caseData = bulkPrintService.sendToBulkPrint(caseDetails, authorisationToken);
+        Map<String, Object> caseData = bulkPrintService.sendConsentOrderToBulkPrint(caseDetails, authorisationToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

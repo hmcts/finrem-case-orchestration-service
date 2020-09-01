@@ -64,7 +64,10 @@ public class NotificationsController implements BaseController {
                     helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(caseDetails, authToken);
 
                 // Send notification letter to Bulk Print
-                bulkPrintService.sendNotificationLetterForBulkPrint(hwfSuccessfulNotificationLetter, caseDetails);
+                bulkPrintService.sendDocumentForPrint(hwfSuccessfulNotificationLetter, caseDetails);
+                log.info("Notification letter sent to Bulk Print: {} for Case ID: {}", hwfSuccessfulNotificationLetter,
+                    caseDetails.getId());
+
             } else if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
                 log.info("Sending Consented HWF Successful email notification to Solicitor");
                 notificationService.sendConsentedHWFSuccessfulConfirmationEmail(callbackRequest);
@@ -100,7 +103,9 @@ public class NotificationsController implements BaseController {
                 assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, authToken);
 
             // Send notification letter to Bulk Print
-            bulkPrintService.sendNotificationLetterForBulkPrint(assignedToJudgeNotificationLetter, caseDetails);
+            bulkPrintService.sendDocumentForPrint(assignedToJudgeNotificationLetter, caseDetails);
+            log.info("Notification letter sent to Bulk Print: {} for Case ID: {}", assignedToJudgeNotificationLetter,
+                caseDetails.getId());
         } else if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
             log.info("Sending email notification to Solicitor for Judge successfully assigned to case");
             notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
