@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 import javax.validation.constraints.NotNull;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
@@ -78,8 +79,8 @@ public class PBAPaymentController implements BaseController {
                            @RequestBody CallbackRequest callbackRequest, Map<String, Object> caseData) {
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeResponse = new FeeLookupController(feeService)
                 .feeLookup(authToken, callbackRequest);
-        caseData.put(ORDER_SUMMARY, feeResponse.getBody().getData().get(ORDER_SUMMARY));
-        caseData.put(AMOUNT_TO_PAY, feeResponse.getBody().getData().get(AMOUNT_TO_PAY));
+        caseData.put(ORDER_SUMMARY, Objects.requireNonNull(feeResponse.getBody()).getData().get(ORDER_SUMMARY));
+        caseData.put(AMOUNT_TO_PAY, Objects.requireNonNull(feeResponse.getBody()).getData().get(AMOUNT_TO_PAY));
     }
 
     private ResponseEntity<AboutToStartOrSubmitCallbackResponse> paymentFailure(Map<String, Object> caseData, PaymentResponse paymentResponse) {
