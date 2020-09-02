@@ -497,7 +497,7 @@ public class NotificationsControllerTest {
         verify(notificationService, times(1))
             .sendContestedConsentGeneralOrderEmail(any(CallbackRequest.class));
     }
-  
+
     @Test
     public void shouldNotSendContestedConsentOrderApprovedEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
@@ -540,4 +540,5 @@ public class NotificationsControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource(fileName).toURI()));
     }
+
 }
