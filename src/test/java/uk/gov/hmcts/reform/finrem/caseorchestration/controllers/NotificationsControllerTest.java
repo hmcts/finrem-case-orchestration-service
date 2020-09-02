@@ -540,5 +540,4 @@ public class NotificationsControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource(fileName).toURI()));
     }
-
 }
