@@ -65,6 +65,7 @@ public class NotificationsControllerTest {
     private static final String DRAFT_ORDER_UNSUCCESSFUL_RESPONDENT_SOL = "/fixtures/respondent-solicitor-to-draft-order-with-email-consent.json";
     private static final String GENERAL_EMAIL_CONSENTED = "/fixtures/general-email-consented.json";
     private static final String GENERAL_EMAIL_CONTESTED = "/fixtures/contested/general-email-contested.json";
+    private static final String CONTESTED_PAPER_CASE_JSON = "/fixtures/contested/paper-case.json";
 
     @Autowired
     private WebApplicationContext applicationContext;
@@ -497,7 +498,7 @@ public class NotificationsControllerTest {
         verify(notificationService, times(1))
             .sendContestedConsentGeneralOrderEmail(any(CallbackRequest.class));
     }
-  
+
     @Test
     public void shouldNotSendContestedConsentOrderApprovedEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
@@ -533,6 +534,19 @@ public class NotificationsControllerTest {
             .andExpect(status().isOk());
 
         verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void sendContestedManualPaymentLetter() throws Exception {
+        buildCcdRequest(CONTESTED_PAPER_CASE_JSON);
+        mockMvc.perform(post(CONTESTED_CONSENT_ORDER_NOT_APPROVED_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+            .sendContestedConsentOrderNotApprovedEmail(any(CallbackRequest.class));
     }
 
     private void buildCcdRequest(String fileName) throws IOException, URISyntaxException {
