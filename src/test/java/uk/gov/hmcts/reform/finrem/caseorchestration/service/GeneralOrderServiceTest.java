@@ -84,7 +84,7 @@ public class GeneralOrderServiceTest {
         assertThat(generalOrders.get(0).getId(), is("1234"));
         assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
         assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentFilename(),
-            is("app_docs.pdf"));
+            is("generalOrder.pdf"));
         assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentBinaryUrl(),
             is("http://dm-store/lhjbyuivu87y989hijbb/binary"));
 
