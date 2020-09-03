@@ -290,14 +290,17 @@ public class NotificationsController implements BaseController {
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestOrderApprovedEmail(
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
-        if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
+        validateCaseData(callbackRequest);
+
+        log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        if (!isPaperApplication(caseData) && isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
             log.info("Sending 'Contest Order Approved' email notification to Applicant Solicitor");
             notificationService.sendContestOrderApprovedEmail(callbackRequest);
         }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 

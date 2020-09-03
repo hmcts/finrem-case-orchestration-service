@@ -84,7 +84,7 @@ public class BulkPrintService {
         bulkPrintDocuments.addAll(orderDocuments);
 
         if (!isOrderApprovedCollectionPresent(caseDetails.getData()) && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
-            bulkPrintDocuments.add(generalOrderService.getLatestGeneralOrderForPrintingConsented(caseDetails.getData()));
+            bulkPrintDocuments.add(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData()));
         }
 
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), bulkPrintDocuments);

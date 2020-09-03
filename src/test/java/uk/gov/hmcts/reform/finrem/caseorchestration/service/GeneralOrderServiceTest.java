@@ -218,7 +218,7 @@ public class GeneralOrderServiceTest {
     @Test
     public void getsCorrectGeneralOrdersForPrintingConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
-        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderForPrintingConsented(details.getData());
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData());
         assertThat(latestGeneralOrder.getBinaryFileUrl(), is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
 
@@ -226,7 +226,7 @@ public class GeneralOrderServiceTest {
     public void getsZeroGeneralOrdersForPrintingWhenNoneConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
         details.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, null);
-        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderForPrintingConsented(details.getData());
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData());
         assertTrue(latestGeneralOrder == null);
     }
 
