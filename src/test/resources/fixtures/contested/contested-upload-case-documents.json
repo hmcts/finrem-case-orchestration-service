@@ -1,0 +1,715 @@
+{
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": "123",
+    "jurisdiction": "DIVORCE",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "PBANumber": "PBA123",
+      "PBAreference": "ABCD",
+      "consentOrder": {
+        "document_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"
+      },
+      "d81Applicant": {
+        "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b/binary"
+      },
+      "d81Respondent": {
+        "document_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
+      },
+      "solicitorFirm": "Mr",
+      "solicitorName": "Solictor",
+      "applicantLName": "Guy",
+      "authorisation3": "2010-01-01",
+      "solicitorEmail": "test@admin.com",
+      "solicitorPhone": "9963472494",
+      "applicantFMName": "Poor",
+      "authorisation2b": "test",
+      "otherCollection": [
+        {
+          "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
+          "value": {
+            "typeOfDocument": "ScheduleOfAssets",
+            "uploadedDocument": {
+              "document_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee",
+              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+              "document_binary_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee/binary"
+            }
+          }
+        }
+      ],
+      "respondentEmail": null,
+      "respondentPhone": "9963472494",
+      "appRespondentRep": "No",
+      "consentOrderText": {
+        "document_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
+      },
+      "solicitorAddress": {
+        "County": "test",
+        "Country": "United Kingdom",
+        "PostCode": "b1 1ab",
+        "PostTown": "SRIKALAHASTI",
+        "AddressLine1": "House no: 6-354-2, Gandhi Street",
+        "AddressLine2": "Srikalahasti, Chittor District",
+        "AddressLine3": "test"
+      },
+      "authorisationFirm": "test",
+      "authorisationName": "test",
+      "divorceCaseNumber": "DD12D12345",
+      "issueDate": "2019-03-04",
+      "hearingDate": "2019-06-24",
+      "fastTrackDecision": "yes",
+      "pensionCollection": [
+        {
+          "id": "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",
+          "value": {
+            "typeOfDocument": "Form P2",
+            "uploadedDocument": {
+              "document_url": "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589",
+              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+              "document_binary_url": "http://document-management-store:8080/documents/fcecdc83-2070-4d3d-923e-5cca58f8a589/binary"
+            }
+          }
+        }
+      ],
+      "respondentAddress": {
+        "County": "Essex",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "252 Marvels Lane",
+        "AddressLine2": "AddressGlobalUK",
+        "AddressLine3": "London"
+      },
+      "solicitorDXnumber": null,
+      "appRespondentLName": "Korivi",
+      "solicitorReference": "LL01",
+      "appRespondentFMName": "test",
+      "divorceStageReached": "Decree Nisi",
+      "helpWithFeesQuestion": "No",
+      "natureOfApplication2": [
+        "Lump Sum Order",
+        "Periodical Payment Order",
+        "Pension Sharing Order",
+        "Pension Attachment Order",
+        "Pension Compensation Sharing Order",
+        "Pension Compensation Attachment Order",
+        "A settlement or a transfer of property",
+        "Property Adjustment Order"
+      ],
+      "natureOfApplication5": "No",
+      "natureOfApplication6": [
+        "Step Child or Step Children",
+        "disability expenses",
+        "In addition to child support",
+        "training",
+        "When not habitually resident"
+      ],
+      "natureOfApplication7": "test",
+      "natureOfApplication3a": "test",
+      "natureOfApplication3b": "test",
+      "divorceUploadEvidence1": {
+        "document_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
+      },
+      "orderForChildrenQuestion1": "Yes",
+      "solicitorAgreeToReceiveEmails": "No",
+      "miniFormA": {
+        "document_url": "http://doc1",
+        "document_filename": "doc1",
+        "document_binary_url": "http://doc1.binary"
+      },
+      "MIAMDomesticViolenceChecklist": [
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_2",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_3",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_4",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_5",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_6",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_7",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_8",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_13",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_15",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_23",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_22",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_20",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_19",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_18",
+        "FR_ms_MIAMDomesticViolenceChecklist_Value_11"
+      ],
+      "uploadCaseDocument": [
+        {
+          "id": "6fb96061-8020-4851-abe0-261e8c3b3c5c",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/681a4d90-f689-4447-9c45-bd607d5551de",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/681a4d90-f689-4447-9c45-bd607d5551de/binary"
+            },
+            "caseDocumentType": "Statement of Issues",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "d5f05f49-e101-4d27-89b3-2662e7497859",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e4ba00eb-02db-4ba7-abd2-f03650d00b26",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e4ba00eb-02db-4ba7-abd2-f03650d00b26/binary"
+            },
+            "caseDocumentType": "Chronology",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "bcd463a7-149c-4bea-b701-ad9144ca77e1",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4b7db9a6-6e99-43a5-9751-3d8165a9c9e5",
+              "document_filename": "FakeDocumentUpload.docx",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4b7db9a6-6e99-43a5-9751-3d8165a9c9e5/binary"
+            },
+            "caseDocumentType": "Form B",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "299fa7ed-7fbf-467b-8750-3ce4a0c36b89",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a0cf2be4-e229-41e2-aa8a-ac163e07ada1",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a0cf2be4-e229-41e2-aa8a-ac163e07ada1/binary"
+            },
+            "caseDocumentType": "Applicant - Form E",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "25f5a737-9288-4180-b15b-6b550e0942a4",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/44318245-2e1d-4fae-934f-ebe13ef65a1c",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/44318245-2e1d-4fae-934f-ebe13ef65a1c/binary"
+            },
+            "caseDocumentType": "Form F",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "7f3be7e6-5921-451b-8ecf-adfd24697f7e",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/415272c7-0e04-444d-bdb5-a6ed12fbdd48",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/415272c7-0e04-444d-bdb5-a6ed12fbdd48/binary"
+            },
+            "caseDocumentType": "Form G",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "18c3452f-3755-4ae9-8bda-686239e7828b",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b34c6760-d207-4233-bdb3-7ffb38535be4",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b34c6760-d207-4233-bdb3-7ffb38535be4/binary"
+            },
+            "caseDocumentType": "Form H",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "8f28e528-d378-4ace-87e7-a728513aae17",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/307bfd7e-55a2-4272-adb4-3ba92e80ca81",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/307bfd7e-55a2-4272-adb4-3ba92e80ca81/binary"
+            },
+            "caseDocumentType": "Letter from Applicant",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "cbaeb93b-3638-4db1-b54d-c762b12efc88",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/cf0f0c51-f890-4bd6-9db2-f13a9fd763f5",
+              "document_filename": "FakeDocumentUpload.docx",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/cf0f0c51-f890-4bd6-9db2-f13a9fd763f5/binary"
+            },
+            "caseDocumentType": "Case Summary",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "cd3d9599-60dd-4ec4-b551-815de626bfa9",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/76a40a90-121a-4fd8-9101-fa19012ff507",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/76a40a90-121a-4fd8-9101-fa19012ff507/binary"
+            },
+            "caseDocumentType": "Questionnaire",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "251d0dac-313e-486a-a959-9803a4a327d3",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0b913983-3982-40a1-afd9-f892784613ae",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0b913983-3982-40a1-afd9-f892784613ae/binary"
+            },
+            "caseDocumentType": "Reply to Questionnaire",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "e379df21-e3fe-4b9f-85ba-50f5ce297a00",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/26c457f0-b2d3-4f1b-9984-3717858c60ba",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/26c457f0-b2d3-4f1b-9984-3717858c60ba/binary"
+            },
+            "caseDocumentType": "Valuation Report",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "c2d4437c-7126-4d11-a1c2-c0bc8c325cb8",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d68a5a5f-3c23-4dc3-bb10-c200687dd31d",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d68a5a5f-3c23-4dc3-bb10-c200687dd31d/binary"
+            },
+            "caseDocumentType": "Pension Plan",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "1ed97b6a-366e-4a05-9c9c-6057dd6c141b",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e3714c18-1029-45b9-99e3-31fe7a2b72d6",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e3714c18-1029-45b9-99e3-31fe7a2b72d6/binary"
+            },
+            "caseDocumentType": "Position Statement",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "2b9507de-c6f1-449a-8985-95e55ec1347e",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/852179ea-cec3-4bf3-a1bc-580f0e7f9be9",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/852179ea-cec3-4bf3-a1bc-580f0e7f9be9/binary"
+            },
+            "caseDocumentType": "Skeleton Argument",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "05888961-7686-4c96-b602-59a583224c6d",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/aecd0257-eba8-48c9-b4e2-7d04cf18565d",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/aecd0257-eba8-48c9-b4e2-7d04cf18565d/binary"
+            },
+            "caseDocumentType": "Expert Evidence",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "1ce63f9c-1e12-460c-b1da-2941893b532b",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a4eb156c-ef4d-458c-9eae-3cf587ce4d6c",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a4eb156c-ef4d-458c-9eae-3cf587ce4d6c/binary"
+            },
+            "caseDocumentType": "Witness Statement/Affidavit",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "d8a2a6cd-a967-45e7-b5e4-03cecdbcc8b1",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/17294d66-b424-44f2-87d0-712bfedc7fcc",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/17294d66-b424-44f2-87d0-712bfedc7fcc/binary"
+            },
+            "caseDocumentType": "Care Plan",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "92910a25-ab45-4843-bbcc-6a600a73e7a4",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b1056966-bfa8-480c-a7e2-e4ffc9422c19",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b1056966-bfa8-480c-a7e2-e4ffc9422c19/binary"
+            },
+            "caseDocumentType": "Offers",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "2abcb647-e778-4b06-85f1-16a0ffbddf14",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/13b9837c-8afc-4fb3-a42c-e75235653c60",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/13b9837c-8afc-4fb3-a42c-e75235653c60/binary"
+            },
+            "caseDocumentType": "Trial Bundle",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "342137af-9862-49dc-9c35-dcd7728e0f80",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5e",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5e/binary"
+            },
+            "caseDocumentType": "other",
+            "caseDocumentOther": "Other Example",
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "342137af-9862-49dc-9c35-6a600a73e7a4",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5e",
+              "document_filename": "FakeDocumentUpload.docx",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5e/binary"
+            },
+            "caseDocumentParty": null,
+            "caseDocumentType": "other",
+            "caseDocumentOther": "Party Not Specified"
+          }
+        },
+        {
+          "id": "6fb96061-8020-4851-abe0-261e8c3b3c5c",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/681a4d90-f689-4447-9c45-bd607d5551de",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/681a4d90-f689-4447-9c45-bd607d5551de/binary"
+            },
+            "caseDocumentType": "Statement of Issues",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "d5f05f49-e101-4d27-89b3-2662e7497859",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e4ba00eb-02db-4ba7-abd2-f03650d00b26",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e4ba00eb-02db-4ba7-abd2-f03650d00b26/binary"
+            },
+            "caseDocumentType": "Chronology",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "bcd463a7-149c-4bea-b701-ad9144ca77e1",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4b7db9a6-6e99-43a5-9751-3d8165a9c9e5",
+              "document_filename": "FakeDocumentUpload.docx",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4b7db9a6-6e99-43a5-9751-3d8165a9c9e5/binary"
+            },
+            "caseDocumentType": "Form B",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "299fa7ed-7fbf-467b-8750-3ce4a0c36b89",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a0cf2be4-e229-41e2-aa8a-ac163e07ada1",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a0cf2be4-e229-41e2-aa8a-ac163e07ada1/binary"
+            },
+            "caseDocumentType": "Applicant - Form E",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "25f5a737-9288-4180-b15b-6b550e0942a4",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/44318245-2e1d-4fae-934f-ebe13ef65a1c",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/44318245-2e1d-4fae-934f-ebe13ef65a1c/binary"
+            },
+            "caseDocumentType": "Form F",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "7f3be7e6-5921-451b-8ecf-adfd24697f7e",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/415272c7-0e04-444d-bdb5-a6ed12fbdd48",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/415272c7-0e04-444d-bdb5-a6ed12fbdd48/binary"
+            },
+            "caseDocumentType": "Form G",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "18c3452f-3755-4ae9-8bda-686239e7828b",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b34c6760-d207-4233-bdb3-7ffb38535be4",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b34c6760-d207-4233-bdb3-7ffb38535be4/binary"
+            },
+            "caseDocumentType": "Form H",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "8f28e528-d378-4ace-87e7-a728513aae17",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/307bfd7e-55a2-4272-adb4-3ba92e80ca81",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/307bfd7e-55a2-4272-adb4-3ba92e80ca81/binary"
+            },
+            "caseDocumentType": "Letter from Applicant",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "cbaeb93b-3638-4db1-b54d-c762b12efc88",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/cf0f0c51-f890-4bd6-9db2-f13a9fd763f5",
+              "document_filename": "FakeDocumentUpload.docx",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/cf0f0c51-f890-4bd6-9db2-f13a9fd763f5/binary"
+            },
+            "caseDocumentType": "Case Summary",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "cd3d9599-60dd-4ec4-b551-815de626bfa9",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/76a40a90-121a-4fd8-9101-fa19012ff507",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/76a40a90-121a-4fd8-9101-fa19012ff507/binary"
+            },
+            "caseDocumentType": "Questionnaire",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "251d0dac-313e-486a-a959-9803a4a327d3",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0b913983-3982-40a1-afd9-f892784613ae",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0b913983-3982-40a1-afd9-f892784613ae/binary"
+            },
+            "caseDocumentType": "Reply to Questionnaire",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "e379df21-e3fe-4b9f-85ba-50f5ce297a00",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/26c457f0-b2d3-4f1b-9984-3717858c60ba",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/26c457f0-b2d3-4f1b-9984-3717858c60ba/binary"
+            },
+            "caseDocumentType": "Valuation Report",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "c2d4437c-7126-4d11-a1c2-c0bc8c325cb8",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d68a5a5f-3c23-4dc3-bb10-c200687dd31d",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d68a5a5f-3c23-4dc3-bb10-c200687dd31d/binary"
+            },
+            "caseDocumentType": "Pension Plan",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "1ed97b6a-366e-4a05-9c9c-6057dd6c141b",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e3714c18-1029-45b9-99e3-31fe7a2b72d6",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e3714c18-1029-45b9-99e3-31fe7a2b72d6/binary"
+            },
+            "caseDocumentType": "Position Statement",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "2b9507de-c6f1-449a-8985-95e55ec1347e",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/852179ea-cec3-4bf3-a1bc-580f0e7f9be9",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/852179ea-cec3-4bf3-a1bc-580f0e7f9be9/binary"
+            },
+            "caseDocumentType": "Skeleton Argument",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "05888961-7686-4c96-b602-59a583224c6d",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/aecd0257-eba8-48c9-b4e2-7d04cf18565d",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/aecd0257-eba8-48c9-b4e2-7d04cf18565d/binary"
+            },
+            "caseDocumentType": "Expert Evidence",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "1ce63f9c-1e12-460c-b1da-2941893b532b",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a4eb156c-ef4d-458c-9eae-3cf587ce4d6c",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a4eb156c-ef4d-458c-9eae-3cf587ce4d6c/binary"
+            },
+            "caseDocumentType": "Witness Statement/Affidavit",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "d8a2a6cd-a967-45e7-b5e4-03cecdbcc8b1",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/17294d66-b424-44f2-87d0-712bfedc7fcc",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/17294d66-b424-44f2-87d0-712bfedc7fcc/binary"
+            },
+            "caseDocumentType": "Care Plan",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "92910a25-ab45-4843-bbcc-6a600a73e7a4",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b1056966-bfa8-480c-a7e2-e4ffc9422c19",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b1056966-bfa8-480c-a7e2-e4ffc9422c19/binary"
+            },
+            "caseDocumentType": "Offers",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "2abcb647-e778-4b06-85f1-16a0ffbddf14",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/13b9837c-8afc-4fb3-a42c-e75235653c60",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/13b9837c-8afc-4fb3-a42c-e75235653c60/binary"
+            },
+            "caseDocumentType": "Trial Bundle",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "342137af-9862-49dc-9c35-dcd7728e0f80",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5e",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5e/binary"
+            },
+            "caseDocumentType": "other",
+            "caseDocumentOther": "Other Example",
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "342137af-9862-49dc-9c35-6a600a73e7a4",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5e",
+              "document_filename": "FakeDocumentUpload.docx",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5e/binary"
+            },
+            "caseDocumentParty": null,
+            "caseDocumentType": "other",
+            "caseDocumentOther": "Party Not Specified"
+          }
+        },
+        {
+          "id": "c9628ff0-268e-4f8d-b491-7d2bda5e67b0",
+          "value": {
+            "caseDocuments": null,
+            "caseDocumentType": "Form B",
+            "caseDocumentOther": null,
+            "caseDocumentParty": "applicant"
+          }
+        },
+        {
+          "id": "c9628ff0-268e-4f8d-b491-7d2bda5e66a2",
+          "value": {
+            "caseDocuments": null,
+            "caseDocumentType": "Form B",
+            "caseDocumentOther": null,
+            "caseDocumentParty": "respondent"
+          }
+        },
+        {
+          "id": "c2d4437c-7126-4d11-a1c2-c0bc8c325cb8",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d68a5a5f-3c23-4dc3-bb10-c200687dd31d",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d68a5a5f-3c23-4dc3-bb10-c200687dd31d/binary"
+            },
+            "caseDocumentType": null,
+            "caseDocumentOther": null,
+            "caseDocumentParty": "respondent"
+          }
+        }
+      ]
+    }
+  }
+}
