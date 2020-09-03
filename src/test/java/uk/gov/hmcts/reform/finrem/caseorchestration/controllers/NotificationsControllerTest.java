@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManualPaymentDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.io.File;
@@ -54,6 +55,7 @@ public class NotificationsControllerTest {
     private static final String CONTESTED_CONSENT_ORDER_NOT_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contested-consent-order-not-approved";
     private static final String CONTESTED_DRAFT_ORDER_URL = "/case-orchestration/notify/draft-order";
     private static final String GENERAL_EMAIL_URL = "/case-orchestration/notify/general-email";
+    private static final String CONTESTED_MANUAL_PAYMENT_URL = "/case-orchestration/notify/manual-payment";
 
     //JSON Data
     private static final String CCD_REQUEST_JSON = "/fixtures/model/ccd-request.json";
@@ -87,6 +89,9 @@ public class NotificationsControllerTest {
 
     @MockBean
     private HelpWithFeesDocumentService helpWithFeesDocumentService;
+
+    @MockBean
+    private ManualPaymentDocumentService manualPaymentDocumentService;
 
     private MockMvc mockMvc;
     private JsonNode requestContent;
@@ -539,14 +544,17 @@ public class NotificationsControllerTest {
     @Test
     public void sendContestedManualPaymentLetter() throws Exception {
         buildCcdRequest(CONTESTED_PAPER_CASE_JSON);
-        mockMvc.perform(post(CONTESTED_CONSENT_ORDER_NOT_APPROVED_CALLBACK_URL)
+        mockMvc.perform(post(CONTESTED_MANUAL_PAYMENT_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .content(requestContent.toString())
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(notificationService, times(1))
-            .sendContestedConsentOrderNotApprovedEmail(any(CallbackRequest.class));
+        verify(manualPaymentDocumentService, times(1))
+            .generateManualPaymentLetter(any(CaseDetails.class),any());
+        verify(bulkPrintService, times(1))
+            .sendNotificationLetterForBulkPrint(any(),any());
+        verifyNoInteractions(notificationService);
     }
 
     private void buildCcdRequest(String fileName) throws IOException, URISyntaxException {
