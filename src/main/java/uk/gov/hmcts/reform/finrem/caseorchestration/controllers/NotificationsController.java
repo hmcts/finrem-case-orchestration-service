@@ -292,13 +292,14 @@ public class NotificationsController implements BaseController {
         @RequestBody CallbackRequest callbackRequest) {
 
         validateCaseData(callbackRequest);
-
-        log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        if (!isPaperApplication(caseData) && isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
-            log.info("Sending 'Contest Order Approved' email notification to Applicant Solicitor");
-            notificationService.sendContestOrderApprovedEmail(callbackRequest);
+
+        if (!isPaperApplication(caseData)) {
+            log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+            if (isApplicantSolicitorAgreeToReceiveEmails(caseData)) {
+                log.info("Sending 'Contest Order Approved' email notification to Applicant Solicitor");
+                notificationService.sendContestOrderApprovedEmail(callbackRequest);
+            }
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
