@@ -542,7 +542,7 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void sendContestedManualPaymentLetter() throws Exception {
+    public void sendContestedManualPaymentLetters() throws Exception {
         buildCcdRequest(CONTESTED_PAPER_CASE_JSON);
         mockMvc.perform(post(CONTESTED_MANUAL_PAYMENT_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -550,9 +550,9 @@ public class NotificationsControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(manualPaymentDocumentService, times(1))
+        verify(manualPaymentDocumentService, times(2))
             .generateManualPaymentLetter(any(CaseDetails.class),any());
-        verify(bulkPrintService, times(1))
+        verify(bulkPrintService, times(2))
             .sendNotificationLetterForBulkPrint(any(),any());
         verifyNoInteractions(notificationService);
     }

@@ -3,31 +3,46 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
+
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetails;
 
 import java.io.InputStream;
-import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
+@ActiveProfiles("test-mock-document-client")
 public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
 
     @Autowired
     private ObjectMapper mapper;
 
     @Autowired
-    private DocumentClient documentClient;
+    private ManualPaymentDocumentService manualPaymentDocumentService;
 
-    @Autowired
-    private ManualPaymentDocumentService service;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+
+    @Captor
+    ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
 
     private CaseDetails caseDetails;
 
@@ -42,19 +57,27 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateManualPaymentLetterForApplicant() {
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
-        CaseDocument document = service.generateManualPaymentLetter(caseDetails, AUTH_TOKEN);
+        CaseDocument generatedManualPaymentLetter
+            = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, AUTH_TOKEN);
 
-        Map<String, Object> caseData = caseDetails.getData();
+        assertCaseDocument(generatedManualPaymentLetter);
 
-        assertEquals(caseData.get("courtDetails"), "");
+        verify(genericDocumentService, times(1)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
 
+        CourtDetails courtDetails = (CourtDetails) documentGenerationRequestCaseDetailsCaptor.getValue().getData().get("courtDetails");
+
+        assertThat(courtDetails, is(notNullValue()));
+        assertThat(courtDetails.getCourtName(), is("Port Talbot Justice Centre"));
+        assertThat(courtDetails.getCourtAddress(), is("Harbourside Road, Port Talbot, SA13 1SB"));
+        assertThat(courtDetails.getPhoneNumber(), is("01792 485 800"));
+        assertThat(courtDetails.getEmail(), is("FRCswansea@justice.gov.uk"));
     }
-
 
     private CaseDetails contestedPaperCaseDetails() throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/contested/paper-case.json")) {
-            ///fixtures/contested/paper-case-with-applicant-represented
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }
