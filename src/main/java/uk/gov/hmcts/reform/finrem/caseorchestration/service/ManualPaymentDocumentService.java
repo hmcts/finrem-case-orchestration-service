@@ -34,19 +34,12 @@ public class ManualPaymentDocumentService {
 
         CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
 
-        /* TODO:
-        Build a mapper in order to populate values in template with:
-        <<courtName>>
-        <<courtAddress>>
-        <<courtEmail>>
-        <<courtphoneNumber>>
-        */
+        addCourtFields(caseDetailsForBulkPrint);
 
         CaseDocument generatedManualPaymentLetter = genericDocumentService.generateDocument(authToken,
             caseDetailsForBulkPrint,
-            documentConfiguration.getManualPaymentFileName(),
+            documentConfiguration.getManualPaymentTemplate(),
             documentConfiguration.getManualPaymentFileName());
-
         log.info("Generated Manual Payment Letter: {}", generatedManualPaymentLetter);
 
         return generatedManualPaymentLetter;

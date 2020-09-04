@@ -25,11 +25,13 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorResponsibleToDraftOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresentedByASolicitor;
 
 @RestController
 @Slf4j
@@ -302,10 +304,10 @@ public class NotificationsController implements BaseController {
     @PostMapping(value = "/case-orchestration/notify/draft-order", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for Solicitor To Draft Order")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Draft Order e-mail sent successfully",
-                    response = AboutToStartOrSubmitCallbackResponse.class)})
+        @ApiResponse(code = 204, message = "Draft Order e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendDraftOrderEmail(
-            @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to send email for 'Applicant Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
 
@@ -354,17 +356,15 @@ public class NotificationsController implements BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         if (isContestedPaperApplication(caseDetails)) {
-            log.info("Sending Manual Payment Letter for bulk print for Case ID: {}",
-                callbackRequest.getCaseDetails().getId());
-
-            CaseDocument manualPaymentLetter =
+            CaseDocument applicantManualPaymentLetter =
                 manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken);
+            bulkPrintService.sendNotificationLetterForBulkPrint(applicantManualPaymentLetter, caseDetails);
 
-            bulkPrintService.sendNotificationLetterForBulkPrint(manualPaymentLetter, caseDetails);
+            CaseDocument respondentManualPaymentLetter =
+                manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken);
+            bulkPrintService.sendNotificationLetterForBulkPrint(respondentManualPaymentLetter, caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
-
-
 }
