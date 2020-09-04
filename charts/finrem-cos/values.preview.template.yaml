@@ -5,3 +5,6 @@ java:
     FEATURE_CONTESTED_COURT_DETAILS_MIGRATION: true
     FEATURE_AUTOMATE_SEND_ORDER: true
     FEATURE_AUTOMATE_ASSIGN_JUDGE: true
+    # Disabled secrets on preview ( remove this and override keyvaults when adding secrets needed for preview)
+    SPRING_CLOUD_PROPERTIESVOLUME_ENABLED: false
+    
