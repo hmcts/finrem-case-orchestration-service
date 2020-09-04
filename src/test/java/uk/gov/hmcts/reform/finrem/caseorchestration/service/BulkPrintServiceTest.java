@@ -32,11 +32,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.bulkPrintDocumentList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService.FINANCIAL_REMEDY_PACK_LETTER_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 
 @ActiveProfiles("test-mock-document-client")
 public class BulkPrintServiceTest extends BaseServiceTest {
@@ -174,7 +175,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
             .thenReturn(bulkPrintDocuments);
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
-        UUID uuid = bulkPrintService.sendOrderForBulkPrintRespondent(caseDocument, caseDetails);
+        UUID uuid = bulkPrintService.sendConsentOrderForBulkPrintRespondent(caseDocument, caseDetails);
         assertThat(uuid, is(letterId));
         verify(generalOrderService).getLatestGeneralOrderForPrintingConsented(caseDetails.getData());
     }
@@ -188,7 +189,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         when(consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails)).thenReturn(Collections.emptyList());
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
-        UUID uuid = bulkPrintService.sendOrderForBulkPrintRespondent(caseDocument, caseDetails);
+        UUID uuid = bulkPrintService.sendConsentOrderForBulkPrintRespondent(caseDocument, caseDetails);
 
         assertThat(uuid, is(letterId));
 
@@ -313,6 +314,12 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         verify(coverSheetService).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         verify(genericDocumentService, times(1)).bulkPrint(any());
+    }
+
+    @Test
+    public void shouldConvertCaseDocumentToBulkPrintDocument() {
+        BulkPrintDocument bulkPrintDoc = bulkPrintService.getBulkPrintDocumentFromCaseDocument(caseDocument());
+        assertThat(bulkPrintDoc.getBinaryFileUrl(), is(BINARY_URL));
     }
 
     private CaseDetails caseDetails() {

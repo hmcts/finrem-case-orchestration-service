@@ -24,7 +24,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
-
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
@@ -69,7 +68,7 @@ public class BulkPrintService {
     }
 
 
-    public UUID sendOrderForBulkPrintRespondent(final CaseDocument coverSheet, final CaseDetails caseDetails) {
+    public UUID sendConsentOrderForBulkPrintRespondent(final CaseDocument coverSheet, final CaseDetails caseDetails) {
         log.info("Sending order documents to recipient / solicitor for Bulk Print");
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
@@ -187,7 +186,7 @@ public class BulkPrintService {
 
     private void generateCoversheetForRespondentAndSendOrders(CaseDetails caseDetails, String authToken) {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authToken);
-        UUID respondentLetterId = sendOrderForBulkPrintRespondent(respondentCoverSheet, caseDetails);
+        UUID respondentLetterId = sendConsentOrderForBulkPrintRespondent(respondentCoverSheet, caseDetails);
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
@@ -206,5 +205,9 @@ public class BulkPrintService {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
         caseDetails.getData().put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
         return documentHelper.getCaseDocumentAsBulkPrintDocument(respondentCoverSheet);
+    }
+
+    public BulkPrintDocument getBulkPrintDocumentFromCaseDocument(CaseDocument caseDocument) {
+        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
     }
 }
