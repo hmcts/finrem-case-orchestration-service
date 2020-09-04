@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,9 +15,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetails;
 
 import java.io.InputStream;
+import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -67,7 +70,8 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).generateDocument(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
 
-        CourtDetails courtDetails = (CourtDetails) documentGenerationRequestCaseDetailsCaptor.getValue().getData().get("courtDetails");
+        CourtDetails courtDetails = convertToCourtDetails(
+            documentGenerationRequestCaseDetailsCaptor.getValue().getData().get("courtDetails"));
 
         assertThat(courtDetails, is(notNullValue()));
         assertThat(courtDetails.getCourtName(), is("Port Talbot Justice Centre"));
@@ -80,5 +84,10 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/contested/paper-case.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
+    }
+
+    private CourtDetails convertToCourtDetails(Object object) {
+        return mapper.convertValue(object, new TypeReference<>() {
+        });
     }
 }
