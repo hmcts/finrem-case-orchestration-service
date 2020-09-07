@@ -45,4 +45,10 @@ public class OrchestrationConstants {
     public static final String CTSC_EMAIL_ADDRESS = "HMCTSFinancialRemedy@justice.gov.uk";
     public static final String CTSC_PHONE_NUMBER = "0300 303 0642";
     public static final String CTSC_OPENING_HOURS = "from 8.30am to 5pm";
+
+    // FRC Contact Details
+    public static final String FRC_CARE_OF = "c/o HMCTS Digital Financial Remedy";
+    public static final String FRC_PO_BOX = "PO Box 12746";
+    public static final String FRC_TOWN = "HARLOW";
+    public static final String FRC_POSTCODE = "CM20 9QZ";
 }
