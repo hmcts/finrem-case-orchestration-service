@@ -322,6 +322,49 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         assertThat(bulkPrintDoc.getBinaryFileUrl(), is(BINARY_URL));
     }
 
+    @Test
+    public void shouldNotPrintForApplicantIfRepresentedAgreedToEmailAndNotPaperCase() {
+        final String json
+            = "/fixtures/refusal-order-contested.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
+
+        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails.getData()), is(false));
+    }
+
+    @Test
+    public void shouldPrintForApplicantIfNotRepresented() {
+        final String json
+            = "/fixtures/refusal-order-contested.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
+        caseDetails.getData().put("applicantRepresented", "No");
+        caseDetails.getData().remove("applicantSolicitorConsentForEmails");
+        caseDetails.getData().put("paperApplication", "No");
+
+        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails.getData()), is(true));
+    }
+
+    @Test
+    public void shouldPrintForApplicantIfRepresentedButNotAgreedToEmail() {
+        final String json
+            = "/fixtures/refusal-order-contested.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
+        caseDetails.getData().put("applicantRepresented", "Yes");
+        caseDetails.getData().put("applicantSolicitorConsentForEmails", "No");
+        caseDetails.getData().put("paperApplication", "No");
+
+        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails.getData()), is(true));
+    }
+
+    @Test
+    public void shouldPrintForApplicantIfPaperCase() {
+        final String json
+            = "/fixtures/refusal-order-contested.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
+        caseDetails.getData().put("paperApplication", "YES");
+
+        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails.getData()), is(true));
+    }
+
     private CaseDetails caseDetails() {
         return TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
     }

@@ -151,8 +151,7 @@ public class BulkPrintService {
     public Map<String, Object> sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (!isApplicantRepresentedByASolicitor(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseData)
-            || isPaperApplication(caseData)) {
+        if (shouldPrintForApplicant(caseData)) {
             UUID applicantLetterId = isOrderApprovedCollectionPresent(caseData)
                 ? printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken)
                 : printApplicantConsentOrderNotApprovedDocuments(caseDetails, authorisationToken);
@@ -209,5 +208,10 @@ public class BulkPrintService {
 
     public BulkPrintDocument getBulkPrintDocumentFromCaseDocument(CaseDocument caseDocument) {
         return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
+    }
+
+    public boolean shouldPrintForApplicant(Map<String, Object> caseData) {
+        return !isApplicantRepresentedByASolicitor(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseData)
+            || isPaperApplication(caseData);
     }
 }

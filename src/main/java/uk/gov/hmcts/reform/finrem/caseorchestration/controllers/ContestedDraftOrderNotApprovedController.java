@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -129,15 +128,16 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
         log.info("Received request for send refusal reason for paper cases with Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        if (CommonFunction.isPaperApplication(caseDetails.getData())) {
-            Optional<CaseDocument> refusalReason = contestedNotApprovedService.getLatestRefusalReason(caseDetails);
+        Optional<CaseDocument> refusalReason = contestedNotApprovedService.getLatestRefusalReason(caseDetails);
 
-            if (refusalReason.isPresent()) {
+        if (refusalReason.isPresent()) {
+            if (bulkPrintService.shouldPrintForApplicant(caseDetails.getData())) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
                     Arrays.asList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
-                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
-                    Arrays.asList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
             }
+
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
+                Arrays.asList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());

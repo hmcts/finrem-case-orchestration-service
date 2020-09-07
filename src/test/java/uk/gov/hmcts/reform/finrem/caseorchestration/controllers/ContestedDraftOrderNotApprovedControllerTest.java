@@ -187,9 +187,10 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     }
 
     @Test
-    public void submitSendRefusalReasonForPaperCaseWithRefusalReasonPrints() throws Exception {
-        doValidRefusalOrderPaperCase();
+    public void submitSendRefusalReasonWithRefusalAndShouldPrintForApplicantTrue() throws Exception {
+        doValidRefusalOrder();
         when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -201,20 +202,22 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     }
 
     @Test
-    public void submitSendRefusalReasonForNonPaperCaseWithRefusalReasonDoesNotPrint() throws Exception {
+    public void submitSendRefusalReasonWithRefusalAndShouldPrintForApplicantFalse() throws Exception {
         doValidRefusalOrder();
+        when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(false);
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
-        verify(contestedDraftOrderNotApprovedService, never()).getLatestRefusalReason(any());
+        verify(contestedDraftOrderNotApprovedService, times(1)).getLatestRefusalReason(any());
         verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
     }
 
     @Test
-    public void submitSendRefusalReasonForPaperCaseWithNoRefusalReasonDoesNotPrint() throws Exception {
+    public void submitSendRefusalReasonWithNotRefusalReasonNotPrint() throws Exception {
         doValidCaseDataSetUpForPaperApplication();
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
             .content(requestContent.toString())

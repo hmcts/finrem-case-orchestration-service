@@ -70,11 +70,6 @@ public abstract class BaseControllerTest extends BaseTest {
             .getResource("/fixtures/refusal-order-contested.json").toURI()));
     }
 
-    void doValidRefusalOrderPaperCase() throws IOException, URISyntaxException {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/refusal-order-contested-paper.json").toURI()));
-    }
-
     CaseDocument getCaseDocument() {
         CaseDocument caseDocument = new CaseDocument();
         caseDocument.setDocumentUrl("http://doc1");
