@@ -13,8 +13,4 @@ java:
   keyVaults:
     finrem:
       secrets:
-        - finrem-doc-s2s-auth-secret
-        - idam-secret
-        - username-solicitor
-        - password-solicitor
         - AppInsightsInstrumentationKey

@@ -5,6 +5,9 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -12,20 +15,27 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletionException;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -34,6 +44,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
@@ -83,15 +95,19 @@ public class HearingDocumentServiceTest {
     private DocumentClient generatorClient;
     private ObjectMapper mapper = new ObjectMapper();
 
+    @Captor
+    private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintDocumentsCaptor;
+
     private GenericDocumentService genericDocumentService;
     private HearingDocumentService hearingDocumentService;
 
     @MockBean
     FeatureToggleService featureToggleService;
 
+    @MockBean
+    BulkPrintService bulkPrintService;
+
     private static final String DATE_OF_HEARING = "2019-01-01";
-    private static final String FORM_C = "formC";
-    private static final String FORM_G = "formG";
 
     @Before
     public void setUp() {
@@ -106,9 +122,14 @@ public class HearingDocumentServiceTest {
         featureToggleService = mock(FeatureToggleService.class);
         when(featureToggleService.isContestedCourtDetailsMigrationEnabled()).thenReturn(true);
 
+        bulkPrintService = mock(BulkPrintService.class);
+
+        MockitoAnnotations.initMocks(this);
+
         generatorClient = new TestDocumentClient();
         genericDocumentService = new GenericDocumentService(generatorClient);
-        hearingDocumentService = new HearingDocumentService(genericDocumentService, config, new DocumentHelper(mapper), mapper, featureToggleService);
+        hearingDocumentService = new HearingDocumentService(
+            genericDocumentService, config, new DocumentHelper(mapper), mapper, featureToggleService, bulkPrintService);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -120,7 +141,7 @@ public class HearingDocumentServiceTest {
     @Test
     public void generateFastTrackFormC() {
         Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
-        assertCaseDocument((CaseDocument) result.get(FORM_C));
+        assertCaseDocument((CaseDocument) result.get(hearingDocumentService.formCDataKey));
         ((TestDocumentClient) generatorClient).verifyAdditionalFastTrackFields();
     }
 
@@ -128,16 +149,49 @@ public class HearingDocumentServiceTest {
     public void generateJudiciaryBasedFastTrackFormC() {
         Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN,
                 makeItJudiciaryFastTrackDecisionCase());
-        assertCaseDocument((CaseDocument) result.get(FORM_C));
+        assertCaseDocument((CaseDocument) result.get(hearingDocumentService.formCDataKey));
         ((TestDocumentClient) generatorClient).verifyAdditionalFastTrackFields();
     }
 
     @Test
     public void generateNonFastTrackFormCAndFormG() {
         Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
-        assertCaseDocument((CaseDocument) result.get(FORM_C));
-        assertCaseDocument((CaseDocument) result.get(FORM_G));
+        assertCaseDocument((CaseDocument) result.get(hearingDocumentService.formCDataKey));
+        assertCaseDocument((CaseDocument) result.get(hearingDocumentService.formGDataKey));
         ((TestDocumentClient) generatorClient).verifyAdditionalNonFastTrackFields();
+    }
+
+    @Test
+    public void sendToBulkPrint() {
+        CaseDetails caseDetails = caseDetails(NO_VALUE);
+
+        hearingDocumentService.sendToBulkPrint(caseDetails, AUTH_TOKEN);
+
+        verify(bulkPrintService, times(1)).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
+
+        assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(3));
+        assertThat(bulkPrintDocumentsCaptor.getValue().get(0).getBinaryFileUrl(), is(BINARY_URL));
+        assertThat(bulkPrintDocumentsCaptor.getValue().get(1).getBinaryFileUrl(), is(BINARY_URL));
+        assertThat(bulkPrintDocumentsCaptor.getValue().get(2).getBinaryFileUrl(), is(BINARY_URL));
+    }
+
+    @Test
+    public void sendToBulkPrint_multipleFormA() {
+        CaseDetails caseDetails = caseDetails(YES_VALUE);
+
+        caseDetails.getData().put(hearingDocumentService.formADataKey, asList(pensionDocumentData(), pensionDocumentData(), pensionDocumentData()));
+
+        hearingDocumentService.sendToBulkPrint(caseDetails, AUTH_TOKEN);
+
+        verify(bulkPrintService, times(1)).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
+
+        assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(5));
+        assertThat(bulkPrintDocumentsCaptor.getValue().get(0).getBinaryFileUrl(), is(BINARY_URL));
+        assertThat(bulkPrintDocumentsCaptor.getValue().get(1).getBinaryFileUrl(), is(BINARY_URL));
+        assertThat(bulkPrintDocumentsCaptor.getValue().get(2).getBinaryFileUrl(), is(BINARY_URL));
+        assertThat(bulkPrintDocumentsCaptor.getValue().get(3).getBinaryFileUrl(), is(BINARY_URL));
+        assertThat(bulkPrintDocumentsCaptor.getValue().get(4).getBinaryFileUrl(), is(BINARY_URL));
     }
 
     @Test
@@ -331,8 +385,14 @@ public class HearingDocumentServiceTest {
     }
 
     private CaseDetails caseDetails(String isFastTrackDecision) {
-        Map<String, Object> caseData =
-                ImmutableMap.of(FAST_TRACK_DECISION, isFastTrackDecision, HEARING_DATE, DATE_OF_HEARING);
+        Map<String, Object> caseData = new HashMap<>();
+
+        caseData.put(FAST_TRACK_DECISION, isFastTrackDecision);
+        caseData.put(HEARING_DATE, DATE_OF_HEARING);
+        caseData.put(hearingDocumentService.formADataKey, asList(pensionDocumentData()));
+        caseData.put(hearingDocumentService.formCDataKey, caseDocument());
+        caseData.put(hearingDocumentService.formGDataKey, caseDocument());
+
         return CaseDetails.builder().data(caseData).build();
     }
 

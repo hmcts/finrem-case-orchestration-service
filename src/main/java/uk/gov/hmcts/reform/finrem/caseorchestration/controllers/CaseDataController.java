@@ -25,6 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_ADMIN;
 
 @RestController
@@ -112,5 +113,6 @@ public class CaseDataController implements BaseController {
 
     private void setPaperCaseData(Map<String, Object> caseData) {
         caseData.put(PAPER_APPLICATION, YES_VALUE);
+        caseData.put(FAST_TRACK_DECISION, NO_VALUE);
     }
 }

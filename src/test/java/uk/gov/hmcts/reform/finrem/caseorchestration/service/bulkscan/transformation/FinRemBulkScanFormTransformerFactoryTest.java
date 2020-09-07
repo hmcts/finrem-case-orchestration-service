@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulk.scan.transformation;
+package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
 import org.junit.Before;
 import org.junit.Rule;

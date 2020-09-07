@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -39,7 +40,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_UR
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.PENSION_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
@@ -70,6 +71,10 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     public String contestedConsentOrderApprovedEndpoint() {
         return "/case-orchestration/consent-in-contested/consent-order-approved";
+    }
+
+    public String contestedConsentSendOrderEndpoint() {
+        return "/case-orchestration/consent-in-contested/send-order";
     }
 
     @Test
@@ -161,7 +166,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
-        when(bulkPrintService.sendToBulkPrint(any(), any())).thenReturn(defaultCaseDetails().getData());
+        when(bulkPrintService.sendConsentOrderToBulkPrint(any(), any())).thenReturn(defaultConsentedCaseDetails().getData());
         when(featureToggleService.isAutomateSendOrderEnabled()).thenReturn(true);
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
@@ -172,7 +177,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk())
             .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
 
-        verify(bulkPrintService).sendToBulkPrint(any(), any());
+        verify(bulkPrintService).sendConsentOrderToBulkPrint(any(), any());
         verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
     }
 
@@ -194,7 +199,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk())
             .andExpect(jsonPath("$.data.state", is("applicationDrafted")));
 
-        verify(bulkPrintService, never()).sendToBulkPrint(any(), any());
+        verify(bulkPrintService, never()).sendConsentOrderToBulkPrint(any(), any());
         verify(notificationService, never()).sendConsentOrderAvailableCtscEmail(any());
     }
 
@@ -223,7 +228,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @Test
     public void consentInContestedConsentOrderApprovedShouldProcessDocuments() throws Exception {
         doValidCaseDataSetUp();
-        when(consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(any(), anyString()))
+        when(consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(any(), anyString()))
             .thenReturn(new HashMap<String, Object>());
         ResultActions result = mvc.perform(post(contestedConsentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -231,15 +236,14 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
-        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentOrderToCollection(any(), anyString());
-        verify(consentOrderApprovedDocumentService, times(1)).stampPensionDocuments(any(), anyString());
+        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentApprovedOrderCollection(any(), anyString());
     }
 
     @Test
     public void consentInContestedConsentOrderApprovedShouldProcessPensionDocs() throws Exception {
         doValidConsentInContestWithPensionData();
-        when(consentOrderApprovedDocumentService.stampAndPopulateContestedConsentOrderToCollection(any(), anyString()))
-            .thenAnswer(i -> i.getArgument(0, CaseDetails.class).getData());
+        when(consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(any(), anyString()))
+            .thenAnswer(i -> i.getArgument(0, LinkedHashMap.class));
 
         ResultActions result = mvc.perform(post(contestedConsentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -247,8 +251,39 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
-        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentOrderToCollection(any(), anyString());
-        verify(consentOrderApprovedDocumentService, times(1)).stampPensionDocuments(any(), anyString());
+        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentApprovedOrderCollection(any(), anyString());
+    }
+
+    @Test
+    public void consentInContestedSendOrderShouldPrintDocsWhenNotApproved() throws Exception {
+        doValidCaseDataSetUp();
+        when(consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(any(), anyString()))
+            .thenReturn(new HashMap<String, Object>());
+        ResultActions result = mvc.perform(post(contestedConsentSendOrderEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderLetter(any(), anyString());
+        verify(bulkPrintService, times(1)).sendConsentOrderToBulkPrint(any(), anyString());
+    }
+
+    @Test
+    public void consentInContestedSendOrderShouldPrintDocsWhenApproved() throws Exception {
+        doValidConsentOrderApprovedSetup();
+        when(consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(any(), anyString()))
+            .thenReturn(caseDocument());
+        when(bulkPrintService.sendConsentOrderToBulkPrint(any(), anyString()))
+            .thenAnswer(i -> i.getArgument(0, CaseDetails.class).getData());
+        ResultActions result = mvc.perform(post(contestedConsentSendOrderEndpoint())
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        verify(consentOrderApprovedDocumentService, times(1)).generateAndPopulateConsentOrderLetter(any(), anyString());
+        verify(bulkPrintService, times(1)).sendConsentOrderToBulkPrint(any(), anyString());
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {

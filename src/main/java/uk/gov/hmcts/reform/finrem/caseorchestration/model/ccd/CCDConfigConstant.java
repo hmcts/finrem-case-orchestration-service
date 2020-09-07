@@ -143,6 +143,7 @@ public class CCDConfigConstant {
     public static final String MINI_FORM_A = "miniFormA";
     public static final String MINI_FORM_A_CONSENTED_IN_CONTESTED = "consentMiniFormA";
     public static final String PENSION_DOCS_COLLECTION = "pensionCollection";
+    public static final String FORM_A_COLLECTION = "copyOfPaperFormA";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_BODY = "generalLetterBody";
@@ -176,6 +177,13 @@ public class CCDConfigConstant {
     public static final String CONTESTED_CONSENT_ORDER_COLLECTION = "Contested_ConsentedApprovedOrders";
     public static final String CONTESTED_CONSENT_PENSION_COLLECTION = "consentPensionCollection";
     public static final String CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION = "consentedNotApprovedOrders";
+    public static final String CONSENTED_ORDER_DIRECTION_JUDGE_TITLE = "orderDirectionJudge";
+    public static final String CONTESTED_ORDER_DIRECTION_JUDGE_TITLE = "consentSelectJudge";
+    public static final String CONSENTED_ORDER_DIRECTION_JUDGE_NAME = "orderDirectionJudgeName";
+    public static final String CONTESTED_ORDER_DIRECTION_JUDGE_NAME = "consentJudgeName";
+    public static final String CONSENTED_ORDER_DIRECTION_DATE = "orderDirectionDate";
+    public static final String CONTESTED_ORDER_DIRECTION_DATE = "consentDateOfOrder";
+
 
     public static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
     public static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
@@ -212,5 +220,20 @@ public class CCDConfigConstant {
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
     public static final String UPLOAD_ORDER = "uploadOrder";
 
+    //Contested Case Documents
+    public static final String CONTESTED_UPLOADED_DOCUMENTS = "uploadCaseDocument";
+    public static final String APPLICANT_CORRESPONDENCE_COLLECTION = "appCorrespondenceCollection";
+    public static final String APPLICANT_FR_FORM_COLLECTION = "appFRFormsCollection";
+    public static final String APPLICANT_EVIDENCE_COLLECTION = "appEvidenceCollection";
+    public static final String APPLICANT_TRIAL_BUNDLE_COLLECTION = "appTrialBundleCollection";
+    public static final String RESPONDENT_CORRESPONDENCE_COLLECTION = "respCorrespondenceCollection";
+    public static final String RESPONDENT_FR_FORM_COLLECTION = "respFRFormsCollection";
+    public static final String RESPONDENT_EVIDENCE_COLLECTION = "respEvidenceCollection";
+    public static final String RESPONDENT_TRIAL_BUNDLE_COLLECTION = "respTrialBundleCollection";
+
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
+
+    //states
+    public static final String CONSENTED_ORDER_APPROVED = "consentedOrderApproved";
+    public static final String CONSENTED_ORDER_NOT_APPROVED = "consentedOrderNotApproved";
 }
