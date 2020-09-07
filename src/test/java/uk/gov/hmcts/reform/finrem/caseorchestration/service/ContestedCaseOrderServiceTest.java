@@ -17,7 +17,9 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 
 public class ContestedCaseOrderServiceTest extends BaseServiceTest {
@@ -46,6 +48,18 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
         assertThat(errors, is(empty()));
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
+    }
+
+    @Test
+    public void givenApplicantSolicitorAgreedToReceiveEmails_whenPrintAndMailGeneralOrderTriggered_thenOnlyRespondentPacksIsPrinted() {
+        CaseDetails caseDetails = contestedCaseDetails();
+        caseDetails.getData().put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
+
+        List<String> errors = contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
+
+        assertThat(errors, is(empty()));
+        verify(bulkPrintService, times(0)).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
     }
 

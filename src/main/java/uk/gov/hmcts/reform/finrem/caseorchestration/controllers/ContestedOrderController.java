@@ -66,10 +66,10 @@ public class ContestedOrderController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
 
-        if (isPaperApplication(caseData)) {
-            List<String> contestedCaseOrderErrors = contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, authToken);
-            errors.addAll(contestedCaseOrderErrors);
-        } else {
+        List<String> contestedCaseOrderErrors = contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, authToken);
+        errors.addAll(contestedCaseOrderErrors);
+
+        if (!isPaperApplication(caseData)) {
             log.info("Received request to stampFinalOrder called with Case ID = {}", caseDetails.getId());
             List<HearingOrderCollectionData> hearingOrderCollectionData = getHearingOrderDocuments(caseData);
 

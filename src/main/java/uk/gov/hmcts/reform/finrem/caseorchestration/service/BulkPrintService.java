@@ -151,7 +151,7 @@ public class BulkPrintService {
     public Map<String, Object> sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (!isApplicantRepresentedByASolicitor(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseData)
+        if (!isApplicantRepresentedByASolicitor(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
             || isPaperApplication(caseData)) {
             UUID applicantLetterId = isOrderApprovedCollectionPresent(caseData)
                 ? printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken)
