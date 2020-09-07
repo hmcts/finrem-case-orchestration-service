@@ -121,7 +121,7 @@ public class GenerateCoverSheetService {
 
     private String formatCtscContactDetailsForCoversheet() {
         CtscContactDetails coversheetCtscContactDetails = CtscContactDetails.builder()
-            .serviceCentre("HMCTS Digital Financial Remedy")
+            .serviceCentre("HMCTS Financial Remedy")
             .poBox("PO BOX " + CTSC_PO_BOX)
             .town(CTSC_TOWN)
             .postcode(CTSC_POSTCODE)

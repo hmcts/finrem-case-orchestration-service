@@ -183,7 +183,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
             any(), any());
         Map<String, Object> data = generateDocumentCaseDetailsCaptor.getValue().getData();
 
-        String expectedCourtContactDetails = "HMCTS Digital Financial Remedy" + "\n"
+        String expectedCourtContactDetails = "HMCTS Financial Remedy" + "\n"
             + "PO BOX 12746" + "\n"
             + "HARLOW" + "\n"
             + "CM20 9QZ";
