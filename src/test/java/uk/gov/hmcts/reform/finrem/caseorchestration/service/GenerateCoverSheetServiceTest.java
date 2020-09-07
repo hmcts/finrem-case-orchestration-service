@@ -29,7 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.COURT_CONTACT_DETAILS;
 
 @ActiveProfiles("test-mock-document-client")
 public class GenerateCoverSheetServiceTest extends BaseServiceTest {
@@ -183,7 +183,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         Map<String, Object> data = generateDocumentCaseDetailsCaptor.getValue().getData();
 
         assertThat(data, hasKey(ADDRESSEE));
-        assertThat(data, hasKey(CTSC_CONTACT_DETAILS));
+        assertThat(data, hasKey(COURT_CONTACT_DETAILS));
         assertThat(data, hasKey(CASE_NUMBER));
     }
 }

@@ -71,7 +71,7 @@ public class DocumentHelper {
 
     public static final String DOCUMENT_BINARY_URL = "document_binary_url";
     public static final String ADDRESSEE = "addressee";
-    public static final String CTSC_CONTACT_DETAILS = "ctscContactDetails";
+    public static final String COURT_CONTACT_DETAILS = "ctscContactDetails";
     public static final String CASE_NUMBER = "caseNumber";
 
     private final ObjectMapper objectMapper;
@@ -202,7 +202,7 @@ public class DocumentHelper {
             caseData.put("letterDate", String.valueOf(LocalDate.now()));
             caseData.put("applicantName", applicantName);
             caseData.put("respondentName", respondentName);
-            caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
+            caseData.put(COURT_CONTACT_DETAILS, buildCtscContactDetails());
         } else {
             log.info("Failed to prepare template data as not all required address details were present");
             throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");

@@ -14,7 +14,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.COURT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
@@ -99,7 +99,7 @@ public class GenerateCoverSheetService {
                     : (Map) caseData.get(partyAddressCcdFieldName)))
                 .build();
             caseData.put(ADDRESSEE, addressee);
-            caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
+            caseData.put(COURT_CONTACT_DETAILS, buildCtscContactDetails());
             caseData.put(CASE_NUMBER, nullToEmpty(caseDetails.getId()));
         }
     }

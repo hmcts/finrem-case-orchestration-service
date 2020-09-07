@@ -22,7 +22,7 @@ import java.util.Optional;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.COURT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
@@ -81,7 +81,7 @@ public class GeneralLetterService {
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put("generalLetterCreatedDate", new Date());
         caseData.put("ccdCaseNumber", caseDetails.getId());
-        caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
+        caseData.put(COURT_CONTACT_DETAILS, buildCtscContactDetails());
         caseData.put("applicantFullName", buildFullApplicantName(caseDetails));
         caseData.put("respondentFullName", buildFullRespondentName(caseDetails));
         populateNameAddressAndReference(caseDetails);
