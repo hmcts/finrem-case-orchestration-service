@@ -32,7 +32,8 @@ public class ManualPaymentDocumentService {
             documentConfiguration.getManualPaymentFileName(),
             documentConfiguration.getManualPaymentTemplate());
 
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
+        // obvs adjust to make suitable for resp as well
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToPartyTemplateData(caseDetails, "Applicant");
 
         addCourtFields(caseDetailsForBulkPrint);
 

@@ -62,7 +62,7 @@ public class ConsentOrderApprovedDocumentService {
     }
 
     public CaseDocument generateApprovedConsentOrderCoverLetter(CaseDetails caseDetails, String authToken) {
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToPartyTemplateData(caseDetails, "Applicant");
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter = genericDocumentService.generateDocument(authToken, caseDetailsForBulkPrint,
             documentConfiguration.getApprovedConsentOrderNotificationTemplate(),

@@ -74,7 +74,7 @@ public class ConsentOrderNotApprovedDocumentService {
     }
 
     private BulkPrintDocument coverLetter(CaseDetails caseDetails, String authorisationToken) {
-        CaseDetails caseDetailsWithTemplateData = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
+        CaseDetails caseDetailsWithTemplateData = documentHelper.prepareLetterToPartyTemplateData(caseDetails, "Applicant");
         CaseDocument coverLetter = genericDocumentService.generateDocument(
             authorisationToken,
             caseDetailsWithTemplateData,
@@ -122,7 +122,7 @@ public class ConsentOrderNotApprovedDocumentService {
     }
 
     private BulkPrintDocument applicantReplyCoversheet(CaseDetails caseDetails, String authorisationToken) {
-        CaseDetails caseDetailsWithTemplateData = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
+        CaseDetails caseDetailsWithTemplateData = documentHelper.prepareLetterToPartyTemplateData(caseDetails, "Applicant");
         CaseDocument applicantCoversheet = genericDocumentService.generateDocument(
             authorisationToken,
             caseDetailsWithTemplateData,

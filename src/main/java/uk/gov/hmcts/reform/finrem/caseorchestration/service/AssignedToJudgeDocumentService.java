@@ -22,7 +22,7 @@ public class AssignedToJudgeDocumentService {
             documentConfiguration.getAssignedToJudgeNotificationTemplate(),
             documentConfiguration.getAssignedToJudgeNotificationFileName());
 
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToPartyTemplateData(caseDetails, "Applicant");
 
         CaseDocument generatedAssignedToJudgeNotificationLetter = genericDocumentService.generateDocument(authToken,
             caseDetailsForBulkPrint,

@@ -197,7 +197,7 @@ public class DocumentHelperTest {
 
     @Test
     public void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated() {
-        CaseDetails preparedCaseDetails = documentHelper.prepareLetterToApplicantTemplateData(defaultConsentedCaseDetails());
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterToPartyTemplateData(defaultConsentedCaseDetails(), "Applicant");
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)

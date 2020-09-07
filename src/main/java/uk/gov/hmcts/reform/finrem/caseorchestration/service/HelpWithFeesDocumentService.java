@@ -22,7 +22,7 @@ public class HelpWithFeesDocumentService {
             documentConfiguration.getHelpWithFeesSuccessfulNotificationFileName(),
             documentConfiguration.getHelpWithFeesSuccessfulNotificationTemplate());
 
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToPartyTemplateData(caseDetails, "Applicant");
 
         CaseDocument generatedHwfSuccessfulNotificationLetter = genericDocumentService.generateDocument(authToken,
             caseDetailsForBulkPrint,
