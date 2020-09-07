@@ -43,6 +43,9 @@ public class NotificationsController implements BaseController {
     private final ManualPaymentDocumentService manualPaymentDocumentService;
     private final GeneralEmailService generalEmailService;
 
+    private static final String APPLICANT = "Applicant";
+    private static final String RESPONDENT = "Respondent";
+
     @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
     @ApiResponses(value = {
@@ -355,11 +358,11 @@ public class NotificationsController implements BaseController {
 
         if (isContestedPaperApplication(caseDetails)) {
             CaseDocument applicantManualPaymentLetter =
-                manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken);
+                manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken, APPLICANT);
             bulkPrintService.sendNotificationLetterForBulkPrint(applicantManualPaymentLetter, caseDetails);
 
             CaseDocument respondentManualPaymentLetter =
-                manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken);
+                manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken, RESPONDENT);
             bulkPrintService.sendNotificationLetterForBulkPrint(respondentManualPaymentLetter, caseDetails);
         }
 

@@ -27,13 +27,21 @@ public class ManualPaymentDocumentService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
 
-    public CaseDocument generateManualPaymentLetter(CaseDetails caseDetails, String authToken) {
+    private static final String APPLICANT = "Applicant";
+    private static final String RESPONDENT = "Respondent";
+
+    private CaseDetails caseDetailsForBulkPrint;
+
+    public CaseDocument generateManualPaymentLetter(CaseDetails caseDetails, String authToken, String party) {
         log.info("Generating Manual Payment Letter {} from {} for bulk print",
             documentConfiguration.getManualPaymentFileName(),
             documentConfiguration.getManualPaymentTemplate());
 
-        // obvs adjust to make suitable for resp as well
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToPartyTemplateData(caseDetails, "Applicant");
+        if (party.equals(APPLICANT)) {
+            caseDetailsForBulkPrint = documentHelper.prepareLetterToPartyTemplateData(caseDetails, APPLICANT);
+        } else {
+            caseDetailsForBulkPrint = documentHelper.prepareLetterToPartyTemplateData(caseDetails, RESPONDENT);
+        }
 
         addCourtFields(caseDetailsForBulkPrint);
 

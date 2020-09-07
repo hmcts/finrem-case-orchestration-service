@@ -551,7 +551,7 @@ public class NotificationsControllerTest {
             .andExpect(status().isOk());
 
         verify(manualPaymentDocumentService, times(2))
-            .generateManualPaymentLetter(any(CaseDetails.class),any());
+            .generateManualPaymentLetter(any(CaseDetails.class), any(), any());
         verify(bulkPrintService, times(2))
             .sendNotificationLetterForBulkPrint(any(),any());
         verifyNoInteractions(notificationService);
