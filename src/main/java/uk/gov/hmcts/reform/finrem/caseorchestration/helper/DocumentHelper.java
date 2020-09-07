@@ -71,7 +71,7 @@ public class DocumentHelper {
 
     public static final String DOCUMENT_BINARY_URL = "document_binary_url";
     public static final String ADDRESSEE = "addressee";
-    public static final String COURT_CONTACT_DETAILS = "ctscContactDetails";
+    public static final String COURT_CONTACT_DETAILS = "courtContactDetails";
     public static final String CASE_NUMBER = "caseNumber";
 
     private final ObjectMapper objectMapper;

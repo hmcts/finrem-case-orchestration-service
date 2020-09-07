@@ -5,17 +5,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
+import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_POSTCODE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.COURT_CONTACT_DETAILS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.buildCtscContactDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
@@ -99,9 +105,37 @@ public class GenerateCoverSheetService {
                     : (Map) caseData.get(partyAddressCcdFieldName)))
                 .build();
             caseData.put(ADDRESSEE, addressee);
-            caseData.put(COURT_CONTACT_DETAILS, buildCtscContactDetails());
+            caseData.put(COURT_CONTACT_DETAILS, getCourtContactDetails(caseDetails));
             caseData.put(CASE_NUMBER, nullToEmpty(caseDetails.getId()));
         }
+    }
+
+    private String getCourtContactDetails(CaseDetails caseDetails) {
+        /*
+        if (isContestedApplication(caseDetails)) {
+            // will implement for FRC Contact Details
+        }
+        */
+        return formatCtscContactDetailsForCoversheet();
+    }
+
+    private String formatCtscContactDetailsForCoversheet() {
+        CtscContactDetails coversheetCtscContactDetails = CtscContactDetails.builder()
+            .serviceCentre("HMCTS Digital Financial Remedy")
+            .poBox("PO BOX " + CTSC_PO_BOX)
+            .town(CTSC_TOWN)
+            .postcode(CTSC_POSTCODE)
+            .build();
+
+        return Stream.of(coversheetCtscContactDetails.getServiceCentre(),
+                coversheetCtscContactDetails.getPoBox(),
+                coversheetCtscContactDetails.getTown(),
+                coversheetCtscContactDetails.getPostcode())
+            .filter(Objects::nonNull)
+            .map(Object::toString)
+            .filter(StringUtils::isNotEmpty)
+            .filter(s -> !s.equals("null"))
+            .collect(Collectors.joining("\n"));
     }
 
     private AddressFoundInCaseData checkAddress(Map<String, Object> caseData, String partyAddressCcdFieldName,

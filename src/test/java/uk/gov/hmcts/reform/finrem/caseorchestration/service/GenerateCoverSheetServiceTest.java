@@ -19,6 +19,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -182,8 +183,14 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
             any(), any());
         Map<String, Object> data = generateDocumentCaseDetailsCaptor.getValue().getData();
 
+        String expectedCourtContactDetails = "HMCTS Digital Financial Remedy" + "\n"
+            + "PO BOX 12746" + "\n"
+            + "HARLOW" + "\n"
+            + "CM20 9QZ";
+
         assertThat(data, hasKey(ADDRESSEE));
         assertThat(data, hasKey(COURT_CONTACT_DETAILS));
+        assertEquals(expectedCourtContactDetails, data.get(COURT_CONTACT_DETAILS));
         assertThat(data, hasKey(CASE_NUMBER));
     }
 }
