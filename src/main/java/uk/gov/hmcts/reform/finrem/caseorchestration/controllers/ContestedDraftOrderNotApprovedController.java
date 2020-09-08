@@ -125,7 +125,7 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request for send refusal reason for paper cases with Case ID: {}", caseDetails.getId());
+        log.info("Received request for send refusal reason for case with Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
         Optional<CaseDocument> refusalReason = contestedNotApprovedService.getLatestRefusalReason(caseDetails);
