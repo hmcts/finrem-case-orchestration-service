@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -66,7 +67,7 @@ public class GeneralLetterService {
         log.info("Generating General letter for Case ID: {}", caseDetails.getId());
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
         addGeneralLetterToCaseData(caseDetails, document);
-        bulkPrintService.printLatestGeneralLetter(caseDetails);
+        printLatestGeneralLetter(caseDetails);
     }
 
     private CaseDocument generateGeneralLetterDocument(CaseDetails caseDetails, String authorisationToken) {
@@ -153,5 +154,11 @@ public class GeneralLetterService {
         } else {
             return emptyList();
         }
+    }
+
+    private UUID printLatestGeneralLetter(CaseDetails caseDetails) {
+        List<GeneralLetterData> generalLettersData = documentHelper.convertToGeneralLetterData(caseDetails.getData().get(GENERAL_LETTER));
+        GeneralLetterData latestGeneralLetterData = generalLettersData.get(generalLettersData.size() - 1);
+        return bulkPrintService.sendDocumentForPrint(latestGeneralLetterData.getGeneralLetter().getGeneratedLetter(), caseDetails);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedCaseOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.io.File;
@@ -30,11 +31,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 
-@WebMvcTest(FinalOrderController.class)
-public class FinalOrderControllerTest extends BaseControllerTest {
+@WebMvcTest(ContestedOrderController.class)
+public class ContestedOrderControllerTest extends BaseControllerTest {
 
     @MockBean
     private GenericDocumentService genericDocumentService;
+
+    @MockBean
+    private ContestedCaseOrderService contestedCaseOrderService;
 
     private static final String SEND_ORDER_ENDPOINT = "/case-orchestration/contested/send-order";
 

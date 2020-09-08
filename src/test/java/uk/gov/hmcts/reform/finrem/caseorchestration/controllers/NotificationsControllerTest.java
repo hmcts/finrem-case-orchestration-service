@@ -135,7 +135,7 @@ public class NotificationsControllerTest {
         verify(helpWithFeesDocumentService, times(1))
             .generateHwfSuccessfulNotificationLetter(any(CaseDetails.class),any());
         verify(bulkPrintService, times(1))
-            .sendNotificationLetterForBulkPrint(any(),any());
+            .sendDocumentForPrint(any(),any());
         verifyNoInteractions(notificationService);
     }
 
@@ -179,7 +179,7 @@ public class NotificationsControllerTest {
         verify(assignedToJudgeDocumentService, times(1))
             .generateAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
         verify(bulkPrintService, times(1))
-            .sendNotificationLetterForBulkPrint(any(),any());
+            .sendDocumentForPrint(any(),any());
         verifyNoInteractions(notificationService);
     }
 
