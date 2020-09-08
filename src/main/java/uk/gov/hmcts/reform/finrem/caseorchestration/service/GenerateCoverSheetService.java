@@ -12,9 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
@@ -127,15 +124,10 @@ public class GenerateCoverSheetService {
             .postcode(CTSC_POSTCODE)
             .build();
 
-        return Stream.of(coversheetCtscContactDetails.getServiceCentre(),
-                coversheetCtscContactDetails.getPoBox(),
-                coversheetCtscContactDetails.getTown(),
-                coversheetCtscContactDetails.getPostcode())
-            .filter(Objects::nonNull)
-            .map(Object::toString)
-            .filter(StringUtils::isNotEmpty)
-            .filter(s -> !s.equals("null"))
-            .collect(Collectors.joining("\n"));
+        return String.join("\n", coversheetCtscContactDetails.getServiceCentre(),
+            coversheetCtscContactDetails.getPoBox(),
+            coversheetCtscContactDetails.getTown(),
+            coversheetCtscContactDetails.getPostcode());
     }
 
     private AddressFoundInCaseData checkAddress(Map<String, Object> caseData, String partyAddressCcdFieldName,
