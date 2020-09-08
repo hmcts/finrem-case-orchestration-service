@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.COURT_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 
 public class DocumentHelperTest {
@@ -210,7 +210,7 @@ public class DocumentHelperTest {
             .openingHours(CTSC_OPENING_HOURS)
             .build();
 
-        assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(COURT_CONTACT_DETAILS));
+        assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
     }
 
     private CallbackRequest prepareCallbackRequest(String fileName) throws Exception {
