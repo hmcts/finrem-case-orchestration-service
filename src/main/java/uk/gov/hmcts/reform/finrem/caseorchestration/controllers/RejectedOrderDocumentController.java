@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
 
 import java.util.Map;
@@ -28,7 +30,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequiredArgsConstructor
 public class RejectedOrderDocumentController {
 
-    private final RefusalOrderDocumentService service;
+    private final RefusalOrderDocumentService refusalOrderDocumentService;
+    private final BulkPrintService bulkPrintService;
 
     @PostMapping(path = "/documents/consent-order-not-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent Order Not Approved Order Generation. Serves as a callback from CCD")
@@ -42,8 +45,12 @@ public class RejectedOrderDocumentController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateConsentOrderNotApproved(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @RequestBody @ApiParam("CaseData") CallbackRequest request) {
-        log.info("Received request to generate 'Consent Order Not Approved' for Case ID: {}", request.getCaseDetails().getId());
-        Map<String, Object> caseData = service.generateConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
+
+        CaseDetails caseDetails = request.getCaseDetails();
+        log.info("Received request to generate 'Consent Order Not Approved' for Case ID: {}", caseDetails.getId());
+
+        Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(authorisationToken, caseDetails);
+        bulkPrintService.sendConsentOrderToBulkPrint(caseDetails, authorisationToken);
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
@@ -67,7 +74,7 @@ public class RejectedOrderDocumentController {
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @RequestBody @ApiParam("CaseData") CallbackRequest request) {
         log.info("Received request to preview generated 'Consent Order Not Approved' for Case ID: {}", request.getCaseDetails().getId());
-        Map<String, Object> caseData = service.previewConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
+        Map<String, Object> caseData = refusalOrderDocumentService.previewConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
