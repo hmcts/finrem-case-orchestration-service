@@ -42,7 +42,7 @@ public class ComplexTypeCollection<T> extends ArrayList<ImmutableMap<String, T>>
             throw new IllegalArgumentException("Index must not be less than 0");
         }
 
-        if (index > size()) {
+        if (index >= size()) {
             throw new IllegalArgumentException("Index must not be greater than size of array");
         }
 
