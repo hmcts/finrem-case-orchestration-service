@@ -54,7 +54,6 @@ public class GeneralLetterService {
     private final BulkPrintService bulkPrintService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
-    private final FeatureToggleService featureToggleService;
 
     public void previewGeneralLetter(String authorisationToken, CaseDetails caseDetails) {
         log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());

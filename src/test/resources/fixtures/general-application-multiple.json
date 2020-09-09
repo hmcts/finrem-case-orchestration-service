@@ -1,0 +1,148 @@
+{
+  "token": "token_test",
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": 1234567890,
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_type_id": "FinancialRemedyMVP2",
+    "case_data": {
+      "PBANumber": "PBA123456",
+      "d81Question": "No",
+      "generalApplicationReceivedFrom": "Applicant",
+      "generalApplicationCreatedBy": "Caseworker",
+      "generalApplicationHearingRequired": "Yes",
+      "generalApplicationTimeEstimate": "12",
+      "generalApplicationSpecialMeasures": "Measures",
+      "generalApplicationDraftOrder": {
+        "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
+        "document_filename": "app_docs.pdf",
+        "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
+      },
+      "generalApplicationDocument": {
+        "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
+        "document_filename": "app_docs.pdf",
+        "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
+      },
+      "generalApplicationLatestDocument": {
+        "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
+        "document_filename": "app_docs.pdf",
+        "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
+      },
+      "generalApplicationCollection": [{
+        "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
+        "value": {
+          "generalApplicationDocument": {
+            "document_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee",
+            "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+            "document_binary_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee/binary"
+          }
+        }
+      }],
+      "d81Applicant": {
+        "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b/binary"
+      },
+      "d81Respondent": {
+        "document_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/e284fb20-47c6-4b3a-bd17-cb005666ab5f/binary"
+      },
+      "solicitorFirm": "Mr",
+      "solicitorName": "Solictor",
+      "applicantLName": "Guy",
+      "authorisation3": "2010-01-01",
+      "solicitorEmail": "test@admin.com",
+      "solicitorPhone": "9963472494",
+      "applicantFMName": "Poor",
+      "authorisation2b": "test",
+      "otherCollection": [
+        {
+          "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
+          "value": {
+            "typeOfDocument": "ScheduleOfAssets",
+            "uploadedDocument": {
+              "document_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee",
+              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+              "document_binary_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee/binary"
+            }
+          }
+        }
+      ],
+      "respondentEmail": null,
+      "respondentPhone": "9963472494",
+      "appRespondentRep": "No",
+      "consentOrderText": {
+        "document_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
+        "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+        "document_binary_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
+      },
+      "solicitorAddress": {
+        "County": "Greater London",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "50 Applicant Solicitor Street",
+        "AddressLine2": "Second Address Line",
+        "AddressLine3": "Third Address Line"
+      },
+      "authorisationFirm": "test",
+      "authorisationName": "test",
+      "divorceCaseNumber": "DD12D12345",
+      "respondentAddress": {
+        "County": "Greater London",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "50 Respondent Street",
+        "AddressLine2": "Second Address Line",
+        "AddressLine3": "Third Address Line"
+      },
+      "rSolicitorName": "Ms Patel",
+      "rSolicitorReference": "RSP-LL01",
+      "rSolicitorAddress": {
+        "County": "Greater London",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "50 Respondent Solicitor Street",
+        "AddressLine2": "Second Address Line",
+        "AddressLine3": "Third Address Line"
+      },
+      "solicitorDXnumber": null,
+      "solicitorReference": "LL01",
+      "appRespondentFMName": "test",
+      "appRespondentLName": "Korivi",
+      "divorceStageReached": "Decree Nisi",
+      "helpWithFeesQuestion": "No",
+      "orderForChildrenQuestion1": "Yes",
+      "solicitorAgreeToReceiveEmails": "Yes",
+      "generalLetterAddressTo": "applicantSolicitor",
+      "generalLetterRecipient": "Mr Rajesh Kuthrappali",
+      "generalLetterRecipientAddress": {
+        "County": "Greater London",
+        "Country": "United Kingdom",
+        "PostCode": "SE12 9SE",
+        "PostTown": "London",
+        "AddressLine1": "50 Applicant Solicitor Street",
+        "AddressLine2": "Second Address Line",
+        "AddressLine3": "Third Address Line"
+      },
+      "generalLetterCreatedBy": "",
+      "generalLetterBody": "Test content for the letter body",
+      "generalLetterCollection": [
+        {
+          "id": "1",
+          "value": {
+            "generatedLetter": {
+              "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
+              "document_filename": "app_docs.pdf",
+              "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
