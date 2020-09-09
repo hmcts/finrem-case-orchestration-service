@@ -5,8 +5,4 @@ spring:
       prefixed: false
       paths: /mnt/secrets/finrem
       aliases:
-        finrem-doc-s2s-auth-secret: AUTH_PROVIDER_SERVICE_CLIENT_KEY
-        idam-secret: OAUTH2_CLIENT_FINREM
-        username-solicitor: USERNAME-SOLICITOR
-        password-solicitor: PASSWORD-SOLICITOR
         AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
