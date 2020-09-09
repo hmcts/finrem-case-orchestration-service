@@ -42,6 +42,7 @@ public class GeneralApplicationService {
     }
 
     private void updateGeneralApplicationDocumentLatest(Map<String, Object> caseData) {
+        log.info("updateGeneralApplicationDocumentLatest caseData: {}", caseData);
         GeneralApplication generalApplication =
             new GeneralApplication(documentHelper.convertToCaseDocument(
                 caseData.get(GENERAL_APPLICATION_DOCUMENT)));
@@ -52,6 +53,7 @@ public class GeneralApplicationService {
     }
 
     private void updateGeneralApplicationDocumentCollection(Map<String, Object> caseData) {
+        log.info("updateGeneralApplicationDocumentCollection caseData: {}", caseData);
         GeneralApplication generalApplication =
             new GeneralApplication(documentHelper.convertToCaseDocument(
                 caseData.get(GENERAL_APPLICATION_DOCUMENT)));
@@ -67,6 +69,7 @@ public class GeneralApplicationService {
     }
 
     private List<GeneralApplicationData> convertToGeneralApplicationDataList(Object object) {
+        log.info("convertToGeneralApplicationDataList object: {}", object);
         return objectMapper.convertValue(object, new TypeReference<List<GeneralApplicationData>>() {});
     }
 
