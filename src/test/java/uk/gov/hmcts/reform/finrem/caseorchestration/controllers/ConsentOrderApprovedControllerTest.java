@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -58,6 +59,9 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
     @MockBean
     private BulkPrintService bulkPrintService;
+
+    @MockBean
+    private ConsentOrderPrintService consentOrderPrintService;
 
     @MockBean
     private FeatureToggleService featureToggleService;
@@ -166,7 +170,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
-        when(bulkPrintService.sendConsentOrderToBulkPrint(any(), any())).thenReturn(defaultConsentedCaseDetails().getData());
+        when(consentOrderPrintService.sendConsentOrderToBulkPrint(any(), any())).thenReturn(defaultConsentedCaseDetails().getData());
         when(featureToggleService.isAutomateSendOrderEnabled()).thenReturn(true);
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
@@ -177,7 +181,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk())
             .andExpect(jsonPath("$.data.state", is(CONSENT_ORDER_MADE.toString())));
 
-        verify(bulkPrintService).sendConsentOrderToBulkPrint(any(), any());
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
         verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
     }
 
@@ -199,7 +203,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk())
             .andExpect(jsonPath("$.data.state", is("applicationDrafted")));
 
-        verify(bulkPrintService, never()).sendConsentOrderToBulkPrint(any(), any());
+        verify(consentOrderPrintService, never()).sendConsentOrderToBulkPrint(any(), any());
         verify(notificationService, never()).sendConsentOrderAvailableCtscEmail(any());
     }
 
@@ -266,7 +270,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
         result.andExpect(status().isOk());
         verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderLetter(any(), anyString());
-        verify(bulkPrintService, times(1)).sendConsentOrderToBulkPrint(any(), anyString());
+        verify(consentOrderPrintService, times(1)).sendConsentOrderToBulkPrint(any(), anyString());
     }
 
     @Test
@@ -274,7 +278,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         doValidConsentOrderApprovedSetup();
         when(consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(any(), anyString()))
             .thenReturn(caseDocument());
-        when(bulkPrintService.sendConsentOrderToBulkPrint(any(), anyString()))
+        when(consentOrderPrintService.sendConsentOrderToBulkPrint(any(), anyString()))
             .thenAnswer(i -> i.getArgument(0, CaseDetails.class).getData());
         ResultActions result = mvc.perform(post(contestedConsentSendOrderEndpoint())
             .content(requestContent.toString())
@@ -283,7 +287,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
         result.andExpect(status().isOk());
         verify(consentOrderApprovedDocumentService, times(1)).generateAndPopulateConsentOrderLetter(any(), anyString());
-        verify(bulkPrintService, times(1)).sendConsentOrderToBulkPrint(any(), anyString());
+        verify(consentOrderPrintService, times(1)).sendConsentOrderToBulkPrint(any(), anyString());
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
