@@ -37,39 +37,28 @@ public class GeneralApplicationService {
 
     public void updateCaseDataSubmit(Map<String, Object> caseData) {
         caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE, LocalDate.now());
+        caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST, documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)));
         updateGeneralApplicationDocumentCollection(caseData);
-        updateGeneralApplicationDocumentLatest(caseData);
-    }
-
-    private void updateGeneralApplicationDocumentLatest(Map<String, Object> caseData) {
-        log.info("updateGeneralApplicationDocumentLatest caseData: {}", caseData);
-        GeneralApplication generalApplication =
-            new GeneralApplication(documentHelper.convertToCaseDocument(
-                caseData.get(GENERAL_APPLICATION_DOCUMENT)));
-
-        GeneralApplicationData generalApplicationData = new GeneralApplicationData(UUID.randomUUID().toString(), generalApplication);
-
-        caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST, generalApplicationData);
     }
 
     private void updateGeneralApplicationDocumentCollection(Map<String, Object> caseData) {
-        log.info("updateGeneralApplicationDocumentCollection caseData: {}", caseData);
-        GeneralApplication generalApplication =
-            new GeneralApplication(documentHelper.convertToCaseDocument(
-                caseData.get(GENERAL_APPLICATION_DOCUMENT)));
+        GeneralApplication generalApplication = GeneralApplication.builder().generalApplicationDocument(
+            documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT))).build();
 
-        GeneralApplicationData generalApplicationData = new GeneralApplicationData(UUID.randomUUID().toString(), generalApplication);
-
-        List<GeneralApplicationData> generalApplicationDataList = Optional.ofNullable(caseData.get(GENERAL_APPLICATION_DOCUMENT_COLLECTION))
+        List<GeneralApplicationData> generalApplicationList = Optional.ofNullable(caseData.get(GENERAL_APPLICATION_DOCUMENT_COLLECTION))
             .map(this::convertToGeneralApplicationDataList)
             .orElse(new ArrayList<>());
 
-        generalApplicationDataList.add(generalApplicationData);
-        caseData.put(GENERAL_APPLICATION_DOCUMENT_COLLECTION, generalApplicationDataList);
+        generalApplicationList.add(
+            GeneralApplicationData.builder()
+                .id(UUID.randomUUID().toString())
+                .generalApplication(generalApplication)
+                .build());
+
+        caseData.put(GENERAL_APPLICATION_DOCUMENT_COLLECTION, generalApplicationList);
     }
 
     private List<GeneralApplicationData> convertToGeneralApplicationDataList(Object object) {
-        log.info("convertToGeneralApplicationDataList object: {}", object);
         return objectMapper.convertValue(object, new TypeReference<List<GeneralApplicationData>>() {});
     }
 

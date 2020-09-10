@@ -44,9 +44,9 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
 
         List<GeneralApplicationData> generalApplicationDataList =
             (List<GeneralApplicationData>) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_COLLECTION);
-        GeneralApplicationData generalApplicationLatest = (GeneralApplicationData) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST);
+        CaseDocument generalApplicationLatest = (CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST);
 
-        doCaseDocumentAssert(generalApplicationLatest.getGeneralApplication().getGeneralApplicationDocument());
+        doCaseDocumentAssert(generalApplicationLatest);
         assertThat(generalApplicationDataList, hasSize(1));
         assertThat(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE), is(LocalDate.now()));
         doCaseDocumentAssert(generalApplicationDataList.get(0).getGeneralApplication().getGeneralApplicationDocument());
@@ -66,8 +66,8 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
             is("http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee"));
         assertThat(generalApplicationDataList.get(1).getGeneralApplication().getGeneralApplicationDocument().getDocumentUrl(), is(DOC_URL));
 
-        GeneralApplicationData generalApplicationLatest = (GeneralApplicationData) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST);
-        doCaseDocumentAssert(generalApplicationLatest.getGeneralApplication().getGeneralApplicationDocument());
+        CaseDocument generalApplicationLatest = (CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST);
+        doCaseDocumentAssert(generalApplicationLatest);
     }
 
     @Test
