@@ -34,11 +34,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 @WebMvcTest(ContestedOrderController.class)
 public class ContestedOrderControllerTest extends BaseControllerTest {
 
-    @MockBean
-    private GenericDocumentService genericDocumentService;
-
-    @MockBean
-    private ContestedCaseOrderService contestedCaseOrderService;
+    @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean private ContestedCaseOrderService contestedCaseOrderService;
 
     private static final String SEND_ORDER_ENDPOINT = "/case-orchestration/contested/send-order";
 
