@@ -33,6 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.bulkPrintDocumentList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService.FINANCIAL_REMEDY_PACK_LETTER_TYPE;
@@ -65,9 +66,9 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldSendAssignedToJudgeNotificationLetterForBulkPrint() {
-        UUID bulkPrintLetterId = bulkPrintService.sendNotificationLetterForBulkPrint(
-            caseDocument, caseDetails());
+    public void shouldSendDocumentForBulkPrint() {
+        UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(
+            new CaseDocument(), caseDetails());
 
         assertThat(bulkPrintLetterId, is(letterId));
     }
@@ -80,9 +81,9 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenPrintingGeneralLetter_thenLatestGeneralLetterIsSentToPrinting() {
+    public void whenPrintingDocument_thenDocumentIsSentToPrinting() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/general-letter.json", mapper);
-        UUID bulkPrintLetterId = bulkPrintService.printLatestGeneralLetter(caseDetails);
+        UUID bulkPrintLetterId = bulkPrintService.sendDocumentForPrint(caseDocument(), caseDetails);
 
         assertThat(bulkPrintLetterId, is(letterId));
     }
@@ -175,7 +176,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         UUID uuid = bulkPrintService.sendOrderForBulkPrintRespondent(caseDocument, caseDetails);
         assertThat(uuid, is(letterId));
-        verify(generalOrderService).getLatestGeneralOrderForPrintingConsented(caseDetails.getData());
+        verify(generalOrderService).getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData());
     }
 
     @Test
@@ -191,7 +192,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         assertThat(uuid, is(letterId));
 
-        verify(generalOrderService, times(1)).getLatestGeneralOrderForPrintingConsented(caseDetails.getData());
+        verify(generalOrderService, times(1)).getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData());
     }
 
     @Test

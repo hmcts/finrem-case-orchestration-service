@@ -99,12 +99,17 @@
           "value": {
             "additionalDocument": {
               "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
-              "document_filename": "app_docs.pdf",
+              "document_filename": "generalOrder.pdf",
               "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
             }
           }
         }
-      ]
+      ],
+      "generalOrderLatestDocument": {
+        "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
+        "document_filename": "generalOrder.pdf",
+        "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
+      }
     }
   }
 }

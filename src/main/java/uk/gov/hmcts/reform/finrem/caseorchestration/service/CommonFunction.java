@@ -80,9 +80,11 @@ public class CommonFunction {
         return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APPLICANT_REPRESENTED)));
     }
 
-    public static boolean isApplicantSolicitorAgreeToReceiveEmails(Map<String, Object> caseData) {
-        return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)))
-            || YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED)));
+    public static boolean isApplicantSolicitorAgreeToReceiveEmails(CaseDetails caseDetails) {
+        boolean isContestedApplication = isContestedApplication(caseDetails);
+        Map<String, Object> caseData = caseDetails.getData();
+        return (isContestedApplication && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED))))
+            || (!isContestedApplication && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED))));
     }
 
     public static boolean isRespondentRepresentedByASolicitor(Map<String, Object> caseData) {
