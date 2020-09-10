@@ -87,11 +87,19 @@ public class ComplexTypeCollectionTest {
     }
 
     @Test
-    public void getChildShouldThrowIllegalArgumentExceptionWhenIndexIsGreaterThanSize() {
+    public void getItemShouldThrowIllegalArgumentExceptionWhenIndexIsGreaterThanSize() {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("Index must not be greater than size of array");
 
         complexTypeCollection.getItem(1);
+    }
+
+    @Test
+    public void getItemShouldThrowIllegalArgumentExceptionWhenIndexIsEqSize() {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("Index must not be greater than size of array");
+
+        complexTypeCollection.getItem(0);
     }
 
 }
