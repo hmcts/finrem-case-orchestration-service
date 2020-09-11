@@ -74,5 +74,6 @@ public class GeneralApplicationService {
         caseData.remove(GENERAL_APPLICATION_SPECIAL_MEASURES);
         caseData.remove(GENERAL_APPLICATION_DOCUMENT);
         caseData.remove(GENERAL_APPLICATION_DRAFT_ORDER);
+        log.info("updateCaseDataStart caseData: {}", caseData);
     }
 }
