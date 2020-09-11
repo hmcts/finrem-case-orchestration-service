@@ -140,7 +140,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
         UUID uuid = consentOrderPrintService.sendConsentOrderForBulkPrintRespondent(caseDocument, caseDetails);
         assertThat(uuid, is(letterId));
-        verify(generalOrderService).getLatestGeneralOrderForPrintingConsented(caseDetails.getData());
+        verify(generalOrderService).getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData());
     }
 
     @Test
@@ -156,7 +156,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
         assertThat(uuid, is(letterId));
 
-        verify(generalOrderService, times(1)).getLatestGeneralOrderForPrintingConsented(caseDetails.getData());
+        verify(generalOrderService, times(1)).getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData());
     }
 
     @Test

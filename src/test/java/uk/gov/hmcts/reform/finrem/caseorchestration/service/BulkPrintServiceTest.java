@@ -135,7 +135,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
             = "/fixtures/refusal-order-contested.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
 
-        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails.getData()), is(false));
+        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails), is(false));
     }
 
     @Test
@@ -147,7 +147,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         caseDetails.getData().remove("applicantSolicitorConsentForEmails");
         caseDetails.getData().put("paperApplication", "No");
 
-        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails.getData()), is(true));
+        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails), is(true));
     }
 
     @Test
@@ -159,7 +159,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         caseDetails.getData().put("applicantSolicitorConsentForEmails", "No");
         caseDetails.getData().put("paperApplication", "No");
 
-        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails.getData()), is(true));
+        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails), is(true));
     }
 
     @Test
@@ -169,7 +169,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
         caseDetails.getData().put("paperApplication", "YES");
 
-        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails.getData()), is(true));
+        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails), is(true));
     }
 
     private CaseDetails caseDetails() {

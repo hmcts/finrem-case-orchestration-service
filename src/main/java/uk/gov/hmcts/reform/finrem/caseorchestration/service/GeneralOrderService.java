@@ -66,7 +66,7 @@ public class GeneralOrderService {
             .apply(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken);
     }
 
-    public BulkPrintDocument getLatestGeneralOrderForPrintingConsented(Map<String, Object> caseData) {
+    public BulkPrintDocument getLatestGeneralOrderAsBulkPrintDocument(Map<String, Object> caseData) {
         if (isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
             log.warn("Latest general order not found for printing for case");
             return null;

@@ -46,10 +46,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
 public class TestSetUpUtils {
@@ -201,8 +206,7 @@ public class TestSetUpUtils {
     public static CaseDetails defaultConsentedCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
         populateApplicantNameAndAddress(caseData);
-        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "Jane");
-        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, "Doe");
+        populateRespondentNameAndAddressConsented(caseData);
 
         return CaseDetails.builder()
             .caseTypeId(CASE_TYPE_ID_CONSENTED)
@@ -214,8 +218,7 @@ public class TestSetUpUtils {
     public static CaseDetails defaultContestedCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
         populateApplicantNameAndAddress(caseData);
-        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "Jane");
-        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, "Doe");
+        populateRespondentNameAndAddressContested(caseData);
 
         return CaseDetails.builder()
             .caseTypeId(CASE_TYPE_ID_CONTESTED)
@@ -246,6 +249,38 @@ public class TestSetUpUtils {
         } catch (Exception exception) {
             throw new IllegalStateException(exception.getMessage(), exception);
         }
+    }
+
+    private static void populateRespondentNameAndAddressConsented(Map<String, Object> caseData) {
+        Map<String, Object> respondentAddress = new HashMap<>();
+        respondentAddress.put("AddressLine1", "50 Respondent Street");
+        respondentAddress.put("AddressLine2", "Consented");
+        respondentAddress.put("AddressLine3", "Third Address Line");
+        respondentAddress.put("County", "London");
+        respondentAddress.put("Country", "England");
+        respondentAddress.put("PostTown", "London");
+        respondentAddress.put("PostCode", "SW1");
+
+        caseData.put(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, "Jane");
+        caseData.put(CONSENTED_RESPONDENT_LAST_NAME, "Doe");
+        caseData.put(RESPONDENT_ADDRESS, respondentAddress);
+        caseData.put(CONSENTED_RESPONDENT_REPRESENTED, null);
+    }
+
+    private static void populateRespondentNameAndAddressContested(Map<String, Object> caseData) {
+        Map<String, Object> respondentAddress = new HashMap<>();
+        respondentAddress.put("AddressLine1", "50 Respondent Street");
+        respondentAddress.put("AddressLine2", "Contested");
+        respondentAddress.put("AddressLine3", "Third Address Line");
+        respondentAddress.put("County", "London");
+        respondentAddress.put("Country", "England");
+        respondentAddress.put("PostTown", "London");
+        respondentAddress.put("PostCode", "SW1");
+
+        caseData.put(CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, "Jane");
+        caseData.put(CONTESTED_RESPONDENT_LAST_NAME, "Doe");
+        caseData.put(RESPONDENT_ADDRESS, respondentAddress);
+        caseData.put(CONTESTED_RESPONDENT_REPRESENTED, null);
     }
 
     public static DocumentGenerationRequest matchDocumentGenerationRequestTemplateAndFilename(String template, String filename) {

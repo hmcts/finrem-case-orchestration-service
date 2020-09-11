@@ -47,7 +47,7 @@ public class ConsentOrderPrintService {
     public Map<String, Object> sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (bulkPrintService.shouldPrintForApplicant(caseData)) {
+        if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
             UUID applicantLetterId = isOrderApprovedCollectionPresent(caseData)
                 ? printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken)
                 : printApplicantConsentOrderNotApprovedDocuments(caseDetails, authorisationToken);
@@ -103,7 +103,7 @@ public class ConsentOrderPrintService {
         bulkPrintDocuments.addAll(orderDocuments);
 
         if (!isOrderApprovedCollectionPresent(caseDetails.getData()) && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
-            bulkPrintDocuments.add(generalOrderService.getLatestGeneralOrderForPrintingConsented(caseDetails.getData()));
+            bulkPrintDocuments.add(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData()));
         }
 
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), bulkPrintDocuments);
