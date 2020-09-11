@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
 
 import java.util.Map;
@@ -76,7 +77,7 @@ public class GeneralApplicationControllerTest extends BaseControllerTest {
     @Test
     public void startGeneralApplication500Error() throws Exception {
         doValidCaseDataSetUp();
-        doThrow(feignError()).when(generalApplicationService).updateCaseDataStart(isA(Map.class));
+        doThrow(feignError()).when(generalApplicationService).updateCaseDataStart(isA(CaseDetails.class));
 
         mvc.perform(post(START_GENERAL_APPLICATION_URL)
             .content(requestContent.toString())

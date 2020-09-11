@@ -204,6 +204,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_DRAFT_ORDER = "generalApplicationDraftOrder";
     public static final String GENERAL_APPLICATION_DOCUMENT_COLLECTION = "generalApplicationCollection";
     public static final String GENERAL_APPLICATION_DOCUMENT_LATEST_DATE = "generalApplicationLatestDocumentDate";
+    public static final String GENERAL_APPLICATION_PRE_STATE = "generalApplicationPreState";
 
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";

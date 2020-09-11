@@ -26,6 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_HEARING_REQUIRED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_RECEIVED_FROM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_SPECIAL_MEASURES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_TIME_ESTIMATE;
@@ -74,7 +75,7 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
     public void updateCaseDataStart() {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/general-application-multiple.json", objectMapper);
 
-        generalApplicationService.updateCaseDataStart(caseDetails.getData());
+        generalApplicationService.updateCaseDataStart(caseDetails);
 
         assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_RECEIVED_FROM), is(false));
         assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_CREATED_BY), is(false));
@@ -83,6 +84,7 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
         assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_SPECIAL_MEASURES), is(false));
         assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_DOCUMENT), is(false));
         assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_DRAFT_ORDER), is(false));
+        assertThat(caseDetails.getData().get(GENERAL_APPLICATION_PRE_STATE), is("applicationDrafted"));
     }
 
     private static void doCaseDocumentAssert(CaseDocument result) {
