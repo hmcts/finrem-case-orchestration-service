@@ -7,6 +7,8 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
+      "applicantRepresented": "Yes",
+      "applicantSolicitorConsentForEmails": "Yes",
       "PBANumber": "PBA123456",
       "d81Question": "No",
       "PBAreference": "ABCD",
@@ -81,7 +83,6 @@
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
       "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "Yes",
       "judgeNotApprovedReasons": [
         {
           "id": "7503a568-8b05-469f-bab7-3f9a59d7a6e3",

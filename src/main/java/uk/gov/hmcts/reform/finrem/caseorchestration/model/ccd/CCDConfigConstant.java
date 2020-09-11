@@ -184,6 +184,9 @@ public class CCDConfigConstant {
     public static final String CONTESTED_ORDER_DIRECTION_JUDGE_NAME = "consentJudgeName";
     public static final String CONSENTED_ORDER_DIRECTION_DATE = "orderDirectionDate";
     public static final String CONTESTED_ORDER_DIRECTION_DATE = "consentDateOfOrder";
+    public static final String PENSION_DOCUMENTS = "pensionDocuments";
+    public static final String ORDER_LETTER = "orderLetter";
+
 
 
     public static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";

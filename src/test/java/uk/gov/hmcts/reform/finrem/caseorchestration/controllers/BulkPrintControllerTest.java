@@ -2,12 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 
 import java.util.Map;
 
@@ -27,8 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 @WebMvcTest(BulkPrintController.class)
 public class BulkPrintControllerTest extends BaseControllerTest {
 
-    @Autowired
-    private ObjectMapper mapper;
+    private ObjectMapper mapper = new ObjectMapper();
 
     private static final String BULK_PRINT_URI = "/case-orchestration/bulk-print";
     private static final String CONTESTED_HWF_JSON = "/fixtures/contested/hwf.json";
@@ -39,9 +38,12 @@ public class BulkPrintControllerTest extends BaseControllerTest {
     @MockBean
     private BulkPrintService bulkPrintService;
 
+    @MockBean
+    private ConsentOrderPrintService consentOrderPrintService;
+
     @Test
     public void shouldSendForBulkPrint() throws Exception {
-        when(bulkPrintService.sendConsentOrderToBulkPrint(any(), any())).thenReturn(caseData());
+        when(consentOrderPrintService.sendConsentOrderToBulkPrint(any(), any())).thenReturn(caseData());
 
         mvc.perform(
             post(BULK_PRINT_URI)
@@ -53,19 +55,19 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes", is(1)))
                 .andExpect(jsonPath("$.data.bulkPrintLetterIdRes", is(1)))
                 .andExpect(jsonPath("$.data.bulkPrintLetterIdApp", is(1)));
-        verify(bulkPrintService, times(1)).sendConsentOrderToBulkPrint(any(), any());
+        verify(consentOrderPrintService, times(1)).sendConsentOrderToBulkPrint(any(), any());
     }
 
     @Test
     public void shouldThrowExceptionOnSendForBulkPrint() throws Exception {
-        when(bulkPrintService.sendConsentOrderToBulkPrint(any(), any())).thenThrow(feignError());
+        when(consentOrderPrintService.sendConsentOrderToBulkPrint(any(), any())).thenThrow(feignError());
         mvc.perform(
             post(BULK_PRINT_URI)
                 .content(resourceContentAsString(CONTESTED_HWF_JSON))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isInternalServerError());
-        verify(bulkPrintService).sendConsentOrderToBulkPrint(any(), any());
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
     }
 
     private Map<String, Object> caseData() {
