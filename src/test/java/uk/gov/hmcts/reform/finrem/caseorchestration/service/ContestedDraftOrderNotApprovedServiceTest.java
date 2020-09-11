@@ -16,8 +16,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGener
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -99,6 +101,19 @@ public class ContestedDraftOrderNotApprovedServiceTest {
             is("refusalOrderTestFilename.pdf"));
         assertThat(latestRefusalOrder.getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
+    }
+
+    @Test
+    public void getLatestRefusalReasonShouldReturnLatestReason() throws Exception {
+        Optional<CaseDocument> doc = refusalOrderService.getLatestRefusalReason(contestedCaseDetails(true));
+        assertThat(doc.isPresent(), is(true));
+        assertThat(doc.get().getDocumentFilename(), is("app_docs.pdf"));
+    }
+
+    @Test
+    public void getLatestRefusalReasonShouldReturnEmptyOptionalIfNoReason() throws Exception {
+        Optional<CaseDocument> doc = refusalOrderService.getLatestRefusalReason(CaseDetails.builder().data(new HashMap<String, Object>()).build());
+        assertThat(doc.isPresent(), is(false));
     }
 
     private CaseDetails contestedCaseDetails(boolean multipleReasons) throws Exception {

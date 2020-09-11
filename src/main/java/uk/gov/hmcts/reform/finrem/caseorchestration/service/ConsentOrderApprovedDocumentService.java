@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_TITLE;
@@ -36,6 +38,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_JUDGE_TITLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Service
@@ -45,7 +49,6 @@ public class ConsentOrderApprovedDocumentService {
 
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
-    private final BulkPrintService bulkPrintService;
     private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
 
@@ -97,7 +100,7 @@ public class ConsentOrderApprovedDocumentService {
             bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter));
         }
 
-        List<BulkPrintDocument> approvedOrderCollection = bulkPrintService.approvedOrderCollection(caseDetails);
+        List<BulkPrintDocument> approvedOrderCollection = approvedOrderCollection(caseDetails);
         bulkPrintDocuments.addAll(approvedOrderCollection);
 
         return bulkPrintDocuments;
@@ -189,5 +192,30 @@ public class ConsentOrderApprovedDocumentService {
         caseData.put(CONSENTED_ORDER_DIRECTION_DATE, caseData.get(CONTESTED_ORDER_DIRECTION_DATE));
 
         return detailsCopy;
+    }
+
+    public List<BulkPrintDocument> approvedOrderCollection(CaseDetails caseDetails) {
+        Map<String, Object> data = caseDetails.getData();
+        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        List collection = CommonFunction.isConsentedInContestedCase(caseDetails)
+            ? (List)data.get(CONTESTED_CONSENT_ORDER_COLLECTION)
+            : (List)data.get(APPROVED_ORDER_COLLECTION);
+
+        List<Map> documentList = ofNullable(collection)
+            .map(i -> (List<Map>) i)
+            .orElse(new ArrayList<>());
+
+        if (!documentList.isEmpty()) {
+            log.info("Extracting 'approvedOrderCollection' from case data for bulk print: {}", data);
+            Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get(VALUE));
+            documentHelper.getDocumentLinkAsBulkPrintDocument(value, "orderLetter").ifPresent(bulkPrintDocuments::add);
+            documentHelper.getDocumentLinkAsBulkPrintDocument(value, CONSENT_ORDER).ifPresent(bulkPrintDocuments::add);
+            bulkPrintDocuments.addAll(documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(value,
+                "pensionDocuments", "uploadedDocument"));
+        } else {
+            log.info("Failed to extract 'approvedOrderCollection' from case data for bulk print as document list was empty.");
+        }
+
+        return bulkPrintDocuments;
     }
 }

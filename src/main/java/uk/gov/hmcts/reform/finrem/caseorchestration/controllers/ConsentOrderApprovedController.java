@@ -23,8 +23,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -55,7 +55,7 @@ public class ConsentOrderApprovedController implements BaseController {
 
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final GenericDocumentService genericDocumentService;
-    private final BulkPrintService bulkPrintService;
+    private final ConsentOrderPrintService consentOrderPrintService;
     private final NotificationService notificationService;
     private final FeatureToggleService featureToggleService;
     private final ObjectMapper mapper;
@@ -135,7 +135,7 @@ public class ConsentOrderApprovedController implements BaseController {
             consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
         }
 
-        bulkPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
+        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDetails.getData())
@@ -183,7 +183,7 @@ public class ConsentOrderApprovedController implements BaseController {
                 // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
                 caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
                 caseDetails.setData(caseData);
-                caseData = bulkPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
+                caseData = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
                 notificationService.sendConsentOrderAvailableCtscEmail(callback);
             } catch (JsonProcessingException e) {
