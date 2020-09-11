@@ -131,7 +131,7 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
         Optional<CaseDocument> refusalReason = contestedNotApprovedService.getLatestRefusalReason(caseDetails);
 
         if (refusalReason.isPresent()) {
-            if (bulkPrintService.shouldPrintForApplicant(caseDetails.getData())) {
+            if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
                     Arrays.asList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
             }

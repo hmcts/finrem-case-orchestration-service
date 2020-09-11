@@ -213,6 +213,24 @@ public class DocumentHelperTest {
         assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
     }
 
+    @Test
+    public void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated() {
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterToRespondentTemplateData(defaultConsentedCaseDetails());
+
+        CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
+            .serviceCentre(CTSC_SERVICE_CENTRE)
+            .careOf(CTSC_CARE_OF)
+            .poBox(CTSC_PO_BOX)
+            .town(CTSC_TOWN)
+            .postcode(CTSC_POSTCODE)
+            .emailAddress(CTSC_EMAIL_ADDRESS)
+            .phoneNumber(CTSC_PHONE_NUMBER)
+            .openingHours(CTSC_OPENING_HOURS)
+            .build();
+
+        assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
+    }
+
     private CallbackRequest prepareCallbackRequest(String fileName) throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class);

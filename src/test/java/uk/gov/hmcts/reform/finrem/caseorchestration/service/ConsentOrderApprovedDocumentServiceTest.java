@@ -13,14 +13,16 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +51,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.docume
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchDocumentGenerationRequestTemplateAndFilename;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
@@ -65,6 +68,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     private ObjectMapper mapper;
 
     @Autowired
+    private DocumentHelper documentHelper;
+
+    @Autowired
     private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
 
     @Autowired
@@ -72,6 +78,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @MockBean
     private BulkPrintService bulkPrintService;
+
+    @MockBean
+    private ConsentOrderPrintService consentOrderPrintService;
 
     @Value("${document.bulkPrintTemplate}") private String documentBulkPrintTemplate;
     @Value("${document.bulkPrintFileName}") private String documentBulkPrintFileName;
@@ -186,10 +195,11 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenPreparingApplicantLetterPack() {
-        when(bulkPrintService.approvedOrderCollection(caseDetails)).thenReturn(preparePaperCaseConsentOrderApprovedCaseData());
+    public void whenPreparingApplicantLetterPack() throws Exception {
+        CaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        addConsentOrderApprovedDataToCaseDetails(caseDetailsTemp);
 
-        List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN);
+        List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetailsTemp, AUTH_TOKEN);
 
         System.out.println(documents);
         assertThat(documents, hasSize(3));
@@ -199,11 +209,12 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenPreparingApplicantLetterPack_paperApplication() {
-        caseDetails.getData().put(PAPER_APPLICATION, YES_VALUE);
-        when(bulkPrintService.approvedOrderCollection(caseDetails)).thenReturn(preparePaperCaseConsentOrderApprovedCaseData());
+    public void whenPreparingApplicantLetterPack_paperApplication() throws Exception {
+        CaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+        caseDetailsTemp.getData().put(PAPER_APPLICATION, YES_VALUE);
+        addConsentOrderApprovedDataToCaseDetails(caseDetailsTemp);
 
-        List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN);
+        List<BulkPrintDocument> documents = consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetailsTemp, AUTH_TOKEN);
 
         System.out.println(documents);
         assertThat(documents, hasSize(4));
@@ -228,24 +239,40 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertThat(getDocumentList(data, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(2));
     }
 
+    @Test
+    public void shouldConvertCollectionDocument() {
+        List<BulkPrintDocument> bulkPrintDocuments = consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails());
+
+        assertThat(bulkPrintDocuments, hasSize(4));
+    }
+
     private List<CaseDocument> getDocumentList(Map<String, Object> data, String field) {
         return mapper.convertValue(data.get(field),
             new TypeReference<List<CaseDocument>>() {
             });
     }
 
-    private List<BulkPrintDocument> preparePaperCaseConsentOrderApprovedCaseData() {
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+    private void addConsentOrderApprovedDataToCaseDetails(CaseDetails caseDetails) throws Exception {
+        PensionCollectionData pensionData = pensionDocumentData();
+        pensionData.getTypedCaseDocument().getPensionDocument().setDocumentBinaryUrl(PENSION_DOCUMENT_URL);
 
-        bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(ORDER_LETTER_URL).build());
-        bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(CONSENT_ORDER_URL).build());
-        bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(PENSION_DOCUMENT_URL).build());
+        ApprovedOrder approvedOrder = ApprovedOrder.builder()
+            .consentOrder(caseDocument(CONSENT_ORDER_URL, CONSENT_ORDER_URL, CONSENT_ORDER_URL))
+            .pensionDocuments(asList(pensionData))
+            .orderLetter(caseDocument(ORDER_LETTER_URL, ORDER_LETTER_URL, ORDER_LETTER_URL))
+            .build();
+        ApprovedOrderData approvedOrderData = ApprovedOrderData.builder().approvedOrder(approvedOrder).build();
 
-        return bulkPrintDocuments;
+        caseDetails.getData().put(APPROVED_ORDER_COLLECTION, asList(approvedOrderData));
+        caseDetails.setData(mapper.readValue(mapper.writeValueAsString(caseDetails.getData()), HashMap.class));
     }
 
     private List<ApprovedOrderData> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<List<ApprovedOrderData>>() {
         });
+    }
+
+    private CaseDetails caseDetails() {
+        return TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print.json", mapper);
     }
 }
