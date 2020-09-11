@@ -130,11 +130,13 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for send refusal reason for case with Case ID: {}", caseDetails.getId());
+
         validateCaseData(callback);
 
         Optional<CaseDocument> refusalReason = contestedNotApprovedService.getLatestRefusalReason(caseDetails);
 
         if (refusalReason.isPresent() && featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()) {
+
             if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
                     Arrays.asList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));

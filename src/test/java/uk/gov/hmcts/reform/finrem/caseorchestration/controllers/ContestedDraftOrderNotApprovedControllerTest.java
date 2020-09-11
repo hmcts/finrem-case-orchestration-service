@@ -252,8 +252,6 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
         verify(bulkPrintService, times(0)).printRespondentDocuments(any(), any(), any());
     }
 
-
-
     private OngoingStubbing<Map<String, Object>> whenServicePopulatesCollection() {
         return when(contestedDraftOrderNotApprovedService.populateRefusalOrderCollection(isA(CaseDetails.class)));
     }
