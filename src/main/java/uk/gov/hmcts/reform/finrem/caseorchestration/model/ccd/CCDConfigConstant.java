@@ -38,6 +38,13 @@ public class CCDConfigConstant {
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";
     public static final String APPLICANT_REPRESENTED_PAPER = "applicantRepresentedPaper";
 
+    //Respondent Solicitor Related
+    public static final String CONSENTED_RESPONDENT_REPRESENTED = "appRespondentRep";
+    public static final String CONTESTED_RESPONDENT_REPRESENTED = "respondentRepresented";
+    public static final String RESP_SOLICITOR_NAME = "rSolicitorName";
+    public static final String RESP_SOLICITOR_ADDRESS = "rSolicitorAddress";
+    public static final String RESP_SOLICITOR_REFERENCE = "rSolicitorReference";
+
     //Court related
     public static final String KENT = "kentfrc";
     public static final String REGION = "regionList";
@@ -98,12 +105,6 @@ public class CCDConfigConstant {
     public static final String MANCHESTER_COURTLIST = "manchesterCourtList";
     public static final String NWOTHER_COURTLIST = "otherNWCourtList";
     public static final String LIVERPOOL_COURTLIST = "liverpoolCourtList";
-
-    //Respondent Solicitor Related
-    public static final String CONSENTED_RESPONDENT_REPRESENTED = "appRespondentRep";
-    public static final String CONTESTED_RESPONDENT_REPRESENTED = "respondentRepresented";
-    public static final String RESP_SOLICITOR_NAME = "rSolicitorName";
-    public static final String RESP_SOLICITOR_ADDRESS = "rSolicitorAddress";
 
     //Draft Order Related
     public static final String SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER = "solicitorResponsibleForDraftingOrder";
