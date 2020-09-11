@@ -17,6 +17,7 @@ import static com.microsoft.applicationinsights.core.dependencies.io.grpc.netty.
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER;
@@ -140,32 +141,18 @@ public class CommonFunctionTest {
     public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnTrueWhenAppSolAgreedToReceiveEmailsIsYesForConsented() {
         Map<String, Object> data = new HashMap<>();
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(data).build();
 
-        assertThat(isApplicantSolicitorAgreeToReceiveEmails(data), is(true));
+        assertThat(isApplicantSolicitorAgreeToReceiveEmails(caseDetails), is(true));
     }
 
     @Test
     public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnFalseWhenAppSolAgreedToReceiveEmailsIsNoForConsented() {
         Map<String, Object> data = new HashMap<>();
         data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, null);
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(data).build();
 
-        assertThat(isApplicantSolicitorAgreeToReceiveEmails(data), is(false));
-    }
-
-    @Test
-    public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnTrueWhenAppSolAgreedToReceiveEmailsIsYesForContested() {
-        Map<String, Object> data = new HashMap<>();
-        data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
-
-        assertThat(isApplicantSolicitorAgreeToReceiveEmails(data), is(true));
-    }
-
-    @Test
-    public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnFalseWhenAppSolAgreedToReceiveEmailsIsNoForContested() {
-        Map<String, Object> data = new HashMap<>();
-        data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, null);
-
-        assertThat(isApplicantSolicitorAgreeToReceiveEmails(data), is(false));
+        assertThat(isApplicantSolicitorAgreeToReceiveEmails(caseDetails), is(false));
     }
 
     @Test
