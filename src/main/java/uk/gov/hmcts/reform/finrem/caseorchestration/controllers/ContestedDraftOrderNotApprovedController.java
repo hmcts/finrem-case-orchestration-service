@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import javax.validation.constraints.NotNull;
@@ -41,6 +42,9 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
 
     @Autowired
     private BulkPrintService bulkPrintService;
+
+    @Autowired
+    private FeatureToggleService featureToggleService;
 
     @Autowired
     private final ContestedDraftOrderNotApprovedService contestedNotApprovedService;
@@ -130,7 +134,7 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
 
         Optional<CaseDocument> refusalReason = contestedNotApprovedService.getLatestRefusalReason(caseDetails);
 
-        if (refusalReason.isPresent()) {
+        if (refusalReason.isPresent() && featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()) {
             if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
                     Arrays.asList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
