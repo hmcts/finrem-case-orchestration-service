@@ -43,7 +43,7 @@ public class GeneralApplicationControllerTest extends BaseControllerTest {
     @Test
     public void submitGeneralApplication500Error() throws Exception {
         doValidCaseDataSetUp();
-        doThrow(feignError()).when(generalApplicationService).updateCaseDataSubmit(isA(Map.class));
+        doThrow(feignError()).when(generalApplicationService).updateCaseDataSubmit(isA(CaseDetails.class));
 
         mvc.perform(post(SUBMIT_GENERAL_APPLICATION_URL)
                 .content(requestContent.toString())
@@ -77,7 +77,7 @@ public class GeneralApplicationControllerTest extends BaseControllerTest {
     @Test
     public void startGeneralApplication500Error() throws Exception {
         doValidCaseDataSetUp();
-        doThrow(feignError()).when(generalApplicationService).updateCaseDataStart(isA(CaseDetails.class));
+        doThrow(feignError()).when(generalApplicationService).updateCaseDataStart(isA(Map.class));
 
         mvc.perform(post(START_GENERAL_APPLICATION_URL)
             .content(requestContent.toString())

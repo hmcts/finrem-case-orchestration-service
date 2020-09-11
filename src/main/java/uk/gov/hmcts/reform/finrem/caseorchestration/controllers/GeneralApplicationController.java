@@ -45,7 +45,7 @@ public class GeneralApplicationController implements BaseController {
         log.info("Received request to submit general application for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData());
+        generalApplicationService.updateCaseDataSubmit(caseDetails);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
@@ -67,9 +67,7 @@ public class GeneralApplicationController implements BaseController {
         log.info("Received request to start general application for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        generalApplicationService.updateCaseDataStart(caseDetails);
-
-        log.info("startGeneralApplication caseDetails.getData: {}", caseDetails.getData());
+        generalApplicationService.updateCaseDataStart(caseDetails.getData());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()

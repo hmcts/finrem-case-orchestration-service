@@ -41,7 +41,7 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
     public void updateCaseDataSubmit() {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/general-application.json", objectMapper);
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData());
+        generalApplicationService.updateCaseDataSubmit(caseDetails);
 
         List<GeneralApplicationData> generalApplicationDataList =
             (List<GeneralApplicationData>) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_COLLECTION);
@@ -51,13 +51,14 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
         assertThat(generalApplicationDataList, hasSize(1));
         assertThat(caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE), is(LocalDate.now()));
         doCaseDocumentAssert(generalApplicationDataList.get(0).getGeneralApplication().getGeneralApplicationDocument());
+        assertThat(caseDetails.getData().get(GENERAL_APPLICATION_PRE_STATE), is("applicationIssued"));
     }
 
     @Test
     public void updateCaseDataSubmit_multiple() {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/general-application-multiple.json", objectMapper);
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData());
+        generalApplicationService.updateCaseDataSubmit(caseDetails);
 
         List<GeneralApplicationData> generalApplicationDataList =
             (List<GeneralApplicationData>) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_COLLECTION);
@@ -69,13 +70,14 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
 
         CaseDocument generalApplicationLatest = (CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_LATEST);
         doCaseDocumentAssert(generalApplicationLatest);
+        assertThat(caseDetails.getData().get(GENERAL_APPLICATION_PRE_STATE), is("applicationIssued"));
     }
 
     @Test
     public void updateCaseDataStart() {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/general-application-multiple.json", objectMapper);
 
-        generalApplicationService.updateCaseDataStart(caseDetails);
+        generalApplicationService.updateCaseDataStart(caseDetails.getData());
 
         assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_RECEIVED_FROM), is(false));
         assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_CREATED_BY), is(false));
@@ -84,7 +86,6 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
         assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_SPECIAL_MEASURES), is(false));
         assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_DOCUMENT), is(false));
         assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_DRAFT_ORDER), is(false));
-        assertThat(caseDetails.getData().get(GENERAL_APPLICATION_PRE_STATE), is("applicationDrafted"));
     }
 
     private static void doCaseDocumentAssert(CaseDocument result) {
