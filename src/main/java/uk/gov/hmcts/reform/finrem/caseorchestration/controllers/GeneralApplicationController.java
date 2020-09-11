@@ -69,8 +69,6 @@ public class GeneralApplicationController implements BaseController {
 
         generalApplicationService.updateCaseDataStart(caseDetails);
 
-        log.info("startGeneralApplication caseDetails.getData: {}", caseDetails.getData());
-
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(caseDetails.getData()).build());
