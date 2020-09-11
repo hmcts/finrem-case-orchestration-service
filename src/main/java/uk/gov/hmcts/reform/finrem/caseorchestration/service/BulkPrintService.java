@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
 
@@ -16,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static java.util.Arrays.asList;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
@@ -26,7 +24,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
@@ -63,15 +60,13 @@ public class BulkPrintService {
         this.coverSheetService = coverSheetService;
     }
 
-    public UUID sendNotificationLetterForBulkPrint(final CaseDocument notificationLetter, final CaseDetails caseDetails) {
-        List<BulkPrintDocument> notificationLetterList = Collections.singletonList(
-            documentHelper.getCaseDocumentAsBulkPrintDocument(notificationLetter));
+    public UUID sendDocumentForPrint(final CaseDocument document, CaseDetails caseDetails) {
+        List<BulkPrintDocument> bulkPrintDocument = Collections.singletonList(
+            BulkPrintDocument.builder().binaryFileUrl(document.getDocumentBinaryUrl()).build());
 
-        Long caseId = caseDetails.getId();
-        log.info("Notification letter sent to Bulk Print: {} for Case ID: {}", notificationLetterList, caseId);
-
-        return bulkPrintFinancialRemedyLetterPack(caseId, notificationLetterList);
+        return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, bulkPrintDocument);
     }
+
 
     public UUID sendOrderForBulkPrintRespondent(final CaseDocument coverSheet, final CaseDetails caseDetails) {
         log.info("Sending order documents to recipient / solicitor for Bulk Print");
@@ -88,20 +83,12 @@ public class BulkPrintService {
         bulkPrintDocuments.addAll(orderDocuments);
 
         if (!isOrderApprovedCollectionPresent(caseDetails.getData()) && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
-            bulkPrintDocuments.add(generalOrderService.getLatestGeneralOrderForPrintingConsented(caseDetails.getData()));
+            bulkPrintDocuments.add(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData()));
         }
 
         return bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), bulkPrintDocuments);
     }
 
-    public UUID printLatestGeneralLetter(CaseDetails caseDetails) {
-        List<GeneralLetterData> generalLettersData = documentHelper.convertToGeneralLetterData(caseDetails.getData().get(GENERAL_LETTER));
-        GeneralLetterData latestGeneralLetterData = generalLettersData.get(generalLettersData.size() - 1);
-        BulkPrintDocument latestGeneralLetter = BulkPrintDocument.builder()
-            .binaryFileUrl(latestGeneralLetterData.getGeneralLetter().getGeneratedLetter().getDocumentBinaryUrl())
-            .build();
-        return bulkPrintDocuments(caseDetails.getId(), FINANCIAL_REMEDY_GENERAL_LETTER, asList(latestGeneralLetter));
-    }
 
     public List<BulkPrintDocument> approvedOrderCollection(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
@@ -164,7 +151,7 @@ public class BulkPrintService {
     public Map<String, Object> sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (!isApplicantRepresentedByASolicitor(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseData)
+        if (!isApplicantRepresentedByASolicitor(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
             || isPaperApplication(caseData)) {
             UUID applicantLetterId = isOrderApprovedCollectionPresent(caseData)
                 ? printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken)

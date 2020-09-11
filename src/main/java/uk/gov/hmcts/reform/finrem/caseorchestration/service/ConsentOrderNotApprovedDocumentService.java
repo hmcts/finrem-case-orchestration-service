@@ -65,7 +65,7 @@ public class ConsentOrderNotApprovedDocumentService {
             && consentOrderInContestedNotApprovedList(caseData).isEmpty();
 
         if ((isPaperApplication(caseData) || isContestedCaseWithNoConsentOrders) && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
-            BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderForPrintingConsented(caseData);
+            BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseData);
             if (generalOrder != null) {
                 existingList.add(generalOrder);
             }

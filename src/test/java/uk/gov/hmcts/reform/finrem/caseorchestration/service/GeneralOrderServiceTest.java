@@ -39,7 +39,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 
-
 public class GeneralOrderServiceTest {
 
     private DocumentClient generatorClient;
@@ -85,7 +84,7 @@ public class GeneralOrderServiceTest {
         assertThat(generalOrders.get(0).getId(), is("1234"));
         assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
         assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentFilename(),
-            is("app_docs.pdf"));
+            is("generalOrder.pdf"));
         assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentBinaryUrl(),
             is("http://dm-store/lhjbyuivu87y989hijbb/binary"));
 
@@ -218,7 +217,7 @@ public class GeneralOrderServiceTest {
     @Test
     public void getsCorrectGeneralOrdersForPrintingConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
-        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderForPrintingConsented(details.getData());
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData());
         assertThat(latestGeneralOrder.getBinaryFileUrl(), is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
 
@@ -226,7 +225,7 @@ public class GeneralOrderServiceTest {
     public void getsZeroGeneralOrdersForPrintingWhenNoneConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
         details.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, null);
-        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderForPrintingConsented(details.getData());
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData());
         assertTrue(latestGeneralOrder == null);
     }
 

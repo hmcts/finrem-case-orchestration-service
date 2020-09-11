@@ -98,7 +98,7 @@
       },
       "divorceDecreeAbsoluteDate": "2010-01-01",
       "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "Yes",
+      "applicantSolicitorConsentForEmails": "Yes",
       "orderDirection": "test",
       "orderDirectionOpt1": {
         "document_url": "http://file1",
@@ -252,6 +252,8 @@
             "amendedConsentOrderDate": "2010-01-02"
           }
         }
+      ],
+      "finalOrderCollection": [
       ]
     }
   }
