@@ -1,15 +1,15 @@
 {
   "token": "token_test",
   "event_id": "some_event_id",
+  "case_details_before": {
+    "state":"applicationIssued"
+  },
   "case_details": {
     "id": 1234567890,
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
-      "case_details_before": {
-        "state":"applicationIssued"
-      },
       "PBANumber": "PBA123456",
       "d81Question": "No",
       "PBAreference": "ABCD",

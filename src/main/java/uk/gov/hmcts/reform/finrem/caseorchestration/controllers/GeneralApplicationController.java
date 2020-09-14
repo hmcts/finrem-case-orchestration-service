@@ -42,10 +42,11 @@ public class GeneralApplicationController implements BaseController {
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
+        CaseDetails caseDetailsBefore = callback.getCaseDetailsBefore();
         log.info("Received request to submit general application for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()

@@ -18,6 +18,7 @@ import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsBeforeFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
@@ -40,8 +41,9 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
     @Test
     public void updateCaseDataSubmit() {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/general-application.json", objectMapper);
+        CaseDetails caseDetailsBefore = caseDetailsBeforeFromResource("/fixtures/general-application.json", objectMapper);
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore);
 
         List<GeneralApplicationData> generalApplicationDataList =
             (List<GeneralApplicationData>) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_COLLECTION);
@@ -57,8 +59,9 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
     @Test
     public void updateCaseDataSubmit_multiple() {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/general-application-multiple.json", objectMapper);
+        CaseDetails caseDetailsBefore = caseDetailsBeforeFromResource("/fixtures/general-application-multiple.json", objectMapper);
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore);
 
         List<GeneralApplicationData> generalApplicationDataList =
             (List<GeneralApplicationData>) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_COLLECTION);
