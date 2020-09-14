@@ -11,6 +11,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.io.File;
@@ -52,6 +53,9 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
 
     @MockBean
     private BulkPrintService bulkPrintService;
+
+    @MockBean
+    private FeatureToggleService featureToggleService;
 
     @MockBean
     private ContestedDraftOrderNotApprovedService contestedDraftOrderNotApprovedService;
@@ -189,6 +193,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void submitSendRefusalReasonWithRefusalAndShouldPrintForApplicantTrue() throws Exception {
         doValidRefusalOrder();
+        when(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()).thenReturn(true);
         when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
@@ -204,6 +209,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void submitSendRefusalReasonWithRefusalAndShouldPrintForApplicantFalse() throws Exception {
         doValidRefusalOrder();
+        when(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()).thenReturn(true);
         when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(false);
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
@@ -219,6 +225,7 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void submitSendRefusalReasonWithNotRefusalReasonNotPrint() throws Exception {
         doValidCaseDataSetUpForPaperApplication();
+        when(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()).thenReturn(true);
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -229,7 +236,21 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
         verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
     }
 
-
+    @Test
+    public void submitSendRefusalReasonWithRefusalAndShouldNotPrintWhenToggleIsFalse() throws Exception {
+        doValidRefusalOrder();
+        when(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()).thenReturn(false);
+        when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+        verify(contestedDraftOrderNotApprovedService, times(1)).getLatestRefusalReason(any());
+        verify(bulkPrintService, times(0)).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, times(0)).printRespondentDocuments(any(), any(), any());
+    }
 
     private OngoingStubbing<Map<String, Object>> whenServicePopulatesCollection() {
         return when(contestedDraftOrderNotApprovedService.populateRefusalOrderCollection(isA(CaseDetails.class)));
