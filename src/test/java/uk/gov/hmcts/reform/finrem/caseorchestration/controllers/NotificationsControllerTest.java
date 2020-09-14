@@ -552,9 +552,7 @@ public class NotificationsControllerTest {
 
         verify(manualPaymentDocumentService, times(1))
             .generateApplicantManualPaymentLetter(any(CaseDetails.class), any());
-        verify(manualPaymentDocumentService, times(1))
-            .generateRespondentManualPaymentLetter(any(CaseDetails.class), any());
-        verify(bulkPrintService, times(2))
+        verify(bulkPrintService, times(1))
             .sendDocumentForPrint(any(),any());
         verifyNoInteractions(notificationService);
     }
