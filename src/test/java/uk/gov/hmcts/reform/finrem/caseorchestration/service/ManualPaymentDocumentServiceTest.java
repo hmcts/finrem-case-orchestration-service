@@ -84,33 +84,6 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldGenerateManualPaymentLetterForRespondentSolicitor() throws Exception {
-        caseDetails = contestedPaperCaseDetails();
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-
-        CaseDocument generatedManualPaymentLetter
-            = manualPaymentDocumentService.generateRespondentManualPaymentLetter(caseDetails, AUTH_TOKEN);
-
-        assertCaseDocument(generatedManualPaymentLetter);
-
-        verify(genericDocumentService, times(1)).generateDocument(any(),
-            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-
-        Map<String, Object> caseData =  documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-
-        Addressee addressee = (Addressee) caseData.get(ADDRESSEE);
-        assertThat(addressee.getName(), is("Respondent Solicitor firm"));
-        assertThat(addressee.getFormattedAddress(), is("1 Respondent Solicitor\nAddress\nLondon\nSW1A 1AA"));
-
-        CourtDetails courtDetails = convertToCourtDetails(caseData.get("courtDetails"));
-        assertThat(courtDetails, is(notNullValue()));
-        assertThat(courtDetails.getCourtName(), is("Port Talbot Justice Centre"));
-        assertThat(courtDetails.getCourtAddress(), is("Harbourside Road, Port Talbot, SA13 1SB"));
-        assertThat(courtDetails.getPhoneNumber(), is("01792 485 800"));
-        assertThat(courtDetails.getEmail(), is("FRCswansea@justice.gov.uk"));
-    }
-
-    @Test
     public void shouldGenerateManualPaymentLetterForApplicant() throws Exception {
         caseDetails = contestedPaperCaseDetailsWithoutSolicitors();
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
@@ -128,33 +101,6 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         Addressee addressee = (Addressee) caseData.get(ADDRESSEE);
         assertThat(addressee.getName(), is("Applicant Name"));
         assertThat(addressee.getFormattedAddress(), is("Buckingham Palace\nLondon\nSW1A 1AA"));
-
-        CourtDetails courtDetails = convertToCourtDetails(caseData.get("courtDetails"));
-        assertThat(courtDetails, is(notNullValue()));
-        assertThat(courtDetails.getCourtName(), is("Horsham County Court And Family Court"));
-        assertThat(courtDetails.getCourtAddress(), is("The Law Courts, Hurst Road, Horsham, RH12 2ET"));
-        assertThat(courtDetails.getPhoneNumber(), is("01634 887900"));
-        assertThat(courtDetails.getEmail(), is("FRCKSS@justice.gov.uk"));
-    }
-
-    @Test
-    public void shouldGenerateManualPaymentLetterForRespondent() throws Exception {
-        caseDetails = contestedPaperCaseDetailsWithoutSolicitors();
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-
-        CaseDocument generatedManualPaymentLetter
-            = manualPaymentDocumentService.generateRespondentManualPaymentLetter(caseDetails, AUTH_TOKEN);
-
-        assertCaseDocument(generatedManualPaymentLetter);
-
-        verify(genericDocumentService, times(1)).generateDocument(any(),
-            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
-
-        Map<String, Object> caseData =  documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-
-        Addressee addressee = (Addressee) caseData.get(ADDRESSEE);
-        assertThat(addressee.getName(), is("Respondent Name"));
-        assertThat(addressee.getFormattedAddress(), is("1 Respondent\nAddress\nLondon\nSW1A 1AA"));
 
         CourtDetails courtDetails = convertToCourtDetails(caseData.get("courtDetails"));
         assertThat(courtDetails, is(notNullValue()));

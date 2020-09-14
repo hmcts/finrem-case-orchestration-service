@@ -391,10 +391,6 @@ public class NotificationsController implements BaseController {
             CaseDocument applicantManualPaymentLetter =
                 manualPaymentDocumentService.generateApplicantManualPaymentLetter(caseDetails, authToken);
             bulkPrintService.sendDocumentForPrint(applicantManualPaymentLetter, caseDetails);
-
-            CaseDocument respondentManualPaymentLetter =
-                manualPaymentDocumentService.generateRespondentManualPaymentLetter(caseDetails, authToken);
-            bulkPrintService.sendDocumentForPrint(respondentManualPaymentLetter, caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
