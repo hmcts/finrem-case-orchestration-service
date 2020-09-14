@@ -92,7 +92,7 @@ public class HearingDocumentService {
         return isFastTrackApplication.apply(pair.getLeft().getData());
     }
 
-    private CaseDetails addCourtFields(CaseDetails caseDetails) {
+    CaseDetails addCourtFields(CaseDetails caseDetails) {
         try {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> data = caseDetails.getData();

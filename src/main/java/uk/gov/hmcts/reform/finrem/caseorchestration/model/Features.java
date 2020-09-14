@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum Features {
 
+    CONTESTED_PRINT_DRAFT_ORDER_NOT_APPROVED("contested_print_draft_order_not_approved"),
+    CONTESTED_PRINT_GENERAL_ORDER("contested_print_general_order"),
     CONTESTED_COURT_DETAILS_MIGRATION("contested_court_details_migration"),
     AUTOMATE_ASSIGN_JUDGE("automate_assign_judge"),
     AUTOMATE_SEND_ORDER("automate_send_order");

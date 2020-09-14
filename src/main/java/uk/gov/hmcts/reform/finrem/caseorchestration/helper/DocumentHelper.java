@@ -55,13 +55,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullName;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Component
@@ -170,7 +175,6 @@ public class DocumentHelper {
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
         boolean isConsentedApplication = isConsentedApplication(caseDetails);
-        String ccdNumber = nullToEmpty((caseDetailsCopy.getId()));
         String reference = "";
         String addresseeName;
         Map addressToSendTo;
@@ -189,6 +193,48 @@ public class DocumentHelper {
             addresseeName = applicantName;
             addressToSendTo = (Map) caseData.get(APPLICANT_ADDRESS);
         }
+        return prepareLetterTemplateData(caseDetailsCopy, reference, addresseeName, addressToSendTo, isConsentedApplication);
+    }
+
+    public CaseDetails prepareLetterToRespondentTemplateData(CaseDetails caseDetails) {
+        // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
+        CaseDetails caseDetailsCopy = deepCopy(caseDetails, CaseDetails.class);
+        Map<String, Object> caseData = caseDetailsCopy.getData();
+        boolean isConsentedApplication = isConsentedApplication(caseDetails);
+        String reference = "";
+        String addresseeName;
+        Map addressToSendTo;
+
+        String respondentName =  buildFullName(caseData,
+            isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME,
+            isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME);
+
+        if (isRespondentRepresentedByASolicitor(caseDetails.getData())) {
+            log.info("Respondent is represented by a solicitor");
+            reference = nullToEmpty((caseData.get(RESP_SOLICITOR_REFERENCE)));
+            addresseeName = nullToEmpty((caseData.get(RESP_SOLICITOR_NAME)));
+            addressToSendTo = (Map) caseData.get(RESP_SOLICITOR_ADDRESS);
+        } else {
+            log.info("Respondent is not represented by a solicitor");
+            addresseeName = respondentName;
+            addressToSendTo = (Map) caseData.get(RESPONDENT_ADDRESS);
+        }
+
+        return prepareLetterTemplateData(caseDetailsCopy, reference, addresseeName, addressToSendTo, isConsentedApplication);
+    }
+
+    private CaseDetails prepareLetterTemplateData(CaseDetails caseDetailsCopy, String reference,
+                                                  String addresseeName, Map addressToSendTo,
+                                                  boolean isConsentedApplication) {
+
+        Map<String, Object> caseData = caseDetailsCopy.getData();
+
+        String ccdNumber = nullToEmpty((caseDetailsCopy.getId()));
+        String applicantName = buildFullName(caseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
+        String respondentName =  buildFullName(caseData,
+            isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME,
+            isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME);
+
 
         if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
             Addressee addressee = Addressee.builder()

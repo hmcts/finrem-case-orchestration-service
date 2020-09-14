@@ -1,10 +1,4 @@
 {
-  "FR_s_CFCList_9": {
-    "courtName": "Central Family Court",
-    "courtAddress": "Central Family Court, First Avenue House, 42-49 High Holborn, London WC1V 6NP",
-    "phoneNumber": "0207 421 8594",
-    "email": "cfc.fru@justice.gov.uk"
-  },
   "FR_s_CFCList_1": {
     "courtName": "Bromley County Court And Family Court",
     "courtAddress": "Bromley County Court, College Road, Bromley, BR1 3PX",
@@ -46,6 +40,12 @@
     "courtAddress": "Brentford County Court, Alexandra Road, High Street, Brentford, TW8 0JJ",
     "phoneNumber": "0208 231 8940",
     "email": "brentfordcountycourt@justice.gov.uk"
+  },
+  "FR_s_CFCList_9": {
+    "courtName": "Central Family Court",
+    "courtAddress": "Central Family Court, First Avenue House, 42-49 High Holborn, London WC1V 6NP",
+    "phoneNumber": "0207 421 8594",
+    "email": "cfc.fru@justice.gov.uk"
   },
   "FR_s_CFCList_11": {
     "courtName": "East London Family Court",
@@ -349,7 +349,7 @@
   },
   "FR_kent_surrey_hc_list_4": {
     "courtName": "Medway County Court And Family Court",
-    "courtAddress": "Anchorage House, 47-67 High Street, Chatham, Me4 4DW",
+    "courtAddress": "Anchorage House, 47-67 High Street, Chatham, ME4 4DW",
     "phoneNumber": "01634 887900",
     "email": "FRCKSS@justice.gov.uk"
   },
@@ -421,7 +421,7 @@
   },
   "FR_swansea_hc_list_6": {
     "courtName": "Port Talbot Justice Centre",
-    "courtAddress": "Harbourside Road, Port Talbot, Sa13 1SB",
+    "courtAddress": "Harbourside Road, Port Talbot, SA13 1SB",
     "phoneNumber": "01792 485 800",
     "email": "FRCswansea@justice.gov.uk"
   },

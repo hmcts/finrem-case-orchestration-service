@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequ
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
@@ -102,8 +101,7 @@ public class BulkPrintService {
     }
 
     public boolean shouldPrintForApplicant(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        return !isApplicantRepresentedByASolicitor(caseData) || !isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
-            || isPaperApplication(caseData);
+        return !isApplicantRepresentedByASolicitor(caseDetails.getData()) || !isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
+            || isPaperApplication(caseDetails.getData());
     }
 }

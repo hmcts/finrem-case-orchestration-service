@@ -19,17 +19,20 @@ public class ContestedCaseOrderService {
 
     private final BulkPrintService bulkPrintService;
     private final GeneralOrderService generalOrderService;
+    private final FeatureToggleService featureToggleService;
 
     public List<String> printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
-        if (!contestedGeneralOrderPresent(caseDetails)) {
-            return asList("No general order present in the case");
-        }
+        if (featureToggleService.isContestedPrintGeneralOrderEnabled()) {
+            if (!contestedGeneralOrderPresent(caseDetails)) {
+                return asList("No general order present in the case");
+            }
 
-        BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData());
-        if (!isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, asList(generalOrder));
+            BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData());
+            if (!isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, asList(generalOrder));
+            }
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, asList(generalOrder));
         }
-        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, asList(generalOrder));
 
         return emptyList();
     }

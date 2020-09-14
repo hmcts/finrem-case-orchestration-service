@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocum
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManualPaymentDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.util.Map;
@@ -29,6 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorResponsibleToDraftOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @RestController
@@ -40,6 +42,7 @@ public class NotificationsController implements BaseController {
     private final BulkPrintService bulkPrintService;
     private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     private final HelpWithFeesDocumentService helpWithFeesDocumentService;
+    private final ManualPaymentDocumentService manualPaymentDocumentService;
     private final GeneralEmailService generalEmailService;
 
     @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
@@ -181,7 +184,7 @@ public class NotificationsController implements BaseController {
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
-   
+
     @PostMapping(value = "/case-orchestration/notify/contested-consent-order-not-approved", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for contested consent order not approved.")
     @ApiResponses(value = {
@@ -189,11 +192,9 @@ public class NotificationsController implements BaseController {
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedConsentOrderNotApprovedEmail(
         @RequestBody CallbackRequest callbackRequest) {
-
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
-
 
         if (!isPaperApplication(caseData) && isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Received request to send email for 'Contested Consent Order Not Approved' for Case ID: {}", caseDetails.getId());
@@ -202,7 +203,7 @@ public class NotificationsController implements BaseController {
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
-  
+
     @PostMapping(value = "/case-orchestration/notify/contested-consent-general-order", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for contested consent general order.")
     @ApiResponses(value = {
@@ -368,5 +369,31 @@ public class NotificationsController implements BaseController {
         CaseDetails updatedDetails = generalEmailService.storeGeneralEmail(callbackRequest.getCaseDetails());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(updatedDetails.getData()).build());
+    }
+
+    @PostMapping(value = "/case-orchestration/notify/manual-payment", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send a manual payment letter")
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "Manual Payment letter sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendManualPayment(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("Received request to send Manual Payment Letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        if (isContestedPaperApplication(caseDetails)) {
+            CaseDocument applicantManualPaymentLetter =
+                manualPaymentDocumentService.generateApplicantManualPaymentLetter(caseDetails, authToken);
+            bulkPrintService.sendDocumentForPrint(applicantManualPaymentLetter, caseDetails);
+
+            CaseDocument respondentManualPaymentLetter =
+                manualPaymentDocumentService.generateRespondentManualPaymentLetter(caseDetails, authToken);
+            bulkPrintService.sendDocumentForPrint(respondentManualPaymentLetter, caseDetails);
+        }
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 }

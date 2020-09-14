@@ -16,6 +16,8 @@ public class FeatureToggleServiceTest {
 
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
+        "feature.toggle.contested_print_draft_order_not_approved=true",
+        "feature.toggle.contested_print_general_order=true",
         "feature.toggle.automate_send_order=true"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOn {
@@ -29,6 +31,16 @@ public class FeatureToggleServiceTest {
         }
 
         @Test
+        public void isContestedPrintGeneralOrderEnabledReturnsTrue() {
+            assertThat(featureToggleService.isContestedPrintGeneralOrderEnabled(), is(true));
+        }
+
+        @Test
+        public void isContestedPrintDraftOrderNotApprovedEnabledReturnsTrue() {
+            assertThat(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled(), is(true));
+        }
+
+        @Test
         public void getFieldsIgnoredDuringSerialisationEmptyWhenFeaturesEnabled() {
             assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
         }
@@ -36,6 +48,8 @@ public class FeatureToggleServiceTest {
 
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
+        "feature.toggle.contested_print_draft_order_not_approved=false",
+        "feature.toggle.contested_print_general_order=false",
         "feature.toggle.automate_send_order=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff {
@@ -51,6 +65,16 @@ public class FeatureToggleServiceTest {
         @Test
         public void isAutomateSendOrderEnabledReturnFalse() {
             assertThat(featureToggleService.isAutomateSendOrderEnabled(), is(false));
+        }
+
+        @Test
+        public void isContestedPrintGeneralOrderEnabledReturnsFalse() {
+            assertThat(featureToggleService.isContestedPrintGeneralOrderEnabled(), is(false));
+        }
+
+        @Test
+        public void isContestedPrintDraftOrderNotApprovedEnabledReturnsFalse() {
+            assertThat(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled(), is(false));
         }
     }
 }

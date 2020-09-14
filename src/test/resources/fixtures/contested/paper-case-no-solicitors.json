@@ -1,0 +1,84 @@
+{
+  "token": "token_test",
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": 1598998126080929,
+    "state": "applicationSubmitted",
+    "version": 1,
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "respondentRepresented": "No",
+      "respondentLName": "Name",
+      "applicantRepresented": "No",
+      "divorcePetitionIssuedDate": "2010-01-01",
+      "divorceStageReached": "Petition Issued",
+      "applicantAttendedMIAM": "Yes",
+      "applicantFMName": "Applicant",
+      "specialAssistanceRequired": "N/A",
+      "fastTrackDecision": "No",
+      "respondentPhone": "",
+      "isApplicantsHomeCourt": "No",
+      "soleTraderName": "Trader Name",
+      "nameOfCourtDivorceCentre": "London Courts",
+      "copyOfPaperFormA": [
+        {
+          "id": "4c1fb0ef-0a85-485b-99f5-8756a9e23fef",
+          "value": {
+            "typeOfDocument": "Copy of paper form A",
+            "uploadedDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/eb75acd4-1323-4fcc-a5da-6efca57a7119",
+              "document_filename": "FakeDocumentUpload.docx",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/eb75acd4-1323-4fcc-a5da-6efca57a7119/binary"
+            }
+          }
+        }
+      ],
+      "divorceUploadPetition": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/57616727-57f8-4bb3-bf82-27d4ac137c64",
+        "document_filename": "dummy.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/57616727-57f8-4bb3-bf82-27d4ac137c64/binary"
+      },
+      "dateOfSepration": null,
+      "mediatorRegistrationNumber": "0987654321",
+      "promptForAnyDocument": "No",
+      "applicantLName": "Name",
+      "respondentAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "SW1A 1AA",
+        "PostTown": "London",
+        "AddressLine1": "1 Respondent",
+        "AddressLine2": "Address",
+        "AddressLine3": ""
+      },
+      "natureOfApplicationChecklist": [
+        "propertyAdjustmentOrder"
+      ],
+      "propertyAddress": "N/A",
+      "applicantAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "SW1A 1AA",
+        "PostTown": "London",
+        "AddressLine1": "Buckingham Palace",
+        "AddressLine2": "",
+        "AddressLine3": ""
+      },
+      "dateOfMarriage": "2000-01-01",
+      "isAdmin": "Yes",
+      "divorceCaseNumber": "AB01D23456",
+      "applicantEmail": "",
+      "paperApplication": "Yes",
+      "additionalPropertyOrderDecision": "No",
+      "respondentEmail": null,
+      "respondentFMName": "Respondent",
+      "familyMediatorServiceName": "Test",
+      "applicantPhone": "",
+      "specificArrangementsRequired": "N/A",
+      "mortgageDetail": "N/A",
+      "regionList": "southeast",
+      "southEastFRCList": "kentfrc",
+      "kentSurreyCourtList": "FR_kent_surrey_hc_list_10"
+    }
+  }
+}

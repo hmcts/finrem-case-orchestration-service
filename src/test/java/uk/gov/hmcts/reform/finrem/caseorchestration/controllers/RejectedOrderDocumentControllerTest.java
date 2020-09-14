@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.RefusalOrderDocumentService;
 
 import java.io.File;
@@ -56,7 +55,6 @@ public class RejectedOrderDocumentControllerTest {
     private WebApplicationContext applicationContext;
 
     @MockBean private RefusalOrderDocumentService documentService;
-    @MockBean private ConsentOrderPrintService consentOrderPrintService;
 
     private MockMvc mvc;
     private JsonNode requestContent;
