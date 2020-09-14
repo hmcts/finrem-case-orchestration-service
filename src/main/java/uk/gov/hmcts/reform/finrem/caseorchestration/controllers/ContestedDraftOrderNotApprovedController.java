@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import javax.validation.constraints.NotNull;
@@ -41,6 +42,9 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
 
     @Autowired
     private BulkPrintService bulkPrintService;
+
+    @Autowired
+    private FeatureToggleService featureToggleService;
 
     @Autowired
     private final ContestedDraftOrderNotApprovedService contestedNotApprovedService;
@@ -125,12 +129,14 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request for send refusal reason for paper cases with Case ID: {}", caseDetails.getId());
+        log.info("Received request for send refusal reason for case with Case ID: {}", caseDetails.getId());
+
         validateCaseData(callback);
 
         Optional<CaseDocument> refusalReason = contestedNotApprovedService.getLatestRefusalReason(caseDetails);
 
-        if (refusalReason.isPresent()) {
+        if (refusalReason.isPresent() && featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()) {
+
             if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
                     Arrays.asList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
