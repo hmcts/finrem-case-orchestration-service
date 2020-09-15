@@ -49,8 +49,8 @@ public class ConsentOrderNotApprovedDocumentService {
         documents.addAll(notApprovedConsentOrder(caseDetails));
         addGeneralOrderIfApplicable(caseDetails, documents);
 
-        return documents.size() == 1 ?
-            EMPTY_LIST  // if only cover letter then print nothing
+        return documents.size() == 1
+            ? EMPTY_LIST  // if only cover letter then print nothing
             : documents;
     }
 
