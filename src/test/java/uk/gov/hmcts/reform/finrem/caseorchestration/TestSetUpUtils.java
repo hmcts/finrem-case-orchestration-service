@@ -251,6 +251,14 @@ public class TestSetUpUtils {
         }
     }
 
+    public static CaseDetails caseDetailsBeforeFromResource(String resourcePath, ObjectMapper mapper) {
+        try (InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(resourcePath)) {
+            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetailsBefore();
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception.getMessage(), exception);
+        }
+    }
+
     private static void populateRespondentNameAndAddressConsented(Map<String, Object> caseData) {
         Map<String, Object> respondentAddress = new HashMap<>();
         respondentAddress.put("AddressLine1", "50 Respondent Street");
