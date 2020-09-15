@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationSe
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -77,7 +78,7 @@ public class GeneralApplicationControllerTest extends BaseControllerTest {
     @Test
     public void startGeneralApplication500Error() throws Exception {
         doValidCaseDataSetUp();
-        doThrow(feignError()).when(generalApplicationService).updateCaseDataStart(isA(Map.class));
+        doThrow(feignError()).when(generalApplicationService).updateCaseDataStart(isA(Map.class), eq(AUTH_TOKEN));
 
         mvc.perform(post(START_GENERAL_APPLICATION_URL)
             .content(requestContent.toString())
@@ -94,6 +95,6 @@ public class GeneralApplicationControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(generalApplicationService, times(1)).updateCaseDataStart(any());
+        verify(generalApplicationService, times(1)).updateCaseDataStart(isA(Map.class),eq(AUTH_TOKEN));
     }
 }

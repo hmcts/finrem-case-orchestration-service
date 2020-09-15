@@ -36,6 +36,7 @@ public class GeneralApplicationService {
 
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
+    private final IdamService idamService;
 
     public void updateCaseDataSubmit(Map<String, Object> caseData, CaseDetails caseDetailsBefore) {
         caseData.put(GENERAL_APPLICATION_PRE_STATE, caseDetailsBefore.getState());
@@ -65,13 +66,13 @@ public class GeneralApplicationService {
         return objectMapper.convertValue(object, new TypeReference<List<GeneralApplicationData>>() {});
     }
 
-    public void updateCaseDataStart(Map<String, Object> caseData) {
+    public void updateCaseDataStart(Map<String, Object> caseData, String authorisationToken) {
         caseData.remove(GENERAL_APPLICATION_RECEIVED_FROM);
-        caseData.remove(GENERAL_APPLICATION_CREATED_BY);
         caseData.remove(GENERAL_APPLICATION_HEARING_REQUIRED);
         caseData.remove(GENERAL_APPLICATION_TIME_ESTIMATE);
         caseData.remove(GENERAL_APPLICATION_SPECIAL_MEASURES);
         caseData.remove(GENERAL_APPLICATION_DOCUMENT);
         caseData.remove(GENERAL_APPLICATION_DRAFT_ORDER);
+        caseData.put(GENERAL_APPLICATION_CREATED_BY, idamService.getIdamFullName(authorisationToken));
     }
 }
