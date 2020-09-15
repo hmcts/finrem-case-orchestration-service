@@ -17,10 +17,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.EMPTY_LIST;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
@@ -47,18 +47,14 @@ public class ConsentOrderNotApprovedDocumentService {
 
         documents.add(coverLetter(caseDetails, authorisationToken));
         documents.addAll(notApprovedConsentOrder(caseDetails));
-        documents = addGeneralOrderIfApplicable(caseDetails, documents);
-        documents.add(applicantReplyCoversheet(caseDetails, authorisationToken));
+        addGeneralOrderIfApplicable(caseDetails, documents);
 
-        //if only coversheet and reply sheet then print nothing
-        if (documents.size() == 2) {
-            return new ArrayList<>();
-        }
-
-        return documents;
+        return documents.size() == 1 ?
+            EMPTY_LIST  // if only cover letter then print nothing
+            : documents;
     }
 
-    private List<BulkPrintDocument> addGeneralOrderIfApplicable(CaseDetails caseDetails, List<BulkPrintDocument> existingList) {
+    private void addGeneralOrderIfApplicable(CaseDetails caseDetails, List<BulkPrintDocument> existingList) {
         Map<String, Object> caseData = caseDetails.getData();
 
         boolean isContestedCaseWithNoConsentOrders = isContestedApplication(caseDetails)
@@ -70,7 +66,6 @@ public class ConsentOrderNotApprovedDocumentService {
                 existingList.add(generalOrder);
             }
         }
-        return existingList;
     }
 
     private BulkPrintDocument coverLetter(CaseDetails caseDetails, String authorisationToken) {
@@ -119,17 +114,5 @@ public class ConsentOrderNotApprovedDocumentService {
         return Optional.ofNullable(caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION))
             .map(documentHelper::convertToContestedConsentOrderData)
             .orElse(new ArrayList<>(1));
-    }
-
-    private BulkPrintDocument applicantReplyCoversheet(CaseDetails caseDetails, String authorisationToken) {
-        CaseDetails caseDetailsWithTemplateData = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
-        CaseDocument applicantCoversheet = genericDocumentService.generateDocument(
-            authorisationToken,
-            caseDetailsWithTemplateData,
-            documentConfiguration.getConsentOrderNotApprovedReplyCoversheetTemplate(),
-            documentConfiguration.getConsentOrderNotApprovedReplyCoversheetFileName());
-        caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoversheet);
-
-        return documentHelper.getCaseDocumentAsBulkPrintDocument(applicantCoversheet);
     }
 }
