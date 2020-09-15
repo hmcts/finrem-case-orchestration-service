@@ -121,7 +121,6 @@ public class CCDConfigConstant {
     public static final String CONTESTED_APPLICATION_NOT_APPROVED_DATE = "refusalOrderDate";
 
     //Application Type related
-    public static final String D81_QUESTION = "d81Question";
     public static final String CONSENT_D81_QUESTION = "consentD81Question";
 
     //Nature of Application
@@ -158,10 +157,8 @@ public class CCDConfigConstant {
     public static final String GENERAL_ORDER_JUDGE_NAME = "generalOrderJudgeName";
     public static final String GENERAL_ORDER_LATEST_DOCUMENT = "generalOrderLatestDocument";
     public static final String GENERAL_ORDER_COLLECTION_CONTESTED = "generalOrders";
-    public static final String GENERAL_ORDER_COLLECTION_CONTESTED_DOCUMENT = "additionalDocument";
     public static final String GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED = "generalOrdersConsent";
     public static final String GENERAL_ORDER_COLLECTION_CONSENTED = "generalOrderCollection";
-    public static final String GENERAL_ORDER_COLLECTION_CONSENTED_DOCUMENT = "generalOrder_documentUpload";
     public static final String APPROVED_ORDER_COLLECTION = "approvedOrderCollection";
     public static final String FINAL_ORDER_COLLECTION = "finalOrderCollection";
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
@@ -199,6 +196,19 @@ public class CCDConfigConstant {
     public static final String GENERAL_EMAIL_RECIPIENT = "generalEmailRecipient";
     public static final String GENERAL_EMAIL_CREATED_BY = "generalEmailCreatedBy";
     public static final String GENERAL_EMAIL_BODY = "generalEmailBody";
+
+    // General application
+    public static final String GENERAL_APPLICATION_DOCUMENT_LATEST = "generalApplicationLatestDocument";
+    public static final String GENERAL_APPLICATION_DOCUMENT = "generalApplicationDocument";
+    public static final String GENERAL_APPLICATION_RECEIVED_FROM = "generalApplicationReceivedFrom";
+    public static final String GENERAL_APPLICATION_CREATED_BY = "generalApplicationCreatedBy";
+    public static final String GENERAL_APPLICATION_HEARING_REQUIRED = "generalApplicationHearingRequired";
+    public static final String GENERAL_APPLICATION_TIME_ESTIMATE = "generalApplicationTimeEstimate";
+    public static final String GENERAL_APPLICATION_SPECIAL_MEASURES = "generalApplicationSpecialMeasures";
+    public static final String GENERAL_APPLICATION_DRAFT_ORDER = "generalApplicationDraftOrder";
+    public static final String GENERAL_APPLICATION_DOCUMENT_COLLECTION = "generalApplicationCollection";
+    public static final String GENERAL_APPLICATION_DOCUMENT_LATEST_DATE = "generalApplicationLatestDocumentDate";
+    public static final String GENERAL_APPLICATION_PRE_STATE = "generalApplicationPreState";
 
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
@@ -239,5 +249,4 @@ public class CCDConfigConstant {
 
     //states
     public static final String CONSENTED_ORDER_APPROVED = "consentedOrderApproved";
-    public static final String CONSENTED_ORDER_NOT_APPROVED = "consentedOrderNotApproved";
 }
