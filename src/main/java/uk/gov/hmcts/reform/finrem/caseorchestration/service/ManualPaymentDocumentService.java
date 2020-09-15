@@ -28,16 +28,6 @@ public class ManualPaymentDocumentService {
         return generateManualPaymentLetter(caseDetailsForBulkPrint, authToken);
     }
 
-    public CaseDocument generateRespondentManualPaymentLetter(CaseDetails caseDetails, String authToken) {
-        log.info("Generating Respondent Manual Payment Letter {} from {} for bulk print",
-            documentConfiguration.getManualPaymentFileName(),
-            documentConfiguration.getManualPaymentTemplate());
-
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToRespondentTemplateData(caseDetails);
-
-        return generateManualPaymentLetter(caseDetailsForBulkPrint, authToken);
-    }
-
     public CaseDocument generateManualPaymentLetter(CaseDetails caseDetailsForBulkPrint, String authToken) {
 
         hearingDocumentService.addCourtFields(caseDetailsForBulkPrint);
