@@ -71,6 +71,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_CONTEST_ORDER_NOT_APPROVED = "http://localhost:8086/notify/contested/order-not-approved";
     private static final String END_POINT_CONTESTED_CONSENT_ORDER_APPROVED = "http://localhost:8086/notify/contested/consent-order-approved";
     private static final String END_POINT_CONTESTED_CONSENT_GENERAL_ORDER = "http://localhost:8086/notify/contested/consent-general-order";
+    private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE = "http://localhost:8086/notify/contested/general-application-refer-to-judge";
     private static final String END_POINT_CONTESTED_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/contested/consent-order-not-approved";
 
     private static final String ERROR_500_MESSAGE = "500 Internal Server Error";
@@ -925,6 +926,14 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedConsentOrderApprovedEmail(callbackRequest);
+    }
+
+    @Test
+    public void sendContestedGeneralApplicationReferToJudgeNotificationEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedGeneralApplicationReferToJudgeEmail(callbackRequest);
     }
 
     @Test

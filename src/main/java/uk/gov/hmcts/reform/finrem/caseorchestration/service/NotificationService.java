@@ -26,6 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_BODY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
@@ -177,6 +178,14 @@ public class NotificationService {
     public void sendContestedConsentGeneralOrderEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedConsentGeneralOrder());
         notificationRequest = createNotificationRequest(callbackRequest);
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+    public void sendContestedGeneralApplicationReferToJudgeEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralApplicationReferToJudge());
+        notificationRequest = createNotificationRequest(callbackRequest);
+        notificationRequest.setNotificationEmail(Objects.toString(
+            callbackRequest.getCaseDetails().getData().get(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL)));
         sendNotificationEmail(notificationRequest, uri);
     }
 
