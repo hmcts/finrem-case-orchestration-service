@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
 @EqualsAndHashCode
-public class CourtDetails {
+public class FrcCourtDetails {
     @JsonProperty("courtName")
     private String courtName;
 
