@@ -959,6 +959,14 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void sendContestedGeneralApplicationReferToJudgeNotificationEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedGeneralApplicationReferToJudgeEmail(callbackRequest);
+    }
+
+    @Test
     public void sendContestedConsentGeneralOrderNotificationEmail() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_CONSENT_GENERAL_ORDER))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
