@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -10,7 +11,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.COURT_CONTACT_DETAILS;
@@ -30,11 +34,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourt;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
@@ -45,6 +56,7 @@ public class GenerateCoverSheetService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
+    private final ObjectMapper objectMapper;
 
     private enum AddressFoundInCaseData { SOLICITOR, PARTY, NONE }
 
@@ -108,11 +120,9 @@ public class GenerateCoverSheetService {
     }
 
     private String getCourtContactDetails(CaseDetails caseDetails) {
-        /*
         if (isContestedApplication(caseDetails)) {
-            // will implement for FRC Contact Details
+            return formatFrcContactDetailsForCoversheet(caseDetails);
         }
-        */
         return formatCtscContactDetailsForCoversheet();
     }
 
@@ -128,6 +138,31 @@ public class GenerateCoverSheetService {
             coversheetCtscContactDetails.getPoBox(),
             coversheetCtscContactDetails.getTown(),
             coversheetCtscContactDetails.getPostcode());
+    }
+
+    private String formatFrcContactDetailsForCoversheet(CaseDetails caseDetails) {
+
+        Map<String, Object> courtDetailsMap;
+        try {
+            courtDetailsMap  = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+        } catch (IOException | NullPointerException e) {
+            throw new RuntimeException("Could not retrieve court contact information for printing. ",e);
+        }
+
+        Map<String, Object> data = caseDetails.getData();
+        Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourt(data)));
+
+        FrcCourtDetails coversheetFrcContactDetails = FrcCourtDetails.builder()
+            .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
+            .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
+            .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
+            .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
+            .build();
+
+        return String.join("\n", coversheetFrcContactDetails.getCourtName(),
+            coversheetFrcContactDetails.getCourtAddress(),
+            coversheetFrcContactDetails.getPhoneNumber(),
+            coversheetFrcContactDetails.getEmail());
     }
 
     private AddressFoundInCaseData checkAddress(Map<String, Object> caseData, String partyAddressCcdFieldName,
