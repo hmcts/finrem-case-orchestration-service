@@ -2,9 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +21,6 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.rules.ExpectedException.none;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -41,9 +38,6 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
     @Autowired private GenerateCoverSheetService generateCoverSheetService;
     @Autowired private ObjectMapper mapper;
 
-    @Rule
-    public ExpectedException expectedException = none();
-
     @MockBean
     private GenericDocumentService genericDocumentService;
 
@@ -57,13 +51,13 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateApplicantCoverSheetForConsented() throws Exception {
-        CaseDocument caseDocument = generateCoverSheetService.generateApplicantCoverSheet(caseDetailsConsented(), AUTH_TOKEN);
+        CaseDocument caseDocument = generateCoverSheetService.generateApplicantCoverSheet(caseDetails(), AUTH_TOKEN);
 
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
 
-        assertConsentedCoversheetCalledWithRequiredData();
+        assertCoversheetCalledWithRequiredData();
     }
 
     @Test
@@ -74,41 +68,18 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
 
-        assertContestedCoversheetCalledWithRequiredData();
+        assertCoversheetCalledWithRequiredData();
     }
 
     @Test
-    public void shouldGenerateRespondentCoverSheetForConsented() throws Exception {
-        CaseDocument caseDocument = generateCoverSheetService.generateRespondentCoverSheet(caseDetailsConsented(), AUTH_TOKEN);
+    public void shouldGenerateRespondentCoverSheet() throws Exception {
+        CaseDocument caseDocument = generateCoverSheetService.generateRespondentCoverSheet(caseDetails(), AUTH_TOKEN);
 
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
         assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
 
-        assertConsentedCoversheetCalledWithRequiredData();
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void shouldThrowExceptionWhenCourtDataMissingWhenGeneratingApplicantCoverSheetForContested() throws Exception {
-
-        generateCoverSheetService.generateApplicantCoverSheet(caseDetailsContestedWithIncorrectCourtDetails(), AUTH_TOKEN);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void shouldThrowExceptionWhenCourtDataMissingWhenGeneratingRespondentCoverSheetForContested() throws Exception {
-
-        generateCoverSheetService.generateRespondentCoverSheet(caseDetailsContestedWithIncorrectCourtDetails(), AUTH_TOKEN);
-    }
-
-    @Test
-    public void shouldGenerateRespondentCoverSheetForContested() throws Exception {
-        CaseDocument caseDocument = generateCoverSheetService.generateRespondentCoverSheet(caseDetailsContested(), AUTH_TOKEN);
-
-        assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
-        assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
-        assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
-
-        assertContestedCoversheetCalledWithRequiredData();
+        assertCoversheetCalledWithRequiredData();
     }
 
     @Test
@@ -165,16 +136,9 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         assertAddresseeName(2, "Jane Doe");
     }
 
-    private CaseDetails caseDetailsConsented() throws Exception {
+    private CaseDetails caseDetails() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
-    }
-
-    private CaseDetails caseDetailsContestedWithIncorrectCourtDetails() throws Exception {
-        try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-contested-incorrect-court-provided.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }
@@ -214,7 +178,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         assertThat(addressee.getName(), is(name));
     }
 
-    private void assertConsentedCoversheetCalledWithRequiredData() {
+    private void assertCoversheetCalledWithRequiredData() {
         verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
             any(), any());
         Map<String, Object> data = generateDocumentCaseDetailsCaptor.getValue().getData();
@@ -223,22 +187,6 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
             + "PO BOX 12746" + "\n"
             + "HARLOW" + "\n"
             + "CM20 9QZ";
-
-        assertThat(data, hasKey(ADDRESSEE));
-        assertThat(data, hasKey(COURT_CONTACT_DETAILS));
-        assertEquals(expectedCourtContactDetails, data.get(COURT_CONTACT_DETAILS));
-        assertThat(data, hasKey(CASE_NUMBER));
-    }
-
-    private void assertContestedCoversheetCalledWithRequiredData() {
-        verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
-            any(), any());
-        Map<String, Object> data = generateDocumentCaseDetailsCaptor.getValue().getData();
-
-        String expectedCourtContactDetails = "Hastings County Court And Family Court Hearing Centre" + "\n"
-            + "The Law Courts, Bohemia Road, Hastings, TN34 1QX" + "\n"
-            + "01634 887900" + "\n"
-            + "FRCKSS@justice.gov.uk";
 
         assertThat(data, hasKey(ADDRESSEE));
         assertThat(data, hasKey(COURT_CONTACT_DETAILS));

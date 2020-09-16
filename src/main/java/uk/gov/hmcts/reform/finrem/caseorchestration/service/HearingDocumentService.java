@@ -26,7 +26,7 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addFastTrackFields;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourt;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
@@ -97,7 +97,7 @@ public class HearingDocumentService {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> data = caseDetails.getData();
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourt(data)));
-            data.put("courtDetails", buildFrcCourtDetails(courtDetails));
+            data.put("courtDetails", buildCourtDetails(courtDetails));
             return caseDetails;
         } catch (IOException | NullPointerException e) {
             return caseDetails;

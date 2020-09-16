@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.CourtDetails;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -176,8 +176,8 @@ final class CaseHearingFunctions {
         return null;
     }
 
-    static Map<String, Object> buildFrcCourtDetails(Map<String, Object> courtDetailsMap) {
-        return new ObjectMapper().convertValue(FrcCourtDetails.builder()
+    static Map<String, Object> buildCourtDetails(Map<String, Object> courtDetailsMap) {
+        return new ObjectMapper().convertValue(CourtDetails.builder()
             .courtName((String) courtDetailsMap.get(COURT_DETAILS_NAME_KEY))
             .courtAddress((String) courtDetailsMap.get(COURT_DETAILS_ADDRESS_KEY))
             .phoneNumber((String) courtDetailsMap.get(COURT_DETAILS_PHONE_KEY))
