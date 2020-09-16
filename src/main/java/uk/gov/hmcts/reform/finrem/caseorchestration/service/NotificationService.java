@@ -174,7 +174,7 @@ public class NotificationService {
         notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
-  
+
     public void sendContestedConsentGeneralOrderEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedConsentGeneralOrder());
         notificationRequest = createNotificationRequest(callbackRequest);
@@ -186,6 +186,12 @@ public class NotificationService {
         notificationRequest = createNotificationRequest(callbackRequest);
         notificationRequest.setNotificationEmail(Objects.toString(
             callbackRequest.getCaseDetails().getData().get(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL)));
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+    public void sendContestedGeneralApplicationOutcomeEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralApplicationOutcome());
+        notificationRequest = createNotificationRequest(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
 

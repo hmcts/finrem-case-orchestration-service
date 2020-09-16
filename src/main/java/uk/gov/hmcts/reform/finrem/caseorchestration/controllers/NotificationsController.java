@@ -413,4 +413,22 @@ public class NotificationsController implements BaseController {
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
+
+    @PostMapping(value = "/case-orchestration/notify/general-application-outcome", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send general application outcome email")
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "General Application Outcome email sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralApplicationOutcomeEmail(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        log.info("Received request to send General Application Outcome email for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+    }
 }
