@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManualPaymentDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
@@ -421,7 +422,7 @@ public class NotificationsController implements BaseController {
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralApplicationOutcomeEmail(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody CallbackRequest callbackRequest) throws IOException {
         log.info("Received request to send General Application Outcome email for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
 
