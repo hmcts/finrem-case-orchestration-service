@@ -610,14 +610,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL, DUMMY_EMAIL);
         caseData.put(REGION, regionValue);
         caseData.put(frcList, frcValue);
-        //add the court list and the court value
         caseData.put(courtList, courtValue);
-
-        /*
-            "regionList": "southeast",
-            "southEastFRCList": "kentfrc",
-            "kentSurreyCourtList": "FR_kent_surrey_hc_list_10"
-         */
         caseData.put(BULK_PRINT_LETTER_ID_RES, "nottingham");
         return CallbackRequest.builder()
             .caseDetails(CaseDetails.builder()
@@ -976,7 +969,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.jsonPath("notificationEmail").value(DUMMY_EMAIL))
             .andRespond(MockRestResponseCreators.withNoContent());
 
-        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST, SWANSEA);
+        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST,
+            SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1");
 
         notificationService.sendContestedGeneralApplicationReferToJudgeEmail(callbackRequest);
     }
@@ -987,21 +981,14 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
 
-        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST, SWANSEA);
+        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST,
+            SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1");
 
         try {
             notificationService.sendContestedGeneralApplicationReferToJudgeEmail(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
-    }
-
-    @Test
-    public void sendContestedGeneralApplicationReferToJudgeNotificationEmail() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedGeneralApplicationReferToJudgeEmail(callbackRequest);
     }
 
     @Test
