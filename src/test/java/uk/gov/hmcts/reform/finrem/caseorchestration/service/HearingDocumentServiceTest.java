@@ -200,7 +200,7 @@ public class HearingDocumentServiceTest {
             WALES, WALES_FRC_LIST, SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1"));
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Swansea Civil & Family Justice Centre", "Carvella House, Quay West, Quay Parade, Swansea, SA1 1SD",
-            "01792 485 800", "FRCswansea@justice.gov.uk");
+            "01792 485 800", "fr_applicant_sol@sharklasers.com");
     }
 
     @Test
@@ -209,7 +209,7 @@ public class HearingDocumentServiceTest {
             WALES, WALES_FRC_LIST, NEWPORT, NEWPORT_COURTLIST, "FR_newport_hc_list_1"));
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Newport Civil and Family Court", "Clarence House, Clarence Place, Newport, NP19 7AA",
-            "01633 245 040", "FRCNewport@justice.gov.uk");
+            "01633 245 040", "fr_applicant_sol@sharklasers.com");
     }
 
     @Test
@@ -225,7 +225,7 @@ public class HearingDocumentServiceTest {
             SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST, "FR_kent_surrey_hc_list_1"));
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Canterbury Family Court Hearing Centre", "The Law Courts, Chaucer Road, Canterbury, CT1 1ZA",
-            "01634 887900", "FRCKSS@justice.gov.uk");
+            "01634 887900", "fr_applicant_sol@sharklasers.com");
     }
 
     @Test
@@ -241,7 +241,7 @@ public class HearingDocumentServiceTest {
             NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST, "FR_cleaveland_hc_list_1"));
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Newcastle Upon Tyne Justice Centre", "The Law Courts, The Quayside, Newcastle-upon-Tyne, NE1 3LA",
-            "0191 2012000", "Family.newcastle.countycourt@justice.gov.uk");
+            "0191 2012000", "fr_applicant_sol@sharklasers.com");
     }
 
     @Test
@@ -250,7 +250,7 @@ public class HearingDocumentServiceTest {
             NORTHEAST, NORTHEAST_FRC_LIST, NWYORKSHIRE, NWYORKSHIRE_COURTLIST, "FR_nw_yorkshire_hc_list_1"));
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Harrogate Justice Centre", "The Court House, Victoria Avenue, Harrogate, HG1 1EL",
-            "0113 306 2501", "leedsfamily@justice.gov.uk");
+            "0113 306 2501", "fr_applicant_sol@sharklasers.com");
     }
 
     @Test
@@ -259,7 +259,7 @@ public class HearingDocumentServiceTest {
             NORTHEAST, NORTHEAST_FRC_LIST, HSYORKSHIRE, HSYORKSHIRE_COURTLIST, "FR_humber_hc_list_1"));
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Sheffield Family Hearing Centre", "The Law Courts, 50 West Bar, Sheffield, S3 8PH",
-            "0114 2812522", "FRCSheffield@justice.gov.uk");
+            "0114 2812522", "fr_applicant_sol@sharklasers.com");
     }
 
     @Test
@@ -275,7 +275,7 @@ public class HearingDocumentServiceTest {
             NORTHWEST, NORTHWEST_FRC_LIST, LIVERPOOL, LIVERPOOL_COURTLIST, "FR_liverpool_hc_list_1"));
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Liverpool Civil And Family Court", "35 Vernon Street, Liverpool, L2 2BX",
-            "0151 296 2225", "FRCLiverpool@Justice.gov.uk");
+            "0151 296 2225", "fr_applicant_sol@sharklasers.com");
     }
 
     @Test
@@ -284,7 +284,7 @@ public class HearingDocumentServiceTest {
             NORTHWEST, NORTHWEST_FRC_LIST, MANCHESTER, MANCHESTER_COURTLIST, "FR_manchester_hc_list_1"));
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Manchester County And Family Court", "1 Bridge Street West, Manchester, M60 9DJ",
-            "0161 240 5430", "HMCTSFinancialRemedy@justice.gov.uk");
+            "0161 240 5430", "fr_applicant_sol@sharklasers.com");
     }
 
     @Test
@@ -300,7 +300,7 @@ public class HearingDocumentServiceTest {
             LONDON, LONDON_FRC_LIST, CFC, CFC_COURTLIST, "FR_s_CFCList_1"));
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Bromley County Court And Family Court", "Bromley County Court, College Road, Bromley, BR1 3PX",
-            "0208 290 9620", "family.bromley.countycourt@justice.gov.uk");
+            "0208 290 9620", "fr_applicant_sol@sharklasers.com");
     }
 
     @Test
@@ -316,7 +316,7 @@ public class HearingDocumentServiceTest {
             MIDLANDS, MIDLANDS_FRC_LIST, NOTTINGHAM, NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_1"));
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Nottingham County Court And Family Court", "60 Canal Street, Nottingham NG1 7EJ",
-            "0115 910 3504", "FRCNottingham@justice.gov.uk");
+            "0115 910 3504", "fr_applicant_sol@sharklasers.com");
     }
 
     @Test
@@ -325,7 +325,7 @@ public class HearingDocumentServiceTest {
             MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURTLIST, "FR_birmingham_hc_list_1"));
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Birmingham Civil And Family Justice Centre", "Pipers Row, Wolverhampton, WV1 3LQ",
-            "0121 250 6794", "FRCBirmingham@justice.gov.uk");
+            "0121 250 6794", "fr_applicant_sol@sharklasers.com");
     }
 
     @Test
