@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
@@ -71,9 +72,11 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_CONTEST_ORDER_NOT_APPROVED = "http://localhost:8086/notify/contested/order-not-approved";
     private static final String END_POINT_CONTESTED_CONSENT_ORDER_APPROVED = "http://localhost:8086/notify/contested/consent-order-approved";
     private static final String END_POINT_CONTESTED_CONSENT_GENERAL_ORDER = "http://localhost:8086/notify/contested/consent-general-order";
+    private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE = "http://localhost:8086/notify/contested/general-application-refer-to-judge";
     private static final String END_POINT_CONTESTED_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/contested/consent-order-not-approved";
 
     private static final String ERROR_500_MESSAGE = "500 Internal Server Error";
+    private static final String DUMMY_EMAIL = "some@person.email";
 
     @Autowired
     private NotificationService notificationService;
@@ -574,6 +577,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(CONTESTED_SOLICITOR_EMAIL, "test@test.com");
         caseData.put(CONTESTED_SOLICITOR_NAME, "solicitorName");
         caseData.put(SOLICITOR_REFERENCE, "56789");
+        caseData.put(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL, DUMMY_EMAIL);
         caseData.put(REGION, regionValue);
         caseData.put(frcList, frcValue);
         caseData.put(BULK_PRINT_LETTER_ID_RES, "nottingham");
@@ -925,6 +929,33 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedConsentOrderApprovedEmail(callbackRequest);
+    }
+
+    @Test
+    public void sendContestedGeneralApplicationReferToJudgeNotificationEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andExpect(MockRestRequestMatchers.jsonPath("notificationEmail").value(DUMMY_EMAIL))
+            .andRespond(MockRestResponseCreators.withNoContent());
+
+        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST, SWANSEA);
+
+        notificationService.sendContestedGeneralApplicationReferToJudgeEmail(callbackRequest);
+    }
+
+    @Test
+    public void throwExceptionWhenContestedGeneralApplicationReferToJudgeEmailIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+
+        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST, SWANSEA);
+
+        try {
+            notificationService.sendContestedGeneralApplicationReferToJudgeEmail(callbackRequest);
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
+        }
     }
 
     @Test
