@@ -138,13 +138,6 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         }
     }
 
-    private CaseDetails caseDetailsContested() throws Exception {
-        try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/contested/consent-in-contested-application-approved.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
-    }
-
     private CaseDetails caseDetailsWithEmptySolAddress() throws Exception {
         try (InputStream resourceAsStream =
                      getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-empty-solicitor-address.json")) {
