@@ -15,6 +15,3 @@ java:
     finrem:
       secrets:
         - AppInsightsInstrumentationKey
-  rd_professional:
-    api:
-      url: "http://fake-rd-professional-api"
