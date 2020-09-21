@@ -6,6 +6,13 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
+      "ApplicantOrganisationPolicy": {
+        "Organisation" : {
+          "OrganisationName" : "",
+          "OrganisationID" : ""
+        },
+        "OrgPolicyCaseAssignedRole": null
+      },
       "helpWithFeesQuestion": "Yes",
       "applicantLName":"Guy",
       "dateOfMarriage":"1111-01-01",

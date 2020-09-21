@@ -1,8 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import feign.Feign;
+import feign.jackson.JacksonEncoder;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,8 +15,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.OrganisationClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.ServiceAuthTokenGeneratorService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.util.ArrayList;
@@ -35,6 +43,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @SuppressWarnings("unchecked")
 public class CaseDataController implements BaseController {
     private final IdamService idamService;
+    private final OrganisationClient organisationClient;
+    private final ServiceAuthTokenGeneratorService serviceAuthTokenGeneratorService;
+
+    private final String applicationPolicy = "[APPSOLICITOR]";
+    @Value("${idam.s2s-auth.url}")
+    String s2sUrl;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for consented journey")
@@ -45,6 +59,7 @@ public class CaseDataController implements BaseController {
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
+        setOrganisationPolicy(caseData, authToken);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -57,6 +72,7 @@ public class CaseDataController implements BaseController {
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
+        setOrganisationPolicy(caseData, authToken);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -72,6 +88,7 @@ public class CaseDataController implements BaseController {
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setPaperCaseData(caseData);
+        setOrganisationPolicy(caseData, authToken);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -114,5 +131,23 @@ public class CaseDataController implements BaseController {
     private void setPaperCaseData(Map<String, Object> caseData) {
         caseData.put(PAPER_APPLICATION, YES_VALUE);
         caseData.put(FAST_TRACK_DECISION, NO_VALUE);
+    }
+
+    private void setOrganisationPolicy(Map<String, Object> caseData, final String authToken) {
+
+        ServiceAuthorisationApi serviceAuthorisationApi = Feign.builder()
+            .encoder(new JacksonEncoder())
+            .contract(new SpringMvcContract())
+            .target(ServiceAuthorisationApi.class, s2sUrl);
+
+        Organisation org = organisationClient.findOrganisationById(authToken,
+            serviceAuthTokenGeneratorService.createTokenGenerator().generate());
+        Map<String, Object> policy = (Map)caseData.get("ApplicantOrganisationPolicy");
+        policy.put("OrgPolicyCaseAssignedRole", applicationPolicy);
+        Map<String, Object> orgObject = (Map)policy.get("Organisation");
+        orgObject.put("OrganisationID", org.getOrganisationIdentifier());
+        orgObject.put("OrganisationName", org.getName());
+        caseData.put("OrganisationField", orgObject);
+        log.info("added organisation {} with id {}", org.getName(), org.getOrganisationIdentifier());
     }
 }

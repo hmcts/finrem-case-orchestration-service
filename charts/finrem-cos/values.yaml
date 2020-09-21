@@ -10,7 +10,11 @@ java:
     DOCUMENT_GENERATOR_SERVICE_API_BASEURL : "http://finrem-dgcs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     FINREM_NOTIFICATION_SERVICE_BASE_URL : "http://finrem-ns-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     PAYMENT_SERVICE_API_BASEURL : "http://finrem-ps-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+    RD_PROFESSIONAL_API_URL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
   keyVaults:
     finrem:
       secrets:
         - AppInsightsInstrumentationKey
+  rd_professional:
+    api:
+      url: "http://fake-rd-professional-api"

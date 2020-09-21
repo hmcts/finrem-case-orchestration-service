@@ -1,14 +1,21 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.OrganisationClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.ServiceAuthTokenGeneratorService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.io.File;
 
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -31,6 +38,27 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @MockBean
     private  IdamService idamService;
+
+    @MockBean
+    private OrganisationClient organisationClient;
+
+    @MockBean
+    private ServiceAuthTokenGeneratorService serviceAuthTokenGeneratorService;
+
+    @Mock
+    private ServiceAuthTokenGenerator serviceAuthTokenGenerator;
+
+    @Before
+    public void setUp() {
+        super.setUp();
+        Organisation defaultOrg = new Organisation();
+        defaultOrg.setName("org");
+        defaultOrg.setOrganisationIdentifier("12345");
+        when(organisationClient.findOrganisationById(anyString(), anyString())).thenReturn(defaultOrg);
+        when(serviceAuthTokenGenerator.generate()).thenReturn("abc");
+        when(serviceAuthTokenGeneratorService.createTokenGenerator()).thenReturn(serviceAuthTokenGenerator);
+
+    }
 
     @Test
     public void shouldSuccessfullyMoveValues() throws Exception {
@@ -124,7 +152,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldSuccessfullyReturnAsAdminConsented() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
-
         requestContent = objectMapper.readTree(
             new File(getClass()
                 .getResource(CONTESTED_HWF_JSON).toURI()));
