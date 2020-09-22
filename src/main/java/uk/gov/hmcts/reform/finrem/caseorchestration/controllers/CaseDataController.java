@@ -131,9 +131,14 @@ public class CaseDataController implements BaseController {
     private void setOrganisationPolicy(Map<String, Object> caseData, final String authToken) {
 
         ServiceAuthTokenGenerator tokenGenerator = serviceAuthTokenGeneratorService.createTokenGenerator();
+        log.info("token generator obtained");
+
         String serviceAuthToken = tokenGenerator.generate();
+        log.info("service auth token got - {}", serviceAuthToken);
 
         Organisation org = organisationClient.findOrganisationById(authToken, serviceAuthToken);
+        log.info("org found {}", org.getName());
+
         Map<String, Object> policy = (Map)caseData.get("ApplicantOrganisationPolicy");
         policy.put("OrgPolicyCaseAssignedRole", applicationPolicy);
         Map<String, Object> orgObject = (Map)policy.get("Organisation");
