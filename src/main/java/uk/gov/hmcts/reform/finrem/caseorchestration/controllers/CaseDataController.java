@@ -48,8 +48,6 @@ public class CaseDataController implements BaseController {
     private final ServiceAuthTokenGeneratorService serviceAuthTokenGeneratorService;
 
     private final String applicationPolicy = "[APPSOLICITOR]";
-    @Value("${idam.s2s-auth.url}")
-    String s2sUrl;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for consented journey")
@@ -135,11 +133,6 @@ public class CaseDataController implements BaseController {
     }
 
     private void setOrganisationPolicy(Map<String, Object> caseData, final String authToken) {
-
-        ServiceAuthorisationApi serviceAuthorisationApi = Feign.builder()
-            .encoder(new JacksonEncoder())
-            .contract(new SpringMvcContract())
-            .target(ServiceAuthorisationApi.class, s2sUrl);
 
         ServiceAuthTokenGenerator tokenGenerator = serviceAuthTokenGeneratorService.createTokenGenerator();
         String serviceAuthToken = tokenGenerator.generate();

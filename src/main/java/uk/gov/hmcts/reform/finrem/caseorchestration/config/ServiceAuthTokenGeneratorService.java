@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.config;
 import feign.Feign;
 import feign.jackson.JacksonEncoder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,7 @@ import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 @Configuration
 @RequiredArgsConstructor
 @PropertySource(value = {"classpath:application.properties"})
+@Slf4j
 public class ServiceAuthTokenGeneratorService {
 
     @Value("${idam.s2s-auth.url}")
@@ -29,6 +31,9 @@ public class ServiceAuthTokenGeneratorService {
             .encoder(new JacksonEncoder())
             .contract(new SpringMvcContract())
             .target(ServiceAuthorisationApi.class, s2sUrl);
+
+        //removing before live, testing values only
+        log.warn("ABCDEFG Creating auth token gen with values {} | {} | {}", s2sUrl, secret, microservice);
         return new uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator(secret, microservice, serviceAuthorisationApi);
     }
 }
