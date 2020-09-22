@@ -6,3 +6,4 @@ spring:
       paths: /mnt/secrets/finrem
       aliases:
         AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
+        finrem-doc-s2s-auth-secret: AUTH_PROVIDER_SERVICE_CLIENT_KEY

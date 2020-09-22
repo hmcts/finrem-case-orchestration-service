@@ -15,3 +15,4 @@ java:
     finrem:
       secrets:
         - AppInsightsInstrumentationKey
+        - finrem-doc-s2s-auth-secret

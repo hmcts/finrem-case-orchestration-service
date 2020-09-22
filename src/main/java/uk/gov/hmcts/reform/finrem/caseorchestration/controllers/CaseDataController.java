@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
+import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.OrganisationClient;
@@ -140,8 +141,10 @@ public class CaseDataController implements BaseController {
             .contract(new SpringMvcContract())
             .target(ServiceAuthorisationApi.class, s2sUrl);
 
-        Organisation org = organisationClient.findOrganisationById(authToken,
-            serviceAuthTokenGeneratorService.createTokenGenerator().generate());
+        ServiceAuthTokenGenerator tokenGenerator = serviceAuthTokenGeneratorService.createTokenGenerator();
+        String serviceAuthToken = tokenGenerator.generate();
+
+        Organisation org = organisationClient.findOrganisationById(authToken, serviceAuthToken);
         Map<String, Object> policy = (Map)caseData.get("ApplicantOrganisationPolicy");
         policy.put("OrgPolicyCaseAssignedRole", applicationPolicy);
         Map<String, Object> orgObject = (Map)policy.get("Organisation");
