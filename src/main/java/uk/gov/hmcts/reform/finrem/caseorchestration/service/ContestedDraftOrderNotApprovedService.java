@@ -122,7 +122,7 @@ public class ContestedDraftOrderNotApprovedService {
     }
 
     private List<ContestedRefusalOrderData> convertToRefusalOrderContestedList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<ContestedRefusalOrderData>>() {});
+        return objectMapper.convertValue(object, new TypeReference<>() {});
     }
 
     public Optional<CaseDocument> getLatestRefusalReason(CaseDetails caseDetails) {

@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
@@ -21,6 +21,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ConsentOrderPrintService {
 
     private final BulkPrintService bulkPrintService;
@@ -28,21 +29,6 @@ public class ConsentOrderPrintService {
     private final GeneralOrderService generalOrderService;
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    private final DocumentHelper documentHelper;
-
-    public ConsentOrderPrintService(BulkPrintService bulkPrintService,
-                                    GenerateCoverSheetService coverSheetService,
-                                    GeneralOrderService generalOrderService,
-                                    ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService,
-                                    DocumentHelper documentHelper,
-                                    ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService) {
-        this.coverSheetService = coverSheetService;
-        this.bulkPrintService = bulkPrintService;
-        this.generalOrderService = generalOrderService;
-        this.consentOrderApprovedDocumentService = consentOrderApprovedDocumentService;
-        this.consentOrderNotApprovedDocumentService = consentOrderNotApprovedDocumentService;
-        this.documentHelper = documentHelper;
-    }
 
     public Map<String, Object> sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();

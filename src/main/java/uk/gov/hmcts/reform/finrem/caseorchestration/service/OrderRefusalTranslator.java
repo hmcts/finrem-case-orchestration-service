@@ -67,7 +67,7 @@ public final class OrderRefusalTranslator {
     }
 
     private static List<OrderRefusalData> convertToRefusalOrderList(Object object) {
-        return MAPPER.convertValue(object, new TypeReference<List<OrderRefusalData>>() {
+        return MAPPER.convertValue(object, new TypeReference<>() {
         });
     }
 

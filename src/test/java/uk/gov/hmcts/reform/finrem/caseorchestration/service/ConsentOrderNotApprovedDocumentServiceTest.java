@@ -23,7 +23,7 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -47,14 +47,10 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
 
     private static final String COVER_LETTER_URL = "cover_letter_url";
     private static final String GENERAL_ORDER_URL = "general_letter_url";
-    private static final String REPLY_COVERSHEET_URL = "reply_coversheet_url";
     private static final String DEFAULT_COVERSHEET_URL = "default_coversheet_url";
 
     private static final String CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_TEMPLATE = "FL-FRM-LET-ENG-00319.docx";
     private static final String CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_FILENAME = "consentOrderNotApprovedCoverLetter.pdf";
-
-    private static final String CONSENT_ORDER_NOT_APPROVED_REPLY_COVERSHEET_TEMPLATE = "FL-FRM-LET-ENG-00320.docx";
-    private static final String CONSENT_ORDER_NOT_APPROVED_REPLY_COVERSHEET_FILENAME = "consentOrderNotApprovedReplyCoversheet.pdf";
 
     private static final String BULK_PRINT_TEMPLATE = "FL-FRM-LET-ENG-00522.docx";
     private static final String BULK_PRINT_FILENAME = "BulkPrintCoverSheet.pdf";
@@ -71,8 +67,6 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     public void setupDocumentGenerationMocks() {
         mockDocumentClientToReturnUrlForDocumentGenerationRequest(CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_TEMPLATE,
             CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_FILENAME, COVER_LETTER_URL);
-        mockDocumentClientToReturnUrlForDocumentGenerationRequest(CONSENT_ORDER_NOT_APPROVED_REPLY_COVERSHEET_TEMPLATE,
-            CONSENT_ORDER_NOT_APPROVED_REPLY_COVERSHEET_FILENAME, REPLY_COVERSHEET_URL);
         mockDocumentClientToReturnUrlForDocumentGenerationRequest(BULK_PRINT_TEMPLATE, BULK_PRINT_FILENAME, DEFAULT_COVERSHEET_URL);
     }
 
@@ -109,13 +103,12 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, AUTH_TOKEN);
 
-        assertThat(generatedDocuments, hasSize(4));
+        assertThat(generatedDocuments, hasSize(3));
         assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
         assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(GENERAL_ORDER_URL));
         assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
-        assertThat(generatedDocuments.get(3).getBinaryFileUrl(), is(REPLY_COVERSHEET_URL));
 
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
+        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(nullValue()));
     }
 
     @Test
@@ -126,12 +119,11 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, AUTH_TOKEN);
 
-        assertThat(generatedDocuments, hasSize(3));
+        assertThat(generatedDocuments, hasSize(2));
         assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
         assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
-        assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(REPLY_COVERSHEET_URL));
 
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
+        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(nullValue()));
     }
 
     @Test
@@ -144,7 +136,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
 
         assertThat(generatedDocuments, hasSize(0));
 
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
+        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(nullValue()));
     }
 
     @Test
@@ -155,8 +147,8 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, AUTH_TOKEN);
 
-        assertThat(generatedDocuments, hasSize(3));
-        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(notNullValue()));
+        assertThat(generatedDocuments, hasSize(2));
+        assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(nullValue()));
     }
 
     private void addConsentedInContestedConsentOrderNotApproved() {
