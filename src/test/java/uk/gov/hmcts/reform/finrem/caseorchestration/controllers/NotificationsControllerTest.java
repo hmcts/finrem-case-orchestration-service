@@ -43,6 +43,7 @@ public class NotificationsControllerTest {
     //URLs
     private static final String HWF_SUCCESSFUL_CALLBACK_URL = "/case-orchestration/notify/hwf-successful";
     private static final String ASSIGN_TO_JUDGE_CALLBACK_URL = "/case-orchestration/notify/assign-to-judge";
+    private static final String CONSENT_IN_CONTESTED_ASSIGN_TO_JUDGE_CALLBACK_URL = "/case-orchestration/notify/assign-to-judge-consent-in-contested";
     private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
     private static final String ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/order-not-approved";
     private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/consent-order-available";
@@ -189,6 +190,36 @@ public class NotificationsControllerTest {
         verify(bulkPrintService, times(1))
             .sendDocumentForPrint(any(),any());
         verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void shouldNotSendConsentInContestedAssignToJudgeConfirmationEmail() throws Exception {
+        buildCcdRequest(CCD_REQUEST_JSON);
+        mockMvc.perform(post(CONSENT_IN_CONTESTED_ASSIGN_TO_JUDGE_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verifyNoInteractions(bulkPrintService);
+    }
+
+    @Test
+    public void sendConsentInContestedAssignToJudgeNotificationLetterIfIsPaperApplication() throws Exception {
+        buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
+
+        mockMvc.perform(post(CONSENT_IN_CONTESTED_ASSIGN_TO_JUDGE_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(assignedToJudgeDocumentService, times(1))
+            .generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+        verify(assignedToJudgeDocumentService, times(1))
+            .generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+        verify(bulkPrintService, times(2))
+            .sendDocumentForPrint(any(),any());
     }
 
     @Test

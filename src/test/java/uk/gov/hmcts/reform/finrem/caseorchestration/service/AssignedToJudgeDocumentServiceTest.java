@@ -47,6 +47,8 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
         DocumentConfiguration config = new DocumentConfiguration();
         config.setAssignedToJudgeNotificationTemplate("FL-FRM-LET-ENG-00318.docx");
         config.setAssignedToJudgeNotificationFileName("AssignedToJudgeNotificationLetter.pdf");
+        config.setConsentInContestedAssignedToJudgeNotificationFileName("FL-FRM-LET-ENG-00578.docx");
+        config.setConsentInContestedAssignedToJudgeNotificationFileName("ConsentInContestedAssignedToJudgeNotificationLetter.pdf");
 
         caseDetails = defaultConsentedCaseDetails();
     }
