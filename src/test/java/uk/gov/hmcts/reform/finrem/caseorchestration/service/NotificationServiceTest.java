@@ -992,7 +992,20 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendContestedGeneralApplicationOutcomeNotificationEmail() throws IOException {
+    public void sendContestedGeneralApplicationOutcomeNotificationEmailWhenSendToFRCToggleTrue() throws IOException {
+        when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
+        callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST,
+            NOTTINGHAM, NOTTINGHAM_COURTLIST,  "FR_s_NottinghamList_1");
+
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest);
+    }
+
+    @Test
+    public void sendContestedGeneralApplicationOutcomeNotificationEmailWhenSendToFRCToggleFalse() throws IOException {
+        when(featureToggleService.isSendToFRCEnabled()).thenReturn(false);
         callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST,
             NOTTINGHAM, NOTTINGHAM_COURTLIST,  "FR_s_NottinghamList_1");
 

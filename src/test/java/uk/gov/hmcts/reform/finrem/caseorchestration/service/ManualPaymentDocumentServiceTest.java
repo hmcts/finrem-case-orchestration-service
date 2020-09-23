@@ -80,7 +80,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         assertThat(frcCourtDetails.getCourtName(), is("Port Talbot Justice Centre"));
         assertThat(frcCourtDetails.getCourtAddress(), is("Harbourside Road, Port Talbot, SA13 1SB"));
         assertThat(frcCourtDetails.getPhoneNumber(), is("01792 485 800"));
-        assertThat(frcCourtDetails.getEmail(), is("fr_applicant_sol@sharklasers.com"));
+        assertThat(frcCourtDetails.getEmail(), is("FRCswansea@justice.gov.uk"));
     }
 
     @Test
@@ -107,7 +107,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         assertThat(frcCourtDetails.getCourtName(), is("Horsham County Court And Family Court"));
         assertThat(frcCourtDetails.getCourtAddress(), is("The Law Courts, Hurst Road, Horsham, RH12 2ET"));
         assertThat(frcCourtDetails.getPhoneNumber(), is("01634 887900"));
-        assertThat(frcCourtDetails.getEmail(), is("fr_applicant_sol@sharklasers.com"));
+        assertThat(frcCourtDetails.getEmail(), is("FRCKSS@justice.gov.uk"));
     }
 
     private CaseDetails contestedPaperCaseDetails() throws Exception {

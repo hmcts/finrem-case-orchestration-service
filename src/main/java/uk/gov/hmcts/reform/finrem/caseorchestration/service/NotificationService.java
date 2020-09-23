@@ -75,6 +75,8 @@ public class NotificationService {
 
     private NotificationRequest notificationRequest;
 
+    private String recipientEmail = "fr_applicant_sol@sharklasers.com";
+
     public void sendConsentedHWFSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
         notificationRequest = createNotificationRequest(callbackRequest);
@@ -195,14 +197,19 @@ public class NotificationService {
     }
 
     public void sendContestedGeneralApplicationOutcomeEmail(CallbackRequest callbackRequest) throws IOException {
-        URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralApplicationOutcome());
 
-        Map<String, Object> data = callbackRequest.getCaseDetails().getData();
-        Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-        Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(CaseHearingFunctions.getSelectedCourt(data)));
+        if (featureToggleService.isSendToFRCEnabled()) {
+            Map<String, Object> data = callbackRequest.getCaseDetails().getData();
+            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(CaseHearingFunctions.getSelectedCourt(data)));
+
+            recipientEmail = (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
+        }
 
         notificationRequest = createNotificationRequest(callbackRequest);
-        notificationRequest.setNotificationEmail((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY));
+        notificationRequest.setNotificationEmail(recipientEmail);
+
+        URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralApplicationOutcome());
         sendNotificationEmail(notificationRequest, uri);
     }
 
