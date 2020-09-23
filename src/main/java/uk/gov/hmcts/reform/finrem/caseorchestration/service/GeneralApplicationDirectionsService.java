@@ -92,18 +92,18 @@ public class GeneralApplicationDirectionsService {
 
     private void printGeneralApplicationDirectionsOrder(CaseDetails caseDetails, String authorisationToken) {
         BulkPrintDocument generalApplicationOrder = documentHelper.getCaseDocumentAsBulkPrintDocument(
-            genericDocumentService.generateDocument(authorisationToken, caseDetails, documentConfiguration.getGeneralApplicationHearingNoticeTemplate(),
-                documentConfiguration.getGeneralApplicationHearingNoticeFileName())
-        );
+            genericDocumentService.generateDocument(authorisationToken, caseDetails,
+                documentConfiguration.getGeneralApplicationHearingNoticeTemplate(),
+                documentConfiguration.getGeneralApplicationHearingNoticeFileName()));
 
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, asList(generalApplicationOrder));
     }
 
     private void printHearingRequiredNoticePack(CaseDetails caseDetails, String authorisationToken) {
         BulkPrintDocument hearingRequiredNotice = documentHelper.getCaseDocumentAsBulkPrintDocument(
-            genericDocumentService.generateDocument(authorisationToken, caseDetails, documentConfiguration.getGeneralApplicationHearingNoticeTemplate(),
-                documentConfiguration.getGeneralApplicationHearingNoticeFileName())
-        );
+            genericDocumentService.generateDocument(authorisationToken, caseDetails,
+                documentConfiguration.getGeneralApplicationHearingNoticeTemplate(),
+                documentConfiguration.getGeneralApplicationHearingNoticeFileName()));
 
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, asList(hearingRequiredNotice));
     }
