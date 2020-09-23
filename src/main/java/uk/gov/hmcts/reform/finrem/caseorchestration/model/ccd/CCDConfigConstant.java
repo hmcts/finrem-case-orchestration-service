@@ -211,6 +211,36 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_PRE_STATE = "generalApplicationPreState";
     public static final String GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL = "generalApplicationReferToJudgeEmail";
 
+    // General application directions
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED = "generalApplicationDirectionsHearingRequired";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HEARING_DATE = "generalApplicationDirectionsHearingDate";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME = "generalApplicationDirectionsHearingTime";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME_ESTIMATE = "generalApplicationDirectionsHearingTimeEstimate";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION = "generalApplicationDirectionsHearingRegion";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC = "generalApplicationDirectionsMidlandsFRC";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_LONDON_FRC = "generalApplicationDirectionsLondonFRC";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_NORTHWEST_FRC = "generalApplicationDirectionsNorthWestFRC";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_NORTHEAST_FRC = "generalApplicationDirectionsNorthEastFRC";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC = "generalApplicationDirectionsSouthEastFRC";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_WALES_FRC = "generalApplicationDirectionsWalesFRC";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_NOTTINGHAM_COURT = "generalApplicationDirectionsNottinghamCourt";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_CFC_COURT = "generalApplicationDirectionsCfcCourt";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_BIRMINGHAM_COURT = "generalApplicationDirectionsBirminghamCourt";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_LIVERPOOL_COURT = "generalApplicationDirectionsLiverpoolCourt";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_MANCHESTER_COURT = "generalApplicationDirectionsManchesterCourt";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_CLEVELAND_COURT = "generalApplicationDirectionsClevelandCourt";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_NWYORKSHIRE_COURT = "generalApplicationDirectionsNwyorkshireCourt";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HUMBER_COURT = "generalApplicationDirectionsHumberCourt";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_KENTSURREY_COURT = "generalApplicationDirectionsKentSurreyCourt";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_NEWPORT_COURT = "generalApplicationDirectionsNewportCourt";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_SWANSEA_COURT = "generalApplicationDirectionsSwanseaCourt";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION = "generalApplicationDirectionsAdditionalInformation";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_RECITALS = "generalApplicationDirectionsRecitals";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_JUDGE_TYPE = "generalApplicationDirectionsJudgeType";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME = "generalApplicationDirectionsJudgeName";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_COURT_ORDER_DATE = "generalApplicationDirectionsCourtOrderDate";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE = "generalApplicationDirectionsTextFromJudge";
+
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
     public static final String FEES = "Fees";
