@@ -67,6 +67,11 @@ public class FeatureToggleService {
         return isFeatureEnabled(AUTOMATE_SEND_ORDER);
     }
 
+    /*
+     * Used for sending emails to FRC in Notification Service
+     * Removing will result in test account being emailed, rather than actual FRCs
+     * Court Emails are defined in court-details.json
+     */
     public boolean isSendToFRCEnabled() {
         return isFeatureEnabled(SEND_TO_FRC);
     }

@@ -89,6 +89,8 @@ public class NotificationServiceTest extends BaseServiceTest {
 
     private static final String ERROR_500_MESSAGE = "500 Internal Server Error";
     private static final String DUMMY_EMAIL = "some@person.email";
+    private static final String TEST_USER_EMAIL = "fr_applicant_sol@sharklasers.com";
+    private static final String NOTTINGHAM_FRC_EMAIL = "FRCNottingham@justice.gov.uk";
 
     @Autowired
     private NotificationService notificationService;
@@ -999,18 +1001,23 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andExpect(MockRestRequestMatchers.jsonPath("notificationEmail")
+                .value(NOTTINGHAM_FRC_EMAIL))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest);
     }
 
     @Test
-    public void sendContestedGeneralApplicationOutcomeNotificationEmailWhenSendToFRCToggleFalse() throws IOException {
+    public void sendContestedGeneralApplicationOutcomeNotificationEmailToTestAccountWhenSendToFRCToggleFalse()
+        throws IOException {
         when(featureToggleService.isSendToFRCEnabled()).thenReturn(false);
         callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST,
             NOTTINGHAM, NOTTINGHAM_COURTLIST,  "FR_s_NottinghamList_1");
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andExpect(MockRestRequestMatchers.jsonPath("notificationEmail")
+                .value(TEST_USER_EMAIL))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest);
     }
