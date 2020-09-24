@@ -202,6 +202,7 @@ public class NotificationsControllerTest {
             .andExpect(status().isOk());
 
         verifyNoInteractions(bulkPrintService);
+        verifyNoInteractions(assignedToJudgeDocumentService);
     }
 
     @Test

@@ -72,6 +72,7 @@ public class GeneralLetterService {
     private CaseDocument generateGeneralLetterDocument(CaseDetails caseDetails, String authorisationToken) {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         prepareCaseDetailsForDocumentGeneration(caseDetailsCopy);
+        caseDetailsCopy.getData().put("generalLetterCreatedDate", new Date());
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getGeneralLetterTemplate(), documentConfiguration.getGeneralLetterFileName());
@@ -79,7 +80,6 @@ public class GeneralLetterService {
 
     private void prepareCaseDetailsForDocumentGeneration(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.put("generalLetterCreatedDate", new Date());
         caseData.put("ccdCaseNumber", caseDetails.getId());
         caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
         caseData.put("applicantFullName", buildFullApplicantName(caseDetails));
