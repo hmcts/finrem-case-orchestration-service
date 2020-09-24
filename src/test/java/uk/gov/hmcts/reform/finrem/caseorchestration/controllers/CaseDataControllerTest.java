@@ -20,6 +20,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 
 @WebMvcTest(CaseDataController.class)
 public class CaseDataControllerTest extends BaseControllerTest {
@@ -27,6 +28,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private static final String MOVE_VALUES_SAMPLE_JSON = "/fixtures/move-values-sample.json";
     private static final String CONTESTED_HWF_JSON = "/fixtures/contested/hwf.json";
     private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
+    private static final String ORGANISATION_POLICY_JSON = "/fixtures/contested/organisation-policy.json";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockBean
@@ -253,5 +255,35 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)))
             .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)));
+    }
+
+    @Test
+    public void shouldSuccessfullyReturnOrgPolicyIfPresent() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource(ORGANISATION_POLICY_JSON).toURI()));
+        mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.OrgPolicyCaseAssignedRole", is(APP_SOLICITOR_POLICY)));
+    }
+
+    @Test
+    public void shouldNotReturnOrgPolicyIfNotPresent() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
+        mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.ApplicantOrganisationPolicy").doesNotExist());
     }
 }
