@@ -42,7 +42,7 @@ public class GeneralApplicationDirectionsController implements BaseController {
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to submit general application for Case ID: {}", caseDetails.getId());
+        log.info("Received request to submit general application directions for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
         generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, authorisationToken);
