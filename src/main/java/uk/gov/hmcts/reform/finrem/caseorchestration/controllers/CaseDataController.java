@@ -139,8 +139,6 @@ public class CaseDataController implements BaseController {
             org.put(ORGANISATION_POLICY_ORGANISATION_ID, null);
             org.put(ORGANISATION_POLICY_ORGANISATION_NAME, null);
             appPolicy.put(ORGANISATION_POLICY_ORGANISATION, org);
-            appPolicy.put(ORGANISATION_POLICY_ORGANISATION_NAME, null);
-            appPolicy.put(ORGANISATION_POLICY_ORGANISATION_ID, null);
 
             caseData.put(ORGANISATION_POLICY_APPLICANT, appPolicy);
 
