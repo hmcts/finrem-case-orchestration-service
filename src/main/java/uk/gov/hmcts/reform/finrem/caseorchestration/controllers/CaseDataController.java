@@ -130,6 +130,7 @@ public class CaseDataController implements BaseController {
     }
 
     private void setOrganisationPolicy(Map<String, Object> caseData) {
+        log.info("Share a case is enabled: {}", featureToggleService.isShareACaseEnabled() );
         if (featureToggleService.isShareACaseEnabled()) {
             Map<String, Object> appPolicy = new HashMap<>();
             appPolicy.put(ORGANISATION_POLICY_ROLE, APP_SOLICITOR_POLICY);
@@ -142,6 +143,8 @@ public class CaseDataController implements BaseController {
             appPolicy.put(ORGANISATION_POLICY_ORGANISATION_ID, null);
 
             caseData.put(ORGANISATION_POLICY_APPLICANT, appPolicy);
+
+            log.info("App policy added to case : {}", appPolicy);
         }
     }
 }
