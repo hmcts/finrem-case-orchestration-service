@@ -13,7 +13,7 @@ This application orchestrates a workflow based on the requested business require
 The project uses [Gradle](https://gradle.org) as a build tool but you don't have to install it locally since there is a
 `./gradlew` wrapper script.
 
-To build project please execute the following command:
+To build project please execute the following command: 
 
 ```bash
     ./gradlew build
