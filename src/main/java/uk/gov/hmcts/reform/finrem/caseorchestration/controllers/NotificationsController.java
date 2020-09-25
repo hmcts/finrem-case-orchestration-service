@@ -446,7 +446,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/general-application-outcome", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/general-application-outcome", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send general application outcome email")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "General Application Outcome email sent successfully",
