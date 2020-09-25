@@ -19,6 +19,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.AUTOMA
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_COURT_DETAILS_MIGRATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_DRAFT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_GENERAL_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SHARE_A_CASE;
 
 /**
@@ -69,6 +70,15 @@ public class FeatureToggleService {
 
     public boolean isAutomateSendOrderEnabled() {
         return isFeatureEnabled(AUTOMATE_SEND_ORDER);
+    }
+
+    /*
+     * Used for sending emails to FRC in Notification Service
+     * Removing will result in test account being emailed, rather than actual FRCs
+     * Court Emails are defined in court-details.json
+     */
+    public boolean isSendToFRCEnabled() {
+        return isFeatureEnabled(SEND_TO_FRC);
     }
 
     /**

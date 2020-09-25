@@ -12,7 +12,8 @@ public enum Features {
     CONTESTED_COURT_DETAILS_MIGRATION("contested_court_details_migration"),
     AUTOMATE_ASSIGN_JUDGE("automate_assign_judge"),
     AUTOMATE_SEND_ORDER("automate_send_order"),
-    SHARE_A_CASE("share_a_case");
+    SHARE_A_CASE("share_a_case"),
+    SEND_TO_FRC("send_to_frc");
 
     private final String name;
 }

@@ -33,3 +33,6 @@ functional-output/
 ### Local test files (properties or yaml) ###
 /src/functionalTests/resources/application-local.*
 /src/main/resources/application-*.*
+
+# Log file
+*.log
