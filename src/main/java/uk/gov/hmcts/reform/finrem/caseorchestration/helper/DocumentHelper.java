@@ -228,11 +228,9 @@ public class DocumentHelper {
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
         String ccdNumber = nullToEmpty((caseDetailsCopy.getId()));
-        String applicantName = buildFullName(caseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
-        String respondentName =  buildFullName(caseData,
-            isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME,
-            isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME);
-
+        String applicantName = getApplicantFullName(caseDetailsCopy);
+        String respondentName = isConsentedApplication
+            ? getRespondentFullNameConsented(caseDetailsCopy) : getRespondentFullNameContested(caseDetailsCopy);
 
         if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
             Addressee addressee = Addressee.builder()
@@ -247,7 +245,7 @@ public class DocumentHelper {
             caseData.put("applicantName", applicantName);
             caseData.put("respondentName", respondentName);
             caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
-            caseData.put("courtDetails", buildFrcCourtDetails(caseDetailsCopy.getData(), objectMapper));
+            caseData.put("courtDetails", buildFrcCourtDetails(caseData, objectMapper));
         } else {
             log.info("Failed to prepare template data as not all required address details were present");
             throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
@@ -320,15 +318,15 @@ public class DocumentHelper {
     }
 
     public static String getApplicantFullName(CaseDetails caseDetails) {
-        return buildFullName(caseDetails.getData(),"applicantFMName", "applicantLName");
+        return buildFullName(caseDetails.getData(),APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
     }
 
     public static String getRespondentFullNameConsented(CaseDetails caseDetails) {
-        return buildFullName(caseDetails.getData(),"appRespondentFMName", "appRespondentLName");
+        return buildFullName(caseDetails.getData(),CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, CONSENTED_RESPONDENT_LAST_NAME);
     }
 
     public static String getRespondentFullNameContested(CaseDetails caseDetails) {
-        return buildFullName(caseDetails.getData(),"respondentFMName", "respondentLName");
+        return buildFullName(caseDetails.getData(),CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, CONTESTED_RESPONDENT_LAST_NAME);
     }
 
     public List<ContestedConsentOrderData> convertToContestedConsentOrderData(Object object) {

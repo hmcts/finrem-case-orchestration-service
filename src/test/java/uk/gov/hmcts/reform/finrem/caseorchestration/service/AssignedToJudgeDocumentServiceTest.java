@@ -133,6 +133,9 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
         assertThat(ctscContactDetails.getServiceCentre(), is("Courts and Tribunals Service Centre"));
 
         assertThat(caseDetails.getData().get("letterDate"), is(String.valueOf(LocalDate.now())));
+        assertThat(caseDetails.getData().get("applicantName"), is("James Joyce"));
+        assertThat(caseDetails.getData().get("respondentName"), is("Jane Doe"));
+        assertThat(caseDetails.getData().get("caseNumber"), is("987654321"));
 
         Map<String, Object> courtDetails = (Map<String, Object>) caseDetails.getData().get("courtDetails");
         assertThat(courtDetails.get("courtName"), is("Mansfield Magistrates And County Court"));
@@ -176,6 +179,9 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
         assertThat(ctscContactDetails.getServiceCentre(), is("Courts and Tribunals Service Centre"));
 
         assertThat(caseDetails.getData().get("letterDate"), is(String.valueOf(LocalDate.now())));
+        assertThat(caseDetails.getData().get("applicantName"), is("James Joyce"));
+        assertThat(caseDetails.getData().get("respondentName"), is("Jane Doe"));
+        assertThat(caseDetails.getData().get("caseNumber"), is("987654321"));
 
         Map<String, Object> courtDetails = (Map<String, Object>) caseDetails.getData().get("courtDetails");
         assertThat(courtDetails.get("courtName"), is("Mansfield Magistrates And County Court"));
@@ -204,6 +210,9 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
         assertThat(ctscContactDetails.getServiceCentre(), is("Courts and Tribunals Service Centre"));
 
         assertThat(caseDetails.getData().get("letterDate"), is(String.valueOf(LocalDate.now())));
+        assertThat(caseDetails.getData().get("applicantName"), is("James Joyce"));
+        assertThat(caseDetails.getData().get("respondentName"), is("Jane Doe"));
+        assertThat(caseDetails.getData().get("caseNumber"), is("987654321"));
 
         Map<String, Object> courtDetails = (Map<String, Object>) caseDetails.getData().get("courtDetails");
         assertThat(courtDetails.get("courtName"), is("Mansfield Magistrates And County Court"));
@@ -247,6 +256,9 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
         assertThat(ctscContactDetails.getServiceCentre(), is("Courts and Tribunals Service Centre"));
 
         assertThat(caseDetails.getData().get("letterDate"), is(String.valueOf(LocalDate.now())));
+        assertThat(caseDetails.getData().get("applicantName"), is("James Joyce"));
+        assertThat(caseDetails.getData().get("respondentName"), is("Jane Doe"));
+        assertThat(caseDetails.getData().get("caseNumber"), is("987654321"));
 
         Map<String, Object> courtDetails = (Map<String, Object>) caseDetails.getData().get("courtDetails");
         assertThat(courtDetails.get("courtName"), is("Mansfield Magistrates And County Court"));
