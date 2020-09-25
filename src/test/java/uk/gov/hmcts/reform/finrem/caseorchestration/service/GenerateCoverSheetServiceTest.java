@@ -181,4 +181,20 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         assertEquals(expectedCourtContactDetails, data.get(COURT_CONTACT_DETAILS));
         assertThat(data, hasKey(CASE_NUMBER));
     }
+
+    private void assertContestedCoversheetCalledWithRequiredData() {
+        verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
+            any(), any());
+        Map<String, Object> data = generateDocumentCaseDetailsCaptor.getValue().getData();
+
+        String expectedCourtContactDetails = "Hastings County Court And Family Court Hearing Centre" + "\n"
+            + "The Law Courts, Bohemia Road, Hastings, TN34 1QX" + "\n"
+            + "01634 887900" + "\n"
+            + "fr_applicant_sol@sharklasers.com";
+
+        assertThat(data, hasKey(ADDRESSEE));
+        assertThat(data, hasKey(COURT_CONTACT_DETAILS));
+        assertEquals(expectedCourtContactDetails, data.get(COURT_CONTACT_DETAILS));
+        assertThat(data, hasKey(CASE_NUMBER));
+    }
 }

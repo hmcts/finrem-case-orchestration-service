@@ -30,4 +30,5 @@ public class NotificationServiceConfiguration {
     private String contestedConsentGeneralOrder;
     private String contestedConsentOrderNotApproved;
     private String contestedGeneralApplicationReferToJudge;
+    private String contestedGeneralApplicationOutcome;
 }

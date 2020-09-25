@@ -50,7 +50,8 @@ public class FeatureToggleServiceTest {
     @SpringBootTest(properties = {
         "feature.toggle.contested_print_draft_order_not_approved=false",
         "feature.toggle.contested_print_general_order=false",
-        "feature.toggle.automate_send_order=false"
+        "feature.toggle.automate_send_order=false",
+        "feature.toggle.send_to_frc=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff {
 
@@ -75,6 +76,11 @@ public class FeatureToggleServiceTest {
         @Test
         public void isContestedPrintDraftOrderNotApprovedEnabledReturnsFalse() {
             assertThat(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled(), is(false));
+        }
+
+        @Test
+        public void isSendToFRCEnabledReturnsFalse() {
+            assertThat(featureToggleService.isSendToFRCEnabled(), is(false));
         }
     }
 }
