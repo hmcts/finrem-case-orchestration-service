@@ -130,7 +130,7 @@ public class CaseDataController implements BaseController {
     }
 
     private void setOrganisationPolicy(Map<String, Object> caseData) {
-        log.info("Share a case is enabled: {}", featureToggleService.isShareACaseEnabled() );
+        log.info("Share a case is enabled: {}", featureToggleService.isShareACaseEnabled());
         if (featureToggleService.isShareACaseEnabled()) {
             Map<String, Object> appPolicy = new HashMap<>();
             appPolicy.put(ORGANISATION_POLICY_ROLE, APP_SOLICITOR_POLICY);
