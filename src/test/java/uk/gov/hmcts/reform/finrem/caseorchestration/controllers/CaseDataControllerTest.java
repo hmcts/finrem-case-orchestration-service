@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.io.File;
@@ -28,11 +29,13 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private static final String MOVE_VALUES_SAMPLE_JSON = "/fixtures/move-values-sample.json";
     private static final String CONTESTED_HWF_JSON = "/fixtures/contested/hwf.json";
     private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
-    private static final String ORGANISATION_POLICY_JSON = "/fixtures/contested/organisation-policy.json";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockBean
     private  IdamService idamService;
+
+    @MockBean
+    FeatureToggleService featureToggleService;
 
     @Test
     public void shouldSuccessfullyMoveValues() throws Exception {
@@ -258,11 +261,12 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSuccessfullyReturnOrgPolicyIfPresent() throws Exception {
+    public void shouldSuccessfullySetOrgPolicyIfToggleEnabled() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
+        when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(ORGANISATION_POLICY_JSON).toURI()));
+            .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
         mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -273,8 +277,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotReturnOrgPolicyIfNotPresent() throws Exception {
+    public void shouldNotSetOrgPolicyIfFeatureDisabled() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
+        when(featureToggleService.isShareACaseEnabled()).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
@@ -284,6 +289,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.ApplicantOrganisationPolicy").doesNotExist());
+            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").doesNotExist());
     }
 }
