@@ -229,8 +229,7 @@ public class DocumentHelper {
 
         String ccdNumber = nullToEmpty((caseDetailsCopy.getId()));
         String applicantName = getApplicantFullName(caseDetailsCopy);
-        String respondentName = isConsentedApplication
-            ? getRespondentFullNameConsented(caseDetailsCopy) : getRespondentFullNameContested(caseDetailsCopy);
+        String respondentName = getRespondentFullName(caseDetailsCopy, isConsentedApplication);
 
         if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
             Addressee addressee = Addressee.builder()
@@ -319,6 +318,11 @@ public class DocumentHelper {
 
     public static String getApplicantFullName(CaseDetails caseDetails) {
         return buildFullName(caseDetails.getData(),APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
+    }
+
+    private static String getRespondentFullName(CaseDetails caseDetails, boolean isConsentedApplication) {
+        return isConsentedApplication
+            ? getRespondentFullNameConsented(caseDetails) : getRespondentFullNameContested(caseDetails);
     }
 
     public static String getRespondentFullNameConsented(CaseDetails caseDetails) {

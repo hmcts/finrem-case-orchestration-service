@@ -255,8 +255,6 @@ public class TestSetUpUtils {
         caseData.put(NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_7");
     }
 
-
-
     public static CaseDetails caseDetailsFromResource(String resourcePath, ObjectMapper mapper) {
         try (InputStream resourceAsStream = TestSetUpUtils.class.getResourceAsStream(resourcePath)) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
