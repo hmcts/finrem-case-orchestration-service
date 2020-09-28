@@ -251,4 +251,14 @@ public class CCDConfigConstant {
 
     //states
     public static final String CONSENTED_ORDER_APPROVED = "consentedOrderApproved";
+
+    //organisation policy
+    public static final String ORGANISATION_POLICY_APPLICANT = "ApplicantOrganisationPolicy";
+    public static final String ORGANISATION_POLICY_ROLE = "OrgPolicyCaseAssignedRole";
+    public static final String ORGANISATION_POLICY_REF = "OrgPolicyReference";
+    public static final String ORGANISATION_POLICY_ORGANISATION = "Organisation";
+    public static final String ORGANISATION_POLICY_ORGANISATION_NAME = "OrganisationName";
+    public static final String ORGANISATION_POLICY_ORGANISATION_ID = "OrganisationID";
+    public static final String APP_SOLICITOR_POLICY = "[APPSOLICITOR]";
+
 }
