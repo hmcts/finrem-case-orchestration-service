@@ -44,6 +44,7 @@ public class CCDConfigConstant {
     public static final String RESP_SOLICITOR_NAME = "rSolicitorName";
     public static final String RESP_SOLICITOR_ADDRESS = "rSolicitorAddress";
     public static final String RESP_SOLICITOR_REFERENCE = "rSolicitorReference";
+    public static final String RESP_SOLICITOR_EMAIL = "rSolicitorEmail";
 
     //Court related
     public static final String KENT = "kentfrc";
