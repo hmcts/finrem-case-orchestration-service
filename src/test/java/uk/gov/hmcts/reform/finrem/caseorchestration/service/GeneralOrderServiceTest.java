@@ -25,8 +25,8 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
@@ -226,7 +226,7 @@ public class GeneralOrderServiceTest {
         CaseDetails details = consentedCaseDetails();
         details.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, null);
         BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData());
-        assertTrue(latestGeneralOrder == null);
+        assertNull(latestGeneralOrder);
     }
 
     private CaseDetails consentedCaseDetails() throws Exception {
