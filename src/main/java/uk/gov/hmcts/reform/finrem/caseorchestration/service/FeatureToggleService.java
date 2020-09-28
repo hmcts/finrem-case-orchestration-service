@@ -20,6 +20,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTES
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_DRAFT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SHARE_A_CASE;
 
 /**
  * To add a feature toggle flag:
@@ -61,6 +62,10 @@ public class FeatureToggleService {
 
     public boolean isContestedCourtDetailsMigrationEnabled() {
         return isFeatureEnabled(CONTESTED_COURT_DETAILS_MIGRATION);
+    }
+
+    public boolean isShareACaseEnabled() {
+        return isFeatureEnabled(SHARE_A_CASE);
     }
 
     public boolean isAutomateSendOrderEnabled() {
