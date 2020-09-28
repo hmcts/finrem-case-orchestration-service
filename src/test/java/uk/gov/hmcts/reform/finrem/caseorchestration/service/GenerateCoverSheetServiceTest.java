@@ -2,7 +2,9 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,23 +21,28 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.rules.ExpectedException.none;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.COURT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
 
 @ActiveProfiles("test-mock-document-client")
 public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
     @Autowired private GenerateCoverSheetService generateCoverSheetService;
     @Autowired private ObjectMapper mapper;
+
+    @Rule
+    public ExpectedException expectedException = none();
 
     @MockBean
     private GenericDocumentService genericDocumentService;
@@ -49,19 +56,8 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldGenerateApplicantCoverSheetForConsented() throws Exception {
-        CaseDocument caseDocument = generateCoverSheetService.generateApplicantCoverSheet(caseDetails(), AUTH_TOKEN);
-
-        assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
-        assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
-        assertThat(document().getUrl(), is(caseDocument.getDocumentUrl()));
-
-        assertCoversheetCalledWithRequiredData();
-    }
-
-    @Test
-    public void shouldGenerateApplicantCoverSheetForContested() throws Exception {
-        CaseDocument caseDocument = generateCoverSheetService.generateApplicantCoverSheet(caseDetailsContested(), AUTH_TOKEN);
+    public void shouldGenerateApplicantCoverSheet() throws Exception {
+        CaseDocument caseDocument = generateCoverSheetService.generateApplicantCoverSheet(caseDetailsConsented(), AUTH_TOKEN);
 
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
@@ -72,7 +68,7 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldGenerateRespondentCoverSheet() throws Exception {
-        CaseDocument caseDocument = generateCoverSheetService.generateRespondentCoverSheet(caseDetails(), AUTH_TOKEN);
+        CaseDocument caseDocument = generateCoverSheetService.generateRespondentCoverSheet(caseDetailsConsented(), AUTH_TOKEN);
 
         assertThat(document().getBinaryUrl(), is(caseDocument.getDocumentBinaryUrl()));
         assertThat(document().getFileName(), is(caseDocument.getDocumentFilename()));
@@ -135,16 +131,9 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
         assertAddresseeName(2, "Jane Doe");
     }
 
-    private CaseDetails caseDetails() throws Exception {
+    private CaseDetails caseDetailsConsented() throws Exception {
         try (InputStream resourceAsStream =
                  getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
-    }
-
-    private CaseDetails caseDetailsContested() throws Exception {
-        try (InputStream resourceAsStream =
-                 getClass().getResourceAsStream("/fixtures/contested/consent-in-contested-application-approved.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }
@@ -182,8 +171,30 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
             any(), any());
         Map<String, Object> data = generateDocumentCaseDetailsCaptor.getValue().getData();
 
+        String expectedCourtContactDetails = "HMCTS Financial Remedy" + "\n"
+            + "PO BOX 12746" + "\n"
+            + "HARLOW" + "\n"
+            + "CM20 9QZ";
+
         assertThat(data, hasKey(ADDRESSEE));
-        assertThat(data, hasKey(CTSC_CONTACT_DETAILS));
+        assertThat(data, hasKey(COURT_CONTACT_DETAILS));
+        assertEquals(expectedCourtContactDetails, data.get(COURT_CONTACT_DETAILS));
+        assertThat(data, hasKey(CASE_NUMBER));
+    }
+
+    private void assertContestedCoversheetCalledWithRequiredData() {
+        verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
+            any(), any());
+        Map<String, Object> data = generateDocumentCaseDetailsCaptor.getValue().getData();
+
+        String expectedCourtContactDetails = "Hastings County Court And Family Court Hearing Centre" + "\n"
+            + "The Law Courts, Bohemia Road, Hastings, TN34 1QX" + "\n"
+            + "01634 887900" + "\n"
+            + "fr_applicant_sol@sharklasers.com";
+
+        assertThat(data, hasKey(ADDRESSEE));
+        assertThat(data, hasKey(COURT_CONTACT_DETAILS));
+        assertEquals(expectedCourtContactDetails, data.get(COURT_CONTACT_DETAILS));
         assertThat(data, hasKey(CASE_NUMBER));
     }
 }

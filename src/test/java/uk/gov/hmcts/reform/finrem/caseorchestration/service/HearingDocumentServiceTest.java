@@ -284,7 +284,7 @@ public class HearingDocumentServiceTest {
             NORTHWEST, NORTHWEST_FRC_LIST, MANCHESTER, MANCHESTER_COURTLIST, "FR_manchester_hc_list_1"));
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Manchester County And Family Court", "1 Bridge Street West, Manchester, M60 9DJ",
-            "0161 240 5430", "HMCTSFinancialRemedy@justice.gov.uk");
+            "0161 240 5430", "manchesterdivorce@justice.gov.uk");
     }
 
     @Test

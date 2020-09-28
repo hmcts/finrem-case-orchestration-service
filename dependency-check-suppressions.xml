@@ -32,4 +32,11 @@
         <packageUrl regex="true">^pkg:maven/org.yaml/snakeyaml@.*$</packageUrl>
         <cve>CVE-2017-18640</cve>
     </suppress>
+    <suppress>
+        <notes>
+        <![CDATA[ CVE is a json vulnerability that applies only to Ruby or Node projects]]>
+        </notes>
+        <cve>CVE-2020-10663</cve>
+        <cve>CVE-2020-7712</cve>
+    </suppress>
 </suppressions>

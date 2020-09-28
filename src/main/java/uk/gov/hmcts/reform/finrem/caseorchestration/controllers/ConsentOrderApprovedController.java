@@ -23,8 +23,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
@@ -55,7 +55,7 @@ public class ConsentOrderApprovedController implements BaseController {
 
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final GenericDocumentService genericDocumentService;
-    private final BulkPrintService bulkPrintService;
+    private final ConsentOrderPrintService consentOrderPrintService;
     private final NotificationService notificationService;
     private final FeatureToggleService featureToggleService;
     private final ObjectMapper mapper;
@@ -119,7 +119,7 @@ public class ConsentOrderApprovedController implements BaseController {
 
     @PostMapping(path = "/consent-in-contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "'Consent Order Approved' callback handler for consent in contested. Checks state and if "
-        + "approved generates docs else puts latest general order into uploadORder fields. Then sends the data to bulk print")
+        + "approved generates docs else puts latest general order into uploadOrder fields. Then sends the data to bulk print")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
@@ -135,7 +135,7 @@ public class ConsentOrderApprovedController implements BaseController {
             consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
         }
 
-        bulkPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
+        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDetails.getData())
@@ -183,7 +183,7 @@ public class ConsentOrderApprovedController implements BaseController {
                 // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
                 caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
                 caseDetails.setData(caseData);
-                caseData = bulkPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
+                caseData = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
                 notificationService.sendConsentOrderAvailableCtscEmail(callback);
             } catch (JsonProcessingException e) {

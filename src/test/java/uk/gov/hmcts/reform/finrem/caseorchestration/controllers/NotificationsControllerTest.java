@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManualPaymentDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
 import java.io.File;
@@ -50,10 +51,14 @@ public class NotificationsControllerTest {
     private static final String CONTESTED_APPLICATION_ISSUED_CALLBACK_URL = "/case-orchestration/notify/contest-application-issued";
     private static final String CONTEST_ORDER_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contest-order-approved";
     private static final String CONTESTED_CONSENT_ORDER_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contested-consent-order-approved";
+    private static final String CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE_CALLBACK_URL =
+        "/case-orchestration/notify/general-application-refer-to-judge";
+    private static final String CONTESTED_GENERAL_APPLICATION_OUTCOME_CALLBACK_URL = "/case-orchestration/notify/general-application-outcome";
     private static final String CONTESTED_CONSENT_GENERAL_ORDER_CALLBACK_URL = "/case-orchestration/notify/contested-consent-general-order";
     private static final String CONTESTED_CONSENT_ORDER_NOT_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contested-consent-order-not-approved";
     private static final String CONTESTED_DRAFT_ORDER_URL = "/case-orchestration/notify/draft-order";
     private static final String GENERAL_EMAIL_URL = "/case-orchestration/notify/general-email";
+    private static final String CONTESTED_MANUAL_PAYMENT_URL = "/case-orchestration/notify/manual-payment";
 
     //JSON Data
     private static final String CCD_REQUEST_JSON = "/fixtures/model/ccd-request.json";
@@ -65,12 +70,16 @@ public class NotificationsControllerTest {
     private static final String DRAFT_ORDER_UNSUCCESSFUL_RESPONDENT_SOL = "/fixtures/respondent-solicitor-to-draft-order-with-email-consent.json";
     private static final String GENERAL_EMAIL_CONSENTED = "/fixtures/general-email-consented.json";
     private static final String GENERAL_EMAIL_CONTESTED = "/fixtures/contested/general-email-contested.json";
+    private static final String CONTESTED_PAPER_CASE_JSON = "/fixtures/contested/paper-case.json";
 
     @Autowired
     private WebApplicationContext applicationContext;
 
     @MockBean
     private NotificationService notificationService;
+
+    @MockBean
+    private ManualPaymentDocumentService manualPaymentDocumentService;
 
     @MockBean
     private FeatureToggleService featureToggleService;
@@ -135,7 +144,7 @@ public class NotificationsControllerTest {
         verify(helpWithFeesDocumentService, times(1))
             .generateHwfSuccessfulNotificationLetter(any(CaseDetails.class),any());
         verify(bulkPrintService, times(1))
-            .sendNotificationLetterForBulkPrint(any(),any());
+            .sendDocumentForPrint(any(),any());
         verifyNoInteractions(notificationService);
     }
 
@@ -179,7 +188,7 @@ public class NotificationsControllerTest {
         verify(assignedToJudgeDocumentService, times(1))
             .generateAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
         verify(bulkPrintService, times(1))
-            .sendNotificationLetterForBulkPrint(any(),any());
+            .sendDocumentForPrint(any(),any());
         verifyNoInteractions(notificationService);
     }
 
@@ -486,7 +495,7 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void sendContestedConsentOGeneralOrderEmail() throws Exception {
+    public void sendContestedConsentGeneralOrderEmail() throws Exception {
         buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
         mockMvc.perform(post(CONTESTED_CONSENT_GENERAL_ORDER_CALLBACK_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -508,6 +517,19 @@ public class NotificationsControllerTest {
             .andExpect(status().isOk());
 
         verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void sendContestedGeneralApplicationReferToJudgeEmail() throws Exception {
+        buildCcdRequest(CCD_REQUEST_JSON);
+        mockMvc.perform(post(CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+            .sendContestedGeneralApplicationReferToJudgeEmail(any(CallbackRequest.class));
     }
 
     @Test
@@ -533,6 +555,35 @@ public class NotificationsControllerTest {
             .andExpect(status().isOk());
 
         verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void sendContestedManualPaymentLetters() throws Exception {
+        buildCcdRequest(CONTESTED_PAPER_CASE_JSON);
+        mockMvc.perform(post(CONTESTED_MANUAL_PAYMENT_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(manualPaymentDocumentService, times(1))
+            .generateApplicantManualPaymentLetter(any(CaseDetails.class), any());
+        verify(bulkPrintService, times(1))
+            .sendDocumentForPrint(any(),any());
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void sendContestedGeneralApplicationOutcomeEmail() throws Exception {
+        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
+        mockMvc.perform(post(CONTESTED_GENERAL_APPLICATION_OUTCOME_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+            .sendContestedGeneralApplicationOutcomeEmail(any(CallbackRequest.class));
     }
 
     private void buildCcdRequest(String fileName) throws IOException, URISyntaxException {

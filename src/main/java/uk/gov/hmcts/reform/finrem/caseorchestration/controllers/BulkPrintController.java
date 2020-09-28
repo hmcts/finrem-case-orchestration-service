@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 
 import javax.validation.constraints.NotNull;
 
@@ -31,6 +32,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class BulkPrintController implements BaseController {
 
     private final BulkPrintService bulkPrintService;
+    private final ConsentOrderPrintService consentOrderPrintService;
 
     @PostMapping(path = "/bulk-print", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles bulk print")
@@ -50,7 +52,7 @@ public class BulkPrintController implements BaseController {
         log.info("Received request for Bulk Print for Case ID {}", caseDetails.getId());
         validateCaseData(callback);
 
-        Map<String, Object> caseData = bulkPrintService.sendConsentOrderToBulkPrint(caseDetails, authorisationToken);
+        Map<String, Object> caseData = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authorisationToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

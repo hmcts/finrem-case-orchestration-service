@@ -9,19 +9,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDataWithRefusalOrder;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME;
@@ -47,11 +52,18 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     private IdamService idamService;
 
     @MockBean
+    private BulkPrintService bulkPrintService;
+
+    @MockBean
+    private FeatureToggleService featureToggleService;
+
+    @MockBean
     private ContestedDraftOrderNotApprovedService contestedDraftOrderNotApprovedService;
 
     private static final String START_REFUSAL_ORDER_URL = "/case-orchestration/contested-application-not-approved-start";
     private static final String PREVIEW_REFUSAL_ORDER_URL = "/case-orchestration/documents/preview-refusal-order";
     private static final String SUBMIT_REFUSAL_ORDER_URL =  "/case-orchestration/contested-application-not-approved-submit";
+    private static final String SUBMIT_REFUSAL_REASON_URL =  "/case-orchestration/contested-application-send-refusal";
 
     private String bearerToken = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJqc2NyMGE0M3JnMHU5aGZpNHRva21vdHJ"
         + "vOSIsInN1YiI6IjEiLCJpYXQiOjE1NjAyNDcyNzgsImV4cCI6MTU2MDI2NTI3OCwiZGF0YSI6ImNjZC1pbXBv"
@@ -176,6 +188,68 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void submitSendRefusalReasonWithRefusalAndShouldPrintForApplicantTrue() throws Exception {
+        doValidRefusalOrder();
+        when(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()).thenReturn(true);
+        when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+        verify(contestedDraftOrderNotApprovedService, times(1)).getLatestRefusalReason(any());
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
+    }
+
+    @Test
+    public void submitSendRefusalReasonWithRefusalAndShouldPrintForApplicantFalse() throws Exception {
+        doValidRefusalOrder();
+        when(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()).thenReturn(true);
+        when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(false);
+        mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+        verify(contestedDraftOrderNotApprovedService, times(1)).getLatestRefusalReason(any());
+        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
+    }
+
+    @Test
+    public void submitSendRefusalReasonWithNotRefusalReasonNotPrint() throws Exception {
+        doValidCaseDataSetUpForPaperApplication();
+        when(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()).thenReturn(true);
+        mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+        verify(contestedDraftOrderNotApprovedService, times(1)).getLatestRefusalReason(any());
+        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
+    }
+
+    @Test
+    public void submitSendRefusalReasonWithRefusalAndShouldNotPrintWhenToggleIsFalse() throws Exception {
+        doValidRefusalOrder();
+        when(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()).thenReturn(false);
+        when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+        verify(contestedDraftOrderNotApprovedService, times(1)).getLatestRefusalReason(any());
+        verify(bulkPrintService, times(0)).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, times(0)).printRespondentDocuments(any(), any(), any());
     }
 
     private OngoingStubbing<Map<String, Object>> whenServicePopulatesCollection() {

@@ -54,8 +54,7 @@ public class RejectedOrderDocumentControllerTest {
     @Autowired
     private WebApplicationContext applicationContext;
 
-    @MockBean
-    private RefusalOrderDocumentService documentService;
+    @MockBean private RefusalOrderDocumentService documentService;
 
     private MockMvc mvc;
     private JsonNode requestContent;
