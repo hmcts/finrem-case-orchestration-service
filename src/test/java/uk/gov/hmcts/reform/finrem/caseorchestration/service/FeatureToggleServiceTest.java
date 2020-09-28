@@ -18,7 +18,8 @@ public class FeatureToggleServiceTest {
     @SpringBootTest(properties = {
         "feature.toggle.contested_print_draft_order_not_approved=true",
         "feature.toggle.contested_print_general_order=true",
-        "feature.toggle.automate_send_order=true"
+        "feature.toggle.automate_send_order=true",
+        "feature.toggle.share_a_case=true"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOn {
 
@@ -44,6 +45,11 @@ public class FeatureToggleServiceTest {
         public void getFieldsIgnoredDuringSerialisationEmptyWhenFeaturesEnabled() {
             assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
         }
+
+        @Test
+        public void isShareACaseEnabledReturnsTrue() {
+            assertThat(featureToggleService.isShareACaseEnabled(), is(true));
+        }
     }
 
     @RunWith(SpringRunner.class)
@@ -51,7 +57,8 @@ public class FeatureToggleServiceTest {
         "feature.toggle.contested_print_draft_order_not_approved=false",
         "feature.toggle.contested_print_general_order=false",
         "feature.toggle.automate_send_order=false",
-        "feature.toggle.send_to_frc=false"
+        "feature.toggle.send_to_frc=false",
+        "feature.toggle.share_a_case=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff {
 
@@ -81,6 +88,11 @@ public class FeatureToggleServiceTest {
         @Test
         public void isSendToFRCEnabledReturnsFalse() {
             assertThat(featureToggleService.isSendToFRCEnabled(), is(false));
+        }
+
+        @Test
+        public void isShareACaseEnabledReturnsFalse() {
+            assertThat(featureToggleService.isShareACaseEnabled(), is(false));
         }
     }
 }
