@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 
@@ -39,7 +38,6 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
 
     @Autowired private GeneralApplicationService generalApplicationService;
     @Autowired private ObjectMapper objectMapper;
-    @Autowired private DocumentHelper documentHelper;
     @MockBean private IdamService idamService;
 
     @Test

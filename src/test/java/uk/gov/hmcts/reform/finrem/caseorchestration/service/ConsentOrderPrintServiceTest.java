@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
@@ -35,9 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.bulkPr
 @ActiveProfiles("test-mock-document-client")
 public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
-    @Autowired private BulkPrintService bulkPrintService;
     @Autowired private ObjectMapper mapper = new ObjectMapper();
-    @Autowired private DocumentHelper documentHelper;
     @Autowired private ConsentOrderPrintService consentOrderPrintService;
 
     @MockBean private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
@@ -50,7 +47,6 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     private UUID letterId;
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor = ArgumentCaptor.forClass(BulkPrintRequest.class);
     private CaseDocument caseDocument = TestSetUpUtils.caseDocument();
-    private BulkPrintDocument bulkPrintDocument;
 
     @Test
     public void shouldSendForBulkPrintPackWithRespondentAndApplicantAddress() {

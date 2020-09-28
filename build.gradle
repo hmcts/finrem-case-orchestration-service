@@ -251,7 +251,7 @@ jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = 0.1
+                minimum = 0.8
             }
         }
     }
@@ -263,7 +263,6 @@ def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/*
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/error/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication']
 
 sonarqube {
