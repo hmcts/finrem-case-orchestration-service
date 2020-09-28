@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +27,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_ADMIN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_REF;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,6 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @SuppressWarnings("unchecked")
 public class CaseDataController implements BaseController {
     private final IdamService idamService;
+    private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for consented journey")
@@ -45,6 +55,7 @@ public class CaseDataController implements BaseController {
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
+        setOrganisationPolicy(caseData);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -57,6 +68,7 @@ public class CaseDataController implements BaseController {
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
+        setOrganisationPolicy(caseData);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -72,6 +84,7 @@ public class CaseDataController implements BaseController {
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setPaperCaseData(caseData);
+        setOrganisationPolicy(caseData);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -114,5 +127,22 @@ public class CaseDataController implements BaseController {
     private void setPaperCaseData(Map<String, Object> caseData) {
         caseData.put(PAPER_APPLICATION, YES_VALUE);
         caseData.put(FAST_TRACK_DECISION, NO_VALUE);
+    }
+
+    private void setOrganisationPolicy(Map<String, Object> caseData) {
+        log.info("Share a case is enabled: {}", featureToggleService.isShareACaseEnabled());
+        if (featureToggleService.isShareACaseEnabled()) {
+            Map<String, Object> appPolicy = new HashMap<>();
+            appPolicy.put(ORGANISATION_POLICY_ROLE, APP_SOLICITOR_POLICY);
+            appPolicy.put(ORGANISATION_POLICY_REF, null);
+            Map<String, Object> org = new HashMap<>();
+            org.put(ORGANISATION_POLICY_ORGANISATION_ID, null);
+            org.put(ORGANISATION_POLICY_ORGANISATION_NAME, null);
+            appPolicy.put(ORGANISATION_POLICY_ORGANISATION, org);
+
+            caseData.put(ORGANISATION_POLICY_APPLICANT, appPolicy);
+
+            log.info("App policy added to case : {}", appPolicy);
+        }
     }
 }
