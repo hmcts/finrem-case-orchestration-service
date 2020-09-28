@@ -136,21 +136,22 @@ public class NotificationsController implements BaseController {
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        if (isPaperApplication(caseDetails.getData())) {
+        if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
             log.info("Sending applicant Consent in Contested AssignedToJudge notification letter for bulk print for Case ID: {}",
                 callbackRequest.getCaseDetails().getId());
 
             CaseDocument applicantAssignedToJudgeNotificationLetter =
                 assignedToJudgeDocumentService.generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken);
             bulkPrintService.sendDocumentForPrint(applicantAssignedToJudgeNotificationLetter, caseDetails);
-
-            log.info("Sending respondent Consent in Contested AssignedToJudge notification letter for bulk print for Case ID: {}",
-                callbackRequest.getCaseDetails().getId());
-
-            CaseDocument respondentAssignedToJudgeNotificationLetter =
-                assignedToJudgeDocumentService.generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken);
-            bulkPrintService.sendDocumentForPrint(respondentAssignedToJudgeNotificationLetter, caseDetails);
         }
+
+        log.info("Sending respondent Consent in Contested AssignedToJudge notification letter for bulk print for Case ID: {}",
+            callbackRequest.getCaseDetails().getId());
+
+        CaseDocument respondentAssignedToJudgeNotificationLetter =
+            assignedToJudgeDocumentService.generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken);
+        bulkPrintService.sendDocumentForPrint(respondentAssignedToJudgeNotificationLetter, caseDetails);
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 

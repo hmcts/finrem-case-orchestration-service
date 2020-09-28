@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -194,21 +195,30 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void shouldNotSendConsentInContestedAssignToJudgeConfirmationEmail() throws Exception {
+    public void shouldNotSendApplicantConsentInContestedAssignToJudgeConfirmationEmail() throws Exception {
         buildCcdRequest(CCD_REQUEST_JSON);
+
+        when(bulkPrintService.shouldPrintForApplicant(any(CaseDetails.class))).thenReturn(false);
+
         mockMvc.perform(post(CONSENT_IN_CONTESTED_ASSIGN_TO_JUDGE_CALLBACK_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .content(requestContent.toString())
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verifyNoInteractions(bulkPrintService);
-        verifyNoInteractions(assignedToJudgeDocumentService);
+        verify(assignedToJudgeDocumentService, never())
+            .generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+        verify(assignedToJudgeDocumentService, times(1))
+            .generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+        verify(bulkPrintService, times(1))
+            .sendDocumentForPrint(any(),any());
     }
 
     @Test
-    public void sendConsentInContestedAssignToJudgeNotificationLetterIfIsPaperApplication() throws Exception {
+    public void sendConsentInContestedAssignToJudgeNotificationLetterIfShouldSend() throws Exception {
         buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
+
+        when(bulkPrintService.shouldPrintForApplicant(any(CaseDetails.class))).thenReturn(true);
 
         mockMvc.perform(post(CONSENT_IN_CONTESTED_ASSIGN_TO_JUDGE_CALLBACK_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
