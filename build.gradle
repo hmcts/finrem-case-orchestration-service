@@ -237,6 +237,10 @@ tasks.withType(Checkstyle).each { checkstyleTask ->
     }
 }
 
+jacoco {
+    toolVersion = "0.8.6"
+}
+
 jacocoTestReport {
     executionData(test)
 
