@@ -296,7 +296,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotSetOrgPolicyIfFeatureEnabledButInvalidCaseType() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
-        when(featureToggleService.isShareACaseEnabled()).thenReturn(false);
+        when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(INVALID_CASE_TYPE_JSON).toURI()));
