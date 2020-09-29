@@ -174,7 +174,7 @@ public class GeneralLetterServiceTest extends BaseServiceTest {
     }
 
     private void assertNameUsedForGeneralLetterAddressTo(int invocation, String generalLetterAddressTo, String expectedName) {
-        CaseDetails caseDetails = null;
+        CaseDetails caseDetails;
         try {
             caseDetails = caseDetails();
         } catch (Exception e) {

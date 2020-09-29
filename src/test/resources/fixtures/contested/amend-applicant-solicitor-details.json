@@ -7,11 +7,23 @@
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
       "helpWithFeesQuestion": "Yes",
+      "applicantFMName":"Poor",
       "applicantLName":"Guy",
+      "applicantPhone": "89897876765",
+      "applicantEmail": "email01@email.com",
+      "applicantRepresented": "No",
+      "applicantAddress": {
+        "AddressLine1": "67 Pears Road",
+        "AddressLine2": "",
+        "AddressLine3": "",
+        "PostTown": "Hounslow",
+        "County": "",
+        "PostCode": "TW3 1SS",
+        "Country": "United Kingdom"
+      },
       "dateOfMarriage":"1111-01-01",
       "mortgageDetail":"test",
       "netValueOfHome":"dfdf",
-      "applicantFMName":"Poor",
       "dateOfSepration":"1111-01-01",
       "propertyAddress":"test",
       "respondentEmail":null,
@@ -41,21 +53,7 @@
       "paymentForChildrenDecision":"Yes",
       "addToComplexityListOfCourts":"trueDontKnow",
       "otherReasonForComplexityText":"sdff",
-      "additionalPropertyOrderDecision":"No",
-      "applicantRepresented": "No",
-      "applicantAddress": {
-        "AddressLine1": "67 Pears Road",
-        "AddressLine2": "",
-        "AddressLine3": "",
-        "PostTown": "Hounslow",
-        "County": "",
-        "PostCode": "TW3 1SS",
-        "Country": "United Kingdom"
-      },
-      "applicantPhone": "89897876765",
-      "applicantEmail": "email01@email.com",
-      "applicantFMName": "Test",
-      "applicantLName":  "Test"
+      "additionalPropertyOrderDecision":"No"
     }
   }
 }

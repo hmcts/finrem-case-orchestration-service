@@ -49,7 +49,7 @@ public class IdamUtils {
         final String authHeader = "Basic " + new String(Base64.getEncoder().encode(userLoginDetails.getBytes()));
 
         int retryCount = 0;
-        Response response = null;
+        Response response;
         do {
             response = RestAssured.given()
                 .header(AUTHORIZATION_HEADER, authHeader)
