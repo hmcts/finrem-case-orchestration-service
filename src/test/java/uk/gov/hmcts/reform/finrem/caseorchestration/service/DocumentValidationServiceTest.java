@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_PENSION_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse.builder;
@@ -187,7 +188,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
             "http://file1.binary"))
             .thenReturn(documentValidationResponse1);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-            "consentOrder", AUTH_TOKEN);
+            CONSENT_ORDER, AUTH_TOKEN);
         assertThat(response.getErrors(), nullValue());
     }
 
@@ -195,12 +196,12 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     public void shouldReturnErrorInConsentInContestedConsentOrderWhenInvalidType() throws Exception {
         setUpCaseDetails(CONSENT_IN_CONTESTED);
         DocumentValidationResponse documentValidationResponse1 = builder()
-            .errors(singletonList("Invalid file type")).build();;
+            .errors(singletonList("Invalid file type")).build();
         when(documentClient.checkUploadedFileType(AUTH_TOKEN,
             "http://file1.binary"))
             .thenReturn(documentValidationResponse1);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-            "consentOrder", AUTH_TOKEN);
+            CONSENT_ORDER, AUTH_TOKEN);
         assertThat(response.getErrors(), hasItem("Invalid file type"));
     }
 
@@ -213,7 +214,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
             "http://file1.binary"))
             .thenReturn(documentValidationResponse1);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-            "consentPensionCollection", AUTH_TOKEN);
+            CONTESTED_CONSENT_PENSION_COLLECTION, AUTH_TOKEN);
         assertThat(response.getErrors(), nullValue());
     }
 
@@ -231,7 +232,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
             "http://file2.binary"))
             .thenReturn(documentValidationResponse2);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-            "consentPensionCollection", AUTH_TOKEN);
+            CONTESTED_CONSENT_PENSION_COLLECTION, AUTH_TOKEN);
         assertThat(response.getErrors(), hasItem("Invalid file type"));
     }
 
@@ -239,7 +240,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     public void shouldReturnValidForConsentInContestedPensionCollectionWhenNonePresent() throws Exception {
         setUpCaseDetails(CONSENT_IN_CONTESTED_NO_PENSION_COLLECTION);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-            "consentPensionCollection", AUTH_TOKEN);
+            CONTESTED_CONSENT_PENSION_COLLECTION, AUTH_TOKEN);
         assertThat(response.getErrors(), nullValue());
     }
 

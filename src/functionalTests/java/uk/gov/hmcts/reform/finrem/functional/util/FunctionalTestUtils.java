@@ -97,7 +97,7 @@ public class FunctionalTestUtils {
         PDDocument pdDoc = null;
         COSDocument cosDoc = null;
         PDFTextStripper pdfStripper;
-        String parsedText = "";
+        String parsedText;
 
         try {
             parser = new PDFParser(inputStream);

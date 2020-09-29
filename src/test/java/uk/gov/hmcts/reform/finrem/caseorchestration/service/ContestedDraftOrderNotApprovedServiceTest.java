@@ -111,7 +111,7 @@ public class ContestedDraftOrderNotApprovedServiceTest {
     }
 
     @Test
-    public void getLatestRefusalReasonShouldReturnEmptyOptionalIfNoReason() throws Exception {
+    public void getLatestRefusalReasonShouldReturnEmptyOptionalIfNoReason() {
         Optional<CaseDocument> doc = refusalOrderService.getLatestRefusalReason(CaseDetails.builder().data(new HashMap<String, Object>()).build());
         assertThat(doc.isPresent(), is(false));
     }
