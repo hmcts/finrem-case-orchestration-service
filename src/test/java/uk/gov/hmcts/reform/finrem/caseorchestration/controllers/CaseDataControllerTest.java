@@ -29,6 +29,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private static final String MOVE_VALUES_SAMPLE_JSON = "/fixtures/move-values-sample.json";
     private static final String CONTESTED_HWF_JSON = "/fixtures/contested/hwf.json";
     private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
+    private static final String INVALID_CASE_TYPE_JSON = "/fixtures/invalid-case-type.json";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockBean
@@ -283,6 +284,22 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
+        mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").doesNotExist());
+    }
+
+    @Test
+    public void shouldNotSetOrgPolicyIfFeatureEnabledButInvalidCaseType() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
+        when(featureToggleService.isShareACaseEnabled()).thenReturn(false);
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource(INVALID_CASE_TYPE_JSON).toURI()));
         mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -36,6 +37,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_REF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,7 +58,7 @@ public class CaseDataController implements BaseController {
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
-        setOrganisationPolicy(caseData);
+        setOrganisationPolicy(callbackRequest.getCaseDetails());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -68,7 +71,7 @@ public class CaseDataController implements BaseController {
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
-        setOrganisationPolicy(caseData);
+        setOrganisationPolicy(callbackRequest.getCaseDetails());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -84,7 +87,7 @@ public class CaseDataController implements BaseController {
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setPaperCaseData(caseData);
-        setOrganisationPolicy(caseData);
+        setOrganisationPolicy(callbackRequest.getCaseDetails());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -129,9 +132,11 @@ public class CaseDataController implements BaseController {
         caseData.put(FAST_TRACK_DECISION, NO_VALUE);
     }
 
-    private void setOrganisationPolicy(Map<String, Object> caseData) {
+    private void setOrganisationPolicy(CaseDetails caseDetails) {
         log.info("Share a case is enabled: {}", featureToggleService.isShareACaseEnabled());
-        if (featureToggleService.isShareACaseEnabled()) {
+        if (featureToggleService.isShareACaseEnabled() && (isContestedApplication(caseDetails)
+            || isConsentedApplication(caseDetails))) {
+
             Map<String, Object> appPolicy = new HashMap<>();
             appPolicy.put(ORGANISATION_POLICY_ROLE, APP_SOLICITOR_POLICY);
             appPolicy.put(ORGANISATION_POLICY_REF, null);
@@ -140,7 +145,7 @@ public class CaseDataController implements BaseController {
             org.put(ORGANISATION_POLICY_ORGANISATION_NAME, null);
             appPolicy.put(ORGANISATION_POLICY_ORGANISATION, org);
 
-            caseData.put(ORGANISATION_POLICY_APPLICANT, appPolicy);
+            caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appPolicy);
 
             log.info("App policy added to case : {}", appPolicy);
         }
