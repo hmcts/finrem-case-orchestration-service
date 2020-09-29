@@ -126,7 +126,7 @@ public class HearingDocumentService {
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, formGDataKey).ifPresent(caseDocuments::add);
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
-        caseDocuments.addAll(formACaseDocuments.stream().map(e -> documentHelper.getCaseDocumentAsBulkPrintDocument(e)).collect(Collectors.toList()));
+        caseDocuments.addAll(formACaseDocuments.stream().map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList()));
 
         log.info("Sending Contested Paper Case bulk print documents: {}", caseDocuments);
 

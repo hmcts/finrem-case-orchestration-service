@@ -160,7 +160,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
         });
     }
 
-    private void setPensionCollectionData() throws Exception {
+    private void setPensionCollectionData() {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> data = caseDetails.getData();
         Object pensionObject = data.get(PENSION_DOCS_COLLECTION);
@@ -172,7 +172,7 @@ public class DocumentValidationTests extends IntegrationTestBase {
         callbackRequest.setCaseDetails(caseDetails);
     }
 
-    private void setResponseToOrderDocument() throws Exception {
+    private void setResponseToOrderDocument() {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> data = caseDetails.getData();
         Object respondToOrderDocumentsObject = data.get(RESPOND_TO_ORDER_DOCUMENTS);

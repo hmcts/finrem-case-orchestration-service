@@ -36,8 +36,8 @@ public class RemoveApplicantDetailsControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.applicantAddress", is(notNullValue())))
                 .andExpect(jsonPath("$.data.applicantPhone", is("89897876765")))
                 .andExpect(jsonPath("$.data.applicantEmail", is("email01@email.com")))
-                .andExpect(jsonPath("$.data.applicantFMName", is("Test")))
-                .andExpect(jsonPath("$.data.applicantLName", is("Test")))
+                .andExpect(jsonPath("$.data.applicantFMName", is("Poor")))
+                .andExpect(jsonPath("$.data.applicantLName", is("Guy")))
 
                 .andExpect(jsonPath("$.data.applicantSolicitorName").doesNotExist())
                 .andExpect(jsonPath("$.data.applicantSolicitorFirm").doesNotExist())
