@@ -29,6 +29,8 @@ public class NotificationServiceConfigurationTest extends BaseServiceTest {
         assertEquals("/contested/order-not-approved", underTest.getContestedOrderNotApproved());
         assertEquals("/contested/consent-order-approved", underTest.getContestedConsentOrderApproved());
         assertEquals("/contested/consent-general-order", underTest.getContestedConsentGeneralOrder());
+        assertEquals("/contested/general-order", underTest.getContestedGeneralOrder());
+        assertEquals("/consented/general-order", underTest.getConsentedGeneralOrder());
         assertEquals("/contested/consent-order-not-approved", underTest.getContestedConsentOrderNotApproved());
         assertEquals("/contested/general-application-refer-to-judge", underTest.getContestedGeneralApplicationReferToJudge());
         assertEquals("/contested/general-application-outcome", underTest.getContestedGeneralApplicationOutcome());

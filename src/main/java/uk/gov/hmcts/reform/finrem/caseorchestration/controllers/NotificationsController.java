@@ -31,6 +31,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorResponsibleToDraftOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
@@ -205,22 +206,32 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/contested-consent-general-order", consumes = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "send e-mail for contested consent general order.")
+    @PostMapping(value = "/case-orchestration/notify/general-order-raised", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send e-mail for general order raised.")
     @ApiResponses(value = {
-        @ApiResponse(code = 204, message = "Contested consent general order e-mail sent successfully",
+        @ApiResponse(code = 204, message = "General order raised e-mail sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendContestedConsentGeneralOrderEmail(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendGeneralOrderRaisedEmail(
         @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("Received request to send email for 'Contested Consent General Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to send email for General Order raised for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending email notification to Solicitor for 'Contested Consent General Order'");
-            notificationService.sendContestedConsentGeneralOrderEmail(callbackRequest);
+            if (isConsentedApplication(caseDetails)) {
+                log.info("Sending email notification to Solicitor for 'Contested Consent General Order'");
+                notificationService.sendConsentedGeneralOrderEmail(callbackRequest);
+            } else {
+                if (isConsentedInContestedCase(caseDetails)) {
+                    log.info("Sending email notification to Solicitor for 'Consented General Order'");
+                    notificationService.sendContestedConsentGeneralOrderEmail(callbackRequest);
+                } else {
+                    log.info("Sending email notification to Solicitor for 'Contested General Order'");
+                    notificationService.sendContestedGeneralOrderEmail(callbackRequest);
+                }
+            }
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
