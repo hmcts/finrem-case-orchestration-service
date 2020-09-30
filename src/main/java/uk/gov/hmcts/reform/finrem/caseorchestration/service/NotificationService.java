@@ -227,25 +227,23 @@ public class NotificationService {
     }
 
     private NotificationRequest createNotificationRequestForAppSolicitor(CallbackRequest callbackRequest) {
-        if (isConsentedApplication(callbackRequest.getCaseDetails())) {
-            applicantNotificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
-                CONSENTED_SOLICITOR_NAME, SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER);
-        } else {
-            applicantNotificationRequest = buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
+
+        applicantNotificationRequest = isConsentedApplication(callbackRequest.getCaseDetails())
+            ? buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
+                CONSENTED_SOLICITOR_NAME, SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER)
+            : buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
                 CONTESTED_SOLICITOR_NAME, CONTESTED_SOLICITOR_EMAIL, CONTESTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER);
-        }
 
         return applicantNotificationRequest;
     }
 
     private NotificationRequest createNotificationRequestForRespSolicitor(CallbackRequest callbackRequest) {
-        if (isConsentedApplication(callbackRequest.getCaseDetails())) {
-            applicantNotificationRequest = buildNotificationRequest(callbackRequest, RESP_SOLICITOR_REFERENCE,
-                RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER);
-        } else {
-            applicantNotificationRequest = buildNotificationRequest(callbackRequest, RESP_SOLICITOR_REFERENCE,
+
+        applicantNotificationRequest = isConsentedApplication(callbackRequest.getCaseDetails())
+            ? buildNotificationRequest(callbackRequest, RESP_SOLICITOR_REFERENCE,
+                RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER)
+            : buildNotificationRequest(callbackRequest, RESP_SOLICITOR_REFERENCE,
                 RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONTESTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER);
-        }
 
         return applicantNotificationRequest;
     }
