@@ -25,8 +25,8 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
@@ -38,7 +38,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
-
 
 public class GeneralOrderServiceTest {
 
@@ -85,7 +84,7 @@ public class GeneralOrderServiceTest {
         assertThat(generalOrders.get(0).getId(), is("1234"));
         assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
         assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentFilename(),
-            is("app_docs.pdf"));
+            is("generalOrder.pdf"));
         assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentBinaryUrl(),
             is("http://dm-store/lhjbyuivu87y989hijbb/binary"));
 
@@ -218,7 +217,7 @@ public class GeneralOrderServiceTest {
     @Test
     public void getsCorrectGeneralOrdersForPrintingConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
-        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderForPrintingConsented(details.getData());
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData());
         assertThat(latestGeneralOrder.getBinaryFileUrl(), is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
 
@@ -226,8 +225,8 @@ public class GeneralOrderServiceTest {
     public void getsZeroGeneralOrdersForPrintingWhenNoneConsented() throws Exception {
         CaseDetails details = consentedCaseDetails();
         details.getData().put(GENERAL_ORDER_LATEST_DOCUMENT, null);
-        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderForPrintingConsented(details.getData());
-        assertTrue(latestGeneralOrder == null);
+        BulkPrintDocument latestGeneralOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(details.getData());
+        assertNull(latestGeneralOrder);
     }
 
     private CaseDetails consentedCaseDetails() throws Exception {

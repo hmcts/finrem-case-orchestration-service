@@ -16,12 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -34,6 +39,12 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
 
     @Autowired
     private IdamService idamService;
+
+    @Autowired
+    private BulkPrintService bulkPrintService;
+
+    @Autowired
+    private FeatureToggleService featureToggleService;
 
     @Autowired
     private final ContestedDraftOrderNotApprovedService contestedNotApprovedService;
@@ -104,5 +115,37 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
         Map<String, Object> caseData = contestedNotApprovedService.populateRefusalOrderCollection(caseDetails);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    @PostMapping(path = "/contested-application-send-refusal", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Sends refusal reason to paper cases")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendRefusalReason(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+
+        CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("Received request for send refusal reason for case with Case ID: {}", caseDetails.getId());
+
+        validateCaseData(callback);
+
+        Optional<CaseDocument> refusalReason = contestedNotApprovedService.getLatestRefusalReason(caseDetails);
+
+        if (refusalReason.isPresent() && featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()) {
+
+            if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
+                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
+                    Arrays.asList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
+            }
+
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
+                Arrays.asList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
+        }
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 }

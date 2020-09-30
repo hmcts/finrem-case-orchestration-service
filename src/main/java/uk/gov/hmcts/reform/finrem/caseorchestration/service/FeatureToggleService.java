@@ -17,6 +17,10 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.AUTOMATE_ASSIGN_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.AUTOMATE_SEND_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_COURT_DETAILS_MIGRATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_DRAFT_ORDER_NOT_APPROVED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_GENERAL_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SHARE_A_CASE;
 
 /**
  * To add a feature toggle flag:
@@ -43,6 +47,15 @@ public class FeatureToggleService {
             .orElse(false);
     }
 
+
+    public boolean isContestedPrintDraftOrderNotApprovedEnabled() {
+        return isFeatureEnabled(CONTESTED_PRINT_DRAFT_ORDER_NOT_APPROVED);
+    }
+
+    public boolean isContestedPrintGeneralOrderEnabled() {
+        return isFeatureEnabled(CONTESTED_PRINT_GENERAL_ORDER);
+    }
+
     public boolean isAutomateAssignJudgeEnabled() {
         return isFeatureEnabled(AUTOMATE_ASSIGN_JUDGE);
     }
@@ -51,8 +64,21 @@ public class FeatureToggleService {
         return isFeatureEnabled(CONTESTED_COURT_DETAILS_MIGRATION);
     }
 
+    public boolean isShareACaseEnabled() {
+        return isFeatureEnabled(SHARE_A_CASE);
+    }
+
     public boolean isAutomateSendOrderEnabled() {
         return isFeatureEnabled(AUTOMATE_SEND_ORDER);
+    }
+
+    /*
+     * Used for sending emails to FRC in Notification Service
+     * Removing will result in test account being emailed, rather than actual FRCs
+     * Court Emails are defined in court-details.json
+     */
+    public boolean isSendToFRCEnabled() {
+        return isFeatureEnabled(SEND_TO_FRC);
     }
 
     /**

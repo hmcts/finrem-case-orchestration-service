@@ -26,7 +26,7 @@ import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addFastTrackFields;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildCourtDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getSelectedCourt;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
@@ -92,12 +92,12 @@ public class HearingDocumentService {
         return isFastTrackApplication.apply(pair.getLeft().getData());
     }
 
-    private CaseDetails addCourtFields(CaseDetails caseDetails) {
+    CaseDetails addCourtFields(CaseDetails caseDetails) {
         try {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> data = caseDetails.getData();
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourt(data)));
-            data.put("courtDetails", buildCourtDetails(courtDetails));
+            data.put("courtDetails", buildFrcCourtDetails(courtDetails));
             return caseDetails;
         } catch (IOException | NullPointerException e) {
             return caseDetails;
@@ -126,7 +126,7 @@ public class HearingDocumentService {
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, formGDataKey).ifPresent(caseDocuments::add);
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
-        caseDocuments.addAll(formACaseDocuments.stream().map(e -> documentHelper.getCaseDocumentAsBulkPrintDocument(e)).collect(Collectors.toList()));
+        caseDocuments.addAll(formACaseDocuments.stream().map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList()));
 
         log.info("Sending Contested Paper Case bulk print documents: {}", caseDocuments);
 

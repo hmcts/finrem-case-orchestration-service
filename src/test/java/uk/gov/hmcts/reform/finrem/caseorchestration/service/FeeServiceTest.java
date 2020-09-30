@@ -16,7 +16,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONTESTED;
 
@@ -35,7 +35,7 @@ public class FeeServiceTest extends BaseServiceTest {
         paymentService.stubFor(get(urlPathEqualTo(FEE_LOOKUP_API))
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.OK.value())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                         .withBody("{\"code\": \"TEST\", \"fee_amount\": \"50\", "
                                 + "\"description\": \"desc\", \"version\": \"1.0\"}")));
 
@@ -51,7 +51,7 @@ public class FeeServiceTest extends BaseServiceTest {
         paymentService.stubFor(get(urlPathEqualTo(FEE_LOOKUP_API))
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.OK.value())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                         .withBody("{\"code\": \"TEST\", \"fee_amount\": \"255\", "
                                 + "\"description\": \"desc\", \"version\": \"1.0\"}")));
 

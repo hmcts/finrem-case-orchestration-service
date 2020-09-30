@@ -24,6 +24,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT;
@@ -121,6 +122,23 @@ public class ContestedDraftOrderNotApprovedService {
     }
 
     private List<ContestedRefusalOrderData> convertToRefusalOrderContestedList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<ContestedRefusalOrderData>>() {});
+        return objectMapper.convertValue(object, new TypeReference<>() {});
+    }
+
+    public Optional<CaseDocument> getLatestRefusalReason(CaseDetails caseDetails) {
+
+        if (isNull(caseDetails.getData().get(CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION))) {
+            log.warn("Refusal order not found for printing for case");
+            return Optional.empty();
+        }
+
+        List<ContestedRefusalOrderData> refusalOrderList = Optional.ofNullable(caseDetails.getData()
+            .get(CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION))
+            .map(this::convertToRefusalOrderContestedList)
+            .orElse(new ArrayList<>());
+
+        return Optional.of(refusalOrderList.get(refusalOrderList.size() - 1)
+            .getContestedRefusalOrder()
+            .getRefusalOrderAdditionalDocument());
     }
 }
