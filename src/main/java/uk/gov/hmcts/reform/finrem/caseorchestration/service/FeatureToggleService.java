@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.AUTOMATE_ASSIGN_JUDGE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.AUTOMATE_SEND_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_COURT_DETAILS_MIGRATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_DRAFT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_GENERAL_ORDER;
@@ -56,20 +54,12 @@ public class FeatureToggleService {
         return isFeatureEnabled(CONTESTED_PRINT_GENERAL_ORDER);
     }
 
-    public boolean isAutomateAssignJudgeEnabled() {
-        return isFeatureEnabled(AUTOMATE_ASSIGN_JUDGE);
-    }
-
     public boolean isContestedCourtDetailsMigrationEnabled() {
         return isFeatureEnabled(CONTESTED_COURT_DETAILS_MIGRATION);
     }
 
     public boolean isShareACaseEnabled() {
         return isFeatureEnabled(SHARE_A_CASE);
-    }
-
-    public boolean isAutomateSendOrderEnabled() {
-        return isFeatureEnabled(AUTOMATE_SEND_ORDER);
     }
 
     /*
