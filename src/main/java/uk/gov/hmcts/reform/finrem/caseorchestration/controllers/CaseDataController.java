@@ -133,7 +133,8 @@ public class CaseDataController implements BaseController {
     }
 
     private void setOrganisationPolicy(CaseDetails caseDetails) {
-        log.info("Share a case is enabled: {}", featureToggleService.isShareACaseEnabled());
+        log.info("Share a case is enabled: {}  -  casetype: {}", featureToggleService.isShareACaseEnabled(),
+            caseDetails.getCaseTypeId());
         if (featureToggleService.isShareACaseEnabled() && (isContestedApplication(caseDetails)
             || isConsentedApplication(caseDetails))) {
 
