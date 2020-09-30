@@ -40,7 +40,6 @@ public class HearingDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
-    private final FeatureToggleService featureToggleService;
     private final BulkPrintService bulkPrintService;
 
     public String formADataKey = "copyOfPaperFormA";
@@ -49,9 +48,7 @@ public class HearingDocumentService {
 
     public Map<String, Object> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         CaseDetails courtDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        if (featureToggleService.isContestedCourtDetailsMigrationEnabled()) {
-            courtDetailsCopy = addCourtFields(courtDetailsCopy);
-        }
+        courtDetailsCopy = addCourtFields(courtDetailsCopy);
 
         return Optional.of(Pair.of(courtDetailsCopy, authorisationToken))
             .filter(pair -> pair.getLeft().getData().get(FAST_TRACK_DECISION) != null)

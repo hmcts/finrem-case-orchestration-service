@@ -20,7 +20,6 @@ import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALLOCATED_COURT_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
@@ -60,6 +59,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 
 @Service
 @Slf4j
@@ -110,9 +110,9 @@ public class NotificationService {
 
     public void sendConsentOrderAvailableCtscEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailableCtsc());
-        applicantNotificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        applicantNotificationRequest.setNotificationEmail(notificationServiceConfiguration.getCtscEmail());
-        sendNotificationEmail(applicantNotificationRequest, uri);
+        NotificationRequest ctscNotificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        ctscNotificationRequest.setNotificationEmail(notificationServiceConfiguration.getCtscEmail());
+        sendNotificationEmail(ctscNotificationRequest, uri);
     }
 
     public void sendContestedHwfSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
@@ -191,10 +191,10 @@ public class NotificationService {
 
     public void sendContestedGeneralApplicationReferToJudgeEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralApplicationReferToJudge());
-        applicantNotificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        applicantNotificationRequest.setNotificationEmail(Objects.toString(
+        NotificationRequest judgeNotificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        judgeNotificationRequest.setNotificationEmail(Objects.toString(
             callbackRequest.getCaseDetails().getData().get(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL)));
-        sendNotificationEmail(applicantNotificationRequest, uri);
+        sendNotificationEmail(judgeNotificationRequest, uri);
     }
 
     public void sendContestedGeneralApplicationOutcomeEmail(CallbackRequest callbackRequest) throws IOException {
@@ -226,7 +226,7 @@ public class NotificationService {
         }
     }
 
-    private NotificationRequest createNotificationRequestForAppSolicitor(CallbackRequest callbackRequest) {
+    public NotificationRequest createNotificationRequestForAppSolicitor(CallbackRequest callbackRequest) {
 
         applicantNotificationRequest = isConsentedApplication(callbackRequest.getCaseDetails())
             ? buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
@@ -237,7 +237,7 @@ public class NotificationService {
         return applicantNotificationRequest;
     }
 
-    private NotificationRequest createNotificationRequestForRespSolicitor(CallbackRequest callbackRequest) {
+    public NotificationRequest createNotificationRequestForRespSolicitor(CallbackRequest callbackRequest) {
 
         applicantNotificationRequest = isConsentedApplication(callbackRequest.getCaseDetails())
             ? buildNotificationRequest(callbackRequest, RESP_SOLICITOR_REFERENCE,
@@ -266,9 +266,9 @@ public class NotificationService {
         notificationRequest.setGeneralEmailBody(Objects.toString(mapOfCaseData.get(generalEmailBody)));
         notificationRequest.setCaseType(caseType);
 
-        if (CONTESTED.equalsIgnoreCase(caseType)) {
-            String selectedCourt = featureToggleService.isContestedCourtDetailsMigrationEnabled()
-                ? getSelectedCourt(mapOfCaseData) : getSelectedCourtAllocatedCourt(mapOfCaseData.get(ALLOCATED_COURT_LIST));
+        // TODO replcae this check with isContestedApplication()
+        if (isContestedApplication(callbackRequest.getCaseDetails())) {
+            String selectedCourt =  getSelectedCourt(mapOfCaseData);
             notificationRequest.setSelectedCourt(selectedCourt);
 
             log.info("selectedCourt is {} for case ID: {}", selectedCourt,
@@ -363,87 +363,6 @@ public class NotificationService {
 
     private String getMidlandFRC(Map mapOfCaseData) {
         String midlandsList = (String) mapOfCaseData.get(MIDLANDS_FRC_LIST);
-        if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
-            return NOTTINGHAM;
-        } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
-            return BIRMINGHAM;
-        }
-        return EMPTY;
-    }
-
-    private String getSelectedCourtAllocatedCourt(Object allocatedCourtList) {
-        HashMap<String, Object> allocatedCourtMap = (HashMap<String, Object>) allocatedCourtList;
-        String region = (String) allocatedCourtMap.get("region");
-        if (MIDLANDS.equalsIgnoreCase(region)) {
-            return getMidlandsFrcAllocatedCourt(allocatedCourtMap);
-        }
-        if (LONDON.equalsIgnoreCase(region)) {
-            return getLondonFrcAllocatedCourt(allocatedCourtMap);
-        }
-        if (NORTHWEST.equalsIgnoreCase(region)) {
-            return getNorthWestFrcAllocatedCourt(allocatedCourtMap);
-        }
-        if (NORTHEAST.equalsIgnoreCase(region)) {
-            return getNorthEastFrcAllocatedCourt(allocatedCourtMap);
-        }
-        if (SOUTHEAST.equalsIgnoreCase(region)) {
-            return getSouthEastFrcAllocatedCourt(allocatedCourtMap);
-        } else if (WALES.equalsIgnoreCase(region)) {
-            return getWalesFrcAllocatedCourt(allocatedCourtMap);
-        }
-        return EMPTY;
-    }
-
-    private String getWalesFrcAllocatedCourt(Map allocatedCourtMap) {
-        String walesList = (String) allocatedCourtMap.get("walesList");
-        if (NEWPORT.equalsIgnoreCase(walesList)) {
-            return NEWPORT;
-        } else if (SWANSEA.equalsIgnoreCase(walesList)) {
-            return SWANSEA;
-        }
-        return EMPTY;
-    }
-
-    private String getSouthEastFrcAllocatedCourt(Map allocatedCourtMap) {
-        String southEastList = (String) allocatedCourtMap.get("southEastList");
-        if (KENT.equalsIgnoreCase(southEastList)) {
-            return KENT;
-        }
-        return EMPTY;
-    }
-
-    private String getNorthEastFrcAllocatedCourt(Map allocatedCourtMap) {
-        String northEastList = (String) allocatedCourtMap.get("northEastList");
-        if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
-            return CLEAVELAND;
-        } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
-            return NWYORKSHIRE;
-        } else if (HSYORKSHIRE.equalsIgnoreCase(northEastList)) {
-            return HSYORKSHIRE;
-        }
-        return EMPTY;
-    }
-
-    private String getNorthWestFrcAllocatedCourt(Map allocatedCourtMap) {
-        String northWestList = (String) allocatedCourtMap.get("northWestList");
-        if (LIVERPOOL.equalsIgnoreCase(northWestList)) {
-            return LIVERPOOL;
-        } else if (MANCHESTER.equalsIgnoreCase(northWestList)) {
-            return MANCHESTER;
-        }
-        return EMPTY;
-    }
-
-    private String getLondonFrcAllocatedCourt(Map allocatedCourtMap) {
-        String londonList = (String) allocatedCourtMap.get("londonList");
-        if (CFC.equalsIgnoreCase(londonList)) {
-            return CFC;
-        }
-        return EMPTY;
-    }
-
-    private String getMidlandsFrcAllocatedCourt(Map allocatedCourtMap) {
-        String midlandsList = (String) allocatedCourtMap.get("midlandsList");
         if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
             return NOTTINGHAM;
         } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
