@@ -162,6 +162,7 @@
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/start-general-application_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/submit-general-application_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/upload-contested-case-documents_POST": "ignore",
+  "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/manual-payment_POST": "ignore",
   "10010_Cookie No HttpOnly Flag_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/general-application-outcome_POST": "ignore",
   "10010_Cookie No HttpOnly Flag_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/generate-mini-form-a_POST": "ignore",
   "10010_Cookie No HttpOnly Flag_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/preview-general-order_POST": "ignore",
@@ -265,5 +266,6 @@
   "100000_A Server Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/start-general-application_POST": "ignore",
   "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested-application-not-approved-submit_POST": "ignore",
   "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/general-email_POST": "ignore",
+  "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/submit-general-order_POST": "ignore",
   "10021_X-Content-Type-Options Header Missing_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/general-email_POST": "ignore"
 }
