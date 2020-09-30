@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -57,7 +56,6 @@ public class ConsentOrderApprovedController implements BaseController {
     private final GenericDocumentService genericDocumentService;
     private final ConsentOrderPrintService consentOrderPrintService;
     private final NotificationService notificationService;
-    private final FeatureToggleService featureToggleService;
     private final ObjectMapper mapper;
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -92,7 +90,7 @@ public class ConsentOrderApprovedController implements BaseController {
     }
 
     @PostMapping(path = "/consent-in-contested/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "'Consent Order Approved' callback handler for consent in contetested. Stamps Consent Order Approved documents"
+    @ApiOperation(value = "'Consent Order Approved' callback handler for consent in contested. Stamps Consent Order Approved documents"
         + "and adds them to a collection")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
@@ -177,7 +175,7 @@ public class ConsentOrderApprovedController implements BaseController {
 
         log.info("Successfully generated documents for 'Consent Order Approved'");
 
-        if (featureToggleService.isAutomateSendOrderEnabled() && isEmpty(pensionDocs)) {
+        if (isEmpty(pensionDocs)) {
             log.info("Case has no pension documents, updating status to {} and sending for bulk print", CONSENT_ORDER_MADE.toString());
             try {
                 // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
