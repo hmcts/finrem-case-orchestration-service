@@ -38,6 +38,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_DIRECTION_JUDGE_TITLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_LETTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getFirstMapValue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
@@ -208,10 +210,10 @@ public class ConsentOrderApprovedDocumentService {
         if (!documentList.isEmpty()) {
             log.info("Extracting 'approvedOrderCollection' from case data for bulk print: {}", data);
             Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get(VALUE));
-            documentHelper.getDocumentLinkAsBulkPrintDocument(value, "orderLetter").ifPresent(bulkPrintDocuments::add);
+            documentHelper.getDocumentLinkAsBulkPrintDocument(value, ORDER_LETTER).ifPresent(bulkPrintDocuments::add);
             documentHelper.getDocumentLinkAsBulkPrintDocument(value, CONSENT_ORDER).ifPresent(bulkPrintDocuments::add);
             bulkPrintDocuments.addAll(documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(value,
-                "pensionDocuments", "uploadedDocument"));
+                PENSION_DOCUMENTS, "uploadedDocument"));
         } else {
             log.info("Failed to extract 'approvedOrderCollection' from case data for bulk print as document list was empty.");
         }

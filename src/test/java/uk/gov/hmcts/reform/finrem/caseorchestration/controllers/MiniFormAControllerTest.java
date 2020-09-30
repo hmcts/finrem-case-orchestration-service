@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DefaultsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
@@ -20,9 +19,7 @@ import java.net.URISyntaxException;
 import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
-import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -47,9 +44,6 @@ public class MiniFormAControllerTest extends BaseControllerTest {
 
     @MockBean
     protected IdamService idamService;
-
-    @MockBean
-    protected FeatureToggleService featureToggleService;
 
     @MockBean
     protected DefaultsConfiguration defaultsConfiguration;
@@ -77,10 +71,9 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void generateMiniFormA_isAutomateAssignJudgeEnabledTrue() throws Exception {
+    public void generateMiniFormA() throws Exception {
         doRequestSetUpConsented();
         whenServiceGeneratesDocument().thenReturn(caseDocument());
-        when(featureToggleService.isAutomateAssignJudgeEnabled()).thenReturn(true);
 
         mvc.perform(post(endpoint())
                 .content(requestContent.toString())
@@ -96,28 +89,6 @@ public class MiniFormAControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.referToJudgeDate", is(LocalDate.now().toString())))
                 .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void generateMiniFormA_isAutomateAssignJudgeEnabledFalse() throws Exception {
-        doRequestSetUpConsented();
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
-        when(featureToggleService.isAutomateAssignJudgeEnabled()).thenReturn(false);
-
-        mvc.perform(post(endpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
-            .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
-            .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BINARY_URL)))
-            .andExpect(jsonPath("$.data", not(hasKey("assignedToJudge"))))
-            .andExpect(jsonPath("$.data", not(hasKey("assignedToJudgeReason"))))
-            .andExpect(jsonPath("$.data", not(hasKey("referToJudgeText"))))
-            .andExpect(jsonPath("$.data", not(hasKey("referToJudgeDate"))))
-            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
