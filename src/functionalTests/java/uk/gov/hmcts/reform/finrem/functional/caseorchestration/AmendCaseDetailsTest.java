@@ -16,6 +16,16 @@ import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ATTENDED_MIAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLAIMING_EXEMPTION_MIAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 
 @RunWith(SerenityRunner.class)
 public class AmendCaseDetailsTest extends IntegrationTestBase {
@@ -46,8 +56,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
 
         if (jsonPathEvaluator.get("d81Applicant") != null
                 || jsonPathEvaluator.get("d81Respondent") != null) {
-            Assert.fail("The d81Applicant or d81Respondent is still showing in the result even after "
-                    + "selecting d81Joint.");
+            Assert.fail("The d81Applicant or d81Respondent is still showing in the result even after selecting d81Joint.");
         }
     }
 
@@ -131,13 +140,13 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "remove-respondent-solicitor-details1.json");
 
-        if (jsonPathEvaluator.get("rSolicitorFirm") != null
-                || jsonPathEvaluator.get("rSolicitorName") != null
-                || jsonPathEvaluator.get("rSolicitorReference") != null
-                || jsonPathEvaluator.get("rSolicitorAddress") != null
-                || jsonPathEvaluator.get("rSolicitorDXnumber") != null
-                || jsonPathEvaluator.get("rSolicitorEmail") != null
-                || jsonPathEvaluator.get("rSolicitorPhone") != null) {
+        if (jsonPathEvaluator.get(RESP_SOLICITOR_FIRM) != null
+                || jsonPathEvaluator.get(RESP_SOLICITOR_NAME) != null
+                || jsonPathEvaluator.get(RESP_SOLICITOR_REFERENCE) != null
+                || jsonPathEvaluator.get(RESP_SOLICITOR_ADDRESS) != null
+                || jsonPathEvaluator.get(RESP_SOLICITOR_DX_NUMBER) != null
+                || jsonPathEvaluator.get(RESP_SOLICITOR_EMAIL) != null
+                || jsonPathEvaluator.get(RESP_SOLICITOR_PHONE) != null) {
             Assert.fail("The respondent Solicitor Details are still showing in the result.");
         }
     }
@@ -233,13 +242,13 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-respondent-solicitor-details1.json");
 
-        if (jsonPathEvaluator.get("rSolicitorName") != null
-                || jsonPathEvaluator.get("rSolicitorFirm") != null
-                || jsonPathEvaluator.get("rSolicitorReference") != null
-                || jsonPathEvaluator.get("rSolicitorEmail") != null
-                || jsonPathEvaluator.get("rSolicitorAddress") != null
-                || jsonPathEvaluator.get("rSolicitorPhone") != null
-                || jsonPathEvaluator.get("rSolicitorDXnumber") != null) {
+        if (jsonPathEvaluator.get(RESP_SOLICITOR_NAME) != null
+                || jsonPathEvaluator.get(RESP_SOLICITOR_FIRM) != null
+                || jsonPathEvaluator.get(RESP_SOLICITOR_REFERENCE) != null
+                || jsonPathEvaluator.get(RESP_SOLICITOR_EMAIL) != null
+                || jsonPathEvaluator.get(RESP_SOLICITOR_ADDRESS) != null
+                || jsonPathEvaluator.get(RESP_SOLICITOR_PHONE) != null
+                || jsonPathEvaluator.get(RESP_SOLICITOR_DX_NUMBER) != null) {
             Assert.fail("The respondent solicitor details are still showing in the result.");
         }
     }
@@ -249,9 +258,9 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
         jsonPathEvaluator = amendCaseDetails(amendContestedCaseDetailsUrl,contestedDir,
                 "remove-respondent-address-details1.json");
 
-        if (jsonPathEvaluator.get("respondentAddress") != null
-                || jsonPathEvaluator.get("respondentPhone") != null
-                || jsonPathEvaluator.get("respondentEmail") != null) {
+        if (jsonPathEvaluator.get(RESPONDENT_ADDRESS) != null
+                || jsonPathEvaluator.get(RESPONDENT_PHONE) != null
+                || jsonPathEvaluator.get(RESPONDENT_EMAIL) != null) {
             Assert.fail("The respondent solicitor address details are still showing in the result.");
         }
     }
@@ -340,10 +349,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
                 || jsonPathEvaluator.get("MIAMUrgencyReasonChecklist") != null
                 || jsonPathEvaluator.get("MIAMPreviousAttendanceChecklist") != null
                 || jsonPathEvaluator.get("MIAMOtherGroundsChecklist") != null) {
-            Assert.fail("The Miam exception details when applicant attended"
-                    +
-                    " Miam for contested are not correctly updated  "
-                    + "in the result.");
+            Assert.fail("The Miam exception details when applicant attended Miam for contested are not correctly updated in the result.");
         }
     }
 
@@ -474,7 +480,7 @@ public class AmendCaseDetailsTest extends IntegrationTestBase {
     }
 
     @Test
-    public void shouldReturnLatestAmendedConsentOrderWhenACaseIsRespondedBySolictor() {
+    public void shouldReturnLatestAmendedConsentOrderWhenACaseIsRespondedBySolicitor() {
         jsonPathEvaluator = amendCaseDetails(amendCaseDetailsUrl,consentedDir,
                 "respond-to-order-solicitor.json");
         assertThat(jsonPathEvaluator.get("latestConsentOrder.document_binary_url"), is("http://doc1/binary"));

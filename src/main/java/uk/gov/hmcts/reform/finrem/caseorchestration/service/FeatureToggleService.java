@@ -16,7 +16,6 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.AUTOMATE_ASSIGN_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.AUTOMATE_SEND_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_COURT_DETAILS_MIGRATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_DRAFT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
@@ -58,10 +57,6 @@ public class FeatureToggleService {
 
     public boolean isAutomateAssignJudgeEnabled() {
         return isFeatureEnabled(AUTOMATE_ASSIGN_JUDGE);
-    }
-
-    public boolean isContestedCourtDetailsMigrationEnabled() {
-        return isFeatureEnabled(CONTESTED_COURT_DETAILS_MIGRATION);
     }
 
     public boolean isShareACaseEnabled() {

@@ -28,9 +28,20 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ATTENDED_MIAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLAIMING_EXEMPTION_MIAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAMILY_MEDIATOR_MIAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -269,17 +280,17 @@ public class UpdateContestedCaseController implements BaseController {
     }
 
     private void removeRespondentSolicitorAddress(Map<String, Object> caseData) {
-        caseData.put("rSolicitorName", null);
-        caseData.put("rSolicitorFirm", null);
-        caseData.put("rSolicitorReference", null);
-        caseData.put("rSolicitorAddress", null);
-        caseData.put("rSolicitorPhone", null);
-        caseData.put("rSolicitorEmail", null);
-        caseData.put("rSolicitorDXnumber", null);
+        caseData.put(RESP_SOLICITOR_NAME, null);
+        caseData.put(RESP_SOLICITOR_FIRM, null);
+        caseData.put(RESP_SOLICITOR_REFERENCE, null);
+        caseData.put(RESP_SOLICITOR_ADDRESS, null);
+        caseData.put(RESP_SOLICITOR_PHONE, null);
+        caseData.put(RESP_SOLICITOR_EMAIL, null);
+        caseData.put(RESP_SOLICITOR_DX_NUMBER, null);
     }
 
     private void updateContestedRespondentDetails(Map<String, Object> caseData) {
-        if (equalsTo((String) caseData.get("respondentRepresented"), NO_VALUE)) {
+        if (equalsTo((String) caseData.get(CONTESTED_RESPONDENT_REPRESENTED), NO_VALUE)) {
             removeRespondentSolicitorAddress(caseData);
         } else {
             removeContestedRespondentAddress(caseData);
@@ -287,9 +298,9 @@ public class UpdateContestedCaseController implements BaseController {
     }
 
     private void removeContestedRespondentAddress(Map<String, Object> caseData) {
-        caseData.put("respondentAddress", null);
-        caseData.put("respondentPhone", null);
-        caseData.put("respondentEmail", null);
+        caseData.put(RESPONDENT_ADDRESS, null);
+        caseData.put(RESPONDENT_PHONE, null);
+        caseData.put(RESPONDENT_EMAIL, null);
     }
 
     private boolean equalsTo(String fieldData, String value) {
