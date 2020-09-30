@@ -72,7 +72,8 @@ public class ContestedOrderController implements BaseController {
                 .get(hearingOrderCollectionData.size() - 1)
                 .getHearingOrderDocuments().getUploadDraftDocument();
 
-            log.info("Received request to stampFinalOrder called with Case ID = {}, latestHearingOrder = {}", caseDetails.getId(), latestHearingOrder);
+            log.info("Received request to stampFinalOrder called with Case ID = {}, latestHearingOrder = {}", caseDetails.getId(),
+                latestHearingOrder);
 
             stampAndAddToCollection(caseData, latestHearingOrder, authToken);
         }
