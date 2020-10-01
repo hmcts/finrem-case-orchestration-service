@@ -191,14 +191,14 @@ public class NotificationService {
 
     public void sendConsentedGeneralOrderEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentedGeneralOrder());
-        notificationRequest = createNotificationRequest(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        applicantNotificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        sendNotificationEmail(applicantNotificationRequest, uri);
     }
 
     public void sendContestedGeneralOrderEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralOrder());
-        notificationRequest = createNotificationRequest(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        applicantNotificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        sendNotificationEmail(applicantNotificationRequest, uri);
     }
 
     public void sendContestedGeneralApplicationReferToJudgeEmail(CallbackRequest callbackRequest) {
