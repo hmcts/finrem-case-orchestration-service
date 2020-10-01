@@ -165,6 +165,7 @@
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/manual-payment_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/general-application-refer-to-judge_POST": "ignore",
   "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/general-application-outcome_POST": "ignore",
+  "90033_Loosely Scoped Cookie_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested-application-send-refusal_POST": "ignore",
   "10010_Cookie No HttpOnly Flag_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/general-application-outcome_POST": "ignore",
   "10010_Cookie No HttpOnly Flag_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/generate-mini-form-a_POST": "ignore",
   "10010_Cookie No HttpOnly Flag_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/preview-general-order_POST": "ignore",
