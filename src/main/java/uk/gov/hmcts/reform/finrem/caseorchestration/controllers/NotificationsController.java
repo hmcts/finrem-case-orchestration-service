@@ -221,11 +221,11 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             if (isConsentedApplication(caseDetails)) {
-                log.info("Sending email notification to Solicitor for 'Contested Consent General Order'");
+                log.info("Sending email notification to Solicitor for 'Consented General Order'");
                 notificationService.sendConsentedGeneralOrderEmail(callbackRequest);
             } else {
                 if (isConsentedInContestedCase(caseDetails)) {
-                    log.info("Sending email notification to Solicitor for 'Consented General Order'");
+                    log.info("Sending email notification to Solicitor for 'Contested consent General Order'");
                     notificationService.sendContestedConsentGeneralOrderEmail(callbackRequest);
                 } else {
                     log.info("Sending email notification to Solicitor for 'Contested General Order'");
