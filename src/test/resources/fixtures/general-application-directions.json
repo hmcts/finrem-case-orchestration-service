@@ -137,7 +137,17 @@
       "generalApplicationDirectionsJudgeType": "Her Honour Judge",
       "generalApplicationDirectionsJudgeName": "Ms Justice",
       "generalApplicationDirectionsCourtOrderDate": "2020-07-06",
-      "generalApplicationDirectionsTextFromJudge": "the case needs to be reconsidered"
+      "generalApplicationDirectionsTextFromJudge": "the case needs to be reconsidered",
+      "generalApplicationLatestDocument": {
+        "document_url": "http://dm-store/hijbb-general-application-latest-document",
+        "document_filename": "app_docs.pdf",
+        "document_binary_url": "http://dm-store/hijbb-general-application-latest-document/binary"
+      },
+      "generalApplicationDraftOrder": {
+        "document_url": "http://dm-store/hijbb-general-application-draft-order",
+        "document_filename": "app_docs.pdf",
+        "document_binary_url": "http://dm-store/hijbb-general-application-draft-order/binary"
+      }
     }
   }
 }

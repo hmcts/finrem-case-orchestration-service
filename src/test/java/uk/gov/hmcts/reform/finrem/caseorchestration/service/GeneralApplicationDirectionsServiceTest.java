@@ -12,13 +12,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.in;
@@ -61,8 +63,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_SWANSEA_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST_DATE;
 
 public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
@@ -74,6 +74,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     @MockBean private GenericDocumentService genericDocumentService;
 
     @Captor ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
+    @Captor ArgumentCaptor<List<BulkPrintDocument>> printDocumentsRequestDocumentListCaptor;
 
     private CaseDetails caseDetails;
 
@@ -121,17 +122,6 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenGeneralApplicationDirectionsSubmitted_thenGeneralApplicationLatestDocumentIsUpdated() {
-        List<String> generalApplicationLatestDocumentFields = asList(GENERAL_APPLICATION_DOCUMENT_LATEST, GENERAL_APPLICATION_DOCUMENT_LATEST_DATE);
-
-        assertThat(caseDetails.getData(), not(hasKey(in(generalApplicationLatestDocumentFields))));
-
-        generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, AUTH_TOKEN);
-
-        assertThat(caseDetails.getData(), allOf(generalApplicationLatestDocumentFields.stream().map(Matchers::hasKey).collect(Collectors.toList())));
-    }
-
-    @Test
     public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrinted() {
         generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, AUTH_TOKEN);
 
@@ -141,7 +131,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             eq(documentConfiguration.getGeneralApplicationHearingNoticeTemplate()),
             eq(documentConfiguration.getGeneralApplicationHearingNoticeFileName()));
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN), any());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN),
+            printDocumentsRequestDocumentListCaptor.capture());
 
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
 
@@ -157,6 +148,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             Matchers.<String, Object>hasEntry("hearingVenue",
                 "Croydon County Court And Family Court, Croydon County Court, Altyre Road, Croydon, CR9 5AB"),
             hasKey("letterDate")));
+
+        assertDocumentPrintRequestContainsExpectedDocuments();
     }
 
     @Test
@@ -169,11 +162,11 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             documentGenerationRequestCaseDetailsCaptor.capture(),
             eq(documentConfiguration.getGeneralApplicationOrderTemplate()),
             eq(documentConfiguration.getGeneralApplicationOrderFileName()));
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN), any());
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN),
+            printDocumentsRequestDocumentListCaptor.capture());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
 
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
-
         assertThat(data, allOf(
             hasEntry("courtDetails", ImmutableMap.of(
                 "courtName", "Kingston-Upon-Thames County Court And Family Court",
@@ -183,5 +176,17 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
             Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
             hasKey("letterDate")));
+
+        assertDocumentPrintRequestContainsExpectedDocuments();
+    }
+
+    private void assertDocumentPrintRequestContainsExpectedDocuments() {
+        List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
+        assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
+            "http://dm-store/lhjbyuivu87y989hijbb/binary",
+            "http://dm-store/hijbb-general-application-latest-document/binary",
+            "http://dm-store/hijbb-general-application-draft-order/binary")
+            .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).build())
+            .toArray()));
     }
 }

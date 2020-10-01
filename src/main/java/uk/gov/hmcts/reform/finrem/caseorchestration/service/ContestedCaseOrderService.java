@@ -11,7 +11,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +27,7 @@ public class ContestedCaseOrderService {
             }
 
             BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData());
-            if (!isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, asList(generalOrder));
             }
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, asList(generalOrder));

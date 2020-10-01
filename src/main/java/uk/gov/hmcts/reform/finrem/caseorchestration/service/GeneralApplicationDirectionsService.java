@@ -11,12 +11,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BIRMINGHAM_COURT;
@@ -47,7 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
@@ -99,25 +99,34 @@ public class GeneralApplicationDirectionsService {
     }
 
     public void submitGeneralApplicationDirections(CaseDetails caseDetails, String authorisationToken) {
-        CaseDocument document = caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED).equals(YES_VALUE)
-            ? prepareHearingRequiredNoticeDocument(caseDetails, authorisationToken)
-            : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
-
-        printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, document);
-        updateGeneralApplicationLatestDocument(caseDetails, document);
+        List<BulkPrintDocument> documents = prepareDocumentsToPrint(caseDetails, authorisationToken);
+        printDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
         resetStateToGeneralApplicationPrestate(caseDetails);
     }
 
-    private void printDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken, CaseDocument document) {
-        List<BulkPrintDocument> documents = asList(documentHelper.getCaseDocumentAsBulkPrintDocument(document));
-        bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
-        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
+    private List<BulkPrintDocument> prepareDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
+        Map<String, Object> caseData = caseDetails.getData();
+        List<BulkPrintDocument> documents = new ArrayList<>();
+
+        CaseDocument directionsDocument = caseData.get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED).equals(YES_VALUE)
+            ? prepareHearingRequiredNoticeDocument(caseDetails, authorisationToken)
+            : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);
+        documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(directionsDocument));
+
+        Stream.of(GENERAL_APPLICATION_DOCUMENT_LATEST, GENERAL_APPLICATION_DRAFT_ORDER).forEach(documentFieldName -> {
+            if (caseData.get(documentFieldName) != null) {
+                documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(
+                    documentHelper.convertToCaseDocument(caseData.get(documentFieldName))));
+            }
+        });
+
+        return documents;
     }
 
-    private void updateGeneralApplicationLatestDocument(CaseDetails caseDetails, CaseDocument document) {
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST, document);
-        caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE, LocalDate.now());
+    private void printDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken,
+                                                                  List<BulkPrintDocument> documents) {
+        bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, documents);
+        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, documents);
     }
 
     private void resetStateToGeneralApplicationPrestate(CaseDetails caseDetails) {
