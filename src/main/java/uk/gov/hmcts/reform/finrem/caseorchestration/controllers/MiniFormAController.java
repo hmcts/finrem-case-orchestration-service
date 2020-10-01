@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DefaultsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
 import javax.validation.constraints.NotNull;
@@ -38,9 +37,6 @@ public class MiniFormAController implements BaseController {
 
     @Autowired
     private OnlineFormDocumentService service;
-
-    @Autowired
-    private FeatureToggleService featureToggleService;
 
     @Autowired
     private DefaultsConfiguration defaultsConfiguration;
@@ -72,10 +68,8 @@ public class MiniFormAController implements BaseController {
             CaseDocument document = service.generateMiniFormA(authorisationToken, callback.getCaseDetails());
             caseData.put(MINI_FORM_A, document);
 
-            if (featureToggleService.isAutomateAssignJudgeEnabled()) {
-                log.info("Defaulting AssignedToJudge fields for Case ID: {}", callback.getCaseDetails().getId());
-                populateAssignToJudgeFields(caseData);
-            }
+            log.info("Defaulting AssignedToJudge fields for Case ID: {}", callback.getCaseDetails().getId());
+            populateAssignToJudgeFields(caseData);
         } else {
             CaseDocument document = service.generateConsentedInContestedMiniFormA(callback.getCaseDetails(), authorisationToken);
             caseData.put(MINI_FORM_A_CONSENTED_IN_CONTESTED, document);
