@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
 import javax.validation.constraints.NotNull;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -28,8 +28,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isDocumentPresentInCaseData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isDocumentPresentInCaseData;
 
 @RestController
 @RequiredArgsConstructor
@@ -49,7 +49,7 @@ public class HearingDocumentController implements BaseController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocument(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) throws IOException {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
@@ -70,8 +70,7 @@ public class HearingDocumentController implements BaseController {
             if (isDocumentPresentInCaseData(FORM_C, caseDetails) && isDocumentPresentInCaseData(FORM_G, caseDetails)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
                 service.createAndSendAdditionalHearingDocuments(authorisationToken, caseDetails);
-            }
-            else {
+            } else {
                 log.info("Sending Forms A, C, G to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
                 service.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
             }
