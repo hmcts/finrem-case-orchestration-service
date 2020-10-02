@@ -14,5 +14,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AdditionalHearingDocument {
     @JsonProperty("additionalHearingDocument")
-    private CaseDocument additionalHearingDocument;
+    private CaseDocument document;
 }

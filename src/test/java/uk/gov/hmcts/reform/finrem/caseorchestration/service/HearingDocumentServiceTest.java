@@ -11,9 +11,11 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
@@ -21,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,10 +31,13 @@ import java.util.UUID;
 import java.util.concurrent.CompletionException;
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -46,6 +52,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CASE_ALLOCATED_TO;
@@ -101,8 +108,13 @@ public class HearingDocumentServiceTest {
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintDocumentsCaptor;
 
-    private GenericDocumentService genericDocumentService;
+    @Captor
+    ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
+
     private HearingDocumentService hearingDocumentService;
+
+    @MockBean
+    GenericDocumentService genericDocumentService;
 
     @MockBean
     FeatureToggleService featureToggleService;
@@ -372,6 +384,40 @@ public class HearingDocumentServiceTest {
         hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
     }
 
+    @Test
+    public void generateAdditionalHearingDocument() throws IOException {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", mapper);
+
+        hearingDocumentService.createAndSendAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+
+        List<AdditionalHearingDocumentData> additionalHearingDocumentData =
+            (List<AdditionalHearingDocumentData>) caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION);
+
+        assertThat(additionalHearingDocumentData, hasSize(1));
+        doCaseDocumentAssert(additionalHearingDocumentData.get(0).getAdditionalHearingDocument().getDocument());
+
+        verify(genericDocumentService, times(1)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
+
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        assertThat(data.get("CCDCaseNumber"), is(1234567890L));
+        assertThat(data.get("DivorceCaseNumber"), is("AB01D23456"));
+        assertThat(data.get("applicantFullName"), is("Test Applicant"));
+        assertThat(data.get("respondentFullName"), is("Name Respondent"));
+
+        assertThat(data.get("HearingType"), is(""));
+        assertThat(data.get("HearingVenue"), is("Nottingham County Court And Family Court"));
+        assertThat(data.get("HearingDate"), is("2021-01-01"));
+        assertThat(data.get("HearingTime"), is("12:00"));
+        assertThat(data.get("HearingLength"), is("30 minutes"));
+        assertThat(data.get("AnyOtherDirections"), is("N/A"));
+
+        assertThat(data.get("CourtName"), is("Nottingham County Court And Family Court"));
+        assertThat(data.get("CourtAddress"), is("60 Canal Street, Nottingham NG1 7EJ"));
+        assertThat(data.get("CourtPhone"), is("0115 910 3504"));
+        assertThat(data.get("CourtEmail"), is("FRCNottingham@justice.gov.uk"));
+    }
+
     private CaseDetails makeItNonFastTrackDecisionCase() {
         return caseDetails(NO_VALUE);
     }
@@ -488,5 +534,11 @@ public class HearingDocumentServiceTest {
             assertThat(data.get("hearingDateLess35Days"), is(notNullValue()));
             assertThat(data.get("hearingDateLess14Days"), is(notNullValue()));
         }
+    }
+
+    private static void doCaseDocumentAssert(CaseDocument result) {
+        assertThat(result.getDocumentFilename(), is(FILE_NAME));
+        assertThat(result.getDocumentUrl(), is(DOC_URL));
+        assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
     }
 }

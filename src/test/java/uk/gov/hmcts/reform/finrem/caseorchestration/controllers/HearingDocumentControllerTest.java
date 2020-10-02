@@ -120,4 +120,17 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isInternalServerError());
     }
+
+    @Test
+    public void generateAdditionalHearingDocumentSuccess() throws Exception {
+        doValidCaseDataSetUpForAdditionalHearing();
+
+        mvc.perform(post(GEN_DOC_URL)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk());
+
+        verify(service, times(1)).createAndSendAdditionalHearingDocuments(any(), any());
+    }
 }
