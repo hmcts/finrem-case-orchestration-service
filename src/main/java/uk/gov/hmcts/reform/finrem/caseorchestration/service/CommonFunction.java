@@ -137,7 +137,7 @@ public class CommonFunction {
         return caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION)).isEmpty();
     }
 
-    public static boolean isDocumentPresentInCaseData(String documentName, CaseDetails caseDetails){
+    public static boolean isDocumentPresentInCaseData(String documentName, CaseDetails caseDetails) {
         return caseDetails.getData().containsKey(documentName);
     }
 }
