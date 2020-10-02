@@ -32,6 +32,6 @@ public class ObjectMapperConfigurationTest {
 
     @Test
     public void createObjectMapper() {
-        assertThat(objectMapperConfiguration.objectMapper(Jackson2ObjectMapperBuilder.json()), is(notNullValue()));
+        assertThat(objectMapperConfiguration.objectMapper(), is(notNullValue()));
     }
 }
