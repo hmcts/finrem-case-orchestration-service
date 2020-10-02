@@ -58,6 +58,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
@@ -141,7 +144,7 @@ public class HearingDocumentServiceTest {
     @Test
     public void generateFastTrackFormC() {
         Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
-        assertCaseDocument((CaseDocument) result.get(hearingDocumentService.formCDataKey));
+        assertCaseDocument((CaseDocument) result.get(FORM_C));
         ((TestDocumentClient) generatorClient).verifyAdditionalFastTrackFields();
     }
 
@@ -149,15 +152,15 @@ public class HearingDocumentServiceTest {
     public void generateJudiciaryBasedFastTrackFormC() {
         Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN,
                 makeItJudiciaryFastTrackDecisionCase());
-        assertCaseDocument((CaseDocument) result.get(hearingDocumentService.formCDataKey));
+        assertCaseDocument((CaseDocument) result.get(FORM_C));
         ((TestDocumentClient) generatorClient).verifyAdditionalFastTrackFields();
     }
 
     @Test
     public void generateNonFastTrackFormCAndFormG() {
         Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItNonFastTrackDecisionCase());
-        assertCaseDocument((CaseDocument) result.get(hearingDocumentService.formCDataKey));
-        assertCaseDocument((CaseDocument) result.get(hearingDocumentService.formGDataKey));
+        assertCaseDocument((CaseDocument) result.get(FORM_C));
+        assertCaseDocument((CaseDocument) result.get(FORM_G));
         ((TestDocumentClient) generatorClient).verifyAdditionalNonFastTrackFields();
     }
 
@@ -165,7 +168,7 @@ public class HearingDocumentServiceTest {
     public void sendToBulkPrint() {
         CaseDetails caseDetails = caseDetails(NO_VALUE);
 
-        hearingDocumentService.sendToBulkPrint(caseDetails, AUTH_TOKEN);
+        hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService, times(1)).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
         verify(bulkPrintService, times(1)).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
@@ -180,9 +183,9 @@ public class HearingDocumentServiceTest {
     public void sendToBulkPrint_multipleFormA() {
         CaseDetails caseDetails = caseDetails(YES_VALUE);
 
-        caseDetails.getData().put(hearingDocumentService.formADataKey, asList(pensionDocumentData(), pensionDocumentData(), pensionDocumentData()));
+        caseDetails.getData().put(FORM_A_COLLECTION, asList(pensionDocumentData(), pensionDocumentData(), pensionDocumentData()));
 
-        hearingDocumentService.sendToBulkPrint(caseDetails, AUTH_TOKEN);
+        hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService, times(1)).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
 
@@ -389,9 +392,9 @@ public class HearingDocumentServiceTest {
 
         caseData.put(FAST_TRACK_DECISION, isFastTrackDecision);
         caseData.put(HEARING_DATE, DATE_OF_HEARING);
-        caseData.put(hearingDocumentService.formADataKey, asList(pensionDocumentData()));
-        caseData.put(hearingDocumentService.formCDataKey, caseDocument());
-        caseData.put(hearingDocumentService.formGDataKey, caseDocument());
+        caseData.put(FORM_A_COLLECTION, asList(pensionDocumentData()));
+        caseData.put(FORM_C, caseDocument());
+        caseData.put(FORM_G, caseDocument());
 
         return CaseDetails.builder().data(caseData).build();
     }

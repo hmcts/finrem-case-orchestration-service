@@ -136,4 +136,8 @@ public class CommonFunction {
     private static boolean isContestedApprovedOrderCollectionPresent(Map<String, Object> caseData) {
         return caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION)).isEmpty();
     }
+
+    public static boolean isDocumentPresentInCaseData(String documentName, CaseDetails caseDetails){
+        return caseDetails.getData().containsKey(documentName);
+    }
 }

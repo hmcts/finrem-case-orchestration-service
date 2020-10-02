@@ -45,4 +45,6 @@ public class DocumentConfiguration {
     private String contestedDraftOrderNotApprovedFileName;
     private String manualPaymentTemplate;
     private String manualPaymentFileName;
+    private String additionalHearingTemplate;
+    private String additionalHearingFileName;
 }
