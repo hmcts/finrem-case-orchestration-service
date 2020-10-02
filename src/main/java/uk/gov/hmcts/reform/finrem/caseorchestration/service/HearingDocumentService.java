@@ -151,7 +151,7 @@ public class HearingDocumentService {
         bulkPrintAdditionalHearingDocuments(caseDetails, authorisationToken);
     }
 
-    private CaseDocument generateAdditionalHearingDocument(CaseDetails caseDetails, String authorisationToken) throws IOException {
+    public CaseDocument generateAdditionalHearingDocument(CaseDetails caseDetails, String authorisationToken) throws IOException {
         log.info("Generating Additional Hearing Document for Case ID: {}", caseDetails.getId());
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         prepareCaseDetailsForDocumentGeneration(caseDetailsCopy);
@@ -173,7 +173,7 @@ public class HearingDocumentService {
             .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
             .build();
 
-        caseData.put("ccdCaseNumber", caseDetails.getId());
+        caseData.put("CCDCaseNumber", caseDetails.getId());
         caseData.put("DivorceCaseNumber", caseDetails.getData().get(DIVORCE_CASE_NUMBER));
         caseData.put("ApplicantName", buildFullApplicantName(caseDetails));
         caseData.put("RespondentName", buildFullRespondentName(caseDetails));
@@ -193,7 +193,7 @@ public class HearingDocumentService {
     private void addAdditionalHearingDocumentToCaseData(CaseDetails caseDetails, CaseDocument document) {
         AdditionalHearingDocumentData generatedDocumentData = AdditionalHearingDocumentData.builder()
             .additionalHearingDocument(AdditionalHearingDocument.builder()
-                .additionalHearingDocument(document)
+                .document(document)
                 .build())
             .build();
 
@@ -209,15 +209,13 @@ public class HearingDocumentService {
     }
 
     private void bulkPrintAdditionalHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
-        List<AdditionalHearingDocumentData> additionalHearingDocumentData =
-            documentHelper.convertToAdditionalHearingDocumentData(
-                caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
+        List<AdditionalHearingDocumentData> additionalHearingDocumentData = documentHelper.convertToAdditionalHearingDocumentData(caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
 
         AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
 
         List<BulkPrintDocument> document = Collections.singletonList(
             bulkPrintService.getBulkPrintDocumentFromCaseDocument(
-                additionalHearingDocument.getAdditionalHearingDocument().getAdditionalHearingDocument()));
+                additionalHearingDocument.getAdditionalHearingDocument().getDocument()));
 
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
