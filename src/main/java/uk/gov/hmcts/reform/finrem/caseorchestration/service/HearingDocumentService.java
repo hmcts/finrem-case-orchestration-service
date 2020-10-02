@@ -212,7 +212,9 @@ public class HearingDocumentService {
     }
 
     private void bulkPrintAdditionalHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
-        List<AdditionalHearingDocumentData> additionalHearingDocumentData = documentHelper.convertToAdditionalHearingDocumentData(caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
+        List<AdditionalHearingDocumentData> additionalHearingDocumentData =
+            documentHelper.convertToAdditionalHearingDocumentData(
+                caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION));
 
         AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
 
