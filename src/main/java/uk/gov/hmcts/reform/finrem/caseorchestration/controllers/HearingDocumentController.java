@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
@@ -37,7 +38,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 public class HearingDocumentController implements BaseController {
 
-    private final HearingDocumentService service;
+    private final HearingDocumentService hearingService;
+    private final AdditionalHearingDocumentService additionalHearingService;
     private final ValidateHearingService validateHearingService;
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -64,15 +66,15 @@ public class HearingDocumentController implements BaseController {
         }
 
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.putAll(service.generateHearingDocuments(authorisationToken, caseDetails));
+        caseData.putAll(hearingService.generateHearingDocuments(authorisationToken, caseDetails));
 
         if (isContestedPaperApplication(caseDetails)) {
             if (alreadyHadFirstHearing(caseDetails)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
-                service.createAndSendAdditionalHearingDocuments(authorisationToken, caseDetails);
+                additionalHearingService.createAndSendAdditionalHearingDocuments(authorisationToken, caseDetails);
             } else {
                 log.info("Sending Forms A, C, G to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
-                service.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
+                hearingService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
             }
         }
 

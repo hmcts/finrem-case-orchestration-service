@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
@@ -40,7 +41,10 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     private static final String GEN_DOC_URL = "/case-orchestration/documents/hearing";
 
     @MockBean
-    private HearingDocumentService service;
+    private HearingDocumentService hearingService;
+
+    @MockBean
+    private AdditionalHearingDocumentService additionalHearingService;
 
     @MockBean
     private ValidateHearingService validateHearingService;
@@ -74,7 +78,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateHearingDocumentFormC() throws Exception {
-        when(service.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
+        when(hearingService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
                 .thenReturn(ImmutableMap.of("formC", caseDocument()));
 
         mvc.perform(post(GEN_DOC_URL)
@@ -86,7 +90,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
                 .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
 
-        verify(service, never()).sendFormCAndGForBulkPrint(any(), any());
+        verify(hearingService, never()).sendFormCAndGForBulkPrint(any(), any());
     }
 
     @Test
@@ -94,7 +98,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json").toURI()));
 
-        when(service.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
+        when(hearingService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
             .thenReturn(ImmutableMap.of("formC", caseDocument()));
 
         mvc.perform(post(GEN_DOC_URL)
@@ -106,12 +110,12 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
             .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
 
-        verify(service, times(1)).sendFormCAndGForBulkPrint(isA(CaseDetails.class), eq(AUTH_TOKEN));
+        verify(hearingService, times(1)).sendFormCAndGForBulkPrint(isA(CaseDetails.class), eq(AUTH_TOKEN));
     }
 
     @Test
     public void generateMiniFormAHttpError500() throws Exception {
-        when(service.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
+        when(hearingService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
                 .thenThrow(feignError());
 
         mvc.perform(post(GEN_DOC_URL)
@@ -131,6 +135,6 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verify(service, times(1)).createAndSendAdditionalHearingDocuments(any(), any());
+        verify(additionalHearingService, times(1)).createAndSendAdditionalHearingDocuments(any(), any());
     }
 }
