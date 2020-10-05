@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -54,7 +54,7 @@ public class AdditionalHearingDocumentServiceTest {
         config.setAdditionalHearingFileName("AdditionalHearingDocument.pdf");
     }
 
-    @Test
+    @Test(expected = IllegalStateException.class)
     public void generateAdditionalHearingDocument() throws IOException {
         CaseDetails caseDetails =
             TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
