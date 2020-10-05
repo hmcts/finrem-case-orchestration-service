@@ -7,6 +7,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
@@ -20,11 +21,15 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 
 @ActiveProfiles("test-mock-document-client")
 public class AdditionalHearingDocumentServiceTest {
@@ -52,14 +57,16 @@ public class AdditionalHearingDocumentServiceTest {
         DocumentConfiguration config = new DocumentConfiguration();
         config.setAdditionalHearingTemplate("FL-FRM-HNO-ENG-00588.docx");
         config.setAdditionalHearingFileName("AdditionalHearingDocument.pdf");
+        objectMapper = new ObjectMapper();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    @Test
     public void generateAdditionalHearingDocument() throws IOException {
         CaseDetails caseDetails =
             TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
 
-        additionalHearingDocumentService.createAndSendAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+        when(documentClient.generatePdf(any(), anyString())).thenReturn(document());
 
         CaseDocument additionalHearingDocument = additionalHearingDocumentService.generateAdditionalHearingDocument(caseDetails, AUTH_TOKEN);
 
