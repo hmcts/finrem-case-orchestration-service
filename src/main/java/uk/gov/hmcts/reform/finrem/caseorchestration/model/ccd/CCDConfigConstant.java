@@ -21,6 +21,8 @@ public class CCDConfigConstant {
     public static final String CONSENTED_RESPONDENT_LAST_NAME = "appRespondentLName";
     public static final String CONTESTED_RESPONDENT_LAST_NAME = "respondentLName";
     public static final String RESPONDENT_ADDRESS = "respondentAddress";
+    public static final String RESPONDENT_PHONE = "respondentPhone";
+    public static final String RESPONDENT_EMAIL = "respondentEmail";
 
     //Applicant Solicitor related
     public static final String SOLICITOR_REFERENCE = "solicitorReference";
@@ -37,13 +39,19 @@ public class CCDConfigConstant {
     public static final String APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED = "applicantSolicitorConsentForEmails";
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";
     public static final String APPLICANT_REPRESENTED_PAPER = "applicantRepresentedPaper";
+    public static final String CONSENTED_SOLICITOR_DX_NUMBER = "solicitorDXnumber";
+    public static final String CONTESTED_SOLICITOR_DX_NUMBER = "applicantSolicitorDXnumber";
 
     //Respondent Solicitor Related
     public static final String CONSENTED_RESPONDENT_REPRESENTED = "appRespondentRep";
     public static final String CONTESTED_RESPONDENT_REPRESENTED = "respondentRepresented";
     public static final String RESP_SOLICITOR_NAME = "rSolicitorName";
+    public static final String RESP_SOLICITOR_FIRM = "rSolicitorFirm";
     public static final String RESP_SOLICITOR_ADDRESS = "rSolicitorAddress";
     public static final String RESP_SOLICITOR_REFERENCE = "rSolicitorReference";
+    public static final String RESP_SOLICITOR_PHONE = "rSolicitorPhone";
+    public static final String RESP_SOLICITOR_EMAIL = "rSolicitorEmail";
+    public static final String RESP_SOLICITOR_DX_NUMBER = "rSolicitorDXnumber";
 
     //Court related
     public static final String KENT = "kentfrc";
@@ -77,7 +85,10 @@ public class CCDConfigConstant {
     public static final String COURT_DETAILS_ADDRESS_KEY = "courtAddress";
     public static final String COURT_DETAILS_PHONE_KEY = "phoneNumber";
     public static final String COURT_DETAILS_EMAIL_KEY = "email";
-    public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
+
+    // IDAM
+    public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
+    public static final String ROLES = "roles";
 
     //contest courts
     public static final String HEARING_DATE = "hearingDate";
@@ -86,8 +97,6 @@ public class CCDConfigConstant {
     public static final String FAMILY_MEDIATOR_MIAM = "familyMediatorMIAM";
     public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMIAM";
     public static final String IS_ADMIN = "isAdmin";
-    public static final String FR_COURT_ADMIN = "caseworker-divorce-financialremedy-courtadmin";
-    public static final String ROLES = "roles";
     public static final String KENTFRC_COURTLIST = "kentSurreyCourtList";
     public static final String SEOTHER_COURTLIST = "otherSECourtList";
     public static final String SWOTHER_COURTLIST = "otherSWCourtList";
@@ -250,4 +259,14 @@ public class CCDConfigConstant {
 
     //states
     public static final String CONSENTED_ORDER_APPROVED = "consentedOrderApproved";
+
+    //organisation policy
+    public static final String ORGANISATION_POLICY_APPLICANT = "ApplicantOrganisationPolicy";
+    public static final String ORGANISATION_POLICY_ROLE = "OrgPolicyCaseAssignedRole";
+    public static final String ORGANISATION_POLICY_REF = "OrgPolicyReference";
+    public static final String ORGANISATION_POLICY_ORGANISATION = "Organisation";
+    public static final String ORGANISATION_POLICY_ORGANISATION_NAME = "OrganisationName";
+    public static final String ORGANISATION_POLICY_ORGANISATION_ID = "OrganisationID";
+    public static final String APP_SOLICITOR_POLICY = "[APPSOLICITOR]";
+
 }

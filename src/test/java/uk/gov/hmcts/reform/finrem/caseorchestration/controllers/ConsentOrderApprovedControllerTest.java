@@ -9,10 +9,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -58,13 +56,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     private GenericDocumentService genericDocumentService;
 
     @MockBean
-    private BulkPrintService bulkPrintService;
-
-    @MockBean
     private ConsentOrderPrintService consentOrderPrintService;
-
-    @MockBean
-    private FeatureToggleService featureToggleService;
 
     @MockBean
     private NotificationService notificationService;
@@ -171,7 +163,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
         when(consentOrderPrintService.sendConsentOrderToBulkPrint(any(), any())).thenReturn(defaultConsentedCaseDetails().getData());
-        when(featureToggleService.isAutomateSendOrderEnabled()).thenReturn(true);
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -183,28 +174,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
 
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
         verify(notificationService).sendConsentOrderAvailableCtscEmail(any());
-    }
-
-    @Test
-    public void shouldNotUpdateStateToConsentOrderMadeAndBulkPrint() throws Exception {
-        doValidCaseDataSetUpNoPensionCollection();
-        whenServiceGeneratesDocument().thenReturn(caseDocument());
-        whenServiceGeneratesNotificationLetter().thenReturn(caseDocument());
-        whenAnnexStampingDocument().thenReturn(caseDocument());
-        whenStampingDocument().thenReturn(caseDocument());
-        whenStampingPensionDocuments().thenReturn(asList(pensionDocumentData()));
-        when(featureToggleService.isAutomateSendOrderEnabled()).thenReturn(false);
-
-        ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE));
-
-        result.andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.state", is("applicationDrafted")));
-
-        verify(consentOrderPrintService, never()).sendConsentOrderToBulkPrint(any(), any());
-        verify(notificationService, never()).sendConsentOrderAvailableCtscEmail(any());
     }
 
     @Test

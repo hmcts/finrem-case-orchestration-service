@@ -31,11 +31,6 @@
       "authorisationFirm": "test",
       "authorisationName": "test",
       "consentOrder": {
-        "document_binary_url": "string",
-        "document_filename": "string",
-        "document_url": "string"
-      },
-      "consentOrder": {
         "document_binary_url": "http://file1.binary",
         "document_filename": "string",
         "document_url": "string"

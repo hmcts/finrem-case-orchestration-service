@@ -17,7 +17,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -44,7 +43,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -125,8 +124,8 @@ public class HearingNonFastTrackDocumentTest {
             mvcResult = webClient.perform(MockMvcRequestBuilders.post(API_URL)
                 .content(objectMapper.writeValueAsString(request))
                 .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
                 .andReturn();
         } while (++requestsMade < 5 && mvcResult.getResponse().getStatus() == HttpStatus.INTERNAL_SERVER_ERROR.value());
 
@@ -146,8 +145,8 @@ public class HearingNonFastTrackDocumentTest {
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
             .content(objectMapper.writeValueAsString(request))
             .header(AUTHORIZATION, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .accept(MediaType.APPLICATION_JSON_VALUE))
+            .contentType(APPLICATION_JSON_VALUE)
+            .accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
     }
 
@@ -158,8 +157,8 @@ public class HearingNonFastTrackDocumentTest {
         webClient.perform(MockMvcRequestBuilders.post(API_URL)
             .content(objectMapper.writeValueAsString(request))
             .header(AUTHORIZATION, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE)
-            .accept(MediaType.APPLICATION_JSON_VALUE))
+            .contentType(APPLICATION_JSON_VALUE)
+            .accept(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(content().json(expectedErrorData(), true));
     }
@@ -207,7 +206,7 @@ public class HearingNonFastTrackDocumentTest {
             .withHeader(CONTENT_TYPE, equalTo("application/json"))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 .withBody(objectMapper.writeValueAsString(document()))));
     }
 
@@ -219,6 +218,6 @@ public class HearingNonFastTrackDocumentTest {
             .withHeader(CONTENT_TYPE, equalTo("application/json"))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)));
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)));
     }
 }

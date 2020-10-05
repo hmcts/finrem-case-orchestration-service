@@ -37,6 +37,8 @@ public class OrchestrationConstants {
     public static final String YES_VALUE = "Yes";
     public static final String NO_VALUE = "No";
 
+    public static final String REGION = "region";
+
     // CTSC Contact Details
     public static final String CTSC_SERVICE_CENTRE = "Courts and Tribunals Service Centre";
     public static final String CTSC_CARE_OF = "c/o HMCTS Digital Financial Remedy";

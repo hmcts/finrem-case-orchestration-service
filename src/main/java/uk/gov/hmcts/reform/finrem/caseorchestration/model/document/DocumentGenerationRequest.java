@@ -17,7 +17,7 @@ public class DocumentGenerationRequest {
     @JsonProperty(value = "template", required = true)
     @NotBlank
     private final String template;
-    @ApiModelProperty(value = "Name of the file", required = false)
+    @ApiModelProperty(value = "Name of the file")
     @JsonProperty(value = "fileName", required = true)
     private final String fileName;
     @JsonProperty(value = "values", required = true)

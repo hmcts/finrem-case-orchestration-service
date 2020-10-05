@@ -36,7 +36,6 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -102,9 +101,6 @@ public class HearingDocumentServiceTest {
     private HearingDocumentService hearingDocumentService;
 
     @MockBean
-    FeatureToggleService featureToggleService;
-
-    @MockBean
     BulkPrintService bulkPrintService;
 
     private static final String DATE_OF_HEARING = "2019-01-01";
@@ -119,9 +115,6 @@ public class HearingDocumentServiceTest {
         config.setFormGFileName("Form-G.pdf");
         config.setMiniFormFileName("file_name");
 
-        featureToggleService = mock(FeatureToggleService.class);
-        when(featureToggleService.isContestedCourtDetailsMigrationEnabled()).thenReturn(true);
-
         bulkPrintService = mock(BulkPrintService.class);
 
         MockitoAnnotations.initMocks(this);
@@ -129,7 +122,7 @@ public class HearingDocumentServiceTest {
         generatorClient = new TestDocumentClient();
         genericDocumentService = new GenericDocumentService(generatorClient);
         hearingDocumentService = new HearingDocumentService(
-            genericDocumentService, config, new DocumentHelper(mapper), mapper, featureToggleService, bulkPrintService);
+            genericDocumentService, config, new DocumentHelper(mapper), mapper, bulkPrintService);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -326,14 +319,6 @@ public class HearingDocumentServiceTest {
         ((TestDocumentClient) generatorClient).verifyCourtDetailsFields(
             "Birmingham Civil And Family Justice Centre", "Pipers Row, Wolverhampton, WV1 3LQ",
             "0121 250 6794", "FRCBirmingham@justice.gov.uk");
-    }
-
-    @Test
-    public void verifyIsContestedCourtDetailsMigrationEnabledFalse() {
-        when(featureToggleService.isContestedCourtDetailsMigrationEnabled()).thenReturn(false);
-        hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, caseDetailsWithCourtDetails(
-            MIDLANDS, MIDLANDS_FRC_LIST, BIRMINGHAM, BIRMINGHAM_COURTLIST, "FR_birmingham_hc_list_1"));
-        ((TestDocumentClient) generatorClient).verifyCourtDetailsFieldsNotSet();
     }
 
     @Test
