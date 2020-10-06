@@ -59,7 +59,8 @@ public class AdditionalHearingDocumentService {
         prepareCaseDetailsForDocumentGeneration(caseDetailsCopy);
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-            documentConfiguration.getAdditionalHearingTemplate(), documentConfiguration.getAdditionalHearingFileName());
+            documentConfiguration.getAdditionalHearingTemplate(),
+            documentConfiguration.getAdditionalHearingFileName());
     }
 
     private void prepareCaseDetailsForDocumentGeneration(CaseDetails caseDetails) throws IOException {
@@ -81,10 +82,10 @@ public class AdditionalHearingDocumentService {
         caseData.put("RespondentName", buildFullRespondentName(caseDetails));
         caseData.put("HearingType", caseDetails.getData().get(HEARING_TYPE));
         caseData.put("HearingVenue", selectedFRCDetails.getCourtName());
-        caseData.put("HearingDate", HEARING_DATE);
-        caseData.put("HearingTime", HEARING_TIME);
-        caseData.put("HearingLength", TIME_ESTIMATE);
-        caseData.put("AnyOtherDirections", HEARING_ADDITIONAL_INFO);
+        caseData.put("HearingDate", caseDetails.getData().get(HEARING_DATE));
+        caseData.put("HearingTime", caseDetails.getData().get(HEARING_TIME));
+        caseData.put("HearingLength", caseDetails.getData().get(TIME_ESTIMATE));
+        caseData.put("AnyOtherDirections", caseDetails.getData().get(HEARING_ADDITIONAL_INFO));
 
         caseData.put("CourtName", selectedFRCDetails.getCourtName());
         caseData.put("CourtAddress", selectedFRCDetails.getCourtAddress());

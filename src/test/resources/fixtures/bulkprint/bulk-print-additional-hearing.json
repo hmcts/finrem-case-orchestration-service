@@ -49,6 +49,7 @@
       "applicantSolicitorDXnumber": null,
       "isAdmin": "Yes",
       "hearingTime": "12:00",
+      "hearingType": "Directions (DIR)",
       "formC": {
         "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4f73432d-2889-47eb-bc16-84d021222dbc",
         "document_filename": "Form-C.pdf",
