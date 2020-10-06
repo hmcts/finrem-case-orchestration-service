@@ -214,6 +214,7 @@
   "10010_Cookie No HttpOnly Flag_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/hwf-successful_POST": "ignore",
   "10010_Cookie No HttpOnly Flag_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/upload-contested-case-documents_POST": "ignore",
   "10010_Cookie No HttpOnly Flag_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/consent-in-contested/send-order_POST": "ignore",
+  "10054_Cookie Without SameSite Attribute_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested/set-paper-case-defaults_POST": "ignore",
   "10054_Cookie Without SameSite Attribute_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/manual-payment_POST": "ignore",
   "10054_Cookie Without SameSite Attribute_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/notify/general-application-outcome_POST": "ignore",
   "10054_Cookie Without SameSite Attribute_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/upload-contested-case-documents_POST": "ignore",
