@@ -3,54 +3,59 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedRefusalOrderData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse;
 
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT;
 
-public class ContestedDraftOrderNotApprovedServiceTest {
+public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
 
-    private DocumentClient generatorClient;
-    private ObjectMapper mapper = new ObjectMapper();
+    @MockBean
     private GenericDocumentService genericDocumentService;
+
+    @Autowired
     private ContestedDraftOrderNotApprovedService refusalOrderService;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private DocumentConfiguration documentConfiguration;
+
+    @Captor
+    private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
 
     @Before
     public void setUp() {
-        DocumentConfiguration config = new DocumentConfiguration();
-        config.setGeneralOrderTemplate("test_template");
-        config.setGeneralOrderFileName("test_file");
-
-        generatorClient = new ContestedDraftOrderNotApprovedServiceTest.TestDocumentClient();
-        genericDocumentService = new GenericDocumentService(generatorClient);
-        refusalOrderService = new ContestedDraftOrderNotApprovedService(genericDocumentService, new DocumentHelper(mapper), config, mapper);
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
     }
 
     @Test
@@ -59,7 +64,8 @@ public class ContestedDraftOrderNotApprovedServiceTest {
 
         CaseDocument result = (CaseDocument) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT);
         doCaseDocumentAssert(result);
-        ((ContestedDraftOrderNotApprovedServiceTest.TestDocumentClient) generatorClient).verifyAdditionalFieldsWithSingularReason();
+
+        verifyAdditionalFieldsWithSingularReason();
     }
 
     @Test
@@ -68,7 +74,7 @@ public class ContestedDraftOrderNotApprovedServiceTest {
 
         CaseDocument result = (CaseDocument) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT);
         doCaseDocumentAssert(result);
-        ((ContestedDraftOrderNotApprovedServiceTest.TestDocumentClient) generatorClient).verifyAdditionalFieldsWithMultipleReasons();
+        verifyAdditionalFieldsWithMultipleReasons();
     }
 
     @Test
@@ -119,11 +125,11 @@ public class ContestedDraftOrderNotApprovedServiceTest {
     private CaseDetails contestedCaseDetails(boolean multipleReasons) throws Exception {
         if (multipleReasons) {
             try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/refusal-order-contested.json")) {
-                return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+                return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
             }
         } else {
             try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/refusal-order-singular-contested.json")) {
-                return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+                return objectMapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
             }
         }
     }
@@ -134,66 +140,33 @@ public class ContestedDraftOrderNotApprovedServiceTest {
         assertThat(result.getDocumentBinaryUrl(), is(BINARY_URL));
     }
 
-    private static class TestDocumentClient implements DocumentClient {
+    void verifyAdditionalFieldsWithMultipleReasons() {
+        verify(genericDocumentService, times(1))
+            .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+                eq(documentConfiguration.getContestedDraftOrderNotApprovedTemplate()),
+                eq(documentConfiguration.getContestedDraftOrderNotApprovedFileName()));
 
-        private Map<String, Object> value;
+        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
+        assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
+        assertThat(data.get("Court"),is("Nottingham County Court and Family Court"));
+        assertThat(data.get("JudgeDetails"), is("Her Honour Judge Contested"));
+        assertThat(data.get("ContestOrderNotApprovedRefusalReasonsFormatted"),
+            is("- Test Reason 1\n- Test Reason 2"));
+    }
 
-        @Override
-        public Document generatePdf(DocumentGenerationRequest request, String authorizationToken) {
-            this.value = request.getValues();
-            return document();
-        }
+    void verifyAdditionalFieldsWithSingularReason() {
+        verify(genericDocumentService, times(1))
+            .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+                eq(documentConfiguration.getContestedDraftOrderNotApprovedTemplate()),
+                eq(documentConfiguration.getContestedDraftOrderNotApprovedFileName()));
 
-        @Override
-        public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void deleteDocument(String fileUrl, String authorizationToken) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public DocumentValidationResponse checkUploadedFileType(String authorizationToken, String fileUrl) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Document stampDocument(Document document, String authorizationToken) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Document annexStampDocument(Document document, String authorizationToken) {
-            throw new UnsupportedOperationException();
-        }
-
-        void verifyAdditionalFieldsWithMultipleReasons() {
-            Map<String, Object> data = data();
-
-            assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
-            assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
-            assertThat(data.get("Court"),is("Nottingham County Court and Family Court"));
-            assertThat(data.get("JudgeDetails"), is("Her Honour Judge Contested"));
-            assertThat(data.get("ContestOrderNotApprovedRefusalReasonsFormatted"),
-                is("- Test Reason 1\n- Test Reason 2"));
-        }
-
-        void verifyAdditionalFieldsWithSingularReason() {
-            Map<String, Object> data = data();
-
-            assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
-            assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
-            assertThat(data.get("Court"),is("Nottingham County Court and Family Court"));
-            assertThat(data.get("JudgeDetails"), is("Her Honour Judge Contested"));
-            assertThat(data.get("ContestOrderNotApprovedRefusalReasonsFormatted"),
-                is("- Draft order is not sufficient, signature is required"));
-        }
-
-        private Map<String, Object> data() {
-            CaseDetails caseDetails = (CaseDetails) value.get("caseDetails");
-            return caseDetails.getData();
-        }
+        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
+        assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
+        assertThat(data.get("Court"),is("Nottingham County Court and Family Court"));
+        assertThat(data.get("JudgeDetails"), is("Her Honour Judge Contested"));
+        assertThat(data.get("ContestOrderNotApprovedRefusalReasonsFormatted"),
+            is("- Draft order is not sufficient, signature is required"));
     }
 }
