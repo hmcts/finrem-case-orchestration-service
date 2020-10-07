@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingServi
 
 import javax.validation.constraints.NotNull;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +50,7 @@ public class HearingDocumentController implements BaseController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocument(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) throws IOException {
+            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
@@ -66,7 +65,9 @@ public class HearingDocumentController implements BaseController {
         }
 
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.putAll(hearingService.generateHearingDocuments(authorisationToken, caseDetails));
+        if (! alreadyHadFirstHearing(caseDetails)) {
+            caseData.putAll(hearingService.generateHearingDocuments(authorisationToken, caseDetails));
+        }
 
         if (isContestedPaperApplication(caseDetails)) {
             if (alreadyHadFirstHearing(caseDetails)) {
