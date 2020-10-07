@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetai
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +88,7 @@ public class AdditionalHearingDocumentService {
             caseData.put("HearingTime", caseDetails.getData().get(HEARING_TIME));
             caseData.put("HearingLength", caseDetails.getData().get(TIME_ESTIMATE));
             caseData.put("AnyOtherDirections", caseDetails.getData().get(HEARING_ADDITIONAL_INFO));
+            caseData.put("AdditionalHearingDated", new Date());
 
             caseData.put("CourtName", selectedFRCDetails.getCourtName());
             caseData.put("CourtAddress", selectedFRCDetails.getCourtAddress());

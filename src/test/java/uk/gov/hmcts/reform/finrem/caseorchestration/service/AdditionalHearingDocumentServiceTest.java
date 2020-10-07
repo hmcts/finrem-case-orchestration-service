@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -80,6 +81,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         assertThat(data.get("HearingTime"), is("12:00"));
         assertThat(data.get("HearingLength"), is("30 minutes"));
         assertThat(data.get("AnyOtherDirections"), is("N/A"));
+        assertThat(data.get("AdditionalHearingDated"), is(notNullValue()));
 
         assertThat(data.get("CourtName"), is("Nottingham County Court And Family Court"));
         assertThat(data.get("CourtAddress"), is("60 Canal Street, Nottingham NG1 7EJ"));
