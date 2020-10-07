@@ -102,8 +102,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     @Before
     public void setUp() {
-        CaseDocument caseDocument = caseDocument();
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument);
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
     }
 
     @Test(expected = IllegalArgumentException.class)
