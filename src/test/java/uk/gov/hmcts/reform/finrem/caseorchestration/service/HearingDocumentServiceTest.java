@@ -115,7 +115,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     public void generateFastTrackFormC() {
         Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN, makeItFastTrackDecisionCase());
         assertCaseDocument((CaseDocument) result.get(hearingDocumentService.formCDataKey));
-        verifyAdditionalFastTrackFields(result);
+        verifyAdditionalFastTrackFields();
     }
 
     @Test
@@ -123,7 +123,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN,
                 makeItJudiciaryFastTrackDecisionCase());
         assertCaseDocument((CaseDocument) result.get(hearingDocumentService.formCDataKey));
-        verifyAdditionalFastTrackFields(result);
+        verifyAdditionalFastTrackFields();
     }
 
     @Test
@@ -174,7 +174,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFields(caseDetailsArgumentCaptor.getValue().getData(),
+        verifyCourtDetailsFields(
             "Swansea Civil & Family Justice Centre", "Carvella House, Quay West, Quay Parade, Swansea, SA1 1SD",
             "01792 485 800", "FRCswansea@justice.gov.uk");
     }
@@ -186,7 +186,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFields(caseDetailsArgumentCaptor.getValue().getData(),
+        verifyCourtDetailsFields(
             "Newport Civil and Family Court", "Clarence House, Clarence Place, Newport, NP19 7AA",
             "01633 245 040", "FRCNewport@justice.gov.uk");
     }
@@ -198,7 +198,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFieldsNotSet(caseDetailsArgumentCaptor.getValue().getData());
+        verifyCourtDetailsFieldsNotSet();
     }
 
     @Test
@@ -208,7 +208,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFields(caseDetailsArgumentCaptor.getValue().getData(),
+        verifyCourtDetailsFields(
             "Canterbury Family Court Hearing Centre", "The Law Courts, Chaucer Road, Canterbury, CT1 1ZA",
             "01634 887900", "FRCKSS@justice.gov.uk");
     }
@@ -220,7 +220,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFieldsNotSet(caseDetailsArgumentCaptor.getValue().getData());
+        verifyCourtDetailsFieldsNotSet();
     }
 
     @Test
@@ -230,7 +230,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFields(caseDetailsArgumentCaptor.getValue().getData(),
+        verifyCourtDetailsFields(
             "Newcastle Upon Tyne Justice Centre", "The Law Courts, The Quayside, Newcastle-upon-Tyne, NE1 3LA",
             "0191 2012000", "Family.newcastle.countycourt@justice.gov.uk");
     }
@@ -242,7 +242,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFields(caseDetailsArgumentCaptor.getValue().getData(),
+        verifyCourtDetailsFields(
             "Harrogate Justice Centre", "The Court House, Victoria Avenue, Harrogate, HG1 1EL",
             "0113 306 2501", "leedsfamily@justice.gov.uk");
     }
@@ -254,7 +254,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFields(caseDetailsArgumentCaptor.getValue().getData(),
+        verifyCourtDetailsFields(
             "Sheffield Family Hearing Centre", "The Law Courts, 50 West Bar, Sheffield, S3 8PH",
             "0114 2812522", "FRCSheffield@justice.gov.uk");
     }
@@ -266,7 +266,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFieldsNotSet(caseDetailsArgumentCaptor.getValue().getData());
+        verifyCourtDetailsFieldsNotSet();
     }
 
     @Test
@@ -276,7 +276,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFields(caseDetailsArgumentCaptor.getValue().getData(),
+        verifyCourtDetailsFields(
             "Liverpool Civil And Family Court", "35 Vernon Street, Liverpool, L2 2BX",
             "0151 296 2225", "FRCLiverpool@Justice.gov.uk");
     }
@@ -288,7 +288,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFields(caseDetailsArgumentCaptor.getValue().getData(),
+        verifyCourtDetailsFields(
             "Manchester County And Family Court", "1 Bridge Street West, Manchester, M60 9DJ",
             "0161 240 5430", "manchesterdivorce@justice.gov.uk");
     }
@@ -300,7 +300,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFieldsNotSet(caseDetailsArgumentCaptor.getValue().getData());
+        verifyCourtDetailsFieldsNotSet();
     }
 
     @Test
@@ -310,7 +310,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFields(caseDetailsArgumentCaptor.getValue().getData(),
+        verifyCourtDetailsFields(
             "Bromley County Court And Family Court", "Bromley County Court, College Road, Bromley, BR1 3PX",
             "0208 290 9620", "family.bromley.countycourt@justice.gov.uk");
     }
@@ -322,7 +322,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFieldsNotSet(caseDetailsArgumentCaptor.getValue().getData());
+        verifyCourtDetailsFieldsNotSet();
     }
 
     @Test
@@ -332,7 +332,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFields(caseDetailsArgumentCaptor.getValue().getData(),
+        verifyCourtDetailsFields(
             "Nottingham County Court And Family Court", "60 Canal Street, Nottingham NG1 7EJ",
             "0115 910 3504", "FRCNottingham@justice.gov.uk");
     }
@@ -344,7 +344,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFields(caseDetailsArgumentCaptor.getValue().getData(),
+        verifyCourtDetailsFields(
             "Birmingham Civil And Family Justice Centre", "Pipers Row, Wolverhampton, WV1 3LQ",
             "0121 250 6794", "FRCBirmingham@justice.gov.uk");
     }
@@ -356,7 +356,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFieldsNotSet(caseDetailsArgumentCaptor.getValue().getData());
+        verifyCourtDetailsFieldsNotSet();
     }
 
     @Test
@@ -366,7 +366,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFieldsNotSet(caseDetailsArgumentCaptor.getValue().getData());
+        verifyCourtDetailsFieldsNotSet();
     }
 
     @Test
@@ -376,7 +376,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFieldsNotSet(caseDetailsArgumentCaptor.getValue().getData());
+        verifyCourtDetailsFieldsNotSet();
     }
 
     @Test
@@ -385,7 +385,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         verifyAdditionalNonFastTrackFields();
 
-        verifyCourtDetailsFieldsNotSet(caseDetailsArgumentCaptor.getValue().getData());
+        verifyCourtDetailsFieldsNotSet();
     }
 
     private CaseDetails makeItNonFastTrackDecisionCase() {
@@ -421,18 +421,20 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         return CaseDetails.builder().data(caseData).build();
     }
 
-    void verifyAdditionalFastTrackFields(Map<String, Object> data) {
+    void verifyAdditionalFastTrackFields() {
         verify(genericDocumentService, times(1))
             .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
                 eq(documentConfiguration.getFormCFastTrackTemplate()), eq(documentConfiguration.getFormCFileName()));
         verify(genericDocumentService, never()).generateDocument(any(), any(), eq(documentConfiguration.getFormCNonFastTrackTemplate()), any());
         verify(genericDocumentService, never()).generateDocument(any(), any(), eq(documentConfiguration.getFormGTemplate()), any());
 
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("formCCreatedDate"), is(notNullValue()));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("eventDatePlus21Days"), is(notNullValue()));
+        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        assertThat(data.get("formCCreatedDate"), is(notNullValue()));
+        assertThat(data.get("eventDatePlus21Days"), is(notNullValue()));
     }
 
-    void verifyCourtDetailsFields(Map<String, Object> data, String courtName, String courtAddress, String phone, String email) {
+    void verifyCourtDetailsFields(String courtName, String courtAddress, String phone, String email) {
+        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         Map<String, Object> courtDetails = (Map<String, Object>) data.get("courtDetails");
         assertThat(courtDetails.get(COURT_DETAILS_NAME_KEY), is(courtName));
         assertThat(courtDetails.get(COURT_DETAILS_ADDRESS_KEY), is(courtAddress));
@@ -440,7 +442,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         assertThat(courtDetails.get(COURT_DETAILS_PHONE_KEY), is(phone));
     }
 
-    void verifyCourtDetailsFieldsNotSet(Map<String, Object> data) {
+    void verifyCourtDetailsFieldsNotSet() {
+        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("courtDetails"), is(nullValue()));
     }
 
@@ -453,8 +456,9 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1))
             .generateDocument(eq(AUTH_TOKEN), any(), eq(documentConfiguration.getFormGTemplate()), eq(documentConfiguration.getFormGFileName()));
 
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("formCCreatedDate"), is(notNullValue()));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("hearingDateLess35Days"), is(notNullValue()));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("hearingDateLess14Days"), is(notNullValue()));
+        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        assertThat(data.get("formCCreatedDate"), is(notNullValue()));
+        assertThat(data.get("hearingDateLess35Days"), is(notNullValue()));
+        assertThat(data.get("hearingDateLess14Days"), is(notNullValue()));
     }
 }

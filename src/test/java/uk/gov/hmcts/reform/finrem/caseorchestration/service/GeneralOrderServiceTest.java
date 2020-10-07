@@ -266,15 +266,16 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
                 eq(documentConfiguration.getGeneralOrderTemplate()), eq(documentConfiguration.getGeneralOrderFileName()));
 
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("DivorceCaseNumber"), is("DD12D12345"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("ApplicantName"), is("Consented Applicant Name"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("RespondentName"), is("Consented Respondent Name"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("GeneralOrderCourt"), is("SITTING in private"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("GeneralOrderJudgeDetails"), is("His Honour Judge Consented"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("GeneralOrderRecitals"), is("Consented Recitals"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("GeneralOrderDate"), is("01/01/2020"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("GeneralOrderBodyText"), is("Test is dummy text for consented"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("GeneralOrderHeaderOne"), is("Sitting in the Family Court"));
+        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        assertThat(data.get("DivorceCaseNumber"), is("DD12D12345"));
+        assertThat(data.get("ApplicantName"), is("Consented Applicant Name"));
+        assertThat(data.get("RespondentName"), is("Consented Respondent Name"));
+        assertThat(data.get("GeneralOrderCourt"), is("SITTING in private"));
+        assertThat(data.get("GeneralOrderJudgeDetails"), is("His Honour Judge Consented"));
+        assertThat(data.get("GeneralOrderRecitals"), is("Consented Recitals"));
+        assertThat(data.get("GeneralOrderDate"), is("01/01/2020"));
+        assertThat(data.get("GeneralOrderBodyText"), is("Test is dummy text for consented"));
+        assertThat(data.get("GeneralOrderHeaderOne"), is("Sitting in the Family Court"));
     }
 
     void verifyAdditionalFieldsContested() {
@@ -282,17 +283,18 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
                 eq(documentConfiguration.getGeneralOrderTemplate()), eq(documentConfiguration.getGeneralOrderFileName()));
 
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("DivorceCaseNumber"), is("DD98D76543"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("ApplicantName"), is("Contested Applicant Name"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("RespondentName"), is("Contested Respondent Name"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("GeneralOrderCourt"),is("Nottingham County Court and Family Court"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("GeneralOrderJudgeDetails"), is("Her Honour Judge Contested"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("GeneralOrderRecitals"), is("Contested Recitals"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("GeneralOrderDate"), is("01/06/2020"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("GeneralOrderBodyText"), is("Test is dummy text for contested"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("GeneralOrderHeaderOne"), is("In the Family Court"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("GeneralOrderHeaderTwo"), is("sitting in the"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("GeneralOrderCourtSitting"), is("SITTING AT the Family Court at the "));
+        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        assertThat(data.get("DivorceCaseNumber"), is("DD98D76543"));
+        assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
+        assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
+        assertThat(data.get("GeneralOrderCourt"),is("Nottingham County Court and Family Court"));
+        assertThat(data.get("GeneralOrderJudgeDetails"), is("Her Honour Judge Contested"));
+        assertThat(data.get("GeneralOrderRecitals"), is("Contested Recitals"));
+        assertThat(data.get("GeneralOrderDate"), is("01/06/2020"));
+        assertThat(data.get("GeneralOrderBodyText"), is("Test is dummy text for contested"));
+        assertThat(data.get("GeneralOrderHeaderOne"), is("In the Family Court"));
+        assertThat(data.get("GeneralOrderHeaderTwo"), is("sitting in the"));
+        assertThat(data.get("GeneralOrderCourtSitting"), is("SITTING AT the Family Court at the "));
 
     }
 }

@@ -146,11 +146,12 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
                 eq(documentConfiguration.getContestedDraftOrderNotApprovedTemplate()),
                 eq(documentConfiguration.getContestedDraftOrderNotApprovedFileName()));
 
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("ApplicantName"), is("Contested Applicant Name"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("RespondentName"), is("Contested Respondent Name"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("Court"),is("Nottingham County Court and Family Court"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("JudgeDetails"), is("Her Honour Judge Contested"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("ContestOrderNotApprovedRefusalReasonsFormatted"),
+        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
+        assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
+        assertThat(data.get("Court"),is("Nottingham County Court and Family Court"));
+        assertThat(data.get("JudgeDetails"), is("Her Honour Judge Contested"));
+        assertThat(data.get("ContestOrderNotApprovedRefusalReasonsFormatted"),
             is("- Test Reason 1\n- Test Reason 2"));
     }
 
@@ -160,11 +161,12 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
                 eq(documentConfiguration.getContestedDraftOrderNotApprovedTemplate()),
                 eq(documentConfiguration.getContestedDraftOrderNotApprovedFileName()));
 
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("ApplicantName"), is("Contested Applicant Name"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("RespondentName"), is("Contested Respondent Name"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("Court"),is("Nottingham County Court and Family Court"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("JudgeDetails"), is("Her Honour Judge Contested"));
-        assertThat(caseDetailsArgumentCaptor.getValue().getData().get("ContestOrderNotApprovedRefusalReasonsFormatted"),
+        Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
+        assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
+        assertThat(data.get("Court"),is("Nottingham County Court and Family Court"));
+        assertThat(data.get("JudgeDetails"), is("Her Honour Judge Contested"));
+        assertThat(data.get("ContestOrderNotApprovedRefusalReasonsFormatted"),
             is("- Draft order is not sufficient, signature is required"));
     }
 }
