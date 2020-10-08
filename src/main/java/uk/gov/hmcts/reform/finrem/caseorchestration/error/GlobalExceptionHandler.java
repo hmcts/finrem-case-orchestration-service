@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidCaseDataException.class)
     ResponseEntity<Object> handleInvalidCaseDataException(InvalidCaseDataException exception) {
         log.error(exception.getMessage(), exception);
-        return ResponseEntity.status(exception.status()).body(SERVER_ERROR_MSG);
+        return ResponseEntity.status(exception.status()).body(SERVER_ERROR_MSG + ". Error: " + exception.getMessage());
     }
 
     @ExceptionHandler(HttpServerErrorException.class)
