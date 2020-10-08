@@ -189,6 +189,18 @@ public class NotificationService {
         sendNotificationEmail(applicantNotificationRequest, uri);
     }
 
+    public void sendConsentedGeneralOrderEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getConsentedGeneralOrder());
+        applicantNotificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        sendNotificationEmail(applicantNotificationRequest, uri);
+    }
+
+    public void sendContestedGeneralOrderEmail(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralOrder());
+        applicantNotificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        sendNotificationEmail(applicantNotificationRequest, uri);
+    }
+
     public void sendContestedGeneralApplicationReferToJudgeEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralApplicationReferToJudge());
         NotificationRequest judgeNotificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
