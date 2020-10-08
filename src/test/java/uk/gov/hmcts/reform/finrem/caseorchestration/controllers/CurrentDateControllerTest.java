@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -28,7 +29,7 @@ public class CurrentDateControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(is(GlobalExceptionHandler.SERVER_ERROR_MSG)));
+                .andExpect(content().string(startsWith(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
 
     @Test

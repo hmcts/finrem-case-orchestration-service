@@ -13,6 +13,7 @@ import java.io.File;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -42,7 +43,7 @@ public class PBAValidateControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(is(GlobalExceptionHandler.SERVER_ERROR_MSG)));
+                .andExpect(content().string(startsWith(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
 
     private void doValidatePBASetUp(boolean isValidPBA) throws Exception {

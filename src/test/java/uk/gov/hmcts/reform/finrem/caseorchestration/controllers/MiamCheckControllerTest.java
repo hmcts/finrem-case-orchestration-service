@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.MiamCheckService;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -39,7 +39,7 @@ public class MiamCheckControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(is(GlobalExceptionHandler.SERVER_ERROR_MSG)));
+                .andExpect(content().string(startsWith(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
 
     @Test
