@@ -8,12 +8,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 
 import java.io.InputStream;
-import java.util.List;
 
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,13 +25,14 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     private BulkPrintService bulkPrintService;
 
     @Test
-    public void givenNoGeneralOrderPresent_whenPrintAndMailGeneralOrderTriggered_thenErrorIsReturned() {
+    public void givenNoGeneralOrderPresent_whenPrintAndMailGeneralOrderTriggered_thenDocumentsAreNotPrinted() {
         CaseDetails caseDetails = contestedCaseDetails();
         caseDetails.getData().remove(GENERAL_ORDER_LATEST_DOCUMENT);
 
-        List<String> errors = contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
+        contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
-        assertThat(errors, hasSize(1));
+        verify(bulkPrintService, times(0)).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, times(0)).printRespondentDocuments(any(), any(), any());
     }
 
     @Test
@@ -44,9 +40,8 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = contestedCaseDetails();
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
 
-        List<String> errors = contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
+        contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
-        assertThat(errors, is(empty()));
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
     }
@@ -56,9 +51,8 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = contestedCaseDetails();
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(false);
 
-        List<String> errors = contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
+        contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
-        assertThat(errors, is(empty()));
         verify(bulkPrintService, times(0)).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
     }
