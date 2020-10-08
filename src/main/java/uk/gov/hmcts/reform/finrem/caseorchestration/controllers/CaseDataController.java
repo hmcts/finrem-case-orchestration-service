@@ -87,9 +87,24 @@ public class CaseDataController implements BaseController {
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setPaperCaseData(caseData);
-        setOrganisationPolicy(callbackRequest.getCaseDetails());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
+
+    @PostMapping(path = "/contested/set-paper-case-org-policy",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Set default values for contested paper case journey")
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedPaperCaseOrganisationPolicy(
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
+        @RequestBody final CallbackRequest callbackRequest) {
+        log.info("Setting default values for contested paper case journey.");
+        validateCaseData(callbackRequest);
+        setOrganisationPolicy(callbackRequest.getCaseDetails());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
+    }
+
+
+
 
     @PostMapping(path = "/move-collection/{source}/to/{destination}", consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
