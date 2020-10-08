@@ -34,14 +34,14 @@
     </suppress>
     <suppress>
         <notes>
-        <![CDATA[ CVE is a json vulnerability that applies only to Ruby or Node projects]]>
+            <![CDATA[ CVE is a json vulnerability that applies only to Ruby or Node projects]]>
         </notes>
         <cve>CVE-2020-10663</cve>
         <cve>CVE-2020-7712</cve>
     </suppress>
     <suppress>
         <notes>
-        <![CDATA[CVE is a browser vulnerability]]>
+            <![CDATA[CVE is a browser vulnerability]]>
         </notes>
         <cve>CVE-2020-5421</cve>
     </suppress>
