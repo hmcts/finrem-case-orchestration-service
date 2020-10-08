@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.functional.caseorchestration;
 
-import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.rest.SerenityRest;
@@ -10,6 +9,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SerenityRunner.class)
@@ -20,15 +21,13 @@ public class ValidateHearingDatesTest extends IntegrationTestBase {
 
     private String contestedDir = "/json/contested/";
     private String consentedDir = "/json/consented/";
-    private JsonPath jsonPathEvaluator;
 
     @Test
     public void verifyShouldReturnBadRequestWhenCaseDataIsMissingInRequest() {
-
         assertEquals(400, utils.getStatusCode(validateHearing, "empty-casedata1.json",consentedDir));
 
-        assertEquals("Some server side exception occurred. Please check logs for details",
-            utils.getResponse(validateHearing, "empty-casedata1.json",consentedDir).body().asString());
+        assertThat(utils.getResponse(validateHearing, "empty-casedata1.json",consentedDir).body().asString(),
+            startsWith("Some server side exception occurred. Please check logs for details"));
     }
 
     @Test
