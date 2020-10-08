@@ -63,6 +63,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullName;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
@@ -185,9 +186,6 @@ public class DocumentHelper {
         String addresseeName;
         Map addressToSendTo;
         String applicantName = buildFullName(caseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
-        String respondentName =  buildFullName(caseData,
-            isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME,
-            isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME);
 
         if (isApplicantRepresentedByASolicitor(caseData)) {
             log.info("Applicant is represented by a solicitor");
@@ -236,11 +234,8 @@ public class DocumentHelper {
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
         String ccdNumber = nullToEmpty((caseDetailsCopy.getId()));
-        String applicantName = buildFullName(caseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
-        String respondentName =  buildFullName(caseData,
-            isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME,
-            isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME);
-
+        String applicantName = getApplicantFullName(caseDetailsCopy);
+        String respondentName = getRespondentFullName(caseDetailsCopy, isConsentedApplication);
 
         if (addressLineOneAndPostCodeAreBothNotEmpty(addressToSendTo)) {
             Addressee addressee = Addressee.builder()
@@ -255,6 +250,7 @@ public class DocumentHelper {
             caseData.put("applicantName", applicantName);
             caseData.put("respondentName", respondentName);
             caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
+            caseData.put("courtDetails", buildFrcCourtDetails(caseData, objectMapper));
         } else {
             log.info("Failed to prepare template data as not all required address details were present");
             throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
@@ -327,15 +323,20 @@ public class DocumentHelper {
     }
 
     public static String getApplicantFullName(CaseDetails caseDetails) {
-        return buildFullName(caseDetails.getData(),"applicantFMName", "applicantLName");
+        return buildFullName(caseDetails.getData(),APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
+    }
+
+    private static String getRespondentFullName(CaseDetails caseDetails, boolean isConsentedApplication) {
+        return isConsentedApplication
+            ? getRespondentFullNameConsented(caseDetails) : getRespondentFullNameContested(caseDetails);
     }
 
     public static String getRespondentFullNameConsented(CaseDetails caseDetails) {
-        return buildFullName(caseDetails.getData(),"appRespondentFMName", "appRespondentLName");
+        return buildFullName(caseDetails.getData(),CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME, CONSENTED_RESPONDENT_LAST_NAME);
     }
 
     public static String getRespondentFullNameContested(CaseDetails caseDetails) {
-        return buildFullName(caseDetails.getData(),"respondentFMName", "respondentLName");
+        return buildFullName(caseDetails.getData(),CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME, CONTESTED_RESPONDENT_LAST_NAME);
     }
 
     public List<ContestedConsentOrderData> convertToContestedConsentOrderData(Object object) {

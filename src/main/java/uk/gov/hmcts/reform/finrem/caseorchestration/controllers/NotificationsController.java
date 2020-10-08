@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -37,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 
 @RestController
 @Slf4j
+@RequestMapping(value = "/case-orchestration/notify")
 @RequiredArgsConstructor
 public class NotificationsController implements BaseController {
 
@@ -47,7 +49,7 @@ public class NotificationsController implements BaseController {
     private final ManualPaymentDocumentService manualPaymentDocumentService;
     private final GeneralEmailService generalEmailService;
 
-    @PostMapping(value = "/case-orchestration/notify/hwf-successful", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "HWFSuccessful notification sent successfully",
@@ -86,7 +88,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/assign-to-judge", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/assign-to-judge", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify solicitor when Judge assigned to case via email or letter")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Case assigned to Judge notification sent successfully",
@@ -121,7 +123,40 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/consent-order-made", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/assign-to-judge-consent-in-contested", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Notify applicant and respondent when Judge assigned to case via letter")
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "Case assigned to Judge notification sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentInContestedAssignToJudgeConfirmationEmail(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        log.info("Received request to notify applicant and respondent for Judge successfully assigned to case for Case ID: {}",
+            callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
+            log.info("Sending applicant Consent in Contested AssignedToJudge notification letter for bulk print for Case ID: {}",
+                callbackRequest.getCaseDetails().getId());
+
+            CaseDocument applicantAssignedToJudgeNotificationLetter =
+                assignedToJudgeDocumentService.generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken);
+            bulkPrintService.sendDocumentForPrint(applicantAssignedToJudgeNotificationLetter, caseDetails);
+        }
+
+        log.info("Sending respondent Consent in Contested AssignedToJudge notification letter for bulk print for Case ID: {}",
+            callbackRequest.getCaseDetails().getId());
+
+        CaseDocument respondentAssignedToJudgeNotificationLetter =
+            assignedToJudgeDocumentService.generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken);
+        bulkPrintService.sendDocumentForPrint(respondentAssignedToJudgeNotificationLetter, caseDetails);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+    }
+
+    @PostMapping(value = "/consent-order-made", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for Consent Order Made.")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Consent order made e-mail sent successfully",
@@ -141,7 +176,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/order-not-approved", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/order-not-approved", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for consent/contest order not approved.")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Consent/Contest order not approved e-mail sent successfully",
@@ -166,7 +201,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/contested-consent-order-approved", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/contested-consent-order-approved", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for contested consent order approved.")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Contested consent order approved e-mail sent successfully",
@@ -187,7 +222,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/contested-consent-order-not-approved", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/contested-consent-order-not-approved", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for contested consent order not approved.")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Contested consent order not approved e-mail sent successfully",
@@ -206,7 +241,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/general-order-raised", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/general-order-raised", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for general order raised.")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "General order raised e-mail sent successfully",
@@ -237,7 +272,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/consent-order-available", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/consent-order-available", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for Consent order available.")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Consent order available e-mail sent successfully",
@@ -257,7 +292,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/prepare-for-hearing", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/prepare-for-hearing", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for 'Prepare for Hearing'.")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "'Prepare for Hearing' e-mail sent successfully",
@@ -277,7 +312,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/prepare-for-hearing-order-sent", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/prepare-for-hearing-order-sent", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for 'Prepare for Hearing (after order sent)'.")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "'Prepare for Hearing (after send order)' e-mail sent successfully",
@@ -298,7 +333,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/contest-application-issued", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/contest-application-issued", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for Contested 'Application Issued'.")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Consent order available e-mail sent successfully",
@@ -317,7 +352,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/contest-order-approved", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/contest-order-approved", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for 'Contest Order Approved'.")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Contest order approved e-mail sent successfully",
@@ -340,7 +375,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/draft-order", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/draft-order", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for Solicitor To Draft Order")
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Draft Order e-mail sent successfully",
@@ -360,7 +395,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/general-email", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/general-email", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send a general email")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "General e-mail sent successfully",
@@ -383,7 +418,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(updatedDetails.getData()).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/manual-payment", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/manual-payment", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send a manual payment letter")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Manual Payment letter sent successfully",
@@ -405,7 +440,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/general-application-refer-to-judge", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/general-application-refer-to-judge", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send general application refer to judge email")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "General application refer to judge email sent successfully",
@@ -423,7 +458,7 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
-    @PostMapping(value = "/case-orchestration/notify/general-application-outcome", consumes = APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/general-application-outcome", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send general application outcome email")
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "General Application Outcome email sent successfully",
