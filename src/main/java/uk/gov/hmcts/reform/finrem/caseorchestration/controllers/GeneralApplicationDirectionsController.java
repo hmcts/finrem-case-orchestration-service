@@ -15,9 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 
 import javax.validation.constraints.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -45,11 +49,18 @@ public class GeneralApplicationDirectionsController implements BaseController {
         log.info("Received request to submit general application directions for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, authorisationToken);
+        List<String> errors = new ArrayList<>();
+        try {
+            generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, authorisationToken);
+        } catch (InvalidCaseDataException invalidCaseDataException) {
+            errors.add(invalidCaseDataException.getMessage());
+        }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(caseDetails.getData()).build());
+            .data(caseDetails.getData())
+            .errors(errors)
+            .build());
     }
 
     @PostMapping(path = "/start-general-application-directions", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
