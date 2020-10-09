@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -43,6 +44,7 @@ public class NotificationsControllerTest {
     //URLs
     private static final String HWF_SUCCESSFUL_CALLBACK_URL = "/case-orchestration/notify/hwf-successful";
     private static final String ASSIGN_TO_JUDGE_CALLBACK_URL = "/case-orchestration/notify/assign-to-judge";
+    private static final String CONSENT_IN_CONTESTED_ASSIGN_TO_JUDGE_CALLBACK_URL = "/case-orchestration/notify/assign-to-judge-consent-in-contested";
     private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
     private static final String ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/order-not-approved";
     private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/consent-order-available";
@@ -54,7 +56,7 @@ public class NotificationsControllerTest {
     private static final String CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE_CALLBACK_URL =
         "/case-orchestration/notify/general-application-refer-to-judge";
     private static final String CONTESTED_GENERAL_APPLICATION_OUTCOME_CALLBACK_URL = "/case-orchestration/notify/general-application-outcome";
-    private static final String CONTESTED_CONSENT_GENERAL_ORDER_CALLBACK_URL = "/case-orchestration/notify/contested-consent-general-order";
+    private static final String GENERAL_ORDER_RAISED_CALLBACK_URL = "/case-orchestration/notify/general-order-raised";
     private static final String CONTESTED_CONSENT_ORDER_NOT_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contested-consent-order-not-approved";
     private static final String CONTESTED_DRAFT_ORDER_URL = "/case-orchestration/notify/draft-order";
     private static final String GENERAL_EMAIL_URL = "/case-orchestration/notify/general-email";
@@ -64,6 +66,8 @@ public class NotificationsControllerTest {
     private static final String CCD_REQUEST_JSON = "/fixtures/model/ccd-request.json";
     private static final String CONSENTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON = "/fixtures/consented-ccd-request-with-solicitor-agreed-to-emails.json";
     private static final String CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON = "/fixtures/contested-ccd-request-with-solicitor-agreed-to-emails.json";
+    private static final String CONTESTED_CONSENT_SOL_SUBSCRIBED_FOR_EMAILS_JSON =
+        "/fixtures/contested-consent-ccd-request-with-solicitor-agreed-to-emails.json";
     private static final String BULK_PRINT_PAPER_APPLICATION_JSON = "/fixtures/bulkprint/bulk-print-paper-application.json";
     private static final String DRAFT_ORDER_SUCCESSFUL_APPLICANT_SOL = "/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json";
     private static final String DRAFT_ORDER_UNSUCCESSFUL_APPLICANT_SOL = "/fixtures/applicant-solicitor-to-draft-order-without-email-consent.json";
@@ -190,6 +194,46 @@ public class NotificationsControllerTest {
         verify(bulkPrintService, times(1))
             .sendDocumentForPrint(any(),any());
         verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void shouldNotSendApplicantConsentInContestedAssignToJudgeConfirmationEmail() throws Exception {
+        buildCcdRequest(CCD_REQUEST_JSON);
+
+        when(bulkPrintService.shouldPrintForApplicant(any(CaseDetails.class))).thenReturn(false);
+
+        mockMvc.perform(post(CONSENT_IN_CONTESTED_ASSIGN_TO_JUDGE_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(assignedToJudgeDocumentService, never())
+            .generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+        verify(assignedToJudgeDocumentService, times(1))
+            .generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+        verify(bulkPrintService, times(1))
+            .sendDocumentForPrint(any(),any());
+    }
+
+    @Test
+    public void sendConsentInContestedAssignToJudgeNotificationLetterIfShouldSend() throws Exception {
+        buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
+
+        when(bulkPrintService.shouldPrintForApplicant(any(CaseDetails.class))).thenReturn(true);
+
+        mockMvc.perform(post(CONSENT_IN_CONTESTED_ASSIGN_TO_JUDGE_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(assignedToJudgeDocumentService, times(1))
+            .generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+        verify(assignedToJudgeDocumentService, times(1))
+            .generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+        verify(bulkPrintService, times(2))
+            .sendDocumentForPrint(any(),any());
     }
 
     @Test
@@ -495,9 +539,21 @@ public class NotificationsControllerTest {
     }
 
     @Test
+    public void shouldNotSendGeneralOrderEmail() throws Exception {
+        buildCcdRequest(CCD_REQUEST_JSON);
+        mockMvc.perform(post(GENERAL_ORDER_RAISED_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
     public void sendContestedConsentGeneralOrderEmail() throws Exception {
-        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(CONTESTED_CONSENT_GENERAL_ORDER_CALLBACK_URL)
+        buildCcdRequest(CONTESTED_CONSENT_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
+        mockMvc.perform(post(GENERAL_ORDER_RAISED_CALLBACK_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .content(requestContent.toString())
             .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -505,6 +561,32 @@ public class NotificationsControllerTest {
 
         verify(notificationService, times(1))
             .sendContestedConsentGeneralOrderEmail(any(CallbackRequest.class));
+    }
+
+    @Test
+    public void sendContestedGeneralOrderEmail() throws Exception {
+        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
+        mockMvc.perform(post(GENERAL_ORDER_RAISED_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+            .sendContestedGeneralOrderEmail(any(CallbackRequest.class));
+    }
+
+    @Test
+    public void sendConsentedGeneralOrderEmail() throws Exception {
+        buildCcdRequest(CONSENTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
+        mockMvc.perform(post(GENERAL_ORDER_RAISED_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1))
+            .sendConsentedGeneralOrderEmail(any(CallbackRequest.class));
     }
 
     @Test
