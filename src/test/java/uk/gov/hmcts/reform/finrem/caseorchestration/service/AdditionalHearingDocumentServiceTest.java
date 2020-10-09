@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 
 @ActiveProfiles("test-mock-document-client")
 public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
@@ -60,7 +61,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void generateAdditionalHearingDocument() {
+    public void generateAndAddAdditionalHearingDocument() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAndSendAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
@@ -90,9 +91,8 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
         verify(bulkPrintService, times(1)).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
         verify(bulkPrintService, times(1)).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
+
         assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(1));
+        assertThat(caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION), is(notNullValue()));
     }
-
-
-    //TODO: Test that the document is successfully added to the case data
 }

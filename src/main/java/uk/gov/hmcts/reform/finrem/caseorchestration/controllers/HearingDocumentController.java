@@ -66,14 +66,14 @@ public class HearingDocumentController implements BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        boolean justHadFirstHearing = alreadyHadFirstHearing(caseDetails);
+        boolean hadFirstHearing = alreadyHadFirstHearing(caseDetails);
 
-        if (! justHadFirstHearing) {
+        if (! hadFirstHearing) {
             caseData.putAll(hearingService.generateHearingDocuments(authorisationToken, caseDetails));
         }
 
         if (isContestedPaperApplication(caseDetails)) {
-            if (justHadFirstHearing) {
+            if (hadFirstHearing) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
                 additionalHearingService.createAndSendAdditionalHearingDocuments(authorisationToken, caseDetails);
             } else {

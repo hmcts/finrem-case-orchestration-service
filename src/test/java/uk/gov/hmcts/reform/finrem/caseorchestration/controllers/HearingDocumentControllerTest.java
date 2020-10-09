@@ -135,6 +135,19 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
+        verify(hearingService,  times(0)).generateHearingDocuments(any(), any());
+        verify(additionalHearingService, times(1)).createAndSendAdditionalHearingDocuments(any(), any());
+    }
+
+    @Test
+    public void generateAdditionalGearingDocumentWhenOneAlreadyExists() throws Exception {
+        mvc.perform(post(GEN_DOC_URL)
+            .content(resourceContentAsString("/fixtures/bulkprint/bulk-print-additional-hearing-exists.json"))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(hearingService,  times(0)).generateHearingDocuments(any(), any());
         verify(additionalHearingService, times(1)).createAndSendAdditionalHearingDocuments(any(), any());
     }
 }

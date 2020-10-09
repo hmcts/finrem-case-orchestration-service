@@ -1,0 +1,150 @@
+{
+  "token": "token_test",
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": 1234567890,
+    "jurisdiction": "DIVORCE",
+    "state": "caseFileSubmitted",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "paperApplication": "Yes",
+      "divorcePetitionIssuedDate": "2010-01-01",
+      "hearingDate": "2021-01-01",
+      "divorceStageReached": "Petition Issued",
+      "timeEstimate": "30 minutes",
+      "applicantFMName": "Test",
+      "fastTrackDecision": "No",
+      "potentialAllegationChecklist": [
+        "notApplicable"
+      ],
+      "applicantSolicitorAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "SW1A 1AA",
+        "PostTown": "London",
+        "AddressLine1": "Buckingham Palace",
+        "AddressLine2": "",
+        "AddressLine3": ""
+      },
+      "applicantSolicitorFirm": "Solicitor Firm",
+      "nameOfCourtDivorceCentre": "London Courts",
+      "netValueOfHome": "N/A",
+      "dateOfSepration": null,
+      "promptForAnyDocument": "No",
+      "applicantLName": "Applicant",
+      "respondentAddress": {
+        "County": "",
+        "Country": "United Kingdom",
+        "PostCode": "SE1 7XH",
+        "PostTown": "London",
+        "AddressLine1": "Address Line 1",
+        "AddressLine2": "Address Line 2",
+        "AddressLine3": "Address Line 3"
+      },
+      "nottinghamCourtList": "FR_s_NottinghamList_1",
+      "natureOfApplicationChecklist": [
+        "periodicalPaymentOrder"
+      ],
+      "applicantSolicitorConsentForEmails": "Yes",
+      "applicantSolicitorDXnumber": null,
+      "isAdmin": "Yes",
+      "hearingTime": "12:00",
+      "hearingType": "Directions (DIR)",
+      "formC": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4f73432d-2889-47eb-bc16-84d021222dbc",
+        "document_filename": "Form-C.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4f73432d-2889-47eb-bc16-84d021222dbc/binary"
+      },
+      "applicantSolicitorName": "Applicant Solicitor",
+      "uploadCaseDocument": [],
+      "applicantSolicitorEmail": "Test@Test.com",
+      "paymentForChildrenDecision": "No",
+      "familyMediatorServiceName": "Test",
+      "specificArrangementsRequired": "N/A",
+      "respondentRepresented": "No",
+      "miniFormA": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3a33a471-da52-4bac-99ec-8ff997ac22a5",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/3a33a471-da52-4bac-99ec-8ff997ac22a5/binary"
+      },
+      "respondentLName": "Respondent",
+      "judgeTimeEstimate": "standardTime",
+      "applicantRepresented": "Yes",
+      "midlandsFRCList": "nottingham",
+      "applicantAttendedMIAM": "Yes",
+      "specialAssistanceRequired": "N/A",
+      "formG": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d5ebe0f2-d7a0-4d05-bf99-77e0027e5ec8",
+        "document_filename": "Form-G.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/d5ebe0f2-d7a0-4d05-bf99-77e0027e5ec8/binary"
+      },
+      "judgeAllocated": [
+        "FR_judgeAllocatedList_3"
+      ],
+      "respondentPhone": "",
+      "isApplicantsHomeCourt": "No",
+      "applicantSolicitorPhone": "0123456789",
+      "additionalInformationAboutHearing": "N/A",
+      "caseAllocatedTo": "No",
+      "solicitorReference": "Reference Number Here",
+      "soleTraderName": "Trader Name",
+      "copyOfPaperFormA": [
+        {
+          "id": "a6ecd84c-cd70-41f9-989b-e117b995b204",
+          "value": {
+            "typeOfDocument": "Copy of paper form A",
+            "uploadedDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8cefb045-63d1-41a5-93bf-ec3bd900b710",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8cefb045-63d1-41a5-93bf-ec3bd900b710/binary"
+            }
+          }
+        }
+      ],
+      "divorceUploadPetition": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6d8ba153-dceb-4216-b3c3-b9f13c0fc972",
+        "document_filename": "dummy.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/6d8ba153-dceb-4216-b3c3-b9f13c0fc972/binary"
+      },
+      "issueDate": "2020-09-28",
+      "mediatorRegistrationNumber": "0987654321",
+      "appEvidenceCollection": [
+        {
+          "id": "578d4244-b112-42e7-b6a0-11a8dc810b3c",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b1532b0a-3759-4d45-8c66-d1a8e5f3273b",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b1532b0a-3759-4d45-8c66-d1a8e5f3273b/binary"
+            },
+            "caseDocumentType": "other",
+            "caseDocumentOther": "Text",
+            "caseDocumentParty": "applicant"
+          }
+        }
+      ],
+      "regionList": "midlands",
+      "dateOfMarriage": "2000-01-01",
+      "divorceCaseNumber": "AB01D23456",
+      "respondentEmail": null,
+      "estimatedAssetsChecklist": [
+        "estimatedAssetsChecklist_1"
+      ],
+      "respondentFMName": "Name",
+      "applicationAllocatedTo": "No",
+      "addToComplexityListOfCourts": "trueDontKnow"
+    },
+    "additionalHearingDocuments": [
+      {
+        "id": "0d3c4d22-d1e8-4746-a95f-c38bee23ea67",
+        "value": {
+          "additionalHearingDocument": {
+            "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a944aed5-7553-49da-91c9-5874d367316c",
+            "document_filename": "AdditionalHearingDocument.pdf",
+            "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a944aed5-7553-49da-91c9-5874d367316c/binary"
+          }
+        }
+      }
+    ]
+  }
+}
