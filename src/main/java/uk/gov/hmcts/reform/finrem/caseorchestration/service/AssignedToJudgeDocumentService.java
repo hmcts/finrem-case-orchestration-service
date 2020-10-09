@@ -33,4 +33,29 @@ public class AssignedToJudgeDocumentService {
 
         return generatedAssignedToJudgeNotificationLetter;
     }
+
+    public CaseDocument generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken) {
+        return generateConsentInContestedAssignedToJudgeNotificationLetter(
+            documentHelper.prepareLetterToApplicantTemplateData(caseDetails), authToken);
+    }
+
+    public CaseDocument generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken) {
+        return generateConsentInContestedAssignedToJudgeNotificationLetter(
+            documentHelper.prepareLetterToRespondentTemplateData(caseDetails), authToken);
+    }
+
+    private CaseDocument generateConsentInContestedAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken) {
+        log.info("Generating Consent in Contested Assigned To Judge Notification Letter {} from {} for bulk print",
+            documentConfiguration.getConsentInContestedAssignedToJudgeNotificationTemplate(),
+            documentConfiguration.getConsentInContestedAssignedToJudgeNotificationFileName());
+
+        CaseDocument generatedAssignedToJudgeNotificationLetter = genericDocumentService.generateDocument(authToken,
+            caseDetails,
+            documentConfiguration.getConsentInContestedAssignedToJudgeNotificationTemplate(),
+            documentConfiguration.getConsentInContestedAssignedToJudgeNotificationFileName());
+
+        log.info("Generated Consent in Contested Assigned To Judge Notification Letter: {}", generatedAssignedToJudgeNotificationLetter);
+
+        return generatedAssignedToJudgeNotificationLetter;
+    }
 }
