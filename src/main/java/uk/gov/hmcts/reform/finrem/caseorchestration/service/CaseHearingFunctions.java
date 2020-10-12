@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -66,7 +67,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Component
 @RequiredArgsConstructor
 @Slf4j
-final class CaseHearingFunctions {
+public final class CaseHearingFunctions {
 
     public static final String COURT_DETAILS_JSON_PATH = "/json/court-details.json";
 
@@ -191,13 +192,21 @@ final class CaseHearingFunctions {
         return null;
     }
 
-    static Map<String, Object> buildFrcCourtDetails(Map<String, Object> courtDetailsMap) {
-        return new ObjectMapper().convertValue(FrcCourtDetails.builder()
-            .courtName((String) courtDetailsMap.get(COURT_DETAILS_NAME_KEY))
-            .courtAddress((String) courtDetailsMap.get(COURT_DETAILS_ADDRESS_KEY))
-            .phoneNumber((String) courtDetailsMap.get(COURT_DETAILS_PHONE_KEY))
-            .email((String) courtDetailsMap.get(COURT_DETAILS_EMAIL_KEY))
-            .build(), Map.class);
+    public static Map<String, Object> buildFrcCourtDetails(Map<String, Object> data, ObjectMapper objectMapper) {
+        try {
+            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourt(data)));
+
+            return new ObjectMapper().convertValue(FrcCourtDetails.builder()
+                .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
+                .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
+                .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
+                .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
+                .build(), Map.class);
+        } catch (IOException | NullPointerException e) {
+            return null;
+        }
+
     }
 
     static String getCourtDetailsString() throws IOException {
