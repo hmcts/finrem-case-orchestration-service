@@ -141,7 +141,7 @@ public class GeneralApplicationDirectionsService {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
-        addContestedCourtDetails(caseDetailsCopy);
+        caseData.put("courtDetails", buildFrcCourtDetails(caseData, objectMapper));
         caseData.put("applicantName", DocumentHelper.getApplicantFullName(caseDetailsCopy));
         caseData.put("respondentName", DocumentHelper.getRespondentFullNameContested(caseDetailsCopy));
         caseData.put("letterDate", String.valueOf(LocalDate.now()));
@@ -156,7 +156,7 @@ public class GeneralApplicationDirectionsService {
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
         caseData.put("ccdCaseNumber", caseDetails.getId());
-        addContestedCourtDetails(caseDetailsCopy);
+        caseData.put("courtDetails", buildFrcCourtDetails(caseData, objectMapper));
         caseData.put("applicantName", DocumentHelper.getApplicantFullName(caseDetailsCopy));
         caseData.put("respondentName", DocumentHelper.getRespondentFullNameContested(caseDetailsCopy));
         addHearingVenueDetails(caseDetailsCopy);
@@ -174,18 +174,6 @@ public class GeneralApplicationDirectionsService {
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseData.get(getSelectedCourt(
                 caseData, "generalApplicationDirections_")));
             caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
-        } catch (IOException exception) {
-            throw new IllegalStateException(exception);
-        }
-    }
-
-    private void addContestedCourtDetails(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-
-        try {
-            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseData.get(getSelectedCourt(caseData)));
-            caseData.put("courtDetails", buildFrcCourtDetails(courtDetails, objectMapper));
         } catch (IOException exception) {
             throw new IllegalStateException(exception);
         }

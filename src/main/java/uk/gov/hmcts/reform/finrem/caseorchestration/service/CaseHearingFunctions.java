@@ -206,7 +206,6 @@ public final class CaseHearingFunctions {
         } catch (IOException | NullPointerException e) {
             return null;
         }
-
     }
 
     static String getCourtDetailsString() throws IOException {
