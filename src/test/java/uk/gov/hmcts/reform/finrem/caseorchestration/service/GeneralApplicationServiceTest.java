@@ -11,10 +11,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
@@ -37,9 +39,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class GeneralApplicationServiceTest extends BaseServiceTest {
 
-    @Autowired private GeneralApplicationService generalApplicationService;
-    @Autowired private ObjectMapper objectMapper;
-    @MockBean private IdamService idamService;
+    @Autowired
+    private GeneralApplicationService generalApplicationService;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @MockBean
+    private IdamService idamService;
 
     @Test
     public void updateCaseDataSubmit() {
@@ -87,13 +92,14 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
 
         generalApplicationService.updateCaseDataStart(caseDetails.getData(), AUTH_TOKEN);
 
-        assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_RECEIVED_FROM), is(false));
-        assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_HEARING_REQUIRED), is(false));
-        assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_TIME_ESTIMATE), is(false));
-        assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_SPECIAL_MEASURES), is(false));
-        assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_DOCUMENT), is(false));
-        assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_DRAFT_ORDER), is(false));
-        assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT), is(false));
+        Stream.of(GENERAL_APPLICATION_RECEIVED_FROM,
+            GENERAL_APPLICATION_HEARING_REQUIRED,
+            GENERAL_APPLICATION_TIME_ESTIMATE,
+            GENERAL_APPLICATION_SPECIAL_MEASURES,
+            GENERAL_APPLICATION_DOCUMENT,
+            GENERAL_APPLICATION_DRAFT_ORDER,
+            GENERAL_APPLICATION_DIRECTIONS_DOCUMENT)
+            .forEach(ccdFieldName -> assertThat(caseDetails.getData().get(ccdFieldName), is(nullValue())));
         assertThat(caseDetails.getData().get(GENERAL_APPLICATION_CREATED_BY), is(name));
     }
 

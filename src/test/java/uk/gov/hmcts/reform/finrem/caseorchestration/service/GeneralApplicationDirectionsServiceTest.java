@@ -19,15 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.in;
-import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -73,15 +71,22 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
     private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
 
-    @Autowired private GeneralApplicationDirectionsService generalApplicationDirectionsService;
-    @Autowired private ObjectMapper objectMapper;
-    @Autowired private DocumentConfiguration documentConfiguration;
+    @Autowired
+    private GeneralApplicationDirectionsService generalApplicationDirectionsService;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private DocumentConfiguration documentConfiguration;
 
-    @MockBean private BulkPrintService bulkPrintService;
-    @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean
+    private BulkPrintService bulkPrintService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
 
-    @Captor ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
-    @Captor ArgumentCaptor<List<BulkPrintDocument>> printDocumentsRequestDocumentListCaptor;
+    @Captor
+    ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
+    @Captor
+    ArgumentCaptor<List<BulkPrintDocument>> printDocumentsRequestDocumentListCaptor;
 
     private CaseDetails caseDetails;
 
@@ -94,8 +99,10 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void whenGeneralApplicationDirectionsStarted_thenStateSpecificFieldAreRemoved() {
-        List<String> generalApplicationDirectionsSpecificFields = asList(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED,
+    public void whenGeneralApplicationDirectionsStarted_thenStateSpecificFieldAreSetToNull() {
+        generalApplicationDirectionsService.startGeneralApplicationDirections(caseDetails);
+
+        Stream.of(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED,
             GENERAL_APPLICATION_DIRECTIONS_HEARING_DATE,
             GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME,
             GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME_ESTIMATE,
@@ -122,11 +129,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             GENERAL_APPLICATION_DIRECTIONS_JUDGE_TYPE,
             GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME,
             GENERAL_APPLICATION_DIRECTIONS_COURT_ORDER_DATE,
-            GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE);
-
-        generalApplicationDirectionsService.startGeneralApplicationDirections(caseDetails);
-
-        assertThat(caseDetails.getData(), not(hasKey(in(generalApplicationDirectionsSpecificFields))));
+            GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE)
+            .forEach(ccdFieldName -> assertThat(caseDetails.getData().get(ccdFieldName), is(nullValue())));
     }
 
     @Test
@@ -194,7 +198,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
     private void assertCaseDataHasGeneralApplicationDirectionsDocument() {
         assertThat(caseDetails.getData(), hasKey(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
-        assertThat(((CaseDocument)caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT)).getDocumentBinaryUrl(),
+        assertThat(((CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT)).getDocumentBinaryUrl(),
             is(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
     }
 
