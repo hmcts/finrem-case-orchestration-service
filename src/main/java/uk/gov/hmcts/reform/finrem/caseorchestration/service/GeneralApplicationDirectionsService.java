@@ -185,7 +185,7 @@ public class GeneralApplicationDirectionsService {
         try {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseData.get(getSelectedCourt(caseData)));
-            caseData.put("courtDetails", buildFrcCourtDetails(courtDetails));
+            caseData.put("courtDetails", buildFrcCourtDetails(courtDetails, objectMapper));
         } catch (IOException exception) {
             throw new IllegalStateException(exception);
         }
