@@ -12,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.List;
@@ -19,13 +20,14 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -33,6 +35,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION;
@@ -40,6 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_CFC_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_CLEVELAND_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_COURT_ORDER_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED;
@@ -66,6 +71,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
+    private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
+
     @Autowired private GeneralApplicationDirectionsService generalApplicationDirectionsService;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private DocumentConfiguration documentConfiguration;
@@ -82,7 +89,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     public void setup() {
         caseDetails = caseDetailsFromResource("/fixtures/general-application-directions.json", objectMapper);
 
-        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
+        when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument(DOC_URL, FILE_NAME,
+            GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
     }
 
     @Test
@@ -125,6 +133,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     public void givenHearingRequired_whenGeneralApplicationDirectionsSubmitted_thenHearingNoticeIsPrinted() {
         generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, AUTH_TOKEN);
 
+        assertCaseDataHasGeneralApplicationDirectionsDocument();
+
         verify(genericDocumentService, times(1)).generateDocument(
             eq(AUTH_TOKEN),
             documentGenerationRequestCaseDetailsCaptor.capture(),
@@ -157,6 +167,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         caseDetails.getData().put(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED, NO_VALUE);
         generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, AUTH_TOKEN);
 
+        assertCaseDataHasGeneralApplicationDirectionsDocument();
+
         verify(genericDocumentService, times(1)).generateDocument(
             eq(AUTH_TOKEN),
             documentGenerationRequestCaseDetailsCaptor.capture(),
@@ -180,10 +192,17 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         assertDocumentPrintRequestContainsExpectedDocuments();
     }
 
+    private void assertCaseDataHasGeneralApplicationDirectionsDocument() {
+        assertThat(caseDetails.getData(), hasKey(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
+        assertThat(((CaseDocument)caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT)).getDocumentBinaryUrl(),
+            is(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL));
+    }
+
     private void assertDocumentPrintRequestContainsExpectedDocuments() {
         List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
+        System.out.println(documentsToPrint);
         assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
-            "http://dm-store/lhjbyuivu87y989hijbb/binary",
+            GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL,
             "http://dm-store/hijbb-general-application-latest-document/binary",
             "http://dm-store/hijbb-general-application-draft-order/binary")
             .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).build())

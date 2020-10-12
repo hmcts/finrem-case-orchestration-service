@@ -249,6 +249,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME = "generalApplicationDirectionsJudgeName";
     public static final String GENERAL_APPLICATION_DIRECTIONS_COURT_ORDER_DATE = "generalApplicationDirectionsCourtOrderDate";
     public static final String GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE = "generalApplicationDirectionsTextFromJudge";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT = "generalApplicationDirectionsDocument";
 
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";

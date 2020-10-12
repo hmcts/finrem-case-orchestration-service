@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
@@ -73,6 +74,7 @@ public class GeneralApplicationService {
         caseData.remove(GENERAL_APPLICATION_SPECIAL_MEASURES);
         caseData.remove(GENERAL_APPLICATION_DOCUMENT);
         caseData.remove(GENERAL_APPLICATION_DRAFT_ORDER);
+        caseData.remove(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT);
         caseData.put(GENERAL_APPLICATION_CREATED_BY, idamService.getIdamFullName(authorisationToken));
     }
 }

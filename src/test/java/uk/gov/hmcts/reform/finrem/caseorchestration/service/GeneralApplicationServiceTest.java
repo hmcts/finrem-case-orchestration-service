@@ -23,6 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsBeforeFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_CREATED_BY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DOCUMENT_LATEST;
@@ -92,6 +93,7 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
         assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_SPECIAL_MEASURES), is(false));
         assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_DOCUMENT), is(false));
         assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_DRAFT_ORDER), is(false));
+        assertThat(caseDetails.getData().containsKey(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT), is(false));
         assertThat(caseDetails.getData().get(GENERAL_APPLICATION_CREATED_BY), is(name));
     }
 
