@@ -79,5 +79,7 @@ public class GeneralApplicationService {
             GENERAL_APPLICATION_DIRECTIONS_DOCUMENT)
             .forEach(ccdFieldName -> caseData.put(ccdFieldName, null));
         caseData.put(GENERAL_APPLICATION_CREATED_BY, idamService.getIdamFullName(authorisationToken));
+
+        log.info("1 GENERAL_APPLICATION_DIRECTIONS_DOCUMENT is {}", caseData.get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
     }
 }
