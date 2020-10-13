@@ -43,12 +43,12 @@ public class GeneralApplicationController implements BaseController {
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        CaseDetails caseDetailsBefore = callback.getCaseDetailsBefore();
         log.info("Received request to submit general application for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
         log.info("2 GENERAL_APPLICATION_DIRECTIONS_DOCUMENT is {}", caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
 
+        CaseDetails caseDetailsBefore = callback.getCaseDetailsBefore();
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore);
 
         log.info("3 GENERAL_APPLICATION_DIRECTIONS_DOCUMENT is {}", caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
