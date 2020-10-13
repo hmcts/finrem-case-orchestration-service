@@ -72,8 +72,11 @@ public class GeneralApplicationController implements BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to start general application for Case ID: {}", caseDetails.getId());
+        log.info("A ----------");
         validateCaseData(callback);
+        log.info("B ----------");
 
+        log.info("C ----------");
         log.info("0 GENERAL_APPLICATION_DIRECTIONS_DOCUMENT is {}", caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
 
         generalApplicationService.updateCaseDataStart(caseDetails.getData(), authorisationToken);
