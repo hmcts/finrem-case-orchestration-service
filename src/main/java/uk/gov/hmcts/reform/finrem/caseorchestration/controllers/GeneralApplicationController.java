@@ -21,7 +21,6 @@ import javax.validation.constraints.NotNull;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -46,12 +45,8 @@ public class GeneralApplicationController implements BaseController {
         log.info("Received request to submit general application for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        log.info("2 GENERAL_APPLICATION_DIRECTIONS_DOCUMENT is {}", caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
-
         CaseDetails caseDetailsBefore = callback.getCaseDetailsBefore();
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore);
-
-        log.info("3 GENERAL_APPLICATION_DIRECTIONS_DOCUMENT is {}", caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
@@ -72,16 +67,9 @@ public class GeneralApplicationController implements BaseController {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request to start general application for Case ID: {}", caseDetails.getId());
-        log.info("A ----------");
         validateCaseData(callback);
-        log.info("B ----------");
-
-        log.info("C ----------");
-        log.info("0 GENERAL_APPLICATION_DIRECTIONS_DOCUMENT is {}", caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
 
         generalApplicationService.updateCaseDataStart(caseDetails.getData(), authorisationToken);
-
-        log.info("1a GENERAL_APPLICATION_DIRECTIONS_DOCUMENT is {}", caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()

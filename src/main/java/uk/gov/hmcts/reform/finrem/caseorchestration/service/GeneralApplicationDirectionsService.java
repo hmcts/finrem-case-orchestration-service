@@ -96,7 +96,7 @@ public class GeneralApplicationDirectionsService {
             GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME,
             GENERAL_APPLICATION_DIRECTIONS_COURT_ORDER_DATE,
             GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE
-        ).forEach(generalApplicationDirectionCcdField -> caseData.put(generalApplicationDirectionCcdField, null));
+        ).forEach(generalApplicationDirectionCcdField -> caseData.remove(generalApplicationDirectionCcdField));
     }
 
     public void submitGeneralApplicationDirections(CaseDetails caseDetails, String authorisationToken) {
