@@ -8,11 +8,13 @@ import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.util.Map;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.COURT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_POSTCODE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
@@ -90,7 +92,11 @@ public class GenerateCoverSheetService {
         AddressFoundInCaseData addressFoundInCaseData = checkAddress(caseData, partyAddressCcdFieldName, solicitorAddressCcdFieldName,
             isRepresentedByASolicitor);
 
-        if (addressFoundInCaseData != AddressFoundInCaseData.NONE) {
+        if (addressFoundInCaseData == AddressFoundInCaseData.NONE) {
+            String offendingCcdField = isRepresentedByASolicitor ? solicitorAddressCcdFieldName : partyAddressCcdFieldName;
+            throw new InvalidCaseDataException(BAD_REQUEST.value(), "CCD address field " + offendingCcdField
+                + " needs to contain both first line of address and postcode");
+        } else {
             boolean sendToSolicitor = addressFoundInCaseData == AddressFoundInCaseData.SOLICITOR;
 
             Addressee addressee = Addressee.builder()

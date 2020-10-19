@@ -12,40 +12,11 @@
     "case_data": {
       "PBANumber": "PBA123456",
       "d81Question": "No",
-      "generalApplicationReceivedFrom": "Applicant",
-      "generalApplicationCreatedBy": "Caseworker",
-      "generalApplicationHearingRequired": "Yes",
-      "generalApplicationTimeEstimate": "12",
-      "generalApplicationSpecialMeasures": "Measures",
-      "generalApplicationDraftOrder": {
-        "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
-        "document_filename": "app_docs.pdf",
-        "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
-      },
+      "PBAreference": "ABCD",
       "generalApplicationDocument": {
         "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
         "document_filename": "app_docs.pdf",
         "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
-      },
-      "generalApplicationLatestDocument": {
-        "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
-        "document_filename": "app_docs.pdf",
-        "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
-      },
-      "generalApplicationCollection": [{
-        "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
-        "value": {
-          "generalApplicationDocument": {
-            "document_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee",
-            "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-            "document_binary_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee/binary"
-          }
-        }
-      }],
-      "generalApplicationDirectionsDocument": {
-        "document_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-6e4e1a1d11ec",
-        "document_filename": "generalApplicationDirections.pdf",
-        "document_binary_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-6e4e1a1d11ec/binary"
       },
       "d81Applicant": {
         "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
@@ -120,8 +91,8 @@
       },
       "solicitorDXnumber": null,
       "solicitorReference": "LL01",
-      "appRespondentFMName": "test",
-      "appRespondentLName": "Korivi",
+      "respondentFMName": "test",
+      "respondentLName": "Korivi",
       "divorceStageReached": "Decree Nisi",
       "helpWithFeesQuestion": "No",
       "orderForChildrenQuestion1": "Yes",
@@ -150,7 +121,33 @@
             }
           }
         }
-      ]
+      ],
+      "regionList": "london",
+      "londonFRCList": "cfc",
+      "cfcCourtList": "FR_s_CFCList_4",
+      "generalApplicationDirectionsHearingRequired": "Yes",
+      "generalApplicationDirectionsHearingDate": "2020-06-01",
+      "generalApplicationDirectionsHearingTime": "2:00 pm",
+      "generalApplicationDirectionsHearingTimeEstimate": "30 minutes",
+      "generalApplicationDirections_regionList": "london",
+      "generalApplicationDirections_londonFRCList": "cfc",
+      "generalApplicationDirections_cfcCourtList": "FR_s_CFCList_2",
+      "generalApplicationDirectionsAdditionalInformation": "refreshments will be provided",
+      "generalApplicationDirectionsRecitals": "phantom of the opera",
+      "generalApplicationDirectionsJudgeType": "Her Honour Judge",
+      "generalApplicationDirectionsJudgeName": "Ms Justice",
+      "generalApplicationDirectionsCourtOrderDate": "2020-07-06",
+      "generalApplicationDirectionsTextFromJudge": "the case needs to be reconsidered",
+      "generalApplicationLatestDocument": {
+        "document_url": "http://dm-store/hijbb-general-application-latest-document",
+        "document_filename": "app_docs.pdf",
+        "document_binary_url": "http://dm-store/hijbb-general-application-latest-document/binary"
+      },
+      "generalApplicationDraftOrder": {
+        "document_url": "http://dm-store/hijbb-general-application-draft-order",
+        "document_filename": "app_docs.pdf",
+        "document_binary_url": "http://dm-store/hijbb-general-application-draft-order/binary"
+      }
     }
   }
 }

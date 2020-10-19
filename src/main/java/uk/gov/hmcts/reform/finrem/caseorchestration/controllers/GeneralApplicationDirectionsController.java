@@ -15,9 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.InvalidCaseDataException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralApplicationDirectionsService;
 
 import javax.validation.constraints.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -26,12 +30,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequestMapping(value = "/case-orchestration")
 @RequiredArgsConstructor
 @Slf4j
-public class GeneralApplicationController implements BaseController {
+public class GeneralApplicationDirectionsController implements BaseController {
 
-    private final GeneralApplicationService generalApplicationService;
+    private final GeneralApplicationDirectionsService generalApplicationDirectionsService;
 
-    @PostMapping(path = "/submit-general-application", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Submit general application")
+    @PostMapping(path = "/submit-general-application-directions", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Submit general application directions")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
@@ -42,20 +46,25 @@ public class GeneralApplicationController implements BaseController {
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to submit general application for Case ID: {}", caseDetails.getId());
+        log.info("Received request to submit general application directions for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        CaseDetails caseDetailsBefore = callback.getCaseDetailsBefore();
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore);
+        List<String> errors = new ArrayList<>();
+        try {
+            generalApplicationDirectionsService.submitGeneralApplicationDirections(caseDetails, authorisationToken);
+        } catch (InvalidCaseDataException invalidCaseDataException) {
+            errors.add(invalidCaseDataException.getMessage());
+        }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(caseDetails.getData())
+            .errors(errors)
             .build());
     }
 
-    @PostMapping(path = "/start-general-application", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Start general application")
+    @PostMapping(path = "/start-general-application-directions", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Start general application directions")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
@@ -66,10 +75,10 @@ public class GeneralApplicationController implements BaseController {
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        log.info("Received request to start general application for Case ID: {}", caseDetails.getId());
+        log.info("Received request to start general application directions for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
-        generalApplicationService.updateCaseDataStart(caseDetails.getData(), authorisationToken);
+        generalApplicationDirectionsService.startGeneralApplicationDirections(caseDetails);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()

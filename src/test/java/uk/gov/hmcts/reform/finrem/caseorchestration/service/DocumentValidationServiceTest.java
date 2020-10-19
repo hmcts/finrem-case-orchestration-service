@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
@@ -25,6 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPOND_TO_ORDER_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentValidationResponse.builder;
 
+@ActiveProfiles("test-mock-document-client")
 public class DocumentValidationServiceTest extends BaseServiceTest {
 
     private static final String PATH = "/fixtures/latestConsentedConsentOrder/";
@@ -39,7 +40,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     @Autowired
     private DocumentValidationService documentValidationService;
 
-    @MockBean
+    @Autowired
     private DocumentClient documentClient;
 
     private CallbackRequest callbackRequest;
