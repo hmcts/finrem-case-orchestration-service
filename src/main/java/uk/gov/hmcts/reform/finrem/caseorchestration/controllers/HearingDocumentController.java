@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
@@ -25,7 +26,10 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isDocumentPresentInCaseData;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,7 +37,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 public class HearingDocumentController implements BaseController {
 
-    private final HearingDocumentService service;
+    private final HearingDocumentService hearingService;
+    private final AdditionalHearingDocumentService additionalHearingService;
     private final ValidateHearingService validateHearingService;
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -60,15 +65,30 @@ public class HearingDocumentController implements BaseController {
         }
 
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.putAll(service.generateHearingDocuments(authorisationToken, caseDetails));
+
+        boolean hadFirstHearing = alreadyHadFirstHearing(caseDetails);
+
+        if (! hadFirstHearing) {
+            caseData.putAll(hearingService.generateHearingDocuments(authorisationToken, caseDetails));
+        }
 
         if (isContestedPaperApplication(caseDetails)) {
-            log.info("Sending Contested Paper Case to bulk print Case ID: {}", caseDetails.getId());
-            service.sendToBulkPrint(caseDetails, authorisationToken);
+            if (hadFirstHearing) {
+                log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
+                additionalHearingService.createAndSendAdditionalHearingDocuments(authorisationToken, caseDetails);
+            } else {
+                log.info("Sending Forms A, C, G to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
+                hearingService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
+            }
         }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
         return ResponseEntity.ok(
                 AboutToStartOrSubmitCallbackResponse.builder().data(caseData).warnings(warnings).build());
+    }
+
+    private boolean alreadyHadFirstHearing(CaseDetails caseDetails) {
+        return isDocumentPresentInCaseData(FORM_C, caseDetails)
+            && isDocumentPresentInCaseData(FORM_G, caseDetails);
     }
 }

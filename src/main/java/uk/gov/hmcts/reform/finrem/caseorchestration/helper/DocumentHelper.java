@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
@@ -147,6 +148,11 @@ public class DocumentHelper {
 
     public List<GeneralLetterData> convertToGeneralLetterData(Object object) {
         return objectMapper.convertValue(object, new TypeReference<List<GeneralLetterData>>() {
+        });
+    }
+
+    public List<AdditionalHearingDocumentData> convertToAdditionalHearingDocumentData(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<List<AdditionalHearingDocumentData>>() {
         });
     }
 

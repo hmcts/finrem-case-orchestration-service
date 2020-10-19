@@ -91,7 +91,6 @@ public class CCDConfigConstant {
     public static final String ROLES = "roles";
 
     //contest courts
-    public static final String HEARING_DATE = "hearingDate";
     public static final String CASE_ALLOCATED_TO = "caseAllocatedTo";
     public static final String APPLICANT_ATTENDED_MIAM = "applicantAttendedMIAM";
     public static final String FAMILY_MEDIATOR_MIAM = "familyMediatorMIAM";
@@ -153,6 +152,8 @@ public class CCDConfigConstant {
     public static final String MINI_FORM_A_CONSENTED_IN_CONTESTED = "consentMiniFormA";
     public static final String PENSION_DOCS_COLLECTION = "pensionCollection";
     public static final String FORM_A_COLLECTION = "copyOfPaperFormA";
+    public static final String FORM_C = "formC";
+    public static final String FORM_G = "formG";
     public static final String OTHER_DOCS_COLLECTION = "otherCollection";
     public static final String GENERAL_LETTER = "generalLetterCollection";
     public static final String GENERAL_LETTER_BODY = "generalLetterBody";
@@ -300,4 +301,11 @@ public class CCDConfigConstant {
     public static final String ORGANISATION_POLICY_ORGANISATION_ID = "OrganisationID";
     public static final String APP_SOLICITOR_POLICY = "[APPSOLICITOR]";
 
+    //scheduled hearings
+    public static final String ADDITIONAL_HEARING_DOCUMENT_COLLECTION = "additionalHearingDocuments";
+    public static final String HEARING_TYPE = "hearingType";
+    public static final String TIME_ESTIMATE = "timeEstimate";
+    public static final String HEARING_DATE = "hearingDate";
+    public static final String HEARING_TIME = "hearingTime";
+    public static final String HEARING_ADDITIONAL_INFO = "additionalInformationAboutHearing";
 }

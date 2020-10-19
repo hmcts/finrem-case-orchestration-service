@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addFastTrackFields;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
@@ -38,10 +40,6 @@ public class HearingDocumentService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
     private final BulkPrintService bulkPrintService;
-
-    public String formADataKey = "copyOfPaperFormA";
-    public String formCDataKey = "formC";
-    public String formGDataKey = "formG";
 
     public Map<String, Object> generateHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         CaseDetails courtDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
@@ -73,11 +71,11 @@ public class HearingDocumentService {
     }
 
     private Map<String, Object> createDocumentMap(CaseDocument formC, CaseDocument formG) {
-        return ImmutableMap.of(formCDataKey, formC, formGDataKey, formG);
+        return ImmutableMap.of(FORM_C, formC, FORM_G, formG);
     }
 
     private Map<String, Object> generateFastTrackFormC(Pair<CaseDetails, String> pair) {
-        return ImmutableMap.of(formCDataKey,
+        return ImmutableMap.of(FORM_C,
             genericDocumentService.generateDocument(pair.getRight(), addFastTrackFields.apply(pair.getLeft()),
                 documentConfiguration.getFormCFastTrackTemplate(), documentConfiguration.getFormCFileName()));
     }
@@ -92,7 +90,7 @@ public class HearingDocumentService {
         return caseDetails;
     }
 
-    public void sendToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
+    public void sendFormCAndGForBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData());
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
@@ -110,8 +108,8 @@ public class HearingDocumentService {
 
         log.info("Fetching Contested Paper Case bulk print document from Case Data: {}", caseData);
 
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, formCDataKey).ifPresent(caseDocuments::add);
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, formGDataKey).ifPresent(caseDocuments::add);
+        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, FORM_C).ifPresent(caseDocuments::add);
+        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, FORM_G).ifPresent(caseDocuments::add);
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
         caseDocuments.addAll(formACaseDocuments.stream().map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList()));

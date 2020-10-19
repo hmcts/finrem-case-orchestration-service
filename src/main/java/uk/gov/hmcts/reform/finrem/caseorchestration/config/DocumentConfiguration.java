@@ -51,4 +51,6 @@ public class DocumentConfiguration {
     private String generalApplicationHearingNoticeFileName;
     private String generalApplicationOrderTemplate;
     private String generalApplicationOrderFileName;
+    private String additionalHearingTemplate;
+    private String additionalHearingFileName;
 }
