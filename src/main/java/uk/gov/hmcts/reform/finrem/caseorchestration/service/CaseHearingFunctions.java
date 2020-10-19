@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
@@ -101,26 +102,40 @@ public final class CaseHearingFunctions {
     };
 
     static String getSelectedCourt(Map<String, Object> mapOfCaseData) {
-        switch ((String) mapOfCaseData.get(REGION)) {
+        return getSelectedCourt(mapOfCaseData, "");
+    }
+
+    static String getSelectedCourt(Map<String, Object> mapOfCaseData, String fieldNamePrefix) {
+        String courtListFieldName;
+
+        switch ((String) mapOfCaseData.get(fieldNamePrefix + REGION)) {
             case MIDLANDS:
-                return getMidlandFRC(mapOfCaseData);
+                courtListFieldName = getMidlandFRC(mapOfCaseData, fieldNamePrefix);
+                break;
             case LONDON:
-                return getLondonFRC(mapOfCaseData);
+                courtListFieldName = getLondonFRC(mapOfCaseData, fieldNamePrefix);
+                break;
             case NORTHWEST:
-                return getNorthWestFRC(mapOfCaseData);
+                courtListFieldName = getNorthWestFRC(mapOfCaseData, fieldNamePrefix);
+                break;
             case NORTHEAST:
-                return getNorthEastFRC(mapOfCaseData);
+                courtListFieldName = getNorthEastFRC(mapOfCaseData, fieldNamePrefix);
+                break;
             case SOUTHEAST:
-                return getSouthEastFRC(mapOfCaseData);
+                courtListFieldName = getSouthEastFRC(mapOfCaseData, fieldNamePrefix);
+                break;
             case WALES:
-                return getWalesFRC(mapOfCaseData);
+                courtListFieldName = getWalesFRC(mapOfCaseData, fieldNamePrefix);
+                break;
             default:
                 return null;
         }
+
+        return fieldNamePrefix + courtListFieldName;
     }
 
-    static String getWalesFRC(Map mapOfCaseData) {
-        String walesList = (String) mapOfCaseData.get(WALES_FRC_LIST);
+    private static String getWalesFRC(Map mapOfCaseData, String fieldNamePrefix) {
+        String walesList = (String) mapOfCaseData.get(fieldNamePrefix + WALES_FRC_LIST);
         if (NEWPORT.equalsIgnoreCase(walesList)) {
             return NEWPORT_COURTLIST;
         } else if (SWANSEA.equalsIgnoreCase(walesList)) {
@@ -129,16 +144,16 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    static String getSouthEastFRC(Map mapOfCaseData) {
-        String southEastList = (String) mapOfCaseData.get(SOUTHEAST_FRC_LIST);
+    private static String getSouthEastFRC(Map mapOfCaseData, String fieldNamePrefix) {
+        String southEastList = (String) mapOfCaseData.get(fieldNamePrefix + SOUTHEAST_FRC_LIST);
         if (KENT.equalsIgnoreCase(southEastList)) {
             return KENTFRC_COURTLIST;
         }
         return null;
     }
 
-    static String getNorthEastFRC(Map mapOfCaseData) {
-        String northEastList = (String) mapOfCaseData.get(NORTHEAST_FRC_LIST);
+    private static String getNorthEastFRC(Map mapOfCaseData, String fieldNamePrefix) {
+        String northEastList = (String) mapOfCaseData.get(fieldNamePrefix + NORTHEAST_FRC_LIST);
         if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
             return CLEAVELAND_COURTLIST;
         } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
@@ -149,8 +164,8 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    static String getNorthWestFRC(Map mapOfCaseData) {
-        String northWestList = (String) mapOfCaseData.get(NORTHWEST_FRC_LIST);
+    private static String getNorthWestFRC(Map mapOfCaseData, String fieldNamePrefix) {
+        String northWestList = (String) mapOfCaseData.get(fieldNamePrefix + NORTHWEST_FRC_LIST);
         if (LIVERPOOL.equalsIgnoreCase(northWestList)) {
             return LIVERPOOL_COURTLIST;
         } else if (MANCHESTER.equalsIgnoreCase(northWestList)) {
@@ -159,16 +174,16 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    static String getLondonFRC(Map mapOfCaseData) {
-        String londonList = (String) mapOfCaseData.get(LONDON_FRC_LIST);
+    private static String getLondonFRC(Map mapOfCaseData, String fieldNamePrefix) {
+        String londonList = (String) mapOfCaseData.get(fieldNamePrefix + LONDON_FRC_LIST);
         if (CFC.equalsIgnoreCase(londonList)) {
             return CFC_COURTLIST;
         }
         return null;
     }
 
-    static String getMidlandFRC(Map mapOfCaseData) {
-        String midlandsList = (String) mapOfCaseData.get(MIDLANDS_FRC_LIST);
+    private static String getMidlandFRC(Map mapOfCaseData, String fieldNamePrefix) {
+        String midlandsList = (String) mapOfCaseData.get(fieldNamePrefix + MIDLANDS_FRC_LIST);
         if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
             return NOTTINGHAM_COURTLIST;
         } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
@@ -191,12 +206,15 @@ public final class CaseHearingFunctions {
         } catch (IOException | NullPointerException e) {
             return null;
         }
-
     }
 
     static String getCourtDetailsString() throws IOException {
         try (InputStream inputStream = CaseHearingFunctions.class.getResourceAsStream(COURT_DETAILS_JSON_PATH)) {
             return IOUtils.toString(inputStream, UTF_8);
         }
+    }
+
+    static String getFrcCourtDetailsAsOneLineAddressString(Map<String, Object> courtDetailsMap) {
+        return StringUtils.joinWith(", ", courtDetailsMap.get(COURT_DETAILS_NAME_KEY), courtDetailsMap.get(COURT_DETAILS_ADDRESS_KEY));
     }
 }

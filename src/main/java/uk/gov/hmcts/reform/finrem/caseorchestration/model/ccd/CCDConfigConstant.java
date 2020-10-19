@@ -221,6 +221,37 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_PRE_STATE = "generalApplicationPreState";
     public static final String GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL = "generalApplicationReferToJudgeEmail";
 
+    // General application directions
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED = "generalApplicationDirectionsHearingRequired";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HEARING_DATE = "generalApplicationDirectionsHearingDate";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME = "generalApplicationDirectionsHearingTime";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME_ESTIMATE = "generalApplicationDirectionsHearingTimeEstimate";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION = "generalApplicationDirections_regionList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC = "generalApplicationDirections_midlandsFRCList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_LONDON_FRC = "generalApplicationDirections_londonFRCList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_NORTHWEST_FRC = "generalApplicationDirections_northWestFRCList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_NORTHEAST_FRC = "generalApplicationDirections_northEastFRCList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC = "generalApplicationDirections_southEastFRCList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_WALES_FRC = "generalApplicationDirections_walesFRCList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_NOTTINGHAM_COURT = "generalApplicationDirections_nottinghamCourtList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_CFC_COURT = "generalApplicationDirections_cfcCourtList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_BIRMINGHAM_COURT = "generalApplicationDirections_birminghamCourtList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_LIVERPOOL_COURT = "generalApplicationDirections_liverpoolCourtList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_MANCHESTER_COURT = "generalApplicationDirections_manchesterCourtList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_CLEVELAND_COURT = "generalApplicationDirections_cleavelandCourtList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_NWYORKSHIRE_COURT = "generalApplicationDirections_nwyorkshireCourtList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_HUMBER_COURT = "generalApplicationDirections_humberCourtList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_KENTSURREY_COURT = "generalApplicationDirections_kentSurreyCourtList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_NEWPORT_COURT = "generalApplicationDirections_newportCourtList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_SWANSEA_COURT = "generalApplicationDirections_swanseaCourtList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION = "generalApplicationDirectionsAdditionalInformation";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_RECITALS = "generalApplicationDirectionsRecitals";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_JUDGE_TYPE = "generalApplicationDirectionsJudgeType";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME = "generalApplicationDirectionsJudgeName";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_COURT_ORDER_DATE = "generalApplicationDirectionsCourtOrderDate";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE = "generalApplicationDirectionsTextFromJudge";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT = "generalApplicationDirectionsDocument";
+
     //Payment related
     public static final String ORDER_SUMMARY = "orderSummary";
     public static final String FEES = "Fees";

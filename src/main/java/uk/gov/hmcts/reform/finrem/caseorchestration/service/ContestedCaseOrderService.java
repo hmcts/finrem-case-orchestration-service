@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocu
 import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +20,7 @@ public class ContestedCaseOrderService {
     public void printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
         if (featureToggleService.isContestedPrintGeneralOrderEnabled() && contestedGeneralOrderPresent(caseDetails)) {
             BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData());
-            if (!isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
             }
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, singletonList(generalOrder));

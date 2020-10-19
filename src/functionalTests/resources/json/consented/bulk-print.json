@@ -73,12 +73,13 @@
       ],
       "respondentEmail": null,
       "respondentPhone": "9963472494",
-      "appRespondentRep": "No",
       "consentOrderText": {
         "document_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
         "document_binary_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
       },
+      "applicantRepresented": "Yes",
+      "appRespondentRep": "No",
       "solicitorAddress": {
         "County": "test",
         "Country": "United Kingdom",

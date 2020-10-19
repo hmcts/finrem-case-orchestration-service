@@ -12,9 +12,8 @@ import java.io.InputStream;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 
 public class ContestedCaseOrderServiceTest extends BaseServiceTest {
@@ -39,6 +38,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     @Test
     public void whenPrintAndMailGeneralOrderTriggered_thenBothApplicantAndRespondentPacksArePrinted() {
         CaseDetails caseDetails = contestedCaseDetails();
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
@@ -47,9 +47,9 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenApplicantSolicitorAgreedToReceiveEmails_whenPrintAndMailGeneralOrderTriggered_thenOnlyRespondentPacksIsPrinted() {
+    public void givenShouldNotPrintPackForApplicant_whenPrintAndMailGeneralOrderTriggered_thenOnlyRespondentPacksIsPrinted() {
         CaseDetails caseDetails = contestedCaseDetails();
-        caseDetails.getData().put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(false);
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 

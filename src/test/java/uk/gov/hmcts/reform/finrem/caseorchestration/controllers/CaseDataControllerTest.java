@@ -268,7 +268,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
-        mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
+        mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
@@ -284,7 +284,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
-        mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
+        mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
@@ -300,7 +300,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(INVALID_CASE_TYPE_JSON).toURI()));
-        mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
+        mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))

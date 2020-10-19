@@ -14,6 +14,7 @@ import java.io.File;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
@@ -61,7 +62,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
-                .andExpect(content().string(is(SERVER_ERROR_MSG)));
+                .andExpect(content().string(startsWith(SERVER_ERROR_MSG)));
     }
 
     private void doPBASetUp(boolean success) throws Exception {
