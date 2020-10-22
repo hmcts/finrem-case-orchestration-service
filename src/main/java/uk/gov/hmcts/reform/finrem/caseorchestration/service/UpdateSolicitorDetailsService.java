@@ -17,7 +17,7 @@ public class UpdateSolicitorDetailsService {
 
     private final PrdOrganisationService organisationService;
 
-    public void updateApplicantSolicitorAddressFromPrd(CaseDetails caseDetails, String authToken){
+    public void updateApplicantSolicitorAddressFromPrd(CaseDetails caseDetails, String authToken) {
         OrganisationsResponse organisationData = organisationService.retrieveOrganisationsData(authToken);
 
         caseDetails.getData().put(CONTESTED_SOLICITOR_ADDRESS, convertOrganisationAddressToSolicitorAddress(organisationData));
