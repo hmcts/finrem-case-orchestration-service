@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "prd.organisation")
+@ConfigurationProperties(prefix = "prd.organisations")
 public class PrdOrganisationConfiguration {
     private String url;
     private String api;

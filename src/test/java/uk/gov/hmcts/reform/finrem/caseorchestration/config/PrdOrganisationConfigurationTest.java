@@ -1,30 +1,25 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.config;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @TestPropertySource(locations = "/application.properties")
-public class PrdOrganisationConfigurationTest {
+public class PrdOrganisationConfigurationTest extends BaseTest {
+
 
     @Autowired
     private PrdOrganisationConfiguration config;
-
-    @Autowired
-    protected RestTemplate restTemplate;
-
-    protected MockRestServiceServer mockServer;
-
-    @Before
-    public void setUp() {
-        mockServer = MockRestServiceServer.createServer(restTemplate);
-    }
 
     @Test
     public void shouldCreateOrganisationConfigFromAppProperties() {
