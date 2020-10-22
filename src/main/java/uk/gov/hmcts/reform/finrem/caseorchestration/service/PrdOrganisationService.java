@@ -10,7 +10,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.PRDOrganisationConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
 import java.net.URI;
@@ -22,9 +22,9 @@ import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class OrganisationService {
+public class PrdOrganisationService {
 
-    private final PRDOrganisationConfiguration serviceConfig;
+    private final PrdOrganisationConfiguration serviceConfig;
     private final RestTemplate restTemplate;
     private final AuthTokenGenerator authTokenGenerator;
 

@@ -167,12 +167,12 @@ public class CaseDataController implements BaseController {
         }
     }
 
-    private void setApplicantSolicitorOrganisationDetails(CaseDetails caseDetails, String authToken){
+    private void setApplicantSolicitorOrganisationDetails(CaseDetails caseDetails, String authToken) {
         if (featureToggleService.isShareACaseEnabled() && isContestedApplication(caseDetails)) {
             log.info("Share a case toggle is: {}", featureToggleService.isShareACaseEnabled());
 
             if (isApplicantRepresentedByASolicitor(caseDetails.getData())) {
-                solicitorService.updateApplicantSolicitorAddressFromPRD(caseDetails, authToken);
+                solicitorService.updateApplicantSolicitorAddressFromPrd(caseDetails, authToken);
             }
         }
     }

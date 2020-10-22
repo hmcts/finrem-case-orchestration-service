@@ -15,15 +15,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RequiredArgsConstructor
 public class UpdateSolicitorDetailsService {
 
-    private final OrganisationService organisationService;
+    private final PrdOrganisationService organisationService;
 
-    public void updateApplicantSolicitorAddressFromPRD(CaseDetails caseDetails, String authToken){
+    public void updateApplicantSolicitorAddressFromPrd(CaseDetails caseDetails, String authToken){
         OrganisationsResponse organisationData = organisationService.retrieveOrganisationsData(authToken);
 
         caseDetails.getData().put(CONTESTED_SOLICITOR_ADDRESS, convertOrganisationAddressToSolicitorAddress(organisationData));
     }
 
-    private Map convertOrganisationAddressToSolicitorAddress (OrganisationsResponse organisationData) {
+    private Map convertOrganisationAddressToSolicitorAddress(OrganisationsResponse organisationData) {
         return new ObjectMapper().convertValue(Address.builder()
             .addressLine1(organisationData.getContactInformation().getAddressLine1())
             .addressLine2(organisationData.getContactInformation().getAddressLine2())

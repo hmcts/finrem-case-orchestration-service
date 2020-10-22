@@ -11,10 +11,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @TestPropertySource(locations = "/application.properties")
-public class PRDOrganisationConfigurationTest {
+public class PrdOrganisationConfigurationTest {
 
     @Autowired
-    private PRDOrganisationConfiguration config;
+    private PrdOrganisationConfiguration config;
 
     @Autowired
     protected RestTemplate restTemplate;
