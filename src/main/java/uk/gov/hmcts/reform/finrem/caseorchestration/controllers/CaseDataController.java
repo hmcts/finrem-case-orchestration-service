@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_REF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 
@@ -48,6 +50,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 public class CaseDataController implements BaseController {
     private final IdamService idamService;
     private final FeatureToggleService featureToggleService;
+    private final UpdateSolicitorDetailsService solicitorService;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for consented journey")
@@ -65,13 +68,14 @@ public class CaseDataController implements BaseController {
     @PostMapping(path = "/contested/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for contested journey")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedDefaultValues(
-            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
-            @RequestBody final CallbackRequest callbackRequest) {
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
+        @RequestBody final CallbackRequest callbackRequest) {
         log.info("Setting default values for contested journey.");
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setOrganisationPolicy(callbackRequest.getCaseDetails());
+        setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails(), authToken);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -102,14 +106,14 @@ public class CaseDataController implements BaseController {
         setOrganisationPolicy(callbackRequest.getCaseDetails());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
-    
+
     @PostMapping(path = "/move-collection/{source}/to/{destination}", consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+        produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> moveValues(
-            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
-            @RequestBody final CallbackRequest callbackRequest,
-            @PathVariable("source") final String source,
-            @PathVariable("destination") final String destination) {
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
+        @RequestBody final CallbackRequest callbackRequest,
+        @PathVariable("source") final String source,
+        @PathVariable("destination") final String destination) {
 
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
@@ -160,6 +164,16 @@ public class CaseDataController implements BaseController {
             caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appPolicy);
 
             log.info("App policy added to case : {}", appPolicy);
+        }
+    }
+
+    private void setApplicantSolicitorOrganisationDetails(CaseDetails caseDetails, String authToken){
+        if (featureToggleService.isShareACaseEnabled() && isContestedApplication(caseDetails)) {
+            log.info("Share a case toggle is: {}", featureToggleService.isShareACaseEnabled());
+
+            if (isApplicantRepresentedByASolicitor(caseDetails.getData())) {
+                solicitorService.updateApplicantSolicitorAddressFromPRD(caseDetails, authToken);
+            }
         }
     }
 }
