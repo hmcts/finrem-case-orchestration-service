@@ -50,12 +50,12 @@ public class HearingDocumentController implements BaseController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocument(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest request) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        CaseDetails caseDetails = request.getCaseDetails();
         log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callback);
+        validateCaseData(request);
 
         List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
         if (!errors.isEmpty()) {
