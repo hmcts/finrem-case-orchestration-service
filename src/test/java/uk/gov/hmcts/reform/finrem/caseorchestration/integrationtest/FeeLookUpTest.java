@@ -19,6 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 
@@ -46,7 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Slf4j
 @Category(IntegrationTest.class)
-public class FeeLookUpTest {
+public class FeeLookUpTest extends BaseTest {
     private static final String FEE_LOOKUP_URL = "/case-orchestration/fee-lookup";
     @Autowired
     private ObjectMapper objectMapper;

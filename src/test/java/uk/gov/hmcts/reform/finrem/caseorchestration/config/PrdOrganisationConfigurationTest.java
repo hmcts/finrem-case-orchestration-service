@@ -17,7 +17,6 @@ import static org.hamcrest.Matchers.is;
 @TestPropertySource(locations = "/application.properties")
 public class PrdOrganisationConfigurationTest extends BaseTest {
 
-
     @Autowired
     private PrdOrganisationConfiguration config;
 
