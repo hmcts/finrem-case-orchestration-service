@@ -48,9 +48,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 @SuppressWarnings("unchecked")
 public class CaseDataController implements BaseController {
+
+    private final UpdateSolicitorDetailsService solicitorService;
     private final IdamService idamService;
     private final FeatureToggleService featureToggleService;
-    private final UpdateSolicitorDetailsService solicitorService;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for consented journey")
