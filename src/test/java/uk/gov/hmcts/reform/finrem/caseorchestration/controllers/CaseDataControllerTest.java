@@ -1,14 +1,18 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
 import java.io.File;
+import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -30,6 +34,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private static final String CONTESTED_HWF_JSON = "/fixtures/contested/hwf.json";
     private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
     private static final String INVALID_CASE_TYPE_JSON = "/fixtures/invalid-case-type.json";
+    private static final String CONTESTED_NO_APPLICANT_SOL_ADDRESS = "/fixtures/contested/contested-upload-case-documents.json";
 
     @MockBean private UpdateSolicitorDetailsService updateSolicitorDetailsService;
     @MockBean private IdamService idamService;
@@ -304,5 +309,76 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").doesNotExist());
+    }
+
+    @Test
+    public void shouldSuccessfullyPopulateApplicantSolicitorAddress() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
+        when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
+        when(updateSolicitorDetailsService.updateApplicantSolicitorAddressFromPrd(
+            isA(String.class))).thenReturn(fakeFirmAddress());
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource(CONTESTED_NO_APPLICANT_SOL_ADDRESS).toURI()));
+        mvc.perform(post("/case-orchestration/contested/set-defaults")
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.applicantSolicitorAddress", is(notNullValue())));
+    }
+
+    //TODO: test for Share a case enabled + Applicant is represented
+    @Test
+    public void shouldNotPopulateApplicantSolicitorAddressAsShareACaseIsDisabled() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
+        when(featureToggleService.isShareACaseEnabled()).thenReturn(false);
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource(CONTESTED_NO_APPLICANT_SOL_ADDRESS).toURI()));
+        mvc.perform(post("/case-orchestration/contested/set-defaults")
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.applicantSolicitorAddress").doesNotExist());
+    }
+
+    //TODO: test for Share a case enabled + App is not represented
+    @Test
+    public void shouldNotPopulateApplicantSolicitorAddressAsApplicantIsNotRepresented() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
+        when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource(CONTESTED_NO_APPLICANT_SOL_ADDRESS).toURI()));
+        mvc.perform(post("/case-orchestration/contested/set-defaults")
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.applicantSolicitorAddress").doesNotExist());
+    }
+
+    //TODO: test for Share a case disabled
+
+    //@Test
+    //public void shouldNotPopulateApplicantSolicitorAddressAsApplicantIsRepresented()
+        //check for isApplicantRepresented in Controller may be redundant
+        //Test scenarios should be if Share A case enabled and Disabled ^^
+
+    private Map fakeFirmAddress(){
+        return new ObjectMapper().convertValue(Address.builder()
+            .addressLine1("Applicant Solicitor Firm")
+            .addressLine2("AddressLine2")
+            .addressLine3("AddressLine3")
+            .county("County")
+            .country("Country")
+            .postTown("Town")
+            .postCode("Postcode")
+            .build(), Map.class);
     }
 }

@@ -3,13 +3,10 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
 import java.util.Map;
-
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 
 @Service
 @RequiredArgsConstructor
@@ -17,10 +14,10 @@ public class UpdateSolicitorDetailsService {
 
     private final PrdOrganisationService organisationService;
 
-    public void updateApplicantSolicitorAddressFromPrd(CaseDetails caseDetails, String authToken) {
+    public Map updateApplicantSolicitorAddressFromPrd(String authToken) {
         OrganisationsResponse organisationData = organisationService.retrieveOrganisationsData(authToken);
 
-        caseDetails.getData().put(CONTESTED_SOLICITOR_ADDRESS, convertOrganisationAddressToSolicitorAddress(organisationData));
+        return convertOrganisationAddressToSolicitorAddress(organisationData);
     }
 
     private Map convertOrganisationAddressToSolicitorAddress(OrganisationsResponse organisationData) {
