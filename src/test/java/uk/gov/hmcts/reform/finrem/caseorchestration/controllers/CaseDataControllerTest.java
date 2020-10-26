@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
-import java.io.File;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -44,98 +43,81 @@ public class CaseDataControllerTest extends BaseControllerTest {
     public void shouldSuccessfullyMoveValues() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(MOVE_VALUES_SAMPLE_JSON)
-                .toURI()));
+        loadRequestContentWith(MOVE_VALUES_SAMPLE_JSON);
         mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/uploadHearingOrderRO")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrderRO[0]").exists())
-                .andExpect(jsonPath("$.data.uploadHearingOrderRO[1]").exists())
-                .andExpect(jsonPath("$.data.uploadHearingOrderRO[2]").exists())
-                .andExpect(jsonPath("$.data.uploadHearingOrder").isEmpty());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.uploadHearingOrderRO[0]").exists())
+            .andExpect(jsonPath("$.data.uploadHearingOrderRO[1]").exists())
+            .andExpect(jsonPath("$.data.uploadHearingOrderRO[2]").exists())
+            .andExpect(jsonPath("$.data.uploadHearingOrder").isEmpty());
     }
 
     @Test
     public void shouldSuccessfullyMoveValuesToNewCollections() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(MOVE_VALUES_SAMPLE_JSON)
-                .toURI()));
+        loadRequestContentWith(MOVE_VALUES_SAMPLE_JSON);
         mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/uploadHearingOrderNew")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrderNew[0]").exists())
-                .andExpect(jsonPath("$.data.uploadHearingOrder").isEmpty());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.uploadHearingOrderNew[0]").exists())
+            .andExpect(jsonPath("$.data.uploadHearingOrder").isEmpty());
     }
 
     @Test
     public void shouldDoNothingWithNonArraySourceValueMove() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(MOVE_VALUES_SAMPLE_JSON)
-                .toURI()));
+        loadRequestContentWith(MOVE_VALUES_SAMPLE_JSON);
         mvc.perform(post("/case-orchestration/move-collection/someString/to/uploadHearingOrder")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
     }
 
     @Test
     public void shouldDoNothingWithNonArrayDestinationValueMove() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(MOVE_VALUES_SAMPLE_JSON)
-                .toURI()));
+        loadRequestContentWith(MOVE_VALUES_SAMPLE_JSON);
         mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/someString")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
     }
 
     @Test
     public void shouldDoNothingWhenSourceIsEmptyMove() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(MOVE_VALUES_SAMPLE_JSON)
-                .toURI()));
+        loadRequestContentWith(MOVE_VALUES_SAMPLE_JSON);
         mvc.perform(post("/case-orchestration/move-collection/empty/to/uploadHearingOrder")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
     }
 
     @Test
     public void shouldSuccessfullyReturnAsAdminConsented() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(CONTESTED_HWF_JSON).toURI()));
+        loadRequestContentWith(CONTESTED_HWF_JSON);
         mvc.perform(post("/case-orchestration/consented/set-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -149,8 +131,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     public void shouldSuccessfullyReturnNotAsAdminConsented() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
+        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/consented/set-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -165,8 +146,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     public void shouldSuccessfullyReturnAsAdminContested() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(CONTESTED_HWF_JSON).toURI()));
+        loadRequestContentWith(CONTESTED_HWF_JSON);
         mvc.perform(post("/case-orchestration/contested/set-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -180,8 +160,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     public void shouldSuccessfullyReturnNotAsAdminContested() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
+        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -196,9 +175,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     public void shouldSuccessfullyReturnAsAdminConsentedPaperCase() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(CONTESTED_HWF_JSON).toURI()));
+        loadRequestContentWith(CONTESTED_HWF_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -214,8 +191,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     public void shouldSuccessfullyReturnNotAsAdminConsentedPaperCase() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
+        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -232,8 +208,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     public void shouldSuccessfullyReturnAsAdminContestedPaperCase() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(CONTESTED_HWF_JSON).toURI()));
+        loadRequestContentWith(CONTESTED_HWF_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -249,8 +224,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     public void shouldSuccessfullyReturnNotAsAdminContestedPaperCase() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
+        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -268,8 +242,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
         when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
+        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -284,8 +257,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
         when(featureToggleService.isShareACaseEnabled()).thenReturn(false);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
+        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -300,8 +272,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
         when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(INVALID_CASE_TYPE_JSON).toURI()));
+        loadRequestContentWith(INVALID_CASE_TYPE_JSON);
         mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -318,8 +289,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(updateSolicitorDetailsService.updateApplicantSolicitorAddressFromPrd(
             isA(String.class))).thenReturn(fakeFirmAddress());
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(CONTESTED_NO_APPLICANT_SOL_ADDRESS).toURI()));
+        loadRequestContentWith(CONTESTED_NO_APPLICANT_SOL_ADDRESS);
         mvc.perform(post("/case-orchestration/contested/set-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -335,8 +305,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
         when(featureToggleService.isShareACaseEnabled()).thenReturn(false);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(CONTESTED_NO_APPLICANT_SOL_ADDRESS).toURI()));
+        loadRequestContentWith(CONTESTED_NO_APPLICANT_SOL_ADDRESS);
         mvc.perform(post("/case-orchestration/contested/set-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -352,8 +321,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
         when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
 
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(CONTESTED_NO_APPLICANT_SOL_ADDRESS).toURI()));
+        loadRequestContentWith(CONTESTED_NO_APPLICANT_SOL_ADDRESS);
         mvc.perform(post("/case-orchestration/contested/set-defaults")
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -367,10 +335,10 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     //@Test
     //public void shouldNotPopulateApplicantSolicitorAddressAsApplicantIsRepresented()
-        //check for isApplicantRepresented in Controller may be redundant
-        //Test scenarios should be if Share A case enabled and Disabled ^^
+    //check for isApplicantRepresented in Controller may be redundant
+    //Test scenarios should be if Share A case enabled and Disabled ^^
 
-    private Map fakeFirmAddress(){
+    private Map fakeFirmAddress() {
         return new ObjectMapper().convertValue(Address.builder()
             .addressLine1("Applicant Solicitor Firm")
             .addressLine2("AddressLine2")
