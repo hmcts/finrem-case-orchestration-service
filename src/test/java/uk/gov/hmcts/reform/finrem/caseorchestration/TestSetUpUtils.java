@@ -27,8 +27,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,7 +146,7 @@ public class TestSetUpUtils {
         ConsentOrder consentOrder = new ConsentOrder();
         consentOrder.setDocumentType(REJECTED_ORDER_TYPE);
         consentOrder.setDocumentLink(caseDocument());
-        consentOrder.setDocumentDateAdded(new Date());
+        consentOrder.setDocumentDateAdded(LocalDate.now());
 
         ConsentOrderData consentOrderData = new ConsentOrderData();
         consentOrderData.setId(id);
