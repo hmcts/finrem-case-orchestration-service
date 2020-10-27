@@ -16,9 +16,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_COLLECTION;
 
-public class OrderRefusalTranslatorTest extends BaseServiceTest {
+public class OrderRefusalTranslatorServiceTest extends BaseServiceTest {
 
-    @Autowired OrderRefusalTranslatorService orderRefusalTranslatorService;
+    @Autowired
+    OrderRefusalTranslatorService orderRefusalTranslatorService;
 
     private CaseDetails caseDetails;
 
