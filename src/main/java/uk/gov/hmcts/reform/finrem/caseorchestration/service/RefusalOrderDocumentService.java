@@ -15,8 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -103,7 +103,7 @@ public class RefusalOrderDocumentService {
     private ConsentOrderData applyCreateConsentOrderData(CaseDocument caseDocument) {
         ConsentOrder consentOrder = new ConsentOrder();
         consentOrder.setDocumentType(documentConfiguration.getRejectedOrderDocType());
-        consentOrder.setDocumentDateAdded(new Date());
+        consentOrder.setDocumentDateAdded(LocalDate.now());
         consentOrder.setDocumentLink(caseDocument);
         consentOrder.setDocumentComment(DOCUMENT_COMMENT);
 
