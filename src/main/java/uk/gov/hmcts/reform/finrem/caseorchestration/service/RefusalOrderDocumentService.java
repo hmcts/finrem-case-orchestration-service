@@ -57,8 +57,7 @@ public class RefusalOrderDocumentService {
         return copyToOrderRefusalCollection(caseDetails);
     }
 
-    public Map<String, Object> previewConsentOrderNotApproved(
-        String authorisationToken, final CaseDetails caseDetails) {
+    public Map<String, Object> previewConsentOrderNotApproved(String authorisationToken, CaseDetails caseDetails) {
         return translateOrderRefusalCollection
             .andThen(generateDocument)
             .andThen(caseDocument -> populateConsentOrderNotApproved(caseDocument, caseDetails))
@@ -70,7 +69,6 @@ public class RefusalOrderDocumentService {
         caseData.put(ORDER_REFUSAL_PREVIEW_COLLECTION, caseDocument);
         return caseData;
     }
-
 
     private Map<String, Object> populateConsentOrderData(ConsentOrderData consentOrderData, CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
