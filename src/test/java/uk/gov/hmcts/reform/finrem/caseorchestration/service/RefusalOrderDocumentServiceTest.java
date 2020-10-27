@@ -12,11 +12,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalData;
 
 import java.io.InputStream;
@@ -44,25 +41,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @ActiveProfiles("test-mock-document-client")
 public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired private ObjectMapper mapper = new ObjectMapper();
+    @Autowired private ObjectMapper objectMapper;
     @Autowired private RefusalOrderDocumentService refusalOrderDocumentService;
 
-    @MockBean
-    private GenericDocumentService genericDocumentService;
+    @MockBean private GenericDocumentService genericDocumentService;
 
-    @Captor
-    private ArgumentCaptor<CaseDetails> generateDocumentCaseDetailsCaptor;
+    @Captor private ArgumentCaptor<CaseDetails> generateDocumentCaseDetailsCaptor;
 
     @Before
     public void setUp() {
-        DocumentConfiguration config = new DocumentConfiguration();
-        config.setRejectedOrderTemplate("test_template");
-        config.setRejectedOrderFileName("test_file");
-        config.setRejectedOrderDocType(REJECTED_ORDER_TYPE);
-
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
-
-        refusalOrderDocumentService = new RefusalOrderDocumentService(genericDocumentService, config, new DocumentHelper(mapper), mapper);
     }
 
     @Test
@@ -135,7 +123,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
     }
 
     private List<CaseDocument> getDocumentList(Map<String, Object> data, String field) {
-        return mapper.convertValue(data.get(field), new TypeReference<>() {});
+        return objectMapper.convertValue(data.get(field), new TypeReference<>() {});
     }
 
     private void assertCaseDataExtraFields() {
@@ -167,13 +155,11 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
     private CaseDocument getCaseDocument(Map<String, Object> caseData) {
         Object orderRefusalPreviewDocument = caseData.get(ORDER_REFUSAL_PREVIEW_COLLECTION);
 
-        return mapper.convertValue(orderRefusalPreviewDocument, CaseDocument.class);
+        return objectMapper.convertValue(orderRefusalPreviewDocument, CaseDocument.class);
     }
 
     private ConsentOrderData consentOrderData(Map<String, Object> caseData) {
-        List<ConsentOrderData> list =
-                mapper.convertValue(caseData.get(UPLOAD_ORDER), new TypeReference<List<ConsentOrderData>>() {
-                });
+        List<ConsentOrderData> list = objectMapper.convertValue(caseData.get(UPLOAD_ORDER), new TypeReference<>() {});
 
         return list
                 .stream()
@@ -181,25 +167,13 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
                 .findFirst().orElseThrow(() -> new IllegalStateException(REJECTED_ORDER_TYPE + " missing"));
     }
 
-    private ContestedConsentOrderData consentInContestedOrderData(Map<String, Object> caseData) {
-        List<ContestedConsentOrderData> list =
-            mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION), new TypeReference<List<ContestedConsentOrderData>>() {
-            });
-
-        return list
-            .stream()
-            .findFirst().orElseThrow(() -> new IllegalStateException(REJECTED_ORDER_TYPE + " missing"));
-    }
-
     private CaseDetails caseDetails(String name) throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(name)) {
-            return mapper.readValue(resourceAsStream, CaseDetails.class);
+            return objectMapper.readValue(resourceAsStream, CaseDetails.class);
         }
     }
 
     private List<OrderRefusalData> refusalOrderCollection(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(ORDER_REFUSAL_COLLECTION),
-                new TypeReference<List<OrderRefusalData>>() {
-                });
+        return objectMapper.convertValue(caseData.get(ORDER_REFUSAL_COLLECTION), new TypeReference<>() {});
     }
 }

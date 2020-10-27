@@ -29,8 +29,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.copyToOrderRefusalCollection;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.translateOrderRefusalCollection;
 
 @Service
 @RequiredArgsConstructor
@@ -39,26 +37,27 @@ public class RefusalOrderDocumentService {
     private static final String DOCUMENT_COMMENT = "System Generated";
 
     private final GenericDocumentService genericDocumentService;
+    private final OrderRefusalTranslatorService orderRefusalTranslatorService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
 
-    private Function<Pair<CaseDetails, String>, CaseDocument> generateDocument = this::applyGenerateRefusalOrder;
-    private Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
-    private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
+    private final Function<Pair<CaseDetails, String>, CaseDocument> generateDocument = this::applyGenerateRefusalOrder;
+    private final Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
+    private final UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
 
     public Map<String, Object> generateConsentOrderNotApproved(
         String authorisationToken, final CaseDetails caseDetails) {
-        translateOrderRefusalCollection
+        orderRefusalTranslatorService.translateOrderRefusalCollection
             .andThen(generateDocument)
             .andThen(createConsentOrderData)
             .andThen(consentOrderData -> populateConsentOrderData(consentOrderData, caseDetails))
             .apply(Pair.of(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken));
-        return copyToOrderRefusalCollection(caseDetails);
+        return orderRefusalTranslatorService.copyToOrderRefusalCollection(caseDetails);
     }
 
     public Map<String, Object> previewConsentOrderNotApproved(String authorisationToken, CaseDetails caseDetails) {
-        return translateOrderRefusalCollection
+        return orderRefusalTranslatorService.translateOrderRefusalCollection
             .andThen(generateDocument)
             .andThen(caseDocument -> populateConsentOrderNotApproved(caseDocument, caseDetails))
             .apply(Pair.of(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken));
