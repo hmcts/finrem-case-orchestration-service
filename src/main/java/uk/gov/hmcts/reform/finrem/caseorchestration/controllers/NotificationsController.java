@@ -192,6 +192,7 @@ public class NotificationsController implements BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
+        log.info("-----------------------------------------------");
         log.info("Debug notification order-not-approved: {}", caseData);
         log.info("Debug notification order-not-approved json: {}", objectMapper.writer().writeValueAsString(caseData));
 
