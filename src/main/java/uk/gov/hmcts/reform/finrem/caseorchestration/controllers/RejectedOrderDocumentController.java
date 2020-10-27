@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -32,7 +30,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class RejectedOrderDocumentController {
 
     private final RefusalOrderDocumentService refusalOrderDocumentService;
-    private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/documents/consent-order-not-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent Order Not Approved Order Generation. Serves as a callback from CCD")
@@ -45,20 +42,12 @@ public class RejectedOrderDocumentController {
     })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateConsentOrderNotApproved(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-            @RequestBody @ApiParam("CaseData") CallbackRequest request) throws JsonProcessingException {
+            @RequestBody @ApiParam("CaseData") CallbackRequest request) {
 
         CaseDetails caseDetails = request.getCaseDetails();
         log.info("Received request to generate 'Consent Order Not Approved' for Case ID: {}", caseDetails.getId());
 
-        log.info("-----------------------------------------------");
-        log.info("Debug docs order-not-approved: {}", caseDetails.getData());
-        log.info("Debug docs order-not-approved json: {}", objectMapper.writer().writeValueAsString(caseDetails.getData()));
-
         Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(authorisationToken, caseDetails);
-
-        log.info("-----------------------------------------------");
-        log.info("Debug after docs order-not-approved: {}", caseData);
-        log.info("Debug after docs order-not-approved json: {}", objectMapper.writer().writeValueAsString(caseData));
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
@@ -81,6 +70,7 @@ public class RejectedOrderDocumentController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> previewConsentOrderNotApproved(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
             @RequestBody @ApiParam("CaseData") CallbackRequest request) {
+
         log.info("Received request to preview generated 'Consent Order Not Approved' for Case ID: {}", request.getCaseDetails().getId());
         Map<String, Object> caseData = refusalOrderDocumentService.previewConsentOrderNotApproved(authorisationToken, request.getCaseDetails());
 

@@ -115,8 +115,7 @@ public class RefusalOrderDocumentService {
     }
 
     private List<ConsentOrderData> convertToUploadOrderList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<ConsentOrderData>>() {
-        });
+        return objectMapper.convertValue(object, new TypeReference<>() {});
     }
 
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
