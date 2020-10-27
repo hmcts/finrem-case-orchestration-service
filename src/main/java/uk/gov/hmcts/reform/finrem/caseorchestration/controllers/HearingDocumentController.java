@@ -29,7 +29,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isDocumentPresentInCaseData;
 
 @RestController
 @RequiredArgsConstructor
@@ -88,7 +87,7 @@ public class HearingDocumentController implements BaseController {
     }
 
     private boolean alreadyHadFirstHearing(CaseDetails caseDetails) {
-        return isDocumentPresentInCaseData(FORM_C, caseDetails)
-            && isDocumentPresentInCaseData(FORM_G, caseDetails);
+        return caseDetails.getData().containsKey(FORM_C)
+            && caseDetails.getData().containsKey(FORM_G);
     }
 }

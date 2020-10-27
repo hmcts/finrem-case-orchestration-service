@@ -48,59 +48,75 @@ public class AdditionalHearingDocumentService {
     private final ObjectMapper objectMapper;
     private final BulkPrintService bulkPrintService;
 
-    public void createAndSendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
-        CaseDocument document = generateAdditionalHearingDocument(caseDetails, authorisationToken);
+    public void createAndSendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws IOException {
+        Map<String, Object> caseData = caseDetails.getData();
+        Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+        Map<String, Object> courtDetails = (Map<String, Object>)
+            courtDetailsMap.get(caseData.get(CaseHearingFunctions.getSelectedCourt(caseData)));
+
+        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+
+        prepareHearingCaseDetails(caseDetailsCopy, courtDetails, caseData.get(HEARING_TYPE), caseData.get(HEARING_DATE),
+            caseData.get(HEARING_TIME), caseData.get(TIME_ESTIMATE), caseData.get(HEARING_ADDITIONAL_INFO));
+
+        CaseDocument document = generateAdditionalHearingDocument(caseDetailsCopy, authorisationToken);
         addAdditionalHearingDocumentToCaseData(caseDetails, document);
         bulkPrintAdditionalHearingDocuments(caseDetails, authorisationToken);
     }
 
-    public CaseDocument generateAdditionalHearingDocument(CaseDetails caseDetails, String authorisationToken) {
-        log.info("Generating Additional Hearing Document for Case ID: {}", caseDetails.getId());
+    public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws IOException {
+        Map<String, Object> caseData = caseDetails.getData();
+        Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+        Map<String, Object> courtDetails = (Map<String, Object>)
+            courtDetailsMap.get(caseData.get(CaseHearingFunctions.getSelectedCourt(caseData)));
+
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        prepareCaseDetailsForDocumentGeneration(caseDetailsCopy);
+        prepareHearingCaseDetails(caseDetailsCopy, courtDetails, caseData.get(HEARING_TYPE), caseData.get(HEARING_DATE),
+            caseData.get(HEARING_TIME), caseData.get(TIME_ESTIMATE), caseData.get(HEARING_ADDITIONAL_INFO));
+
+        CaseDocument document = generateAdditionalHearingDocument(caseDetailsCopy, authorisationToken);
+        addAdditionalHearingDocumentToCaseData(caseDetails, document);
+    }
+
+    private CaseDocument generateAdditionalHearingDocument(CaseDetails caseDetailsCopy, String authorisationToken) {
+        log.info("Generating Additional Hearing Document for Case ID: {}", caseDetailsCopy.getId());
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
             documentConfiguration.getAdditionalHearingTemplate(),
             documentConfiguration.getAdditionalHearingFileName());
     }
 
-    private void prepareCaseDetailsForDocumentGeneration(CaseDetails caseDetails) {
-        try {
-            Map<String, Object> caseData = caseDetails.getData();
-            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> courtDetails = (Map<String, Object>)
-                courtDetailsMap.get(caseData.get(CaseHearingFunctions.getSelectedCourt(caseData)));
+    private void prepareHearingCaseDetails(CaseDetails caseDetails, Map<String, Object> courtDetails,
+                                           Object hearingType, Object hearingDate, Object hearingTime, Object hearingLength, Object hearingInfo) {
+        Map<String, Object> caseData = caseDetails.getData();
 
-            FrcCourtDetails selectedFRCDetails = FrcCourtDetails.builder()
-                .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
-                .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
-                .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
-                .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
-                .build();
+        FrcCourtDetails selectedFRCDetails = FrcCourtDetails.builder()
+            .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
+            .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
+            .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
+            .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
+            .build();
 
-            caseData.put("CCDCaseNumber", caseDetails.getId());
-            caseData.put("DivorceCaseNumber", caseDetails.getData().get(DIVORCE_CASE_NUMBER));
-            caseData.put("ApplicantName", buildFullApplicantName(caseDetails));
-            caseData.put("RespondentName", buildFullRespondentName(caseDetails));
-            caseData.put("HearingType", caseDetails.getData().get(HEARING_TYPE));
-            caseData.put("HearingVenue", selectedFRCDetails.getCourtName());
-            caseData.put("HearingDate", caseDetails.getData().get(HEARING_DATE));
-            caseData.put("HearingTime", caseDetails.getData().get(HEARING_TIME));
-            caseData.put("HearingLength", caseDetails.getData().get(TIME_ESTIMATE));
-            caseData.put("AnyOtherDirections", caseDetails.getData().get(HEARING_ADDITIONAL_INFO));
-            caseData.put("AdditionalHearingDated", new Date());
+        caseData.put("HearingType", hearingType);
+        caseData.put("HearingVenue", selectedFRCDetails.getCourtName());
+        caseData.put("HearingDate", hearingDate);
+        caseData.put("HearingTime", hearingTime);
+        caseData.put("HearingLength", hearingLength);
+        caseData.put("AnyOtherDirections", hearingInfo);
+        caseData.put("AdditionalHearingDated", new Date());
 
-            caseData.put("CourtName", selectedFRCDetails.getCourtName());
-            caseData.put("CourtAddress", selectedFRCDetails.getCourtAddress());
-            caseData.put("CourtPhone", selectedFRCDetails.getPhoneNumber());
-            caseData.put("CourtEmail", selectedFRCDetails.getEmail());
+        caseData.put("CourtName", selectedFRCDetails.getCourtName());
+        caseData.put("CourtAddress", selectedFRCDetails.getCourtAddress());
+        caseData.put("CourtPhone", selectedFRCDetails.getPhoneNumber());
+        caseData.put("CourtEmail", selectedFRCDetails.getEmail());
 
-        } catch (IOException | NullPointerException e) {
-            log.info("Failed to load court details json");
-        }
+        caseData.put("CCDCaseNumber", caseDetails.getId());
+        caseData.put("DivorceCaseNumber", caseData.get(DIVORCE_CASE_NUMBER));
+        caseData.put("ApplicantName", buildFullApplicantName(caseDetails));
+        caseData.put("RespondentName", buildFullRespondentName(caseDetails));
     }
 
-    void addAdditionalHearingDocumentToCaseData(CaseDetails caseDetails, CaseDocument document) {
+    private void addAdditionalHearingDocumentToCaseData(CaseDetails caseDetails, CaseDocument document) {
         AdditionalHearingDocumentData generatedDocumentData = AdditionalHearingDocumentData.builder()
             .additionalHearingDocument(AdditionalHearingDocument.builder()
                 .document(document)

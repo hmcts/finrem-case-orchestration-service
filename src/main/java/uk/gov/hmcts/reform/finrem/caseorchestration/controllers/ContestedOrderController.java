@@ -53,7 +53,6 @@ public class ContestedOrderController implements BaseController {
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 500, message = "Internal Server Error")
         })
-
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> stampFinalOrder(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
             @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {

@@ -155,7 +155,7 @@ public final class CaseHearingFunctions {
     private static String getNorthEastFRC(Map mapOfCaseData, String fieldNamePrefix) {
         String northEastList = (String) mapOfCaseData.get(fieldNamePrefix + NORTHEAST_FRC_LIST);
         if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
-            return CLEAVELAND_COURTLIST;
+            return CLEAVELAND_COURTLIST
         } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
             return NWYORKSHIRE_COURTLIST;
         } else if (HSYORKSHIRE.equalsIgnoreCase(northEastList)) {
