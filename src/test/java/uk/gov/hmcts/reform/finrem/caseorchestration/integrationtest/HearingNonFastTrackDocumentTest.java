@@ -17,7 +17,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,14 +32,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGener
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static java.util.Collections.emptyList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -60,13 +62,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHeari
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @PropertySource(value = "classpath:application.properties")
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Category(IntegrationTest.class)
 public class HearingNonFastTrackDocumentTest {
 
-    private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
-    private static final String API_URL = "/case-orchestration/documents/hearing";
+    private static final String SUBMIT_SCHEDULING_AND_LISTING_DETAILS = "/case-orchestration/submit-scheduling-and-listing-details";
+    private static final String VALIDATE_HEARING =  "/case-orchestration/validate-hearing";
+
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
+    private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
 
     @Autowired
     protected ObjectMapper objectMapper;
@@ -96,18 +99,20 @@ public class HearingNonFastTrackDocumentTest {
     }
 
     @Test
-    public void missingIssueDate() throws Exception {
-        doMissingMustFieldTest(ISSUE_DATE);
+    public void whenMissingIssueDateOrHearingDateOrFastTrackDecision_thenErrorIsReturned() throws Exception {
+        Stream.of(ISSUE_DATE, HEARING_DATE, FAST_TRACK_DECISION)
+            .forEach(this::validateRequestWithMissingField);
     }
 
     @Test
-    public void missingHearingDate() throws Exception {
-        doMissingMustFieldTest(HEARING_DATE);
-    }
-
-    @Test
-    public void missingFastTrackDecision() throws Exception {
-        doMissingMustFieldTest(FAST_TRACK_DECISION);
+    public void whenValidatingHearingData_ExpectWarningForHearingDate() throws Exception {
+        webClient.perform(MockMvcRequestBuilders.post(VALIDATE_HEARING)
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE)
+            .accept(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(content().json(expectedValidateHearingResponseData(emptyList(), ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS)), true));
     }
 
     @Test
@@ -115,23 +120,12 @@ public class HearingNonFastTrackDocumentTest {
         generateDocumentServiceSuccessStub(formCDocumentRequest());
         generateDocumentServiceSuccessStub(formGDocumentRequest());
 
-        MvcResult mvcResult;
-        int requestsMade = 0;
-        do {
-            if (requestsMade > 0) {
-                Thread.sleep(100);
-            }
-            mvcResult = webClient.perform(MockMvcRequestBuilders.post(API_URL)
-                .content(objectMapper.writeValueAsString(request))
-                .header(AUTHORIZATION, AUTH_TOKEN)
-                .contentType(APPLICATION_JSON_VALUE)
-                .accept(APPLICATION_JSON_VALUE))
-                .andReturn();
-        } while (++requestsMade < 5 && mvcResult.getResponse().getStatus() == HttpStatus.INTERNAL_SERVER_ERROR.value());
-
-        if (requestsMade > 1) {
-            System.out.println("generateFormCAndFormGSuccess requests made: " + requestsMade);
-        }
+        MvcResult mvcResult = webClient.perform(MockMvcRequestBuilders.post(SUBMIT_SCHEDULING_AND_LISTING_DETAILS)
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE)
+            .accept(APPLICATION_JSON_VALUE))
+            .andReturn();
 
         assertThat(mvcResult.getResponse().getStatus(), is(HttpStatus.OK.value()));
         assertThat(mvcResult.getResponse().getContentAsString(), is(expectedCaseData()));
@@ -142,7 +136,7 @@ public class HearingNonFastTrackDocumentTest {
         generateDocumentServiceSuccessStub(formCDocumentRequest());
         generateDocumentServiceErrorStub(formGDocumentRequest());
 
-        webClient.perform(MockMvcRequestBuilders.post(API_URL)
+        webClient.perform(MockMvcRequestBuilders.post(SUBMIT_SCHEDULING_AND_LISTING_DETAILS)
             .content(objectMapper.writeValueAsString(request))
             .header(AUTHORIZATION, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE)
@@ -150,17 +144,21 @@ public class HearingNonFastTrackDocumentTest {
             .andExpect(status().isInternalServerError());
     }
 
-    private void doMissingMustFieldTest(String missingFieldKey) throws Exception {
+    private void validateRequestWithMissingField(String missingFieldKey) {
         CaseDetails caseDetails = request.getCaseDetails();
         caseDetails.getData().put(missingFieldKey, null);
 
-        webClient.perform(MockMvcRequestBuilders.post(API_URL)
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE)
-            .accept(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(content().json(expectedErrorData(), true));
+        try {
+            webClient.perform(MockMvcRequestBuilders.post(VALIDATE_HEARING)
+                .content(objectMapper.writeValueAsString(request))
+                .header(AUTHORIZATION, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedValidateHearingResponseData(ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR), emptyList()), true));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private DocumentGenerationRequest formGDocumentRequest() {
@@ -171,10 +169,11 @@ public class HearingNonFastTrackDocumentTest {
         return documentRequest(config.getFormCNonFastTrackTemplate(), config.getFormCFileName());
     }
 
-    private String expectedErrorData() throws JsonProcessingException {
+    private String expectedValidateHearingResponseData(List<String> errors, List<String> warnings) throws JsonProcessingException {
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR))
+                .errors(errors)
+                .warnings(warnings)
                 .build());
     }
 
@@ -186,7 +185,6 @@ public class HearingNonFastTrackDocumentTest {
         return objectMapper.writeValueAsString(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDetails.getData())
-                .warnings(ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS))
                 .build());
     }
 
