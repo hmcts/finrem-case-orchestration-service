@@ -11,13 +11,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOr
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.EMPTY_LIST;
+import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
@@ -50,7 +49,7 @@ public class ConsentOrderNotApprovedDocumentService {
         addGeneralOrderIfApplicable(caseDetails, documents);
 
         return documents.size() == 1
-            ? EMPTY_LIST  // if only cover letter then print nothing
+            ? emptyList()  // if only cover letter then print nothing
             : documents;
     }
 
@@ -91,7 +90,7 @@ public class ConsentOrderNotApprovedDocumentService {
             log.info("Extracting 'uploadOrder' from case data for bulk print.");
             List<Map> documentList = ofNullable(caseData.get(UPLOAD_ORDER))
                 .map(i -> (List<Map>) i)
-                .orElse(Collections.emptyList());
+                .orElse(emptyList());
 
             if (!documentList.isEmpty()) {
                 Map<String, Object> value = ((Map) getLastMapValue.apply(documentList).get(VALUE));
@@ -107,7 +106,7 @@ public class ConsentOrderNotApprovedDocumentService {
             }
         }
 
-        return Collections.emptyList();
+        return emptyList();
     }
 
     private List<ContestedConsentOrderData> consentOrderInContestedNotApprovedList(Map<String, Object> caseData) {

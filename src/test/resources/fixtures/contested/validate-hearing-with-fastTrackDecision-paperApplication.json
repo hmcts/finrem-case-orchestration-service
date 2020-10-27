@@ -26,6 +26,7 @@
       },
       "solicitorFirm": "Mr",
       "solicitorName": "Solictor",
+      "applicantSolicitorConsentForEmails": "Yes",
       "applicantLName": "Guy",
       "authorisation3": "2010-01-01",
       "solicitorEmail": "test@admin.com",

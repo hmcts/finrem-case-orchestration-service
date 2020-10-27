@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
@@ -31,7 +32,7 @@ public class ValidateHearingService {
         String fastTrackDecision = Objects.toString(caseData.get(FAST_TRACK_DECISION), "");
 
         return Stream.of(issueDate, hearingDate, fastTrackDecision).anyMatch(StringUtils::isBlank)
-            ? ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR) : ImmutableList.of();
+            ? ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR) : emptyList();
     }
 
     public List<String> validateHearingWarnings(CaseDetails caseDetails) {
@@ -44,19 +45,17 @@ public class ValidateHearingService {
 
         boolean fastTrackApplication = isFastTrackApplication.apply(caseData);
         if (fastTrackApplication) {
-            if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(6), issueLocalDate.plusWeeks(10),
-                    hearingLocalDate)) {
+            if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(6), issueLocalDate.plusWeeks(10), hearingLocalDate)) {
                 return ImmutableList.of(DATE_BETWEEN_6_AND_10_WEEKS);
             }
-        } else if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(12), issueLocalDate.plusWeeks(16),
-                hearingLocalDate)) {
+        } else if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(12), issueLocalDate.plusWeeks(16), hearingLocalDate)) {
             return ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS);
         }
-        return ImmutableList.of();
+
+        return emptyList();
     }
 
-    private static boolean isDateInBetweenIncludingEndPoints(final LocalDate min, final LocalDate max,
-                                                            final LocalDate date) {
+    private static boolean isDateInBetweenIncludingEndPoints(LocalDate min, LocalDate max, LocalDate date) {
         return !(date.isBefore(min) || date.isAfter(max));
     }
 }
