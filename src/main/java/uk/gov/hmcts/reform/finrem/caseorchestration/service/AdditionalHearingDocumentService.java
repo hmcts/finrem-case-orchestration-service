@@ -27,12 +27,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_INFO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE_CT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LOCAL_COURT_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TIME_ESTIMATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TIME_ESTIMATE_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullApplicantName;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullRespondentName;
@@ -57,7 +63,8 @@ public class AdditionalHearingDocumentService {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
 
         prepareHearingCaseDetails(caseDetailsCopy, courtDetails, caseData.get(HEARING_TYPE), caseData.get(HEARING_DATE),
-            caseData.get(HEARING_TIME), caseData.get(TIME_ESTIMATE), caseData.get(HEARING_ADDITIONAL_INFO));
+            caseData.get(HEARING_TIME), caseData.get(TIME_ESTIMATE));
+        caseDetailsCopy.getData().put("AnyOtherDirections", caseData.get(HEARING_ADDITIONAL_INFO));
 
         CaseDocument document = generateAdditionalHearingDocument(caseDetailsCopy, authorisationToken);
         addAdditionalHearingDocumentToCaseData(caseDetails, document);
@@ -65,14 +72,15 @@ public class AdditionalHearingDocumentService {
     }
 
     public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws IOException {
-        Map<String, Object> caseData = caseDetails.getData();
+        Map<String, Object> hearingData = (Map<String, Object>) caseDetails.getData().get(DIRECTION_DETAILS_COLLECTION_CT);
+        Map<String, Object> courtData = (Map<String, Object>) hearingData.get(LOCAL_COURT_CT);
         Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
         Map<String, Object> courtDetails = (Map<String, Object>)
-            courtDetailsMap.get(caseData.get(CaseHearingFunctions.getSelectedCourt(caseData)));
+            courtDetailsMap.get(courtData.get(CaseHearingFunctions.getSelectedCourtComplexType(hearingData)));
 
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        prepareHearingCaseDetails(caseDetailsCopy, courtDetails, caseData.get(HEARING_TYPE), caseData.get(HEARING_DATE),
-            caseData.get(HEARING_TIME), caseData.get(TIME_ESTIMATE), caseData.get(HEARING_ADDITIONAL_INFO));
+        prepareHearingCaseDetails(caseDetailsCopy, courtDetails, hearingData.get(HEARING_TYPE_CT), hearingData.get(HEARING_DATE_CT),
+            hearingData.get(HEARING_TIME_CT), hearingData.get(TIME_ESTIMATE_CT));
 
         CaseDocument document = generateAdditionalHearingDocument(caseDetailsCopy, authorisationToken);
         addAdditionalHearingDocumentToCaseData(caseDetails, document);
@@ -87,7 +95,7 @@ public class AdditionalHearingDocumentService {
     }
 
     private void prepareHearingCaseDetails(CaseDetails caseDetails, Map<String, Object> courtDetails,
-                                           Object hearingType, Object hearingDate, Object hearingTime, Object hearingLength, Object hearingInfo) {
+                                           Object hearingType, Object hearingDate, Object hearingTime, Object hearingLength) {
         Map<String, Object> caseData = caseDetails.getData();
 
         FrcCourtDetails selectedFRCDetails = FrcCourtDetails.builder()
@@ -102,7 +110,6 @@ public class AdditionalHearingDocumentService {
         caseData.put("HearingDate", hearingDate);
         caseData.put("HearingTime", hearingTime);
         caseData.put("HearingLength", hearingLength);
-        caseData.put("AnyOtherDirections", hearingInfo);
         caseData.put("AdditionalHearingDated", new Date());
 
         caseData.put("CourtName", selectedFRCDetails.getCourtName());

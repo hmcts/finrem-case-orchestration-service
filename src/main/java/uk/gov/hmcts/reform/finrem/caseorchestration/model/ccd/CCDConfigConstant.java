@@ -63,6 +63,13 @@ public class CCDConfigConstant {
     public static final String NORTHWEST_FRC_LIST = "northWestFRCList";
     public static final String LONDON_FRC_LIST = "londonFRCList";
     public static final String MIDLANDS_FRC_LIST = "midlandsFRCList";
+    public static final String REGION_CT = "region";
+    public static final String WALES_FRC_LIST_CT = "walesList";
+    public static final String SOUTHEAST_FRC_LIST_CT = "southEastList";
+    public static final String NORTHEAST_FRC_LIST_CT = "northEastList";
+    public static final String NORTHWEST_FRC_LIST_CT = "northWestList";
+    public static final String LONDON_FRC_LIST_CT = "londonList";
+    public static final String MIDLANDS_FRC_LIST_CT = "midlandsList";
     public static final String LIVERPOOL = "liverpool";
     public static final String MANCHESTER = "manchester";
     public static final String OTHER = "other";
@@ -308,4 +315,10 @@ public class CCDConfigConstant {
     public static final String HEARING_DATE = "hearingDate";
     public static final String HEARING_TIME = "hearingTime";
     public static final String HEARING_ADDITIONAL_INFO = "additionalInformationAboutHearing";
+    public static final String DIRECTION_DETAILS_COLLECTION_CT = "directionDetailsCollection";
+    public static final String LOCAL_COURT_CT = "localCourt";
+    public static final String HEARING_TYPE_CT = "typeOfHearing";
+    public static final String TIME_ESTIMATE_CT = "timeEstimate";
+    public static final String HEARING_DATE_CT = "dateOfHearing";
+    public static final String HEARING_TIME_CT = "hearingTime";
 }
