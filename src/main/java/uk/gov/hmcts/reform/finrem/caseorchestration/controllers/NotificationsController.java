@@ -306,6 +306,9 @@ public class NotificationsController implements BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
+        log.info("NC data before {}", callbackRequest.getCaseDetailsBefore());
+        log.info("NC data {}", callbackRequest.getCaseDetails());
+
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmail(callbackRequest);

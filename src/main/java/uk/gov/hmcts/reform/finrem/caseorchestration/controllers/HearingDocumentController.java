@@ -57,6 +57,9 @@ public class HearingDocumentController implements BaseController {
 
         validateCaseData(callback);
 
+        log.info("HDC before data before {}", callback.getCaseDetailsBefore());
+        log.info("HDC before data {}", callback.getCaseDetails());
+
         List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
         if (!errors.isEmpty()) {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
@@ -81,6 +84,9 @@ public class HearingDocumentController implements BaseController {
                 hearingService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
             }
         }
+
+        log.info("HDC after data before {}", callback.getCaseDetailsBefore());
+        log.info("HDC after data {}", callback.getCaseDetails());
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
         return ResponseEntity.ok(
