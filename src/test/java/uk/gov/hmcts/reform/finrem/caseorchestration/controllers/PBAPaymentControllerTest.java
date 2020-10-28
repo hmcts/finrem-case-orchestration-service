@@ -148,6 +148,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
                 .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(pbaPaymentService, times(0)).makePayment(anyString(), any());
+        verify(pbaPaymentService, never()).makePayment(anyString(), any());
     }
 }

@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +62,7 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void generateAndAddAdditionalHearingDocument() {
+    public void generateAndAddAdditionalHearingDocument() throws IOException {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
         additionalHearingDocumentService.createAndSendAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 

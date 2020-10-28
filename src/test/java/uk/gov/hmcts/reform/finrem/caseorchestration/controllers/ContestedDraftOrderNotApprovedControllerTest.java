@@ -248,8 +248,8 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
         verify(contestedDraftOrderNotApprovedService, times(1)).getLatestRefusalReason(any());
-        verify(bulkPrintService, times(0)).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService, times(0)).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
     }
 
     private OngoingStubbing<Map<String, Object>> whenServicePopulatesCollection() {

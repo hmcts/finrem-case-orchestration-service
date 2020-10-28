@@ -60,6 +60,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
         when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
+        when(additionalHearingService.alreadyHadFirstHearing(any())).thenReturn(false);
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
@@ -128,6 +129,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void generateAdditionalHearingDocumentSuccess() throws Exception {
         doValidCaseDataSetUpForAdditionalHearing();
+        when(additionalHearingService.alreadyHadFirstHearing(any())).thenReturn(true);
 
         mvc.perform(post(GEN_DOC_URL)
                 .content(requestContent.toString())
@@ -135,19 +137,21 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verify(hearingService,  times(0)).generateHearingDocuments(any(), any());
+        verify(hearingService,  never()).generateHearingDocuments(any(), any());
         verify(additionalHearingService, times(1)).createAndSendAdditionalHearingDocuments(any(), any());
     }
 
     @Test
     public void generateAdditionalGearingDocumentWhenOneAlreadyExists() throws Exception {
+        when(additionalHearingService.alreadyHadFirstHearing(any())).thenReturn(true);
+
         mvc.perform(post(GEN_DOC_URL)
             .content(resourceContentAsString("/fixtures/bulkprint/bulk-print-additional-hearing-exists.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(hearingService,  times(0)).generateHearingDocuments(any(), any());
+        verify(hearingService,  never()).generateHearingDocuments(any(), any());
         verify(additionalHearingService, times(1)).createAndSendAdditionalHearingDocuments(any(), any());
     }
 }

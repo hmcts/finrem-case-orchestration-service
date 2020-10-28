@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.bsp.common.model.shared.in.InputScannedDoc;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.InputScannedDocUrl;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FormAValidator;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FixedListOption;
 
 import javax.annotation.PostConstruct;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;

@@ -27,8 +27,6 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 
 @RestController
@@ -66,7 +64,7 @@ public class HearingDocumentController implements BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        boolean hadFirstHearing = alreadyHadFirstHearing(caseDetails);
+        boolean hadFirstHearing = additionalHearingService.alreadyHadFirstHearing(caseDetails);
 
         if (!hadFirstHearing) {
             caseData.putAll(hearingService.generateHearingDocuments(authorisationToken, caseDetails));
@@ -87,8 +85,25 @@ public class HearingDocumentController implements BaseController {
                 AboutToStartOrSubmitCallbackResponse.builder().data(caseData).warnings(warnings).build());
     }
 
-    private boolean alreadyHadFirstHearing(CaseDetails caseDetails) {
-        return caseDetails.getData().containsKey(FORM_C)
-            && caseDetails.getData().containsKey(FORM_G);
+    @PostMapping(path = "/contested-upload-direction-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocumentDirectionOrder(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) throws IOException {
+        CaseDetails caseDetails = callback.getCaseDetails();
+        validateCaseData(callback);
+        Map<String, Object> caseData = caseDetails.getData();
+
+        if (additionalHearingService.directionDetailsIsAnotherHearing(caseDetails)) {
+            log.info("Storing Additional Hearing Document for Case ID: {}", caseDetails.getId());
+            additionalHearingService.createAndStoreAdditionalHearingDocuments(authorisationToken, caseDetails);
+        }
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }

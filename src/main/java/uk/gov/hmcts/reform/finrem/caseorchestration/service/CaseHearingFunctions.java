@@ -33,6 +33,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LONDON_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_NORTHEAST_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_NORTHWEST_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_PREFIX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
@@ -108,19 +116,20 @@ public final class CaseHearingFunctions {
                 .orElseGet(() -> fastTrackDecision.equalsIgnoreCase("yes"));
     };
 
-    static String getSelectedCourt(Map<String, Object> mapOfCaseData) {
-        return getSelectedCourt(mapOfCaseData, REGION, MIDLANDS_FRC_LIST, LONDON_FRC_LIST, NORTHWEST_FRC_LIST,
-            NORTHEAST_FRC_LIST, SOUTHEAST_FRC_LIST, WALES_FRC_LIST);
-    }
-
     static String getSelectedCourtGA(Map<String, Object> mapOfCaseData) {
-        return "generalApplicationDirections_" + getSelectedCourt(mapOfCaseData, REGION, MIDLANDS_FRC_LIST, LONDON_FRC_LIST, NORTHWEST_FRC_LIST,
-            NORTHEAST_FRC_LIST, SOUTHEAST_FRC_LIST, WALES_FRC_LIST);
+        return GENERAL_APPLICATION_DIRECTIONS_PREFIX + getSelectedCourt(mapOfCaseData, GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION,
+            GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC, GENERAL_APPLICATION_DIRECTIONS_LONDON_FRC, GENERAL_APPLICATION_DIRECTIONS_NORTHWEST_FRC,
+            GENERAL_APPLICATION_DIRECTIONS_NORTHEAST_FRC, GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC, GENERAL_APPLICATION_DIRECTIONS_WALES_FRC);
     }
 
     static String getSelectedCourtComplexType(Map<String, Object> mapOfCaseData) {
         return getSelectedCourt(mapOfCaseData, REGION_CT, MIDLANDS_FRC_LIST_CT, LONDON_FRC_LIST_CT, NORTHWEST_FRC_LIST_CT,
             NORTHEAST_FRC_LIST_CT, SOUTHEAST_FRC_LIST_CT, WALES_FRC_LIST_CT);
+    }
+
+    static String getSelectedCourt(Map<String, Object> mapOfCaseData) {
+        return getSelectedCourt(mapOfCaseData, REGION, MIDLANDS_FRC_LIST, LONDON_FRC_LIST, NORTHWEST_FRC_LIST,
+            NORTHEAST_FRC_LIST, SOUTHEAST_FRC_LIST, WALES_FRC_LIST);
     }
 
     private static String getSelectedCourt(Map<String, Object> mapOfCaseData, String regionListName, String midlandsListName,

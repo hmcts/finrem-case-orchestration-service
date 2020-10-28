@@ -251,6 +251,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_DIRECTIONS_KENTSURREY_COURT = "generalApplicationDirections_kentSurreyCourtList";
     public static final String GENERAL_APPLICATION_DIRECTIONS_NEWPORT_COURT = "generalApplicationDirections_newportCourtList";
     public static final String GENERAL_APPLICATION_DIRECTIONS_SWANSEA_COURT = "generalApplicationDirections_swanseaCourtList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_PREFIX = "generalApplicationDirections_";
     public static final String GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION = "generalApplicationDirectionsAdditionalInformation";
     public static final String GENERAL_APPLICATION_DIRECTIONS_RECITALS = "generalApplicationDirectionsRecitals";
     public static final String GENERAL_APPLICATION_DIRECTIONS_JUDGE_TYPE = "generalApplicationDirectionsJudgeType";
@@ -321,4 +322,5 @@ public class CCDConfigConstant {
     public static final String TIME_ESTIMATE_CT = "timeEstimate";
     public static final String HEARING_DATE_CT = "dateOfHearing";
     public static final String HEARING_TIME_CT = "hearingTime";
+    public static final String IS_ANOTHER_HEARING_CT = "isAnotherHearingYN";
 }
