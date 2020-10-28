@@ -37,6 +37,7 @@
       "authorisation3": "2020-01-01",
       "authorisationFirm": "test",
       "authorisationName": "test",
+      "fastTrackDecision" : "yes",
       "consentOrder": {
         "document_binary_url": "http://file1.binary",
         "document_filename": "string",

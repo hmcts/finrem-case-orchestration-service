@@ -19,25 +19,23 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RunWith(SerenityRunner.class)
 public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
-    private static String APPLICANT_NAME = "Williams";
-    private static String DIVORCE_CASENO = "DD12D12345";
-    private static String SOLICITOR_FIRM = "Michael Jones & Partners";
-    private static String SOLICITOR_NAME = "Jane Smith";
-    private static String SOLICITOR_REF = "JAW052018";
-    private static String GENERAL_ORDER_JSON = "document-rejected-order1.json";
-    private static String CONTESTED_FORM_G_JSON = "validate-hearing-without-fastTrackDecision1.json";
-    private static String MINI_FORM_A_JSON = "documentGeneratePayload1.json";
-    private static String MINI_FORM_A_CONTESTED_JSON = "generate-contested-form-A1.json";
-    private static String CONTESTED_FORM_C_JSON = "validate-hearing-with-fastTrackDecision1.json";
-    private static String APPLICANT_NAME_HEARING = "Guy";
-    private static String SOLICITOR_REF_HEARING = "LL01";
-    private String contestedDir = "/json/contested/";
-    private String consentedDir = "/json/consented/";
+    private static final String APPLICANT_NAME = "Williams";
+    private static final String DIVORCE_CASENO = "DD12D12345";
+    private static final String SOLICITOR_FIRM = "Michael Jones & Partners";
+    private static final String SOLICITOR_NAME = "Jane Smith";
+    private static final String SOLICITOR_REF = "JAW052018";
+    private static final String GENERAL_ORDER_JSON = "document-rejected-order1.json";
+    private static final String CONTESTED_FORM_G_JSON = "validate-hearing-without-fastTrackDecision1.json";
+    private static final String MINI_FORM_A_JSON = "documentGeneratePayload1.json";
+    private static final String MINI_FORM_A_CONTESTED_JSON = "generate-contested-form-A1.json";
+    private static final String CONTESTED_FORM_C_JSON = "validate-hearing-with-fastTrackDecision1.json";
+    private static final String APPLICANT_NAME_HEARING = "Guy";
+    private static final String SOLICITOR_REF_HEARING = "LL01";
+    private static final String contestedDir = "/json/contested/";
+    private static final String consentedDir = "/json/consented/";
 
     private String url1;
     private JsonPath jsonPathEvaluator;
-    @Value("${idam.s2s-auth.microservice}")
-    private String microservice;
 
     @Value("${cos.document.miniform.api}")
     private String generatorUrl;
@@ -48,9 +46,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Value("${document.rejected.order}")
     private String documentRejectedOrderUrl;
 
-    @Value("${cos.document.hearing.api}")
-    private String generatorHearingUrl;
-
     @Value("${cos.document.contested.miniform.api}")
     private String generateContestedUrl;
 
@@ -59,9 +54,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Value("${cos.document.hearing.api}")
     private String generateHearingUrl;
-
-    @Value("${document.approved.order}")
-    private String documentApprovedOrderUrl;
 
     @Value("${case.orchestration.api}")
     private String caseOrchestration;
@@ -92,7 +84,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void verifyRejectedOrderDocumentGenerationPostResponseContent() {
-
         JsonPath jsonPathEvaluator = generateDocument(GENERAL_ORDER_JSON, documentRejectedOrderUrl, consentedDir);
 
         assertTrue(jsonPathEvaluator.get("data.uploadOrder[0].value.DocumentType").toString()
@@ -101,31 +92,26 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void verifyContestedDocumentGenerationPostResponseContent() {
-
         generateDocument(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl, contestedDir);
     }
 
     @Test
     public void verifyContestedDraftDocumentGenerationPostResponseContent() {
-
         generateDocument(MINI_FORM_A_CONTESTED_JSON, generateContestedDraftUrl, contestedDir);
     }
 
     @Test
     public void verifyContestedFormCDocumentGenerationPostResponseContent() {
-
         generateDocument(CONTESTED_FORM_C_JSON, generateHearingUrl, contestedDir);
     }
 
     @Test
     public void verifyContestedFormGDocumentGenerationPostResponseContent() {
-
         generateDocument(CONTESTED_FORM_G_JSON, generateHearingUrl, contestedDir);
     }
 
     @Test
     public void verifyRejectedOrderGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
-
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
             "document", "generalOrder", consentedDir);
 
@@ -136,7 +122,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void verifyGeneratedDocumentCanBeAccessedAndVerifyGetResponseContent() {
-
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_JSON, generatorUrl,
             "document", MINI_FORM_A, consentedDir);
 
@@ -147,7 +132,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void verifyGeneratedContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
-
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl,
             "document", MINI_FORM_A, contestedDir);
 
@@ -159,7 +143,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void verifyGeneratedFormCContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
-
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_C_JSON, generateHearingUrl,
             "document", "hearing", contestedDir);
 
@@ -171,7 +154,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void verifyGeneratedFormGContestedDocumentCanBeAccessedAndVerifyGetResponseContent() {
-
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_G_JSON, generateHearingUrl,
             "document", "hearing", contestedDir);
 
@@ -183,7 +165,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void downloadDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
-
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_JSON, generatorUrl,
             BINARY_URL_TYPE, MINI_FORM_A, consentedDir);
 
@@ -198,7 +179,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void downloadRejectOrderDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
-
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(GENERAL_ORDER_JSON, documentRejectedOrderUrl,
             BINARY_URL_TYPE, "generalOrder", consentedDir);
         String documentContent = utils.downloadPdfAndParseToString(fileRetrieveUrl(documentUrl));
@@ -207,7 +187,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void downloadContestedDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
-
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(MINI_FORM_A_CONTESTED_JSON, generateContestedUrl,
             BINARY_URL_TYPE, MINI_FORM_A, contestedDir);
 
@@ -219,7 +198,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void downloadContestedFormCDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
-
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_C_JSON, generateHearingUrl,
             BINARY_URL_TYPE, "hearing", contestedDir);
 
@@ -232,7 +210,6 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
 
     @Test
     public void downloadContestedFormGDocumentAndVerifyContentAgainstOriginalJsonFileInput() {
-
         String documentUrl = getDocumentUrlOrDocumentBinaryUrl(CONTESTED_FORM_G_JSON, generateHearingUrl,
             BINARY_URL_TYPE, "hearing", contestedDir);
 
@@ -304,11 +281,9 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     }
 
     private String fileRetrieveUrl(String url) {
-        if (url != null && url.contains("dm-store:8080")) {
-            return url.replace("http://dm-store:8080", dmStoreBaseUrl);
-        }
-
-        return url;
+        return url != null && url.contains("dm-store:8080")
+            ? url.replace("http://dm-store:8080", dmStoreBaseUrl)
+            : url;
     }
 }
 
