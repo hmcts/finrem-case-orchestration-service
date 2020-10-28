@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
@@ -16,7 +16,7 @@ public class ConsentOrder {
     @JsonProperty("DocumentLink")
     private CaseDocument documentLink;
     @JsonProperty("DocumentDateAdded")
-    private Date documentDateAdded;
+    private LocalDate documentDateAdded;
     @JsonProperty("DocumentComment")
     private String documentComment;
     @JsonProperty("DocumentFileName")

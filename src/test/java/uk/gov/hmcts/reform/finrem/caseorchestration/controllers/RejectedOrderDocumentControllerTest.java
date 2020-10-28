@@ -22,9 +22,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -50,6 +52,8 @@ public class RejectedOrderDocumentControllerTest {
 
     private static final String API_URL = "/case-orchestration/documents/consent-order-not-approved";
     private static final String PREVIEW_API_URL = "/case-orchestration/documents/preview-consent-order-not-approved";
+
+    private static final Pattern DATE_WITH_OPTIONAL_TIMEZONE_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}(\\+.{5})?$");
 
     @Autowired
     private WebApplicationContext applicationContext;
@@ -83,13 +87,10 @@ public class RejectedOrderDocumentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.uploadOrder[0].id", is(notNullValue())))
                 .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentType", is(REJECTED_ORDER_TYPE)))
-                .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentDateAdded", is(notNullValue())))
+                .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentDateAdded", matchesRegex(DATE_WITH_OPTIONAL_TIMEZONE_PATTERN)))
                 .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_url", is(DOC_URL)))
-                .andExpect(
-                        jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_filename", is(FILE_NAME)))
-                .andExpect(
-                        jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_binary_url",
-                                is(BINARY_URL)))
+                .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_filename", is(FILE_NAME)))
+                .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_binary_url", is(BINARY_URL)))
                 .andExpect(jsonPath("$.errors", hasSize(0)))
                 .andExpect(jsonPath("$.warnings", hasSize(0)));
     }
@@ -128,11 +129,8 @@ public class RejectedOrderDocumentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.orderRefusalPreviewDocument", is(notNullValue())))
                 .andExpect(jsonPath("$.data.orderRefusalPreviewDocument.document_url", is(DOC_URL)))
-                .andExpect(
-                        jsonPath("$.data.orderRefusalPreviewDocument.document_filename", is(FILE_NAME)))
-                .andExpect(
-                        jsonPath("$.data.orderRefusalPreviewDocument.document_binary_url",
-                                is(BINARY_URL)))
+                .andExpect(jsonPath("$.data.orderRefusalPreviewDocument.document_filename", is(FILE_NAME)))
+                .andExpect(jsonPath("$.data.orderRefusalPreviewDocument.document_binary_url", is(BINARY_URL)))
                 .andExpect(jsonPath("$.errors", hasSize(0)))
                 .andExpect(jsonPath("$.warnings", hasSize(0)));
     }

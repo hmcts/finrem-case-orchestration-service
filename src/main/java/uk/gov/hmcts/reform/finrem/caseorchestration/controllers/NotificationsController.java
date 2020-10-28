@@ -198,6 +198,7 @@ public class NotificationsController implements BaseController {
                 notificationService.sendContestOrderNotApprovedEmail(callbackRequest);
             }
         }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
