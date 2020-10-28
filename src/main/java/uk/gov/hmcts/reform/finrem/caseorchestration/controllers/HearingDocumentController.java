@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingServi
 import javax.validation.constraints.NotNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -94,16 +96,26 @@ public class HearingDocumentController implements BaseController {
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocumentDirectionOrder(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) throws IOException {
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
         validateCaseData(callback);
         Map<String, Object> caseData = caseDetails.getData();
+        List<String> errors = new ArrayList<>();
 
         if (additionalHearingService.directionDetailsIsAnotherHearing(caseDetails)) {
             log.info("Storing Additional Hearing Document for Case ID: {}", caseDetails.getId());
-            additionalHearingService.createAndStoreAdditionalHearingDocuments(authorisationToken, caseDetails);
+            try {
+                additionalHearingService.createAndStoreAdditionalHearingDocuments(authorisationToken, caseDetails);
+            } catch (CourtDetailsParseException e) {
+                log.error(e.getMessage());
+                errors.add(e.getMessage());
+            }
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(caseData)
+            .errors(errors)
+            .build());
     }
 }

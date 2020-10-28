@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
@@ -88,11 +89,18 @@ public class AdditionalHearingDocumentService {
             && caseDetails.getData().containsKey(FORM_G);
     }
 
-    public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws IOException {
+    public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws CourtDetailsParseException {
         Map<String, Object> hearingData = objectMapper.convertValue(caseDetails.getData().get(DIRECTION_DETAILS_COLLECTION_CT),
             new TypeReference<List<Map>>() {}).get(0);
         Map<String, Object> courtData = (Map<String, Object>) hearingData.get(LOCAL_COURT_CT);
-        Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+        Map<String, Object> courtDetailsMap;
+
+        try {
+            courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+        } catch (IOException e) {
+            throw new CourtDetailsParseException();
+        }
+
         Map<String, Object> courtDetails = (Map<String, Object>)
             courtDetailsMap.get(courtData.get(CaseHearingFunctions.getSelectedCourtComplexType(hearingData)));
 

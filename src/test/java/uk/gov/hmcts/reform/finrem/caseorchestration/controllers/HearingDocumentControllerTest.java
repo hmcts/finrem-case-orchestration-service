@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
@@ -21,6 +22,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -39,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 @WebMvcTest(HearingDocumentController.class)
 public class HearingDocumentControllerTest extends BaseControllerTest {
     private static final String GEN_DOC_URL = "/case-orchestration/documents/hearing";
+    private static final String DIRECTION_ORDER_URL = "/case-orchestration/contested-upload-direction-order";
 
     @MockBean
     private HearingDocumentService hearingService;
@@ -153,5 +156,44 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         verify(hearingService,  never()).generateHearingDocuments(any(), any());
         verify(additionalHearingService, times(1)).createAndSendAdditionalHearingDocuments(any(), any());
+    }
+
+    @Test
+    public void generateHearingDocumentDirectionOrder_isAnotherHearingTrue() throws Exception {
+        when(additionalHearingService.directionDetailsIsAnotherHearing(any())).thenReturn(true);
+
+        mvc.perform(post(DIRECTION_ORDER_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(additionalHearingService, times(1)).createAndStoreAdditionalHearingDocuments(any(), any());
+    }
+
+    @Test
+    public void generateHearingDocumentDirectionOrder_isAnotherHearingFalse() throws Exception {
+        when(additionalHearingService.directionDetailsIsAnotherHearing(any())).thenReturn(false);
+
+        mvc.perform(post(DIRECTION_ORDER_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(additionalHearingService, never()).createAndStoreAdditionalHearingDocuments(any(), any());
+    }
+
+    @Test
+    public void generateHearingDocumentDirectionOrder_CourtDetailsParseException() throws Exception {
+        when(additionalHearingService.directionDetailsIsAnotherHearing(any())).thenReturn(true);
+        doThrow(new CourtDetailsParseException()).when(additionalHearingService).createAndStoreAdditionalHearingDocuments(any(), any());
+
+        mvc.perform(post(DIRECTION_ORDER_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors[0]", is(new CourtDetailsParseException().getMessage())));
     }
 }
