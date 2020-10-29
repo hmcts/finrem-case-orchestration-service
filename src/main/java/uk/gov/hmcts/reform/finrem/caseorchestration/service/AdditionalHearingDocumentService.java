@@ -74,8 +74,7 @@ public class AdditionalHearingDocumentService {
     }
 
     public boolean alreadyHadFirstHearing(CaseDetails caseDetails) {
-        return caseDetails.getData().containsKey(FORM_C)
-            && caseDetails.getData().containsKey(FORM_G);
+        return caseDetails.getData().containsKey(FORM_C);
     }
 
     public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws CourtDetailsParseException {
