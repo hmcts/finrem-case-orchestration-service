@@ -35,8 +35,8 @@ public class UploadContestedCaseDocumentControllerTest extends BaseControllerTes
                 .content(resourceContentAsString(CONTESTED_UPLOAD_DOCUMENTS_DATA))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print());
+            .andExpect(status().isOk())
+            .andDo(print());
         verify(service, times(1)).filterDocumentsToRelevantParty(any());
     }
 }

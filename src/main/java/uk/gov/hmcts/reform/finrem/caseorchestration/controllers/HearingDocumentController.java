@@ -44,13 +44,13 @@ public class HearingDocumentController implements BaseController {
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-                    response = AboutToStartOrSubmitCallbackResponse.class),
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 500, message = "Internal Server Error")})
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocument(
-            @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) throws IOException {
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) throws IOException {
 
         CaseDetails caseDetails = callback.getCaseDetails();
         log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
@@ -60,8 +60,8 @@ public class HearingDocumentController implements BaseController {
         List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
         if (!errors.isEmpty()) {
             return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors(errors)
-                    .build());
+                .errors(errors)
+                .build());
         }
 
         Map<String, Object> caseData = caseDetails.getData();
@@ -84,11 +84,11 @@ public class HearingDocumentController implements BaseController {
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
         return ResponseEntity.ok(
-                AboutToStartOrSubmitCallbackResponse.builder().data(caseData).warnings(warnings).build());
+            AboutToStartOrSubmitCallbackResponse.builder().data(caseData).warnings(warnings).build());
     }
 
     @PostMapping(path = "/contested-upload-direction-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
+    @ApiOperation(value = "Handles direction order generation. Serves as a callback from CCD")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
@@ -102,14 +102,12 @@ public class HearingDocumentController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
         List<String> errors = new ArrayList<>();
 
-        if (additionalHearingService.directionDetailsIsAnotherHearing(caseDetails)) {
-            log.info("Storing Additional Hearing Document for Case ID: {}", caseDetails.getId());
-            try {
-                additionalHearingService.createAndStoreAdditionalHearingDocuments(authorisationToken, caseDetails);
-            } catch (CourtDetailsParseException e) {
-                log.error(e.getMessage());
-                errors.add(e.getMessage());
-            }
+        log.info("Storing Additional Hearing Document for Case ID: {}", caseDetails.getId());
+        try {
+            additionalHearingService.createAndStoreAdditionalHearingDocuments(authorisationToken, caseDetails);
+        } catch (CourtDetailsParseException e) {
+            log.error(e.getMessage());
+            errors.add(e.getMessage());
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse

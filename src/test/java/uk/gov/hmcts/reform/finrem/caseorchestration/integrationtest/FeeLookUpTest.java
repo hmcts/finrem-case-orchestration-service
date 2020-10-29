@@ -61,7 +61,7 @@ public class FeeLookUpTest {
 
     public CallbackRequest request(ApplicationType applicationType) throws IOException {
         String fileName = applicationType == CONSENTED
-                ? "/fixtures/fee-lookup.json" : "/fixtures/contested/fee-lookup.json";
+            ? "/fixtures/fee-lookup.json" : "/fixtures/contested/fee-lookup.json";
         try (InputStream resourceAsStream = getClass().getResourceAsStream(fileName)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
@@ -96,17 +96,17 @@ public class FeeLookUpTest {
     private String expectedBody(ApplicationType applicationType) {
         String amount = applicationType == CONSENTED ? "5000" : "25500";
         return "{\"data\":{"
-                + "\"amountToPay\":\"" + amount + "\","
-                + "\"orderSummary\":{\"PaymentReference\":\"ABCD\","
-                + "\"PaymentTotal\":\"" + amount + "\","
-                + "\"Fees\":[{\"value\":"
-                + "{\"FeeDescription\":\"Application (without notice)\","
-                + "\"FeeVersion\":\"1\","
-                + "\"FeeCode\":\"FEE0600\","
-                + "\"FeeAmount\":\"" + amount + "\"}}]}"
-                + "},"
-                + "\"errors\":null,"
-                + "\"warnings\":null}";
+            + "\"amountToPay\":\"" + amount + "\","
+            + "\"orderSummary\":{\"PaymentReference\":\"ABCD\","
+            + "\"PaymentTotal\":\"" + amount + "\","
+            + "\"Fees\":[{\"value\":"
+            + "{\"FeeDescription\":\"Application (without notice)\","
+            + "\"FeeVersion\":\"1\","
+            + "\"FeeCode\":\"FEE0600\","
+            + "\"FeeAmount\":\"" + amount + "\"}}]}"
+            + "},"
+            + "\"errors\":null,"
+            + "\"warnings\":null}";
     }
 
     private void stubFeeLookUp(ApplicationType applicationType) {
@@ -120,10 +120,10 @@ public class FeeLookUpTest {
     private String response(ApplicationType applicationType) {
         int amount = applicationType == CONSENTED ? 50 : 255;
         return "{\n"
-                + "  \"code\": \"FEE0600\",\n"
-                + "  \"description\": \"Application (without notice)\",\n"
-                + "  \"version\": 1,\n"
-                + "  \"fee_amount\": " + amount + "\n"
-                + "}";
+            + "  \"code\": \"FEE0600\",\n"
+            + "  \"description\": \"Application (without notice)\",\n"
+            + "  \"version\": 1,\n"
+            + "  \"fee_amount\": " + amount + "\n"
+            + "}";
     }
 }

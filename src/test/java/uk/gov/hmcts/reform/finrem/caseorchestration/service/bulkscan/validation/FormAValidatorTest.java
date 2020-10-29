@@ -92,50 +92,50 @@ public class FormAValidatorTest {
     @Before
     public void setup() {
         mandatoryFieldsWithValues = asList(
-                new OcrDataField(DIVORCE_CASE_NUMBER, "DD12D12345"),
-                new OcrDataField(APPLICANT_FULL_NAME, "Peter Griffin"),
-                new OcrDataField(RESPONDENT_FULL_NAME, "Louis Griffin"),
-                new OcrDataField(PROVISION_MADE_FOR, "in connection with matrimonial or civil partnership proceedings"),
-                new OcrDataField(NATURE_OF_APPLICATION, "Periodical Payment Order, Pension Attachment Order"),
-                new OcrDataField(APPLICANT_INTENDS_TO, "ApplyToCourtFor"),
-                new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "Yes"),
-                new OcrDataField(DIVORCE_STAGE_REACHED, "Decree Nisi"),
-                new OcrDataField(APPLICANT_REPRESENTED, "I am not represented by a solicitor in these proceedings"),
-                new OcrDataField(AUTHORISATION_SIGNED, "Yes"),
-                new OcrDataField(AUTHORISATION_SIGNED_BY, "Applicant's solicitor"),
-                new OcrDataField(AUTHORISATION_DATE, "12/03/2020"),
-                new OcrDataField(APPLICANT_ADDRESS_LINE_1, "Road"),
-                new OcrDataField(APPLICANT_ADDRESS_POSTCODE, "SW9 9SD"),
-                new OcrDataField(RESPONDENT_ADDRESS_LINE_1, "Avenue"),
-                new OcrDataField(RESPONDENT_ADDRESS_POSTCODE, "SW1 9SD")
+            new OcrDataField(DIVORCE_CASE_NUMBER, "DD12D12345"),
+            new OcrDataField(APPLICANT_FULL_NAME, "Peter Griffin"),
+            new OcrDataField(RESPONDENT_FULL_NAME, "Louis Griffin"),
+            new OcrDataField(PROVISION_MADE_FOR, "in connection with matrimonial or civil partnership proceedings"),
+            new OcrDataField(NATURE_OF_APPLICATION, "Periodical Payment Order, Pension Attachment Order"),
+            new OcrDataField(APPLICANT_INTENDS_TO, "ApplyToCourtFor"),
+            new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "Yes"),
+            new OcrDataField(DIVORCE_STAGE_REACHED, "Decree Nisi"),
+            new OcrDataField(APPLICANT_REPRESENTED, "I am not represented by a solicitor in these proceedings"),
+            new OcrDataField(AUTHORISATION_SIGNED, "Yes"),
+            new OcrDataField(AUTHORISATION_SIGNED_BY, "Applicant's solicitor"),
+            new OcrDataField(AUTHORISATION_DATE, "12/03/2020"),
+            new OcrDataField(APPLICANT_ADDRESS_LINE_1, "Road"),
+            new OcrDataField(APPLICANT_ADDRESS_POSTCODE, "SW9 9SD"),
+            new OcrDataField(RESPONDENT_ADDRESS_LINE_1, "Avenue"),
+            new OcrDataField(RESPONDENT_ADDRESS_POSTCODE, "SW1 9SD")
         );
 
         optionalFieldsWithValues = asList(
-                new OcrDataField(HWF_NUMBER, "123456"),
-                new OcrDataField(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "a lump sum order,a pension compensation sharing order"),
-                new OcrDataField(APPLICANT_SOLICITOR_NAME, "Saul Call"),
-                new OcrDataField(APPLICANT_SOLICITOR_FIRM, "Better Divorce Ltd"),
-                new OcrDataField(APPLICANT_SOLICITOR_DX_NUMBER, "DX123"),
-                new OcrDataField(APPLICANT_SOLICITOR_REFERENCE, "SOL-RED"),
-                new OcrDataField(APPLICANT_PBA_NUMBER, "PBA123456"),
-                new OcrDataField(APPLICANT_ADDRESS_TOWN, "Manchester"),
-                new OcrDataField(APPLICANT_ADDRESS_COUNTY, "There"),
-                new OcrDataField(APPLICANT_ADDRESS_COUNTRY, "UK"),
-                new OcrDataField(APPLICANT_PHONE, "0712345654"),
-                new OcrDataField(APPLICANT_EMAIL, "applicant@divorcity.com"),
-                new OcrDataField(RESPONDENT_ADDRESS_TOWN, "Bristol"),
-                new OcrDataField(RESPONDENT_ADDRESS_COUNTY, "Here"),
-                new OcrDataField(RESPONDENT_ADDRESS_COUNTRY, "UK"),
-                new OcrDataField(ADDRESS_OF_PROPERTIES, "26 Westminster Avenue"),
-                new OcrDataField(MORTGAGE_DETAILS, "We paid for the house with our mortgage which we split"),
-                new OcrDataField(ORDER_FOR_CHILDREN, "there is no agreement, but the applicant is applying for payments"),
-                new OcrDataField(ORDER_FOR_CHILDREN_NO_AGREEMENT,
-                        "in addition to child support maintenance already paid under a Child Support Agency assessment"),
-                new OcrDataField(CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "Yes"),
-                new OcrDataField(CHILD_SUPPORT_AGENCY_CALCULATION_REASON, "Various reasons why I'm making this application"),
-                new OcrDataField(AUTHORISATION_FIRM, "Better Divorce Ltd"),
-                new OcrDataField(AUTHORISATION_SOLICITOR_ADDRESS, "1 Single Lane, Liverpool, LE5 AV2"),
-                new OcrDataField(AUTHORISATION_SOLICITOR_POSITION, "I'm the CEO")
+            new OcrDataField(HWF_NUMBER, "123456"),
+            new OcrDataField(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "a lump sum order,a pension compensation sharing order"),
+            new OcrDataField(APPLICANT_SOLICITOR_NAME, "Saul Call"),
+            new OcrDataField(APPLICANT_SOLICITOR_FIRM, "Better Divorce Ltd"),
+            new OcrDataField(APPLICANT_SOLICITOR_DX_NUMBER, "DX123"),
+            new OcrDataField(APPLICANT_SOLICITOR_REFERENCE, "SOL-RED"),
+            new OcrDataField(APPLICANT_PBA_NUMBER, "PBA123456"),
+            new OcrDataField(APPLICANT_ADDRESS_TOWN, "Manchester"),
+            new OcrDataField(APPLICANT_ADDRESS_COUNTY, "There"),
+            new OcrDataField(APPLICANT_ADDRESS_COUNTRY, "UK"),
+            new OcrDataField(APPLICANT_PHONE, "0712345654"),
+            new OcrDataField(APPLICANT_EMAIL, "applicant@divorcity.com"),
+            new OcrDataField(RESPONDENT_ADDRESS_TOWN, "Bristol"),
+            new OcrDataField(RESPONDENT_ADDRESS_COUNTY, "Here"),
+            new OcrDataField(RESPONDENT_ADDRESS_COUNTRY, "UK"),
+            new OcrDataField(ADDRESS_OF_PROPERTIES, "26 Westminster Avenue"),
+            new OcrDataField(MORTGAGE_DETAILS, "We paid for the house with our mortgage which we split"),
+            new OcrDataField(ORDER_FOR_CHILDREN, "there is no agreement, but the applicant is applying for payments"),
+            new OcrDataField(ORDER_FOR_CHILDREN_NO_AGREEMENT,
+                "in addition to child support maintenance already paid under a Child Support Agency assessment"),
+            new OcrDataField(CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "Yes"),
+            new OcrDataField(CHILD_SUPPORT_AGENCY_CALCULATION_REASON, "Various reasons why I'm making this application"),
+            new OcrDataField(AUTHORISATION_FIRM, "Better Divorce Ltd"),
+            new OcrDataField(AUTHORISATION_SOLICITOR_ADDRESS, "1 Single Lane, Liverpool, LE5 AV2"),
+            new OcrDataField(AUTHORISATION_SOLICITOR_POSITION, "I'm the CEO")
         );
     }
 
@@ -162,9 +162,9 @@ public class FormAValidatorTest {
     @Test
     public void shouldFailValidationWhenMandatoryFieldsArePresentButEmpty() {
         OcrValidationResult validationResult = formAValidator.validateBulkScanForm(
-                mandatoryFieldsWithValues.stream()
-                        .map(emptyValueOcrDataField)
-                        .collect(Collectors.toList()));
+            mandatoryFieldsWithValues.stream()
+                .map(emptyValueOcrDataField)
+                .collect(Collectors.toList()));
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
         assertThat(validationResult.getErrors(), is(emptyList()));
@@ -174,8 +174,8 @@ public class FormAValidatorTest {
     @Test
     public void shouldPassValidationForOptionalEmptyFields() {
         List<OcrDataField> optionalFieldsWithEmptyValues = optionalFieldsWithValues.stream()
-                .map(emptyValueOcrDataField)
-                .collect(Collectors.toList());
+            .map(emptyValueOcrDataField)
+            .collect(Collectors.toList());
 
         List<OcrDataField> ocrDataFields = new ArrayList<>(mandatoryFieldsWithValues);
         ocrDataFields.addAll(optionalFieldsWithEmptyValues);
@@ -188,97 +188,97 @@ public class FormAValidatorTest {
     @Test
     public void shouldFailFieldsHavingInvalidValues() {
         OcrValidationResult validationResult = formAValidator.validateBulkScanForm(asList(
-                new OcrDataField(HWF_NUMBER, "12345"),
-                new OcrDataField(APPLICANT_FULL_NAME, "Peter"),
-                new OcrDataField(RESPONDENT_FULL_NAME, "Louis"),
-                new OcrDataField(PROVISION_MADE_FOR, "Onions"),
-                new OcrDataField(NATURE_OF_APPLICATION, "Mountains, Forest"),
-                new OcrDataField(APPLICANT_INTENDS_TO, "have breakfast"),
-                new OcrDataField(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "house with pool"),
-                new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "No"),
-                new OcrDataField(DIVORCE_STAGE_REACHED, "The cree"),
-                new OcrDataField(APPLICANT_REPRESENTED, "It's wrong!"),
-                new OcrDataField(APPLICANT_EMAIL, "peter@com"),
-                new OcrDataField(ORDER_FOR_CHILDREN, "Not a valid order for children"),
-                new OcrDataField(ORDER_FOR_CHILDREN_NO_AGREEMENT, "Not a valid reason for no agreement"),
-                new OcrDataField(CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "Decision not yet made"),
-                new OcrDataField(AUTHORISATION_SIGNED_BY, "My cat"),
-                new OcrDataField(AUTHORISATION_DATE, "Date in the moonlight"),
-                new OcrDataField(DATE_OF_BIRTH_CHILD_1, "20 may 2010"),
-                new OcrDataField(DATE_OF_BIRTH_CHILD_2, "yesterday"),
-                new OcrDataField(GENDER_CHILD_1, "book"),
-                new OcrDataField(GENDER_CHILD_2, "pokemon")
+            new OcrDataField(HWF_NUMBER, "12345"),
+            new OcrDataField(APPLICANT_FULL_NAME, "Peter"),
+            new OcrDataField(RESPONDENT_FULL_NAME, "Louis"),
+            new OcrDataField(PROVISION_MADE_FOR, "Onions"),
+            new OcrDataField(NATURE_OF_APPLICATION, "Mountains, Forest"),
+            new OcrDataField(APPLICANT_INTENDS_TO, "have breakfast"),
+            new OcrDataField(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE, "house with pool"),
+            new OcrDataField(APPLYING_FOR_CONSENT_ORDER, "No"),
+            new OcrDataField(DIVORCE_STAGE_REACHED, "The cree"),
+            new OcrDataField(APPLICANT_REPRESENTED, "It's wrong!"),
+            new OcrDataField(APPLICANT_EMAIL, "peter@com"),
+            new OcrDataField(ORDER_FOR_CHILDREN, "Not a valid order for children"),
+            new OcrDataField(ORDER_FOR_CHILDREN_NO_AGREEMENT, "Not a valid reason for no agreement"),
+            new OcrDataField(CHILD_SUPPORT_AGENCY_CALCULATION_MADE, "Decision not yet made"),
+            new OcrDataField(AUTHORISATION_SIGNED_BY, "My cat"),
+            new OcrDataField(AUTHORISATION_DATE, "Date in the moonlight"),
+            new OcrDataField(DATE_OF_BIRTH_CHILD_1, "20 may 2010"),
+            new OcrDataField(DATE_OF_BIRTH_CHILD_2, "yesterday"),
+            new OcrDataField(GENDER_CHILD_1, "book"),
+            new OcrDataField(GENDER_CHILD_2, "pokemon")
         ));
 
         assertThat(validationResult.getStatus(), is(WARNINGS));
         assertThat(validationResult.getErrors(), is(emptyList()));
         assertThat(validationResult.getWarnings().size(), is(26));
         assertThat(validationResult.getWarnings(), hasItems(
-                mandatoryFieldIsMissing.apply(DIVORCE_CASE_NUMBER),
-                "HWFNumber is usually 6 digits",
-                mustHaveAtLeastTwoNames(APPLICANT_FULL_NAME),
-                mustHaveAtLeastTwoNames(RESPONDENT_FULL_NAME),
-                mustBeOneOf(PROVISION_MADE_FOR,
-                        "in connection with matrimonial or civil partnership proceedings",
-                        "under paragraphs 1 or 2 of Schedule 1 to the Children Act 1989"),
+            mandatoryFieldIsMissing.apply(DIVORCE_CASE_NUMBER),
+            "HWFNumber is usually 6 digits",
+            mustHaveAtLeastTwoNames(APPLICANT_FULL_NAME),
+            mustHaveAtLeastTwoNames(RESPONDENT_FULL_NAME),
+            mustBeOneOf(PROVISION_MADE_FOR,
+                "in connection with matrimonial or civil partnership proceedings",
+                "under paragraphs 1 or 2 of Schedule 1 to the Children Act 1989"),
 
-                containsValueThatIsNotAccepted(NATURE_OF_APPLICATION),
-                mustBeOneOf(APPLICANT_INTENDS_TO,
-                        "ApplyToCourtFor",
-                        "ProceedWithApplication",
-                        "ApplyToVary",
-                        "ApplyToDischargePeriodicalPaymentOrder"),
-                containsValueThatIsNotAccepted(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE),
-                APPLYING_FOR_CONSENT_ORDER + " only accepts value of \"Yes\"",
-                mustBeOneOf(DIVORCE_STAGE_REACHED, "Decree Nisi", "Decree Absolute", "Petition Issued"),
-                mustBeOneOf(APPLICANT_REPRESENTED,
-                        "I am not represented by a solicitor in these proceedings",
-                        "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
-                        "I am represented by a solicitor in these proceedings, who has signed Section 5"
-                                + " and all documents for my attention should be sent to my solicitor whose details are as follows"),
-                notInValidFormat(APPLICANT_EMAIL),
-                mustBeOneOf(ORDER_FOR_CHILDREN,
-                        "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children",
-                        "there is a written agreement made on or after 5 April 1993 about maintenance for the benefit of children",
-                        "there is no agreement, but the applicant is applying for payments"),
-                mustBeOneOf(ORDER_FOR_CHILDREN_NO_AGREEMENT,
-                        "for a stepchild or stepchildren",
-                        "in addition to child support maintenance already paid under a Child Support Agency assessment",
-                        "to meet expenses arising from a child’s disability",
-                        "to meet expenses incurred by a child in being educated or training for work",
-                        "when either the child or the person with care of the child "
-                                + "or the absent parent of the child is not habitually resident in the United Kingdom"),
-                CHILD_SUPPORT_AGENCY_CALCULATION_MADE + " must be \"Yes\", \"No\" or left blank",
-                mustBeOneOf(AUTHORISATION_SIGNED_BY,
-                        "Applicant",
-                        "Litigation Friend",
-                        "Applicant's solicitor"),
-                AUTHORISATION_DATE + " must be a valid date",
-                DATE_OF_BIRTH_CHILD_1 + " must be a valid date",
-                DATE_OF_BIRTH_CHILD_2 + " must be a valid date",
-                GENDER_CHILD_1 + " must be \"Male\", \"Female\" or left blank",
-                GENDER_CHILD_2 + " must be \"Male\", \"Female\" or left blank",
-                mandatoryFieldIsMissing.apply(APPLICANT_ADDRESS_LINE_1),
-                mandatoryFieldIsMissing.apply(APPLICANT_ADDRESS_POSTCODE),
-                mandatoryFieldIsMissing.apply(RESPONDENT_ADDRESS_LINE_1),
-                mandatoryFieldIsMissing.apply(RESPONDENT_ADDRESS_POSTCODE)
+            containsValueThatIsNotAccepted(NATURE_OF_APPLICATION),
+            mustBeOneOf(APPLICANT_INTENDS_TO,
+                "ApplyToCourtFor",
+                "ProceedWithApplication",
+                "ApplyToVary",
+                "ApplyToDischargePeriodicalPaymentOrder"),
+            containsValueThatIsNotAccepted(DISCHARGE_PERIODICAL_PAYMENT_SUBSTITUTE),
+            APPLYING_FOR_CONSENT_ORDER + " only accepts value of \"Yes\"",
+            mustBeOneOf(DIVORCE_STAGE_REACHED, "Decree Nisi", "Decree Absolute", "Petition Issued"),
+            mustBeOneOf(APPLICANT_REPRESENTED,
+                "I am not represented by a solicitor in these proceedings",
+                "I am not represented by a solicitor in these proceedings but am receiving advice from a solicitor",
+                "I am represented by a solicitor in these proceedings, who has signed Section 5"
+                    + " and all documents for my attention should be sent to my solicitor whose details are as follows"),
+            notInValidFormat(APPLICANT_EMAIL),
+            mustBeOneOf(ORDER_FOR_CHILDREN,
+                "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children",
+                "there is a written agreement made on or after 5 April 1993 about maintenance for the benefit of children",
+                "there is no agreement, but the applicant is applying for payments"),
+            mustBeOneOf(ORDER_FOR_CHILDREN_NO_AGREEMENT,
+                "for a stepchild or stepchildren",
+                "in addition to child support maintenance already paid under a Child Support Agency assessment",
+                "to meet expenses arising from a child’s disability",
+                "to meet expenses incurred by a child in being educated or training for work",
+                "when either the child or the person with care of the child "
+                    + "or the absent parent of the child is not habitually resident in the United Kingdom"),
+            CHILD_SUPPORT_AGENCY_CALCULATION_MADE + " must be \"Yes\", \"No\" or left blank",
+            mustBeOneOf(AUTHORISATION_SIGNED_BY,
+                "Applicant",
+                "Litigation Friend",
+                "Applicant's solicitor"),
+            AUTHORISATION_DATE + " must be a valid date",
+            DATE_OF_BIRTH_CHILD_1 + " must be a valid date",
+            DATE_OF_BIRTH_CHILD_2 + " must be a valid date",
+            GENDER_CHILD_1 + " must be \"Male\", \"Female\" or left blank",
+            GENDER_CHILD_2 + " must be \"Male\", \"Female\" or left blank",
+            mandatoryFieldIsMissing.apply(APPLICANT_ADDRESS_LINE_1),
+            mandatoryFieldIsMissing.apply(APPLICANT_ADDRESS_POSTCODE),
+            mandatoryFieldIsMissing.apply(RESPONDENT_ADDRESS_LINE_1),
+            mandatoryFieldIsMissing.apply(RESPONDENT_ADDRESS_POSTCODE)
         ));
     }
 
     @Test
     public void shouldPassValidationForValuesWeDoNotSupportYet() {
         String domesticViolenceValue = "ArrestedRelevantDomesticViolenceOffence, "
-                + "invalid, insert random here,"
-                + "UndertakingSection46Or63EFamilyLawActOrScotlandNorthernIrelandProtectiveInjunction";
+            + "invalid, insert random here,"
+            + "UndertakingSection46Or63EFamilyLawActOrScotlandNorthernIrelandProtectiveInjunction";
 
         String urgencyValue = "RiskLifeLibertyPhysicalSafety";
         String previousAttendanceValue = "AnotherDisputeeResolutionn";
 
         List<OcrDataField> ocrDataFields = new ArrayList<>(mandatoryFieldsWithValues);
         ocrDataFields.addAll(asList(
-                new OcrDataField("MIAMDomesticViolenceChecklist", domesticViolenceValue),
-                new OcrDataField("MIAMUrgencyChecklist", urgencyValue),
-                new OcrDataField("MIAMPreviousAttendanceChecklist", previousAttendanceValue)
+            new OcrDataField("MIAMDomesticViolenceChecklist", domesticViolenceValue),
+            new OcrDataField("MIAMUrgencyChecklist", urgencyValue),
+            new OcrDataField("MIAMPreviousAttendanceChecklist", previousAttendanceValue)
         ));
 
         OcrValidationResult validationResult = formAValidator.validateBulkScanForm(ocrDataFields);
@@ -290,12 +290,12 @@ public class FormAValidatorTest {
     @Test
     public void shouldValidateDivorceCaseNumber() {
         OcrValidationResult ocrInvalidResult = formAValidator.validateBulkScanForm(asList(
-                new OcrDataField(DIVORCE_CASE_NUMBER, "1234567890")
+            new OcrDataField(DIVORCE_CASE_NUMBER, "1234567890")
         ));
         assertThat(ocrInvalidResult.getWarnings(), hasItem("divorceCaseNumber is not in a valid format"));
 
         OcrValidationResult ocrValidResult = formAValidator.validateBulkScanForm(asList(
-                new OcrDataField(DIVORCE_CASE_NUMBER, "DD12D12345")
+            new OcrDataField(DIVORCE_CASE_NUMBER, "DD12D12345")
         ));
         assertThat(ocrValidResult.getWarnings(), not(hasItem("divorceCaseNumber is not in a valid format")));
     }
@@ -482,9 +482,9 @@ public class FormAValidatorTest {
     private Matcher<List<String>> warningMessagesForMissingOrEmptyFields() {
         List<String> mandatoryFields = mandatoryFieldsWithValues.stream().map(OcrDataField::getName).collect(Collectors.toList());
         return allOf(
-                hasItems(mandatoryFields.stream()
-                        .map(mandatoryFieldIsMissing)
-                        .toArray(String[]::new))
+            hasItems(mandatoryFields.stream()
+                .map(mandatoryFieldIsMissing)
+                .toArray(String[]::new))
         );
     }
 

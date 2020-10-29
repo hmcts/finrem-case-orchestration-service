@@ -62,8 +62,8 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
 
     private static final String START_REFUSAL_ORDER_URL = "/case-orchestration/contested-application-not-approved-start";
     private static final String PREVIEW_REFUSAL_ORDER_URL = "/case-orchestration/documents/preview-refusal-order";
-    private static final String SUBMIT_REFUSAL_ORDER_URL =  "/case-orchestration/contested-application-not-approved-submit";
-    private static final String SUBMIT_REFUSAL_REASON_URL =  "/case-orchestration/contested-application-send-refusal";
+    private static final String SUBMIT_REFUSAL_ORDER_URL = "/case-orchestration/contested-application-not-approved-submit";
+    private static final String SUBMIT_REFUSAL_REASON_URL = "/case-orchestration/contested-application-send-refusal";
 
     private String bearerToken = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJqc2NyMGE0M3JnMHU5aGZpNHRva21vdHJ"
         + "vOSIsInN1YiI6IjEiLCJpYXQiOjE1NjAyNDcyNzgsImV4cCI6MTU2MDI2NTI3OCwiZGF0YSI6ImNjZC1pbXBv"

@@ -38,8 +38,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 @ActiveProfiles("test-mock-document-client")
 public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
-    @Autowired private GenerateCoverSheetService generateCoverSheetService;
-    @Autowired private ObjectMapper mapper;
+    @Autowired
+    private GenerateCoverSheetService generateCoverSheetService;
+    @Autowired
+    private ObjectMapper mapper;
 
     @Rule
     public ExpectedException expectedException = none();
@@ -140,14 +142,14 @@ public class GenerateCoverSheetServiceTest extends BaseServiceTest {
 
     private CaseDetails caseDetailsWithEmptySolAddress() throws Exception {
         try (InputStream resourceAsStream =
-                     getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-empty-solicitor-address.json")) {
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-empty-solicitor-address.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }
 
     private CaseDetails caseDetailsWithSolicitors() throws Exception {
         try (InputStream resourceAsStream =
-                     getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-with-solicitors.json")) {
+                 getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-with-solicitors.json")) {
             return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
         }
     }

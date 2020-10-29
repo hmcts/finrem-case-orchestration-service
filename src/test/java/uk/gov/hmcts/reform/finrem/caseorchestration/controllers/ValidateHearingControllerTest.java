@@ -40,64 +40,64 @@ public class ValidateHearingControllerTest extends BaseControllerTest {
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
         doEmptyCaseDataSetUp();
         mvc.perform(post("/case-orchestration/validate-hearing")
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(startsWith(GlobalExceptionHandler.SERVER_ERROR_MSG)));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(startsWith(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
 
     @Test
     public void shouldThrowErrorWhenIssueDateAndHearingDateAreEmpty() throws Exception {
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class)))
-                .thenReturn(ImmutableList.of(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
+            .thenReturn(ImmutableList.of(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
 
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/pba-validate.json").toURI()));
+            .getResource("/fixtures/pba-validate.json").toURI()));
         mvc.perform(post(VALIDATE_HEARING_JSON)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.errors[0]",
-                        Matchers.is(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY)));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.errors[0]",
+                Matchers.is(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY)));
     }
 
     @Test
     public void shouldThrowWarningsWhenNotFastTrackDecision() throws Exception {
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
         when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class)))
-                .thenReturn(ImmutableList.of("Date of the hearing must be between 12 and 14 weeks."));
+            .thenReturn(ImmutableList.of("Date of the hearing must be between 12 and 14 weeks."));
 
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/contested/validate-hearing-withoutfastTrackDecision.json").toURI()));
+            .getResource("/fixtures/contested/validate-hearing-withoutfastTrackDecision.json").toURI()));
         mvc.perform(post(VALIDATE_HEARING_JSON)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.warnings[0]",
-                        Matchers.is("Date of the hearing must be between 12 and 14 weeks.")));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.warnings[0]",
+                Matchers.is("Date of the hearing must be between 12 and 14 weeks.")));
     }
 
     @Test
     public void shouldThrowWarningsWhenFastTrackDecision() throws Exception {
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
         when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class)))
-                .thenReturn(ImmutableList.of("Date of the Fast Track hearing must be between 6 and 10 weeks."));
+            .thenReturn(ImmutableList.of("Date of the Fast Track hearing must be between 6 and 10 weeks."));
 
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json").toURI()));
+            .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json").toURI()));
         mvc.perform(post(VALIDATE_HEARING_JSON)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.warnings[0]",
-                        Matchers.is("Date of the Fast Track hearing must be between 6 and 10 weeks.")));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.warnings[0]",
+                Matchers.is("Date of the Fast Track hearing must be between 6 and 10 weeks.")));
     }
 
     @Test
@@ -106,13 +106,13 @@ public class ValidateHearingControllerTest extends BaseControllerTest {
         when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
 
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/contested/validate-hearing-successfully.json").toURI()));
+            .getResource("/fixtures/contested/validate-hearing-successfully.json").toURI()));
         mvc.perform(post(VALIDATE_HEARING_JSON)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.warnings").doesNotExist());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.warnings").doesNotExist());
     }
 }

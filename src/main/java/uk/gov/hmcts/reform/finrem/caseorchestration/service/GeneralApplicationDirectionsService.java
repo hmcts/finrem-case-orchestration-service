@@ -149,8 +149,8 @@ public class GeneralApplicationDirectionsService {
         caseData.put("letterDate", String.valueOf(LocalDate.now()));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-                documentConfiguration.getGeneralApplicationOrderTemplate(),
-                documentConfiguration.getGeneralApplicationOrderFileName());
+            documentConfiguration.getGeneralApplicationOrderTemplate(),
+            documentConfiguration.getGeneralApplicationOrderFileName());
     }
 
     private CaseDocument prepareHearingRequiredNoticeDocument(CaseDetails caseDetails, String authorisationToken) {
@@ -165,8 +165,8 @@ public class GeneralApplicationDirectionsService {
         caseData.put("letterDate", String.valueOf(LocalDate.now()));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
-                documentConfiguration.getGeneralApplicationHearingNoticeTemplate(),
-                documentConfiguration.getGeneralApplicationHearingNoticeFileName());
+            documentConfiguration.getGeneralApplicationHearingNoticeTemplate(),
+            documentConfiguration.getGeneralApplicationHearingNoticeFileName());
     }
 
     private void addHearingVenueDetails(CaseDetails caseDetails) {

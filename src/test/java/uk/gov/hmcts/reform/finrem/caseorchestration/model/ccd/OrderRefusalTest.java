@@ -18,7 +18,7 @@ public class OrderRefusalTest {
     public void setUp() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         order = mapper.readValue(new File(getClass()
-                .getResource("/fixtures/model/order-refusal.json").toURI()), OrderRefusal.class);
+            .getResource("/fixtures/model/order-refusal.json").toURI()), OrderRefusal.class);
     }
 
     @Test

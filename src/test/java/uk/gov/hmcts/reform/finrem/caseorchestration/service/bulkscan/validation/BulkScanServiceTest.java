@@ -116,9 +116,9 @@ public class BulkScanServiceTest {
     @Test(expected = InvalidDataException.class)
     public void shouldThrowInvalidDataExceptionForTransformer() {
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
-                .formType(TEST_FORM_TYPE)
-                .ocrDataFields(singletonList(new OcrDataField(TEST_KEY, TEST_VALUE)))
-                .build();
+            .formType(TEST_FORM_TYPE)
+            .ocrDataFields(singletonList(new OcrDataField(TEST_KEY, TEST_VALUE)))
+            .build();
 
         OcrValidationResult validatedWithWarn = OcrValidationResult.builder().addWarning("warning").build();
         when(finRemBulkScanFormValidatorFactory.getValidator(TEST_FORM_TYPE)).thenReturn(bulkScanFormValidator);

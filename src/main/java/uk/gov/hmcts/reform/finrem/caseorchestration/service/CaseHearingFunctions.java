@@ -112,8 +112,8 @@ public final class CaseHearingFunctions {
         String caseAllocatedTo = (String) caseData.get(CASE_ALLOCATED_TO);
 
         return Optional.ofNullable(caseAllocatedTo)
-                .map(s -> s.equalsIgnoreCase("yes"))
-                .orElseGet(() -> fastTrackDecision.equalsIgnoreCase("yes"));
+            .map(s -> s.equalsIgnoreCase("yes"))
+            .orElseGet(() -> fastTrackDecision.equalsIgnoreCase("yes"));
     };
 
     static String getSelectedCourtGA(Map<String, Object> mapOfCaseData) {
@@ -133,8 +133,8 @@ public final class CaseHearingFunctions {
     }
 
     private static String getSelectedCourt(Map<String, Object> mapOfCaseData, String regionListName, String midlandsListName,
-                                   String londonListName, String northwestListName, String northeastListName,
-                                   String southeastListName, String walesListName) {
+                                           String londonListName, String northwestListName, String northeastListName,
+                                           String southeastListName, String walesListName) {
         switch ((String) mapOfCaseData.get(regionListName)) {
             case MIDLANDS:
                 return getMidlandFRC(mapOfCaseData, midlandsListName);

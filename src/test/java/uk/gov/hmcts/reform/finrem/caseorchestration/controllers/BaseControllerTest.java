@@ -32,12 +32,12 @@ public abstract class BaseControllerTest extends BaseTest {
 
     void doEmptyCaseDataSetUp() throws IOException, URISyntaxException {
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/empty-casedata.json").toURI()));
+            .getResource("/fixtures/empty-casedata.json").toURI()));
     }
 
     void doValidCaseDataSetUp() throws IOException, URISyntaxException {
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/pba-validate.json").toURI()));
+            .getResource("/fixtures/pba-validate.json").toURI()));
     }
 
     void doValidConsentOrderApprovedSetup() throws IOException, URISyntaxException {
@@ -57,7 +57,7 @@ public abstract class BaseControllerTest extends BaseTest {
 
     void doMissingLatestConsentOrder() throws IOException, URISyntaxException {
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/hwf.json").toURI()));
+            .getResource("/fixtures/hwf.json").toURI()));
     }
 
     void doValidConsentInContestWithPensionData() throws IOException, URISyntaxException {

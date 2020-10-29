@@ -33,11 +33,11 @@ public class FeeServiceTest extends BaseServiceTest {
     @Test
     public void retrieveConsentedApplicationFee() {
         paymentService.stubFor(get(urlPathEqualTo(FEE_LOOKUP_API))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBody("{\"code\": \"TEST\", \"fee_amount\": \"50\", "
-                                + "\"description\": \"desc\", \"version\": \"1.0\"}")));
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody("{\"code\": \"TEST\", \"fee_amount\": \"50\", "
+                    + "\"description\": \"desc\", \"version\": \"1.0\"}")));
 
         FeeResponse feeResponse = feeService.getApplicationFee(CONSENTED);
         assertThat(feeResponse.getCode(), is("TEST"));
@@ -49,11 +49,11 @@ public class FeeServiceTest extends BaseServiceTest {
     @Test
     public void retrieveContestedApplicationFee() {
         paymentService.stubFor(get(urlPathEqualTo(FEE_LOOKUP_API))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBody("{\"code\": \"TEST\", \"fee_amount\": \"255\", "
-                                + "\"description\": \"desc\", \"version\": \"1.0\"}")));
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody("{\"code\": \"TEST\", \"fee_amount\": \"255\", "
+                    + "\"description\": \"desc\", \"version\": \"1.0\"}")));
 
         FeeResponse feeResponse = feeService.getApplicationFee(CONTESTED);
         assertThat(feeResponse.getCode(), is("TEST"));

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +11,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
@@ -36,15 +37,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_INFO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE_CT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_ANOTHER_HEARING_CT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LOCAL_COURT_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TIME_ESTIMATE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TIME_ESTIMATE_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullApplicantName;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullRespondentName;
@@ -78,21 +73,27 @@ public class AdditionalHearingDocumentService {
         bulkPrintAdditionalHearingDocuments(caseDetails, authorisationToken);
     }
 
-    public boolean directionDetailsIsAnotherHearing(CaseDetails caseDetails) {
-        Map<String, Object> directionDetails = (Map<String, Object>) caseDetails.getData().get(DIRECTION_DETAILS_COLLECTION_CT);
-
-        return YES_VALUE.equalsIgnoreCase(nullToEmpty(directionDetails.get(IS_ANOTHER_HEARING_CT)));
-    }
-
     public boolean alreadyHadFirstHearing(CaseDetails caseDetails) {
         return caseDetails.getData().containsKey(FORM_C)
             && caseDetails.getData().containsKey(FORM_G);
     }
 
     public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws CourtDetailsParseException {
-        Map<String, Object> hearingData = objectMapper.convertValue(caseDetails.getData().get(DIRECTION_DETAILS_COLLECTION_CT),
-            new TypeReference<List<Map>>() {}).get(0);
-        Map<String, Object> courtData = (Map<String, Object>) hearingData.get(LOCAL_COURT_CT);
+        List<DirectionDetailsCollectionData> directionDetailsCollectionList = documentHelper
+            .convertToDirectionDetailsCollectionData(caseDetails
+                .getData()
+                .get(DIRECTION_DETAILS_COLLECTION_CT));
+
+        if (directionDetailsCollectionList.size() == 0
+            || !YES_VALUE.equalsIgnoreCase(nullToEmpty(
+                directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()))) {
+            log.info("Additional hearing document not required for case: {}", caseDetails.getId());
+            return;
+        }
+
+        DirectionDetailsCollection directionDetailsCollection = directionDetailsCollectionList.get(0).getDirectionDetailsCollection();
+
+        Map<String, Object> courtData = directionDetailsCollection.getLocalCourt();
         Map<String, Object> courtDetailsMap;
 
         try {
@@ -101,12 +102,12 @@ public class AdditionalHearingDocumentService {
             throw new CourtDetailsParseException();
         }
 
-        Map<String, Object> courtDetails = (Map<String, Object>)
-            courtDetailsMap.get(courtData.get(CaseHearingFunctions.getSelectedCourtComplexType(hearingData)));
+        Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(
+            courtData.get(CaseHearingFunctions.getSelectedCourtComplexType(courtData)));
 
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        prepareHearingCaseDetails(caseDetailsCopy, courtDetails, hearingData.get(HEARING_TYPE_CT), hearingData.get(HEARING_DATE_CT),
-            hearingData.get(HEARING_TIME_CT), hearingData.get(TIME_ESTIMATE_CT));
+        prepareHearingCaseDetails(caseDetailsCopy, courtDetails, directionDetailsCollection.getTypeOfHearing(),
+            directionDetailsCollection.getDateOfHearing(), directionDetailsCollection.getHearingTime(), directionDetailsCollection.getTimeEstimate());
 
         CaseDocument document = generateAdditionalHearingDocument(caseDetailsCopy, authorisationToken);
         addAdditionalHearingDocumentToCaseData(caseDetails, document);

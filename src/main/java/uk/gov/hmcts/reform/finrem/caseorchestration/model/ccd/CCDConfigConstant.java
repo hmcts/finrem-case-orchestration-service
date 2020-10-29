@@ -202,7 +202,6 @@ public class CCDConfigConstant {
     public static final String ORDER_LETTER = "orderLetter";
 
 
-
     public static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
     public static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
     public static final String FR_CONSENT_ORDER = "FR_consentOrder";

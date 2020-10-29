@@ -43,7 +43,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 
 public class ContestedCourtHelper {
-    private ContestedCourtHelper(){
+    private ContestedCourtHelper() {
     }
 
     public static String getSelectedCourt(CaseDetails caseDetails) {

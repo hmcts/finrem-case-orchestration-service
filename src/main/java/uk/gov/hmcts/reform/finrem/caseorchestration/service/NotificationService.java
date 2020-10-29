@@ -242,9 +242,9 @@ public class NotificationService {
 
         applicantNotificationRequest = isConsentedApplication(callbackRequest.getCaseDetails())
             ? buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
-                CONSENTED_SOLICITOR_NAME, SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER)
+            CONSENTED_SOLICITOR_NAME, SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER)
             : buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
-                CONTESTED_SOLICITOR_NAME, CONTESTED_SOLICITOR_EMAIL, CONTESTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER);
+            CONTESTED_SOLICITOR_NAME, CONTESTED_SOLICITOR_EMAIL, CONTESTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER);
 
         return applicantNotificationRequest;
     }
@@ -253,9 +253,9 @@ public class NotificationService {
 
         applicantNotificationRequest = isConsentedApplication(callbackRequest.getCaseDetails())
             ? buildNotificationRequest(callbackRequest, RESP_SOLICITOR_REFERENCE,
-                RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER)
+            RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER)
             : buildNotificationRequest(callbackRequest, RESP_SOLICITOR_REFERENCE,
-                RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONTESTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER);
+            RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONTESTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER);
 
         return applicantNotificationRequest;
     }
@@ -280,7 +280,7 @@ public class NotificationService {
 
         // TODO replcae this check with isContestedApplication()
         if (isContestedApplication(callbackRequest.getCaseDetails())) {
-            String selectedCourt =  getSelectedCourt(mapOfCaseData);
+            String selectedCourt = getSelectedCourt(mapOfCaseData);
             notificationRequest.setSelectedCourt(selectedCourt);
 
             log.info("selectedCourt is {} for case ID: {}", selectedCourt,

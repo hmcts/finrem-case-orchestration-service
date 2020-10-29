@@ -70,8 +70,8 @@ public class OptionIdToValueTranslator {
             Map<String, String> optionMap = optionsMap(optionKey);
 
             List<String> collect = originalOptionsList.stream()
-                    .map(key -> optionMap.getOrDefault(key, key))
-                    .collect(Collectors.toList());
+                .map(key -> optionMap.getOrDefault(key, key))
+                .collect(Collectors.toList());
 
             data.put(optionKey, collect);
         }

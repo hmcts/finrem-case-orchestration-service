@@ -53,7 +53,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     private ValidateHearingService validateHearingService;
 
     @Before
-    public void setUp()  {
+    public void setUp() {
         super.setUp();
         try {
             doRequestSetUp();
@@ -68,31 +68,31 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json").toURI()));
+            .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json").toURI()));
     }
 
     @Test
     public void generateHearingDocumentHttpError400() throws Exception {
         mvc.perform(post(GEN_DOC_URL)
-                .content("kwuilebge")
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest());
+            .content("kwuilebge")
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
     public void generateHearingDocumentFormC() throws Exception {
         when(hearingService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-                .thenReturn(ImmutableMap.of("formC", caseDocument()));
+            .thenReturn(ImmutableMap.of("formC", caseDocument()));
 
         mvc.perform(post(GEN_DOC_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.formC.document_url", is(DOC_URL)))
-                .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
-                .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.formC.document_url", is(DOC_URL)))
+            .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
+            .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
 
         verify(hearingService, never()).sendFormCAndGForBulkPrint(any(), any());
     }
@@ -120,13 +120,13 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void generateMiniFormAHttpError500() throws Exception {
         when(hearingService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-                .thenThrow(feignError());
+            .thenThrow(feignError());
 
         mvc.perform(post(GEN_DOC_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isInternalServerError());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -135,12 +135,12 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         when(additionalHearingService.alreadyHadFirstHearing(any())).thenReturn(true);
 
         mvc.perform(post(GEN_DOC_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
-        verify(hearingService,  never()).generateHearingDocuments(any(), any());
+        verify(hearingService, never()).generateHearingDocuments(any(), any());
         verify(additionalHearingService, times(1)).createAndSendAdditionalHearingDocuments(any(), any());
     }
 
@@ -154,14 +154,12 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(hearingService,  never()).generateHearingDocuments(any(), any());
+        verify(hearingService, never()).generateHearingDocuments(any(), any());
         verify(additionalHearingService, times(1)).createAndSendAdditionalHearingDocuments(any(), any());
     }
 
     @Test
     public void generateHearingDocumentDirectionOrder_isAnotherHearingTrue() throws Exception {
-        when(additionalHearingService.directionDetailsIsAnotherHearing(any())).thenReturn(true);
-
         mvc.perform(post(DIRECTION_ORDER_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -172,21 +170,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void generateHearingDocumentDirectionOrder_isAnotherHearingFalse() throws Exception {
-        when(additionalHearingService.directionDetailsIsAnotherHearing(any())).thenReturn(false);
-
-        mvc.perform(post(DIRECTION_ORDER_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
-
-        verify(additionalHearingService, never()).createAndStoreAdditionalHearingDocuments(any(), any());
-    }
-
-    @Test
     public void generateHearingDocumentDirectionOrder_CourtDetailsParseException() throws Exception {
-        when(additionalHearingService.directionDetailsIsAnotherHearing(any())).thenReturn(true);
         doThrow(new CourtDetailsParseException()).when(additionalHearingService).createAndStoreAdditionalHearingDocuments(any(), any());
 
         mvc.perform(post(DIRECTION_ORDER_URL)

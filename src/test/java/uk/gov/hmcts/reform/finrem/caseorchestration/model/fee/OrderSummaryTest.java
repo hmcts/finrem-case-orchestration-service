@@ -13,19 +13,19 @@ public class OrderSummaryTest {
     @Test
     public void shouldCreateOrderSummary() throws Exception {
         String json = "{ "
-                    + " \"PaymentReference\": \"Ref1\","
-                    + " \"PaymentTotal\": \"1000\","
-                    + " \"Fees\": ["
-                            + "{ "
-                            + " \"value\": {"
-                            + " \"FeeDescription\": \"desc\","
-                            + " \"FeeVersion\": \"v1\","
-                            + " \"FeeCode\": \"code1\","
-                            + " \"FeeAmount\": \"1000\""
-                            + "}"
-                         + "}"
-                        + "]"
-                    + "}";
+            + " \"PaymentReference\": \"Ref1\","
+            + " \"PaymentTotal\": \"1000\","
+            + " \"Fees\": ["
+            + "{ "
+            + " \"value\": {"
+            + " \"FeeDescription\": \"desc\","
+            + " \"FeeVersion\": \"v1\","
+            + " \"FeeCode\": \"code1\","
+            + " \"FeeAmount\": \"1000\""
+            + "}"
+            + "}"
+            + "]"
+            + "}";
 
         OrderSummary orderSummary = mapper.readValue(json, OrderSummary.class);
         assertThat(orderSummary.getPaymentReference(), is("Ref1"));

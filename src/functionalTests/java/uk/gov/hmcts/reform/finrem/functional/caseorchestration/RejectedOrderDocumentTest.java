@@ -44,10 +44,10 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
     @Test
     public void verifyPreviewConsentOrderNotApproved() {
 
-        InputStream resourceAsStream =  getClass().getResourceAsStream(consentedDir + "approved-consent-order.json");
+        InputStream resourceAsStream = getClass().getResourceAsStream(consentedDir + "approved-consent-order.json");
         DocumentContext documentContext = JsonPath.parse(resourceAsStream);
 
-        HashMap<String,Object> caseDetails = documentContext.read("$.case_details.case_data");
+        HashMap<String, Object> caseDetails = documentContext.read("$.case_details.case_data");
         caseDetails.remove(ORDER_REFUSAL_PREVIEW_COLLECTION);
 
         try {
@@ -56,7 +56,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
             throw new RuntimeException("Error generating CallbackRequest from approved-consent-order.json ");
         }
 
-        Response response = functionalTestUtils.getResponseData(previewConsentOrderNotApprovedEndPoint,callbackRequest);
+        Response response = functionalTestUtils.getResponseData(previewConsentOrderNotApprovedEndPoint, callbackRequest);
 
         List<Object> orderRefusalPreviewDocuments = JsonPath.parse(response.asString())
             .read("$.data[?(@.orderRefusalPreviewDocument)]");
@@ -67,9 +67,9 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
     @Test
     public void verifyConsentOrderNotApproved() {
 
-        InputStream resourceAsStream =  getClass().getResourceAsStream(consentedDir + "approved-consent-order.json");
+        InputStream resourceAsStream = getClass().getResourceAsStream(consentedDir + "approved-consent-order.json");
         DocumentContext documentContext = JsonPath.parse(resourceAsStream);
-        int uploadOrdersBeforeCount = ((List)documentContext.read("$.case_details.case_data.uploadOrder")).size();
+        int uploadOrdersBeforeCount = ((List) documentContext.read("$.case_details.case_data.uploadOrder")).size();
 
         try {
             callbackRequest = objectMapper.readValue(documentContext.jsonString(), CallbackRequest.class);
@@ -77,7 +77,7 @@ public class RejectedOrderDocumentTest extends IntegrationTestBase {
             throw new RuntimeException("Error generating CallbackRequest from approved-consent-order.json ");
         }
 
-        Response response = functionalTestUtils.getResponseData(consentOrderNotApprovedEndPoint,callbackRequest);
+        Response response = functionalTestUtils.getResponseData(consentOrderNotApprovedEndPoint, callbackRequest);
 
         List<Object> uploadOrders = JsonPath.parse(response.getBody().asString())
             .read("$.data.uploadOrder[?(@.id)].id");

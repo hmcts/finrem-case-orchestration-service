@@ -44,8 +44,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @ActiveProfiles("test-mock-document-client")
 public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired private ObjectMapper mapper = new ObjectMapper();
-    @Autowired private RefusalOrderDocumentService refusalOrderDocumentService;
+    @Autowired
+    private ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private RefusalOrderDocumentService refusalOrderDocumentService;
 
     @MockBean
     private GenericDocumentService genericDocumentService;
@@ -174,13 +176,13 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
     private ConsentOrderData consentOrderData(Map<String, Object> caseData) {
         List<ConsentOrderData> list =
-                mapper.convertValue(caseData.get(UPLOAD_ORDER), new TypeReference<List<ConsentOrderData>>() {
-                });
+            mapper.convertValue(caseData.get(UPLOAD_ORDER), new TypeReference<List<ConsentOrderData>>() {
+            });
 
         return list
-                .stream()
-                .filter(cd -> cd.getConsentOrder().getDocumentType().equals(REJECTED_ORDER_TYPE))
-                .findFirst().orElseThrow(() -> new IllegalStateException(REJECTED_ORDER_TYPE + " missing"));
+            .stream()
+            .filter(cd -> cd.getConsentOrder().getDocumentType().equals(REJECTED_ORDER_TYPE))
+            .findFirst().orElseThrow(() -> new IllegalStateException(REJECTED_ORDER_TYPE + " missing"));
     }
 
     private ContestedConsentOrderData consentInContestedOrderData(Map<String, Object> caseData) {
@@ -201,7 +203,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
     private List<OrderRefusalData> refusalOrderCollection(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(ORDER_REFUSAL_COLLECTION),
-                new TypeReference<List<OrderRefusalData>>() {
-                });
+            new TypeReference<List<OrderRefusalData>>() {
+            });
     }
 }

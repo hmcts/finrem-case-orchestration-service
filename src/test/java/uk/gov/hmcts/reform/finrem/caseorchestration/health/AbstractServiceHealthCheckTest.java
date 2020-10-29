@@ -47,7 +47,7 @@ public abstract class AbstractServiceHealthCheckTest {
         String uri = uri();
 
         when(restTemplate.getForEntity(eq(uri), eq(Object.class)))
-                .thenReturn(ResponseEntity.accepted().build());
+            .thenReturn(ResponseEntity.accepted().build());
         assertThat(healthCheckInstance().health(), is(Health.unknown().withDetail("uri", uri).build()));
     }
 
@@ -55,7 +55,7 @@ public abstract class AbstractServiceHealthCheckTest {
         String uri = uri();
 
         when(restTemplate.getForEntity(eq(uri), eq(Object.class)))
-                .thenThrow(ex);
+            .thenThrow(ex);
 
         assertThat(healthCheckInstance().health(), is(Health.down().withDetail("uri", uri).withException(ex).build()));
 

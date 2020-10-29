@@ -396,16 +396,16 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void sendSolicitorToDraftOrderEmail() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
-                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-                .andRespond(MockRestResponseCreators.withNoContent());
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendSolicitorToDraftOrderEmail(callbackRequest);
     }
 
     @Test
     public void throwExceptionWhenSolicitorToDraftOrderEmailIsRequested() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
-                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
             notificationService.sendSolicitorToDraftOrderEmail(callbackRequest);
         } catch (Exception ex) {
@@ -416,7 +416,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void sendContestedHwfSuccessfulNotificationEmailForNottingham() {
         callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST,
-            NOTTINGHAM, NOTTINGHAM_COURTLIST,  "FR_s_NottinghamList_1");
+            NOTTINGHAM, NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_1");
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
@@ -435,7 +435,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void sendContestedHwfSuccessfulNotificationEmailForBirmingham() {
         callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST,
-            BIRMINGHAM, BIRMINGHAM_COURTLIST,  "FR_birmingham_hc_list_1");
+            BIRMINGHAM, BIRMINGHAM_COURTLIST, "FR_birmingham_hc_list_1");
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
@@ -564,7 +564,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void sendNoContestedHwfSuccessfulNotificationEmailForNottingham() {
         callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST,
-            NOTTINGHAM, NOTTINGHAM_COURTLIST,  "FR_s_NottinghamList_1");
+            NOTTINGHAM, NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_1");
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
@@ -697,7 +697,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     private CallbackRequest getContestedCallbackRequestForRespSolicitor(String regionValue, String frcList, String frcValue,
-                                                        String courtList, String courtValue) {
+                                                                        String courtList, String courtValue) {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
         caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
@@ -808,7 +808,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     public void sendContestedGeneralApplicationOutcomeNotificationEmailWhenSendToFRCToggleTrue() throws IOException {
         when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
         callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST,
-            NOTTINGHAM, NOTTINGHAM_COURTLIST,  "FR_s_NottinghamList_1");
+            NOTTINGHAM, NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_1");
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -823,7 +823,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         throws IOException {
         when(featureToggleService.isSendToFRCEnabled()).thenReturn(false);
         callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST,
-            NOTTINGHAM, NOTTINGHAM_COURTLIST,  "FR_s_NottinghamList_1");
+            NOTTINGHAM, NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_1");
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))

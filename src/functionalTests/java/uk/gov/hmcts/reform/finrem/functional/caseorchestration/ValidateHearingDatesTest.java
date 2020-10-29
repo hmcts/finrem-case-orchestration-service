@@ -24,9 +24,9 @@ public class ValidateHearingDatesTest extends IntegrationTestBase {
 
     @Test
     public void verifyShouldReturnBadRequestWhenCaseDataIsMissingInRequest() {
-        assertEquals(400, utils.getStatusCode(validateHearing, "empty-casedata1.json",consentedDir));
+        assertEquals(400, utils.getStatusCode(validateHearing, "empty-casedata1.json", consentedDir));
 
-        assertThat(utils.getResponse(validateHearing, "empty-casedata1.json",consentedDir).body().asString(),
+        assertThat(utils.getResponse(validateHearing, "empty-casedata1.json", consentedDir).body().asString(),
             startsWith("Some server side exception occurred. Please check logs for details"));
     }
 
@@ -34,34 +34,34 @@ public class ValidateHearingDatesTest extends IntegrationTestBase {
     public void verifyShouldThrowErrorWhenIssueDateAndHearingDateAreEmpty() {
 
         assertEquals("Issue Date, fast track decision or hearingDate is empty",
-                getResponse(validateHearing, "pba-validate1.json",consentedDir).jsonPath().get("errors[0]"));
+            getResponse(validateHearing, "pba-validate1.json", consentedDir).jsonPath().get("errors[0]"));
     }
 
     @Test
     public void verifyShouldThrowWarningsWhenNotFastTrackDecision() {
 
         assertEquals("Date of the hearing must be between 12 and 16 weeks.",
-                getResponse(validateHearing, "validate-hearing-without-fastTrackDecision1.json",
-                        contestedDir).jsonPath().get("warnings[0]"));
+            getResponse(validateHearing, "validate-hearing-without-fastTrackDecision1.json",
+                contestedDir).jsonPath().get("warnings[0]"));
     }
 
     @Test
     public void verifyshouldThrowWarningsWhenFastTrackDecision() {
 
         assertEquals("Date of the Fast Track hearing must be between 6 and 10 weeks.",
-                getResponse(validateHearing, "validate-hearing-with-fastTrackDecision1.json",
-                        contestedDir).jsonPath().get("warnings[0]"));
+            getResponse(validateHearing, "validate-hearing-with-fastTrackDecision1.json",
+                contestedDir).jsonPath().get("warnings[0]"));
     }
 
     @Test
     public void verifyShouldSuccessfullyValidate() {
 
         Assert.assertNull(
-                getResponse(validateHearing, "validate-hearing-successfully1.json",
-                        contestedDir).jsonPath().get("warnings"));
+            getResponse(validateHearing, "validate-hearing-successfully1.json",
+                contestedDir).jsonPath().get("warnings"));
     }
 
-    private Response getResponse(String url,  String jsonFileName, String journeyType) {
+    private Response getResponse(String url, String jsonFileName, String journeyType) {
 
         Response response = SerenityRest.given()
             .relaxedHTTPSValidation()

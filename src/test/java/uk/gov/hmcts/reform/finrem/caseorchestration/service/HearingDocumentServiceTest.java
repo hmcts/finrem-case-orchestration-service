@@ -124,7 +124,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     @Test
     public void generateJudiciaryBasedFastTrackFormC() {
         Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN,
-                makeItJudiciaryFastTrackDecisionCase());
+            makeItJudiciaryFastTrackDecisionCase());
         assertCaseDocument((CaseDocument) result.get(FORM_C));
         verifyAdditionalFastTrackFields();
     }
@@ -401,8 +401,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     private CaseDetails makeItJudiciaryFastTrackDecisionCase() {
         Map<String, Object> caseData =
-                ImmutableMap.of(FAST_TRACK_DECISION, NO_VALUE,
-                        CASE_ALLOCATED_TO, YES_VALUE, HEARING_DATE, DATE_OF_HEARING);
+            ImmutableMap.of(FAST_TRACK_DECISION, NO_VALUE,
+                CASE_ALLOCATED_TO, YES_VALUE, HEARING_DATE, DATE_OF_HEARING);
         return CaseDetails.builder().data(caseData).build();
     }
 
