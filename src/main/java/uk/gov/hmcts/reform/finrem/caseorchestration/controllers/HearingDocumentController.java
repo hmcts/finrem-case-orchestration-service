@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -105,7 +106,7 @@ public class HearingDocumentController implements BaseController {
         log.info("Storing Additional Hearing Document for Case ID: {}", caseDetails.getId());
         try {
             additionalHearingService.createAndStoreAdditionalHearingDocuments(authorisationToken, caseDetails);
-        } catch (CourtDetailsParseException e) {
+        } catch (CourtDetailsParseException | JsonProcessingException e) {
             log.error(e.getMessage());
             errors.add(e.getMessage());
         }

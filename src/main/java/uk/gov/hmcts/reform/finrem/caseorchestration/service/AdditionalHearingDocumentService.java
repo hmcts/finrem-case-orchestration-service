@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_INFO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME;
@@ -77,7 +77,8 @@ public class AdditionalHearingDocumentService {
         return caseDetails.getData().containsKey(FORM_C);
     }
 
-    public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws CourtDetailsParseException {
+    public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails)
+        throws CourtDetailsParseException, JsonProcessingException {
         List<DirectionDetailsCollectionData> directionDetailsCollectionList = documentHelper
             .convertToDirectionDetailsCollectionData(caseDetails
                 .getData()
@@ -95,11 +96,7 @@ public class AdditionalHearingDocumentService {
         Map<String, Object> courtData = directionDetailsCollection.getLocalCourt();
         Map<String, Object> courtDetailsMap;
 
-        try {
-            courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-        } catch (IOException e) {
-            throw new CourtDetailsParseException();
-        }
+        courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
 
         Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(
             courtData.get(CaseHearingFunctions.getSelectedCourtComplexType(courtData)));
