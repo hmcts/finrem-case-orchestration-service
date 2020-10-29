@@ -51,8 +51,8 @@ public class ValidateHearingDatesTest extends IntegrationTestBase {
 
     @Test
     public void verifyShouldSuccessfullyValidate() {
-        assertThat(getResponseAndAssertSuccessStatusCode(validateHearing, "validate-hearing-successfully1.json", contestedDir).jsonPath().getList("warnings"),
-            is(empty()));
+        assertThat(getResponseAndAssertSuccessStatusCode(validateHearing, "validate-hearing-successfully1.json", contestedDir)
+            .jsonPath().getList("warnings"), is(empty()));
     }
 
     private Response getResponse(String url, String jsonFileName, String journeyType) {
