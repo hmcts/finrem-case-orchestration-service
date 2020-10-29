@@ -22,9 +22,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -51,11 +53,12 @@ public class RejectedOrderDocumentControllerTest {
     private static final String API_URL = "/case-orchestration/documents/consent-order-not-approved";
     private static final String PREVIEW_API_URL = "/case-orchestration/documents/preview-consent-order-not-approved";
 
+    private static final Pattern DATE_WITH_OPTIONAL_TIMEZONE_PATTERN = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}(\\+.{5})?$");
+
     @Autowired
     private WebApplicationContext applicationContext;
 
-    @MockBean
-    private RefusalOrderDocumentService documentService;
+    @MockBean private RefusalOrderDocumentService documentService;
 
     private MockMvc mvc;
     private JsonNode requestContent;
@@ -69,93 +72,87 @@ public class RejectedOrderDocumentControllerTest {
     private void doRequestSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/fee-lookup.json").toURI()));
+                .getResource("/fixtures/fee-lookup.json").toURI()));
     }
 
     @Test
     public void generateConsentOrderNotApprovedSuccess() throws Exception {
         when(documentService.generateConsentOrderNotApproved(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-            .thenReturn(caseDataWithUploadOrder(UUID.randomUUID().toString()));
+                .thenReturn(caseDataWithUploadOrder(UUID.randomUUID().toString()));
 
         mvc.perform(post(API_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.uploadOrder[0].id", is(notNullValue())))
-            .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentType", is(REJECTED_ORDER_TYPE)))
-            .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentDateAdded", is(notNullValue())))
-            .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_url", is(DOC_URL)))
-            .andExpect(
-                jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_filename", is(FILE_NAME)))
-            .andExpect(
-                jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_binary_url",
-                    is(BINARY_URL)))
-            .andExpect(jsonPath("$.errors", hasSize(0)))
-            .andExpect(jsonPath("$.warnings", hasSize(0)));
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.uploadOrder[0].id", is(notNullValue())))
+                .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentType", is(REJECTED_ORDER_TYPE)))
+                .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentDateAdded", matchesRegex(DATE_WITH_OPTIONAL_TIMEZONE_PATTERN)))
+                .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_url", is(DOC_URL)))
+                .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_filename", is(FILE_NAME)))
+                .andExpect(jsonPath("$.data.uploadOrder[0].value.DocumentLink.document_binary_url", is(BINARY_URL)))
+                .andExpect(jsonPath("$.errors", hasSize(0)))
+                .andExpect(jsonPath("$.warnings", hasSize(0)));
     }
 
     @Test
     public void generateConsentOrderNotApproved400() throws Exception {
         mvc.perform(post(API_URL)
-            .content("kwuilebge")
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isBadRequest());
+                .content("kwuilebge")
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     public void generateConsentOrderNotApproved500() throws Exception {
         when(documentService.generateConsentOrderNotApproved(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-            .thenThrow(feignError());
+                .thenThrow(feignError());
 
         mvc.perform(post(API_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isInternalServerError());
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
     public void previewConsentOrderNotApprovedSuccess() throws Exception {
         when(documentService.previewConsentOrderNotApproved(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-            .thenReturn(caseDataWithPreviewOrder());
+                .thenReturn(caseDataWithPreviewOrder());
 
         mvc.perform(post(PREVIEW_API_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.orderRefusalPreviewDocument", is(notNullValue())))
-            .andExpect(jsonPath("$.data.orderRefusalPreviewDocument.document_url", is(DOC_URL)))
-            .andExpect(
-                jsonPath("$.data.orderRefusalPreviewDocument.document_filename", is(FILE_NAME)))
-            .andExpect(
-                jsonPath("$.data.orderRefusalPreviewDocument.document_binary_url",
-                    is(BINARY_URL)))
-            .andExpect(jsonPath("$.errors", hasSize(0)))
-            .andExpect(jsonPath("$.warnings", hasSize(0)));
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.orderRefusalPreviewDocument", is(notNullValue())))
+                .andExpect(jsonPath("$.data.orderRefusalPreviewDocument.document_url", is(DOC_URL)))
+                .andExpect(jsonPath("$.data.orderRefusalPreviewDocument.document_filename", is(FILE_NAME)))
+                .andExpect(jsonPath("$.data.orderRefusalPreviewDocument.document_binary_url", is(BINARY_URL)))
+                .andExpect(jsonPath("$.errors", hasSize(0)))
+                .andExpect(jsonPath("$.warnings", hasSize(0)));
     }
 
     @Test
     public void previewConsentOrderNotApproved400() throws Exception {
         mvc.perform(post(PREVIEW_API_URL)
-            .content("kwuilebge")
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isBadRequest());
+                .content("kwuilebge")
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     public void previewConsentOrderNotApproved500() throws Exception {
         when(documentService.previewConsentOrderNotApproved(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-            .thenThrow(feignError());
+                .thenThrow(feignError());
 
         mvc.perform(post(PREVIEW_API_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isInternalServerError());
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isInternalServerError());
     }
 }
