@@ -22,14 +22,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingServi
 import javax.validation.constraints.NotNull;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_G;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isDocumentPresentInCaseData;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,8 +33,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 public class HearingDocumentController implements BaseController {
 
-    private final HearingDocumentService hearingService;
-    private final AdditionalHearingDocumentService additionalHearingService;
+    private final HearingDocumentService hearingDocumentService;
+    private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ValidateHearingService validateHearingService;
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -50,15 +46,12 @@ public class HearingDocumentController implements BaseController {
             @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocument(
             @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callback);
-
-        log.info("HDC before data before {}", callback.getCaseDetailsBefore());
-        log.info("HDC before data {}", callback.getCaseDetails());
+        validateCaseData(callbackRequest);
 
         List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
         if (!errors.isEmpty()) {
@@ -67,34 +60,15 @@ public class HearingDocumentController implements BaseController {
                     .build());
         }
 
-        Map<String, Object> caseData = caseDetails.getData();
-
-        boolean hadFirstHearing = alreadyHadFirstHearing(caseDetails);
-
-        if (! hadFirstHearing) {
-            caseData.putAll(hearingService.generateHearingDocuments(authorisationToken, caseDetails));
-        }
-
-        if (isContestedPaperApplication(caseDetails)) {
-            if (hadFirstHearing) {
-                log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
-                additionalHearingService.createAndSendAdditionalHearingDocuments(authorisationToken, caseDetails);
-            } else {
-                log.info("Sending Forms A, C, G to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
-                hearingService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
+        if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
+            if (isContestedPaperApplication(caseDetails)) {
+                additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
             }
+        } else {
+            caseDetails.getData().putAll(hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails));
         }
-
-        log.info("HDC after data before {}", callback.getCaseDetailsBefore());
-        log.info("HDC after data {}", callback.getCaseDetails());
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
-        return ResponseEntity.ok(
-                AboutToStartOrSubmitCallbackResponse.builder().data(caseData).warnings(warnings).build());
-    }
-
-    private boolean alreadyHadFirstHearing(CaseDetails caseDetails) {
-        return isDocumentPresentInCaseData(FORM_C, caseDetails)
-            && isDocumentPresentInCaseData(FORM_G, caseDetails);
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
     }
 }

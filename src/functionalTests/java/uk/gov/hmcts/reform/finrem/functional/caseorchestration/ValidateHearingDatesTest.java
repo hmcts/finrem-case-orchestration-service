@@ -16,7 +16,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(SerenityRunner.class)
 public class ValidateHearingDatesTest extends IntegrationTestBase {
 
-    @Value("${cos.validate.hearing}")
+    @Value("${cos.document.hearing.api}")
     private String validateHearing;
 
     private String contestedDir = "/json/contested/";

@@ -48,9 +48,12 @@ public class AdditionalHearingDocumentService {
     private final ObjectMapper objectMapper;
     private final BulkPrintService bulkPrintService;
 
-    public void createAndSendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
+    public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         CaseDocument document = generateAdditionalHearingDocument(caseDetails, authorisationToken);
         addAdditionalHearingDocumentToCaseData(caseDetails, document);
+    }
+
+    public void sendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         bulkPrintAdditionalHearingDocuments(caseDetails, authorisationToken);
     }
 
