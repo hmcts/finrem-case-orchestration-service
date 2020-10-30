@@ -316,6 +316,8 @@ public class NotificationsController implements BaseController {
         }
 
         if (isContestedPaperApplication(caseDetails)) {
+            log.info("Debug ---- before ---- {}", callbackRequest.getCaseDetailsBefore());
+            log.info("Debug ---- after ----- {}", callbackRequest.getCaseDetails());
             if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
                 additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
