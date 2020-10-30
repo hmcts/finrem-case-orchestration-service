@@ -101,7 +101,6 @@ public class CaseDataController implements BaseController {
         produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for contested paper case journey")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedPaperCaseOrganisationPolicy(
-        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
         @RequestBody final CallbackRequest callbackRequest) {
         log.info("Setting default values for contested paper case journey.");
         validateCaseData(callbackRequest);
@@ -112,7 +111,6 @@ public class CaseDataController implements BaseController {
     @PostMapping(path = "/move-collection/{source}/to/{destination}", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> moveValues(
-        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
         @RequestBody final CallbackRequest callbackRequest,
         @PathVariable("source") final String source,
         @PathVariable("destination") final String destination) {
@@ -136,10 +134,8 @@ public class CaseDataController implements BaseController {
 
     private void setData(final String authToken, final Map<String, Object> caseData) {
         if (idamService.isUserRoleAdmin(authToken)) {
-            log.info("Admin users.");
             caseData.put(IS_ADMIN, YES_VALUE);
         } else {
-            log.info("other users.");
             caseData.put(IS_ADMIN, NO_VALUE);
             caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
         }
@@ -165,18 +161,15 @@ public class CaseDataController implements BaseController {
 
             caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appPolicy);
 
-            log.info("App policy added to case : {}", appPolicy);
+            log.info("App policy added to case: {}, case ID {}", appPolicy, caseDetails.getId());
         }
     }
 
     private void setApplicantSolicitorOrganisationDetails(CaseDetails caseDetails, String authToken) {
         if (featureToggleService.isShareACaseEnabled() && isContestedApplication(caseDetails)) {
-            log.info("Share a case toggle is: {}", featureToggleService.isShareACaseEnabled());
+            log.info("Share a case toggle is: {} for case ID {}", featureToggleService.isShareACaseEnabled(), caseDetails.getId());
 
             if (isApplicantRepresentedByASolicitor(caseDetails.getData())) {
-                //this check could possibly be removed. I added the field into this file, it can probably be removed:
-                // fixtures/contested/contested-upload-case-documents.json
-
                 caseDetails.getData().put(CONTESTED_SOLICITOR_ADDRESS, solicitorService.updateApplicantSolicitorAddressFromPrd(authToken));
             }
         }

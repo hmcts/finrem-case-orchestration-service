@@ -17,7 +17,6 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -49,7 +48,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.uploadHearingOrderRO[0]").exists())
             .andExpect(jsonPath("$.data.uploadHearingOrderRO[1]").exists())
             .andExpect(jsonPath("$.data.uploadHearingOrderRO[2]").exists())
@@ -66,7 +64,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.uploadHearingOrderNew[0]").exists())
             .andExpect(jsonPath("$.data.uploadHearingOrder").isEmpty());
     }
@@ -81,7 +78,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
     }
 
@@ -95,7 +91,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
     }
 
@@ -109,7 +104,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
     }
 
@@ -123,7 +117,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)));
     }
 
@@ -137,7 +130,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)));
     }
@@ -152,7 +144,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)));
     }
 
@@ -166,7 +157,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.applicantRepresented", is(YES_VALUE)));
     }
@@ -181,7 +171,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)))
             .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)));
@@ -197,7 +186,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)))
@@ -214,7 +202,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(YES_VALUE)))
             .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)));
@@ -230,7 +217,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.isAdmin", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.fastTrackDecision", is(NO_VALUE)))
             .andExpect(jsonPath("$.data.paperApplication", is(YES_VALUE)))
@@ -248,7 +234,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.OrgPolicyCaseAssignedRole", is(APP_SOLICITOR_POLICY)));
     }
 
@@ -263,7 +248,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").doesNotExist());
     }
 
@@ -278,16 +262,15 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").doesNotExist());
     }
 
     @Test
     public void shouldSuccessfullyPopulateApplicantSolicitorAddress() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
         when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
         when(updateSolicitorDetailsService.updateApplicantSolicitorAddressFromPrd(
-            isA(String.class))).thenReturn(fakeFirmAddress());
+            isA(String.class))).thenReturn(mockFirmAddress());
 
         loadRequestContentWith(CONTESTED_NO_APPLICANT_SOL_ADDRESS);
         mvc.perform(post("/case-orchestration/contested/set-defaults")
@@ -295,15 +278,15 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.applicantSolicitorAddress", is(notNullValue())));
     }
 
-    //TODO: test for Share a case enabled + Applicant is represented
     @Test
-    public void shouldNotPopulateApplicantSolicitorAddressAsShareACaseIsDisabled() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
-        when(featureToggleService.isShareACaseEnabled()).thenReturn(false);
+    public void givenShareCaseIsEnabledAndApplicantIsRepresented_whenCaseInitialised_appSolAddressIsPopulated() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
+        when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
+        when(updateSolicitorDetailsService.updateApplicantSolicitorAddressFromPrd(
+            isA(String.class))).thenReturn(mockFirmAddress());
 
         loadRequestContentWith(CONTESTED_NO_APPLICANT_SOL_ADDRESS);
         mvc.perform(post("/case-orchestration/contested/set-defaults")
@@ -311,11 +294,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.applicantSolicitorAddress").doesNotExist());
+            .andExpect(jsonPath("$.data.applicantSolicitorAddress", is(notNullValue())));
     }
 
-    //TODO: test for Share a case enabled + App is not represented
     @Test
     public void shouldNotPopulateApplicantSolicitorAddressAsApplicantIsNotRepresented() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
@@ -327,18 +308,24 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
             .andExpect(jsonPath("$.data.applicantSolicitorAddress").doesNotExist());
     }
 
-    //TODO: test for Share a case disabled
+    @Test
+    public void shouldNotPopulateApplicantSolicitorAddressAsShareACaseIsDisabled() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
+        when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
 
-    //@Test
-    //public void shouldNotPopulateApplicantSolicitorAddressAsApplicantIsRepresented()
-    //check for isApplicantRepresented in Controller may be redundant
-    //Test scenarios should be if Share A case enabled and Disabled ^^
+        loadRequestContentWith(CONTESTED_NO_APPLICANT_SOL_ADDRESS);
+        mvc.perform(post("/case-orchestration/contested/set-defaults")
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.applicantSolicitorAddress").doesNotExist());
+    }
 
-    private Map fakeFirmAddress() {
+    private Map mockFirmAddress() {
         return new ObjectMapper().convertValue(Address.builder()
             .addressLine1("Applicant Solicitor Firm")
             .addressLine2("AddressLine2")
