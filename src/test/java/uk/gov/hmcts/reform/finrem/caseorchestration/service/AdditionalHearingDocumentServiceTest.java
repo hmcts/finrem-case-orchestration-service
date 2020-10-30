@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -11,15 +10,14 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -32,37 +30,22 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @ActiveProfiles("test-mock-document-client")
 public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired
-    private AdditionalHearingDocumentService additionalHearingDocumentService;
+    @Autowired private AdditionalHearingDocumentService additionalHearingDocumentService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Captor private ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
+    @Captor private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintDocumentsCaptor;
 
-    @Captor
-    private ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
-
-    @Captor
-    private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintDocumentsCaptor;
-
-    @MockBean
-    GenericDocumentService genericDocumentService;
-
-    @MockBean
-    BulkPrintService bulkPrintService;
+    @MockBean GenericDocumentService genericDocumentService;
+    @MockBean BulkPrintService bulkPrintService;
 
     @Before
     public void setUp() {
-        DocumentConfiguration config = new DocumentConfiguration();
-        config.setAdditionalHearingTemplate("FL-FRM-HNO-ENG-00588.docx");
-        config.setAdditionalHearingFileName("AdditionalHearingDocument.pdf");
-        objectMapper = new ObjectMapper();
-
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
     }
 
     @Test
     public void generateAndAddAdditionalHearingDocument() {
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", mapper);
         additionalHearingDocumentService.createAndSendAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
         verify(genericDocumentService, times(1)).generateDocument(any(),

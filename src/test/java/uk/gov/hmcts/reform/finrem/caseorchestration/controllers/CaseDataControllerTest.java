@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -325,8 +324,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.applicantSolicitorAddress").doesNotExist());
     }
 
-    private Map mockFirmAddress() {
-        return new ObjectMapper().convertValue(Address.builder()
+    private Map<String, Object> mockFirmAddress() {
+        return objectMapper.convertValue(Address.builder()
             .addressLine1("Applicant Solicitor Firm")
             .addressLine2("AddressLine2")
             .addressLine3("AddressLine3")

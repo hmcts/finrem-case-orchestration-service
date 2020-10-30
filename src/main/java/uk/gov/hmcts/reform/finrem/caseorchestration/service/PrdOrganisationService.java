@@ -6,7 +6,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.exceptions.InvalidTokenException;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -24,33 +23,25 @@ import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
 @Slf4j
 public class PrdOrganisationService {
 
-    private final PrdOrganisationConfiguration serviceConfig;
+    private final PrdOrganisationConfiguration prdOrganisationConfiguration;
     private final RestTemplate restTemplate;
     private final AuthTokenGenerator authTokenGenerator;
 
     public OrganisationsResponse retrieveOrganisationsData(String authToken) {
-
         URI uri = buildUri();
         log.info("Inside retrieveOrganisationData, PRD API uri : {}", uri);
 
-        try {
-            HttpEntity request;
-            request = buildRequest(authToken);
+        HttpEntity request = buildRequest(authToken);
 
-            ResponseEntity<OrganisationsResponse> responseEntity =
-                restTemplate.exchange(uri, GET, request, OrganisationsResponse.class);
+        ResponseEntity<OrganisationsResponse> responseEntity =
+            restTemplate.exchange(uri, GET, request, OrganisationsResponse.class);
 
-            return Objects.requireNonNull(responseEntity.getBody());
-
-        } catch (HttpClientErrorException ex) {
-            log.info("HttpClientErrorException caught", ex);
-            return OrganisationsResponse.builder().build();
-        }
+        return Objects.requireNonNull(responseEntity.getBody());
     }
 
     private HttpEntity buildRequest(String authToken) {
         HttpHeaders headers = new HttpHeaders();
-        if (!authToken.matches("^Bearer .+")) {
+        if (!authToken.startsWith("Bearer ")) {
             throw new InvalidTokenException("Invalid user token");
         }
         headers.add("Authorization", authToken);
@@ -60,7 +51,6 @@ public class PrdOrganisationService {
     }
 
     private URI buildUri() {
-        return fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi())
-            .build().toUri();
+        return fromHttpUrl(prdOrganisationConfiguration.getUrl() + prdOrganisationConfiguration.getApi()).build().toUri();
     }
 }

@@ -19,10 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -34,7 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.bulkPr
 @ActiveProfiles("test-mock-document-client")
 public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
-    @Autowired private ObjectMapper mapper = new ObjectMapper();
+    @Autowired private ObjectMapper mapper;
     @Autowired private ConsentOrderPrintService consentOrderPrintService;
 
     @MockBean private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;

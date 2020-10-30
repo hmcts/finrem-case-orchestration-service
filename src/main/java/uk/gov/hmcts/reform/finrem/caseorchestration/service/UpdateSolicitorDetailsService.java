@@ -13,15 +13,16 @@ import java.util.Map;
 public class UpdateSolicitorDetailsService {
 
     private final PrdOrganisationService organisationService;
+    private final ObjectMapper objectMapper;
 
-    public Map updateApplicantSolicitorAddressFromPrd(String authToken) {
+    public Map<String, Object> updateApplicantSolicitorAddressFromPrd(String authToken) {
         OrganisationsResponse organisationData = organisationService.retrieveOrganisationsData(authToken);
 
         return convertOrganisationAddressToSolicitorAddress(organisationData);
     }
 
-    private Map convertOrganisationAddressToSolicitorAddress(OrganisationsResponse organisationData) {
-        return new ObjectMapper().convertValue(Address.builder()
+    private Map<String, Object> convertOrganisationAddressToSolicitorAddress(OrganisationsResponse organisationData) {
+        return objectMapper.convertValue(Address.builder()
             .addressLine1(organisationData.getContactInformation().getAddressLine1())
             .addressLine2(organisationData.getContactInformation().getAddressLine2())
             .addressLine3(organisationData.getContactInformation().getAddressLine3())
