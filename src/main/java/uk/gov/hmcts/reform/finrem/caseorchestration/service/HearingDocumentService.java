@@ -97,9 +97,15 @@ public class HearingDocumentService {
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
     }
 
+    /**
+     * Checks for presence of Form C on case data.
+     *
+     * <p>It checks for form C only, because this form will be populated for
+     * both non-fast track and fast track cases. Fast track cases will have
+     * additionally form G populated.</p>
+     */
     public boolean alreadyHadFirstHearing(CaseDetails caseDetails) {
-        return isDocumentPresentInCaseData(FORM_C, caseDetails)
-            && isDocumentPresentInCaseData(FORM_G, caseDetails);
+        return isDocumentPresentInCaseData(FORM_C, caseDetails);
     }
 
     private List<BulkPrintDocument> getHearingCaseDocuments(Map<String, Object> caseData) {
