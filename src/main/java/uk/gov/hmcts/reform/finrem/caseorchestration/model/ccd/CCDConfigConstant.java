@@ -96,23 +96,33 @@ public class CCDConfigConstant {
     public static final String FAMILY_MEDIATOR_MIAM = "familyMediatorMIAM";
     public static final String CLAIMING_EXEMPTION_MIAM = "claimingExemptionMIAM";
     public static final String IS_ADMIN = "isAdmin";
-    public static final String KENTFRC_COURTLIST = "kentSurreyCourtList";
-    public static final String SEOTHER_COURTLIST = "otherSECourtList";
-    public static final String SWOTHER_COURTLIST = "otherSWCourtList";
-    public static final String NEWPORT_COURTLIST = "newportCourtList";
-    public static final String SWANSEA_COURTLIST = "swanseaCourtList";
-    public static final String WALES_OTHER_COURTLIST = "welshOtherCourtList";
-    public static final String CLEAVELAND_COURTLIST = "cleavelandCourtList";
-    public static final String NWYORKSHIRE_COURTLIST = "nwyorkshireCourtList";
-    public static final String HSYORKSHIRE_COURTLIST = "humberCourtList";
-    public static final String NOTTINGHAM_COURTLIST = "nottinghamCourtList";
+
+    //courtLists
+    public static final String BEDFORDSHIRE_COURTLIST = "bedfordshireCourtList";
     public static final String BIRMINGHAM_COURTLIST = "birminghamCourtList";
-    public static final String LONDON_CFC = "cfc";
+    public static final String BRISTOL_COURTLIST = "bristolCourtList";
     public static final String CFC_COURTLIST = "cfcCourtList";
+    public static final String CLEAVELAND_COURTLIST = "cleavelandCourtList";
+    public static final String DEVON_COURTLIST = "devonCourtList";
+    public static final String DORSET_COURTLIST = "dorsetCourtList";
+    public static final String HSYORKSHIRE_COURTLIST = "humberCourtList";
+    public static final String HUMBER_COURTLIST = "humberCourtList";
+    public static final String KENTFRC_COURTLIST = "kentSurreyCourtList";
+    public static final String LANCASHIRE_COURTLIST = "lancashireCourtList";
+    public static final String LONDON_CFC = "cfc";
     public static final String LONDON_COURTLIST = "londonCourtList";
-    public static final String MANCHESTER_COURTLIST = "manchesterCourtList";
-    public static final String NWOTHER_COURTLIST = "otherNWCourtList";
     public static final String LIVERPOOL_COURTLIST = "liverpoolCourtList";
+    public static final String MANCHESTER_COURTLIST = "manchesterCourtList";
+    public static final String NEWPORT_COURTLIST = "newportCourtList";
+    public static final String NORTH_WALES_COURTLIST = "northWalesCourtList";
+    public static final String NOTTINGHAM_COURTLIST = "nottinghamCourtList";
+    public static final String NWOTHER_COURTLIST = "otherNWCourtList";
+    public static final String NWYORKSHIRE_COURTLIST = "nwyorkshireCourtList";
+    public static final String SEOTHER_COURTLIST = "otherSECourtList";
+    public static final String SWANSEA_COURTLIST = "swanseaCourtList";
+    public static final String SWOTHER_COURTLIST = "otherSWCourtList";
+    public static final String THAMESVALLEY_COURTLIST = "thamesvalleyCourtList";
+    public static final String WALES_OTHER_COURTLIST = "welshOtherCourtList";
 
     //Draft Order Related
     public static final String SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER = "solicitorResponsibleForDraftingOrder";

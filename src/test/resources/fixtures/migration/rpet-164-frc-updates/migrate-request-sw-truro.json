@@ -1,0 +1,15 @@
+{
+  "token": "test_token",
+  "event_id": "FR_migrateCase",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "Divorce",
+    "case_type_id": "FinancialRemedyMVP2",
+    "state": "created",
+    "case_data": {
+      "regionList": "southwest",
+      "southWestFRCList": "other",
+      "otherSWCourtList": "FR_SWList_6"
+    }
+  }
+}
