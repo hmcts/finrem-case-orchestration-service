@@ -34,7 +34,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -140,13 +139,5 @@ public class CommonFunction {
 
     public static boolean isDocumentPresentInCaseData(String documentName, CaseDetails caseDetails) {
         return caseDetails.getData().containsKey(documentName);
-    }
-
-    public static boolean shouldNotifyRespondentSolicitorWithEmailInContestedCase(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        return isContestedApplication(caseDetails)
-            && !isPaperApplication(caseData)
-            && isRespondentRepresentedByASolicitor(caseData)
-            && isNotEmpty(RESP_SOLICITOR_EMAIL, caseData);
     }
 }

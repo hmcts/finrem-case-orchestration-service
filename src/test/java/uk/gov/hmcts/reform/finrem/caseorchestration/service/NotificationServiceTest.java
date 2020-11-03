@@ -21,10 +21,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
@@ -41,6 +46,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
@@ -887,5 +893,44 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+    }
+
+    @Test
+    public void shouldEmailRespondentSolicitor_shouldReturnTrue() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(PAPER_APPLICATION, NO_VALUE);
+        caseData.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
+        caseData.put(RESP_SOLICITOR_EMAIL, TEST_USER_EMAIL);
+
+        assertTrue(notificationService.shouldEmailRespondentSolicitor(caseData));
+    }
+
+    @Test
+    public void shouldEmailRespondentSolicitor_paperApplication() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(PAPER_APPLICATION, YES_VALUE);
+        caseData.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
+        caseData.put(RESP_SOLICITOR_EMAIL, TEST_USER_EMAIL);
+
+        assertFalse(notificationService.shouldEmailRespondentSolicitor(caseData));
+    }
+
+    @Test
+    public void shouldEmailRespondentSolicitor_notRepresented() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(PAPER_APPLICATION, NO_VALUE);
+        caseData.put(CONTESTED_RESPONDENT_REPRESENTED, NO_VALUE);
+        caseData.put(RESP_SOLICITOR_EMAIL, TEST_USER_EMAIL);
+
+        assertFalse(notificationService.shouldEmailRespondentSolicitor(caseData));
+    }
+
+    @Test
+    public void shouldEmailRespondentSolicitor_emailNotProvided() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(PAPER_APPLICATION, NO_VALUE);
+        caseData.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
+
+        assertFalse(notificationService.shouldEmailRespondentSolicitor(caseData));
     }
 }
