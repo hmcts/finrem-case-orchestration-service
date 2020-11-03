@@ -148,9 +148,18 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendSolicitorToDraftOrderEmail(CallbackRequest callbackRequest) {
-        URI uri = buildUri(notificationServiceConfiguration.getContestedDraftOrder());
+    public void sendSolicitorToDraftOrderEmailApplicant(CallbackRequest callbackRequest) {
         notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        sendSolicitorToDraftOrderEmail(notificationRequest);
+    }
+
+    public void sendSolicitorToDraftOrderEmailRespondent(CallbackRequest callbackRequest) {
+        notificationRequest = createNotificationRequestForRespSolicitor(callbackRequest);
+        sendSolicitorToDraftOrderEmail(notificationRequest);
+    }
+
+    private void sendSolicitorToDraftOrderEmail(NotificationRequest notificationRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getContestedDraftOrder());
         sendNotificationEmail(notificationRequest, uri);
     }
 

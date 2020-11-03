@@ -441,7 +441,7 @@ public class NotificationsControllerTest {
                 .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendSolicitorToDraftOrderEmail(any(CallbackRequest.class));
+                .sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
     }
 
     @Test
