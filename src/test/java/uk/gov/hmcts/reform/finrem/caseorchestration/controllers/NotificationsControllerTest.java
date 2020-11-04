@@ -80,11 +80,11 @@ public class NotificationsControllerTest {
 
     @MockBean private NotificationService notificationService;
     @MockBean private ManualPaymentDocumentService manualPaymentDocumentService;
-    @MockBean private FeatureToggleService featureToggleService;
     @MockBean private BulkPrintService bulkPrintService;
     @MockBean private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
     @MockBean private GeneralEmailService generalEmailService;
     @MockBean private HelpWithFeesDocumentService helpWithFeesDocumentService;
+    @MockBean private FeatureToggleService featureToggleService;
 
     private MockMvc mockMvc;
     private JsonNode requestContent;
@@ -372,6 +372,7 @@ public class NotificationsControllerTest {
 
     @Test
     public void shouldSendContestedApplicationIssuedEmailWhenAgreed_andNotifyRespondentSolicitorWhenShould() throws Exception {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
         buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
@@ -386,7 +387,24 @@ public class NotificationsControllerTest {
     }
 
     @Test
+    public void shouldSendContestedApplicationIssuedEmailWhenAgreed_andNotSendRespondentNotificationWhenToggledOff() throws Exception {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
+        mockMvc.perform(post(CONTESTED_APPLICATION_ISSUED_CALLBACK_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1)).sendContestedApplicationIssuedEmailToApplicantSolicitor(any());
+        verify(notificationService, times(0)).sendContestedApplicationIssuedEmailToRespondentSolicitor(any());
+    }
+
+    @Test
     public void shouldNotSendContestedApplicationIssuedEmailWhenNotAgreed_andDontNotifyRespondentSolicitorWhenShouldNot() throws Exception {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
 
         buildCcdRequest(CCD_REQUEST_JSON);
@@ -444,7 +462,7 @@ public class NotificationsControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verifyNoInteractions(notificationService);
+        verify(notificationService, times(0)).sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
     }
 
     @Test
@@ -455,7 +473,7 @@ public class NotificationsControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verifyNoInteractions(notificationService);
+        verify(notificationService, times(0)).sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
     }
 
     @Test
