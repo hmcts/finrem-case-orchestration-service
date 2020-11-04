@@ -76,29 +76,15 @@ public class NotificationsControllerTest {
     private static final String GENERAL_EMAIL_CONTESTED = "/fixtures/contested/general-email-contested.json";
     private static final String CONTESTED_PAPER_CASE_JSON = "/fixtures/contested/paper-case.json";
 
-    @Autowired
-    private WebApplicationContext applicationContext;
+    @Autowired private WebApplicationContext applicationContext;
 
-    @MockBean
-    private NotificationService notificationService;
-
-    @MockBean
-    private ManualPaymentDocumentService manualPaymentDocumentService;
-
-    @MockBean
-    private FeatureToggleService featureToggleService;
-
-    @MockBean
-    private BulkPrintService bulkPrintService;
-
-    @MockBean
-    private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
-
-    @MockBean
-    private GeneralEmailService generalEmailService;
-
-    @MockBean
-    private HelpWithFeesDocumentService helpWithFeesDocumentService;
+    @MockBean private NotificationService notificationService;
+    @MockBean private ManualPaymentDocumentService manualPaymentDocumentService;
+    @MockBean private FeatureToggleService featureToggleService;
+    @MockBean private BulkPrintService bulkPrintService;
+    @MockBean private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
+    @MockBean private GeneralEmailService generalEmailService;
+    @MockBean private HelpWithFeesDocumentService helpWithFeesDocumentService;
 
     private MockMvc mockMvc;
     private JsonNode requestContent;
@@ -385,7 +371,9 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void shouldSendContestedApplicationIssuedEmailWhenAgreed() throws Exception {
+    public void shouldSendContestedApplicationIssuedEmailWhenAgreed_andNotifyRespondentSolicitorWhenShould() throws Exception {
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
         buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
         mockMvc.perform(post(CONTESTED_APPLICATION_ISSUED_CALLBACK_URL)
             .content(requestContent.toString())
@@ -393,11 +381,14 @@ public class NotificationsControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(notificationService, times(1)).sendContestedApplicationIssuedEmail(any());
+        verify(notificationService, times(1)).sendContestedApplicationIssuedEmailToApplicantSolicitor(any());
+        verify(notificationService, times(1)).sendContestedApplicationIssuedEmailToRespondentSolicitor(any());
     }
 
     @Test
-    public void shouldNotSendContestedApplicationIssuedEmailWhenNotAgreed() throws Exception {
+    public void shouldNotSendContestedApplicationIssuedEmailWhenNotAgreed_andDontNotifyRespondentSolicitorWhenShouldNot() throws Exception {
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(CONTESTED_APPLICATION_ISSUED_CALLBACK_URL)
             .content(requestContent.toString())
@@ -405,7 +396,8 @@ public class NotificationsControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verifyNoInteractions(notificationService);
+        verify(notificationService, times(0)).sendContestedApplicationIssuedEmailToApplicantSolicitor(any());
+        verify(notificationService, times(0)).sendContestedApplicationIssuedEmailToRespondentSolicitor(any());
     }
 
     @Test
