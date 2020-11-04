@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
@@ -40,7 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
-public class NotificationsControllerTest {
+public class NotificationsControllerTest extends BaseControllerTest {
     //URLs
     private static final String HWF_SUCCESSFUL_CALLBACK_URL = "/case-orchestration/notify/hwf-successful";
     private static final String ASSIGN_TO_JUDGE_CALLBACK_URL = "/case-orchestration/notify/assign-to-judge";
@@ -79,6 +80,9 @@ public class NotificationsControllerTest {
     @Autowired
     private WebApplicationContext applicationContext;
 
+    @Autowired
+    private NotificationsController notificationsController;
+
     @MockBean
     private NotificationService notificationService;
 
@@ -99,6 +103,9 @@ public class NotificationsControllerTest {
 
     @MockBean
     private HelpWithFeesDocumentService helpWithFeesDocumentService;
+
+    @MockBean
+    private CaseDataService caseDataService;
 
     private MockMvc mockMvc;
     private JsonNode requestContent;
@@ -464,6 +471,36 @@ public class NotificationsControllerTest {
                 .andExpect(status().isOk());
 
         verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void shouldSendSolicitorToDraftOrderEmailRespondent() {
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
+
+        notificationsController.sendDraftOrderEmail(buildCallbackRequest());
+
+        verify(notificationService, times(1)).sendSolicitorToDraftOrderEmailRespondent(any());
+    }
+
+    @Test
+    public void shouldSendSolicitorToDraftOrderEmailRespondent_shouldNotSendEmail() {
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
+
+        notificationsController.sendDraftOrderEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendSolicitorToDraftOrderEmailRespondent(any());
+    }
+
+    @Test
+    public void shouldSendSolicitorToDraftOrderEmailRespondent_respSolicitorNotResponsible() {
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(false);
+
+        notificationsController.sendDraftOrderEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendSolicitorToDraftOrderEmailRespondent(any());
     }
 
     @Test
