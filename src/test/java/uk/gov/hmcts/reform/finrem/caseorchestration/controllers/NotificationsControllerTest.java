@@ -399,7 +399,7 @@ public class NotificationsControllerTest {
             .andExpect(status().isOk());
 
         verify(notificationService, times(1)).sendContestedApplicationIssuedEmailToApplicantSolicitor(any());
-        verify(notificationService, times(0)).sendContestedApplicationIssuedEmailToRespondentSolicitor(any());
+        verify(notificationService, never()).sendContestedApplicationIssuedEmailToRespondentSolicitor(any());
     }
 
     @Test
@@ -414,8 +414,8 @@ public class NotificationsControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(notificationService, times(0)).sendContestedApplicationIssuedEmailToApplicantSolicitor(any());
-        verify(notificationService, times(0)).sendContestedApplicationIssuedEmailToRespondentSolicitor(any());
+        verify(notificationService, never()).sendContestedApplicationIssuedEmailToApplicantSolicitor(any());
+        verify(notificationService, never()).sendContestedApplicationIssuedEmailToRespondentSolicitor(any());
     }
 
     @Test
@@ -462,7 +462,7 @@ public class NotificationsControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verify(notificationService, times(0)).sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
+        verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
     }
 
     @Test
@@ -473,7 +473,7 @@ public class NotificationsControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verify(notificationService, times(0)).sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
+        verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
     }
 
     @Test
