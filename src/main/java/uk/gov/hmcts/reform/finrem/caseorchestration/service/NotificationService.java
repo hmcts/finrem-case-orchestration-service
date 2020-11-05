@@ -136,9 +136,18 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendPrepareForHearingEmail(CallbackRequest callbackRequest) {
-        URI uri = buildUri(notificationServiceConfiguration.getPrepareForHearing());
+    public void sendPrepareForHearingEmailApplicant(CallbackRequest callbackRequest) {
         notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        sendPrepareForHearingEmail(notificationRequest);
+    }
+
+    public void sendPrepareForHearingEmailRespondent(CallbackRequest callbackRequest) {
+        notificationRequest = createNotificationRequestForRespSolicitor(callbackRequest);
+        sendPrepareForHearingEmail(notificationRequest);
+    }
+
+    private void sendPrepareForHearingEmail(NotificationRequest notificationRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getPrepareForHearing());
         sendNotificationEmail(notificationRequest, uri);
     }
 
