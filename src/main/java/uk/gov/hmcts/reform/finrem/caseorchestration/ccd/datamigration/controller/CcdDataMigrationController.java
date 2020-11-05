@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.MigrationHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.RemoveNottinghamCourtListGaMigration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164Phase1FrcCourtListMigrationImpl;
 
 import java.util.Map;
@@ -33,6 +34,31 @@ public class CcdDataMigrationController {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = CallbackResponse.class)})
     public CallbackResponse migrate(
+        @RequestHeader(value = AUTHORIZATION_HEADER) final String authorisationToken,
+        @RequestBody @ApiParam("CaseData") final CallbackRequest ccdRequest) {
+
+        CaseDetails caseDetails = ccdRequest.getCaseDetails();
+        log.info("FR case migration request received for case {}", caseDetails.getId());
+
+        AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder responseBuilder =
+            AboutToStartOrSubmitCallbackResponse.builder();
+
+        // Change the below to point to your new migration service and modify controller tests to match
+        RemoveNottinghamCourtListGaMigration removeNottinghamCourtListGaMigration = new RemoveNottinghamCourtListGaMigration();
+        Map<String, Object> caseData = removeNottinghamCourtListGaMigration.migrate(caseDetails);
+
+        if (caseData != null) {
+            responseBuilder.data(caseData);
+        }
+
+        return responseBuilder.build();
+    }
+
+    @PostMapping(value = "/migrateFrc", consumes = APPLICATION_JSON_VALUE)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = CallbackResponse.class)})
+    public CallbackResponse migrateFrc(
         @RequestHeader(value = AUTHORIZATION_HEADER) final String authorisationToken,
         @RequestBody @ApiParam("CaseData") final CallbackRequest ccdRequest) {
 
