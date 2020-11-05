@@ -5,8 +5,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import java.util.HashMap;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
-
 public class CourtDetailsMigration {
 
     public static final String REGION = "regionList";
@@ -101,50 +99,7 @@ public class CourtDetailsMigration {
     public static final String KENT_SURREY_COURT_LIST_AC = "kentSurreyCourtList";
 
     public Map<String, Object> migrate(CaseDetails caseDetails) {
-        if (migrationRequired(caseDetails)) {
             return migrateCaseData(caseDetails.getData());
-        }
-
-        return null;
-    }
-
-    private boolean migrationRequired(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        return isContestedApplication(caseDetails) && !hasRegionList(caseData) && hasCourtDetails(caseData);
-    }
-
-    private boolean hasRegionList(Map<String, Object> caseData) {
-        return caseData.containsKey(REGION);
-    }
-
-    private boolean hasCourtDetails(Map<String, Object> caseData) {
-        return caseData.containsKey(REGION_SL) || hasAllocatedCourtDetails(caseData) || hasAllocatedCourtDetailsGA(caseData);
-    }
-
-    private boolean hasAllocatedCourtDetails(Map<String, Object> caseData) {
-        if (caseData.containsKey(ALLOCATED_COURT_LIST)) {
-            try {
-                Map<String, Object> allocatedCourtList = (Map<String, Object>) caseData.getOrDefault(ALLOCATED_COURT_LIST, new HashMap<>());
-                return allocatedCourtList.containsKey(REGION_AC);
-            } catch (ClassCastException e) {
-                return false;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean hasAllocatedCourtDetailsGA(Map<String, Object> caseData) {
-        if (caseData.containsKey(ALLOCATED_COURT_LIST_GA)) {
-            try {
-                Map<String, Object> allocatedCourtList = (Map<String, Object>) caseData.getOrDefault(ALLOCATED_COURT_LIST_GA, new HashMap<>());
-                return allocatedCourtList.containsKey(REGION_AC);
-            } catch (ClassCastException e) {
-                return false;
-            }
-        }
-
-        return false;
     }
 
     public Map<String, Object> migrateCaseData(Map<String, Object> caseData) {

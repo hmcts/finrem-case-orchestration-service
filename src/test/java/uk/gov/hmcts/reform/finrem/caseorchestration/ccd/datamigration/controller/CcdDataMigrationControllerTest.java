@@ -2,13 +2,13 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controlle
 
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNot.not;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -22,16 +22,20 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     private static final String MIGRATE_URL = "/ccd-data-migration/migrate";
 
     @Test
-    public void shouldRemove_nottinghamCourtListGA_fromCase() throws Exception {
-        String resourcePath = "/fixtures/migration/removeNottinghamCourtListGAMigration/ccd-migrate-remove-nottingham-court-list-ga.json";
-
+    public void shouldMigrateCase_newport() throws Exception {
         mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString(resourcePath))
+            .content(resourceContentAsString("/fixtures/migration/courtDetailsMigration/ccd-migrate-request-migration-applicable-newport.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
+            .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("nottinghamCourtListGA"))))
+            .andExpect(jsonPath("$.data.regionList", is("wales")))
+            .andExpect(jsonPath("$.data.walesFRCList", is("newport")))
+            .andExpect(jsonPath("$.data.newportCourtList", is("FR_newport_hc_list_1")))
+            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
+            .andExpect(jsonPath("$.data", not(hasItem("walesFRCListSL"))))
+            .andExpect(jsonPath("$.data", not(hasItem("newportCourtListSL"))))
+            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 }
