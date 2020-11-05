@@ -406,8 +406,14 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorResponsibleToDraftOrder(caseData) && isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Draft Order'");
-            notificationService.sendSolicitorToDraftOrderEmail(callbackRequest);
+            notificationService.sendSolicitorToDraftOrderEmailApplicant(callbackRequest);
         }
+
+        if (notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            log.info("Sending email notification to Respondent Solicitor for 'Draft Order'");
+            notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest);
+        }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
