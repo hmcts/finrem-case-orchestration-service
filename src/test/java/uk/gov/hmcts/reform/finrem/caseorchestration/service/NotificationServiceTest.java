@@ -278,22 +278,44 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendPrepareForHearingAfterSentNotificationEmail() {
+    public void sendPrepareForHearingAfterSentNotificationEmailApplicant() {
         callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST,
             SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1");
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING_ORDER_SENT))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendPrepareForHearingOrderSentEmail(callbackRequest);
+        notificationService.sendPrepareForHearingOrderSentEmailApplicant(callbackRequest);
     }
 
     @Test
-    public void throwExceptionWhenPrepareForHearingAfterSentNotificationEmailIsRequested() {
+    public void throwExceptionWhenPrepareForHearingAfterSentNotificationEmailApplicantIsRequested() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING_ORDER_SENT))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendPrepareForHearingOrderSentEmail(callbackRequest);
+            notificationService.sendPrepareForHearingOrderSentEmailApplicant(callbackRequest);
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
+        }
+    }
+
+    @Test
+    public void sendPrepareForHearingAfterSentNotificationEmailRespondent() {
+        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST,
+            SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1");
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING_ORDER_SENT))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendPrepareForHearingOrderSentEmailRespondent(callbackRequest);
+    }
+
+    @Test
+    public void throwExceptionWhenPrepareForHearingAfterSentNotificationEmailRespondentIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING_ORDER_SENT))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+        try {
+            notificationService.sendPrepareForHearingOrderSentEmailRespondent(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }

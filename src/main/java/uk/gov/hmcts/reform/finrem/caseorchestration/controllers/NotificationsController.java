@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManualPaymentDocumentService;
@@ -50,6 +51,7 @@ public class NotificationsController implements BaseController {
     private final ManualPaymentDocumentService manualPaymentDocumentService;
     private final GeneralEmailService generalEmailService;
     private final CaseDataService caseDataService;
+    private final FeatureToggleService featureToggleService;
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
@@ -331,8 +333,14 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing (after send order)'");
-            notificationService.sendPrepareForHearingOrderSentEmail(callbackRequest);
+            notificationService.sendPrepareForHearingOrderSentEmailApplicant(callbackRequest);
         }
+
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing (after send order)'");
+            notificationService.sendPrepareForHearingOrderSentEmailRespondent(callbackRequest);
+        }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 

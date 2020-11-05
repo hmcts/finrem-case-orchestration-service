@@ -27,6 +27,9 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.prepare-for-hearing.api}")
     private String prepareForHearingApiUri;
 
+    @Value("${cos.notification.prepare-for-hearing-order-sent.api}")
+    private String prepareForHearingOrderSentApiUri;
+
     @Value("${cos.notification.contest-application-issued.api}")
     private String contestApplicationIssuedApiUri;
 
@@ -78,6 +81,13 @@ public class NotificationTests extends IntegrationTestBase {
     public void verifyNotifyPrepareForHearingTestIsOkay() {
 
         utils.validatePostSuccess(prepareForHearingApiUri,
+            "ccd-request-with-solicitor-prepareForHearing.json", contestedDir);
+    }
+
+    @Test
+    public void verifyNotifyPrepareForHearingOrderSentTestIsOkay() {
+
+        utils.validatePostSuccess(prepareForHearingOrderSentApiUri,
             "ccd-request-with-solicitor-prepareForHearing.json", contestedDir);
     }
 

@@ -376,7 +376,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(notificationService, times(1)).sendPrepareForHearingOrderSentEmail(any());
+        verify(notificationService, times(1)).sendPrepareForHearingOrderSentEmailApplicant(any());
     }
 
     @Test
@@ -388,7 +388,37 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verifyNoInteractions(notificationService);
+        verify(notificationService, never()).sendPrepareForHearingOrderSentEmailApplicant(any());
+    }
+
+    @Test
+    public void sendPrepareForHearingOrderSentEmail_shouldSendRespondentEmail() {
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+
+        notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
+
+        verify(notificationService, times(1)).sendPrepareForHearingOrderSentEmailRespondent(any());
+    }
+
+    @Test
+    public void sendPrepareForHearingOrderSentEmail_shouldNotSendRespondentEmail() {
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+
+        notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendPrepareForHearingOrderSentEmailRespondent(any());
+    }
+
+    @Test
+    public void sendPrepareForHearingOrderSentEmail_toggledOff() {
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(false);
+
+        notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendPrepareForHearingOrderSentEmailRespondent(any());
     }
 
     @Test
