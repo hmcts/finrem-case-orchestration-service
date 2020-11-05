@@ -1,6 +1,6 @@
 {
   "token": "test_token",
-  "event_id": "FR_migrateCase",
+  "event_id": "FR_migrateFrcCase",
   "case_details": {
     "id": "12345678",
     "jurisdiction": "Divorce",
