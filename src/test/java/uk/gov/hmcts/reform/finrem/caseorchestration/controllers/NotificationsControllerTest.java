@@ -477,6 +477,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void shouldSendSolicitorToDraftOrderEmailRespondent() {
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
         when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
 
         notificationsController.sendDraftOrderEmail(buildCallbackRequest());
 
@@ -487,6 +488,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void shouldSendSolicitorToDraftOrderEmailRespondent_shouldNotSendEmail() {
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
         when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
 
         notificationsController.sendDraftOrderEmail(buildCallbackRequest());
 
@@ -497,6 +499,18 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void shouldSendSolicitorToDraftOrderEmailRespondent_respSolicitorNotResponsible() {
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
         when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(false);
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+
+        notificationsController.sendDraftOrderEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendSolicitorToDraftOrderEmailRespondent(any());
+    }
+
+    @Test
+    public void shouldSendSolicitorToDraftOrderEmailRespondent_toggledOff() {
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(false);
 
         notificationsController.sendDraftOrderEmail(buildCallbackRequest());
 
