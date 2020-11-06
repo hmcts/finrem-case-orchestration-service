@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftHearingOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
@@ -131,15 +133,15 @@ public class DocumentHelper {
     }
 
     public CaseDocument getLatestContestedDraftOrderCollection(Map<String, Object> caseData) {
-        List<CaseDocument> contestedDraftOrders = ofNullable(caseData.get(DRAFT_HEARING_ORDER_COLLECTION))
-            .map(this::convertToCaseDocumentList)
+        List<DraftHearingOrderData> contestedDraftOrders = ofNullable(caseData.get(DRAFT_HEARING_ORDER_COLLECTION))
+            .map(this::convertToDraftHearingOrderDataList)
             .orElse(emptyList())
             .stream()
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
         if (!contestedDraftOrders.isEmpty()) {
-            return contestedDraftOrders.get(contestedDraftOrders.size() - 1);
+            return contestedDraftOrders.get(contestedDraftOrders.size() - 1).getDraftHearingOrder().getCaseDocument();
         } else {
             return null;
         }
@@ -158,6 +160,11 @@ public class DocumentHelper {
 
     private List<PensionCollectionData> convertToPensionCollectionDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<List<PensionCollectionData>>() {
+        });
+    }
+
+    private List<DraftHearingOrderData> convertToDraftHearingOrderDataList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<List<DraftHearingOrderData>>() {
         });
     }
 
