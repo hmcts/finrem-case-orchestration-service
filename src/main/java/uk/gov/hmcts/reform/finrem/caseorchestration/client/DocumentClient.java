@@ -61,4 +61,13 @@ public interface DocumentClient {
     Document annexStampDocument(
             @RequestBody Document document,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+
+    @PostMapping(
+        path = "/version/1/convert-to-pdf",
+        headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
+    )
+    Document convertDocumentToPdf(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
+        @RequestBody Document document);
+
 }

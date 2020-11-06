@@ -308,4 +308,9 @@ public class CCDConfigConstant {
     public static final String HEARING_DATE = "hearingDate";
     public static final String HEARING_TIME = "hearingTime";
     public static final String HEARING_ADDITIONAL_INFO = "additionalInformationAboutHearing";
+
+    //draft hearing order
+    public static final String LATEST_DRAFT_HEARING_ORDER  = "latestDraftHearingOrder";
+    public static final String DRAFT_HEARING_ORDER_COLLECTION_RO  = "draftDirectionDetailsCollectionRO";
+    public static final String DRAFT_HEARING_ORDER_COLLECTION  = "draftDirectionDetailsCollection";
 }

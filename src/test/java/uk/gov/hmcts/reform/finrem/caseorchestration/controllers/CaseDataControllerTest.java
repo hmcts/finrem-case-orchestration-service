@@ -6,10 +6,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.MoveCollectionService;
 
 import java.io.File;
+import java.util.HashMap;
 
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -38,93 +42,24 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @MockBean
     FeatureToggleService featureToggleService;
 
+    @MockBean
+    MoveCollectionService moveCollectionService;
+
     @Test
-    public void shouldSuccessfullyMoveValues() throws Exception {
+    public void shouldSuccessfullyMoveCollection() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
+        when(moveCollectionService.moveCollection(anyMap(), anyString(), anyString())).thenReturn(new HashMap<>());
 
         requestContent = objectMapper.readTree(
             new File(getClass()
                 .getResource(MOVE_VALUES_SAMPLE_JSON)
                 .toURI()));
         mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/uploadHearingOrderRO")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrderRO[0]").exists())
-                .andExpect(jsonPath("$.data.uploadHearingOrderRO[1]").exists())
-                .andExpect(jsonPath("$.data.uploadHearingOrderRO[2]").exists())
-                .andExpect(jsonPath("$.data.uploadHearingOrder").isEmpty());
-    }
-
-    @Test
-    public void shouldSuccessfullyMoveValuesToNewCollections() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
-
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(MOVE_VALUES_SAMPLE_JSON)
-                .toURI()));
-        mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/uploadHearingOrderNew")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrderNew[0]").exists())
-                .andExpect(jsonPath("$.data.uploadHearingOrder").isEmpty());
-    }
-
-    @Test
-    public void shouldDoNothingWithNonArraySourceValueMove() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
-
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(MOVE_VALUES_SAMPLE_JSON)
-                .toURI()));
-        mvc.perform(post("/case-orchestration/move-collection/someString/to/uploadHearingOrder")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
-    }
-
-    @Test
-    public void shouldDoNothingWithNonArrayDestinationValueMove() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
-
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(MOVE_VALUES_SAMPLE_JSON)
-                .toURI()));
-        mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/someString")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
-    }
-
-    @Test
-    public void shouldDoNothingWhenSourceIsEmptyMove() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
-
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(MOVE_VALUES_SAMPLE_JSON)
-                .toURI()));
-        mvc.perform(post("/case-orchestration/move-collection/empty/to/uploadHearingOrder")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print());
     }
 
     @Test

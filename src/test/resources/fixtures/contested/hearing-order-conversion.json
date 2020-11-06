@@ -1,0 +1,46 @@
+{
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": "123",
+    "jurisdiction": "DIVORCE",
+    "state": "applicationDrafted",
+    "case_data": {
+      "someString": "String",
+      "someInteger": 1,
+      "draftDirectionDetailsCollectionRO": [
+        {
+          "id": 1,
+          "value": {
+            "uploadDraftDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/e0f1a60f-85b7-462a-add1-1eedcf05032b",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/e0f1a60f-85b7-462a-add1-1eedcf05032b/binary",
+              "document_filename": "sample.pdf"
+            }
+          }
+        },
+        {
+          "id": 2,
+          "value": {
+            "uploadDraftDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/2b6ed2f4-4b12-4c06-ad10-a36191565db0",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/2b6ed2f4-4b12-4c06-ad10-a36191565db0/binary",
+              "document_filename": "Form_A_Eng_6.18.pdf"
+            }
+          }
+        }
+      ],
+      "draftDirectionDetailsCollection": [
+        {
+          "id": 6,
+          "value": {
+            "uploadDraftDocument": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/e0f1a60f-85b7-462a-add1-1eedcf05032b",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal:443/documents/e0f1a60f-85b7-462a-add1-1eedcf05032b/binary",
+              "document_filename": "one.pdf"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

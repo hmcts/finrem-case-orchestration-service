@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,6 +82,14 @@ public abstract class BaseControllerTest extends BaseTest {
         caseDocument.setDocumentBinaryUrl("http://doc1/binary");
         caseDocument.setDocumentFilename("doc1");
         return caseDocument;
+    }
+
+    Document getDocument() {
+        Document document = new Document();
+        document.setUrl("http://doc1");
+        document.setBinaryUrl("http://doc1/binary");
+        document.setFileName("doc1");
+        return document;
     }
 
     protected String resourceContentAsString(String resourcePath) {
