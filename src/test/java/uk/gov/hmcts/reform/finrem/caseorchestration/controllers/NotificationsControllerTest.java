@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
@@ -43,8 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
-public class NotificationsControllerTest {
-
+public class NotificationsControllerTest extends BaseControllerTest {
     //URLs
     private static final String HWF_SUCCESSFUL_CALLBACK_URL = "/case-orchestration/notify/hwf-successful";
     private static final String ASSIGN_TO_JUDGE_CALLBACK_URL = "/case-orchestration/notify/assign-to-judge";
@@ -83,6 +83,7 @@ public class NotificationsControllerTest {
         "/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json";
 
     @Autowired private WebApplicationContext applicationContext;
+    @Autowired private NotificationsController notificationsController;
 
     @MockBean private NotificationService notificationService;
     @MockBean private ManualPaymentDocumentService manualPaymentDocumentService;
@@ -92,6 +93,7 @@ public class NotificationsControllerTest {
     @MockBean private HelpWithFeesDocumentService helpWithFeesDocumentService;
     @MockBean private HearingDocumentService hearingDocumentService;
     @MockBean private AdditionalHearingDocumentService additionalHearingDocumentService;
+    @MockBean private CaseDataService caseDataService;
     @MockBean private FeatureToggleService featureToggleService;
 
     private MockMvc mockMvc;
@@ -476,6 +478,50 @@ public class NotificationsControllerTest {
     }
 
     @Test
+    public void shouldSendSolicitorToDraftOrderEmailRespondent() {
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+
+        notificationsController.sendDraftOrderEmail(buildCallbackRequest());
+
+        verify(notificationService, times(1)).sendSolicitorToDraftOrderEmailRespondent(any());
+    }
+
+    @Test
+    public void shouldSendSolicitorToDraftOrderEmailRespondent_shouldNotSendEmail() {
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+
+        notificationsController.sendDraftOrderEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendSolicitorToDraftOrderEmailRespondent(any());
+    }
+
+    @Test
+    public void shouldSendSolicitorToDraftOrderEmailRespondent_respSolicitorNotResponsible() {
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(false);
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+
+        notificationsController.sendDraftOrderEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendSolicitorToDraftOrderEmailRespondent(any());
+    }
+
+    @Test
+    public void shouldSendSolicitorToDraftOrderEmailRespondent_toggledOff() {
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(false);
+
+        notificationsController.sendDraftOrderEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendSolicitorToDraftOrderEmailRespondent(any());
+    }
+
+    @Test
     public void sendGeneralEmailConsented() throws Exception {
         buildCcdRequest(GENERAL_EMAIL_CONSENTED);
         when(generalEmailService.storeGeneralEmail(any(CaseDetails.class)))
@@ -603,6 +649,7 @@ public class NotificationsControllerTest {
         verify(notificationService, times(1)).sendContestedGeneralOrderEmailApplicant(any(CallbackRequest.class));
         verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any(CallbackRequest.class));
     }
+
     @Test
     public void sendConsentedGeneralOrderEmail() throws Exception {
         buildCcdRequest(CONSENTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);

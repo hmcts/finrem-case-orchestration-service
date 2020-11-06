@@ -397,18 +397,38 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendSolicitorToDraftOrderEmail() {
+    public void sendSolicitorToDraftOrderEmailRespondent() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest);
+    }
+
+    @Test
+    public void throwExceptionWhenSendSolicitorToDraftOrderEmailRespondentIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
+                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+        try {
+            notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest);
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
+        }
+    }
+
+    @Test
+    public void sendSolicitorToDraftOrderEmailApplicant() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendSolicitorToDraftOrderEmailApplicant(callbackRequest);
     }
 
     @Test
-    public void throwExceptionWhenSolicitorToDraftOrderEmailIsRequested() {
+    public void throwExceptionWhenSendSolicitorToDraftOrderEmailApplicant() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
-                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
             notificationService.sendSolicitorToDraftOrderEmailApplicant(callbackRequest);
         } catch (Exception ex) {

@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
@@ -52,6 +53,7 @@ public class NotificationsController implements BaseController {
     private final HelpWithFeesDocumentService helpWithFeesDocumentService;
     private final ManualPaymentDocumentService manualPaymentDocumentService;
     private final GeneralEmailService generalEmailService;
+    private final CaseDataService caseDataService;
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final FeatureToggleService featureToggleService;
@@ -408,7 +410,7 @@ public class NotificationsController implements BaseController {
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendDraftOrderEmail(
             @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("Received request to send email for 'Applicant Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to send email for 'Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
@@ -418,7 +420,9 @@ public class NotificationsController implements BaseController {
             notificationService.sendSolicitorToDraftOrderEmailApplicant(callbackRequest);
         }
 
-        if (notificationService.shouldEmailRespondentSolicitor(caseData)) {
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled()
+            && caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData)
+            && notificationService.shouldEmailRespondentSolicitor(caseData)) {
             log.info("Sending email notification to Respondent Solicitor for 'Draft Order'");
             notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest);
         }
