@@ -2,12 +2,14 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
@@ -17,6 +19,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -26,6 +29,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -38,16 +43,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 
 @WebMvcTest(HearingDocumentController.class)
 public class HearingDocumentControllerTest extends BaseControllerTest {
-    private static final String GEN_DOC_URL = "/case-orchestration/documents/hearing";
 
-    @MockBean
-    private HearingDocumentService hearingService;
+    private static final String VALIDATE_AND_GEN_DOC_URL = "/case-orchestration/documents/hearing";
+    private static final String ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY = "Issue Date, fast track decision or hearingDate is empty";
 
-    @MockBean
-    private AdditionalHearingDocumentService additionalHearingService;
-
-    @MockBean
-    private ValidateHearingService validateHearingService;
+    @MockBean private HearingDocumentService hearingDocumentService;
+    @MockBean private AdditionalHearingDocumentService additionalHearingDocumentService;
+    @MockBean private ValidateHearingService validateHearingService;
 
     @Before
     public void setUp()  {
@@ -69,7 +71,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateHearingDocumentHttpError400() throws Exception {
-        mvc.perform(post(GEN_DOC_URL)
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content("kwuilebge")
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -78,10 +80,10 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     @Test
     public void generateHearingDocumentFormC() throws Exception {
-        when(hearingService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
+        when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
                 .thenReturn(ImmutableMap.of("formC", caseDocument()));
 
-        mvc.perform(post(GEN_DOC_URL)
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -90,7 +92,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
                 .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
 
-        verify(hearingService, never()).sendFormCAndGForBulkPrint(any(), any());
+        verify(hearingDocumentService, never()).sendFormCAndGForBulkPrint(any(), any());
     }
 
     @Test
@@ -98,10 +100,10 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json").toURI()));
 
-        when(hearingService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
+        when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
             .thenReturn(ImmutableMap.of("formC", caseDocument()));
 
-        mvc.perform(post(GEN_DOC_URL)
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -109,16 +111,14 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.formC.document_url", is(DOC_URL)))
             .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
             .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
-
-        verify(hearingService, times(1)).sendFormCAndGForBulkPrint(isA(CaseDetails.class), eq(AUTH_TOKEN));
     }
 
     @Test
     public void generateMiniFormAHttpError500() throws Exception {
-        when(hearingService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
+        when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
                 .thenThrow(feignError());
 
-        mvc.perform(post(GEN_DOC_URL)
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -128,26 +128,109 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void generateAdditionalHearingDocumentSuccess() throws Exception {
         doValidCaseDataSetUpForAdditionalHearing();
+        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
 
-        mvc.perform(post(GEN_DOC_URL)
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verify(hearingService,  times(0)).generateHearingDocuments(any(), any());
-        verify(additionalHearingService, times(1)).createAndSendAdditionalHearingDocuments(any(), any());
+        verify(hearingDocumentService,  times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
+        verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
     }
 
     @Test
     public void generateAdditionalGearingDocumentWhenOneAlreadyExists() throws Exception {
-        mvc.perform(post(GEN_DOC_URL)
+        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
+
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
             .content(resourceContentAsString("/fixtures/bulkprint/bulk-print-additional-hearing-exists.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(hearingService,  times(0)).generateHearingDocuments(any(), any());
-        verify(additionalHearingService, times(1)).createAndSendAdditionalHearingDocuments(any(), any());
+        verify(hearingDocumentService,  times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
+        verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+    }
+
+    @Test
+    public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
+        doEmptyCaseDataSetUp();
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(startsWith(GlobalExceptionHandler.SERVER_ERROR_MSG)));
+    }
+
+    @Test
+    public void shouldThrowErrorWhenIssueDateAndHearingDateAreEmpty() throws Exception {
+        when(validateHearingService.validateHearingErrors(isA(CaseDetails.class)))
+            .thenReturn(ImmutableList.of(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/pba-validate.json").toURI()));
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.errors[0]",
+                Matchers.is(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY)));
+    }
+
+    @Test
+    public void shouldThrowWarningsWhenNotFastTrackDecision() throws Exception {
+        when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class)))
+            .thenReturn(ImmutableList.of("Date of the hearing must be between 12 and 14 weeks."));
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/validate-hearing-withoutfastTrackDecision.json").toURI()));
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.warnings[0]",
+                Matchers.is("Date of the hearing must be between 12 and 14 weeks.")));
+    }
+
+    @Test
+    public void shouldThrowWarningsWhenFastTrackDecision() throws Exception {
+        when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class)))
+            .thenReturn(ImmutableList.of("Date of the Fast Track hearing must be between 6 and 10 weeks."));
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json").toURI()));
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.warnings[0]",
+                Matchers.is("Date of the Fast Track hearing must be between 6 and 10 weeks.")));
+    }
+
+    @Test
+    public void shouldSuccessfullyValidate() throws Exception {
+        when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
+        when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
+
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/contested/validate-hearing-successfully.json").toURI()));
+        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.warnings").isEmpty());
     }
 }
