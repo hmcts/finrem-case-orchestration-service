@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.helper;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
