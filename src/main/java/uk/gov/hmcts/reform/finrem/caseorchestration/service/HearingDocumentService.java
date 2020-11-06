@@ -86,7 +86,7 @@ public class HearingDocumentService {
 
     CaseDetails addCourtFields(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
-        data.put("courtDetails", buildFrcCourtDetails(data, objectMapper));
+        data.put("courtDetails", buildFrcCourtDetails(data));
         return caseDetails;
     }
 
