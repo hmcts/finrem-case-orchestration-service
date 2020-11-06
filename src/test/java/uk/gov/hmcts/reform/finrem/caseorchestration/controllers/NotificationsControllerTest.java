@@ -79,6 +79,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private static final String GENERAL_EMAIL_CONSENTED = "/fixtures/general-email-consented.json";
     private static final String GENERAL_EMAIL_CONTESTED = "/fixtures/contested/general-email-contested.json";
     private static final String CONTESTED_PAPER_CASE_JSON = "/fixtures/contested/paper-case.json";
+
     private static final String CONTESTED_PAPER_APPLICATION_HEARING_JSON =
         "/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json";
 
@@ -404,7 +405,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(notificationService, times(1)).sendContestedApplicationIssuedEmail(any());
+        verify(notificationService, times(1)).sendContestedApplicationIssuedEmailToApplicantSolicitor(any());
     }
 
     @Test
@@ -416,7 +417,37 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verifyNoInteractions(notificationService);
+        verify(notificationService, never()).sendContestedApplicationIssuedEmailToApplicantSolicitor(any());
+    }
+
+    @Test
+    public void shouldSendContestedApplicationIssuedEmailWhenAgreed_andNotifyRespondentSolicitorWhenShould() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
+
+        verify(notificationService, times(1)).sendContestedApplicationIssuedEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void shouldSendContestedApplicationIssuedEmailWhenAgreed_andNotSendRespondentNotificationWhenToggledOff() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendContestedApplicationIssuedEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void shouldNotSendContestedApplicationIssuedEmailWhenNotAgreed_andDontNotifyRespondentSolicitorWhenShouldNot() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
+        notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendContestedApplicationIssuedEmailToRespondentSolicitor(any());
     }
 
     @Test
@@ -463,7 +494,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verifyNoInteractions(notificationService);
+        verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
     }
 
     @Test
@@ -474,7 +505,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verifyNoInteractions(notificationService);
+        verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
     }
 
     @Test

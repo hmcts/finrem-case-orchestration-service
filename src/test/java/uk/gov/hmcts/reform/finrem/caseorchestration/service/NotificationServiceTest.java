@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
@@ -364,7 +364,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedApplicationIssuedEmail(callbackRequest);
+        notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(callbackRequest);
     }
 
     @Test
@@ -373,7 +373,27 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendContestedApplicationIssuedEmail(callbackRequest);
+            notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(callbackRequest);
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
+        }
+    }
+
+    @Test
+    public void sendContestedApplicationIssuedRespondentEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedApplicationIssuedEmailToRespondentSolicitor(callbackRequest);
+    }
+
+    @Test
+    public void throwExceptionWhenContestedApplicationIssuedRespondentEmailIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+        try {
+            notificationService.sendContestedApplicationIssuedEmailToRespondentSolicitor(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
@@ -404,6 +424,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
+
         notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest);
     }
 
@@ -723,7 +744,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     private CallbackRequest getContestedCallbackRequestForRespSolicitor(String regionValue, String frcList, String frcValue,
-                                                        String courtList, String courtValue) {
+                                                                        String courtList, String courtValue) {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
         caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
