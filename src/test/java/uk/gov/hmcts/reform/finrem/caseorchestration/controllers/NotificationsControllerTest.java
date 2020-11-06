@@ -468,7 +468,7 @@ public class NotificationsControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verifyNoInteractions(notificationService);
+        verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any());
     }
 
     @Test
@@ -479,7 +479,7 @@ public class NotificationsControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verifyNoInteractions(notificationService);
+        verify(notificationService, never()).sendSolicitorToDraftOrderEmailRespondent(any());
     }
 
     @Test
