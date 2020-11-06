@@ -62,4 +62,18 @@ public class HearingOrderControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
     }
 
+    @Test
+    public void throwsExceptionIfNoDocumentFound() throws Exception {
+        when(genericDocumentService.stampDocument(any(), anyString())).thenReturn(getCaseDocument());
+        when(moveCollectionService.moveCollection(anyMap(), anyString(), anyString()))
+            .thenReturn(new HashMap<String, Object>() {});
+        when(documentHelper.getLatestContestedDraftOrderCollection(anyMap())).thenReturn(null);
+
+        mvc.perform(post(CONVERSION_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().is4xxClientError());
+    }
+
 }
