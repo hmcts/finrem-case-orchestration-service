@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
@@ -91,6 +92,7 @@ public class NotificationsControllerTest {
     @MockBean private HelpWithFeesDocumentService helpWithFeesDocumentService;
     @MockBean private HearingDocumentService hearingDocumentService;
     @MockBean private AdditionalHearingDocumentService additionalHearingDocumentService;
+    @MockBean private FeatureToggleService featureToggleService;
 
     private MockMvc mockMvc;
     private JsonNode requestContent;
@@ -571,7 +573,10 @@ public class NotificationsControllerTest {
     }
 
     @Test
-    public void sendContestedGeneralOrderEmail() throws Exception {
+    public void sendContestedGeneralOrderEmails() throws Exception {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
         buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
         mockMvc.perform(post(GENERAL_ORDER_RAISED_CALLBACK_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -579,10 +584,25 @@ public class NotificationsControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(notificationService, times(1))
-            .sendContestedGeneralOrderEmail(any(CallbackRequest.class));
+        verify(notificationService, times(1)).sendContestedGeneralOrderEmailApplicant(any(CallbackRequest.class));
+        verify(notificationService, times(1)).sendContestedGeneralOrderEmailRespondent(any(CallbackRequest.class));
     }
 
+    @Test
+    public void shouldNotSendContestedGeneralOrderEmailsToRespondent() throws Exception {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
+        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
+        mockMvc.perform(post(GENERAL_ORDER_RAISED_CALLBACK_URL)
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(notificationService, times(1)).sendContestedGeneralOrderEmailApplicant(any(CallbackRequest.class));
+        verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any(CallbackRequest.class));
+    }
     @Test
     public void sendConsentedGeneralOrderEmail() throws Exception {
         buildCcdRequest(CONSENTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);

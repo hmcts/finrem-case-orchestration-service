@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
@@ -35,6 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorResponsibleToDraftOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
@@ -52,6 +54,7 @@ public class NotificationsController implements BaseController {
     private final GeneralEmailService generalEmailService;
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
+    private final FeatureToggleService featureToggleService;
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
@@ -257,7 +260,6 @@ public class NotificationsController implements BaseController {
         log.info("Received request to send email for General Order raised for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             if (isConsentedApplication(caseDetails)) {
@@ -268,10 +270,17 @@ public class NotificationsController implements BaseController {
                     log.info("Sending email notification to Solicitor for 'Contested consent General Order'");
                     notificationService.sendContestedConsentGeneralOrderEmail(callbackRequest);
                 } else {
-                    log.info("Sending email notification to Solicitor for 'Contested General Order'");
-                    notificationService.sendContestedGeneralOrderEmail(callbackRequest);
+                    log.info("Sending email notification to applicant solicitor for 'Contested General Order'");
+                    notificationService.sendContestedGeneralOrderEmailApplicant(callbackRequest);
                 }
             }
+        }
+
+        Map<String, Object> caseData = caseDetails.getData();
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)
+            && isContestedApplication(caseDetails) && !isConsentedInContestedCase(caseDetails)) {
+            log.info("Sending email notification to respondent solicitor for 'Contested General Order'");
+            notificationService.sendContestedGeneralOrderEmailRespondent(callbackRequest);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());

@@ -207,9 +207,18 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendContestedGeneralOrderEmail(CallbackRequest callbackRequest) {
-        URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralOrder());
+    public void sendContestedGeneralOrderEmailApplicant(CallbackRequest callbackRequest) {
         notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        sendContestedGeneralOrderEmail(notificationRequest);
+    }
+
+    public void sendContestedGeneralOrderEmailRespondent(CallbackRequest callbackRequest) {
+        notificationRequest = createNotificationRequestForRespSolicitor(callbackRequest);
+        sendContestedGeneralOrderEmail(notificationRequest);
+    }
+
+    private void sendContestedGeneralOrderEmail(NotificationRequest notificationRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralOrder());
         sendNotificationEmail(notificationRequest, uri);
     }
 
