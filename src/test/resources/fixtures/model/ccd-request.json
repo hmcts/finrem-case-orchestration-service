@@ -10,6 +10,9 @@
       "PBANumber": "PBA123456",
       "d81Question": "No",
       "PBAreference": "ABCD",
+      "paperApplication": "Yes",
+      "formC": {},
+      "formG": {},
       "consentOrder": {
         "document_url": "http://file1",
         "document_filename": "file1",
