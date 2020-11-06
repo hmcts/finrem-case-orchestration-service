@@ -87,6 +87,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 
 public class NotificationServiceTest extends BaseServiceTest {
+
     private static final String END_POINT_HWF_SUCCESSFUL = "http://localhost:8086/notify/hwf-successful";
     private static final String END_POINT_ASSIGNED_TO_JUDGE = "http://localhost:8086/notify/assign-to-judge";
     private static final String END_POINT_CONSENT_ORDER_MADE = "http://localhost:8086/notify/consent-order-made";
@@ -114,16 +115,12 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String TEST_USER_EMAIL = "fr_applicant_sol@sharklasers.com";
     private static final String NOTTINGHAM_FRC_EMAIL = "FRCNottingham@justice.gov.uk";
 
-    @Autowired
-    private NotificationService notificationService;
+    @Autowired private NotificationService notificationService;
+    @Autowired protected RestTemplate restTemplate;
+
+    @MockBean protected FeatureToggleService featureToggleService;
+
     private CallbackRequest callbackRequest;
-
-    @Autowired
-    protected RestTemplate restTemplate;
-
-    @MockBean
-    protected FeatureToggleService featureToggleService;
-
     private MockRestServiceServer mockServer;
 
     @Before

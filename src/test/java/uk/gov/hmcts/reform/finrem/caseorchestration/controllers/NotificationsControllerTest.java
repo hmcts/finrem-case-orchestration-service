@@ -41,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
 public class NotificationsControllerTest {
+
     //URLs
     private static final String HWF_SUCCESSFUL_CALLBACK_URL = "/case-orchestration/notify/hwf-successful";
     private static final String ASSIGN_TO_JUDGE_CALLBACK_URL = "/case-orchestration/notify/assign-to-judge";
@@ -76,29 +77,15 @@ public class NotificationsControllerTest {
     private static final String GENERAL_EMAIL_CONTESTED = "/fixtures/contested/general-email-contested.json";
     private static final String CONTESTED_PAPER_CASE_JSON = "/fixtures/contested/paper-case.json";
 
-    @Autowired
-    private WebApplicationContext applicationContext;
+    @Autowired private WebApplicationContext applicationContext;
 
-    @MockBean
-    private NotificationService notificationService;
-
-    @MockBean
-    private ManualPaymentDocumentService manualPaymentDocumentService;
-
-    @MockBean
-    private FeatureToggleService featureToggleService;
-
-    @MockBean
-    private BulkPrintService bulkPrintService;
-
-    @MockBean
-    private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
-
-    @MockBean
-    private GeneralEmailService generalEmailService;
-
-    @MockBean
-    private HelpWithFeesDocumentService helpWithFeesDocumentService;
+    @MockBean private NotificationService notificationService;
+    @MockBean private ManualPaymentDocumentService manualPaymentDocumentService;
+    @MockBean private FeatureToggleService featureToggleService;
+    @MockBean private BulkPrintService bulkPrintService;
+    @MockBean private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
+    @MockBean private GeneralEmailService generalEmailService;
+    @MockBean private HelpWithFeesDocumentService helpWithFeesDocumentService;
 
     private MockMvc mockMvc;
     private JsonNode requestContent;
@@ -452,7 +439,7 @@ public class NotificationsControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verifyNoInteractions(notificationService);
+        verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any());
     }
 
     @Test
@@ -463,7 +450,7 @@ public class NotificationsControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk());
 
-        verifyNoInteractions(notificationService);
+        verify(notificationService, never()).sendSolicitorToDraftOrderEmailRespondent(any());
     }
 
     @Test
