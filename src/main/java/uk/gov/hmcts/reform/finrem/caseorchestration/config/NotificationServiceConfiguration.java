@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "finrem.notification")
 public class NotificationServiceConfiguration {
+
     private String url;
     private String api;
     private String hwfSuccessful;
@@ -33,5 +34,4 @@ public class NotificationServiceConfiguration {
     private String contestedConsentOrderNotApproved;
     private String contestedGeneralApplicationReferToJudge;
     private String contestedGeneralApplicationOutcome;
-
 }

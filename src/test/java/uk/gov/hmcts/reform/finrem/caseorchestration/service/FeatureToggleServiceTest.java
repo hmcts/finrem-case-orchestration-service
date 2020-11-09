@@ -7,15 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 @RunWith(Enclosed.class)
 public class FeatureToggleServiceTest {
 
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
+        "feature.toggle.respondent_solicitor_email_notification=true",
         "feature.toggle.contested_print_draft_order_not_approved=true",
         "feature.toggle.contested_print_general_order=true",
         "feature.toggle.share_a_case=true"
@@ -24,6 +25,11 @@ public class FeatureToggleServiceTest {
 
         @Autowired
         private FeatureToggleService featureToggleService;
+
+        @Test
+        public void isRespondentSolicitorEmailNotificationEnabledReturnsTrue() {
+            assertThat(featureToggleService.isRespondentSolicitorEmailNotificationEnabled(), is(true));
+        }
 
         @Test
         public void isContestedPrintGeneralOrderEnabledReturnsTrue() {
@@ -48,6 +54,7 @@ public class FeatureToggleServiceTest {
 
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
+        "feature.toggle.respondent_solicitor_email_notification=false",
         "feature.toggle.contested_print_draft_order_not_approved=false",
         "feature.toggle.contested_print_general_order=false",
         "feature.toggle.send_to_frc=false",
@@ -57,6 +64,11 @@ public class FeatureToggleServiceTest {
 
         @Autowired
         private FeatureToggleService featureToggleService;
+
+        @Test
+        public void isRespondentSolicitorEmailNotificationEnabledReturnsFalse() {
+            assertThat(featureToggleService.isRespondentSolicitorEmailNotificationEnabled(), is(false));
+        }
 
         @Test
         public void getFieldsIgnoredDuringSerialisationContainsElementsWhenFeaturesDisabled() {
