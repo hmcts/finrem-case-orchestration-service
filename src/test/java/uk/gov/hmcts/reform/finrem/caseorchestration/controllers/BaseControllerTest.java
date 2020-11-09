@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -14,6 +16,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class BaseControllerTest extends BaseTest {
 
@@ -74,6 +78,12 @@ public abstract class BaseControllerTest extends BaseTest {
     void doValidCaseDataSetUpForAdditionalHearing() throws IOException, URISyntaxException {
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/bulkprint/bulk-print-additional-hearing.json").toURI()));
+    }
+
+    protected CallbackRequest buildCallbackRequest() {
+        Map<String, Object> caseData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
+        return CallbackRequest.builder().caseDetails(caseDetails).build();
     }
 
     CaseDocument getCaseDocument() {
