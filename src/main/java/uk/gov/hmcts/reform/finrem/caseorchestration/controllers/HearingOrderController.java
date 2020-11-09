@@ -61,6 +61,8 @@ public class HearingOrderController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
+        validateCaseData(callback);
+        log.info("storing hearing order");
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         CaseDocument hearingOrderDocument = getLatestHearingOrderAsPdf(caseData, authorisationToken);
         CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(hearingOrderDocument, authorisationToken);
@@ -78,7 +80,9 @@ public class HearingOrderController implements BaseController {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
         }
 
+        log.info("ABX {}", hearingOrderDocument.getDocumentFilename().toLowerCase());
         if (!hearingOrderDocument.getDocumentFilename().toLowerCase().endsWith(".pdf")) {
+            log.info("Converting document to pdf");
             hearingOrderDocument = genericDocumentService.convertDocumentToPdf(hearingOrderDocument, authorisationToken);
         }
 
