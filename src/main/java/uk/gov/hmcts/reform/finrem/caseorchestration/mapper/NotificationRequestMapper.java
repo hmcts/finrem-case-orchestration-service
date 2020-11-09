@@ -66,7 +66,7 @@ public class NotificationRequestMapper {
         notificationRequest.setCaseType(caseType);
 
         if (isContestedApplication(callbackRequest.getCaseDetails())) {
-            String selectedCourt = ContestedCourtHelper.getSelectedCourt(callbackRequest.getCaseDetails());
+            String selectedCourt = ContestedCourtHelper.getSelectedFrc(callbackRequest.getCaseDetails());
             notificationRequest.setSelectedCourt(selectedCourt);
 
             log.info("selectedCourt is {} for case ID: {}", selectedCourt,

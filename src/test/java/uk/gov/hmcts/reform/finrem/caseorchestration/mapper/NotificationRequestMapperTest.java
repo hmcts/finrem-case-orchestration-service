@@ -44,7 +44,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
         assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("contested", notificationRequest.getCaseType());
-        assertEquals("Nottingham County Court and Family Court", notificationRequest.getSelectedCourt());
+        assertEquals("nottingham", notificationRequest.getSelectedCourt());
     }
 
     @Test
@@ -72,6 +72,6 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_RESP_SOLICITOR_NAME, notificationRequest.getName());
         assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("contested", notificationRequest.getCaseType());
-        assertEquals("Nottingham County Court and Family Court", notificationRequest.getSelectedCourt());
+        assertEquals("nottingham", notificationRequest.getSelectedCourt());
     }
 }
