@@ -124,9 +124,18 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendContestedApplicationIssuedEmail(CallbackRequest callbackRequest) {
-        URI uri = buildUri(notificationServiceConfiguration.getContestedApplicationIssued());
+    public void sendContestedApplicationIssuedEmailToApplicantSolicitor(CallbackRequest callbackRequest) {
         notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        sendContestedApplicationIssuedEmail(notificationRequest);
+    }
+
+    public void sendContestedApplicationIssuedEmailToRespondentSolicitor(CallbackRequest callbackRequest) {
+        notificationRequest = createNotificationRequestForRespSolicitor(callbackRequest);
+        sendContestedApplicationIssuedEmail(notificationRequest);
+    }
+
+    private void sendContestedApplicationIssuedEmail(NotificationRequest notificationRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getContestedApplicationIssued());
         sendNotificationEmail(notificationRequest, uri);
     }
 
@@ -231,7 +240,6 @@ public class NotificationService {
     }
 
     public void sendContestedGeneralApplicationOutcomeEmail(CallbackRequest callbackRequest) throws IOException {
-
         if (featureToggleService.isSendToFRCEnabled()) {
             Map<String, Object> data = callbackRequest.getCaseDetails().getData();
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
@@ -260,7 +268,6 @@ public class NotificationService {
     }
 
     public NotificationRequest createNotificationRequestForAppSolicitor(CallbackRequest callbackRequest) {
-
         notificationRequest = isConsentedApplication(callbackRequest.getCaseDetails())
             ? buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
                 CONSENTED_SOLICITOR_NAME, SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER)
@@ -271,7 +278,6 @@ public class NotificationService {
     }
 
     public NotificationRequest createNotificationRequestForRespSolicitor(CallbackRequest callbackRequest) {
-
         notificationRequest = isConsentedApplication(callbackRequest.getCaseDetails())
             ? buildNotificationRequest(callbackRequest, RESP_SOLICITOR_REFERENCE,
                 RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER)
