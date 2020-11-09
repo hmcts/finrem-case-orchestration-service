@@ -5,6 +5,10 @@ import lombok.Data;
 
 @Data
 public class DraftHearingOrder {
-    @JsonProperty("caseDocuments")
+
+    @JsonProperty("purposeOfDocument")
+    String purposeOfDocument;
+
+    @JsonProperty("uploadDraftDocument")
     CaseDocument caseDocument;
 }
