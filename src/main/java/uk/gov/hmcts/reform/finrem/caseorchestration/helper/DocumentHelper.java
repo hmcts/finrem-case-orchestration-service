@@ -276,7 +276,7 @@ public class DocumentHelper {
             caseData.put("applicantName", applicantName);
             caseData.put("respondentName", respondentName);
             caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
-            caseData.put("courtDetails", buildFrcCourtDetails(caseData, objectMapper));
+            caseData.put("courtDetails", buildFrcCourtDetails(caseData));
         } else {
             log.info("Failed to prepare template data as not all required address details were present");
             throw new IllegalArgumentException("Mandatory data missing from address when trying to generate document");
