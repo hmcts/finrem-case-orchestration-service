@@ -40,11 +40,15 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_D81_QUESTION;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
 public class NotificationsControllerTest extends BaseControllerTest {
+
     //URLs
     private static final String HWF_SUCCESSFUL_CALLBACK_URL = "/case-orchestration/notify/hwf-successful";
     private static final String ASSIGN_TO_JUDGE_CALLBACK_URL = "/case-orchestration/notify/assign-to-judge";
@@ -666,7 +670,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotSendContestedGeneralOrderEmailsToRespondent() throws Exception {
+    public void shouldNotSendContestedGeneralOrderEmailToRespondent() throws Exception {
         when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
 
@@ -678,6 +682,19 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(notificationService, times(1)).sendContestedGeneralOrderEmailApplicant(any(CallbackRequest.class));
+        verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any(CallbackRequest.class));
+    }
+
+    @Test
+    public void shouldNotSendContestedGeneralOrderEmailToRespondentInConsentedInContestedCase() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONTESTED);
+        callbackRequest.getCaseDetails().getData().put(CONSENT_D81_QUESTION, YES_VALUE);
+        notificationsController.sendGeneralOrderRaisedEmail(callbackRequest);
+
         verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any(CallbackRequest.class));
     }
 
