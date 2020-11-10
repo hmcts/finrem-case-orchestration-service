@@ -39,6 +39,9 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.contest-draft-order.api}")
     private String contestDraftOrderApiUri;
 
+    @Value("${cos.notification.contested-consent-order-approved.api}")
+    private String contestedConsentOrderApproved;
+
     private String consentedDir = "/json/consented/";
     private String contestedDir = "/json/contested/";
 
@@ -110,5 +113,12 @@ public class NotificationTests extends IntegrationTestBase {
 
         utils.validatePostSuccess(contestDraftOrderApiUri,
             "applicant-solicitor-to-draft-order-with-email-consent.json", contestedDir);
+    }
+
+    @Test
+    public void verifyNotifyContestedConsentOrderApprovedIsOkay() {
+
+        utils.validatePostSuccess(contestedConsentOrderApproved,
+            "ccd-request-with-solicitor-contestOrderApproved.json", contestedDir);
     }
 }
