@@ -40,7 +40,6 @@ public class Rpet164Phase1FrcCourtListMigrationImpl implements MigrationHandler 
     public static final String BEDFORDSHIRE = "bedfordshire";
     public static final String BIRMINGHAM = "birmingham";
     public static final String BRISTOLFRC = "bristol";
-    //public static final String CFC = "cfc";
     public static final String CLEAVELAND = "cleaveland";
     public static final String DEVON = "devon";
     public static final String DORSET = "dorset";
@@ -75,8 +74,6 @@ public class Rpet164Phase1FrcCourtListMigrationImpl implements MigrationHandler 
     public static final String BLACKBURN = "FR_lancashireList_2";
     public static final String BLACKPOOL = "FR_lancashireList_3";
     public static final String LANCASTER = "FR_lancashireList_4";
-    //public static final String LEYLAND = "FR_lancashireList_5";
-    //public static final String REEDLEY =  "FR_lancashireList_6";
     public static final String BARROW = "FR_lancashireList_7";
     public static final String CARLISLE = "FR_lancashireList_8";
     public static final String WEST_CUMBRIA = "FR_lancashireList_9";
@@ -187,7 +184,6 @@ public class Rpet164Phase1FrcCourtListMigrationImpl implements MigrationHandler 
 
     //North Wales Court List
     public static final String WREXHAM = "FR_northwalesList_1";
-    //public static final String CAERNARFON = "FR_northwalesList_2";
     public static final String PRESTATYN = "FR_northwalesList_3";
     public static final String WELSHPOOL = "FR_northwalesList_4";
     public static final String MOLD = "FR_northwalesList_5";
