@@ -192,9 +192,15 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendContestedConsentOrderApprovedEmail(CallbackRequest callbackRequest) {
+    public void sendContestedConsentOrderApprovedEmailToApplicantSolicitor(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedConsentOrderApproved());
         notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+    public void sendContestedConsentOrderApprovedEmailToRespondentSolicitor(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getContestedConsentOrderApproved());
+        notificationRequest = createNotificationRequestForRespSolicitor(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
 
