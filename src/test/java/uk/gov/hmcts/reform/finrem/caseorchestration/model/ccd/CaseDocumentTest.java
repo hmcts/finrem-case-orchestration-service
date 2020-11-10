@@ -13,10 +13,10 @@ public class CaseDocumentTest {
     @Before
     public void setUp() throws Exception {
         String json = "{"
-                + " \"document_url\" : \"http://doc1\", "
-                + " \"document_filename\" : \"doc1\", "
-                + " \"document_binary_url\" : \"http//doc1.binary\" "
-                + "} ";
+            + " \"document_url\" : \"http://doc1\", "
+            + " \"document_filename\" : \"doc1\", "
+            + " \"document_binary_url\" : \"http//doc1.binary\" "
+            + "} ";
         ObjectMapper mapper = new ObjectMapper();
         document = mapper.readValue(json, CaseDocument.class);
     }

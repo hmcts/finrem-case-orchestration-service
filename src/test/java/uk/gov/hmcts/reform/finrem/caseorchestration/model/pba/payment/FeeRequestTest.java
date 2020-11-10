@@ -14,11 +14,11 @@ public class FeeRequestTest {
     @Test
     public void shouldCreateFeeRequest() throws Exception {
         String json = "{"
-                + " \"calculated_amount\": 1000,"
-                + " \"code\": \"Fee1\","
-                + " \"version\": \"v1\","
-                + " \"volume\": 1"
-                + "}";
+            + " \"calculated_amount\": 1000,"
+            + " \"code\": \"Fee1\","
+            + " \"version\": \"v1\","
+            + " \"volume\": 1"
+            + "}";
         FeeRequest feeRequest = mapper.readValue(json, FeeRequest.class);
         assertThat(feeRequest.getCalculatedAmount(), is(BigDecimal.valueOf(1000)));
         assertThat(feeRequest.getCode(), is("Fee1"));

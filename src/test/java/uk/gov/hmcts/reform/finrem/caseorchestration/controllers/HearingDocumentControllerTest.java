@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
@@ -24,6 +25,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,7 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 
 @WebMvcTest(HearingDocumentController.class)
 public class HearingDocumentControllerTest extends BaseControllerTest {
-
+    private static final String DIRECTION_ORDER_URL = "/case-orchestration/contested-upload-direction-order";
     private static final String VALIDATE_AND_GEN_DOC_URL = "/case-orchestration/documents/hearing";
     private static final String ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY = "Issue Date, fast track decision or hearingDate is empty";
 
@@ -52,7 +54,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @MockBean private ValidateHearingService validateHearingService;
 
     @Before
-    public void setUp()  {
+    public void setUp() {
         super.setUp();
         try {
             doRequestSetUp();
@@ -66,31 +68,31 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json").toURI()));
+            .getResource("/fixtures/contested/validate-hearing-with-fastTrackDecision.json").toURI()));
     }
 
     @Test
     public void generateHearingDocumentHttpError400() throws Exception {
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
-                .content("kwuilebge")
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest());
+            .content("kwuilebge")
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
     public void generateHearingDocumentFormC() throws Exception {
         when(hearingDocumentService.generateHearingDocuments(eq(AUTH_TOKEN), isA(CaseDetails.class)))
-                .thenReturn(ImmutableMap.of("formC", caseDocument()));
+            .thenReturn(ImmutableMap.of("formC", caseDocument()));
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.formC.document_url", is(DOC_URL)))
-                .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
-                .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.formC.document_url", is(DOC_URL)))
+            .andExpect(jsonPath("$.data.formC.document_filename", is(FILE_NAME)))
+            .andExpect(jsonPath("$.data.formC.document_binary_url", is(BINARY_URL)));
 
         verify(hearingDocumentService, never()).sendFormCAndGForBulkPrint(any(), any());
     }
@@ -128,6 +130,7 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     @Test
     public void generateAdditionalHearingDocumentSuccess() throws Exception {
         doValidCaseDataSetUpForAdditionalHearing();
+
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
 
         mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
@@ -141,17 +144,26 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void generateAdditionalGearingDocumentWhenOneAlreadyExists() throws Exception {
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
-
-        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
-            .content(resourceContentAsString("/fixtures/bulkprint/bulk-print-additional-hearing-exists.json"))
+    public void generateHearingDocumentDirectionOrder_isAnotherHearingTrue() throws Exception {
+        mvc.perform(post(DIRECTION_ORDER_URL)
+            .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(hearingDocumentService,  times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
-        verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+        verify(additionalHearingDocumentService, times(1)).createAndStoreAdditionalHearingDocuments(any(), any());
+    }
+
+    @Test
+    public void generateHearingDocumentDirectionOrder_CourtDetailsParseException() throws Exception {
+        doThrow(new CourtDetailsParseException()).when(additionalHearingDocumentService).createAndStoreAdditionalHearingDocuments(any(), any());
+
+        mvc.perform(post(DIRECTION_ORDER_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors[0]", is(new CourtDetailsParseException().getMessage())));
     }
 
     @Test

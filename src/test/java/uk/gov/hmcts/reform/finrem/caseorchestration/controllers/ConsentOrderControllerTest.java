@@ -52,14 +52,14 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
         when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
         when(idamService.isUserRoleAdmin(any())).thenReturn(true);
         mvc.perform(post(UPDATE_LATEST_CONSENT_ORDER_JSON)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.latestConsentOrder").exists())
-                .andExpect(jsonPath("$.data.applicantRepresented").doesNotExist())
-                .andExpect(jsonPath("$.warnings").doesNotExist());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.latestConsentOrder").exists())
+            .andExpect(jsonPath("$.data.applicantRepresented").doesNotExist())
+            .andExpect(jsonPath("$.warnings").doesNotExist());
     }
 
     @Test
@@ -67,28 +67,28 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
         when(consentOrderService.getLatestConsentOrderData(any(CallbackRequest.class))).thenReturn(getCaseDocument());
         when(idamService.isUserRoleAdmin(any())).thenReturn(false);
         mvc.perform(post(UPDATE_LATEST_CONSENT_ORDER_JSON)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.latestConsentOrder").exists())
-                .andExpect(jsonPath("$.data.applicantRepresented").value("Yes"))
-                .andExpect(jsonPath("$.warnings").doesNotExist());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.latestConsentOrder").exists())
+            .andExpect(jsonPath("$.data.applicantRepresented").value("Yes"))
+            .andExpect(jsonPath("$.warnings").doesNotExist());
     }
 
     @Test
     public void shouldThrowHttpError400() throws Exception {
         mvc.perform(post(UPDATE_LATEST_CONSENT_ORDER_JSON)
-                .content("kwuilebge")
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest());
+            .content("kwuilebge")
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource(AMEND_CONSENT_ORDER_BY_SOL_JSON).toURI()));
+            .getResource(AMEND_CONSENT_ORDER_BY_SOL_JSON).toURI()));
     }
 }

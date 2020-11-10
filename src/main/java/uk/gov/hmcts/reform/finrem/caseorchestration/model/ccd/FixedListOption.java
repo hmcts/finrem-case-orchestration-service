@@ -22,7 +22,7 @@ public class FixedListOption {
         return ImmutableSet.copyOf(optionsMap.keySet());
     }
 
-    public  Map<String, String> optionMap(String key) {
+    public Map<String, String> optionMap(String key) {
         return Optional.ofNullable(optionsMap.get(key)).orElse(ImmutableMap.of());
     }
 }

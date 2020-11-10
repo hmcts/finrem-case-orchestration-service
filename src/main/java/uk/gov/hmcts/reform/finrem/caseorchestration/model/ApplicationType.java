@@ -26,6 +26,6 @@ public enum ApplicationType {
             }
         }
         throw new IllegalArgumentException(
-                "Unknown enum type " + value + ", allowed values are " + Arrays.toString(values()));
+            "Unknown enum type " + value + ", allowed values are " + Arrays.toString(values()));
     }
 }

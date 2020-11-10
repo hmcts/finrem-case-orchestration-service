@@ -62,8 +62,8 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
 
     private static final String START_REFUSAL_ORDER_URL = "/case-orchestration/contested-application-not-approved-start";
     private static final String PREVIEW_REFUSAL_ORDER_URL = "/case-orchestration/documents/preview-refusal-order";
-    private static final String SUBMIT_REFUSAL_ORDER_URL =  "/case-orchestration/contested-application-not-approved-submit";
-    private static final String SUBMIT_REFUSAL_REASON_URL =  "/case-orchestration/contested-application-send-refusal";
+    private static final String SUBMIT_REFUSAL_ORDER_URL = "/case-orchestration/contested-application-not-approved-submit";
+    private static final String SUBMIT_REFUSAL_REASON_URL = "/case-orchestration/contested-application-send-refusal";
 
     private String bearerToken = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJqc2NyMGE0M3JnMHU5aGZpNHRva21vdHJ"
         + "vOSIsInN1YiI6IjEiLCJpYXQiOjE1NjAyNDcyNzgsImV4cCI6MTU2MDI2NTI3OCwiZGF0YSI6ImNjZC1pbXBv"
@@ -248,8 +248,8 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
         verify(contestedDraftOrderNotApprovedService, times(1)).getLatestRefusalReason(any());
-        verify(bulkPrintService, times(0)).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService, times(0)).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
     }
 
     private OngoingStubbing<Map<String, Object>> whenServicePopulatesCollection() {

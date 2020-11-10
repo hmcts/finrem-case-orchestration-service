@@ -23,8 +23,8 @@ public class DocumentGenerationRequestTest {
 
     private DocumentGenerationRequest documentRequest() {
         return DocumentGenerationRequest.builder()
-                .template(TEMPLATE_NAME)
-                .values(VALUES)
-                .build();
+            .template(TEMPLATE_NAME)
+            .values(VALUES)
+            .build();
     }
 }

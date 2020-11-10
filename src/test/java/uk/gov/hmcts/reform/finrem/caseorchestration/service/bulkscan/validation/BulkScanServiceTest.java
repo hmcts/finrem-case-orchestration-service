@@ -16,8 +16,6 @@ import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidator;
 import uk.gov.hmcts.reform.bsp.common.service.transformation.BulkScanFormTransformer;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkScanService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.FinRemBulkScanFormTransformerFactory;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FinRemBulkScanFormValidatorFactory;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FormAValidator;
 
 import java.util.List;
 import java.util.Map;
@@ -118,9 +116,9 @@ public class BulkScanServiceTest {
     @Test(expected = InvalidDataException.class)
     public void shouldThrowInvalidDataExceptionForTransformer() {
         ExceptionRecord exceptionRecord = ExceptionRecord.builder()
-                .formType(TEST_FORM_TYPE)
-                .ocrDataFields(singletonList(new OcrDataField(TEST_KEY, TEST_VALUE)))
-                .build();
+            .formType(TEST_FORM_TYPE)
+            .ocrDataFields(singletonList(new OcrDataField(TEST_KEY, TEST_VALUE)))
+            .build();
 
         OcrValidationResult validatedWithWarn = OcrValidationResult.builder().addWarning("warning").build();
         when(finRemBulkScanFormValidatorFactory.getValidator(TEST_FORM_TYPE)).thenReturn(bulkScanFormValidator);
