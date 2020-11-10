@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -319,7 +319,8 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedApplicationIssuedEmail(callbackRequest);
+
+        notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(callbackRequest);
 
         verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
@@ -330,12 +331,32 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendContestedApplicationIssuedEmail(callbackRequest);
+            notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(callbackRequest);
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
+        }
+    }
+
+    @Test
+    public void sendContestedApplicationIssuedRespondentEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedApplicationIssuedEmailToRespondentSolicitor(callbackRequest);
+    }
+
+    @Test
+    public void throwExceptionWhenContestedApplicationIssuedRespondentEmailIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+        try {
+            notificationService.sendContestedApplicationIssuedEmailToRespondentSolicitor(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
-        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
     }
 
     @Test
@@ -367,6 +388,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
                 .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
                 .andRespond(MockRestResponseCreators.withNoContent());
+
         notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest);
 
         verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
@@ -382,8 +404,6 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
-
-        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
     }
 
     @Test
