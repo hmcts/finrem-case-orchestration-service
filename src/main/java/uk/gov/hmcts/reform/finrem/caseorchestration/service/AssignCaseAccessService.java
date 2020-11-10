@@ -1,10 +1,16 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServiceConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
+
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -13,8 +19,17 @@ public class AssignCaseAccessService {
 
     private final AssignCaseAccessServiceConfiguration assignCaseAccessServiceConfiguration;
     private final AssignCaseAccessRequestMapper assignCaseAccessRequestMapper;
+    private final IdamService idamService;
+    private final RestService restService;
+    private final ObjectMapper objectMapper;
 
     public void assignCaseAccess(CaseDetails caseDetails, String authorisationToken) {
+        String userId = idamService.getIdamUserId(authorisationToken);
+        AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(caseDetails, userId);
 
+        restService.restApiPostCall(
+            authorisationToken,
+            assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl(),
+            objectMapper.convertValue(assignCaseAccessRequest, new TypeReference<Map<String, Object>>() {}));
     }
 }
