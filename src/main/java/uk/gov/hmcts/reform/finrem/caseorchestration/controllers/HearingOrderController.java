@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.MoveCollectionServic
 
 import javax.validation.constraints.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -95,6 +96,9 @@ public class HearingOrderController implements BaseController {
 
     private void updateCaseDataForLatestHearingOrderCollection(Map<String, Object> caseData, CaseDocument stampedHearingOrder) {
         List<HearingOrderCollectionData> finalOrderCollection = documentHelper.getFinalOrderDocuments(caseData);
+        if (finalOrderCollection == null) {
+            finalOrderCollection = new ArrayList<>();
+        }
         finalOrderCollection.add(HearingOrderCollectionData.builder()
             .hearingOrderDocuments(HearingOrderDocument
                 .builder()
