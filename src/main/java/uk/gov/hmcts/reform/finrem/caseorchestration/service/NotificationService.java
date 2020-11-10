@@ -94,9 +94,14 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendContestOrderApprovedEmail(CallbackRequest callbackRequest) {
+    public void sendContestOrderApprovedEmailApplicant(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestOrderApproved());
         sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
+    }
+
+    public void sendContestOrderApprovedEmailRespondent(CallbackRequest callbackRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getContestOrderApproved());
+        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest), uri);
     }
 
     public void sendPrepareForHearingEmail(CallbackRequest callbackRequest) {

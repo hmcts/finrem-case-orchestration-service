@@ -400,7 +400,13 @@ public class NotificationsController implements BaseController {
             log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
             if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
                 log.info("Sending 'Contest Order Approved' email notification to Applicant Solicitor");
-                notificationService.sendContestOrderApprovedEmail(callbackRequest);
+                notificationService.sendContestOrderApprovedEmailApplicant(callbackRequest);
+            }
+
+            if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled()
+                && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+                log.info("Sending 'Contest Order Approved' email notification to Respondent Solicitor");
+                notificationService.sendContestOrderApprovedEmailRespondent(callbackRequest);
             }
         }
 

@@ -15,6 +15,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
@@ -29,6 +32,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,6 +47,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
@@ -489,7 +496,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(notificationService, times(1)).sendContestOrderApprovedEmail(any());
+        verify(notificationService, times(1)).sendContestOrderApprovedEmailApplicant(any());
     }
 
     @Test
@@ -503,6 +510,37 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verifyNoInteractions(notificationService);
     }
+
+    @Test
+    public void shouldSendContestOrderApprovedEmailWhenAgreed_andNotifyRespondentSolicitorWhenShould() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendContestOrderApprovedEmail(buildCallbackRequestWithFinalOrderCollection());
+
+        verify(notificationService, times(1)).sendContestOrderApprovedEmailRespondent(any());
+    }
+
+    @Test
+    public void shouldSendContestOrderApprovedEmailWhenAgreed_andNotSendRespondentNotificationWhenToggledOff() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendContestOrderApprovedEmail(buildCallbackRequestWithFinalOrderCollection());
+
+        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any());
+    }
+
+    @Test
+    public void shouldNotSendContestOrderApprovedEmailWhenNotAgreed_andDontNotifyRespondentSolicitor() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
+        notificationsController.sendContestOrderApprovedEmail(buildCallbackRequestWithFinalOrderCollection());
+
+        verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any());
+    }
+
 
     @Test
     public void sendDraftOrderEmailWhenApplicantSolicitorIsNominatedAndIsAcceptingEmails() throws Exception {
@@ -788,5 +826,21 @@ public class NotificationsControllerTest extends BaseControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
                 .getResource(fileName).toURI()));
+    }
+
+    private CallbackRequest buildCallbackRequestWithFinalOrderCollection() {
+        Map<String, Object> caseData = new HashMap<>();
+
+        ArrayList finalOrderCollection = new ArrayList<>();
+        finalOrderCollection.add(HearingOrderCollectionData.builder()
+                .hearingOrderDocuments(HearingOrderDocument
+                    .builder()
+                    .uploadDraftDocument(new CaseDocument())
+                    .build())
+                .build());
+
+        caseData.put(FINAL_ORDER_COLLECTION, finalOrderCollection);
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
+        return CallbackRequest.builder().caseDetails(caseDetails).build();
     }
 }
