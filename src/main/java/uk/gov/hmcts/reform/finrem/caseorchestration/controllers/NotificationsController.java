@@ -348,8 +348,14 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing (after send order)'");
-            notificationService.sendPrepareForHearingOrderSentEmail(callbackRequest);
+            notificationService.sendPrepareForHearingOrderSentEmailApplicant(callbackRequest);
         }
+
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing (after send order)'");
+            notificationService.sendPrepareForHearingOrderSentEmailRespondent(callbackRequest);
+        }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 

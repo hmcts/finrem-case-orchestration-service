@@ -143,7 +143,7 @@ public class GeneralApplicationDirectionsService {
         CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
-        caseData.put("courtDetails", buildFrcCourtDetails(caseData, objectMapper));
+        caseData.put("courtDetails", buildFrcCourtDetails(caseData));
         caseData.put("applicantName", DocumentHelper.getApplicantFullName(caseDetailsCopy));
         caseData.put("respondentName", DocumentHelper.getRespondentFullNameContested(caseDetailsCopy));
         caseData.put("letterDate", String.valueOf(LocalDate.now()));
@@ -158,7 +158,7 @@ public class GeneralApplicationDirectionsService {
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
         caseData.put("ccdCaseNumber", caseDetails.getId());
-        caseData.put("courtDetails", buildFrcCourtDetails(caseData, objectMapper));
+        caseData.put("courtDetails", buildFrcCourtDetails(caseData));
         caseData.put("applicantName", DocumentHelper.getApplicantFullName(caseDetailsCopy));
         caseData.put("respondentName", DocumentHelper.getRespondentFullNameContested(caseDetailsCopy));
         addHearingVenueDetails(caseDetailsCopy);
