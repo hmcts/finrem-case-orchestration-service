@@ -145,9 +145,17 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendContestOrderNotApprovedEmail(CallbackRequest callbackRequest) {
+    public void sendContestOrderNotApprovedEmailApplicant(CallbackRequest callbackRequest) {
+        sendContestOrderNotApprovedEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest));
+    }
+
+    public void sendContestOrderNotApprovedEmailRespondent(CallbackRequest callbackRequest) {
+        sendContestOrderNotApprovedEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest));
+    }
+
+    private void sendContestOrderNotApprovedEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedOrderNotApproved());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendContestedConsentOrderApprovedEmail(CallbackRequest callbackRequest) {
