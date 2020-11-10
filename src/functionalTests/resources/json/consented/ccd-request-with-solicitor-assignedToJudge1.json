@@ -121,32 +121,34 @@
       },
       "orderDirectionOpt2": "test",
       "orderForChildrenQuestion1": "test",
-      "orderRefusalCollection": [{
-        "id": "1",
-        "value": {
-          "orderRefusal": [
-            "Other"
-          ],
-          "orderRefusalDate": "2003-02-01",
-          "orderRefusalDocs": {
-            "document_url": "http://doc1",
-            "document_filename": "doc1",
-            "document_binary_url": "http://doc1.binary"
-          },
-          "orderRefusalJudge": "District Judge",
-          "orderRefusalOther": "test1",
-          "otherHearingDetails": "test2",
-          "orderRefusalJudgeName": "test3",
-          "orderRefusalNotEnough": [
-            "reason1"
-          ],
-          "estimateLengthOfHearing": "10",
-          "orderRefusalAddComments": "comment1",
-          "orderRefusalNotEnoughOther": "test",
-          "whenShouldHearingTakePlace": "today",
-          "whereShouldHearingTakePlace": "EZ801"
+      "orderRefusalCollection": [
+        {
+          "id": "1",
+          "value": {
+            "orderRefusal": [
+              "Other"
+            ],
+            "orderRefusalDate": "2003-02-01",
+            "orderRefusalDocs": {
+              "document_url": "http://doc1",
+              "document_filename": "doc1",
+              "document_binary_url": "http://doc1.binary"
+            },
+            "orderRefusalJudge": "District Judge",
+            "orderRefusalOther": "test1",
+            "otherHearingDetails": "test2",
+            "orderRefusalJudgeName": "test3",
+            "orderRefusalNotEnough": [
+              "reason1"
+            ],
+            "estimateLengthOfHearing": "10",
+            "orderRefusalAddComments": "comment1",
+            "orderRefusalNotEnoughOther": "test",
+            "whenShouldHearingTakePlace": "today",
+            "whereShouldHearingTakePlace": "EZ801"
+          }
         }
-      }],
+      ],
       "orderSummary": {
         "Fees": [
           {
@@ -191,7 +193,7 @@
         "AddressLine1": "Line1",
         "AddressLine2": "Line2",
         "AddressLine3": "Lne3",
-          "Country": "UK",
+        "Country": "UK",
         "County": "Surrey",
         "PostCode": "CR5 2JX",
         "PostTown": "Purley"

@@ -56,7 +56,7 @@ public class PBAPaymentConfirmationTest {
             .andDo(print())
             .andExpect(jsonPath("$.confirmation_body",
                 containsString("You will now be directed to the case file where you can monitor "
-                + "the progress of your application via the ‘history’ tab. Next:")))
+                    + "the progress of your application via the ‘history’ tab. Next:")))
             .andExpect(jsonPath("$.confirmation_body",
                 containsString("* Your application will be issued by Court staff and referred to a Judge")))
             .andExpect(jsonPath("$.confirmation_body",

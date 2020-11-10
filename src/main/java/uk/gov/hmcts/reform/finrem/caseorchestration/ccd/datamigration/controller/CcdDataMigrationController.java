@@ -29,11 +29,11 @@ public class CcdDataMigrationController {
 
     @PostMapping(value = "/migrate", consumes = APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-                response = CallbackResponse.class)})
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = CallbackResponse.class)})
     public CallbackResponse migrate(
-            @RequestHeader(value = AUTHORIZATION_HEADER) final String authorisationToken,
-            @RequestBody @ApiParam("CaseData") final CallbackRequest ccdRequest) {
+        @RequestHeader(value = AUTHORIZATION_HEADER) final String authorisationToken,
+        @RequestBody @ApiParam("CaseData") final CallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         log.info("FR case migration request received for case {}", caseDetails.getId());

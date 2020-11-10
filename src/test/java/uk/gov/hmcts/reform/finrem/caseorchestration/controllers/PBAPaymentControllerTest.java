@@ -47,10 +47,10 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
 
     private static PaymentResponse paymentResponse(boolean success) {
         PaymentResponse paymentResponse = PaymentResponse.builder()
-                .reference("RC1")
-                .status(success ? "success" : "failed")
-                .message(success ? null : "Access denied")
-                .build();
+            .reference("RC1")
+            .status(success ? "success" : "failed")
+            .message(success ? null : "Access denied")
+            .build();
         return paymentResponse;
     }
 
@@ -58,11 +58,11 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
         doEmptyCaseDataSetUp();
         mvc.perform(post(PBA_PAYMENT_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(startsWith(SERVER_ERROR_MSG)));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(startsWith(SERVER_ERROR_MSG)));
     }
 
     private void doPBASetUp(boolean success) throws Exception {
@@ -83,7 +83,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     private void doHWFSetUp() throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/hwf.json").toURI()));
+            .getResource("/fixtures/hwf.json").toURI()));
         when(feeService.getApplicationFee(CONSENTED)).thenReturn(fee(CONSENTED));
     }
 
@@ -91,18 +91,18 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     public void shouldNotDoPBAPaymentWhenPaymentIsDoneWithHWF() throws Exception {
         doHWFSetUp();
         mvc.perform(post(PBA_PAYMENT_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.state", is(AWAITING_HWF_DECISION.toString())))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("1000")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
-                .andExpect(jsonPath("$.data.amountToPay", is("1000")))
-                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.state", is(AWAITING_HWF_DECISION.toString())))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("1000")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
+            .andExpect(jsonPath("$.data.amountToPay", is("1000")))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
     }
 
@@ -110,12 +110,12 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     public void shouldReturnErrorWhenPbaPaymentFails() throws Exception {
         doPBASetUp(false);
         mvc.perform(post(PBA_PAYMENT_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors", hasSize(1)))
-                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
 
     }
@@ -124,17 +124,17 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     public void shouldDoPbaPayment() throws Exception {
         doPBASetUp(true);
         mvc.perform(post(PBA_PAYMENT_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("1000")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
-                .andExpect(jsonPath("$.data.amountToPay", is("1000")))
-                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("1000")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
+            .andExpect(jsonPath("$.data.amountToPay", is("1000")))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
     }
 
@@ -142,12 +142,12 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
         mvc.perform(post(PBA_PAYMENT_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(pbaPaymentService, times(0)).makePayment(anyString(), any());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+        verify(pbaPaymentService, never()).makePayment(anyString(), any());
     }
 }

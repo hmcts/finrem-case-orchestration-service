@@ -23,20 +23,20 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
     @Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage(CaseOrchestrationApplication.class.getPackage().getName()))
-                .build()
-                .useDefaultResponseMessages(true)
-                .apiInfo(apiInfo())
-                .enable(swaggerEnabled);
+            .select()
+            .apis(RequestHandlerSelectors.basePackage(CaseOrchestrationApplication.class.getPackage().getName()))
+            .build()
+            .useDefaultResponseMessages(true)
+            .apiInfo(apiInfo())
+            .enable(swaggerEnabled);
     }
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("Financial Remedy Case Orchestration Service")
-                .description("Given a case data, This service will orchestrate the financial remedy features "
-                        + "like notifications, fee lookUp and DocumentGenerator")
-                .build();
+            .title("Financial Remedy Case Orchestration Service")
+            .description("Given a case data, This service will orchestrate the financial remedy features "
+                + "like notifications, fee lookUp and DocumentGenerator")
+            .build();
     }
 
     @Override
@@ -44,9 +44,9 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
         WebMvcConfigurer.super.addResourceHandlers(registry);
         if (swaggerEnabled) {
             registry.addResourceHandler("/swagger-ui.html**")
-                    .addResourceLocations("classpath:/META-INF/resources/swagger-ui.html");
+                .addResourceLocations("classpath:/META-INF/resources/swagger-ui.html");
             registry.addResourceHandler("/webjars/**")
-                    .addResourceLocations("classpath:/META-INF/resources/webjars/");
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
         }
     }
 
