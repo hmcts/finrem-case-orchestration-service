@@ -192,9 +192,9 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    public static Map<String, Object> buildFrcCourtDetails(Map<String, Object> data, ObjectMapper objectMapper) {
+    public static Map<String, Object> buildFrcCourtDetails(Map<String, Object> data) {
         try {
-            Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+            Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedCourt(data)));
 
             return new ObjectMapper().convertValue(FrcCourtDetails.builder()

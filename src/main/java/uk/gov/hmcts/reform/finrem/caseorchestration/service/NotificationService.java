@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 
 import java.io.IOException;
@@ -18,48 +19,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_BODY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresentedByASolicitor;
@@ -68,69 +33,59 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 @RequiredArgsConstructor
 public class NotificationService {
-
-    private static final String CONSENTED = "consented";
-    private static final String CONTESTED = "contested";
-
     private final NotificationServiceConfiguration notificationServiceConfiguration;
     private final RestTemplate restTemplate;
     private final FeatureToggleService featureToggleService;
     private final ObjectMapper objectMapper;
-
+    private final NotificationRequestMapper notificationRequestMapper;
     private NotificationRequest notificationRequest;
 
     private String recipientEmail = "fr_applicant_sol@sharklasers.com";
 
     public void sendConsentedHWFSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getHwfSuccessful());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
     public void sendAssignToJudgeConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getAssignToJudge());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
     public void sendConsentOrderMadeConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderMade());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
     public void sendConsentOrderNotApprovedEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderNotApproved());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
     public void sendConsentOrderAvailableEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailable());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
     public void sendConsentOrderAvailableCtscEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailableCtsc());
-        NotificationRequest ctscNotificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        NotificationRequest ctscNotificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
         ctscNotificationRequest.setNotificationEmail(notificationServiceConfiguration.getCtscEmail());
         sendNotificationEmail(ctscNotificationRequest, uri);
     }
 
     public void sendContestedHwfSuccessfulConfirmationEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedHwfSuccessful());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
     public void sendContestedApplicationIssuedEmailToApplicantSolicitor(CallbackRequest callbackRequest) {
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
         sendContestedApplicationIssuedEmail(notificationRequest);
     }
 
     public void sendContestedApplicationIssuedEmailToRespondentSolicitor(CallbackRequest callbackRequest) {
-        notificationRequest = createNotificationRequestForRespSolicitor(callbackRequest);
+        notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
         sendContestedApplicationIssuedEmail(notificationRequest);
     }
 
@@ -141,30 +96,34 @@ public class NotificationService {
 
     public void sendContestOrderApprovedEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestOrderApproved());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
     public void sendPrepareForHearingEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getPrepareForHearing());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
-    public void sendPrepareForHearingOrderSentEmail(CallbackRequest callbackRequest) {
+    public void sendPrepareForHearingOrderSentEmailApplicant(CallbackRequest callbackRequest) {
+        sendPrepareForHearingOrderSentEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest));
+    }
+
+    public void sendPrepareForHearingOrderSentEmailRespondent(CallbackRequest callbackRequest) {
+        sendPrepareForHearingOrderSentEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest));
+
+    }
+
+    private void sendPrepareForHearingOrderSentEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getPrepareForHearingOrderSent());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendSolicitorToDraftOrderEmailApplicant(CallbackRequest callbackRequest) {
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        sendSolicitorToDraftOrderEmail(notificationRequest);
+        sendSolicitorToDraftOrderEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest));
     }
 
     public void sendSolicitorToDraftOrderEmailRespondent(CallbackRequest callbackRequest) {
-        notificationRequest = createNotificationRequestForRespSolicitor(callbackRequest);
-        sendSolicitorToDraftOrderEmail(notificationRequest);
+        sendSolicitorToDraftOrderEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest));
     }
 
     private void sendSolicitorToDraftOrderEmail(NotificationRequest notificationRequest) {
@@ -174,55 +133,50 @@ public class NotificationService {
 
     public void sendConsentGeneralEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentGeneralEmail());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
         notificationRequest.setNotificationEmail(Objects.toString(callbackRequest.getCaseDetails().getData().get(GENERAL_EMAIL_RECIPIENT)));
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendContestedGeneralEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralEmail());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
         notificationRequest.setNotificationEmail(Objects.toString(callbackRequest.getCaseDetails().getData().get(GENERAL_EMAIL_RECIPIENT)));
         sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendContestOrderNotApprovedEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedOrderNotApproved());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
     public void sendContestedConsentOrderApprovedEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedConsentOrderApproved());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
     public void sendContestedConsentOrderNotApprovedEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedConsentOrderNotApproved());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
     public void sendContestedConsentGeneralOrderEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedConsentGeneralOrder());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
     public void sendConsentedGeneralOrderEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentedGeneralOrder());
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
-        sendNotificationEmail(notificationRequest, uri);
+        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
     public void sendContestedGeneralOrderEmailApplicant(CallbackRequest callbackRequest) {
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
         sendContestedGeneralOrderEmail(notificationRequest);
     }
 
     public void sendContestedGeneralOrderEmailRespondent(CallbackRequest callbackRequest) {
-        notificationRequest = createNotificationRequestForRespSolicitor(callbackRequest);
+        notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
         sendContestedGeneralOrderEmail(notificationRequest);
     }
 
@@ -233,7 +187,7 @@ public class NotificationService {
 
     public void sendContestedGeneralApplicationReferToJudgeEmail(CallbackRequest callbackRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralApplicationReferToJudge());
-        NotificationRequest judgeNotificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        NotificationRequest judgeNotificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
         judgeNotificationRequest.setNotificationEmail(Objects.toString(
             callbackRequest.getCaseDetails().getData().get(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL)));
         sendNotificationEmail(judgeNotificationRequest, uri);
@@ -248,7 +202,7 @@ public class NotificationService {
             recipientEmail = (String) courtDetails.get(COURT_DETAILS_EMAIL_KEY);
         }
 
-        notificationRequest = createNotificationRequestForAppSolicitor(callbackRequest);
+        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
         notificationRequest.setNotificationEmail(recipientEmail);
 
         URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralApplicationOutcome());
@@ -267,54 +221,6 @@ public class NotificationService {
         }
     }
 
-    public NotificationRequest createNotificationRequestForAppSolicitor(CallbackRequest callbackRequest) {
-        notificationRequest = isConsentedApplication(callbackRequest.getCaseDetails())
-            ? buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
-                CONSENTED_SOLICITOR_NAME, SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER)
-            : buildNotificationRequest(callbackRequest, SOLICITOR_REFERENCE,
-                CONTESTED_SOLICITOR_NAME, CONTESTED_SOLICITOR_EMAIL, CONTESTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER);
-
-        return notificationRequest;
-    }
-
-    public NotificationRequest createNotificationRequestForRespSolicitor(CallbackRequest callbackRequest) {
-        notificationRequest = isConsentedApplication(callbackRequest.getCaseDetails())
-            ? buildNotificationRequest(callbackRequest, RESP_SOLICITOR_REFERENCE,
-                RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONSENTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER)
-            : buildNotificationRequest(callbackRequest, RESP_SOLICITOR_REFERENCE,
-                RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONTESTED, GENERAL_EMAIL_BODY, DIVORCE_CASE_NUMBER);
-
-        return notificationRequest;
-    }
-
-    private NotificationRequest buildNotificationRequest(CallbackRequest callbackRequest,
-                                                         String solicitorReference,
-                                                         String solicitorName,
-                                                         String solicitorEmail,
-                                                         String caseType,
-                                                         String generalEmailBody,
-                                                         String divorceCaseNumber) {
-        NotificationRequest notificationRequest = new NotificationRequest();
-        Map<String, Object> mapOfCaseData = callbackRequest.getCaseDetails().getData();
-
-        notificationRequest.setCaseReferenceNumber(Objects.toString(callbackRequest.getCaseDetails().getId()));
-        notificationRequest.setSolicitorReferenceNumber(Objects.toString(mapOfCaseData.get(solicitorReference)));
-        notificationRequest.setDivorceCaseNumber(Objects.toString(mapOfCaseData.get(divorceCaseNumber)));
-        notificationRequest.setName(Objects.toString(mapOfCaseData.get(solicitorName)));
-        notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(solicitorEmail)));
-        notificationRequest.setGeneralEmailBody(Objects.toString(mapOfCaseData.get(generalEmailBody)));
-        notificationRequest.setCaseType(caseType);
-
-        if (isContestedApplication(callbackRequest.getCaseDetails())) {
-            String selectedCourt =  getSelectedCourt(mapOfCaseData);
-            notificationRequest.setSelectedCourt(selectedCourt);
-
-            log.info("selectedCourt is {} for case ID: {}", selectedCourt,
-                notificationRequest.getCaseReferenceNumber());
-        }
-        return notificationRequest;
-    }
-
     private URI buildUri(String endPoint) {
         return fromHttpUrl(notificationServiceConfiguration.getUrl()
             + notificationServiceConfiguration.getApi()
@@ -327,86 +233,6 @@ public class NotificationService {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
         return headers;
-    }
-
-    private String getSelectedCourt(Map<String, Object> mapOfCaseData) {
-        String region = (String) mapOfCaseData.get(REGION);
-        if (MIDLANDS.equalsIgnoreCase(region)) {
-            return getMidlandFRC(mapOfCaseData);
-        }
-        if (LONDON.equalsIgnoreCase(region)) {
-            return getLondonFRC(mapOfCaseData);
-        }
-        if (NORTHWEST.equalsIgnoreCase(region)) {
-            return getNorthWestFRC(mapOfCaseData);
-        }
-        if (NORTHEAST.equalsIgnoreCase(region)) {
-            return getNorthEastFRC(mapOfCaseData);
-        }
-        if (SOUTHEAST.equalsIgnoreCase(region)) {
-            return getSouthEastFRC(mapOfCaseData);
-        } else if (WALES.equalsIgnoreCase(region)) {
-            return getWalesFRC(mapOfCaseData);
-        }
-        return EMPTY;
-    }
-
-    private String getWalesFRC(Map mapOfCaseData) {
-        String walesList = (String) mapOfCaseData.get(WALES_FRC_LIST);
-        if (NEWPORT.equalsIgnoreCase(walesList)) {
-            return NEWPORT;
-        } else if (SWANSEA.equalsIgnoreCase(walesList)) {
-            return SWANSEA;
-        }
-        return EMPTY;
-    }
-
-    private String getSouthEastFRC(Map mapOfCaseData) {
-        String southEastList = (String) mapOfCaseData.get(SOUTHEAST_FRC_LIST);
-        if (KENT.equalsIgnoreCase(southEastList)) {
-            return KENT;
-        }
-        return EMPTY;
-    }
-
-    private String getNorthEastFRC(Map mapOfCaseData) {
-        String northEastList = (String) mapOfCaseData.get(NORTHEAST_FRC_LIST);
-        if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
-            return CLEAVELAND;
-        } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
-            return NWYORKSHIRE;
-        } else if (HSYORKSHIRE.equalsIgnoreCase(northEastList)) {
-            return HSYORKSHIRE;
-        }
-        return EMPTY;
-    }
-
-    private String getNorthWestFRC(Map mapOfCaseData) {
-        String northWestList = (String) mapOfCaseData.get(NORTHWEST_FRC_LIST);
-        if (LIVERPOOL.equalsIgnoreCase(northWestList)) {
-            return LIVERPOOL;
-        } else if (MANCHESTER.equalsIgnoreCase(northWestList)) {
-            return MANCHESTER;
-        }
-        return EMPTY;
-    }
-
-    private String getLondonFRC(Map mapOfCaseData) {
-        String londonList = (String) mapOfCaseData.get(LONDON_FRC_LIST);
-        if (CFC.equalsIgnoreCase(londonList)) {
-            return CFC;
-        }
-        return EMPTY;
-    }
-
-    private String getMidlandFRC(Map mapOfCaseData) {
-        String midlandsList = (String) mapOfCaseData.get(MIDLANDS_FRC_LIST);
-        if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
-            return NOTTINGHAM;
-        } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
-            return BIRMINGHAM;
-        }
-        return EMPTY;
     }
 
     public boolean shouldEmailRespondentSolicitor(Map<String, Object> caseData) {
