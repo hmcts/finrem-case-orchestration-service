@@ -65,24 +65,6 @@ public class HearingDocumentController implements BaseController {
                 .build());
         }
 
-        Map<String, Object> caseData = caseDetails.getData();
-
-        boolean hadFirstHearing = additionalHearingDocumentService.alreadyHadFirstHearing(caseDetails);
-
-        if (!hadFirstHearing) {
-            caseData.putAll(hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails));
-        }
-
-        if (isContestedPaperApplication(caseDetails)) {
-            if (hadFirstHearing) {
-                log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
-                additionalHearingDocumentService.createAndSendAdditionalHearingDocuments(authorisationToken, caseDetails);
-            } else {
-                log.info("Sending Forms A, C, G to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
-                hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
-            }
-        }
-
         if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
             if (isContestedPaperApplication(caseDetails)) {
                 additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
@@ -92,9 +74,7 @@ public class HearingDocumentController implements BaseController {
         }
 
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
-
-        return ResponseEntity.ok(
-            AboutToStartOrSubmitCallbackResponse.builder().data(caseData).warnings(warnings).build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
     }
 
     @PostMapping(path = "/contested-upload-direction-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)

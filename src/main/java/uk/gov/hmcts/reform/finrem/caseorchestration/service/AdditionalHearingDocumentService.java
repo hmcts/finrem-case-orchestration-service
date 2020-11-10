@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,7 +33,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_C;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ADDITIONAL_INFO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME;
@@ -56,7 +54,7 @@ public class AdditionalHearingDocumentService {
     private final ObjectMapper objectMapper;
     private final BulkPrintService bulkPrintService;
 
-    public void createAndSendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws IOException {
+    public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws JsonProcessingException {
         Map<String, Object> caseData = caseDetails.getData();
         Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
         Map<String, Object> courtDetails = (Map<String, Object>)
@@ -70,20 +68,10 @@ public class AdditionalHearingDocumentService {
 
         CaseDocument document = generateAdditionalHearingDocument(caseDetailsCopy, authorisationToken);
         addAdditionalHearingDocumentToCaseData(caseDetails, document);
-        bulkPrintAdditionalHearingDocuments(caseDetails, authorisationToken);
-    }
-
-    public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
-        CaseDocument document = generateAdditionalHearingDocument(caseDetails, authorisationToken);
-        addAdditionalHearingDocumentToCaseData(caseDetails, document);
     }
 
     public void sendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         bulkPrintAdditionalHearingDocuments(caseDetails, authorisationToken);
-    }
-
-    public boolean alreadyHadFirstHearing(CaseDetails caseDetails) {
-        return caseDetails.getData().containsKey(FORM_C);
     }
 
     public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails)

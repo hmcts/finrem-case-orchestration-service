@@ -64,7 +64,6 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         when(validateHearingService.validateHearingErrors(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
         when(validateHearingService.validateHearingWarnings(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
-        when(additionalHearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
@@ -142,20 +141,6 @@ public class HearingDocumentControllerTest extends BaseControllerTest {
 
         verify(hearingDocumentService,  times(0)).generateHearingDocuments(eq(AUTH_TOKEN), any());
         verify(additionalHearingDocumentService, times(1)).createAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
-    }
-
-    @Test
-    public void generateAdditionalGearingDocumentWhenOneAlreadyExists() throws Exception {
-        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
-
-        mvc.perform(post(VALIDATE_AND_GEN_DOC_URL)
-            .content(resourceContentAsString("/fixtures/bulkprint/bulk-print-additional-hearing-exists.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
-
-        verify(hearingDocumentService, never()).generateHearingDocuments(any(), any());
-        verify(additionalHearingDocumentService, times(1)).createAndSendAdditionalHearingDocuments(any(), any());
     }
 
     @Test
