@@ -32,6 +32,7 @@
       "solicitorPhone": "9963472494",
       "applicantFMName": "Poor",
       "authorisation2b": "test",
+      "applicantSolicitorConsentForEmails": "Yes",
       "otherCollection": [
         {
           "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",

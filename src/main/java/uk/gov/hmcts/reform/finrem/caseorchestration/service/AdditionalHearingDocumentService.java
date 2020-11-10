@@ -19,13 +19,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetai
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
@@ -70,6 +70,15 @@ public class AdditionalHearingDocumentService {
 
         CaseDocument document = generateAdditionalHearingDocument(caseDetailsCopy, authorisationToken);
         addAdditionalHearingDocumentToCaseData(caseDetails, document);
+        bulkPrintAdditionalHearingDocuments(caseDetails, authorisationToken);
+    }
+
+    public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
+        CaseDocument document = generateAdditionalHearingDocument(caseDetails, authorisationToken);
+        addAdditionalHearingDocumentToCaseData(caseDetails, document);
+    }
+
+    public void sendAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) {
         bulkPrintAdditionalHearingDocuments(caseDetails, authorisationToken);
     }
 
@@ -171,8 +180,7 @@ public class AdditionalHearingDocumentService {
 
         AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
 
-        List<BulkPrintDocument> document = Collections.singletonList(
-            bulkPrintService.getBulkPrintDocumentFromCaseDocument(
+        List<BulkPrintDocument> document = singletonList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(
                 additionalHearingDocument.getAdditionalHearingDocument().getDocument()));
 
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);

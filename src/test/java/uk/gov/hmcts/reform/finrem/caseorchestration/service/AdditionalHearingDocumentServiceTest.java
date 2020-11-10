@@ -15,9 +15,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,13 +23,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -55,23 +52,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @ActiveProfiles("test-mock-document-client")
 public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired
-    private AdditionalHearingDocumentService additionalHearingDocumentService;
+    @Autowired private AdditionalHearingDocumentService additionalHearingDocumentService;
+    @Autowired private ObjectMapper objectMapper;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Captor private ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
 
-    @Captor
-    private ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
-
-    @Captor
-    private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintDocumentsCaptor;
-
-    @MockBean
-    GenericDocumentService genericDocumentService;
-
-    @MockBean
-    BulkPrintService bulkPrintService;
+    @MockBean GenericDocumentService genericDocumentService;
+    @MockBean BulkPrintService bulkPrintService;
 
     @Before
     public void setUp() {
@@ -84,9 +71,9 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void generateAndAddAdditionalHearingDocument() throws IOException {
+    public void generateAndAddAdditionalHearingDocument() {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource("/fixtures/bulkprint/bulk-print-additional-hearing.json", objectMapper);
-        additionalHearingDocumentService.createAndSendAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+        additionalHearingDocumentService.createAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
 
         verify(genericDocumentService, times(1)).generateDocument(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
@@ -112,10 +99,6 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         assertThat(data.get("CourtPhone"), is("0115 910 3504"));
         assertThat(data.get("CourtEmail"), is("FRCNottingham@justice.gov.uk"));
 
-        verify(bulkPrintService, times(1)).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
-
-        assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(1));
         assertThat(caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION), is(notNullValue()));
     }
 

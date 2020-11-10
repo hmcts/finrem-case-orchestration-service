@@ -38,8 +38,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 public class HearingDocumentController implements BaseController {
 
-    private final HearingDocumentService hearingService;
-    private final AdditionalHearingDocumentService additionalHearingService;
+    private final HearingDocumentService hearingDocumentService;
+    private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ValidateHearingService validateHearingService;
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -50,13 +50,13 @@ public class HearingDocumentController implements BaseController {
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateHearingDocument(
-        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) throws IOException {
+            @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) throws IOException {
 
-        CaseDetails caseDetails = callback.getCaseDetails();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
 
-        validateCaseData(callback);
+        validateCaseData(callbackRequest);
 
         List<String> errors = validateHearingService.validateHearingErrors(caseDetails);
         if (!errors.isEmpty()) {
@@ -67,23 +67,32 @@ public class HearingDocumentController implements BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        boolean hadFirstHearing = additionalHearingService.alreadyHadFirstHearing(caseDetails);
+        boolean hadFirstHearing = additionalHearingDocumentService.alreadyHadFirstHearing(caseDetails);
 
         if (!hadFirstHearing) {
-            caseData.putAll(hearingService.generateHearingDocuments(authorisationToken, caseDetails));
+            caseData.putAll(hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails));
         }
 
         if (isContestedPaperApplication(caseDetails)) {
             if (hadFirstHearing) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
-                additionalHearingService.createAndSendAdditionalHearingDocuments(authorisationToken, caseDetails);
+                additionalHearingDocumentService.createAndSendAdditionalHearingDocuments(authorisationToken, caseDetails);
             } else {
                 log.info("Sending Forms A, C, G to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
-                hearingService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
+                hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
             }
         }
 
+        if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
+            if (isContestedPaperApplication(caseDetails)) {
+                additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
+            }
+        } else {
+            caseDetails.getData().putAll(hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails));
+        }
+
         List<String> warnings = validateHearingService.validateHearingWarnings(caseDetails);
+
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder().data(caseData).warnings(warnings).build());
     }
@@ -105,7 +114,7 @@ public class HearingDocumentController implements BaseController {
 
         log.info("Storing Additional Hearing Document for Case ID: {}", caseDetails.getId());
         try {
-            additionalHearingService.createAndStoreAdditionalHearingDocuments(authorisationToken, caseDetails);
+            additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(authorisationToken, caseDetails);
         } catch (CourtDetailsParseException | JsonProcessingException e) {
             log.error(e.getMessage());
             errors.add(e.getMessage());
