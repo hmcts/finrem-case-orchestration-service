@@ -670,18 +670,12 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotSendContestedGeneralOrderEmailToRespondent() throws Exception {
+    public void whenShouldNotSendContestedGeneralOrderEmailToRespondent_ThentheEmailIsNotIssued() {
         when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
 
-        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(GENERAL_ORDER_RAISED_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+        notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
 
-        verify(notificationService, times(1)).sendContestedGeneralOrderEmailApplicant(any(CallbackRequest.class));
         verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any(CallbackRequest.class));
     }
 
