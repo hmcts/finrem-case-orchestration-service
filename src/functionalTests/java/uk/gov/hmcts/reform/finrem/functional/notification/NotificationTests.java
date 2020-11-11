@@ -118,7 +118,7 @@ public class NotificationTests extends IntegrationTestBase {
     @Test
     public void verifyNotifyContestedConsentOrderApprovedIsOkay() {
 
-        utils.validatePostSuccess(contestedConsentOrderApproved,
+        utils.validatePostSuccess(contestedConsentOrderApprovedUri,
             "ccd-request-with-solicitor-contestOrderApproved.json", contestedDir);
     }
 }
