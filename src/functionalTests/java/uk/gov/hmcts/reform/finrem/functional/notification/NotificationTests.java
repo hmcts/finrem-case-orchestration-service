@@ -114,11 +114,4 @@ public class NotificationTests extends IntegrationTestBase {
         utils.validatePostSuccess(contestDraftOrderApiUri,
             "applicant-solicitor-to-draft-order-with-email-consent.json", contestedDir);
     }
-
-    @Test
-    public void verifyNotifyContestedConsentOrderApprovedIsOkay() {
-
-        utils.validatePostSuccess(contestedConsentOrderApprovedUri,
-            "ccd-request-with-solicitor-contestOrderApproved.json", contestedDir);
-    }
 }
