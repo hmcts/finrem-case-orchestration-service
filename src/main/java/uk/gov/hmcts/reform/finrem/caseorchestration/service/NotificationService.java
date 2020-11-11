@@ -95,13 +95,16 @@ public class NotificationService {
     }
 
     public void sendContestOrderApprovedEmailApplicant(CallbackRequest callbackRequest) {
-        URI uri = buildUri(notificationServiceConfiguration.getContestOrderApproved());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
+        sendContestOrderApprovedEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest));
     }
 
     public void sendContestOrderApprovedEmailRespondent(CallbackRequest callbackRequest) {
+        sendContestOrderApprovedEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest));
+    }
+
+    private void sendContestOrderApprovedEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestOrderApproved());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest), uri);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendPrepareForHearingEmail(CallbackRequest callbackRequest) {

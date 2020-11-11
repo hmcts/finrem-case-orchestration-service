@@ -33,8 +33,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -516,7 +514,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
-        notificationsController.sendContestOrderApprovedEmail(buildCallbackRequestWithFinalOrderCollection());
+        notificationsController.sendContestOrderApprovedEmail(createCallbackRequestWithFinalOrder());
 
         verify(notificationService, times(1)).sendContestOrderApprovedEmailRespondent(any());
     }
@@ -526,7 +524,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(false);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
-        notificationsController.sendContestOrderApprovedEmail(buildCallbackRequestWithFinalOrderCollection());
+        notificationsController.sendContestOrderApprovedEmail(createCallbackRequestWithFinalOrder());
 
         verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any());
     }
@@ -536,7 +534,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
 
-        notificationsController.sendContestOrderApprovedEmail(buildCallbackRequestWithFinalOrderCollection());
+        notificationsController.sendContestOrderApprovedEmail(createCallbackRequestWithFinalOrder());
 
         verify(notificationService, never()).sendContestOrderApprovedEmailRespondent(any());
     }
@@ -828,8 +826,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
                 .getResource(fileName).toURI()));
     }
 
-    private CallbackRequest buildCallbackRequestWithFinalOrderCollection() {
-        Map<String, Object> caseData = new HashMap<>();
+    private CallbackRequest createCallbackRequestWithFinalOrder() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
 
         ArrayList finalOrderCollection = new ArrayList<>();
         finalOrderCollection.add(HearingOrderCollectionData.builder()
@@ -839,8 +837,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
                     .build())
                 .build());
 
-        caseData.put(FINAL_ORDER_COLLECTION, finalOrderCollection);
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
-        return CallbackRequest.builder().caseDetails(caseDetails).build();
+        callbackRequest.getCaseDetails().getData().put(FINAL_ORDER_COLLECTION, finalOrderCollection);
+
+        return callbackRequest;
     }
 }
