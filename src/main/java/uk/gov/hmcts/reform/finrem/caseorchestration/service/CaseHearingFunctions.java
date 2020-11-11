@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
 import java.io.IOException;
@@ -33,6 +34,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LONDON_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_NORTHEAST_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_NORTHWEST_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_PREFIX;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
@@ -42,27 +51,34 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST_FRC_LIST_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST_FRC_LIST_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST_CT;
 
 @Component
 @RequiredArgsConstructor
@@ -97,45 +113,49 @@ public final class CaseHearingFunctions {
         String caseAllocatedTo = (String) caseData.get(CASE_ALLOCATED_TO);
 
         return Optional.ofNullable(caseAllocatedTo)
-                .map(s -> s.equalsIgnoreCase("yes"))
-                .orElseGet(() -> fastTrackDecision.equalsIgnoreCase("yes"));
+            .map(s -> s.equalsIgnoreCase("yes"))
+            .orElseGet(() -> fastTrackDecision.equalsIgnoreCase("yes"));
     };
 
-    static String getSelectedCourt(Map<String, Object> mapOfCaseData) {
-        return getSelectedCourt(mapOfCaseData, "");
+    static String getSelectedCourtGA(Map<String, Object> mapOfCaseData) {
+        return GENERAL_APPLICATION_DIRECTIONS_PREFIX + getSelectedCourt(mapOfCaseData, GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION,
+            GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC, GENERAL_APPLICATION_DIRECTIONS_LONDON_FRC, GENERAL_APPLICATION_DIRECTIONS_NORTHWEST_FRC,
+            GENERAL_APPLICATION_DIRECTIONS_NORTHEAST_FRC, GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC, GENERAL_APPLICATION_DIRECTIONS_WALES_FRC);
     }
 
-    static String getSelectedCourt(Map<String, Object> mapOfCaseData, String fieldNamePrefix) {
-        String courtListFieldName;
+    static String getSelectedCourtComplexType(Map<String, Object> mapOfCaseData) {
+        return getSelectedCourt(mapOfCaseData, REGION_CT, MIDLANDS_FRC_LIST_CT, LONDON_FRC_LIST_CT, NORTHWEST_FRC_LIST_CT,
+            NORTHEAST_FRC_LIST_CT, SOUTHEAST_FRC_LIST_CT, WALES_FRC_LIST_CT);
+    }
 
-        switch ((String) mapOfCaseData.get(fieldNamePrefix + REGION)) {
+    static String getSelectedCourt(Map<String, Object> mapOfCaseData) {
+        return getSelectedCourt(mapOfCaseData, REGION, MIDLANDS_FRC_LIST, LONDON_FRC_LIST, NORTHWEST_FRC_LIST,
+            NORTHEAST_FRC_LIST, SOUTHEAST_FRC_LIST, WALES_FRC_LIST);
+    }
+
+    private static String getSelectedCourt(Map<String, Object> mapOfCaseData, String regionListName, String midlandsListName,
+                                           String londonListName, String northwestListName, String northeastListName,
+                                           String southeastListName, String walesListName) {
+        switch ((String) mapOfCaseData.get(regionListName)) {
             case MIDLANDS:
-                courtListFieldName = getMidlandFRC(mapOfCaseData, fieldNamePrefix);
-                break;
+                return getMidlandFRC(mapOfCaseData, midlandsListName);
             case LONDON:
-                courtListFieldName = getLondonFRC(mapOfCaseData, fieldNamePrefix);
-                break;
+                return getLondonFRC(mapOfCaseData, londonListName);
             case NORTHWEST:
-                courtListFieldName = getNorthWestFRC(mapOfCaseData, fieldNamePrefix);
-                break;
+                return getNorthWestFRC(mapOfCaseData, northwestListName);
             case NORTHEAST:
-                courtListFieldName = getNorthEastFRC(mapOfCaseData, fieldNamePrefix);
-                break;
+                return getNorthEastFRC(mapOfCaseData, northeastListName);
             case SOUTHEAST:
-                courtListFieldName = getSouthEastFRC(mapOfCaseData, fieldNamePrefix);
-                break;
+                return getSouthEastFRC(mapOfCaseData, southeastListName);
             case WALES:
-                courtListFieldName = getWalesFRC(mapOfCaseData, fieldNamePrefix);
-                break;
+                return getWalesFRC(mapOfCaseData, walesListName);
             default:
                 return null;
         }
-
-        return fieldNamePrefix + courtListFieldName;
     }
 
-    private static String getWalesFRC(Map mapOfCaseData, String fieldNamePrefix) {
-        String walesList = (String) mapOfCaseData.get(fieldNamePrefix + WALES_FRC_LIST);
+    private static String getWalesFRC(Map mapOfCaseData, String frcListName) {
+        String walesList = (String) mapOfCaseData.get(frcListName);
         if (NEWPORT.equalsIgnoreCase(walesList)) {
             return NEWPORT_COURTLIST;
         } else if (SWANSEA.equalsIgnoreCase(walesList)) {
@@ -144,16 +164,16 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    private static String getSouthEastFRC(Map mapOfCaseData, String fieldNamePrefix) {
-        String southEastList = (String) mapOfCaseData.get(fieldNamePrefix + SOUTHEAST_FRC_LIST);
+    private static String getSouthEastFRC(Map mapOfCaseData, String frcListName) {
+        String southEastList = (String) mapOfCaseData.get(frcListName);
         if (KENT.equalsIgnoreCase(southEastList)) {
             return KENTFRC_COURTLIST;
         }
         return null;
     }
 
-    private static String getNorthEastFRC(Map mapOfCaseData, String fieldNamePrefix) {
-        String northEastList = (String) mapOfCaseData.get(fieldNamePrefix + NORTHEAST_FRC_LIST);
+    private static String getNorthEastFRC(Map mapOfCaseData, String frcListName) {
+        String northEastList = (String) mapOfCaseData.get(frcListName);
         if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
             return CLEAVELAND_COURTLIST;
         } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
@@ -164,8 +184,8 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    private static String getNorthWestFRC(Map mapOfCaseData, String fieldNamePrefix) {
-        String northWestList = (String) mapOfCaseData.get(fieldNamePrefix + NORTHWEST_FRC_LIST);
+    private static String getNorthWestFRC(Map mapOfCaseData, String frcListName) {
+        String northWestList = (String) mapOfCaseData.get(frcListName);
         if (LIVERPOOL.equalsIgnoreCase(northWestList)) {
             return LIVERPOOL_COURTLIST;
         } else if (MANCHESTER.equalsIgnoreCase(northWestList)) {
@@ -174,16 +194,16 @@ public final class CaseHearingFunctions {
         return null;
     }
 
-    private static String getLondonFRC(Map mapOfCaseData, String fieldNamePrefix) {
-        String londonList = (String) mapOfCaseData.get(fieldNamePrefix + LONDON_FRC_LIST);
+    private static String getLondonFRC(Map mapOfCaseData, String frcListName) {
+        String londonList = (String) mapOfCaseData.get(frcListName);
         if (CFC.equalsIgnoreCase(londonList)) {
             return CFC_COURTLIST;
         }
         return null;
     }
 
-    private static String getMidlandFRC(Map mapOfCaseData, String fieldNamePrefix) {
-        String midlandsList = (String) mapOfCaseData.get(fieldNamePrefix + MIDLANDS_FRC_LIST);
+    private static String getMidlandFRC(Map mapOfCaseData, String frcListName) {
+        String midlandsList = (String) mapOfCaseData.get(frcListName);
         if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
             return NOTTINGHAM_COURTLIST;
         } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
@@ -208,9 +228,11 @@ public final class CaseHearingFunctions {
         }
     }
 
-    static String getCourtDetailsString() throws IOException {
+    static String getCourtDetailsString() {
         try (InputStream inputStream = CaseHearingFunctions.class.getResourceAsStream(COURT_DETAILS_JSON_PATH)) {
             return IOUtils.toString(inputStream, UTF_8);
+        } catch (IOException e) {
+            throw new CourtDetailsParseException();
         }
     }
 

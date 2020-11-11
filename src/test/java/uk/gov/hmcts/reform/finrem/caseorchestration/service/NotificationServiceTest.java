@@ -380,8 +380,8 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void sendSolicitorToDraftOrderEmailRespondent() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
-                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-                .andRespond(MockRestResponseCreators.withNoContent());
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
 
         notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest);
 
@@ -391,23 +391,13 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void throwExceptionWhenSendSolicitorToDraftOrderEmailRespondentIsRequested() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
-                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
             notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
-    }
-
-    @Test
-    public void sendSolicitorToDraftOrderEmailApplicant() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendSolicitorToDraftOrderEmailApplicant(callbackRequest);
-
-        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -545,6 +535,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     @Test
     public void sendContestedGeneralApplicationOutcomeNotificationEmailWhenSendToFRCToggleTrue() throws IOException {
         when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
+
         callbackRequest = getContestedCallbackRequest();
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME))
@@ -561,6 +552,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     public void sendContestedGeneralApplicationOutcomeNotificationEmailToTestAccountWhenSendToFRCToggleFalse()
         throws IOException {
         when(featureToggleService.isSendToFRCEnabled()).thenReturn(false);
+
         callbackRequest = getContestedCallbackRequest();
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME))

@@ -121,7 +121,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         assertThat(data.get(CONSENTED_SOLICITOR_FIRM), is("Awesome Firm"));
 
         assertThat(data, IsMapContaining.hasKey(CONSENTED_SOLICITOR_ADDRESS));
-        Map<String, Object> addressObject = (Map<String, Object>)data.get(CONSENTED_SOLICITOR_ADDRESS);
+        Map<String, Object> addressObject = (Map<String, Object>) data.get(CONSENTED_SOLICITOR_ADDRESS);
         assertThat(addressObject.get("County").toString(), is("County"));
         assertThat(addressObject.get("Country").toString(), is("UK"));
         assertThat(addressObject.get("PostCode").toString(), is("SW1A 1AA"));

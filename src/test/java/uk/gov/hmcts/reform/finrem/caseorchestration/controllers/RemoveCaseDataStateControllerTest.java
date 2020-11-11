@@ -25,21 +25,21 @@ public class RemoveCaseDataStateControllerTest extends BaseControllerTest {
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
         doEmptyCaseDataSetUp();
         mvc.perform(post(REMOVE_CASE_STATE_URI)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(startsWith(SERVER_ERROR_MSG)));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(startsWith(SERVER_ERROR_MSG)));
     }
 
     @Test
     public void shouldRemoveStateFromCaseData() throws Exception {
         doValidCaseDataSetUp();
         mvc.perform(post(REMOVE_CASE_STATE_URI)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", not(hasKey(STATE))));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data", not(hasKey(STATE))));
     }
 }

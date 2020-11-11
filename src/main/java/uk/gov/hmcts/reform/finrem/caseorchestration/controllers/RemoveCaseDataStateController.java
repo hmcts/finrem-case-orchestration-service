@@ -30,8 +30,8 @@ public class RemoveCaseDataStateController implements BaseController {
     @PostMapping(path = "/remove-case-data-state", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Remove state from a given case")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> removeCaseDataState(
-            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-            @RequestBody CallbackRequest callbackRequest) {
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
+        @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for removing case state for Case ID: {}", caseDetails.getId());

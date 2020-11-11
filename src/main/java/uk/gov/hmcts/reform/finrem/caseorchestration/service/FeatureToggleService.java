@@ -73,6 +73,7 @@ public class FeatureToggleService {
     /**
      * Given runtime feature toggle status, returns fields that should be ignored during serialisation (i.e. not
      * serialised to JSON).
+     *
      * @return a map with Class of ignored fields as key and field names as value
      */
     public Map<Class, List<String>> getFieldsIgnoredDuringSerialisation() {

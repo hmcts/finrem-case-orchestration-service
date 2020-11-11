@@ -34,15 +34,23 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.bulkPr
 @ActiveProfiles("test-mock-document-client")
 public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
-    @Autowired private ObjectMapper mapper = new ObjectMapper();
-    @Autowired private ConsentOrderPrintService consentOrderPrintService;
+    @Autowired
+    private ObjectMapper mapper = new ObjectMapper();
+    @Autowired
+    private ConsentOrderPrintService consentOrderPrintService;
 
-    @MockBean private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    @MockBean private GeneralOrderService generalOrderService;
-    @MockBean private GenerateCoverSheetService coverSheetService;
-    @MockBean private GenericDocumentService genericDocumentService;
-    @MockBean private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
-    @MockBean private DocumentClient documentClient;
+    @MockBean
+    private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+    @MockBean
+    private GeneralOrderService generalOrderService;
+    @MockBean
+    private GenerateCoverSheetService coverSheetService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+    @MockBean
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @MockBean
+    private DocumentClient documentClient;
 
     private UUID letterId;
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor = ArgumentCaptor.forClass(BulkPrintRequest.class);

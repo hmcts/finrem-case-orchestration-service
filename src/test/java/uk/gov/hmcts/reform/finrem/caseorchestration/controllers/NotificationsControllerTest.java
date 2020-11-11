@@ -144,9 +144,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(helpWithFeesDocumentService, times(1))
-            .generateHwfSuccessfulNotificationLetter(any(CaseDetails.class),any());
+            .generateHwfSuccessfulNotificationLetter(any(CaseDetails.class), any());
         verify(bulkPrintService, times(1))
-            .sendDocumentForPrint(any(),any());
+            .sendDocumentForPrint(any(), any());
         verifyNoInteractions(notificationService);
     }
 
@@ -160,7 +160,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendAssignToJudgeConfirmationEmail(any(CallbackRequest.class));
+            .sendAssignToJudgeConfirmationEmail(any(CallbackRequest.class));
         verifyNoInteractions(assignedToJudgeDocumentService);
         verifyNoInteractions(bulkPrintService);
     }
@@ -188,9 +188,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(assignedToJudgeDocumentService, times(1))
-            .generateAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+            .generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
         verify(bulkPrintService, times(1))
-            .sendDocumentForPrint(any(),any());
+            .sendDocumentForPrint(any(), any());
         verifyNoInteractions(notificationService);
     }
 
@@ -207,11 +207,11 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(assignedToJudgeDocumentService, never())
-            .generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+            .generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
         verify(assignedToJudgeDocumentService, times(1))
-            .generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+            .generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
         verify(bulkPrintService, times(1))
-            .sendDocumentForPrint(any(),any());
+            .sendDocumentForPrint(any(), any());
     }
 
     @Test
@@ -227,11 +227,11 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(assignedToJudgeDocumentService, times(1))
-            .generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+            .generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
         verify(assignedToJudgeDocumentService, times(1))
-            .generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+            .generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
         verify(bulkPrintService, times(2))
-            .sendDocumentForPrint(any(),any());
+            .sendDocumentForPrint(any(), any());
     }
 
     @Test
@@ -509,21 +509,21 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void sendDraftOrderEmailWhenApplicantSolicitorIsNominatedAndIsAcceptingEmails() throws Exception {
         buildCcdRequest(DRAFT_ORDER_SUCCESSFUL_APPLICANT_SOL);
         mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
+            .sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
     }
 
     @Test
     public void shouldNotSendDraftOrderEmailAsSolicitorOptedOutOfEmailComms() throws Exception {
         buildCcdRequest(DRAFT_ORDER_UNSUCCESSFUL_APPLICANT_SOL);
         mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
     }
@@ -532,9 +532,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void shouldNotSendDraftOrderEmailAsRespondentSolicitorIsNominated() throws Exception {
         buildCcdRequest(DRAFT_ORDER_UNSUCCESSFUL_RESPONDENT_SOL);
         mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
     }
@@ -768,7 +768,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(manualPaymentDocumentService, times(1))
             .generateApplicantManualPaymentLetter(any(CaseDetails.class), any());
         verify(bulkPrintService, times(1))
-            .sendDocumentForPrint(any(),any());
+            .sendDocumentForPrint(any(), any());
         verifyNoInteractions(notificationService);
     }
 
@@ -788,6 +788,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private void buildCcdRequest(String fileName) throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource(fileName).toURI()));
+            .getResource(fileName).toURI()));
     }
 }
