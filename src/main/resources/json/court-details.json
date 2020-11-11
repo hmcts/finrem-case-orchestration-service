@@ -472,5 +472,311 @@
     "courtAddress": "The Courthouse, 1 Oxford Row, Leeds, LS1 3BG",
     "phoneNumber": "0113 306 2501",
     "email": "leedsfamily@justice.gov.uk"
+  },
+  "FR_lancashireList_1": {
+    "courtName": "Preston Combined Court Centre",
+    "courtAddress": "The Law Courts, Openshaw Place, Ring Way, Preston, PR1 2LL",
+    "phoneNumber": "0300 303 0642",
+    "email": "hmctsfinancialremedy@justice.gov.uk"
+  },
+  "FR_lancashireList_2": {
+    "courtName": "Blackburn Family Court",
+    "courtAddress": "64 Victoria Street, Blackburn, BB1 6DL",
+    "phoneNumber": "0300 303 0642",
+    "email": "hmctsfinancialremedy@justice.gov.uk"
+  },
+  "FR_lancashireList_3": {
+    "courtName": "Blackpool Family Court",
+    "courtAddress": "The Law Courts, Chapel Street, Blackpool, FY1 5RJ",
+    "phoneNumber": "0300 303 0642",
+    "email": "hmctsfinancialremedy@justice.gov.uk"
+  },
+  "FR_lancashireList_4": {
+    "courtName": "Lancaster Courthouse",
+    "courtAddress": "George Street, Lancaster, LA1 1XZ",
+    "phoneNumber": "0300 303 0642",
+    "email": "hmctsfinancialremedy@justice.gov.uk"
+  },
+  "FR_lancashireList_5": {
+    "courtName": "Leyland Family Hearing Centre",
+    "courtAddress": "The Family Court, Sessions House, Lancaster Road, Preston, PR1 2PD",
+    "phoneNumber": "0300 303 0642",
+    "email": "hmctsfinancialremedy@justice.gov.uk"
+  },
+  "FR_lancashireList_6": {
+    "courtName": "Reedley Family Hearing Centre",
+    "courtAddress": "Blackburn Family Court, 64 Victoria Street, Blackburn, BB1 6DJ",
+    "phoneNumber": "0300 303 0642",
+    "email": "hmctsfinancialremedy@justice.gov.uk"
+  },
+  "FR_lancashireList_7": {
+    "courtName": "Barrow in Furness County and Family Court",
+    "courtAddress": "Barrow Law Courts, Abbey Road, Barrow in Furness, LA14 6QX",
+    "phoneNumber": "0300 303 0642",
+    "email": "hmctsfinancialremedy@justice.gov.uk"
+  },
+  "FR_lancashireList_8": {
+    "courtName": "Carlisle Combined Court",
+    "courtAddress": "Courts of Justice, Earl Street, Carlisle, CA1 1DJ",
+    "phoneNumber": "0300 303 0642",
+    "email": "hmctsfinancialremedy@justice.gov.uk"
+  },
+  "FR_lancashireList_9": {
+    "courtName": "West Cumbria Courthouse",
+    "courtAddress": "Hall Park, Ramsay Brow, Workington, CA14 4AS",
+    "phoneNumber": "0300 303 0642",
+    "email": "hmctsfinancialremedy@justice.gov.uk"
+  },
+  "FR_bedfordshireList_1": {
+    "courtName": "Peterborough Combined Court Centre",
+    "courtAddress": "Crown Buildings, Rivergate, Peterborough, PE1 1EJ",
+    "phoneNumber": "0344 892 4000",
+    "email": "FRC.NES.BCH@justice.gov.uk"
+  },
+  "FR_bedfordshireList_2": {
+    "courtName": "Cambridge County Court and Family Court",
+    "courtAddress": "Crown Buildings, Rivergate, Peterborough, PE1 1EJ",
+    "phoneNumber": "0344 892 4000",
+    "email": "FRC.NES.BCH@justice.gov.uk"
+  },
+  "FR_bedfordshireList_3": {
+    "courtName": "Bury St Edmunds County Court and Family Court",
+    "courtAddress": "Norwich Combined Court, The Law Courts, Bishop Gate, Norwich, NR3 1UR",
+    "phoneNumber": "0344 892 4000",
+    "email": "FRC.NES.BCH@justice.gov.uk"
+  },
+  "FR_bedfordshireList_4": {
+    "courtName": "Norwich Combined Court Centre",
+    "courtAddress": "The Law courts, Bishopgate, Norwich, NR3 1UR",
+    "phoneNumber": "0344 892 4000",
+    "email": "FRC.NES.BCH@justice.gov.uk"
+  },
+  "FR_bedfordshireList_5": {
+    "courtName": "Ipswich County Court and Family Hearing Centre",
+    "courtAddress": "The Law courts, Bishopgate, Norwich, NR3 1UR",
+    "phoneNumber": "0344 892 4000",
+    "email": "FRC.NES.BCH@justice.gov.uk"
+  },
+  "FR_bedfordshireList_6": {
+    "courtName": "Chelmsford County Court and Family Hearing Centre",
+    "courtAddress": "Priory Place, New London Road, Chelmsford, CM2 0PP",
+    "phoneNumber": "0344 892 4000",
+    "email": "FRC.NES.BCH@justice.gov.uk"
+  },
+  "FR_bedfordshireList_7": {
+    "courtName": "Southend County Court and Family Hearing Centre",
+    "courtAddress": "80 Victoria Avenue, Southend-On-Sea, SS2 6EU",
+    "phoneNumber": "0344 892 4000",
+    "email": "FRC.NES.BCH@justice.gov.uk"
+  },
+  "FR_bedfordshireList_8": {
+    "courtName": "Bedford County Court and Family Hearing Centre",
+    "courtAddress": "Luton Justice Centre, Floors 4&5 Arndale House, The Mall, Luton, LU1 2LJ",
+    "phoneNumber": "0344 892 4000",
+    "email": "FRC.NES.BCH@justice.gov.uk"
+  },
+  "FR_bedfordshireList_9": {
+    "courtName": "Luton Justice Centre",
+    "courtAddress": "Luton Justice Centre, Floors 4&5 Arndale House, The Mall, Luton, LU1 2LJ",
+    "phoneNumber": "0344 892 4000",
+    "email": "FRC.NES.BCH@justice.gov.uk"
+  },
+  "FR_bedfordshireList_10": {
+    "courtName": "Hertford County Court and Family Hearing Centre",
+    "courtAddress": "PO Box 373, Hertord, SG13 9HT",
+    "phoneNumber": "0344 892 4000",
+    "email": "FRC.NES.BCH@justice.gov.uk"
+  },
+  "FR_bedfordshireList_11": {
+    "courtName": "Watford County Court and Family Hearing Centre",
+    "courtAddress": "3rd Floor, Cassiobury House, 11-19 Station Road, Watford, WD17 1EZ",
+    "phoneNumber": "0344 892 4000",
+    "email": "FRC.NES.BCH@justice.gov.uk"
+  },
+  "FR_thamesvalleyList_1": {
+    "courtName": "Oxford Combined Court Centre",
+    "courtAddress": "St Aldates, Oxford, OX1 1TL",
+    "phoneNumber": "01865 264 200",
+    "email": "FRCThamesValley@justice.gov.uk"
+  },
+  "FR_thamesvalleyList_2": {
+    "courtName": "Reading County Court and Family Court",
+    "courtAddress": "Hearing Centre, 160-163 Friar Street, Reading, RG1 1HE",
+    "phoneNumber": "01865 264 200",
+    "email": "FRCThamesValley@justice.gov.uk"
+  },
+  "FR_thamesvalleyList_3": {
+    "courtName": "Milton Keynes County Court and Family Court",
+    "courtAddress": "351 Silbury Boulevard, Witon Gate East, Central Milton Keynes, MK9 2DT",
+    "phoneNumber": "01865 264 200",
+    "email": "FRCThamesValley@justice.gov.uk"
+  },
+  "FR_thamesvalleyList_4": {
+    "courtName": "Slough County Court and Family Court",
+    "courtAddress": "Administration Centre, Reading County Court, 160-163 Friar Stret, Reading, RG1 1HE",
+    "phoneNumber": "01865 264 200",
+    "email": "FRCThamesValley@justice.gov.uk"
+  },
+  "FR_devonList_1": {
+    "courtName": "Plymouth Combined Court",
+    "courtAddress": "The Law Courts, 10 Armada Way, Plymouth, PL1 2ER",
+    "phoneNumber": "01752 677 400",
+    "email": "FR.PlymouthHub@justice.gov.uk"
+  },
+  "FR_devonList_2": {
+    "courtName": "Exeter Combined Court Centre",
+    "courtAddress": "Southernhay Gardens, Exeter, EX1 1UH",
+    "phoneNumber": "01752 677 400",
+    "email": "FR.PlymouthHub@justice.gov.uk"
+  },
+  "FR_devonList_3": {
+    "courtName": "Taunton Crown, County and Family Court",
+    "courtAddress": "The Shire Hall, Taunton, TA1 4EU",
+    "phoneNumber": "01752 677 400",
+    "email": "FR.PlymouthHub@justice.gov.uk"
+  },
+  "FR_devonList_4": {
+    "courtName": "Torquay and Newton Abbot County and Family Court",
+    "courtAddress": "The Willows, Nicholson Road, Torquay, TQ2 7AZ",
+    "phoneNumber": "01752 677 400",
+    "email": "FR.PlymouthHub@justice.gov.uk"
+  },
+  "FR_devonList_5": {
+    "courtName": "Barnstaple Magistrates, County and Family Court",
+    "courtAddress": "Barnstaple  Law Courts, North Walk, Barnstaple, EX31 1DU",
+    "phoneNumber": "01752 677 400",
+    "email": "FR.PlymouthHub@justice.gov.uk"
+  },
+  "FR_devonList_6": {
+    "courtName": "Truro County Court and Family Court",
+    "courtAddress": "Edward Street, Truro, TR1 2PB",
+    "phoneNumber": "01752 677 400",
+    "email": "FR.PlymouthHub@justice.gov.uk"
+  },
+  "FR_devonList_7": {
+    "courtName": "Yeovil County, Family and Magistrates Court",
+    "courtAddress": "The Law Courts, Petters Way, Yeovil, BA20 1SW",
+    "phoneNumber": "01752 677 400",
+    "email": "FR.PlymouthHub@justice.gov.uk"
+  },
+  "FR_devonList_8": {
+    "courtName": "Bodmin County Court and Family Court",
+    "courtAddress": "The Law Courts, Launceston Road, Bodmin, PL31 2AL",
+    "phoneNumber": "01752 677 400",
+    "email": "FR.PlymouthHub@justice.gov.uk"
+  },
+  "FR_dorsetList_1": {
+    "courtName": "Bournemouth and Poole County Court and Family Court",
+    "courtAddress": "Courts of Justice, Deansleigh Road, Bournemouth, BH7 7DS",
+    "phoneNumber": "01202 502 800",
+    "email": "BournemouthFRC.bournemouth.countycourt@justice.gov.uk"
+  },
+  "FR_dorsetList_2": {
+    "courtName": "Weymouth Combined Court",
+    "courtAddress": "The Law Courts, Westway Road, Weymouth, DT4 8BS",
+    "phoneNumber": "01202 502 800",
+    "email": "BournemouthFRC.bournemouth.countycourt@justice.gov.uk"
+  },
+  "FR_dorsetList_3": {
+    "courtName": "Winchester Combined Court Centre",
+    "courtAddress": "Winchester Combined Court, The Law Courts, Winchester, SO23 9EL",
+    "phoneNumber": "01202 502 800",
+    "email": "BournemouthFRC.bournemouth.countycourt@justice.gov.uk"
+  },
+  "FR_dorsetList_4": {
+    "courtName": "Portsmouth Combined Court Centre",
+    "courtAddress": "The Courts of Justice, Winston Churchill Avenue, Portsmouth, PO1 2EB",
+    "phoneNumber": "01202 502 800",
+    "email": "BournemouthFRC.bournemouth.countycourt@justice.gov.uk"
+  },
+  "FR_dorsetList_5": {
+    "courtName": "Southampton Combined Court Centre",
+    "courtAddress": "The Courts of Justice, London Road, Southampton SO15 2XQ",
+    "phoneNumber": "01202 502 800",
+    "email": "BournemouthFRC.bournemouth.countycourt@justice.gov.uk"
+  },
+  "FR_dorsetList_6": {
+    "courtName": "Aldershot Justice Centre",
+    "courtAddress": "The Court House, Civic Centre, Wellington Avenue, Aldershot, GU11 1NY",
+    "phoneNumber": "01202 502 800",
+    "email": "BournemouthFRC.bournemouth.countycourt@justice.gov.uk"
+  },
+  "FR_dorsetList_7": {
+    "courtName": "Basingstoke County and Family Court",
+    "courtAddress": "The Court House, London Road, Basingstoke, RG21 4AB",
+    "phoneNumber": "01202 502 800",
+    "email": "BournemouthFRC.bournemouth.countycourt@justice.gov.uk"
+  },
+  "FR_dorsetList_8": {
+    "courtName": "Newport (Isle of Wight) Combined Court",
+    "courtAddress": "The Law Courts, 1 Quay Street, Newport, PO30 5YT",
+    "phoneNumber": "01202 502 800",
+    "email": "BournemouthFRC.bournemouth.countycourt@justice.gov.uk"
+  },
+  "FR_bristolList_1": {
+    "courtName": "Bristol Civil and Family Justice Centre",
+    "courtAddress": "2 Redcliff Street, Bristol, BS1 6GR",
+    "phoneNumber": "0117 366 4880",
+    "email": "BristolFRC.bristol.countycourt@justice.gov.uk"
+  },
+  "FR_bristolList_2": {
+    "courtName": "Gloucester and Cheltenham County and Family Court",
+    "courtAddress": "Kimbrose Way, Gloucester, GL1 2DE",
+    "phoneNumber": "0117 366 4880",
+    "email": "BristolFRC.bristol.countycourt@justice.gov.uk"
+  },
+  "FR_bristolList_3": {
+    "courtName": "Swindon Combined Court",
+    "courtAddress": "The Law Courts, Islington Street, Swindon, SN1 2HG",
+    "phoneNumber": "0117 366 4880",
+    "email": "BristolFRC.bristol.countycourt@justice.gov.uk"
+  },
+  "FR_bristolList_4": {
+    "courtName": "Salisbury Law Courts",
+    "courtAddress": "Wilton Road, Salisbury, SP2 7EP",
+    "phoneNumber": "0117 366 4880",
+    "email": "BristolFRC.bristol.countycourt@justice.gov.uk"
+  },
+  "FR_bristolList_5": {
+    "courtName": "Bath Law Courts",
+    "courtAddress": "The Law Courts, North Parade Road, Bath, BA1 5AF",
+    "phoneNumber": "0117 366 4880",
+    "email": "BristolFRC.bristol.countycourt@justice.gov.uk"
+  },
+  "FR_bristolList_6": {
+    "courtName": "Weston Super Mare County and Family Court",
+    "courtAddress": "North Somerset Courthouse, The Hedges, St Georges, Weston-Super-Mare, BS22 7BB",
+    "phoneNumber": "0117 366 4880",
+    "email": "BristolFRC.bristol.countycourt@justice.gov.uk"
+  },
+  "FR_northwalesList_1": {
+    "courtName": "Wrexham County Court and Family Court",
+    "courtAddress": "The Law Courts, Bodhyfryd, Wrexham, LL12 7BP",
+    "phoneNumber": "0300 303 0642",
+    "email": "hmctsfinancialremedy@justice.gov.uk"
+  },
+  "FR_northwalesList_2": {
+    "courtName": "Caernarfon Justice Centre",
+    "courtAddress": "Llanberis Road, Caernarfon, LL55 2DF",
+    "phoneNumber": "0300 303 0642",
+    "email": "hmctsfinancialremedy@justice.gov.uk"
+  },
+  "FR_northwalesList_3": {
+    "courtName": "Prestatyn Justice Centre",
+    "courtAddress": "Victoria Road, Prestatyn, LL19 7TE",
+    "phoneNumber": "0300 303 0642",
+    "email": "hmctsfinancialremedy@justice.gov.uk"
+  },
+  "FR_northwalesList_4": {
+    "courtName": "Welshpool Civil and Family Court",
+    "courtAddress": "Wrexham County Court, Bodhyfryd, Wrexham, LL12 7PB",
+    "phoneNumber": "0300 303 0642",
+    "email": "hmctsfinancialremedy@justice.gov.uk"
+  },
+  "FR_northwalesList_5": {
+    "courtName": "Mold County",
+    "courtAddress": "Law Courts, Mold, CH7 1AE",
+    "phoneNumber": "0300 303 0642",
+    "email": "hmctsfinancialremedy@justice.gov.uk"
   }
 }
