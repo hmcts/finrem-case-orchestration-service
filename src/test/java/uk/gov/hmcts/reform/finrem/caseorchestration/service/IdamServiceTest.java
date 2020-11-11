@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,6 +57,15 @@ public class IdamServiceTest  {
 
         boolean userEmailId = idamService.isUserRoleAdmin(AUTH_TOKEN);
         assertThat(userEmailId, is(Boolean.FALSE));
+    }
+
+    @Test
+    public void retrieveUserId() {
+        mockServer.expect(requestTo(toUri()))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess("{\"id\": \"1234\"}", MediaType.APPLICATION_JSON));
+
+        Assert.assertEquals(idamService.getIdamUserId(AUTH_TOKEN), "1234");
     }
 
     private String toUri() {
