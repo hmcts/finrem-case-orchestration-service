@@ -13,10 +13,10 @@ public class PaymentStatusHistoryTest {
     @Test
     public void shouldCreatePaymentStatusHistory() throws Exception {
         String json = "{"
-                + " \"status\": \"success\","
-                + " \"error_code\": \"err\","
-                + " \"error_message\": \"failed\""
-                + "}";
+            + " \"status\": \"success\","
+            + " \"error_code\": \"err\","
+            + " \"error_message\": \"failed\""
+            + "}";
         PaymentStatusHistory paymentStatusHistory = mapper.readValue(json, PaymentStatusHistory.class);
         assertThat(paymentStatusHistory.getStatus(), is("success"));
         assertThat(paymentStatusHistory.getErrorCode(), is("err"));

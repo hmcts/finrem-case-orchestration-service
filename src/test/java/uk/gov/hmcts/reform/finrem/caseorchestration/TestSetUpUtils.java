@@ -67,8 +67,8 @@ public class TestSetUpUtils {
     public static final String PENSION_TYPE = "PPF1";
     public static final String PENSION_ID = "1";
 
-    public static  final int INTERNAL_SERVER_ERROR = HttpStatus.INTERNAL_SERVER_ERROR.value();
-    public static  final int BAD_REQUEST = HttpStatus.BAD_REQUEST.value();
+    public static final int INTERNAL_SERVER_ERROR = HttpStatus.INTERNAL_SERVER_ERROR.value();
+    public static final int BAD_REQUEST = HttpStatus.BAD_REQUEST.value();
 
     public static FeignException feignError() {
         Response response = Response.builder().status(INTERNAL_SERVER_ERROR)

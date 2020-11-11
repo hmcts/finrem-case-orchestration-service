@@ -49,7 +49,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_OTHER_COURTLIST;
 
 public class ConsentedCourtHelper {
-    private ConsentedCourtHelper(){
+    private ConsentedCourtHelper() {
     }
 
     public static String getSelectedCourt(CaseDetails caseDetails) {

@@ -22,12 +22,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public interface DocumentClient {
 
     @PostMapping(
-            path = "/version/1/generate-pdf",
-            headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
+        path = "/version/1/generate-pdf",
+        headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
     Document generatePdf(
-            @RequestBody DocumentGenerationRequest generateDocumentRequest,
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+        @RequestBody DocumentGenerationRequest generateDocumentRequest,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @PostMapping(
         path = "/version/1/bulk-print",
@@ -37,30 +37,30 @@ public interface DocumentClient {
 
     @DeleteMapping(path = "/version/1/delete-pdf-document")
     void deleteDocument(
-            @RequestParam("fileUrl") String fileUrl,
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+        @RequestParam("fileUrl") String fileUrl,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @GetMapping(path = "/file-upload-check")
     DocumentValidationResponse checkUploadedFileType(
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
-            @RequestParam("fileBinaryUrl") String fileUrl
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
+        @RequestParam("fileBinaryUrl") String fileUrl
     );
 
     @PostMapping(
-            path = "/version/1/stamp-document",
-            headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
+        path = "/version/1/stamp-document",
+        headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
     Document stampDocument(
-            @RequestBody Document document,
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+        @RequestBody Document document,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @PostMapping(
-            path = "/version/1/annex-stamp-document",
-            headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
+        path = "/version/1/annex-stamp-document",
+        headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
     Document annexStampDocument(
-            @RequestBody Document document,
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+        @RequestBody Document document,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @PostMapping(
         path = "/version/1/convert-to-pdf",

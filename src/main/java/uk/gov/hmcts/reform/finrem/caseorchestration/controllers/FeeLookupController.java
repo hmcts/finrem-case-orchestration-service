@@ -45,8 +45,8 @@ public class FeeLookupController implements BaseController {
     @PostMapping(path = "/fee-lookup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles looking up Case Fees")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeLookup(
-            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-            @RequestBody CallbackRequest callbackRequest) {
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
+        @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for Fee lookup for Case ID {}", caseDetails.getId());
@@ -61,7 +61,7 @@ public class FeeLookupController implements BaseController {
         updateCaseWithFee(mapOfCaseData, feeResponseData, feeResponse);
         ObjectMapper objectMapper = new ObjectMapper();
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                .data(objectMapper.convertValue(feeResponseData, Map.class)).build());
+            .data(objectMapper.convertValue(feeResponseData, Map.class)).build());
     }
 
     private void updateCaseWithFee(Map<String, Object> caseRequestData, FeeCaseData feeResponseData, FeeResponse feeResponse) {
@@ -73,27 +73,27 @@ public class FeeLookupController implements BaseController {
 
     private OrderSummary createOrderSummary(Map<String, Object> caseRequestData, FeeItem feeItem) {
         return OrderSummary.builder()
-                .paymentTotal(feeItem.getValue().getFeeAmount())
-                .paymentReference(Objects.toString(caseRequestData.get(PBA_REFERENCE)))
-                .fees(ImmutableList.of(feeItem))
-                .build();
+            .paymentTotal(feeItem.getValue().getFeeAmount())
+            .paymentReference(Objects.toString(caseRequestData.get(PBA_REFERENCE)))
+            .fees(ImmutableList.of(feeItem))
+            .build();
     }
 
     private FeeItem createFeeItem(FeeResponse feeResponse) {
         FeeValue feeValue = createFeeValue(feeResponse);
         return FeeItem.builder()
-                .value(feeValue)
-                .build();
+            .value(feeValue)
+            .build();
     }
 
     private FeeValue createFeeValue(FeeResponse feeResponse) {
         String amountToPay = Objects.toString(feeResponse
-                .getFeeAmount().multiply(BigDecimal.valueOf(100)).longValue());
+            .getFeeAmount().multiply(BigDecimal.valueOf(100)).longValue());
         return FeeValue.builder()
-                .feeCode(feeResponse.getCode())
-                .feeAmount(amountToPay)
-                .feeVersion(feeResponse.getVersion())
-                .feeDescription(feeResponse.getDescription())
-                .build();
+            .feeCode(feeResponse.getCode())
+            .feeAmount(amountToPay)
+            .feeVersion(feeResponse.getVersion())
+            .feeDescription(feeResponse.getDescription())
+            .build();
     }
 }

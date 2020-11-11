@@ -2,9 +2,9 @@
   "token": "test_token",
   "event_id": "event1",
   "case_details": {
-    "id" : "12345678",
-    "jurisdiction":"divorce",
-    "state":"created",
+    "id": "12345678",
+    "jurisdiction": "divorce",
+    "state": "created",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
       "PBANumber": "PBA123456",

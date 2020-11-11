@@ -605,7 +605,7 @@ public class ConsentedCourtHelperTest {
     }
 
     private void verifyCorrectCourtReturned(String region, String subRegionListName, String subRegion,
-                                                          String courtListName, String court, String expectedValue) {
+                                            String courtListName, String court, String expectedValue) {
         details = getCaseDetailsWithAllocatedValues(region, subRegionListName, subRegion, courtListName,
             court);
         assertThat(ConsentedCourtHelper.getSelectedCourt(details), is(expectedValue));

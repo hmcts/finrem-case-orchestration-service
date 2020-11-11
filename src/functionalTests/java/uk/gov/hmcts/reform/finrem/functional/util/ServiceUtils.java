@@ -29,33 +29,33 @@ public class ServiceUtils {
     @Autowired
     private FunctionalTestUtils functionalTestUtils;
 
-    public Map<String,String> uploadFileToEmStore(String fileToUpload, String fileContentType) throws JSONException {
+    public Map<String, String> uploadFileToEmStore(String fileToUpload, String fileContentType) throws JSONException {
         File file = null;
 
         try {
             file = Paths.get(Objects.requireNonNull(getClass()
-                    .getClassLoader()
-                    .getResource(fileToUpload))
-                    .toURI())
-                    .toFile();
+                .getClassLoader()
+                .getResource(fileToUpload))
+                .toURI())
+                .toFile();
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
 
         Response response = SerenityRest.given()
-                .headers(functionalTestUtils.getHeader())
-                .multiPart("file", file, fileContentType)
-                .post(evidenceManagementClientBaseUrl.concat("/upload"))
-                .andReturn();
+            .headers(functionalTestUtils.getHeader())
+            .multiPart("file", file, fileContentType)
+            .post(evidenceManagementClientBaseUrl.concat("/upload"))
+            .andReturn();
         assertEquals(HttpStatus.OK.value(), response.statusCode());
 
         JSONArray responseJson = new JSONArray(response.body().asString());
 
         JSONObject fileUploadResponse = (JSONObject) responseJson.get(0);
-        Map<String,String> uploadedDocument = new HashMap<>();
-        uploadedDocument.put("document_url",fileUploadResponse.get("fileUrl").toString());
-        uploadedDocument.put("document_filename",fileUploadResponse.get("fileName").toString());
-        uploadedDocument.put(DOCUMENT_BINARY_URL,fileUploadResponse.get("fileUrl").toString() + "/binary");
+        Map<String, String> uploadedDocument = new HashMap<>();
+        uploadedDocument.put("document_url", fileUploadResponse.get("fileUrl").toString());
+        uploadedDocument.put("document_filename", fileUploadResponse.get("fileName").toString());
+        uploadedDocument.put(DOCUMENT_BINARY_URL, fileUploadResponse.get("fileUrl").toString() + "/binary");
 
         return uploadedDocument;
     }

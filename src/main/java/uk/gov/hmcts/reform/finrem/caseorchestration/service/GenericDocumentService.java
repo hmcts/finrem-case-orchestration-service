@@ -22,7 +22,7 @@ public class GenericDocumentService {
     private final DocumentClient documentClient;
 
     public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
-                                          String template, String fileName) {
+                                         String template, String fileName) {
 
         Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails);
         Document generatedPdf = documentClient.generatePdf(

@@ -37,7 +37,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockBean
-    private  IdamService idamService;
+    private IdamService idamService;
 
     @MockBean
     FeatureToggleService featureToggleService;

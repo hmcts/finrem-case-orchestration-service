@@ -52,7 +52,7 @@ public class GenerateMiniFormATest extends AbstractDocumentTest {
         caseDetails.getData().put(MINI_FORM_A, caseDocument());
 
         return objectMapper.writeValueAsString(
-                AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+            AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
     private CaseDocument caseDocument() {

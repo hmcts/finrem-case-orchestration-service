@@ -40,9 +40,9 @@ public class PBAValidationServiceTest extends BaseServiceTest {
 
     private void setUpPbaValidateService(String pbaNumber, String response) {
         paymentService.stubFor(get(urlPathEqualTo(PBA_VALIDATE_API + pbaNumber))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBody(response)));
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(response)));
     }
 }

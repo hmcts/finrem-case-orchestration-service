@@ -52,9 +52,9 @@ public class DocumentHelperTest {
     public void shouldGetLatestAmendedConsentOrder() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("amend-consent-order-by-caseworker.json");
         CaseDocument latestAmendedConsentOrder = documentHelper.getLatestAmendedConsentOrder(
-                callbackRequest.getCaseDetails().getData());
+            callbackRequest.getCaseDetails().getData());
         assertThat(latestAmendedConsentOrder.getDocumentBinaryUrl(),
-                is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
+            is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
     }
 
     @Test
@@ -77,7 +77,7 @@ public class DocumentHelperTest {
     public void shouldGetPensionDocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
         List<CaseDocument> pensionDocuments = documentHelper.getPensionDocumentsData(
-                callbackRequest.getCaseDetails().getData());
+            callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
     }
 
@@ -101,7 +101,7 @@ public class DocumentHelperTest {
     public void shouldGetRespondToOrderDocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-solicitor.json");
         Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
-                callbackRequest.getCaseDetails().getData());
+            callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(true));
         assertThat(latestRespondToOrderDocuments.get().getDocumentBinaryUrl(), is("http://doc2/binary"));
     }
@@ -110,7 +110,7 @@ public class DocumentHelperTest {
     public void shouldNotGetRespondToOrderDocuments() throws Exception {
         CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-without-consent-order.json");
         Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
-                callbackRequest.getCaseDetails().getData());
+            callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(false));
     }
 
