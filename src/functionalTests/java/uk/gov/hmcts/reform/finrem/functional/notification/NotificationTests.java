@@ -39,9 +39,6 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.contest-draft-order.api}")
     private String contestDraftOrderApiUri;
 
-    @Value("${cos.notification.contested-consent-order-approved.api}")
-    private String contestedConsentOrderApprovedUri;
-
     private String consentedDir = "/json/consented/";
     private String contestedDir = "/json/contested/";
 
