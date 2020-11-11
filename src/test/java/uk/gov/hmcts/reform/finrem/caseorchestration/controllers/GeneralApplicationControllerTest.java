@@ -35,10 +35,10 @@ public class GeneralApplicationControllerTest extends BaseControllerTest {
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(SUBMIT_GENERAL_APPLICATION_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -47,10 +47,10 @@ public class GeneralApplicationControllerTest extends BaseControllerTest {
         doThrow(feignError()).when(generalApplicationService).updateCaseDataSubmit(isA(Map.class), isA(CaseDetails.class));
 
         mvc.perform(post(SUBMIT_GENERAL_APPLICATION_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isInternalServerError());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -95,6 +95,6 @@ public class GeneralApplicationControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(generalApplicationService, times(1)).updateCaseDataStart(isA(Map.class),eq(AUTH_TOKEN));
+        verify(generalApplicationService, times(1)).updateCaseDataStart(isA(Map.class), eq(AUTH_TOKEN));
     }
 }

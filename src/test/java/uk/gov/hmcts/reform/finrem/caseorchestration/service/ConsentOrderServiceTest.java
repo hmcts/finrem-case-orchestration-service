@@ -24,7 +24,7 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
 
     private void setUpCaseDetails(String fileName) throws Exception {
         try (InputStream resourceAsStream =
-                     getClass().getResourceAsStream(PATH + fileName)) {
+                 getClass().getResourceAsStream(PATH + fileName)) {
             callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
@@ -52,11 +52,11 @@ public class ConsentOrderServiceTest extends BaseServiceTest {
         setUpCaseDetails("amend-consent-order-by-caseworker.json");
         CaseDocument latestConsentOrderData = consentOrderService.getLatestConsentOrderData(callbackRequest);
         assertThat(latestConsentOrderData.getDocumentUrl(),
-                is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838"));
+            is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838"));
         assertThat(latestConsentOrderData.getDocumentFilename(),
-                is("Notification for ABC - Contested.docx"));
+            is("Notification for ABC - Contested.docx"));
         assertThat(latestConsentOrderData.getDocumentBinaryUrl(),
-                is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
+            is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
     }
 
     @Test

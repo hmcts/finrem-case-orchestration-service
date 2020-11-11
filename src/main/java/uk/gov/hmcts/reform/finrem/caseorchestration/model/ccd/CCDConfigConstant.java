@@ -63,6 +63,13 @@ public class CCDConfigConstant {
     public static final String NORTHWEST_FRC_LIST = "northWestFRCList";
     public static final String LONDON_FRC_LIST = "londonFRCList";
     public static final String MIDLANDS_FRC_LIST = "midlandsFRCList";
+    public static final String REGION_CT = "region";
+    public static final String WALES_FRC_LIST_CT = "walesList";
+    public static final String SOUTHEAST_FRC_LIST_CT = "southEastList";
+    public static final String NORTHEAST_FRC_LIST_CT = "northEastList";
+    public static final String NORTHWEST_FRC_LIST_CT = "northWestList";
+    public static final String LONDON_FRC_LIST_CT = "londonList";
+    public static final String MIDLANDS_FRC_LIST_CT = "midlandsList";
     public static final String LIVERPOOL = "liverpool";
     public static final String MANCHESTER = "manchester";
     public static final String OTHER = "other";
@@ -205,7 +212,6 @@ public class CCDConfigConstant {
     public static final String ORDER_LETTER = "orderLetter";
 
 
-
     public static final String FR_RESPOND_TO_ORDER = "FR_respondToOrder";
     public static final String FR_AMENDED_CONSENT_ORDER = "FR_amendedConsentOrder";
     public static final String FR_CONSENT_ORDER = "FR_consentOrder";
@@ -254,6 +260,7 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_DIRECTIONS_KENTSURREY_COURT = "generalApplicationDirections_kentSurreyCourtList";
     public static final String GENERAL_APPLICATION_DIRECTIONS_NEWPORT_COURT = "generalApplicationDirections_newportCourtList";
     public static final String GENERAL_APPLICATION_DIRECTIONS_SWANSEA_COURT = "generalApplicationDirections_swanseaCourtList";
+    public static final String GENERAL_APPLICATION_DIRECTIONS_PREFIX = "generalApplicationDirections_";
     public static final String GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION = "generalApplicationDirectionsAdditionalInformation";
     public static final String GENERAL_APPLICATION_DIRECTIONS_RECITALS = "generalApplicationDirectionsRecitals";
     public static final String GENERAL_APPLICATION_DIRECTIONS_JUDGE_TYPE = "generalApplicationDirectionsJudgeType";
@@ -318,4 +325,11 @@ public class CCDConfigConstant {
     public static final String HEARING_DATE = "hearingDate";
     public static final String HEARING_TIME = "hearingTime";
     public static final String HEARING_ADDITIONAL_INFO = "additionalInformationAboutHearing";
+    public static final String DIRECTION_DETAILS_COLLECTION_CT = "directionDetailsCollection";
+    public static final String LOCAL_COURT_CT = "localCourt";
+    public static final String HEARING_TYPE_CT = "typeOfHearing";
+    public static final String TIME_ESTIMATE_CT = "timeEstimate";
+    public static final String HEARING_DATE_CT = "dateOfHearing";
+    public static final String HEARING_TIME_CT = "hearingTime";
+    public static final String IS_ANOTHER_HEARING_CT = "isAnotherHearingYN";
 }

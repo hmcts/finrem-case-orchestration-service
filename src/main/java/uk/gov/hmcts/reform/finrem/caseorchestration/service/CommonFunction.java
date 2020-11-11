@@ -52,7 +52,7 @@ public class CommonFunction {
         listMap.stream().findFirst().orElse(null);
 
     public static boolean addressLineOneAndPostCodeAreBothNotEmpty(Map address) {
-        return  ObjectUtils.isNotEmpty(address)
+        return ObjectUtils.isNotEmpty(address)
             && StringUtils.isNotBlank((String) address.get(LINE_1))
             && StringUtils.isNotBlank((String) address.get(POSTCODE));
     }
@@ -135,9 +135,5 @@ public class CommonFunction {
 
     private static boolean isContestedApprovedOrderCollectionPresent(Map<String, Object> caseData) {
         return caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION) != null && !((List<Map>) caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION)).isEmpty();
-    }
-
-    public static boolean isDocumentPresentInCaseData(String documentName, CaseDetails caseDetails) {
-        return caseDetails.getData().containsKey(documentName);
     }
 }

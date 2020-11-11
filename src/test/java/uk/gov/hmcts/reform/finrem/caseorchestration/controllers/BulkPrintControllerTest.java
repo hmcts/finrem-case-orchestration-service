@@ -50,11 +50,11 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 .content(resourceContentAsString(CONSENTED_BULK_PRINT_CONSENT_ORDER_NOT_APPROVED_JSON))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes", is(1)))
-                .andExpect(jsonPath("$.data.bulkPrintLetterIdRes", is(1)))
-                .andExpect(jsonPath("$.data.bulkPrintLetterIdApp", is(1)));
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.bulkPrintCoverSheetRes", is(1)))
+            .andExpect(jsonPath("$.data.bulkPrintLetterIdRes", is(1)))
+            .andExpect(jsonPath("$.data.bulkPrintLetterIdApp", is(1)));
         verify(consentOrderPrintService, times(1)).sendConsentOrderToBulkPrint(any(), any());
     }
 
@@ -66,7 +66,7 @@ public class BulkPrintControllerTest extends BaseControllerTest {
                 .content(resourceContentAsString(CONTESTED_HWF_JSON))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isInternalServerError());
+            .andExpect(status().isInternalServerError());
         verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), any());
     }
 

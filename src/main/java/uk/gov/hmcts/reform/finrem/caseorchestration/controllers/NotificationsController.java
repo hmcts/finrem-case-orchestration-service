@@ -348,8 +348,14 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing (after send order)'");
-            notificationService.sendPrepareForHearingOrderSentEmail(callbackRequest);
+            notificationService.sendPrepareForHearingOrderSentEmailApplicant(callbackRequest);
         }
+
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing (after send order)'");
+            notificationService.sendPrepareForHearingOrderSentEmailRespondent(callbackRequest);
+        }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -404,10 +410,10 @@ public class NotificationsController implements BaseController {
     @PostMapping(value = "/draft-order", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for Solicitor To Draft Order")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Draft Order e-mail sent successfully",
-                    response = AboutToStartOrSubmitCallbackResponse.class)})
+        @ApiResponse(code = 204, message = "Draft Order e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendDraftOrderEmail(
-            @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Received request to send email for 'Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);

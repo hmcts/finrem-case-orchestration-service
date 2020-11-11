@@ -27,6 +27,9 @@ public class NotificationTests extends IntegrationTestBase {
     @Value("${cos.notification.prepare-for-hearing.api}")
     private String prepareForHearingApiUri;
 
+    @Value("${cos.notification.prepare-for-hearing-order-sent.api}")
+    private String prepareForHearingOrderSentApiUri;
+
     @Value("${cos.notification.contest-application-issued.api}")
     private String contestApplicationIssuedApiUri;
 
@@ -43,41 +46,48 @@ public class NotificationTests extends IntegrationTestBase {
     public void verifyNotifyAssignToJudgeTestIsOkay() {
 
         utils.validatePostSuccess(notifyAssignToJudge,
-                "ccd-request-with-solicitor-assignedToJudge1.json", consentedDir);
+            "ccd-request-with-solicitor-assignedToJudge1.json", consentedDir);
     }
 
     @Test
     public void verifyNotifyConsentOrderAvailableTestIsOkay() {
 
         utils.validatePostSuccess(consentOrderAvailable,
-                "ccd-request-with-solicitor-consentOrderAvailable1.json", consentedDir);
+            "ccd-request-with-solicitor-consentOrderAvailable1.json", consentedDir);
     }
 
     @Test
     public void verifyNotifyConsentOrderMadeTestIsOkay() {
 
         utils.validatePostSuccess(consentOrderMade,
-                "ccd-request-with-solicitor-consentOrderMade1.json", consentedDir);
+            "ccd-request-with-solicitor-consentOrderMade1.json", consentedDir);
     }
 
     @Test
     public void verifyNotifyConsentOrderNotApprovedTestIsOkay() {
 
         utils.validatePostSuccess(consentOrderNotApproved,
-                "ccd-request-with-solicitor-consentOrderNotApproved1.json", consentedDir);
+            "ccd-request-with-solicitor-consentOrderNotApproved1.json", consentedDir);
     }
 
     @Test
     public void verifyNotifyHwfSuccessfulTestIsOkay() {
 
         utils.validatePostSuccess(hwfSuccessfulApiUri,
-                "ccd-request-with-solicitor-hwfSuccessfulEmail1.json", consentedDir);
+            "ccd-request-with-solicitor-hwfSuccessfulEmail1.json", consentedDir);
     }
 
     @Test
     public void verifyNotifyPrepareForHearingTestIsOkay() {
 
         utils.validatePostSuccess(prepareForHearingApiUri,
+            "ccd-request-with-solicitor-prepareForHearing.json", contestedDir);
+    }
+
+    @Test
+    public void verifyNotifyPrepareForHearingOrderSentTestIsOkay() {
+
+        utils.validatePostSuccess(prepareForHearingOrderSentApiUri,
             "ccd-request-with-solicitor-prepareForHearing.json", contestedDir);
     }
 
