@@ -23,14 +23,19 @@ public class RestService {
     private final RestTemplate restTemplate;
 
     public void restApiPostCall(String userAuthToken, String url, Map<String, Object> body) {
+        HttpEntity authRequest = buildAuthRequest(userAuthToken, body);
+        log.info("restApiPostCall - authRequest - {}", authRequest);
+
         restTemplate.exchange(
             buildUri(url),
             HttpMethod.POST,
-            buildAuthRequest(userAuthToken, body),
+            authRequest,
             Map.class);
     }
 
     private HttpEntity buildAuthRequest(String userAuthToken, Map<String, Object> body) {
+        log.info("buildAuthRequest - body - {}", body);
+
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_HEADER, userAuthToken);
         headers.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
