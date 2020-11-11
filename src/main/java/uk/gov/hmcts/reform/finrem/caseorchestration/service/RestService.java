@@ -24,18 +24,20 @@ public class RestService {
 
     public void restApiPostCall(String userAuthToken, String url, Map<String, Object> body) {
         HttpEntity authRequest = buildAuthRequest(userAuthToken, body);
-        log.info("restApiPostCall - authRequest - {}", authRequest);
+        log.info("restApiPostCall - authRequest.getBody() - {}", authRequest.getBody());
 
-        restTemplate.exchange(
-            buildUri(url),
-            HttpMethod.POST,
-            authRequest,
-            Map.class);
+        try {
+            restTemplate.exchange(
+                buildUri(url),
+                HttpMethod.POST,
+                authRequest,
+                Map.class);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     private HttpEntity buildAuthRequest(String userAuthToken, Map<String, Object> body) {
-        log.info("buildAuthRequest - body - {}", body);
-
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_HEADER, userAuthToken);
         headers.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);

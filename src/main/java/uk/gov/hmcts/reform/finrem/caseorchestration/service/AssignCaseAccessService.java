@@ -27,8 +27,6 @@ public class AssignCaseAccessService {
         String userId = idamService.getIdamUserId(authorisationToken);
         AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(caseDetails, userId);
 
-        log.info("assignCaseAccess - assignCaseAccessRequest - {}", assignCaseAccessRequest);
-
         restService.restApiPostCall(
             authorisationToken,
             assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl(),
