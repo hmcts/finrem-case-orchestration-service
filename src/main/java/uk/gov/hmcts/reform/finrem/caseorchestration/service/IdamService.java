@@ -28,7 +28,7 @@ public class IdamService {
     private final IdamServiceConfiguration serviceConfig;
     private final RestTemplate restTemplate;
 
-    private static final Function<IdamServiceConfiguration,URI> uriSupplier =
+    private static final Function<IdamServiceConfiguration, URI> uriSupplier =
         serviceConfig -> fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi()).build().toUri();
 
     private static final Function<String, HttpEntity> buildAuthRequest = authToken -> {
@@ -40,7 +40,7 @@ public class IdamService {
 
     private static final Function<ResponseEntity<Map>, Boolean> isAdmin =
         responseEntity -> List.class.cast(responseEntity.getBody().get(ROLES)).stream()
-        .anyMatch(role -> role.equals(FR_COURT_ADMIN));
+            .anyMatch(role -> role.equals(FR_COURT_ADMIN));
 
     private static final Function<ResponseEntity<Map>, String> userFullName = responseEntity -> {
         Map body = responseEntity.getBody();
@@ -59,7 +59,7 @@ public class IdamService {
 
     public String getIdamFullName(String authorisationToken) {
         return userFullName.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
-                buildAuthRequest.apply(authorisationToken), Map.class));
+            buildAuthRequest.apply(authorisationToken), Map.class));
     }
 
     public String getIdamUserId(String authorisationToken) {

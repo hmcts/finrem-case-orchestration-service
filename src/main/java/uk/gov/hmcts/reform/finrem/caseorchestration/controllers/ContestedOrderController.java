@@ -48,15 +48,14 @@ public class ContestedOrderController implements BaseController {
     @PostMapping(path = "/contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-                    response = AboutToStartOrSubmitCallbackResponse.class),
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 500, message = "Internal Server Error")
-        })
-
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> stampFinalOrder(
-            @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         validateCaseData(callback);
 

@@ -27,7 +27,7 @@ public class BulkScanService {
 
     private final FinRemBulkScanFormTransformerFactory finRemBulkScanFormTransformerFactory;
 
-    private final  FormAValidator formAValidator;
+    private final FormAValidator formAValidator;
 
     public OcrValidationResult validateBulkScanForm(String formType, List<OcrDataField> ocrDataFields) throws UnsupportedFormTypeException {
         BulkScanFormValidator formValidator = finRemBulkScanFormValidatorFactory.getValidator(formType);
@@ -44,7 +44,7 @@ public class BulkScanService {
     private void validateForTransformation(ExceptionRecord exceptionRecord) throws UnsupportedFormTypeException, InvalidDataException {
 
         OcrValidationResult ocrDataFieldsValidationResult
-            =  validateBulkScanForm(exceptionRecord.getFormType(), exceptionRecord.getOcrDataFields());
+            = validateBulkScanForm(exceptionRecord.getFormType(), exceptionRecord.getOcrDataFields());
 
         if (!ocrDataFieldsValidationResult.getStatus().equals(ValidationStatus.SUCCESS)) {
             String ocrValidationError = String.format("Validation of Exception Record %s finished with status %s",

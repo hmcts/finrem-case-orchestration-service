@@ -24,7 +24,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @TestPropertySource(locations = "/application.properties")
-public class IdamServiceTest  {
+public class IdamServiceTest {
 
     @Autowired
     private IdamService idamService;
@@ -42,8 +42,8 @@ public class IdamServiceTest  {
     @Test
     public void retrieveUserRoleIsAdmin() {
         mockServer.expect(requestTo(toUri()))
-                .andExpect(method(HttpMethod.GET))
-                .andRespond(withSuccess("{\"roles\": [\"caseworker-divorce-financialremedy-courtadmin\"]}", MediaType.APPLICATION_JSON));
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess("{\"roles\": [\"caseworker-divorce-financialremedy-courtadmin\"]}", MediaType.APPLICATION_JSON));
 
         boolean userEmailId = idamService.isUserRoleAdmin(AUTH_TOKEN);
         assertThat(userEmailId, is(Boolean.TRUE));

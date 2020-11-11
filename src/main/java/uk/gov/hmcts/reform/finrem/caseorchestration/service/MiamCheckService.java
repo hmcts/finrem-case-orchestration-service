@@ -15,16 +15,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class MiamCheckService {
 
     private static final String MIAM_EXEMPT_ERROR = "You cannot make this application unless the applicant has "
-            + "either attended, or is exempt from attending a MIAM";
+        + "either attended, or is exempt from attending a MIAM";
 
-    public List<String> miamExemptAttendCheck(CaseDetails  caseDetails) {
+    public List<String> miamExemptAttendCheck(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         String applicantAttended = Objects.toString(caseData.get(APPLICANT_ATTENDED_MIAM));
         String claimingExemption = Objects.toString(caseData.get(CLAIMING_EXEMPTION_MIAM));
 
         if (applicantAttended.equalsIgnoreCase("no")
-                && claimingExemption.equalsIgnoreCase("no")) {
-            return  ImmutableList.of(MIAM_EXEMPT_ERROR);
+            && claimingExemption.equalsIgnoreCase("no")) {
+            return ImmutableList.of(MIAM_EXEMPT_ERROR);
         }
         return ImmutableList.of();
     }

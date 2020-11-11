@@ -126,48 +126,48 @@ public class PaymentServiceTests extends IntegrationTestBase {
         if (paymentType.equals(pba)) {
             if (journeyType.equals(consentedDir)) {
                 assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
-                        .toString().contains("Your application will be issued by Court staff and referred to a Judge"));
+                    .toString().contains("Your application will be issued by Court staff and referred to a Judge"));
             } else {
                 assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
-                        .toString().contains("The application will be sent to the Judge for gatekeeping"));
+                    .toString().contains("The application will be sent to the Judge for gatekeeping"));
             }
         } else if (paymentType.equals(hwf)) {
             if (journeyType.equals(consentedDir)) {
                 assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
-                        .toString().contains("Process the application for help with fees"));
+                    .toString().contains("Process the application for help with fees"));
             } else {
                 assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
-                        .toString().contains("process the application for help with fees"));
+                    .toString().contains("process the application for help with fees"));
             }
         }
     }
 
     private void validateFailurePBAPayment(String url, String fileName, String journeyType) {
         if (pbaAccountLiberataCheckEnabled) {
-            List<String> errors = utils.getResponseData(url, fileName, journeyType,"").get("errors");
+            List<String> errors = utils.getResponseData(url, fileName, journeyType, "").get("errors");
             assertTrue(errors.get(0).contains("Account information could not be found"));
         }
     }
 
     private void validatePostSuccessForPBAPayment(String url, String fileName, String journeyType)
-            throws InterruptedException {
+        throws InterruptedException {
         Thread.sleep(120000);
         utils.getResponseData(url, fileName, journeyType, dataPath);
     }
 
     private void validateFeeLookUpPayment(String url, String fileName, String journeyType) {
         if (journeyType.equals(consentedDir)) {
-            assertTrue(utils.getResponseData(url, fileName, journeyType,feesPath).get("FeeAmount")
-                    .toString().equalsIgnoreCase("5000"));
+            assertTrue(utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeAmount")
+                .toString().equalsIgnoreCase("5000"));
 
-            assertTrue(utils.getResponseData(url, fileName, journeyType,feesPath).get("FeeCode")
-                    .toString().equalsIgnoreCase("FEE0228"));
+            assertTrue(utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeCode")
+                .toString().equalsIgnoreCase("FEE0228"));
         } else {
-            assertTrue(utils.getResponseData(url, fileName, journeyType,feesPath).get("FeeAmount")
-                    .toString().equalsIgnoreCase("25500"));
+            assertTrue(utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeAmount")
+                .toString().equalsIgnoreCase("25500"));
 
-            assertTrue(utils.getResponseData(url, fileName, journeyType,feesPath).get("FeeCode")
-                    .toString().equalsIgnoreCase("FEE0229"));
+            assertTrue(utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeCode")
+                .toString().equalsIgnoreCase("FEE0229"));
         }
     }
 }

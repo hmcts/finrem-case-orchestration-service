@@ -12,11 +12,11 @@ public class FeeValueTest {
     @Test
     public void shouldCreateFeeValue() throws Exception {
         String json = "{"
-                + " \"FeeDescription\": \"desc\","
-                + " \"FeeVersion\": \"v1\","
-                + " \"FeeCode\": \"code1\","
-                + " \"FeeAmount\": \"1000\""
-                + "}";
+            + " \"FeeDescription\": \"desc\","
+            + " \"FeeVersion\": \"v1\","
+            + " \"FeeCode\": \"code1\","
+            + " \"FeeAmount\": \"1000\""
+            + "}";
         FeeValue feeValue = mapper.readValue(json, FeeValue.class);
         assertThat(feeValue.getFeeDescription(), is("desc"));
         assertThat(feeValue.getFeeVersion(), is("v1"));

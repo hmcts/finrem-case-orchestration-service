@@ -12,13 +12,13 @@ import static org.junit.Assert.assertThat;
 public class TypedCaseDocumentTest {
 
     private final String json = "{\n"
-            + "            \"typeOfDocument\": \"pdf\",\n"
-            + "            \"uploadedDocument\": {\n"
-            + "              \"document_url\": \"http://file1\",\n"
-            + "              \"document_filename\": \"file1.pdf\",\n"
-            + "              \"document_binary_url\": \"http://file1.binary\"\n"
-            + "            }\n"
-            + "        }";
+        + "            \"typeOfDocument\": \"pdf\",\n"
+        + "            \"uploadedDocument\": {\n"
+        + "              \"document_url\": \"http://file1\",\n"
+        + "              \"document_filename\": \"file1.pdf\",\n"
+        + "              \"document_binary_url\": \"http://file1.binary\"\n"
+        + "            }\n"
+        + "        }";
 
     @Test
     public void shouldGetPensionDocumentData() throws IOException {
