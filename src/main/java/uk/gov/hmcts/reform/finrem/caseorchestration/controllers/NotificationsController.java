@@ -243,8 +243,13 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (!isPaperApplication(caseData) && isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Received request to send email for 'Contested Consent Order Not Approved' for Case ID: {}", caseDetails.getId());
-            notificationService.sendContestedConsentOrderNotApprovedEmail(callbackRequest);
+            log.info("Sending email for 'Contested Consent Order Not Approved' to Applicant Solicitor for Case ID: {}", caseDetails.getId());
+            notificationService.sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(callbackRequest);
+        }
+
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            log.info("Sending email for 'Contested Consent Order Not Approved' to Respondent Solicitor for Case ID: {}", caseDetails.getId());
+            notificationService.sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(callbackRequest);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
