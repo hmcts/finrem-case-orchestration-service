@@ -50,12 +50,12 @@ public class CaseOrchestrationSmokeTests {
     @Test
     public void shouldFeeLookUp() throws IOException {
         given().config(config)
-                .body(objectMapper.writeValueAsString(getRequestFromFile("/case.json")))
-                .headers("Content-Type", "application/json")
-                .when()
-                .post(url + feeLookupEndPoint)
-                .then()
-                .statusCode(HttpStatus.OK.value());
+            .body(objectMapper.writeValueAsString(getRequestFromFile("/case.json")))
+            .headers("Content-Type", "application/json")
+            .when()
+            .post(url + feeLookupEndPoint)
+            .then()
+            .statusCode(HttpStatus.OK.value());
     }
 
     private CallbackRequest getRequestFromFile(String fileName) throws IOException {

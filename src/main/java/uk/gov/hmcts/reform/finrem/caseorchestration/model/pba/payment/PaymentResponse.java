@@ -37,15 +37,15 @@ public class PaymentResponse {
 
     public String getPaymentError() {
         return Optional.ofNullable(statusHistories)
-                .map(s -> (s.size() > 0 ? s.get(0).getErrorMessage() : message))
-                .orElse(message);
+            .map(s -> (s.size() > 0 ? s.get(0).getErrorMessage() : message))
+            .orElse(message);
 
     }
 
     public boolean isPaymentSuccess() {
         ImmutableList<String> paymentSuccess = ImmutableList.of("success", "pending");
         return Optional.ofNullable(status)
-                .map(s -> paymentSuccess.contains(s.toLowerCase(ENGLISH)))
-                .orElse(false);
+            .map(s -> paymentSuccess.contains(s.toLowerCase(ENGLISH)))
+            .orElse(false);
     }
 }

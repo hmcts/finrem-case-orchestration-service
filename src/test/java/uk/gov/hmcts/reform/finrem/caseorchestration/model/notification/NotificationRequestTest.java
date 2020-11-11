@@ -11,7 +11,7 @@ public class NotificationRequestTest {
     @Test
     public void shouldReturnNotificationRequestData() {
         underTest = new NotificationRequest("12345", "67890", "D123",
-                "Padmaja", "test@test.com", "nottingham", "consented", "general body");
+            "Padmaja", "test@test.com", "nottingham", "consented", "general body");
         assertEquals("12345", underTest.getCaseReferenceNumber());
         assertEquals("67890", underTest.getSolicitorReferenceNumber());
         assertEquals("D123", underTest.getDivorceCaseNumber());

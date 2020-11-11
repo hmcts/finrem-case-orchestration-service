@@ -20,7 +20,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 public class ValidateHearingService {
 
     public static final String DATE_BETWEEN_6_AND_10_WEEKS =
-            "Date of the Fast Track hearing must be between 6 and 10 weeks.";
+        "Date of the Fast Track hearing must be between 6 and 10 weeks.";
     public static final String DATE_BETWEEN_12_AND_16_WEEKS = "Date of the hearing must be between 12 and 16 weeks.";
     public static final String REQUIRED_FIELD_EMPTY_ERROR = "Issue Date, fast track decision or hearingDate is empty";
 
@@ -45,18 +45,18 @@ public class ValidateHearingService {
         boolean fastTrackApplication = isFastTrackApplication.apply(caseData);
         if (fastTrackApplication) {
             if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(6), issueLocalDate.plusWeeks(10),
-                    hearingLocalDate)) {
+                hearingLocalDate)) {
                 return ImmutableList.of(DATE_BETWEEN_6_AND_10_WEEKS);
             }
         } else if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(12), issueLocalDate.plusWeeks(16),
-                hearingLocalDate)) {
+            hearingLocalDate)) {
             return ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS);
         }
         return ImmutableList.of();
     }
 
     private static boolean isDateInBetweenIncludingEndPoints(final LocalDate min, final LocalDate max,
-                                                            final LocalDate date) {
+                                                             final LocalDate date) {
         return !(date.isBefore(min) || date.isAfter(max));
     }
 }

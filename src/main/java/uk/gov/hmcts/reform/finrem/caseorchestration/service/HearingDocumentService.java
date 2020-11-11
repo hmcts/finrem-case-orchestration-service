@@ -29,7 +29,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.addNonFastTrackFields;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isDocumentPresentInCaseData;
 
 @Service
 @Slf4j
@@ -105,7 +104,7 @@ public class HearingDocumentService {
      * additionally form G populated.</p>
      */
     public boolean alreadyHadFirstHearing(CaseDetails caseDetails) {
-        return isDocumentPresentInCaseData(FORM_C, caseDetails);
+        return caseDetails.getData().containsKey(FORM_C);
     }
 
     private List<BulkPrintDocument> getHearingCaseDocuments(Map<String, Object> caseData) {

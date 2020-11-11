@@ -6,7 +6,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadContestedCaseDocumentsService;
 
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,8 +35,8 @@ public class UploadContestedCaseDocumentControllerTest extends BaseControllerTes
                 .content(resourceContentAsString(CONTESTED_UPLOAD_DOCUMENTS_DATA))
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print());
+            .andExpect(status().isOk())
+            .andDo(print());
         verify(service, times(1)).filterDocumentsToRelevantParty(any());
     }
 }

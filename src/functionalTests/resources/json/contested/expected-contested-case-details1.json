@@ -1,7 +1,7 @@
 {
-  "id" : "12345678",
-  "jurisdiction":"divorce",
-  "state":"created",
+  "id": "12345678",
+  "jurisdiction": "divorce",
+  "state": "created",
   "case_type_id": "FinancialRemedyContested",
   "case_data": {
     "MIAMExemptionsChecklist": [
@@ -50,7 +50,6 @@
       "The case involves an insolvency issue",
       "Not applicable"
     ],
-
     "MIAMDomesticViolenceChecklist": [
       "Evidence that a prospective party has been arrested for a relevant domestic violence offence;",
       "Evidence of a relevant police caution for a domestic violence offence;",
