@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.MoveCollectionService;
 
 import java.io.File;
 import java.util.HashMap;
@@ -43,12 +43,12 @@ public class CaseDataControllerTest extends BaseControllerTest {
     FeatureToggleService featureToggleService;
 
     @MockBean
-    MoveCollectionService moveCollectionService;
+    DocumentHelper documentHelper;
 
     @Test
     public void shouldSuccessfullyMoveCollection() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
-        when(moveCollectionService.moveCollection(anyMap(), anyString(), anyString())).thenReturn(new HashMap<>());
+        when(documentHelper.moveCollection(anyMap(), anyString(), anyString())).thenReturn(new HashMap<>());
 
         requestContent = objectMapper.readTree(
             new File(getClass()

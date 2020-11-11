@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.MoveCollectionService;
 
 import javax.validation.constraints.NotNull;
 
@@ -48,8 +47,6 @@ public class HearingOrderController implements BaseController {
     private final DocumentHelper documentHelper;
     @Autowired
     private final GenericDocumentService genericDocumentService;
-    @Autowired
-    private final MoveCollectionService moveCollectionService;
 
     @PostMapping(path = "/hearing-order/store", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles conversion of hearing order if required and storage")
@@ -63,11 +60,11 @@ public class HearingOrderController implements BaseController {
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         validateCaseData(callback);
-        log.info("storing hearing order");
+        log.info("storing hearing order for case: {}", callback.getCaseDetails().getId());
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         CaseDocument hearingOrderDocument = getLatestHearingOrderAsPdf(caseData, authorisationToken);
         CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(hearingOrderDocument, authorisationToken);
-        caseData = moveCollectionService.moveCollection(caseData, DRAFT_HEARING_ORDER_COLLECTION, DRAFT_HEARING_ORDER_COLLECTION_RO);
+        caseData = documentHelper.moveCollection(caseData, DRAFT_HEARING_ORDER_COLLECTION, DRAFT_HEARING_ORDER_COLLECTION_RO);
         updateCaseDataForLatestDraftHearingOrder(caseData, stampedHearingOrder);
         updateCaseDataForLatestHearingOrderCollection(caseData, stampedHearingOrder);
         return ResponseEntity.ok(
@@ -81,9 +78,7 @@ public class HearingOrderController implements BaseController {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
         }
 
-        log.info("ABX {}", hearingOrderDocument.getDocumentFilename().toLowerCase());
         if (!hearingOrderDocument.getDocumentFilename().toLowerCase().endsWith(".pdf")) {
-            log.info("Converting document to pdf");
             hearingOrderDocument = genericDocumentService.convertDocumentToPdf(hearingOrderDocument, authorisationToken);
         }
 

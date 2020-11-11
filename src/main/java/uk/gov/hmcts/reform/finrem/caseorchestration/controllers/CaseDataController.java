@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.MoveCollectionService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +46,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 public class CaseDataController implements BaseController {
     private final IdamService idamService;
     private final FeatureToggleService featureToggleService;
-    private final MoveCollectionService moveCollectionService;
+    private final DocumentHelper documentHelper;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for consented journey")
@@ -112,7 +112,7 @@ public class CaseDataController implements BaseController {
 
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        caseData = moveCollectionService.moveCollection(caseData, source, destination);
+        caseData = documentHelper.moveCollection(caseData, source, destination);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
