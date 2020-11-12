@@ -13,17 +13,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_URL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
 
 public class RestServiceTest extends BaseServiceTest {
 
@@ -36,19 +37,22 @@ public class RestServiceTest extends BaseServiceTest {
 
     @Test
     public void restApiPostCall() {
-        Map<String, Object> body = new HashMap<>();
-        body.put(TEST_KEY, TEST_VALUE);
+        AssignCaseAccessRequest body = AssignCaseAccessRequest
+            .builder()
+            .caseId(TEST_CASE_ID)
+            .caseTypeId(CASE_TYPE_ID_CONTESTED)
+            .assigneeId(TEST_USER_ID)
+            .build();
 
         restService.restApiPostCall(AUTH_TOKEN, TEST_URL, body);
 
         Mockito.verify(restTemplate, Mockito.times(1)).exchange(uriCaptor.capture(), eq(HttpMethod.POST), authRequestCaptor.capture(), eq(Map.class));
 
         HttpHeaders headers = authRequestCaptor.getValue().getHeaders();
-        Map<String, Object> requestBody = (Map<String, Object>) authRequestCaptor.getValue().getBody();
 
         Assert.assertEquals(uriCaptor.getValue(), URI.create(TEST_URL));
         Assert.assertEquals(headers.get(AUTHORIZATION_HEADER).get(0), AUTH_TOKEN);
         Assert.assertEquals(headers.get("Content-Type").get(0), MediaType.APPLICATION_JSON_VALUE);
-        Assert.assertEquals(requestBody.get(TEST_KEY), TEST_VALUE);
+        Assert.assertEquals(authRequestCaptor.getValue().getBody(), body);
     }
 }

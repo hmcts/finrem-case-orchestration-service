@@ -22,7 +22,7 @@ public class RestService {
 
     private final RestTemplate restTemplate;
 
-    public void restApiPostCall(String userAuthToken, String url, Map<String, Object> body) {
+    public void restApiPostCall(String userAuthToken, String url, Object body) {
         URI uri = buildUri(url);
         log.info("restApiPostCall - uri - {}", uri.toString());
         HttpEntity authRequest = buildAuthRequest(userAuthToken, body);
@@ -39,7 +39,7 @@ public class RestService {
         }
     }
 
-    private HttpEntity<Map> buildAuthRequest(String userAuthToken, Map<String, Object> body) {
+    private HttpEntity<Object> buildAuthRequest(String userAuthToken, Object body) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_HEADER, userAuthToken);
         headers.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
