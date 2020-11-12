@@ -23,12 +23,14 @@ public class RestService {
     private final RestTemplate restTemplate;
 
     public void restApiPostCall(String userAuthToken, String url, Map<String, Object> body) {
+        URI uri = buildUri(url);
+        log.info("restApiPostCall - uri - {}", uri.toString());
         HttpEntity authRequest = buildAuthRequest(userAuthToken, body);
-        log.info("restApiPostCall - authRequest.getBody() - {}", authRequest.getBody());
+        log.info("restApiPostCall - authRequest - {}", authRequest.toString());
 
         try {
             restTemplate.exchange(
-                buildUri(url),
+                uri,
                 HttpMethod.POST,
                 authRequest,
                 Map.class);
