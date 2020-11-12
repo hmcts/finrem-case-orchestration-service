@@ -39,7 +39,7 @@ public class RestService {
         }
     }
 
-    private HttpEntity buildAuthRequest(String userAuthToken, Map<String, Object> body) {
+    private HttpEntity<Map> buildAuthRequest(String userAuthToken, Map<String, Object> body) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_HEADER, userAuthToken);
         headers.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
