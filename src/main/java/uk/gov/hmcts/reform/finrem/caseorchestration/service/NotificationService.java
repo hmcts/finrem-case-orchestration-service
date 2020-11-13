@@ -25,8 +25,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresentedByASolicitor;
@@ -40,7 +38,6 @@ public class NotificationService {
     private final FeatureToggleService featureToggleService;
     private final ObjectMapper objectMapper;
     private final NotificationRequestMapper notificationRequestMapper;
-    private NotificationRequest notificationRequest;
 
     private String recipientEmail = "fr_applicant_sol@sharklasers.com";
 
@@ -82,12 +79,12 @@ public class NotificationService {
     }
 
     public void sendContestedApplicationIssuedEmailToApplicantSolicitor(CallbackRequest callbackRequest) {
-        notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
+        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
         sendContestedApplicationIssuedEmail(notificationRequest);
     }
 
     public void sendContestedApplicationIssuedEmailToRespondentSolicitor(CallbackRequest callbackRequest) {
-        notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
+        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
         sendContestedApplicationIssuedEmail(notificationRequest);
     }
 
