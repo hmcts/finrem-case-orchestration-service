@@ -31,7 +31,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 
@@ -158,18 +157,27 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendPrepareForHearingNotificationEmail() {
-        HashMap<String, Object> caseData = new HashMap<>();
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, "Yes");
-
+    public void sendPrepareForHearingNotificationEmailToApplicantSolicitor() {
         callbackRequest = getContestedCallbackRequest();
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendPrepareForHearingEmail(callbackRequest);
+        notificationService.sendPrepareForHearingEmailApplicant(callbackRequest);
 
         verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
+    }
+
+    @Test
+    public void sendPrepareForHearingNotificationEmailToRespondentSolicitor() {
+        callbackRequest = getContestedCallbackRequest();
+
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendPrepareForHearingEmailRespondent(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
     }
 
     @Test
@@ -178,7 +186,7 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendPrepareForHearingEmail(callbackRequest);
+            notificationService.sendPrepareForHearingEmailApplicant(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
@@ -470,11 +478,11 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendContestOrderNotApprovedNotificationEmail() {
+    public void sendContestOrderNotApprovedNotificationEmailApplicant() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_NOT_APPROVED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestOrderNotApprovedEmail(callbackRequest);
+        notificationService.sendContestOrderNotApprovedEmailApplicant(callbackRequest);
 
         verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
@@ -485,20 +493,41 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendContestOrderNotApprovedEmail(callbackRequest);
+            notificationService.sendContestOrderNotApprovedEmailApplicant(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
     }
 
     @Test
-    public void sendContestedConsentOrderApprovedNotificationEmail() {
+    public void sendContestOrderNotApprovedNotificationEmailRespondent() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_NOT_APPROVED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestOrderNotApprovedEmailRespondent(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
+    }
+
+    @Test
+    public void sendContestedConsentOrderApprovedNotificationEmailToApplicantSolicitor() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_CONSENT_ORDER_APPROVED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedConsentOrderApprovedEmail(callbackRequest);
+        notificationService.sendContestedConsentOrderApprovedEmailToApplicantSolicitor(callbackRequest);
 
         verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
+    }
+
+    @Test
+    public void sendContestedConsentOrderApprovedNotificationEmailToRespondentSolicitor() {
+
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_CONSENT_ORDER_APPROVED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedConsentOrderApprovedEmailToRespondentSolicitor(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
     }
 
     @Test
@@ -609,7 +638,7 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendContestedConsentOrderApprovedEmail(callbackRequest);
+            notificationService.sendContestedConsentOrderApprovedEmailToApplicantSolicitor(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
@@ -622,7 +651,7 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_CONSENT_ORDER_NOT_APPROVED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedConsentOrderNotApprovedEmail(callbackRequest);
+        notificationService.sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(callbackRequest);
 
         verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
@@ -633,12 +662,22 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendContestedConsentOrderNotApprovedEmail(callbackRequest);
+            notificationService.sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
         verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
+    }
+
+    @Test
+    public void sendContestedConsentOrderNotApprovedNotificationEmailToRespondentSolicitor() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_CONSENT_ORDER_NOT_APPROVED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
     }
 
     @Test
