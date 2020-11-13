@@ -200,9 +200,19 @@ public class NotificationService {
         sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
-    public void sendContestedGeneralOrderEmail(CallbackRequest callbackRequest) {
+    public void sendContestedGeneralOrderEmailApplicant(CallbackRequest callbackRequest) {
+        notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
+        sendContestedGeneralOrderEmail(notificationRequest);
+    }
+
+    public void sendContestedGeneralOrderEmailRespondent(CallbackRequest callbackRequest) {
+        notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
+        sendContestedGeneralOrderEmail(notificationRequest);
+    }
+
+    private void sendContestedGeneralOrderEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralOrder());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendContestedGeneralApplicationReferToJudgeEmail(CallbackRequest callbackRequest) {

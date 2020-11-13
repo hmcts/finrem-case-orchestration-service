@@ -622,13 +622,21 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendContestedGeneralOrderNotificationEmail() {
+    public void sendContestedGeneralOrderNotificationEmailApplicant() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_ORDER))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedGeneralOrderEmail(callbackRequest);
+        notificationService.sendContestedGeneralOrderEmailApplicant(callbackRequest);
+    }
 
-        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
+    @Test
+    public void sendContestedGeneralOrderNotificationEmailRespondent() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_ORDER))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestedGeneralOrderEmailRespondent(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
     }
 
     @Test
