@@ -98,9 +98,19 @@ public class NotificationService {
         sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
-    public void sendPrepareForHearingEmail(CallbackRequest callbackRequest) {
+    public void sendPrepareForHearingEmailApplicant(CallbackRequest callbackRequest) {
+        notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
+        sendPrepareForHearingEmail(notificationRequest);
+    }
+
+    public void sendPrepareForHearingEmailRespondent(CallbackRequest callbackRequest) {
+        notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
+        sendPrepareForHearingEmail(notificationRequest);
+    }
+
+    private void sendPrepareForHearingEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getPrepareForHearing());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendPrepareForHearingOrderSentEmailApplicant(CallbackRequest callbackRequest) {
@@ -156,14 +166,30 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendContestedConsentOrderApprovedEmail(CallbackRequest callbackRequest) {
-        URI uri = buildUri(notificationServiceConfiguration.getContestedConsentOrderApproved());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
+    public void sendContestedConsentOrderApprovedEmailToApplicantSolicitor(CallbackRequest callbackRequest) {
+        sendContestedConsentOrderApprovedEmailToSolicitor(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest));
     }
 
-    public void sendContestedConsentOrderNotApprovedEmail(CallbackRequest callbackRequest) {
+    public void sendContestedConsentOrderApprovedEmailToRespondentSolicitor(CallbackRequest callbackRequest) {
+        sendContestedConsentOrderApprovedEmailToSolicitor(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest));
+    }
+
+    private void sendContestedConsentOrderApprovedEmailToSolicitor(NotificationRequest notificationRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getContestedConsentOrderApproved());
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+    public void sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(CallbackRequest callbackRequest) {
+        sendContestedConsentOrderNotApprovedEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest));
+    }
+
+    public void sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(CallbackRequest callbackRequest) {
+        sendContestedConsentOrderNotApprovedEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest));
+    }
+
+    private void sendContestedConsentOrderNotApprovedEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestedConsentOrderNotApproved());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendContestedConsentGeneralOrderEmail(CallbackRequest callbackRequest) {
