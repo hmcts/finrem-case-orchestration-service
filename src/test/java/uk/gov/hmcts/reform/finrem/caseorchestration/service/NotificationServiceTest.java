@@ -12,81 +12,30 @@ import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 
 public class NotificationServiceTest extends BaseServiceTest {
+
     private static final String END_POINT_HWF_SUCCESSFUL = "http://localhost:8086/notify/hwf-successful";
     private static final String END_POINT_ASSIGNED_TO_JUDGE = "http://localhost:8086/notify/assign-to-judge";
     private static final String END_POINT_CONSENT_ORDER_MADE = "http://localhost:8086/notify/consent-order-made";
@@ -114,79 +63,23 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String TEST_USER_EMAIL = "fr_applicant_sol@sharklasers.com";
     private static final String NOTTINGHAM_FRC_EMAIL = "FRCNottingham@justice.gov.uk";
 
-    @Autowired
-    private NotificationService notificationService;
+    @Autowired private NotificationService notificationService;
+    @Autowired private RestTemplate restTemplate;
+
+    @MockBean private FeatureToggleService featureToggleService;
+    @MockBean private NotificationRequestMapper notificationRequestMapper;
+
     private CallbackRequest callbackRequest;
-
-    @Autowired
-    protected RestTemplate restTemplate;
-
-    @MockBean
-    protected FeatureToggleService featureToggleService;
-
     private MockRestServiceServer mockServer;
 
     @Before
     public void setUp() {
         mockServer = MockRestServiceServer.createServer(restTemplate);
         callbackRequest = getConsentedCallbackRequest();
-    }
 
-    @Test
-    public void shouldCreateNotificationRequestForAppSolicitorForConsentedJourney() {
-        NotificationRequest notificationRequest = notificationService.createNotificationRequestForAppSolicitor(callbackRequest);
-
-        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
-        assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
-        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
-        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
-        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
-        assertEquals("consented", notificationRequest.getCaseType());
-    }
-
-    @Test
-    public void shouldCreateNotificationRequestForAppSolicitorForContestedJourney() {
-        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST,
-            SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1");
-
-        NotificationRequest notificationRequest = notificationService.createNotificationRequestForAppSolicitor(callbackRequest);
-
-        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
-        assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
-        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
-        assertEquals(TEST_SOLICITOR_NAME, notificationRequest.getName());
-        assertEquals(TEST_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
-        assertEquals("contested", notificationRequest.getCaseType());
-        assertEquals("swansea", notificationRequest.getSelectedCourt());
-    }
-
-    @Test
-    public void shouldCreateNotificationRequestForRespSolicitorForConsentedJourney() {
-        callbackRequest = getConsentedCallbackRequestForRespSolicitor();
-        NotificationRequest notificationRequest = notificationService.createNotificationRequestForRespSolicitor(callbackRequest);
-
-        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
-        assertEquals(TEST_RESP_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
-        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
-        assertEquals(TEST_RESP_SOLICITOR_NAME, notificationRequest.getName());
-        assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
-        assertEquals("consented", notificationRequest.getCaseType());
-    }
-
-    @Test
-    public void shouldCreateNotificationRequestForRespSolicitorForContestedJourney() {
-        callbackRequest = getContestedCallbackRequestForRespSolicitor(WALES, WALES_FRC_LIST,
-            SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1");
-
-        NotificationRequest notificationRequest = notificationService.createNotificationRequestForRespSolicitor(callbackRequest);
-
-        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
-        assertEquals(TEST_RESP_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
-        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
-        assertEquals(TEST_RESP_SOLICITOR_NAME, notificationRequest.getName());
-        assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
-        assertEquals("contested", notificationRequest.getCaseType());
-        assertEquals("swansea", notificationRequest.getSelectedCourt());
+        NotificationRequest notificationRequest = new NotificationRequest();
+        when(notificationRequestMapper.createNotificationRequestForAppSolicitor(any(CallbackRequest.class))).thenReturn(notificationRequest);
+        when(notificationRequestMapper.createNotificationRequestForRespSolicitor(any(CallbackRequest.class))).thenReturn(notificationRequest);
     }
 
     @Test
@@ -195,6 +88,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentedHWFSuccessfulConfirmationEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -207,6 +102,8 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -215,6 +112,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -229,6 +128,8 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -237,6 +138,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentOrderMadeConfirmationEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -249,6 +152,8 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -256,13 +161,14 @@ public class NotificationServiceTest extends BaseServiceTest {
         HashMap<String, Object> caseData = new HashMap<>();
         caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, "Yes");
 
-        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST,
-            SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1");
+        callbackRequest = getContestedCallbackRequest();
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendPrepareForHearingEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -275,16 +181,20 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
     public void sendPrepareForHearingAfterSentNotificationEmailApplicant() {
-        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST,
-            SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1");
+        callbackRequest = getContestedCallbackRequest();
+
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING_ORDER_SENT))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendPrepareForHearingOrderSentEmailApplicant(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -300,16 +210,6 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendPrepareForHearingAfterSentNotificationEmailRespondent() {
-        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST,
-            SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING_ORDER_SENT))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendPrepareForHearingOrderSentEmailRespondent(callbackRequest);
-    }
-
-    @Test
     public void throwExceptionWhenPrepareForHearingAfterSentNotificationEmailRespondentIsRequested() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING_ORDER_SENT))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -319,6 +219,19 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
+    }
+
+    @Test
+    public void sendPrepareForHearingAfterSentNotificationEmailRespondent() {
+        callbackRequest = getContestedCallbackRequest();
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_PREPARE_FOR_HEARING_ORDER_SENT))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendPrepareForHearingOrderSentEmailRespondent(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
     }
 
     @Test
@@ -327,6 +240,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentOrderNotApprovedEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -339,6 +254,8 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -347,6 +264,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentOrderAvailableEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -359,6 +278,8 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -367,6 +288,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentOrderAvailableCtscEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -379,6 +302,8 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -386,7 +311,10 @@ public class NotificationServiceTest extends BaseServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedApplicationIssuedEmail(callbackRequest);
+
+        notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -395,47 +323,27 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendContestedApplicationIssuedEmail(callbackRequest);
+            notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
     }
 
     @Test
-    public void sendContestOrderApprovedEmail() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_APPROVED))
+    public void sendContestedApplicationIssuedRespondentEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestOrderApprovedEmail(callbackRequest);
+        notificationService.sendContestedApplicationIssuedEmailToRespondentSolicitor(callbackRequest);
     }
 
     @Test
-    public void throwExceptionWhenContestOrderApprovedEmailIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_APPROVED))
+    public void throwExceptionWhenContestedApplicationIssuedRespondentEmailIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
             notificationService.sendContestOrderApprovedEmail(callbackRequest);
-        } catch (Exception ex) {
-            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
-        }
-    }
-
-    @Test
-    public void sendSolicitorToDraftOrderEmailRespondent() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
-                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-                .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest);
-    }
-
-    @Test
-    public void throwExceptionWhenSendSolicitorToDraftOrderEmailRespondentIsRequested() {
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
-                .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
-        try {
-            notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
@@ -459,142 +367,66 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
     }
 
     @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForNottingham() {
-        callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST,
-            NOTTINGHAM, NOTTINGHAM_COURTLIST,  "FR_s_NottinghamList_1");
+    public void sendContestOrderApprovedEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_APPROVED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestOrderApprovedEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
+    }
+
+    @Test
+    public void throwExceptionWhenContestOrderApprovedEmailIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_APPROVED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+        try {
+            notificationService.sendContestOrderApprovedEmail(callbackRequest);
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
+        }
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
+    }
+
+    @Test
+    public void sendSolicitorToDraftOrderEmailRespondent() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+
+        notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
+    }
+
+    @Test
+    public void throwExceptionWhenSendSolicitorToDraftOrderEmailRespondentIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_DRAFT_ORDER))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+        try {
+            notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest);
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
+        }
+    }
+
+    @Test
+    public void sendContestedHwfSuccessfulNotificationEmail() {
+        callbackRequest = getContestedCallbackRequest();
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
 
-    @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForMidlandsEmpty() {
-        callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST, "empty", "empty", "empty");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForBirmingham() {
-        callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST,
-            BIRMINGHAM, BIRMINGHAM_COURTLIST,  "FR_birmingham_hc_list_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForLondon() {
-        callbackRequest = getContestedCallbackRequest(LONDON, LONDON_FRC_LIST, CFC, "empty", "empty");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForLiverpool() {
-        callbackRequest = getContestedCallbackRequest(NORTHWEST, NORTHWEST_FRC_LIST,
-            LIVERPOOL, LIVERPOOL_COURTLIST, "FR_liverpool_hc_list_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForNorthWestEmpty() {
-        callbackRequest = getContestedCallbackRequest(NORTHWEST, NORTHWEST_FRC_LIST, "empty", "empty", "empty");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForManchester() {
-        callbackRequest = getContestedCallbackRequest(NORTHWEST, NORTHWEST_FRC_LIST,
-            MANCHESTER, MANCHESTER_COURTLIST, "FR_manchester_hc_list_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForCleaveLand() {
-        callbackRequest = getContestedCallbackRequest(NORTHEAST, NORTHEAST_FRC_LIST,
-            CLEAVELAND, CLEAVELAND_COURTLIST, "FR_cleaveland_hc_list_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForNwYorkshire() {
-        callbackRequest = getContestedCallbackRequest(NORTHEAST, NORTHEAST_FRC_LIST,
-            NWYORKSHIRE, NWYORKSHIRE_COURTLIST, "FR_nw_yorkshire_hc_list_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForHsYorkshire() {
-        callbackRequest = getContestedCallbackRequest(NORTHEAST, NORTHEAST_FRC_LIST,
-            HSYORKSHIRE, HSYORKSHIRE_COURTLIST, "FR_humber_hc_list_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForKent() {
-        callbackRequest = getContestedCallbackRequest(SOUTHEAST, SOUTHEAST_FRC_LIST,
-            KENT, KENTFRC_COURTLIST, "FR_kent_surrey_hc_list_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForNewPort() {
-        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST,
-            NEWPORT, NEWPORT_COURTLIST, "FR_newport_hc_list_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForSwansea() {
-        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST,
-            SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendContestedHwfSuccessfulNotificationEmailForWalesEmpty() {
-        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST, "empty", "empty", "empty");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -610,97 +442,13 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendNoContestedHwfSuccessfulNotificationEmailForNottingham() {
-        callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST,
-            NOTTINGHAM, NOTTINGHAM_COURTLIST,  "FR_s_NottinghamList_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendNoContestedHwfSuccessfulNotificationEmailForLondon() {
-        callbackRequest = getContestedCallbackRequest(LONDON, LONDON_FRC_LIST, CFC, "empty", "empty");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendNoContestedHwfSuccessfulNotificationEmailForLondonEmpty() {
-        callbackRequest = getContestedCallbackRequest(LONDON, LONDON_FRC_LIST, "empty", "empty", "empty");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendNoContestedHwfSuccessfulNotificationEmailForNoSelectedRegion() {
-        callbackRequest = getContestedCallbackRequest(null, LONDON_FRC_LIST, null, "empty", "empty");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendNoContestedHwfSuccessfulNotificationEmailForLiverPool() {
-        callbackRequest = getContestedCallbackRequest(NORTHWEST, NORTHWEST_FRC_LIST,
-            LIVERPOOL, LIVERPOOL_COURTLIST, "FR_liverpool_hc_list_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendNoContestedHwfSuccessfulNotificationEmailForKent() {
-        callbackRequest = getContestedCallbackRequest(SOUTHEAST, SOUTHEAST_FRC_LIST,
-            KENT, KENTFRC_COURTLIST, "FR_kent_surrey_hc_list_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendNoContestedHwfSuccessfulNotificationEmailForSouthEastEmpty() {
-        callbackRequest = getContestedCallbackRequest(SOUTHEAST, SOUTHEAST_FRC_LIST, "empty", "empty", "empty");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendNoContestedHwfSuccessfulNotificationEmailForCleaveLand() {
-        callbackRequest = getContestedCallbackRequest(NORTHEAST, NORTHEAST_FRC_LIST,
-            CLEAVELAND, CLEAVELAND_COURTLIST, "FR_cleaveland_hc_list_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
-    public void sendNoContestedHwfSuccessfulNotificationEmailForSwansea() {
-        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST,
-            SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1");
-        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_HWF_SUCCESSFUL))
-            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
-            .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
-    }
-
-    @Test
     public void sendGeneralEmailConsented() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_GENERAL_EMAIL_CONSENT))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentGeneralEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -709,6 +457,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedGeneralEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -723,84 +473,14 @@ public class NotificationServiceTest extends BaseServiceTest {
         }
     }
 
-    private CallbackRequest getContestedCallbackRequest(String regionValue, String frcList, String frcValue,
-                                                        String courtList, String courtValue) {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(CONTESTED_SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
-        caseData.put(CONTESTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        caseData.put(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL, TEST_JUDGE_EMAIL);
-        caseData.put(REGION, regionValue);
-        caseData.put(frcList, frcValue);
-        caseData.put(courtList, courtValue);
-        caseData.put(BULK_PRINT_LETTER_ID_RES, NOTTINGHAM);
-        return CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONTESTED)
-                .id(12345L)
-                .data(caseData)
-                .build())
-            .build();
-    }
-
-    private CallbackRequest getContestedCallbackRequestForRespSolicitor(String regionValue, String frcList, String frcValue,
-                                                        String courtList, String courtValue) {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
-        caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
-        caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        caseData.put(GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL, TEST_JUDGE_EMAIL);
-        caseData.put(REGION, regionValue);
-        caseData.put(frcList, frcValue);
-        caseData.put(courtList, courtValue);
-        caseData.put(BULK_PRINT_LETTER_ID_RES, NOTTINGHAM);
-        return CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONTESTED)
-                .id(12345L)
-                .data(caseData)
-                .build())
-            .build();
-    }
-
-    private CallbackRequest getConsentedCallbackRequest() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
-        caseData.put(CONSENTED_SOLICITOR_NAME, TEST_SOLICITOR_NAME);
-        caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
-        caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        return CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONSENTED)
-                .id(12345L)
-                .data(caseData)
-                .build())
-            .build();
-    }
-
-    private CallbackRequest getConsentedCallbackRequestForRespSolicitor() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(RESP_SOLICITOR_EMAIL, TEST_RESP_SOLICITOR_EMAIL);
-        caseData.put(RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_NAME);
-        caseData.put(RESP_SOLICITOR_REFERENCE, TEST_RESP_SOLICITOR_REFERENCE);
-        caseData.put(DIVORCE_CASE_NUMBER, TEST_DIVORCE_CASE_NUMBER);
-        return CallbackRequest.builder()
-            .caseDetails(CaseDetails.builder()
-                .caseTypeId(CASE_TYPE_ID_CONSENTED)
-                .id(12345L)
-                .data(caseData)
-                .build())
-            .build();
-    }
-
     @Test
-    public void sendContestOrderNotApprovedNotificationEmail() {
+    public void sendContestOrderNotApprovedNotificationEmailApplicant() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_NOT_APPROVED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendContestOrderNotApprovedEmail(callbackRequest);
+        notificationService.sendContestOrderNotApprovedEmailApplicant(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -809,10 +489,20 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendContestOrderNotApprovedEmail(callbackRequest);
+            notificationService.sendContestOrderNotApprovedEmailApplicant(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+    }
+
+    @Test
+    public void sendContestOrderNotApprovedNotificationEmailRespondent() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTEST_ORDER_NOT_APPROVED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendContestOrderNotApprovedEmailRespondent(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
     }
 
     @Test
@@ -821,6 +511,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedConsentOrderApprovedEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -830,10 +522,11 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.jsonPath("notificationEmail").value(TEST_JUDGE_EMAIL))
             .andRespond(MockRestResponseCreators.withNoContent());
 
-        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST,
-            SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1");
+        callbackRequest = getContestedCallbackRequest();
 
         notificationService.sendContestedGeneralApplicationReferToJudgeEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -842,21 +535,22 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
 
-        callbackRequest = getContestedCallbackRequest(WALES, WALES_FRC_LIST,
-            SWANSEA, SWANSEA_COURTLIST, "FR_swansea_hc_list_1");
+        callbackRequest = getContestedCallbackRequest();
 
         try {
             notificationService.sendContestedGeneralApplicationReferToJudgeEmail(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
     public void sendContestedGeneralApplicationOutcomeNotificationEmailWhenSendToFRCToggleTrue() throws IOException {
         when(featureToggleService.isSendToFRCEnabled()).thenReturn(true);
-        callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST,
-            NOTTINGHAM, NOTTINGHAM_COURTLIST,  "FR_s_NottinghamList_1");
+
+        callbackRequest = getContestedCallbackRequest();
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -864,14 +558,16 @@ public class NotificationServiceTest extends BaseServiceTest {
                 .value(NOTTINGHAM_FRC_EMAIL))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
     public void sendContestedGeneralApplicationOutcomeNotificationEmailToTestAccountWhenSendToFRCToggleFalse()
         throws IOException {
         when(featureToggleService.isSendToFRCEnabled()).thenReturn(false);
-        callbackRequest = getContestedCallbackRequest(MIDLANDS, MIDLANDS_FRC_LIST,
-            NOTTINGHAM, NOTTINGHAM_COURTLIST,  "FR_s_NottinghamList_1");
+
+        callbackRequest = getContestedCallbackRequest();
 
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -879,6 +575,8 @@ public class NotificationServiceTest extends BaseServiceTest {
                 .value(TEST_USER_EMAIL))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -887,6 +585,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedConsentGeneralOrderEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -895,6 +595,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedGeneralOrderEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -903,6 +605,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendConsentedGeneralOrderEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -915,6 +619,8 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -923,6 +629,8 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
         notificationService.sendContestedConsentOrderNotApprovedEmail(callbackRequest);
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
@@ -935,6 +643,8 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test

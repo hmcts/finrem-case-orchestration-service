@@ -34,7 +34,7 @@ public class ValidateHearingServiceTest {
     @Test
     public void issueDateEmpty() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(FAST_TRACK_DECISION, YES_VALUE), pairOf(HEARING_DATE, new Date()));
+            asList(pairOf(FAST_TRACK_DECISION, YES_VALUE), pairOf(HEARING_DATE, new Date()));
 
         List<String> errors = doTestErrors(pairs);
         assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
@@ -43,7 +43,7 @@ public class ValidateHearingServiceTest {
     @Test
     public void fastTrackDecisionEmpty() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(ISSUE_DATE, new Date()), pairOf(HEARING_DATE, new Date()));
+            asList(pairOf(ISSUE_DATE, new Date()), pairOf(HEARING_DATE, new Date()));
 
         List<String> errors = doTestErrors(pairs);
         assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
@@ -52,7 +52,7 @@ public class ValidateHearingServiceTest {
     @Test
     public void hearingDateEmpty() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(ISSUE_DATE, new Date()), pairOf(FAST_TRACK_DECISION, YES_VALUE));
+            asList(pairOf(ISSUE_DATE, new Date()), pairOf(FAST_TRACK_DECISION, YES_VALUE));
 
         List<String> errors = doTestErrors(pairs);
         assertThat(errors, hasItem(ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY));
@@ -61,8 +61,8 @@ public class ValidateHearingServiceTest {
     @Test
     public void noErrors() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(ISSUE_DATE, new Date()), pairOf(FAST_TRACK_DECISION,YES_VALUE),
-                        pairOf(HEARING_DATE, new Date()));
+            asList(pairOf(ISSUE_DATE, new Date()), pairOf(FAST_TRACK_DECISION, YES_VALUE),
+                pairOf(HEARING_DATE, new Date()));
 
         List<String> errors = doTestErrors(pairs);
         assertThat(errors, hasSize(0));
@@ -71,9 +71,9 @@ public class ValidateHearingServiceTest {
     @Test
     public void fastTrackHearingDatesWarningWithJudiciaryOutcome() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(ISSUE_DATE, LocalDate.now()),
-                        pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)),
-                        pairOf(CASE_ALLOCATED_TO, YES_VALUE));
+            asList(pairOf(ISSUE_DATE, LocalDate.now()),
+                pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)),
+                pairOf(CASE_ALLOCATED_TO, YES_VALUE));
 
         List<String> errors = doTestWarnings(pairs);
         assertThat(errors, hasItem(DATE_BETWEEN_6_AND_10_WEEKS));
@@ -82,8 +82,8 @@ public class ValidateHearingServiceTest {
     @Test
     public void fastTrackHearingDatesWarningWithoutJudiciaryOutcome() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION,YES_VALUE),
-                        pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)));
+            asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION, YES_VALUE),
+                pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)));
 
         List<String> errors = doTestWarnings(pairs);
         assertThat(errors, hasItem(DATE_BETWEEN_6_AND_10_WEEKS));
@@ -92,8 +92,8 @@ public class ValidateHearingServiceTest {
     @Test
     public void fastTrackHearingDatesNoWarning() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION,YES_VALUE),
-                        pairOf(HEARING_DATE, LocalDate.now().plusWeeks(7)));
+            asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION, YES_VALUE),
+                pairOf(HEARING_DATE, LocalDate.now().plusWeeks(7)));
 
         List<String> errors = doTestWarnings(pairs);
         assertThat(errors, hasSize(0));
@@ -102,8 +102,8 @@ public class ValidateHearingServiceTest {
     @Test
     public void nonFastTrackHearingDatesWarning() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION,NO_VALUE),
-                        pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)));
+            asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION, NO_VALUE),
+                pairOf(HEARING_DATE, LocalDate.now().plusWeeks(3)));
 
         List<String> errors = doTestWarnings(pairs);
         assertThat(errors, hasItem(DATE_BETWEEN_12_AND_16_WEEKS));
@@ -112,8 +112,8 @@ public class ValidateHearingServiceTest {
     @Test
     public void nonFastTrackHearingDatesNoWarning() {
         List<ImmutablePair<String, Object>> pairs =
-                asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION,NO_VALUE),
-                        pairOf(HEARING_DATE, LocalDate.now().plusWeeks(13)));
+            asList(pairOf(ISSUE_DATE, LocalDate.now()), pairOf(FAST_TRACK_DECISION, NO_VALUE),
+                pairOf(HEARING_DATE, LocalDate.now().plusWeeks(13)));
 
         List<String> errors = doTestWarnings(pairs);
         assertThat(errors, hasSize(0));
@@ -125,21 +125,21 @@ public class ValidateHearingServiceTest {
 
     private List<String> doTestWarnings(List<ImmutablePair<String, Object>> pairs) {
         ImmutableMap<String, Object> caseData = pairs.stream()
-                .collect(collectingAndThen(
-                        toMap(ImmutablePair::getLeft, ImmutablePair::getRight), ImmutableMap::copyOf)
-                );
+            .collect(collectingAndThen(
+                toMap(ImmutablePair::getLeft, ImmutablePair::getRight), ImmutableMap::copyOf)
+            );
 
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
-        return  service.validateHearingWarnings(caseDetails);
+        return service.validateHearingWarnings(caseDetails);
     }
 
     private List<String> doTestErrors(List<ImmutablePair<String, Object>> pairs) {
         ImmutableMap<String, Object> caseData = pairs.stream()
-                .collect(collectingAndThen(
-                        toMap(ImmutablePair::getLeft, ImmutablePair::getRight), ImmutableMap::copyOf)
-                );
+            .collect(collectingAndThen(
+                toMap(ImmutablePair::getLeft, ImmutablePair::getRight), ImmutableMap::copyOf)
+            );
 
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
-        return  service.validateHearingErrors(caseDetails);
+        return service.validateHearingErrors(caseDetails);
     }
 }

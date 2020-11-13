@@ -16,7 +16,7 @@ public class FeeResponseTest {
     @Before
     public void setUp() throws Exception {
         String json = "{ \"code\" : \"FEE0640\", \"fee_amount\" : 50, \"description\" : \"finrem\", "
-                +  "\"version\" : \"v1\" }";
+            + "\"version\" : \"v1\" }";
         ObjectMapper mapper = new ObjectMapper();
         feeResponse = mapper.readValue(json, FeeResponse.class);
     }

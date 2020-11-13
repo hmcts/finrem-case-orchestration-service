@@ -159,7 +159,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
             "value", ImmutableMap.of(
                 "consentOrder", ImmutableMap.of(
                     "document_binary_url", "test_url_"
-        )))));
+                )))));
 
     }
 }

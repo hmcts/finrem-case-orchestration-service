@@ -2,7 +2,7 @@
   "token": "test_token",
   "event_id": "FR_respondToOrder",
   "case_details": {
-    "id" : "12345678",
+    "id": "12345678",
     "jurisdiction": "divorce",
     "state": "created",
     "case_data": {

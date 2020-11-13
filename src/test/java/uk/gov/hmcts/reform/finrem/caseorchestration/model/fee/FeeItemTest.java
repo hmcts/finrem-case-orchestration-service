@@ -12,13 +12,13 @@ public class FeeItemTest {
     @Test
     public void shouldCreateFeeItem() throws Exception {
         String json = "{ "
-                + " \"value\": {"
-                    + " \"FeeDescription\": \"desc\","
-                    + " \"FeeVersion\": \"v1\","
-                    + " \"FeeCode\": \"code1\","
-                    + " \"FeeAmount\": \"1000\""
-                    + "}"
-                + "}";
+            + " \"value\": {"
+            + " \"FeeDescription\": \"desc\","
+            + " \"FeeVersion\": \"v1\","
+            + " \"FeeCode\": \"code1\","
+            + " \"FeeAmount\": \"1000\""
+            + "}"
+            + "}";
         FeeItem feeItem = mapper.readValue(json, FeeItem.class);
         assertThat(feeItem.getValue().getFeeDescription(), is("desc"));
         assertThat(feeItem.getValue().getFeeVersion(), is("v1"));

@@ -18,10 +18,11 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
@@ -82,26 +83,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 
 public class HearingDocumentServiceTest extends BaseServiceTest {
-    @Captor
-    private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintDocumentsCaptor;
-
-    @Captor
-    private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
-
-    @MockBean
-    private GenericDocumentService genericDocumentService;
-
-    @Autowired
-    private HearingDocumentService hearingDocumentService;
-
-    @MockBean
-    BulkPrintService bulkPrintService;
-
-    @Autowired
-    private DocumentConfiguration documentConfiguration;
-
 
     private static final String DATE_OF_HEARING = "2019-01-01";
+
+    @Autowired private HearingDocumentService hearingDocumentService;
+    @Autowired private DocumentConfiguration documentConfiguration;
+
+    @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean BulkPrintService bulkPrintService;
+
+    @Captor private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintDocumentsCaptor;
+    @Captor private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
 
     @Before
     public void setUp() {
@@ -124,7 +116,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     @Test
     public void generateJudiciaryBasedFastTrackFormC() {
         Map<String, Object> result = hearingDocumentService.generateHearingDocuments(AUTH_TOKEN,
-                makeItJudiciaryFastTrackDecisionCase());
+            makeItJudiciaryFastTrackDecisionCase());
         assertCaseDocument((CaseDocument) result.get(FORM_C));
         verifyAdditionalFastTrackFields();
     }
@@ -401,8 +393,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     private CaseDetails makeItJudiciaryFastTrackDecisionCase() {
         Map<String, Object> caseData =
-                ImmutableMap.of(FAST_TRACK_DECISION, NO_VALUE,
-                        CASE_ALLOCATED_TO, YES_VALUE, HEARING_DATE, DATE_OF_HEARING);
+            ImmutableMap.of(FAST_TRACK_DECISION, NO_VALUE,
+                CASE_ALLOCATED_TO, YES_VALUE, HEARING_DATE, DATE_OF_HEARING);
         return CaseDetails.builder().data(caseData).build();
     }
 
@@ -411,7 +403,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         caseData.put(FAST_TRACK_DECISION, isFastTrackDecision);
         caseData.put(HEARING_DATE, DATE_OF_HEARING);
-        caseData.put(FORM_A_COLLECTION, asList(pensionDocumentData()));
+        caseData.put(FORM_A_COLLECTION, singletonList(pensionDocumentData()));
         caseData.put(FORM_C, caseDocument());
         caseData.put(FORM_G, caseDocument());
 

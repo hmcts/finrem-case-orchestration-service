@@ -80,7 +80,7 @@ public class ConsentOrderApprovedDocumentService {
 
     public List<PensionCollectionData> stampPensionDocuments(List<PensionCollectionData> pensionList, String authToken) {
         return pensionList.stream()
-                .map(data -> stampPensionDocuments(data, authToken)).collect(toList());
+            .map(data -> stampPensionDocuments(data, authToken)).collect(toList());
     }
 
     private PensionCollectionData stampPensionDocuments(PensionCollectionData pensionDocument, String authToken) {
@@ -200,8 +200,8 @@ public class ConsentOrderApprovedDocumentService {
         Map<String, Object> data = caseDetails.getData();
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         List collection = CommonFunction.isConsentedInContestedCase(caseDetails)
-            ? (List)data.get(CONTESTED_CONSENT_ORDER_COLLECTION)
-            : (List)data.get(APPROVED_ORDER_COLLECTION);
+            ? (List) data.get(CONTESTED_CONSENT_ORDER_COLLECTION)
+            : (List) data.get(APPROVED_ORDER_COLLECTION);
 
         List<Map> documentList = ofNullable(collection)
             .map(i -> (List<Map>) i)

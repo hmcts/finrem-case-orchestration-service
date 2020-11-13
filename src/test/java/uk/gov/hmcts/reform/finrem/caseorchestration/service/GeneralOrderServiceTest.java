@@ -86,7 +86,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     public void submitContestedGeneralOrder() throws Exception {
         Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(contestedCaseDetails());
 
-        List<GeneralOrderContestedData> generalOrders = (List<GeneralOrderContestedData>)documentMap.get(GENERAL_ORDER_COLLECTION_CONTESTED);
+        List<GeneralOrderContestedData> generalOrders = (List<GeneralOrderContestedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONTESTED);
         assertThat(generalOrders, hasSize(2));
         assertThat(generalOrders.get(0).getId(), is("1234"));
         assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentUrl(), is("http://dm-store/lhjbyuivu87y989hijbb"));
@@ -104,7 +104,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
         assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant"));
 
-        CaseDocument latestGeneralOrder = (CaseDocument)documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
+        CaseDocument latestGeneralOrder = (CaseDocument) documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
         assertThat(latestGeneralOrder.getDocumentUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
         assertThat(latestGeneralOrder.getDocumentFilename(),
@@ -127,7 +127,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     public void submitConsentedInContestedGeneralOrder() throws Exception {
         Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(consentedInContestedCaseDetails());
 
-        List<GeneralOrderContestedData> generalOrders = (List<GeneralOrderContestedData>)documentMap.get(
+        List<GeneralOrderContestedData> generalOrders = (List<GeneralOrderContestedData>) documentMap.get(
             GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED);
         assertThat(generalOrders, hasSize(2));
         assertThat(generalOrders.get(0).getId(), is("1234"));
@@ -146,7 +146,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
         assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant"));
 
-        CaseDocument latestGeneralOrder = (CaseDocument)documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
+        CaseDocument latestGeneralOrder = (CaseDocument) documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
         assertThat(latestGeneralOrder.getDocumentUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
         assertThat(latestGeneralOrder.getDocumentFilename(),
@@ -158,7 +158,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
     @Test
     public void submitConsentedGeneralOrder() throws Exception {
         Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(consentedCaseDetails());
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>)documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
+        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
         assertThat(generalOrders, hasSize(2));
         assertThat(generalOrders.get(0).getId(), is("1234"));
         assertThat(generalOrders.get(0).getGeneralOrder().getGeneralOrder().getDocumentUrl(),
@@ -177,7 +177,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
         assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant"));
 
-        CaseDocument latestGeneralOrder = (CaseDocument)documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
+        CaseDocument latestGeneralOrder = (CaseDocument) documentMap.get(GENERAL_ORDER_LATEST_DOCUMENT);
         assertThat(latestGeneralOrder.getDocumentUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
         assertThat(latestGeneralOrder.getDocumentFilename(),
@@ -191,7 +191,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         CaseDetails details = consentedCaseDetails();
         details.getData().put(GENERAL_ORDER_ADDRESS_TO, "applicant");
         Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>)documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
+        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
         assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant"));
     }
 
@@ -200,7 +200,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         CaseDetails details = consentedCaseDetails();
         details.getData().put(GENERAL_ORDER_ADDRESS_TO, "applicantSolicitor");
         Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>)documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
+        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
         assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Applicant Solicitor"));
     }
 
@@ -209,7 +209,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         CaseDetails details = consentedCaseDetails();
         details.getData().put(GENERAL_ORDER_ADDRESS_TO, "respondentSolicitor");
         Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>)documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
+        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
         assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is("Respondent Solicitor"));
     }
 
@@ -218,7 +218,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         CaseDetails details = consentedCaseDetails();
         details.getData().put(GENERAL_ORDER_ADDRESS_TO, "invalid");
         Map<String, Object> documentMap = generalOrderService.populateGeneralOrderCollection(details);
-        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>)documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
+        List<GeneralOrderConsentedData> generalOrders = (List<GeneralOrderConsentedData>) documentMap.get(GENERAL_ORDER_COLLECTION_CONSENTED);
         assertThat(generalOrders.get(1).getGeneralOrder().getAddressTo(), is(""));
     }
 
@@ -287,7 +287,7 @@ public class GeneralOrderServiceTest extends BaseServiceTest {
         assertThat(data.get("DivorceCaseNumber"), is("DD98D76543"));
         assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
         assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
-        assertThat(data.get("GeneralOrderCourt"),is("Nottingham County Court and Family Court"));
+        assertThat(data.get("GeneralOrderCourt"), is("Nottingham County Court and Family Court"));
         assertThat(data.get("GeneralOrderJudgeDetails"), is("Her Honour Judge Contested"));
         assertThat(data.get("GeneralOrderRecitals"), is("Contested Recitals"));
         assertThat(data.get("GeneralOrderDate"), is("01/06/2020"));

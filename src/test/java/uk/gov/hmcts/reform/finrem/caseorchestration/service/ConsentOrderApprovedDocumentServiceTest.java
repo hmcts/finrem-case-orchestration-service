@@ -82,14 +82,20 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @MockBean
     private ConsentOrderPrintService consentOrderPrintService;
 
-    @Value("${document.bulkPrintTemplate}") private String documentBulkPrintTemplate;
-    @Value("${document.bulkPrintFileName}") private String documentBulkPrintFileName;
+    @Value("${document.bulkPrintTemplate}")
+    private String documentBulkPrintTemplate;
+    @Value("${document.bulkPrintFileName}")
+    private String documentBulkPrintFileName;
 
-    @Value("${document.approvedConsentOrderTemplate}") private String documentApprovedConsentOrderTemplate;
-    @Value("${document.approvedConsentOrderFileName}") private String documentApprovedConsentOrderFileName;
+    @Value("${document.approvedConsentOrderTemplate}")
+    private String documentApprovedConsentOrderTemplate;
+    @Value("${document.approvedConsentOrderFileName}")
+    private String documentApprovedConsentOrderFileName;
 
-    @Value("${document.approvedConsentOrderNotificationTemplate}") private String documentApprovedConsentOrderNotificationTemplate;
-    @Value("${document.approvedConsentOrderNotificationFileName}") private String documentApprovedConsentOrderNotificationFileName;
+    @Value("${document.approvedConsentOrderNotificationTemplate}")
+    private String documentApprovedConsentOrderNotificationTemplate;
+    @Value("${document.approvedConsentOrderNotificationFileName}")
+    private String documentApprovedConsentOrderNotificationFileName;
 
     private CaseDetails caseDetails;
     public static final String ORDER_LETTER_URL = "orderLetterUrl";
@@ -154,7 +160,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         caseDetails.getData().put(APPLICANT_REPRESENTED, NO_VALUE);
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
-                consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN);
+            consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(generatedApprovedConsentOrderNotificationLetter, CONSENT_ORDER_APPROVED_COVER_LETTER_URL);
     }
@@ -177,7 +183,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         caseData.put(CONSENTED_SOLICITOR_ADDRESS, solicitorAddress);
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
-                consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN);
+            consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(generatedApprovedConsentOrderNotificationLetter, CONSENT_ORDER_APPROVED_COVER_LETTER_URL);
     }

@@ -46,62 +46,62 @@ public class DocumentValidationControllerTest extends BaseControllerTest {
     public void shouldReturnSuccessWhenFileUploadCheck() throws Exception {
         doRequestSetUp();
         DocumentValidationResponse response = builder()
-                .mimeType("application/pdf").build();
+            .mimeType("application/pdf").build();
         when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
-                .thenReturn(response);
+            .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
-                .post("/case-orchestration/field/consentOrder/file-upload-check")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors").doesNotExist());
+            .post("/case-orchestration/field/consentOrder/file-upload-check")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors").doesNotExist());
     }
 
     @Test
     public void shouldReturnErrorsWhenFileUploadCheckIsFailed() throws Exception {
         doRequestSetUp();
         DocumentValidationResponse response = builder()
-                .mimeType("application/json")
-                .errors(singletonList("Invalid File Type"))
-                .build();
+            .mimeType("application/json")
+            .errors(singletonList("Invalid File Type"))
+            .build();
         when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
-                .thenReturn(response);
+            .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
-                .post("/case-orchestration/field/consentOrder/file-upload-check")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors").exists());
+            .post("/case-orchestration/field/consentOrder/file-upload-check")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors").exists());
     }
 
     @Test
     public void shouldReturnSuccessWhenFileUploadCheckForInvalidField() throws Exception {
         doRequestSetUp();
         DocumentValidationResponse response = builder()
-                .mimeType("application/pdf")
-                .build();
+            .mimeType("application/pdf")
+            .build();
         when(documentValidationService.validateDocument(any(CallbackRequest.class), anyString(), anyString()))
-                .thenReturn(response);
+            .thenReturn(response);
         this.mockMvc.perform(MockMvcRequestBuilders
-                .post("/case-orchestration/field/yyyyy/file-upload-check")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.errors").doesNotExist());
+            .post("/case-orchestration/field/yyyyy/file-upload-check")
+            .contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors").doesNotExist());
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource(AMEND_CONSENT_ORDER_BY_SOL_JSON).toURI()));
+            .getResource(AMEND_CONSENT_ORDER_BY_SOL_JSON).toURI()));
     }
 }

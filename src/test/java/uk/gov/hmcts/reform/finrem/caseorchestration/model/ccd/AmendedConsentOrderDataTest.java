@@ -9,16 +9,16 @@ import static org.junit.Assert.assertThat;
 
 public class AmendedConsentOrderDataTest {
     private String json = "{\n"
-            + "          \"id\": \"1\",\n"
-            + "          \"value\": {\n"
-            + "            \"amendedConsentOrder\": {\n"
-            + "              \"document_url\": \"http://doc1\",\n"
-            + "              \"document_filename\": \"amendedConsentOrder.docx\",\n"
-            + "              \"document_binary_url\": \"http://doc1/binary\"\n"
-            + "            },\n"
-            + "            \"amendedConsentOrderDate\": \"2018-10-10\"\n"
-            + "          }\n"
-            + "        }";
+        + "          \"id\": \"1\",\n"
+        + "          \"value\": {\n"
+        + "            \"amendedConsentOrder\": {\n"
+        + "              \"document_url\": \"http://doc1\",\n"
+        + "              \"document_filename\": \"amendedConsentOrder.docx\",\n"
+        + "              \"document_binary_url\": \"http://doc1/binary\"\n"
+        + "            },\n"
+        + "            \"amendedConsentOrderDate\": \"2018-10-10\"\n"
+        + "          }\n"
+        + "        }";
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
