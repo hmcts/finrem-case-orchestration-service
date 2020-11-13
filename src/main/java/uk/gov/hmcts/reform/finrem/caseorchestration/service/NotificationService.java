@@ -38,7 +38,6 @@ public class NotificationService {
     private final FeatureToggleService featureToggleService;
     private final ObjectMapper objectMapper;
     private final NotificationRequestMapper notificationRequestMapper;
-    private NotificationRequest notificationRequest;
 
     private String recipientEmail = "fr_applicant_sol@sharklasers.com";
 
@@ -80,13 +79,11 @@ public class NotificationService {
     }
 
     public void sendContestedApplicationIssuedEmailToApplicantSolicitor(CallbackRequest callbackRequest) {
-        notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
-        sendContestedApplicationIssuedEmail(notificationRequest);
+        sendContestedApplicationIssuedEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest));
     }
 
     public void sendContestedApplicationIssuedEmailToRespondentSolicitor(CallbackRequest callbackRequest) {
-        notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
-        sendContestedApplicationIssuedEmail(notificationRequest);
+        sendContestedApplicationIssuedEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest));
     }
 
     private void sendContestedApplicationIssuedEmail(NotificationRequest notificationRequest) {
@@ -100,13 +97,11 @@ public class NotificationService {
     }
 
     public void sendPrepareForHearingEmailApplicant(CallbackRequest callbackRequest) {
-        notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
-        sendPrepareForHearingEmail(notificationRequest);
+        sendPrepareForHearingEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest));
     }
 
     public void sendPrepareForHearingEmailRespondent(CallbackRequest callbackRequest) {
-        notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
-        sendPrepareForHearingEmail(notificationRequest);
+        sendPrepareForHearingEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest));
     }
 
     private void sendPrepareForHearingEmail(NotificationRequest notificationRequest) {
@@ -120,7 +115,6 @@ public class NotificationService {
 
     public void sendPrepareForHearingOrderSentEmailRespondent(CallbackRequest callbackRequest) {
         sendPrepareForHearingOrderSentEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest));
-
     }
 
     private void sendPrepareForHearingOrderSentEmail(NotificationRequest notificationRequest) {
@@ -205,13 +199,11 @@ public class NotificationService {
     }
 
     public void sendContestedGeneralOrderEmailApplicant(CallbackRequest callbackRequest) {
-        notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
-        sendContestedGeneralOrderEmail(notificationRequest);
+        sendContestedGeneralOrderEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest));
     }
 
     public void sendContestedGeneralOrderEmailRespondent(CallbackRequest callbackRequest) {
-        notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
-        sendContestedGeneralOrderEmail(notificationRequest);
+        sendContestedGeneralOrderEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest));
     }
 
     private void sendContestedGeneralOrderEmail(NotificationRequest notificationRequest) {
@@ -238,7 +230,6 @@ public class NotificationService {
 
         NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
         notificationRequest.setNotificationEmail(recipientEmail);
-
         URI uri = buildUri(notificationServiceConfiguration.getContestedGeneralApplicationOutcome());
         sendNotificationEmail(notificationRequest, uri);
     }

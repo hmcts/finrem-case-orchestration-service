@@ -52,7 +52,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
 public class NotificationsControllerTest extends BaseControllerTest {
-
     //URLs
     private static final String HWF_SUCCESSFUL_CALLBACK_URL = "/case-orchestration/notify/hwf-successful";
     private static final String ASSIGN_TO_JUDGE_CALLBACK_URL = "/case-orchestration/notify/assign-to-judge";
