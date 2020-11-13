@@ -48,7 +48,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
 
     private void setUpCaseDetails(String fileName) throws Exception {
         try (InputStream resourceAsStream =
-                     getClass().getResourceAsStream(PATH + fileName)) {
+                 getClass().getResourceAsStream(PATH + fileName)) {
             callbackRequest = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }
@@ -57,11 +57,11 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     public void shouldSuccessWhenFileTypeValidationForConsentOrderField() throws Exception {
         setUpCaseDetails(DRAFT_CONSENT_ORDER_JSON);
         DocumentValidationResponse documentValidationResponse = builder()
-                .mimeType(APPLICATION_PDF)
-                .build();
+            .mimeType(APPLICATION_PDF)
+            .build();
 
         when(documentClient.checkUploadedFileType(AUTH_TOKEN, "http://file1.binary"))
-                .thenReturn(documentValidationResponse);
+            .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             CONSENT_ORDER, AUTH_TOKEN);
         assertThat(response.getMimeType(), is(APPLICATION_PDF));
@@ -71,11 +71,11 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     public void shouldThrowErrorWhenFileTypeValidationForConsentOrderField() throws Exception {
         setUpCaseDetails(DRAFT_CONSENT_ORDER_JSON);
         DocumentValidationResponse documentValidationResponse = builder()
-                .errors(singletonList("Invalid file type"))
-                .build();
+            .errors(singletonList("Invalid file type"))
+            .build();
 
         when(documentClient.checkUploadedFileType(AUTH_TOKEN, "http://file1.binary"))
-                .thenReturn(documentValidationResponse);
+            .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             CONSENT_ORDER, AUTH_TOKEN);
         assertThat(response.getErrors(), hasItem("Invalid file type"));
@@ -87,8 +87,8 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         DocumentValidationResponse documentValidationResponse = builder().mimeType(APPLICATION_PDF).build();
 
         when(documentClient.checkUploadedFileType(AUTH_TOKEN,
-                "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"))
-                .thenReturn(documentValidationResponse);
+            "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"))
+            .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             AMENDED_CONSENT_ORDER_COLLECTION, AUTH_TOKEN);
         assertThat(response.getMimeType(), is(APPLICATION_PDF));
@@ -98,12 +98,12 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     public void shouldThrowErrorWhenFileTypeValidationForAmendConsentOrderCollection() throws Exception {
         setUpCaseDetails("amend-consent-order-by-caseworker.json");
         DocumentValidationResponse documentValidationResponse = builder()
-                .errors(singletonList("Invalid file type"))
-                .build();
+            .errors(singletonList("Invalid file type"))
+            .build();
 
         when(documentClient.checkUploadedFileType(AUTH_TOKEN,
-                "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"))
-                .thenReturn(documentValidationResponse);
+            "http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"))
+            .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             AMENDED_CONSENT_ORDER_COLLECTION, AUTH_TOKEN);
         assertThat(response.getErrors(), hasItem("Invalid file type"));
@@ -115,11 +115,11 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         DocumentValidationResponse documentValidationResponse = builder().mimeType(APPLICATION_PDF).build();
 
         when(documentClient.checkUploadedFileType(AUTH_TOKEN,
-                "http://file1.binary"))
-                .thenReturn(documentValidationResponse);
+            "http://file1.binary"))
+            .thenReturn(documentValidationResponse);
         when(documentClient.checkUploadedFileType(AUTH_TOKEN,
-                "http://file2.binary"))
-                .thenReturn(documentValidationResponse);
+            "http://file2.binary"))
+            .thenReturn(documentValidationResponse);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             PENSION_DOCS_COLLECTION, AUTH_TOKEN);
         assertThat(response.getErrors(), nullValue());
@@ -130,14 +130,14 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         setUpCaseDetails(VALIDATE_PENSION_COLLECTION_JSON);
         DocumentValidationResponse documentValidationResponse1 = builder().mimeType(APPLICATION_PDF).build();
         DocumentValidationResponse documentValidationResponse2 = builder()
-                .errors(singletonList("Invalid file type")).build();
+            .errors(singletonList("Invalid file type")).build();
 
         when(documentClient.checkUploadedFileType(AUTH_TOKEN,
-                "http://file1.binary"))
-                .thenReturn(documentValidationResponse1);
+            "http://file1.binary"))
+            .thenReturn(documentValidationResponse1);
         when(documentClient.checkUploadedFileType(AUTH_TOKEN,
-                "http://file2.binary"))
-                .thenReturn(documentValidationResponse2);
+            "http://file2.binary"))
+            .thenReturn(documentValidationResponse2);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             PENSION_DOCS_COLLECTION, AUTH_TOKEN);
         assertThat(response.getErrors(), hasItem("Invalid file type"));
@@ -157,8 +157,8 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
         setUpCaseDetails(RESPOND_TO_ORDER_SOL_JSON);
         DocumentValidationResponse documentValidationResponse = builder().mimeType(APPLICATION_PDF).build();
         when(documentClient.checkUploadedFileType(AUTH_TOKEN,
-                "http://doc2/binary"))
-                .thenReturn(documentValidationResponse);
+            "http://doc2/binary"))
+            .thenReturn(documentValidationResponse);
 
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
             RESPOND_TO_ORDER_DOCUMENTS, AUTH_TOKEN);
@@ -177,7 +177,7 @@ public class DocumentValidationServiceTest extends BaseServiceTest {
     public void shouldReturnErrorWhenFileTypeValidationWithInvalidField() throws Exception {
         setUpCaseDetails(RESPOND_TO_ORDER_SOL_JSON);
         DocumentValidationResponse response = documentValidationService.validateDocument(callbackRequest,
-                "ssss", AUTH_TOKEN);
+            "ssss", AUTH_TOKEN);
         assertThat(response.getErrors(), nullValue());
     }
 

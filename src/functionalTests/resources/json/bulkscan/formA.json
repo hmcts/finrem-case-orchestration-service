@@ -188,64 +188,241 @@
     }
   ],
   "ocr_data_fields": [
-    { "name": "divorceCaseNumber", "value": "DD12D12345" },
-    { "name": "HWFNumber", "value": "123456" },
-    { "name": "ApplicantFullName", "value": "Peter Griffin" },
-    { "name": "RespondentFullName", "value": "Louis Griffin" },
-    { "name": "ProvisionMadeFor", "value": "in connection with matrimonial or civil partnership proceedings" },
-    { "name": "natureOfApplication", "value": "Periodical Payment Order, Pension Attachment Order" },
-    { "name": "ApplicantIntendsTo", "value": "ApplyToCourtFor" },
-    { "name": "DischargePeriodicalPaymentSubstituteFor", "value": "a lump sum order,a pension sharing order" },
-    { "name": "ApplyingForConsentOrder", "value": "Yes" },
-    { "name": "divorceStageReached", "value": "Decree Nisi" },
-    { "name": "ApplicantRepresented", "value": "I am not represented by a solicitor in these proceedings" },
-    { "name": "ApplicantSolicitorName", "value": "Saul Call" },
-    { "name": "ApplicantSolicitorFirm", "value": "Better Divorce Ltd" },
-    { "name": "ApplicantSolicitorPhone", "value": "0712456543" },
-    { "name": "ApplicantSolicitorDXnumber", "value": "DX123" },
-    { "name": "ApplicantSolicitorReference", "value": "SOL-RED" },
-    { "name": "ApplicantPBANumber", "value": "PBA123456" },
-    { "name": "ApplicantSolicitorEmail", "value": "test@example.com" },
-    { "name": "ApplicantAddressLine1", "value": "Road" },
-    { "name": "ApplicantAddressLine2", "value": "Road 2" },
-    { "name": "ApplicantAddressTown", "value": "Manchester" },
-    { "name": "ApplicantAddressCounty", "value": "There" },
-    { "name": "ApplicantAddressPostcode", "value": "SW9 9SD" },
-    { "name": "ApplicantAddressCountry", "value": "UK" },
-    { "name": "ApplicantPhone", "value": "0712345654" },
-    { "name": "ApplicantEmail", "value": "applicant@divorcity.com" },
-    { "name": "RespondentAddressLine1", "value": "Avenue" },
-    { "name": "RespondentAddressLine2", "value": "line2" },
-    { "name": "RespondentAddressTown", "value": "Bristol" },
-    { "name": "RespondentAddressCounty", "value": "Here" },
-    { "name": "RespondentAddressPostcode", "value": "SW1 9SD" },
-    { "name": "RespondentAddressCountry", "value": "UK" },
-    { "name": "RespondentSolicitorName", "value": "John Adam Smith" },
-    { "name": "RespondentSolicitorFirm", "value": "Solicitor company" },
-    { "name": "AddressofProperties", "value": "255 Westminster Avenue" },
-    { "name": "MortgageDetails", "value": "We split the mortgage for our house" },
-    { "name": "OrderForChildren", "value": "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children" },
-    { "name": "OrderForChildrenNoAgreement", "value": "to meet expenses incurred by a child in being educated or training for work" },
-    { "name": "ChildSupportAgencyCalculationMade", "value": "Yes" },
-    { "name": "ChildSupportAgencyCalculationReason", "value": "Decided based on some random calculations we made" },
-    { "name": "AuthorisationName", "value": "Saul B. Kol" },
-    { "name": "AuthorisationFirm", "value": "Better Divorce Ltd" },
-    { "name": "AuthorisationSolicitorAddress", "value": "1 Single Lane, Liverpool, LE5 AV2" },
-    { "name": "AuthorisationSigned", "value": "Yes" },
-    { "name": "AuthorisationSignedBy", "value": "Applicant's solicitor" },
-    { "name": "AuthorisationDate", "value": "12/03/2020" },
-    { "name": "AuthorisationSolicitorPosition", "value": "I'm the CEO" },
-    { "name": "NameOfChild1", "value": "Bob" },
-    { "name": "RelationshipToApplicantChild1", "value": "Father" },
-    { "name": "RelationshipToRespondentChild1", "value": "Mother" },
-    { "name": "CountryOfResidenceChild1", "value": "UK" },
-    { "name": "DateOfBirthChild1", "value": "03/06/2011" },
-    { "name": "GenderChild1", "value": "Male" },
-    { "name": "NameOfChild2", "value": "Tommy" },
-    { "name": "RelationshipToApplicantChild2", "value": "Mother" },
-    { "name": "RelationshipToRespondentChild2", "value": "" },
-    { "name": "CountryOfResidenceChild2", "value": "FR" },
-    { "name": "DateOfBirthChild2", "value": "04/06/2010" },
-    { "name": "GenderChild2", "value": "Female" }
+    {
+      "name": "divorceCaseNumber",
+      "value": "DD12D12345"
+    },
+    {
+      "name": "HWFNumber",
+      "value": "123456"
+    },
+    {
+      "name": "ApplicantFullName",
+      "value": "Peter Griffin"
+    },
+    {
+      "name": "RespondentFullName",
+      "value": "Louis Griffin"
+    },
+    {
+      "name": "ProvisionMadeFor",
+      "value": "in connection with matrimonial or civil partnership proceedings"
+    },
+    {
+      "name": "natureOfApplication",
+      "value": "Periodical Payment Order, Pension Attachment Order"
+    },
+    {
+      "name": "ApplicantIntendsTo",
+      "value": "ApplyToCourtFor"
+    },
+    {
+      "name": "DischargePeriodicalPaymentSubstituteFor",
+      "value": "a lump sum order,a pension sharing order"
+    },
+    {
+      "name": "ApplyingForConsentOrder",
+      "value": "Yes"
+    },
+    {
+      "name": "divorceStageReached",
+      "value": "Decree Nisi"
+    },
+    {
+      "name": "ApplicantRepresented",
+      "value": "I am not represented by a solicitor in these proceedings"
+    },
+    {
+      "name": "ApplicantSolicitorName",
+      "value": "Saul Call"
+    },
+    {
+      "name": "ApplicantSolicitorFirm",
+      "value": "Better Divorce Ltd"
+    },
+    {
+      "name": "ApplicantSolicitorPhone",
+      "value": "0712456543"
+    },
+    {
+      "name": "ApplicantSolicitorDXnumber",
+      "value": "DX123"
+    },
+    {
+      "name": "ApplicantSolicitorReference",
+      "value": "SOL-RED"
+    },
+    {
+      "name": "ApplicantPBANumber",
+      "value": "PBA123456"
+    },
+    {
+      "name": "ApplicantSolicitorEmail",
+      "value": "test@example.com"
+    },
+    {
+      "name": "ApplicantAddressLine1",
+      "value": "Road"
+    },
+    {
+      "name": "ApplicantAddressLine2",
+      "value": "Road 2"
+    },
+    {
+      "name": "ApplicantAddressTown",
+      "value": "Manchester"
+    },
+    {
+      "name": "ApplicantAddressCounty",
+      "value": "There"
+    },
+    {
+      "name": "ApplicantAddressPostcode",
+      "value": "SW9 9SD"
+    },
+    {
+      "name": "ApplicantAddressCountry",
+      "value": "UK"
+    },
+    {
+      "name": "ApplicantPhone",
+      "value": "0712345654"
+    },
+    {
+      "name": "ApplicantEmail",
+      "value": "applicant@divorcity.com"
+    },
+    {
+      "name": "RespondentAddressLine1",
+      "value": "Avenue"
+    },
+    {
+      "name": "RespondentAddressLine2",
+      "value": "line2"
+    },
+    {
+      "name": "RespondentAddressTown",
+      "value": "Bristol"
+    },
+    {
+      "name": "RespondentAddressCounty",
+      "value": "Here"
+    },
+    {
+      "name": "RespondentAddressPostcode",
+      "value": "SW1 9SD"
+    },
+    {
+      "name": "RespondentAddressCountry",
+      "value": "UK"
+    },
+    {
+      "name": "RespondentSolicitorName",
+      "value": "John Adam Smith"
+    },
+    {
+      "name": "RespondentSolicitorFirm",
+      "value": "Solicitor company"
+    },
+    {
+      "name": "AddressofProperties",
+      "value": "255 Westminster Avenue"
+    },
+    {
+      "name": "MortgageDetails",
+      "value": "We split the mortgage for our house"
+    },
+    {
+      "name": "OrderForChildren",
+      "value": "there is a written agreement made before 5 April 1993 about maintenance for the benefit of children"
+    },
+    {
+      "name": "OrderForChildrenNoAgreement",
+      "value": "to meet expenses incurred by a child in being educated or training for work"
+    },
+    {
+      "name": "ChildSupportAgencyCalculationMade",
+      "value": "Yes"
+    },
+    {
+      "name": "ChildSupportAgencyCalculationReason",
+      "value": "Decided based on some random calculations we made"
+    },
+    {
+      "name": "AuthorisationName",
+      "value": "Saul B. Kol"
+    },
+    {
+      "name": "AuthorisationFirm",
+      "value": "Better Divorce Ltd"
+    },
+    {
+      "name": "AuthorisationSolicitorAddress",
+      "value": "1 Single Lane, Liverpool, LE5 AV2"
+    },
+    {
+      "name": "AuthorisationSigned",
+      "value": "Yes"
+    },
+    {
+      "name": "AuthorisationSignedBy",
+      "value": "Applicant's solicitor"
+    },
+    {
+      "name": "AuthorisationDate",
+      "value": "12/03/2020"
+    },
+    {
+      "name": "AuthorisationSolicitorPosition",
+      "value": "I'm the CEO"
+    },
+    {
+      "name": "NameOfChild1",
+      "value": "Bob"
+    },
+    {
+      "name": "RelationshipToApplicantChild1",
+      "value": "Father"
+    },
+    {
+      "name": "RelationshipToRespondentChild1",
+      "value": "Mother"
+    },
+    {
+      "name": "CountryOfResidenceChild1",
+      "value": "UK"
+    },
+    {
+      "name": "DateOfBirthChild1",
+      "value": "03/06/2011"
+    },
+    {
+      "name": "GenderChild1",
+      "value": "Male"
+    },
+    {
+      "name": "NameOfChild2",
+      "value": "Tommy"
+    },
+    {
+      "name": "RelationshipToApplicantChild2",
+      "value": "Mother"
+    },
+    {
+      "name": "RelationshipToRespondentChild2",
+      "value": ""
+    },
+    {
+      "name": "CountryOfResidenceChild2",
+      "value": "FR"
+    },
+    {
+      "name": "DateOfBirthChild2",
+      "value": "04/06/2010"
+    },
+    {
+      "name": "GenderChild2",
+      "value": "Female"
+    }
   ]
 }

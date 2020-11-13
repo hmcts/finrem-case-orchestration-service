@@ -17,7 +17,7 @@ public class PaymentConfirmationServiceTest extends BaseServiceTest {
         String confirmation = paymentConfirmationService.consentedPbaPaymentConfirmation();
 
         assertThat(confirmation, containsString("You will now be directed to the case file where you can "
-                + "monitor the progress of your application via the ‘history’ tab. Next:"));
+            + "monitor the progress of your application via the ‘history’ tab. Next:"));
         assertThat(confirmation, containsString("* Your application will be issued by Court staff and referred to a Judge"));
         assertThat(confirmation, containsString("* The Judge will consider your application and make an order"));
     }
@@ -36,9 +36,9 @@ public class PaymentConfirmationServiceTest extends BaseServiceTest {
         String confirmation = paymentConfirmationService.contestedPbaPaymentConfirmation();
 
         assertThat(confirmation, containsString("You will receive a notification when the Notice of First "
-                + "Appointment is available. If there are any issues, the Court will contact you."));
+            + "Appointment is available. If there are any issues, the Court will contact you."));
         assertThat(confirmation, containsString("* The application will be sent to the Judge for gatekeeping "
-                        + "(where applicable)"));
+            + "(where applicable)"));
         assertThat(confirmation, containsString("* A First Appointment hearing will be set"));
     }
 
@@ -47,10 +47,10 @@ public class PaymentConfirmationServiceTest extends BaseServiceTest {
         String confirmation = paymentConfirmationService.contestedHwfPaymentConfirmation();
 
         assertThat(confirmation, containsString("You will now be directed to the case file where you can "
-                + "monitor the progress of your application via the ‘history’ tab."));
+            + "monitor the progress of your application via the ‘history’ tab."));
         assertThat(confirmation, containsString("The application will be received by Court staff who will "
-                + "process the application for help with fees."));
+            + "process the application for help with fees."));
         assertThat(confirmation, containsString("You will receive a notification via email confirming the "
-                + "outcome of the help with fees application."));
+            + "outcome of the help with fees application."));
     }
 }

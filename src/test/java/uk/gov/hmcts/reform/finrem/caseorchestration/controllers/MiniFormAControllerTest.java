@@ -76,29 +76,29 @@ public class MiniFormAControllerTest extends BaseControllerTest {
         whenServiceGeneratesDocument().thenReturn(caseDocument());
 
         mvc.perform(post(endpoint())
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
-                .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
-                .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BINARY_URL)))
-                .andExpect(jsonPath("$.data.assignedToJudge", is(defaultsConfiguration.getAssignedToJudgeDefault())))
-                .andExpect(jsonPath("$.data.assignedToJudgeReason", is(MiniFormAController.assignedToJudgeReasonDefault)))
-                .andExpect(jsonPath("$.data.referToJudgeText", is(MiniFormAController.referToJudgeTextDefault)))
-                .andExpect(jsonPath("$.data.referToJudgeDate", is(LocalDate.now().toString())))
-                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.miniFormA.document_url", is(DOC_URL)))
+            .andExpect(jsonPath("$.data.miniFormA.document_filename", is(FILE_NAME)))
+            .andExpect(jsonPath("$.data.miniFormA.document_binary_url", is(BINARY_URL)))
+            .andExpect(jsonPath("$.data.assignedToJudge", is(defaultsConfiguration.getAssignedToJudgeDefault())))
+            .andExpect(jsonPath("$.data.assignedToJudgeReason", is(MiniFormAController.assignedToJudgeReasonDefault)))
+            .andExpect(jsonPath("$.data.referToJudgeText", is(MiniFormAController.referToJudgeTextDefault)))
+            .andExpect(jsonPath("$.data.referToJudgeDate", is(LocalDate.now().toString())))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
     public void generateMiniFormAHttpError400() throws Exception {
         doRequestSetUpConsented();
         mvc.perform(post(endpoint())
-                .content("kwuilebge")
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest());
+            .content("kwuilebge")
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -107,10 +107,10 @@ public class MiniFormAControllerTest extends BaseControllerTest {
         whenServiceGeneratesDocument().thenThrow(feignError());
 
         mvc.perform(post(endpoint())
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isInternalServerError());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isInternalServerError());
     }
 
     @Test

@@ -52,32 +52,32 @@ public class TestContextConfiguration {
 
     @Bean
     public ServiceAuthTokenGenerator serviceAuthTokenGenerator(@Value("${idam.s2s-auth.url}")
-                                                                       String s2sUrl,
+                                                                   String s2sUrl,
                                                                @Value("${idam.auth.secret}")
-                                                                       String secret,
+                                                                   String secret,
                                                                @Value("${idam.s2s-auth.microservice}")
-                                                                       String microservice) {
+                                                                   String microservice) {
         ServiceAuthorisationApi serviceAuthorisationApi = Feign.builder()
-                .encoder(new JacksonEncoder())
-                .contract(new SpringMvcContract())
-                .target(ServiceAuthorisationApi.class, s2sUrl);
+            .encoder(new JacksonEncoder())
+            .contract(new SpringMvcContract())
+            .target(ServiceAuthorisationApi.class, s2sUrl);
         return new ServiceAuthTokenGenerator(secret, microservice, serviceAuthorisationApi);
     }
 
     @Bean
     public CoreCaseDataApi getCoreCaseDataApi(@Value("${core_case_data.api.url}") String coreCaseDataApiUrl) {
         return Feign.builder()
-                .requestInterceptor(requestInterceptor())
-                .encoder(new JacksonEncoder())
-                .decoder(feignDecoder())
-                .contract(new SpringMvcContract())
-                .target(CoreCaseDataApi.class, coreCaseDataApiUrl);
+            .requestInterceptor(requestInterceptor())
+            .encoder(new JacksonEncoder())
+            .decoder(feignDecoder())
+            .contract(new SpringMvcContract())
+            .target(CoreCaseDataApi.class, coreCaseDataApiUrl);
     }
 
     @Bean
     public Decoder feignDecoder() {
         MappingJackson2HttpMessageConverter jacksonConverter =
-                new MappingJackson2HttpMessageConverter(objectMapper());
+            new MappingJackson2HttpMessageConverter(objectMapper());
         jacksonConverter.setSupportedMediaTypes(ImmutableList.of(MediaType.APPLICATION_JSON));
 
         ObjectFactory<HttpMessageConverters> objectFactory = () -> new HttpMessageConverters(jacksonConverter);
@@ -90,7 +90,7 @@ public class TestContextConfiguration {
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        
+
         return objectMapper;
     }
 

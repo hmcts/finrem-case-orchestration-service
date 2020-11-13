@@ -41,7 +41,7 @@ public class GlobalExceptionHandlerTest {
     @Test
     public void handleNoSuchFieldExistsException() {
         ResponseEntity<Object> actual = exceptionHandler.handleNoSuchFieldExistsException(
-                noSuchFieldExistsCaseDataError());
+            noSuchFieldExistsCaseDataError());
         assertThat(actual.getStatusCodeValue(), is(INTERNAL_SERVER_ERROR));
         assertThat(actual.getBody(), is(SERVER_ERROR_MSG));
     }

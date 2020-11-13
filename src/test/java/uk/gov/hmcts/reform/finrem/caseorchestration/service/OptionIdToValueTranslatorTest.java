@@ -49,7 +49,7 @@ public class OptionIdToValueTranslatorTest {
         new OptionIdToValueTranslator("random.json", new ObjectMapper()).initOptionValueMap();
     }
 
-    private CaseDetails caseDetailsWithEmptyOptions()  {
+    private CaseDetails caseDetailsWithEmptyOptions() {
         return CaseDetails.builder().data(ImmutableMap.of()).build();
     }
 
