@@ -79,13 +79,11 @@ public class NotificationService {
     }
 
     public void sendContestedApplicationIssuedEmailToApplicantSolicitor(CallbackRequest callbackRequest) {
-        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
-        sendContestedApplicationIssuedEmail(notificationRequest);
+        sendContestedApplicationIssuedEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest));
     }
 
     public void sendContestedApplicationIssuedEmailToRespondentSolicitor(CallbackRequest callbackRequest) {
-        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
-        sendContestedApplicationIssuedEmail(notificationRequest);
+        sendContestedApplicationIssuedEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest));
     }
 
     private void sendContestedApplicationIssuedEmail(NotificationRequest notificationRequest) {
@@ -201,13 +199,11 @@ public class NotificationService {
     }
 
     public void sendContestedGeneralOrderEmailApplicant(CallbackRequest callbackRequest) {
-        notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
-        sendContestedGeneralOrderEmail(notificationRequest);
+        sendContestedGeneralOrderEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest));
     }
 
     public void sendContestedGeneralOrderEmailRespondent(CallbackRequest callbackRequest) {
-        notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
-        sendContestedGeneralOrderEmail(notificationRequest);
+        sendContestedGeneralOrderEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest));
     }
 
     private void sendContestedGeneralOrderEmail(NotificationRequest notificationRequest) {
