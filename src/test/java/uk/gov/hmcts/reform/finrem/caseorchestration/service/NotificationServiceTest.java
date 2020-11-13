@@ -24,7 +24,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -224,7 +223,7 @@ public class NotificationServiceTest extends BaseServiceTest {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
-        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
     }
 
     @Test
@@ -351,12 +350,12 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendContestOrderApprovedEmail(callbackRequest);
+            notificationService.sendContestedApplicationIssuedEmailToRespondentSolicitor(callbackRequest);
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
-        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
     }
 
     @Test
@@ -404,7 +403,7 @@ public class NotificationServiceTest extends BaseServiceTest {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
 
-        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest);
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest);
     }
 
     @Test
