@@ -35,15 +35,15 @@ public class PBAValidateController implements BaseController {
     @PostMapping(path = "/pba-validate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Validates if PBA Number provided is valid")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaValidate(
-            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-            @RequestBody CallbackRequest callbackRequest) {
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
+        @RequestBody CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request to validate PBA number for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callbackRequest);
 
-        Map<String,Object> caseData = caseDetails.getData();
+        Map<String, Object> caseData = caseDetails.getData();
         if (isPBAPayment(caseData)) {
             String pbaNumber = Objects.toString(caseData.get(PBA_NUMBER));
             log.info("Validating PBA Number: {}", pbaNumber);

@@ -61,16 +61,16 @@ public class FunctionalTestUtils {
 
     public Headers getHeadersWithUserId() {
         return Headers.headers(
-                new Header(SERVICE_AUTHORISATION_HEADER, tokenGenerator.generate()),
-                new Header("user-roles", "caseworker-divorce"),
-                new Header("user-id", userId));
+            new Header(SERVICE_AUTHORISATION_HEADER, tokenGenerator.generate()),
+            new Header("user-roles", "caseworker-divorce"),
+            new Header("user-id", userId));
     }
 
     public Headers getHeaders() {
         return Headers.headers(
-                new Header(AUTHORIZATION_HEADER, "Bearer "
-                        + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
-                new Header("Content-Type", ContentType.JSON.toString()));
+            new Header(AUTHORIZATION_HEADER, "Bearer "
+                + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
+            new Header("Content-Type", ContentType.JSON.toString()));
     }
 
     public String getS2SToken(String callerMicroservice) {
@@ -79,15 +79,15 @@ public class FunctionalTestUtils {
 
     public Headers getHeader() {
         return Headers.headers(
-                new Header(AUTHORIZATION_HEADER, "Bearer "
-                        + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)));
+            new Header(AUTHORIZATION_HEADER, "Bearer "
+                + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)));
     }
 
     public String downloadPdfAndParseToString(String documentUrl) {
         Response document = SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(getHeadersWithUserId())
-                .when().get(documentUrl).andReturn();
+            .relaxedHTTPSValidation()
+            .headers(getHeadersWithUserId())
+            .when().get(documentUrl).andReturn();
 
         return parsePdfToString(document.getBody().asInputStream());
     }
@@ -148,12 +148,12 @@ public class FunctionalTestUtils {
 
     public JsonPath getResponseData(String url, String filename, String journeyType, String dataPath) {
         Response response = SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(getHeader())
-                .contentType("application/json")
-                .body(getJsonFromFile(filename, journeyType))
-                .when().post(url)
-                .andReturn();
+            .relaxedHTTPSValidation()
+            .headers(getHeader())
+            .contentType("application/json")
+            .body(getJsonFromFile(filename, journeyType))
+            .when().post(url)
+            .andReturn();
 
         assertEquals(HttpStatus.OK, HttpStatus.valueOf(response.getStatusCode()));
 
@@ -163,28 +163,28 @@ public class FunctionalTestUtils {
 
     public Response getResponseData(String url, CallbackRequest callbackRequest) {
         return SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(getHeader())
-                .contentType("application/json")
-                .body(callbackRequest)
-                .when().post(url)
-                .andReturn();
+            .relaxedHTTPSValidation()
+            .headers(getHeader())
+            .contentType("application/json")
+            .body(callbackRequest)
+            .when().post(url)
+            .andReturn();
     }
 
     public Response getResponse(String url, String filename, String journeyType) {
         return SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(getHeader())
-                .contentType("application/json")
-                .body(getJsonFromFile(filename, journeyType))
-                .when().post(url).andReturn();
+            .relaxedHTTPSValidation()
+            .headers(getHeader())
+            .contentType("application/json")
+            .body(getJsonFromFile(filename, journeyType))
+            .when().post(url).andReturn();
     }
 
     public int getStatusCode(String url, String jsonFileName, String journeyType) {
         return SerenityRest.given()
-                .relaxedHTTPSValidation()
-                .headers(getHeaders())
-                .body(getJsonFromFile(jsonFileName, journeyType))
-                .when().post(url).getStatusCode();
+            .relaxedHTTPSValidation()
+            .headers(getHeaders())
+            .body(getJsonFromFile(jsonFileName, journeyType))
+            .when().post(url).getStatusCode();
     }
 }

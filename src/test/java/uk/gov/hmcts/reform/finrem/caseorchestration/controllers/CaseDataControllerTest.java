@@ -33,7 +33,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockBean
-    private  IdamService idamService;
+    private IdamService idamService;
 
     @MockBean
     FeatureToggleService featureToggleService;
@@ -47,15 +47,15 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .getResource(MOVE_VALUES_SAMPLE_JSON)
                 .toURI()));
         mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/uploadHearingOrderRO")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrderRO[0]").exists())
-                .andExpect(jsonPath("$.data.uploadHearingOrderRO[1]").exists())
-                .andExpect(jsonPath("$.data.uploadHearingOrderRO[2]").exists())
-                .andExpect(jsonPath("$.data.uploadHearingOrder").isEmpty());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.uploadHearingOrderRO[0]").exists())
+            .andExpect(jsonPath("$.data.uploadHearingOrderRO[1]").exists())
+            .andExpect(jsonPath("$.data.uploadHearingOrderRO[2]").exists())
+            .andExpect(jsonPath("$.data.uploadHearingOrder").isEmpty());
     }
 
     @Test
@@ -67,13 +67,13 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .getResource(MOVE_VALUES_SAMPLE_JSON)
                 .toURI()));
         mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/uploadHearingOrderNew")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrderNew[0]").exists())
-                .andExpect(jsonPath("$.data.uploadHearingOrder").isEmpty());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.uploadHearingOrderNew[0]").exists())
+            .andExpect(jsonPath("$.data.uploadHearingOrder").isEmpty());
     }
 
     @Test
@@ -85,12 +85,12 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .getResource(MOVE_VALUES_SAMPLE_JSON)
                 .toURI()));
         mvc.perform(post("/case-orchestration/move-collection/someString/to/uploadHearingOrder")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
     }
 
     @Test
@@ -102,12 +102,12 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .getResource(MOVE_VALUES_SAMPLE_JSON)
                 .toURI()));
         mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/someString")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
     }
 
     @Test
@@ -119,12 +119,12 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .getResource(MOVE_VALUES_SAMPLE_JSON)
                 .toURI()));
         mvc.perform(post("/case-orchestration/move-collection/empty/to/uploadHearingOrder")
-                            .content(requestContent.toString())
-                            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                            .contentType(APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
     }
 
     @Test
