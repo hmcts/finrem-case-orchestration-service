@@ -32,7 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_REF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
@@ -143,7 +142,6 @@ public class CaseDataController implements BaseController {
             appPolicy.put(ORGANISATION_POLICY_REF, null);
             Map<String, Object> org = new HashMap<>();
             org.put(ORGANISATION_POLICY_ORGANISATION_ID, null);
-            org.put(ORGANISATION_POLICY_ORGANISATION_NAME, null);
             appPolicy.put(ORGANISATION_POLICY_ORGANISATION, org);
 
             caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appPolicy);
