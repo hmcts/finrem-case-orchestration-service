@@ -39,9 +39,9 @@ public class RestServiceTest extends BaseServiceTest {
     public void restApiPostCall() {
         AssignCaseAccessRequest body = AssignCaseAccessRequest
             .builder()
-            .caseId(TEST_CASE_ID)
-            .caseTypeId(CASE_TYPE_ID_CONTESTED)
-            .assigneeId(TEST_USER_ID)
+            .case_id(TEST_CASE_ID)
+            .case_type_id(CASE_TYPE_ID_CONTESTED)
+            .assignee_id(TEST_USER_ID)
             .build();
 
         restService.restApiPostCall(AUTH_TOKEN, TEST_URL, body);

@@ -19,8 +19,8 @@ public class AssignCaseAccessRequestMapperTest extends BaseServiceTest {
 
         AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(caseDetails, TEST_USER_ID);
 
-        Assert.assertEquals(assignCaseAccessRequest.getAssigneeId(), TEST_USER_ID);
-        Assert.assertEquals(assignCaseAccessRequest.getCaseId(), caseDetails.getId().toString());
-        Assert.assertEquals(assignCaseAccessRequest.getCaseTypeId(), caseDetails.getCaseTypeId());
+        Assert.assertEquals(assignCaseAccessRequest.getAssignee_id(), TEST_USER_ID);
+        Assert.assertEquals(assignCaseAccessRequest.getCase_id(), caseDetails.getId().toString());
+        Assert.assertEquals(assignCaseAccessRequest.getCase_type_id(), caseDetails.getCaseTypeId());
     }
 }

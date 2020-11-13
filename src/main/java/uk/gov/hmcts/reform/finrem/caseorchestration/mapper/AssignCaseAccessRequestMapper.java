@@ -13,9 +13,9 @@ public class AssignCaseAccessRequestMapper {
     public AssignCaseAccessRequest mapToAssignCaseAccessRequest(CaseDetails caseDetails, String userId) {
         return AssignCaseAccessRequest
             .builder()
-            .caseId(caseDetails.getId().toString())
-            .assigneeId(userId)
-            .caseTypeId(caseDetails.getCaseTypeId())
+            .case_id(caseDetails.getId().toString())
+            .assignee_id(userId)
+            .case_type_id(caseDetails.getCaseTypeId())
             .build();
     }
 }

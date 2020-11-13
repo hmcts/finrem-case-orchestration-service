@@ -36,9 +36,9 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
     public void setUp() {
         assignCaseAccessRequest = AssignCaseAccessRequest
             .builder()
-            .caseId(TEST_CASE_ID)
-            .caseTypeId(CASE_TYPE_ID_CONTESTED)
-            .assigneeId(TEST_USER_ID)
+            .case_id(TEST_CASE_ID)
+            .case_type_id(CASE_TYPE_ID_CONTESTED)
+            .assignee_id(TEST_USER_ID)
             .build();
 
         when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TEST_USER_ID);
