@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorResponsibleToDraftOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
@@ -195,7 +196,6 @@ public class NotificationsController implements BaseController {
         log.info("Received request to send email for 'Consent/Contest Order Not Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             if (isConsentedApplication(callbackRequest.getCaseDetails())) {
@@ -203,8 +203,14 @@ public class NotificationsController implements BaseController {
                 notificationService.sendConsentOrderNotApprovedEmail(callbackRequest);
             } else {
                 log.info("Sending email notification to Solicitor for 'Contest Order Not Approved'");
-                notificationService.sendContestOrderNotApprovedEmail(callbackRequest);
+                notificationService.sendContestOrderNotApprovedEmailApplicant(callbackRequest);
             }
+        }
+
+        Map<String, Object> caseData = caseDetails.getData();
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)
+            && isContestedApplication(caseDetails)) {
+            notificationService.sendContestOrderNotApprovedEmailRespondent(callbackRequest);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
