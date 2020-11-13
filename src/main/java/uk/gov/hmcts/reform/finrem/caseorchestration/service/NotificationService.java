@@ -99,13 +99,11 @@ public class NotificationService {
     }
 
     public void sendPrepareForHearingEmailApplicant(CallbackRequest callbackRequest) {
-        notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
-        sendPrepareForHearingEmail(notificationRequest);
+        sendPrepareForHearingEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest));
     }
 
     public void sendPrepareForHearingEmailRespondent(CallbackRequest callbackRequest) {
-        notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
-        sendPrepareForHearingEmail(notificationRequest);
+        sendPrepareForHearingEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest));
     }
 
     private void sendPrepareForHearingEmail(NotificationRequest notificationRequest) {
