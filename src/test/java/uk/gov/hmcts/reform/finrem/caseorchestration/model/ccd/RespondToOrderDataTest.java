@@ -10,18 +10,18 @@ import static org.junit.Assert.assertThat;
 public class RespondToOrderDataTest {
 
     private String json = " {\n"
-            + "          \"id\": \"1\",\n"
-            + "          \"value\": {\n"
-            + "            \"DocumentType\": \"AmendedConsentOrder\",\n"
-            + "            \"DocumentLink\": {\n"
-            + "              \"document_url\": \"http://doc1\",\n"
-            + "              \"document_filename\": \"doc1\",\n"
-            + "              \"document_binary_url\": \"http://doc1.binary\"\n"
-            + "            },\n"
-            + "            \"DocumentDateAdded\": \"2010-01-02\",\n"
-            + "            \"DocumentFileName\": \"file1\"\n"
-            + "          }\n"
-            + "        }";
+        + "          \"id\": \"1\",\n"
+        + "          \"value\": {\n"
+        + "            \"DocumentType\": \"AmendedConsentOrder\",\n"
+        + "            \"DocumentLink\": {\n"
+        + "              \"document_url\": \"http://doc1\",\n"
+        + "              \"document_filename\": \"doc1\",\n"
+        + "              \"document_binary_url\": \"http://doc1.binary\"\n"
+        + "            },\n"
+        + "            \"DocumentDateAdded\": \"2010-01-02\",\n"
+        + "            \"DocumentFileName\": \"file1\"\n"
+        + "          }\n"
+        + "        }";
 
     @Test
     public void shouldConvertRespondToOrderDataObject() throws Exception {

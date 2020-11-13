@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorResponsibleToDraftOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
@@ -53,9 +54,9 @@ public class NotificationsController implements BaseController {
     private final ManualPaymentDocumentService manualPaymentDocumentService;
     private final GeneralEmailService generalEmailService;
     private final CaseDataService caseDataService;
-    private final FeatureToggleService featureToggleService;
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
+    private final FeatureToggleService featureToggleService;
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
@@ -195,7 +196,6 @@ public class NotificationsController implements BaseController {
         log.info("Received request to send email for 'Consent/Contest Order Not Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             if (isConsentedApplication(callbackRequest.getCaseDetails())) {
@@ -203,8 +203,14 @@ public class NotificationsController implements BaseController {
                 notificationService.sendConsentOrderNotApprovedEmail(callbackRequest);
             } else {
                 log.info("Sending email notification to Solicitor for 'Contest Order Not Approved'");
-                notificationService.sendContestOrderNotApprovedEmail(callbackRequest);
+                notificationService.sendContestOrderNotApprovedEmailApplicant(callbackRequest);
             }
+        }
+
+        Map<String, Object> caseData = caseDetails.getData();
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)
+            && isContestedApplication(caseDetails)) {
+            notificationService.sendContestOrderNotApprovedEmailRespondent(callbackRequest);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -224,8 +230,13 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending email notification to Solicitor for 'Contested Consent Order Approved'");
-            notificationService.sendContestedConsentOrderApprovedEmail(callbackRequest);
+            log.info("Sending email notification to Applicant Solicitor for 'Contested Consent Order Approved'");
+            notificationService.sendContestedConsentOrderApprovedEmailToApplicantSolicitor(callbackRequest);
+        }
+
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            log.info("Sending email notification to Respondent Solicitor for 'Contested Consent Order Approved'");
+            notificationService.sendContestedConsentOrderApprovedEmailToRespondentSolicitor(callbackRequest);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -243,8 +254,13 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (!isPaperApplication(caseData) && isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Received request to send email for 'Contested Consent Order Not Approved' for Case ID: {}", caseDetails.getId());
-            notificationService.sendContestedConsentOrderNotApprovedEmail(callbackRequest);
+            log.info("Sending email for 'Contested Consent Order Not Approved' to Applicant Solicitor for Case ID: {}", caseDetails.getId());
+            notificationService.sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(callbackRequest);
+        }
+
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            log.info("Sending email for 'Contested Consent Order Not Approved' to Respondent Solicitor for Case ID: {}", caseDetails.getId());
+            notificationService.sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(callbackRequest);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -261,7 +277,6 @@ public class NotificationsController implements BaseController {
         log.info("Received request to send email for General Order raised for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             if (isConsentedApplication(caseDetails)) {
@@ -272,10 +287,17 @@ public class NotificationsController implements BaseController {
                     log.info("Sending email notification to Solicitor for 'Contested consent General Order'");
                     notificationService.sendContestedConsentGeneralOrderEmail(callbackRequest);
                 } else {
-                    log.info("Sending email notification to Solicitor for 'Contested General Order'");
-                    notificationService.sendContestedGeneralOrderEmail(callbackRequest);
+                    log.info("Sending email notification to applicant solicitor for 'Contested General Order'");
+                    notificationService.sendContestedGeneralOrderEmailApplicant(callbackRequest);
                 }
             }
+        }
+
+        Map<String, Object> caseData = caseDetails.getData();
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)
+            && isContestedApplication(caseDetails) && !isConsentedInContestedCase(caseDetails)) {
+            log.info("Sending email notification to respondent solicitor for 'Contested General Order'");
+            notificationService.sendContestedGeneralOrderEmailRespondent(callbackRequest);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -316,7 +338,13 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing'");
-            notificationService.sendPrepareForHearingEmail(callbackRequest);
+            notificationService.sendPrepareForHearingEmailApplicant(callbackRequest);
+        }
+
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(
+            caseDetails.getData())) {
+            log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
+            notificationService.sendPrepareForHearingEmailRespondent(callbackRequest);
         }
 
         if (isContestedPaperApplication(caseDetails)) {
@@ -416,10 +444,10 @@ public class NotificationsController implements BaseController {
     @PostMapping(value = "/draft-order", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for Solicitor To Draft Order")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Draft Order e-mail sent successfully",
-                    response = AboutToStartOrSubmitCallbackResponse.class)})
+        @ApiResponse(code = 204, message = "Draft Order e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendDraftOrderEmail(
-            @RequestBody CallbackRequest callbackRequest) {
+        @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Received request to send email for 'Solicitor To Draft Order' for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);

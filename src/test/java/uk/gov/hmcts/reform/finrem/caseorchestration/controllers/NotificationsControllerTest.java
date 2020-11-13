@@ -33,6 +33,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -44,7 +46,12 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_D81_QUESTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 
 @RunWith(SpringRunner.class)
@@ -148,9 +155,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(helpWithFeesDocumentService, times(1))
-            .generateHwfSuccessfulNotificationLetter(any(CaseDetails.class),any());
+            .generateHwfSuccessfulNotificationLetter(any(CaseDetails.class), any());
         verify(bulkPrintService, times(1))
-            .sendDocumentForPrint(any(),any());
+            .sendDocumentForPrint(any(), any());
         verifyNoInteractions(notificationService);
     }
 
@@ -164,7 +171,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendAssignToJudgeConfirmationEmail(any(CallbackRequest.class));
+            .sendAssignToJudgeConfirmationEmail(any(CallbackRequest.class));
         verifyNoInteractions(assignedToJudgeDocumentService);
         verifyNoInteractions(bulkPrintService);
     }
@@ -192,9 +199,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(assignedToJudgeDocumentService, times(1))
-            .generateAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+            .generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
         verify(bulkPrintService, times(1))
-            .sendDocumentForPrint(any(),any());
+            .sendDocumentForPrint(any(), any());
         verifyNoInteractions(notificationService);
     }
 
@@ -211,11 +218,11 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(assignedToJudgeDocumentService, never())
-            .generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+            .generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
         verify(assignedToJudgeDocumentService, times(1))
-            .generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+            .generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
         verify(bulkPrintService, times(1))
-            .sendDocumentForPrint(any(),any());
+            .sendDocumentForPrint(any(), any());
     }
 
     @Test
@@ -231,11 +238,11 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(assignedToJudgeDocumentService, times(1))
-            .generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+            .generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
         verify(assignedToJudgeDocumentService, times(1))
-            .generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class),any());
+            .generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
         verify(bulkPrintService, times(2))
-            .sendDocumentForPrint(any(),any());
+            .sendDocumentForPrint(any(), any());
     }
 
     @Test
@@ -340,6 +347,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void givenSolAgreedToEmails_and_noPreviousHearing_shouldSendPrepareForHearingEmail_and_PrintHearingDocuments() throws Exception {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
         buildCcdRequest(CONTESTED_PAPER_APPLICATION_HEARING_JSON);
         mockMvc.perform(post(PREPARE_FOR_HEARING_CALLBACK_URL)
             .content(requestContent.toString())
@@ -347,12 +357,16 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(notificationService, times(1)).sendPrepareForHearingEmail(any());
+        verify(notificationService, times(1)).sendPrepareForHearingEmailApplicant(any());
+        verify(notificationService, times(1)).sendPrepareForHearingEmailRespondent(any());
         verify(hearingDocumentService, times(1)).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
     }
 
     @Test
     public void shouldNotSendPrepareForHearingEmailWhenNotAgreed() throws Exception {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(PREPARE_FOR_HEARING_CALLBACK_URL)
             .content(requestContent.toString())
@@ -360,7 +374,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verifyNoInteractions(notificationService);
+        verify(notificationService, never()).sendPrepareForHearingEmailApplicant(any());
+        verify(notificationService, never()).sendPrepareForHearingEmailRespondent(any());
     }
 
     @Test
@@ -544,21 +559,21 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void sendDraftOrderEmailWhenApplicantSolicitorIsNominatedAndIsAcceptingEmails() throws Exception {
         buildCcdRequest(DRAFT_ORDER_SUCCESSFUL_APPLICANT_SOL);
         mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-                .sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
+            .sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
     }
 
     @Test
     public void shouldNotSendDraftOrderEmailAsSolicitorOptedOutOfEmailComms() throws Exception {
         buildCcdRequest(DRAFT_ORDER_UNSUCCESSFUL_APPLICANT_SOL);
         mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
     }
@@ -567,9 +582,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void shouldNotSendDraftOrderEmailAsRespondentSolicitorIsNominated() throws Exception {
         buildCcdRequest(DRAFT_ORDER_UNSUCCESSFUL_RESPONDENT_SOL);
         mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
-                .content(requestContent.toString())
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk());
+            .content(requestContent.toString())
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
 
         verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any(CallbackRequest.class));
     }
@@ -662,7 +677,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-            .sendContestOrderNotApprovedEmail(any(CallbackRequest.class));
+            .sendContestOrderNotApprovedEmailApplicant(any(CallbackRequest.class));
     }
 
     @Test
@@ -678,6 +693,53 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void sendContestedConsentOrderApprovedEmailToApplicantSolicitor() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).id(123L).data(caseData).build();
+        CallbackRequest testData = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        notificationsController.sendContestedConsentOrderApprovedEmail(testData);
+
+        verify(notificationService, times(1))
+            .sendContestedConsentOrderApprovedEmailToApplicantSolicitor(any(CallbackRequest.class));
+    }
+
+    @Test
+    public void sendContestedConsentOrderApprovedEmailToRespondentSolicitor() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendContestedConsentOrderApprovedEmail(buildCallbackRequest());
+
+        verify(notificationService, times(1))
+            .sendContestedConsentOrderApprovedEmailToRespondentSolicitor(any(CallbackRequest.class));
+    }
+
+    public void whenShouldSendRespondentNotification_andCaseIsContested_thenShouldTriggerRespondentEmail() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONTESTED);
+        notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
+
+        verify(notificationService, times(1)).sendContestOrderNotApprovedEmailRespondent(any());
+    }
+
+    @Test
+    public void whenShouldSendRespondentNotification_andCaseIsConsented_thenShouldNotTriggerRespondentEmail() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
+        notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
+
+        verify(notificationService, never()).sendContestOrderNotApprovedEmailRespondent(any());
+    }
+
+    @Test
     public void sendContestedConsentOrderApprovedEmail() throws Exception {
         buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
         mockMvc.perform(post(CONTESTED_CONSENT_ORDER_APPROVED_CALLBACK_URL)
@@ -685,9 +747,28 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .content(requestContent.toString())
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
+    }
 
-        verify(notificationService, times(1))
-            .sendContestedConsentOrderApprovedEmail(any(CallbackRequest.class));
+    @Test
+    public void shouldNotSendContestedConsentOrderApprovedEmailToRespondentSolicitorWhenRespSolShouldNotReceiveEmail() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
+        notificationsController.sendContestedConsentOrderApprovedEmail(buildCallbackRequest());
+
+        verify(notificationService,
+            never()).sendContestedConsentOrderApprovedEmailToRespondentSolicitor(any(CallbackRequest.class));
+    }
+
+    @Test
+    public void shouldNotSendContestedConsentOrderApprovedEmailToRespondentSolicitorWhenRespSolNotificationsToggledOff() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendContestedConsentOrderApprovedEmail(buildCallbackRequest());
+
+        verify(notificationService,
+            never()).sendContestedConsentOrderApprovedEmailToRespondentSolicitor(any(CallbackRequest.class));
     }
 
     @Test
@@ -716,7 +797,10 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void sendContestedGeneralOrderEmail() throws Exception {
+    public void sendContestedGeneralOrderEmails() throws Exception {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
         buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
         mockMvc.perform(post(GENERAL_ORDER_RAISED_CALLBACK_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -724,8 +808,31 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(notificationService, times(1))
-            .sendContestedGeneralOrderEmail(any(CallbackRequest.class));
+        verify(notificationService, times(1)).sendContestedGeneralOrderEmailApplicant(any(CallbackRequest.class));
+        verify(notificationService, times(1)).sendContestedGeneralOrderEmailRespondent(any(CallbackRequest.class));
+    }
+
+    @Test
+    public void whenShouldNotSendContestedGeneralOrderEmailToRespondent_ThentheEmailIsNotIssued() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
+        notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any(CallbackRequest.class));
+    }
+
+    @Test
+    public void shouldNotSendContestedGeneralOrderEmailToRespondentInConsentedInContestedCase() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONTESTED);
+        callbackRequest.getCaseDetails().getData().put(CONSENT_D81_QUESTION, YES_VALUE);
+        notificationsController.sendGeneralOrderRaisedEmail(callbackRequest);
+
+        verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any(CallbackRequest.class));
     }
 
     @Test
@@ -768,6 +875,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendContestedConsentOrderNotApprovedEmail() throws Exception {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
         buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
         mockMvc.perform(post(CONTESTED_CONSENT_ORDER_NOT_APPROVED_CALLBACK_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -775,12 +885,15 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(notificationService, times(1))
-            .sendContestedConsentOrderNotApprovedEmail(any(CallbackRequest.class));
+        verify(notificationService, times(1)).sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(any(CallbackRequest.class));
+        verify(notificationService, times(1)).sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(any(CallbackRequest.class));
     }
 
     @Test
     public void shouldNotSendContestedConsentOrderNotApprovedEmail() throws Exception {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(CONTESTED_CONSENT_ORDER_NOT_APPROVED_CALLBACK_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -788,7 +901,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verifyNoInteractions(notificationService);
+        verify(notificationService, never()).sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(any(CallbackRequest.class));
+        verify(notificationService, never()).sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(any(CallbackRequest.class));
     }
 
     @Test
@@ -803,7 +917,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(manualPaymentDocumentService, times(1))
             .generateApplicantManualPaymentLetter(any(CaseDetails.class), any());
         verify(bulkPrintService, times(1))
-            .sendDocumentForPrint(any(),any());
+            .sendDocumentForPrint(any(), any());
         verifyNoInteractions(notificationService);
     }
 
@@ -823,7 +937,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     private void buildCcdRequest(String fileName) throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource(fileName).toURI()));
+            .getResource(fileName).toURI()));
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {

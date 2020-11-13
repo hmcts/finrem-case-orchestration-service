@@ -46,7 +46,7 @@ public class ContestedDocumentControllerTest extends BaseControllerTest {
     protected IdamService idamService;
 
     @Before
-    public void setUp()  {
+    public void setUp() {
         super.setUp();
         try {
             doRequestSetUp();

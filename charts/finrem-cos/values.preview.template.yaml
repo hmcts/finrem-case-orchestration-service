@@ -2,9 +2,9 @@ java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   environment:
-    FEATURE_RESPONDENT_SOLICITOR_EMAIL_NOTIFICATION: true
     FEATURE_CONTESTED_PRINT_DRAFT_ORDER_NOT_APPROVED: true
     FEATURE_CONTESTED_PRINT_GENERAL_ORDER: true
     FEATURE_SHARE_A_CASE: true
+    FEATURE_RESPONDENT_SOLICITOR_EMAIL_NOTIFICATION: true
     # Disabled secrets on preview ( remove this and override keyvaults when adding secrets needed for preview)
     SPRING_CLOUD_PROPERTIESVOLUME_ENABLED: false

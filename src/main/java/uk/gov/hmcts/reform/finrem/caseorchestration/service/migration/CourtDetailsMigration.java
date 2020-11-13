@@ -5,32 +5,28 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import java.util.HashMap;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 
-public class CourtDetailsMigration {
+public class CourtDetailsMigration implements MigrationHandler {
 
-    public static final String REGION = "regionList";
     public static final String REGION_SL = "regionListSL";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
     public static final String ALLOCATED_COURT_LIST_GA = "allocatedCourtListGA";
     public static final String REGION_AC = "region";
     public static final String EMPTY_STRING = "";
-
-    // regions
-    public static final String WALES = "wales";
-    public static final String LONDON = "london";
-    public static final String MIDLANDS = "midlands";
-    public static final String NORTHWEST = "northwest";
-    public static final String NORTHEAST = "northeast";
-    public static final String SOUTHEAST = "southeast";
-
-    // FRC lists
-    public static final String WALES_FRC_LIST = "walesFRCList";
-    public static final String SOUTHEAST_FRC_LIST = "southEastFRCList";
-    public static final String NORTHEAST_FRC_LIST = "northEastFRCList";
-    public static final String NORTHWEST_FRC_LIST = "northWestFRCList";
-    public static final String LONDON_FRC_LIST = "londonFRCList";
-    public static final String MIDLANDS_FRC_LIST = "midlandsFRCList";
 
     // FRC lists SL
     public static final String WALES_FRC_LIST_SL = "walesFRCListSL";

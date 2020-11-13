@@ -34,27 +34,29 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper
 @WebMvcTest(ContestedOrderController.class)
 public class ContestedOrderControllerTest extends BaseControllerTest {
 
-    @MockBean private GenericDocumentService genericDocumentService;
-    @MockBean private ContestedCaseOrderService contestedCaseOrderService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+    @MockBean
+    private ContestedCaseOrderService contestedCaseOrderService;
 
     private static final String SEND_ORDER_ENDPOINT = "/case-orchestration/contested/send-order";
 
     private void doCaseDataSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/final-order-for-stamping.json").toURI()));
+            .getResource("/fixtures/final-order-for-stamping.json").toURI()));
     }
 
     private void doCaseDataSetUpWithoutAnyHearingOrder() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-              .getResource("/fixtures/final-order-for-stamping-without-hearing-order.json").toURI()));
+            .getResource("/fixtures/final-order-for-stamping-without-hearing-order.json").toURI()));
     }
 
     private void doCaseDataSetUpWithoutAnyFinalOrder() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                  .getResource("/fixtures/final-order-for-stamping-without-existing-order.json").toURI()));
+            .getResource("/fixtures/final-order-for-stamping-without-existing-order.json").toURI()));
     }
 
     @Test
@@ -62,10 +64,10 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
         doEmptyCaseDataSetUp();
 
         mvc.perform(post(SEND_ORDER_ENDPOINT)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -74,9 +76,9 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
         whenStampingDocument().thenReturn(caseDocument());
 
         ResultActions result = mvc.perform(post(SEND_ORDER_ENDPOINT)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
         result.andDo(print());

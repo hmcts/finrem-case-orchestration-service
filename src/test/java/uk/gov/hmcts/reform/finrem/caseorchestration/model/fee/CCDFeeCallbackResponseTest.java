@@ -19,7 +19,7 @@ public class CCDFeeCallbackResponseTest {
         ObjectMapper mapper = new ObjectMapper();
         ccdResponse = mapper.readValue(new File(getClass()
                 .getResource("/fixtures/model/fee/ccd-fee-callback-response.json").toURI()),
-                CCDFeeCallbackResponse.class);
+            CCDFeeCallbackResponse.class);
     }
 
     @Test
