@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import java.io.InputStream;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,8 +32,8 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
-        verify(bulkPrintService, times(0)).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService, times(0)).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
     }
 
     @Test
@@ -53,7 +54,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
-        verify(bulkPrintService, times(0)).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
     }
 

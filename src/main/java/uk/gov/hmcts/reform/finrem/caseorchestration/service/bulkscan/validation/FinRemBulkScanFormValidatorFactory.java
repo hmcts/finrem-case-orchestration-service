@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.service.BulkScanFormValidatorFactory;
 
 import javax.annotation.PostConstruct;
+
 import java.util.HashMap;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.BulkScanForms.FORM_A;

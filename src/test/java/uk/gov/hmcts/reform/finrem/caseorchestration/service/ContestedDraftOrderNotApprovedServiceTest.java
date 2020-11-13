@@ -82,7 +82,7 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
         Map<String, Object> documentMap = refusalOrderService.populateRefusalOrderCollection(contestedCaseDetails(true));
 
         List<ContestedRefusalOrderData> refusalOrders =
-            (List<ContestedRefusalOrderData>)documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION);
+            (List<ContestedRefusalOrderData>) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION);
 
         assertThat(refusalOrders, hasSize(2));
         assertThat(refusalOrders.get(0).getId(), is("1234"));
@@ -100,7 +100,7 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
         assertThat(refusalOrders.get(1).getContestedRefusalOrder().getRefusalOrderAdditionalDocument().getDocumentBinaryUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
 
-        CaseDocument latestRefusalOrder = (CaseDocument)documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT);
+        CaseDocument latestRefusalOrder = (CaseDocument) documentMap.get(CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT);
         assertThat(latestRefusalOrder.getDocumentUrl(),
             is("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d"));
         assertThat(latestRefusalOrder.getDocumentFilename(),
@@ -149,7 +149,7 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
         assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
-        assertThat(data.get("Court"),is("Nottingham County Court and Family Court"));
+        assertThat(data.get("Court"), is("Nottingham County Court and Family Court"));
         assertThat(data.get("JudgeDetails"), is("Her Honour Judge Contested"));
         assertThat(data.get("ContestOrderNotApprovedRefusalReasonsFormatted"),
             is("- Test Reason 1\n- Test Reason 2"));
@@ -164,7 +164,7 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
         assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
-        assertThat(data.get("Court"),is("Nottingham County Court and Family Court"));
+        assertThat(data.get("Court"), is("Nottingham County Court and Family Court"));
         assertThat(data.get("JudgeDetails"), is("Her Honour Judge Contested"));
         assertThat(data.get("ContestOrderNotApprovedRefusalReasonsFormatted"),
             is("- Draft order is not sufficient, signature is required"));

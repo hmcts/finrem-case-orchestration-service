@@ -65,14 +65,14 @@ public class PBAPaymentService {
         JsonNode dataJsonNode = mapper.valueToTree(mapOfCaseData);
         JsonNode feeValueAsJson = dataJsonNode.path(ORDER_SUMMARY).path(FEES).get(0).path(VALUE);
         BigDecimal feeAmount =
-                BigDecimal.valueOf(feeValueAsJson.path(FEE_AMOUNT).asDouble()).divide(BigDecimal.valueOf(100));
+            BigDecimal.valueOf(feeValueAsJson.path(FEE_AMOUNT).asDouble()).divide(BigDecimal.valueOf(100));
 
         return FeeRequest
-                .builder()
-                .calculatedAmount(feeAmount)
-                .code(feeValueAsJson.path(FEE_CODE).asText())
-                .version(feeValueAsJson.path(FEE_VERSION).asText())
-                .build();
+            .builder()
+            .calculatedAmount(feeAmount)
+            .code(feeValueAsJson.path(FEE_CODE).asText())
+            .version(feeValueAsJson.path(FEE_VERSION).asText())
+            .build();
     }
 
     private PaymentRequest buildPaymentRequestWithFee(CaseDetails caseDetails, FeeRequest fee) {
@@ -81,15 +81,15 @@ public class PBAPaymentService {
         String ccdCaseId = String.valueOf(caseDetails.getId());
         String description = isConsentedApplication(caseDetails) ? consentedDescription : contestedDescription;
         return PaymentRequest.builder()
-                .accountNumber(dataJsonNode.path(PBA_NUMBER).asText())
-                .caseReference(dataJsonNode.path(DIVORCE_CASE_NUMBER).asText())
-                .customerReference(dataJsonNode.path(PBA_REFERENCE).asText())
-                .ccdCaseNumber(ccdCaseId)
-                .description(description)
-                .organisationName(dataJsonNode.path(CONSENTED_SOLICITOR_FIRM).asText())
-                .siteId(siteId)
-                .amount(fee.getCalculatedAmount())
-                .feesList(ImmutableList.of(fee))
-                .build();
+            .accountNumber(dataJsonNode.path(PBA_NUMBER).asText())
+            .caseReference(dataJsonNode.path(DIVORCE_CASE_NUMBER).asText())
+            .customerReference(dataJsonNode.path(PBA_REFERENCE).asText())
+            .ccdCaseNumber(ccdCaseId)
+            .description(description)
+            .organisationName(dataJsonNode.path(CONSENTED_SOLICITOR_FIRM).asText())
+            .siteId(siteId)
+            .amount(fee.getCalculatedAmount())
+            .feesList(ImmutableList.of(fee))
+            .build();
     }
 }

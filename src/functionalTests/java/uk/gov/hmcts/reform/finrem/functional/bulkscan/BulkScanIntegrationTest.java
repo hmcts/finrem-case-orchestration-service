@@ -29,7 +29,7 @@ public class BulkScanIntegrationTest extends IntegrationTestBase {
     private static final String VALIDATION_END_POINT = "/forms/FormA/validate-ocr";
     private static final String TRANSFORMATION_END_POINT = "/transform-exception-record";
     private static final String UPDATE_END_POINT = "/update-case";
-    
+
     public static final String FORM_A_JSON_PATH = "json/bulkscan/formA.json";
 
     private String body;

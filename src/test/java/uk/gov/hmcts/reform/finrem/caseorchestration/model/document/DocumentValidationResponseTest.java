@@ -21,8 +21,8 @@ public class DocumentValidationResponseTest {
 
     private DocumentValidationResponse documentValidationResponse() {
         return DocumentValidationResponse.builder()
-                .errors(Collections.singletonList("Invalid file type"))
-                .mimeType("application/xml").build();
+            .errors(Collections.singletonList("Invalid file type"))
+            .mimeType("application/xml").build();
     }
 
     @Test

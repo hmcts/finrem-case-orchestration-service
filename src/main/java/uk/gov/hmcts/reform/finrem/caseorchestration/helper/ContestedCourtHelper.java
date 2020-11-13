@@ -43,10 +43,41 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 
 public class ContestedCourtHelper {
-    private ContestedCourtHelper(){
+    private ContestedCourtHelper() {
     }
 
     public static String getSelectedCourt(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+
+        switch (getSelectedFrc(caseDetails)) {
+            case NEWPORT:
+                return getNewportCourt(caseData);
+            case SWANSEA:
+                return getSwanseaCourt(caseData);
+            case KENT:
+                return getKentCourt(caseData);
+            case CLEAVELAND:
+                return getCleavelandCourt(caseData);
+            case NWYORKSHIRE:
+                return getNwYorkshireCourt(caseData);
+            case HSYORKSHIRE:
+                return getHumberCourt(caseData);
+            case LIVERPOOL:
+                return getLiverpoolCourt(caseData);
+            case MANCHESTER:
+                return getManchesterCourt(caseData);
+            case CFC:
+                return getLondonCourt(caseData);
+            case NOTTINGHAM:
+                return getNottinghamCourt(caseData);
+            case BIRMINGHAM:
+                return getBirminghamCourt(caseData);
+            default:
+                return EMPTY;
+        }
+    }
+
+    public static String getSelectedFrc(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         String region = (String) caseData.get(REGION);
 
@@ -71,60 +102,60 @@ public class ContestedCourtHelper {
         return EMPTY;
     }
 
-    private static String getWalesFRC(Map<String, Object> caseData) {
-        String walesList = (String) caseData.get(WALES_FRC_LIST);
+    private static String getWalesFRC(Map mapOfCaseData) {
+        String walesList = (String) mapOfCaseData.get(WALES_FRC_LIST);
         if (NEWPORT.equalsIgnoreCase(walesList)) {
-            return getNewportCourt(caseData);
+            return NEWPORT;
         } else if (SWANSEA.equalsIgnoreCase(walesList)) {
-            return getSwanseaCourt(caseData);
+            return SWANSEA;
         }
         return EMPTY;
     }
 
-    private static String getSouthEastFRC(Map<String, Object> caseData) {
-        String southEastList = (String) caseData.get(SOUTHEAST_FRC_LIST);
+    private static String getSouthEastFRC(Map mapOfCaseData) {
+        String southEastList = (String) mapOfCaseData.get(SOUTHEAST_FRC_LIST);
         if (KENT.equalsIgnoreCase(southEastList)) {
-            return getKentCourt(caseData);
+            return KENT;
         }
         return EMPTY;
     }
 
-    private static String getNorthEastFRC(Map<String, Object> caseData) {
-        String northEastList = (String) caseData.get(NORTHEAST_FRC_LIST);
+    private static String getNorthEastFRC(Map mapOfCaseData) {
+        String northEastList = (String) mapOfCaseData.get(NORTHEAST_FRC_LIST);
         if (CLEAVELAND.equalsIgnoreCase(northEastList)) {
-            return getCleavelandCourt(caseData);
+            return CLEAVELAND;
         } else if (NWYORKSHIRE.equalsIgnoreCase(northEastList)) {
-            return getNwYorkshireCourt(caseData);
+            return NWYORKSHIRE;
         } else if (HSYORKSHIRE.equalsIgnoreCase(northEastList)) {
-            return getHumberCourt(caseData);
+            return HSYORKSHIRE;
         }
         return EMPTY;
     }
 
-    private static String getNorthWestFRC(Map<String, Object> caseData) {
-        String northWestList = (String) caseData.get(NORTHWEST_FRC_LIST);
+    private static String getNorthWestFRC(Map mapOfCaseData) {
+        String northWestList = (String) mapOfCaseData.get(NORTHWEST_FRC_LIST);
         if (LIVERPOOL.equalsIgnoreCase(northWestList)) {
-            return getLiverpoolCourt(caseData);
+            return LIVERPOOL;
         } else if (MANCHESTER.equalsIgnoreCase(northWestList)) {
-            return getManchesterCourt(caseData);
+            return MANCHESTER;
         }
         return EMPTY;
     }
 
-    private static String getLondonFRC(Map<String, Object> caseData) {
-        String londonList = (String) caseData.get(LONDON_FRC_LIST);
+    private static String getLondonFRC(Map mapOfCaseData) {
+        String londonList = (String) mapOfCaseData.get(LONDON_FRC_LIST);
         if (CFC.equalsIgnoreCase(londonList)) {
-            return getLondonCourt(caseData);
+            return CFC;
         }
         return EMPTY;
     }
 
-    private static String getMidlandFRC(Map<String, Object> caseData) {
-        String midlandsList = (String) caseData.get(MIDLANDS_FRC_LIST);
+    private static String getMidlandFRC(Map mapOfCaseData) {
+        String midlandsList = (String) mapOfCaseData.get(MIDLANDS_FRC_LIST);
         if (NOTTINGHAM.equalsIgnoreCase(midlandsList)) {
-            return getNottinghamCourt(caseData);
+            return NOTTINGHAM;
         } else if (BIRMINGHAM.equalsIgnoreCase(midlandsList)) {
-            return getBirminghamCourt(caseData);
+            return BIRMINGHAM;
         }
         return EMPTY;
     }

@@ -44,11 +44,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class GeneralLetterServiceTest extends BaseServiceTest {
 
-    @Autowired private GeneralLetterService generalLetterService;
-    @Autowired private ObjectMapper mapper;
+    @Autowired
+    private GeneralLetterService generalLetterService;
+    @Autowired
+    private ObjectMapper mapper;
 
-    @MockBean private GenericDocumentService genericDocumentService;
-    @MockBean private BulkPrintService bulkPrintService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+    @MockBean
+    private BulkPrintService bulkPrintService;
 
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;

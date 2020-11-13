@@ -26,7 +26,7 @@ public class MiamCheckControllerTest extends BaseControllerTest {
 
     private static final String API_URL = "/case-orchestration/miam-attend-exempt-check";
     private static final String ERROR_MSG = "You cannot make this application unless the applicant has "
-            + "either attended, or is exempt from attending a MIAM";
+        + "either attended, or is exempt from attending a MIAM";
 
     @MockBean
     private MiamCheckService service;
@@ -35,11 +35,11 @@ public class MiamCheckControllerTest extends BaseControllerTest {
     public void badRequest() throws Exception {
         doEmptyCaseDataSetUp();
         mvc.perform(post(API_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(startsWith(GlobalExceptionHandler.SERVER_ERROR_MSG)));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(startsWith(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
 
     @Test
@@ -48,13 +48,13 @@ public class MiamCheckControllerTest extends BaseControllerTest {
         when(service.miamExemptAttendCheck(isA(CaseDetails.class))).thenReturn(ImmutableList.of(ERROR_MSG));
 
         mvc.perform(post(API_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.errors[0]",
-                        Matchers.is(ERROR_MSG)));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.errors[0]",
+                Matchers.is(ERROR_MSG)));
     }
 
     @Test
@@ -63,11 +63,11 @@ public class MiamCheckControllerTest extends BaseControllerTest {
         when(service.miamExemptAttendCheck(isA(CaseDetails.class))).thenReturn(ImmutableList.of());
 
         mvc.perform(post(API_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.errors[0]").doesNotExist());
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.errors[0]").doesNotExist());
     }
 }
