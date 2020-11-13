@@ -98,9 +98,19 @@ public class NotificationService {
         sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
     }
 
-    public void sendPrepareForHearingEmail(CallbackRequest callbackRequest) {
+    public void sendPrepareForHearingEmailApplicant(CallbackRequest callbackRequest) {
+        notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
+        sendPrepareForHearingEmail(notificationRequest);
+    }
+
+    public void sendPrepareForHearingEmailRespondent(CallbackRequest callbackRequest) {
+        notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
+        sendPrepareForHearingEmail(notificationRequest);
+    }
+
+    private void sendPrepareForHearingEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getPrepareForHearing());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest), uri);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendPrepareForHearingOrderSentEmailApplicant(CallbackRequest callbackRequest) {

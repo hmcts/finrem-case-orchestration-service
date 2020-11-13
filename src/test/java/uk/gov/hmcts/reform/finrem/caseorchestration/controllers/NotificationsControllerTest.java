@@ -343,6 +343,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void givenSolAgreedToEmails_and_noPreviousHearing_shouldSendPrepareForHearingEmail_and_PrintHearingDocuments() throws Exception {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
         buildCcdRequest(CONTESTED_PAPER_APPLICATION_HEARING_JSON);
         mockMvc.perform(post(PREPARE_FOR_HEARING_CALLBACK_URL)
             .content(requestContent.toString())
@@ -350,12 +353,16 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(notificationService, times(1)).sendPrepareForHearingEmail(any());
+        verify(notificationService, times(1)).sendPrepareForHearingEmailApplicant(any());
+        verify(notificationService, times(1)).sendPrepareForHearingEmailRespondent(any());
         verify(hearingDocumentService, times(1)).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
     }
 
     @Test
     public void shouldNotSendPrepareForHearingEmailWhenNotAgreed() throws Exception {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
         buildCcdRequest(CCD_REQUEST_JSON);
         mockMvc.perform(post(PREPARE_FOR_HEARING_CALLBACK_URL)
             .content(requestContent.toString())
@@ -363,7 +370,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verifyNoInteractions(notificationService);
+        verify(notificationService, never()).sendPrepareForHearingEmailApplicant(any());
+        verify(notificationService, never()).sendPrepareForHearingEmailRespondent(any());
     }
 
     @Test
