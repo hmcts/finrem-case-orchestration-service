@@ -30,4 +30,9 @@
         <cve>CVE-2020-13943</cve>
     </suppress>
 
+    <suppress>
+        <notes><![CDATA[file name: junit-4.13.jar]]></notes>
+        <packageUrl regex="true">^pkg:maven/junit/junit@.*$</packageUrl>
+        <cve>CVE-2020-15250</cve>
+    </suppress>
 </suppressions>
