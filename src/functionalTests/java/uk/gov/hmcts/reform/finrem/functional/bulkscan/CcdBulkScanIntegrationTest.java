@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 import uk.gov.hmcts.reform.finrem.functional.model.UserDetails;
 
@@ -38,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @Slf4j
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration.class)
-public class CcdBulkScanIntegrationTest {
+public class CcdBulkScanIntegrationTest extends BaseTest {
 
     private static final String FORM_A_JSON = "json/bulkscan/formA.json";
     private static final String DIVORCE_JURISDICTION_ID = "DIVORCE";
