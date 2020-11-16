@@ -54,9 +54,9 @@ public class NotificationsController implements BaseController {
     private final ManualPaymentDocumentService manualPaymentDocumentService;
     private final GeneralEmailService generalEmailService;
     private final CaseDataService caseDataService;
-    private final FeatureToggleService featureToggleService;
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
+    private final FeatureToggleService featureToggleService;
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Notify Applicant/Applicant Solicitor of HWF Successful by email or letter.")
@@ -230,8 +230,13 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending email notification to Solicitor for 'Contested Consent Order Approved'");
-            notificationService.sendContestedConsentOrderApprovedEmail(callbackRequest);
+            log.info("Sending email notification to Applicant Solicitor for 'Contested Consent Order Approved'");
+            notificationService.sendContestedConsentOrderApprovedEmailToApplicantSolicitor(callbackRequest);
+        }
+
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            log.info("Sending email notification to Respondent Solicitor for 'Contested Consent Order Approved'");
+            notificationService.sendContestedConsentOrderApprovedEmailToRespondentSolicitor(callbackRequest);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -272,7 +277,6 @@ public class NotificationsController implements BaseController {
         log.info("Received request to send email for General Order raised for Case ID: {}", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             if (isConsentedApplication(caseDetails)) {
@@ -283,10 +287,17 @@ public class NotificationsController implements BaseController {
                     log.info("Sending email notification to Solicitor for 'Contested consent General Order'");
                     notificationService.sendContestedConsentGeneralOrderEmail(callbackRequest);
                 } else {
-                    log.info("Sending email notification to Solicitor for 'Contested General Order'");
-                    notificationService.sendContestedGeneralOrderEmail(callbackRequest);
+                    log.info("Sending email notification to applicant solicitor for 'Contested General Order'");
+                    notificationService.sendContestedGeneralOrderEmailApplicant(callbackRequest);
                 }
             }
+        }
+
+        Map<String, Object> caseData = caseDetails.getData();
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)
+            && isContestedApplication(caseDetails) && !isConsentedInContestedCase(caseDetails)) {
+            log.info("Sending email notification to respondent solicitor for 'Contested General Order'");
+            notificationService.sendContestedGeneralOrderEmailRespondent(callbackRequest);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -327,7 +338,13 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing'");
-            notificationService.sendPrepareForHearingEmail(callbackRequest);
+            notificationService.sendPrepareForHearingEmailApplicant(callbackRequest);
+        }
+
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(
+            caseDetails.getData())) {
+            log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
+            notificationService.sendPrepareForHearingEmailRespondent(callbackRequest);
         }
 
         if (isContestedPaperApplication(caseDetails)) {
