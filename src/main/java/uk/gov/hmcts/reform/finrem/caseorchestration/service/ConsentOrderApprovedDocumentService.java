@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,7 +59,8 @@ public class ConsentOrderApprovedDocumentService {
 
         return genericDocumentService.generateDocument(authToken,
             CommonFunction.isContestedApplication(caseDetails)
-                ? applyAddExtraFields(caseDetails) : caseDetails,
+                ? prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(caseDetails)
+                : caseDetails,
             documentConfiguration.getApprovedConsentOrderTemplate(),
             documentConfiguration.getApprovedConsentOrderFileName());
     }
@@ -108,26 +107,22 @@ public class ConsentOrderApprovedDocumentService {
         return bulkPrintDocuments;
     }
 
-    public Map<String, Object> stampAndPopulateContestedConsentApprovedOrderCollection(Map<String, Object> caseData, String authToken) {
+    public void stampAndPopulateContestedConsentApprovedOrderCollection(Map<String, Object> caseData, String authToken) {
         CaseDocument stampedAndAnnexedDoc = stampAndAnnexContestedConsentOrder(caseData, authToken);
         List<PensionCollectionData> pensionDocs = consentInContestedStampPensionDocuments(caseData, authToken);
-        return populateContestedConsentOrderCaseDetails(caseData, stampedAndAnnexedDoc, pensionDocs);
+        populateContestedConsentOrderCaseDetails(caseData, stampedAndAnnexedDoc, pensionDocs);
     }
 
-    public Map<String, Object> generateAndPopulateConsentOrderLetter(CaseDetails caseDetails, String authToken) throws JsonProcessingException {
+    public void generateAndPopulateConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         Map<String, Object> caseData = caseDetails.getData();
         CaseDocument orderLetter = generateApprovedConsentOrderLetter(caseDetails, authToken);
         List<ApprovedOrderData> approvedOrderList = getConsentInContestedApprovedOrderCollection(caseData);
         if (approvedOrderList != null && !approvedOrderList.isEmpty()) {
-            ApprovedOrder approvedOrder = approvedOrderList.get(0).getApprovedOrder();
+            ApprovedOrder approvedOrder = approvedOrderList.get(approvedOrderList.size() - 1).getApprovedOrder();
             approvedOrder.setOrderLetter(orderLetter);
             caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderList);
-            caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
-            caseDetails.setData(caseData);
         }
-        return caseData;
     }
-
 
     private CaseDocument stampAndAnnexContestedConsentOrder(Map<String, Object> caseData, String authToken) {
         CaseDocument latestConsentOrder = getLatestConsentInContestedConsentOrder(caseData);
@@ -137,8 +132,8 @@ public class ConsentOrderApprovedDocumentService {
         return stampedAndAnnexedDoc;
     }
 
-    private Map<String, Object> populateContestedConsentOrderCaseDetails(Map<String, Object> caseData,
-                                                                         CaseDocument stampedDoc, List<PensionCollectionData> pensionDocs) {
+    private void populateContestedConsentOrderCaseDetails(Map<String, Object> caseData, CaseDocument stampedDoc,
+                                                          List<PensionCollectionData> pensionDocs) {
         caseData.put(CONSENT_ORDER, stampedDoc);
         caseData.put(CONTESTED_CONSENT_PENSION_COLLECTION, pensionDocs);
 
@@ -153,13 +148,10 @@ public class ConsentOrderApprovedDocumentService {
             .orElse(new ArrayList<>());
         approvedOrderDataList.add(approvedOrderData.build());
         caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderDataList);
-        return caseData;
     }
 
     private CaseDocument getLatestConsentInContestedConsentOrder(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(CONSENT_ORDER),
-            new TypeReference<CaseDocument>() {
-            });
+        return mapper.convertValue(caseData.get(CONSENT_ORDER), new TypeReference<>() {});
     }
 
     private List<PensionCollectionData> consentInContestedStampPensionDocuments(Map<String, Object> caseData, String authToken) {
@@ -172,17 +164,14 @@ public class ConsentOrderApprovedDocumentService {
             return new ArrayList<>();
         }
 
-        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION),
-            new TypeReference<List<PensionCollectionData>>() {
-            });
+        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION), new TypeReference<>() {});
     }
 
     private List<ApprovedOrderData> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<List<ApprovedOrderData>>() {
-        });
+        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {});
     }
 
-    private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
+    private CaseDetails prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(CaseDetails caseDetails) {
         CaseDetails detailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = detailsCopy.getData();
 
@@ -199,23 +188,23 @@ public class ConsentOrderApprovedDocumentService {
     public List<BulkPrintDocument> approvedOrderCollection(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        List collection = CommonFunction.isConsentedInContestedCase(caseDetails)
-            ? (List) data.get(CONTESTED_CONSENT_ORDER_COLLECTION)
-            : (List) data.get(APPROVED_ORDER_COLLECTION);
+        String approvedOrderCollectionFieldName = CommonFunction.isConsentedInContestedCase(caseDetails)
+            ? CONTESTED_CONSENT_ORDER_COLLECTION : APPROVED_ORDER_COLLECTION;
 
-        List<Map> documentList = ofNullable(collection)
-            .map(i -> (List<Map>) i)
+        List<Map> approvedOrderCollectionData = ofNullable(data.get(approvedOrderCollectionFieldName))
+            .map(List.class::cast)
             .orElse(new ArrayList<>());
 
-        if (!documentList.isEmpty()) {
-            log.info("Extracting 'approvedOrderCollection' from case data for bulk print: {}", data);
-            Map<String, Object> value = ((Map) getFirstMapValue.apply(documentList).get(VALUE));
-            documentHelper.getDocumentLinkAsBulkPrintDocument(value, ORDER_LETTER).ifPresent(bulkPrintDocuments::add);
-            documentHelper.getDocumentLinkAsBulkPrintDocument(value, CONSENT_ORDER).ifPresent(bulkPrintDocuments::add);
-            bulkPrintDocuments.addAll(documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(value,
+        if (!approvedOrderCollectionData.isEmpty()) {
+            log.info("Extracting '{}' from case data for bulk print: {}", approvedOrderCollectionFieldName, data);
+            Map<String, Object> lastApprovedOrder = (Map<String, Object>)(approvedOrderCollectionData.get(approvedOrderCollectionData.size() - 1)
+                .get(VALUE));
+            documentHelper.getDocumentLinkAsBulkPrintDocument(lastApprovedOrder, ORDER_LETTER).ifPresent(bulkPrintDocuments::add);
+            documentHelper.getDocumentLinkAsBulkPrintDocument(lastApprovedOrder, CONSENT_ORDER).ifPresent(bulkPrintDocuments::add);
+            bulkPrintDocuments.addAll(documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(lastApprovedOrder,
                 PENSION_DOCUMENTS, "uploadedDocument"));
         } else {
-            log.info("Failed to extract 'approvedOrderCollection' from case data for bulk print as document list was empty.");
+            log.info("Failed to extract '{}' from case data for bulk print as document list was empty.", approvedOrderCollectionFieldName);
         }
 
         return bulkPrintDocuments;

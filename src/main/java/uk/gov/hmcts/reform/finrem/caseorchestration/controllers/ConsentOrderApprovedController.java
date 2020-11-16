@@ -103,9 +103,10 @@ public class ConsentOrderApprovedController implements BaseController {
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
         validateCaseData(callback);
         CaseDetails caseDetails = callback.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
 
-        Map<String, Object> caseData = consentOrderApprovedDocumentService
-            .stampAndPopulateContestedConsentApprovedOrderCollection(caseDetails.getData(), authToken);
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, authToken);
+        consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
@@ -126,12 +127,8 @@ public class ConsentOrderApprovedController implements BaseController {
     })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedSendOrder(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) throws JsonProcessingException {
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
-
-        if (caseDetails.getState().equals(CONSENTED_ORDER_APPROVED)) {
-            consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
-        }
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
 
