@@ -37,7 +37,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_UR
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.PENSION_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.pensionDocumentData;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
@@ -153,7 +152,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
-        when(consentOrderPrintService.sendConsentOrderToBulkPrint(any(), any())).thenReturn(defaultConsentedCaseDetails().getData());
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -235,8 +233,6 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         doValidConsentOrderApprovedSetup();
         when(consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(any(), eq(AUTH_TOKEN)))
             .thenReturn(caseDocument());
-        when(consentOrderPrintService.sendConsentOrderToBulkPrint(any(), eq(AUTH_TOKEN)))
-            .thenAnswer(i -> i.getArgument(0, CaseDetails.class).getData());
 
         ResultActions result = mvc.perform(post(contestedConsentSendOrderEndpoint())
             .content(requestContent.toString())
