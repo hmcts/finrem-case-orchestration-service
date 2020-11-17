@@ -15,5 +15,5 @@ java:
   keyVaults:
     finrem:
       secrets:
-        - finrem-payment-service-s2s-key
+        - finrem-case-orchestration-service-s2s-key
         - idam-secret
