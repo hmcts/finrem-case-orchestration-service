@@ -15,4 +15,5 @@ java:
   keyVaults:
     finrem:
       secrets:
-        - AppInsightsInstrumentationKey
+        - finrem-payment-service-s2s-key
+        - idam-secret
