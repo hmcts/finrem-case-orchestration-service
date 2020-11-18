@@ -11,7 +11,6 @@ java:
     FINREM_NOTIFICATION_SERVICE_BASE_URL : "http://finrem-ns-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     PAYMENT_SERVICE_API_BASEURL : "http://finrem-ps-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     ACA_SERVICE_API_BASEURL: "http://aac-manage-case-assignment-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
-
   keyVaults:
     finrem:
       secrets:

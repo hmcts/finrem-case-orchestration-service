@@ -48,8 +48,16 @@ public class RestService {
     private HttpEntity<Object> buildAuthRequest(String userAuthToken, Object body) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_HEADER, userAuthToken);
-        headers.add(SERVICE_AUTHORISATION_HEADER, authTokenGenerator.generate());
         headers.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+
+        try {
+            String serviceAuthToken = authTokenGenerator.generate();
+
+            headers.add(SERVICE_AUTHORISATION_HEADER, serviceAuthToken);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
         return new HttpEntity<>(body, headers);
     }
 
