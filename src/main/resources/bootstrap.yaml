@@ -5,5 +5,5 @@ spring:
       prefixed: true
       paths: /mnt/secrets/finrem
       aliases:
-        finrem.finrem-payment-service-s2s-key: AUTH_PROVIDER_SERVICE_CLIENT_KEY
+        finrem.finrem-case-orchestration-service-s2s-key: AUTH_PROVIDER_SERVICE_CLIENT_KEY
         finrem.idam-secret: OAUTH2_CLIENT_FINREM
