@@ -2,9 +2,9 @@ spring:
   cloud:
     propertiesvolume:
       enabled: true
-      prefixed: false
+      prefixed: true
       paths: /mnt/secrets/finrem
       aliases:
-        AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
-        finrem-case-orchestration-service-s2s-key: AUTH_PROVIDER_SERVICE_CLIENT_KEY
-        idam-secret: OAUTH2_CLIENT_FINREM
+        finrem.AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
+        finrem.finrem-case-orchestration-service-s2s-key: AUTH_PROVIDER_SERVICE_CLIENT_KEY
+        finrem.idam-secret: OAUTH2_CLIENT_FINREM
