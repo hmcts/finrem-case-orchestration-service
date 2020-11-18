@@ -14,5 +14,6 @@ java:
   keyVaults:
     finrem:
       secrets:
+        - AppInsightsInstrumentationKey
         - finrem-case-orchestration-service-s2s-key
         - idam-secret
