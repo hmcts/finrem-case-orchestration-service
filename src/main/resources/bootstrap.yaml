@@ -6,5 +6,5 @@ spring:
       paths: /mnt/secrets/finrem
       aliases:
         finrem.AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
-        finrem.finrem-case-orchestration-service-s2s-key: AUTH_PROVIDER_SERVICE_CLIENT_KEY
+        finrem.finrem-case-orchestration-service-s2s-key: idam.s2s-auth.totp_secret
         finrem.idam-secret: OAUTH2_CLIENT_FINREM
