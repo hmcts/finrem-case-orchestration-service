@@ -317,6 +317,9 @@ public class CCDConfigConstant {
     public static final String ORGANISATION_POLICY_ORGANISATION_ID = "OrganisationID";
     public static final String APP_SOLICITOR_POLICY = "[APPSOLICITOR]";
 
+    public static final String CREATOR_ORGANISATION = "creatorOrganisation";
+
+
     //scheduled hearings
     public static final String ADDITIONAL_HEARING_DOCUMENT_COLLECTION = "additionalHearingDocuments";
     public static final String HEARING_TYPE = "hearingType";

@@ -2,14 +2,20 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.mockito.InjectMocks;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrganisationService;
 
 import java.io.File;
 
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -37,6 +43,12 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @MockBean
     FeatureToggleService featureToggleService;
+
+    @MockBean
+    OrganisationService organisationService;
+
+    @InjectMocks
+    CaseDataController caseDataController;
 
     @Test
     public void shouldSuccessfullyMoveValues() throws Exception {
@@ -307,5 +319,15 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").doesNotExist());
+    }
+
+    @Test
+    public void shouldSetCreatorOrg() throws Exception {
+        caseDataController = new CaseDataController(idamService, featureToggleService, organisationService);
+        CaseDetails caseDetails = TestSetUpUtils.defaultConsentedCaseDetails();
+        String authToken = "sdsfsa";
+        when(organisationService.setCreatorOrganisation(eq(authToken), eq(caseDetails)))
+            .thenReturn(caseDetails);
+        caseDataController.setCreatorOrganisation(authToken, CallbackRequest.builder().caseDetails(caseDetails).build());
     }
 }
