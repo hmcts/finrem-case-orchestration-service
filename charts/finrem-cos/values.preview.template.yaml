@@ -8,3 +8,8 @@ java:
     FEATURE_RESPONDENT_SOLICITOR_EMAIL_NOTIFICATION: true
     # Disabled secrets on preview ( remove this and override keyvaults when adding secrets needed for preview)
     SPRING_CLOUD_PROPERTIESVOLUME_ENABLED: false
+  keyVaults:
+    finrem:
+      secrets:
+        - finrem-case-orchestration-service-s2s-key
+        - idam-secret
