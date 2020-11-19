@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
 public class RestService {
 
-    @Value("${idam.s2s-auth.totp_secret}") final String secret;
+    @Value("${idam.s2s-auth.totp_secret}") private String secret;
 
     private final RestTemplate restTemplate;
     private final AuthTokenGenerator authTokenGenerator;
