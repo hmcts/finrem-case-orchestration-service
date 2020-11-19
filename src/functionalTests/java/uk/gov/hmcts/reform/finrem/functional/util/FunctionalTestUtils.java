@@ -35,9 +35,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 
 @ContextConfiguration(classes = TestContextConfiguration.class)
 @Component
+@EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
 @Slf4j
 @RequiredArgsConstructor
-@EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
 public class FunctionalTestUtils {
 
     private final AuthTokenGenerator authTokenGenerator;

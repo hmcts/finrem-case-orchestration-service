@@ -7,15 +7,12 @@ import net.serenitybdd.junit.runners.SerenityRunner;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 @RunWith(SerenityRunner.class)
 public class AssignCaseAccessTest extends IntegrationTestBase {
-
-    @Autowired private ObjectMapper objectMapper;
 
     @Value("${cos.aca.applicant-solicitor.api}")
     private String applicantSolicitorUrl;
@@ -24,7 +21,7 @@ public class AssignCaseAccessTest extends IntegrationTestBase {
 
     @Test
     public void verifyApplicantSolicitor() throws JsonProcessingException {
-        CallbackRequest callbackRequest = objectMapper.readValue(
+        CallbackRequest callbackRequest = new ObjectMapper().readValue(
             utils.getJsonFromFile("ccd-request-with-solicitor-contestApplicationIssued.json", contestedDir), CallbackRequest.class);
 
         Response response = utils.getResponseData(applicantSolicitorUrl, callbackRequest);
