@@ -16,6 +16,7 @@ import org.apache.http.entity.ContentType;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.support.ResponseEntityDecoder;
 import org.springframework.cloud.openfeign.support.SpringDecoder;
 import org.springframework.cloud.openfeign.support.SpringMvcContract;
@@ -40,6 +41,7 @@ import static org.assertj.core.util.Strings.isNullOrEmpty;
 
 @Configuration
 @ComponentScan("uk.gov.hmcts.reform.finrem.functional")
+@EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
 @PropertySource(value = {"classpath:application.properties"})
 @PropertySource(value = {"classpath:application-${env}.properties"})
 @Slf4j
