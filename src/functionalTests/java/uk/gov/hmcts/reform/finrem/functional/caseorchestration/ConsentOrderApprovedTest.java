@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
+import uk.gov.hmcts.reform.finrem.functional.util.FunctionalTestUtils;
 import uk.gov.hmcts.reform.finrem.functional.util.ServiceUtils;
 
 import java.io.IOException;
@@ -22,6 +23,9 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SerenityRunner.class)
 public class ConsentOrderApprovedTest extends IntegrationTestBase {
+
+    @Autowired
+    private FunctionalTestUtils functionalTestUtils;
 
     @Autowired
     private ServiceUtils serviceUtils;
@@ -51,7 +55,7 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Response response = utils.getResponseData(consentOrderApprovedUrl, callbackRequest);
+        Response response = functionalTestUtils.getResponseData(consentOrderApprovedUrl, callbackRequest);
         assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
     }
 
@@ -75,7 +79,7 @@ public class ConsentOrderApprovedTest extends IntegrationTestBase {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Response response = utils.getResponseData(consentOrderApprovedUrl, callbackRequest);
+        Response response = functionalTestUtils.getResponseData(consentOrderApprovedUrl, callbackRequest);
         assertEquals("Request failed " + response.getStatusCode(), 200, response.getStatusCode());
     }
 }
