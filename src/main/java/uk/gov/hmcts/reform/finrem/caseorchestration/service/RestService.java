@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -26,14 +25,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
 public class RestService {
 
-    @Value("${idam.s2s-auth.totp_secret}") private String secret;
-
     private final RestTemplate restTemplate;
     private final AuthTokenGenerator authTokenGenerator;
 
     public void restApiPostCall(String userAuthToken, String url, Object body) {
-        log.info("restApiPostCall - secret - {}", secret);
-
         URI uri = buildUri(url);
         log.info("restApiPostCall - uri - {}", uri.toString());
         HttpEntity authRequest = buildAuthRequest(userAuthToken, body);
@@ -53,16 +48,8 @@ public class RestService {
     private HttpEntity<Object> buildAuthRequest(String userAuthToken, Object body) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_HEADER, userAuthToken);
+        headers.add(SERVICE_AUTHORISATION_HEADER, authTokenGenerator.generate());
         headers.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-
-        try {
-            String serviceAuthToken = authTokenGenerator.generate();
-
-            headers.add(SERVICE_AUTHORISATION_HEADER, serviceAuthToken);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-
         return new HttpEntity<>(body, headers);
     }
 
