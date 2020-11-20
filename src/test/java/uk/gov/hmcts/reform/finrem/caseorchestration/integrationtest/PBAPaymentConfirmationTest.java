@@ -1,13 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -20,7 +24,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication
 
 import java.io.InputStream;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,10 +51,19 @@ public class PBAPaymentConfirmationTest extends BaseTest {
     @Autowired
     private MockMvc webClient;
 
+    @ClassRule public static WireMockClassRule idamService = new WireMockClassRule(4501);
+
     @Autowired
     private ObjectMapper objectMapper;
 
     private CallbackRequest request;
+
+    private String idamUrl = "/details";
+
+    @Before
+    public void setUp() {
+        stubForIdam();
+    }
 
     @Test
     public void shouldDoPbaConfirmation() throws Exception {
@@ -95,5 +114,17 @@ public class PBAPaymentConfirmationTest extends BaseTest {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(name)) {
             request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
+    }
+
+    private void stubForIdam() {
+        idamService.stubFor(get(urlEqualTo(idamUrl))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
+            .willReturn(
+                aResponse()
+                    .withStatus(HttpStatus.OK.value())
+                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("{\"id\": \"1234\"}".getBytes())
+            ));
     }
 }
