@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmail;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmailData;
 
@@ -16,33 +15,27 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_BODY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_CREATED_BY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class GeneralEmailService {
 
-    private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
 
-    private Function<CaseDetails, GeneralEmail> createGeneralEmailData = this::applyGeneralEmailData;
-
-    public CaseDetails storeGeneralEmail(CaseDetails caseDetails) {
-
+    public void storeGeneralEmail(CaseDetails caseDetails) {
         log.info("Storing general email for Case ID: {}", caseDetails.getId());
-        return createGeneralEmailData
-            .andThen(data -> populateGeneralEmailData(data, caseDetails))
-            .apply(documentHelper.deepCopy(caseDetails, CaseDetails.class));
+
+        GeneralEmail generalEmail = makeGeneralEmail(caseDetails);
+        addGeneralEmailToCollection(caseDetails, generalEmail);
     }
 
-    private GeneralEmail applyGeneralEmailData(CaseDetails caseDetails) {
+    private GeneralEmail makeGeneralEmail(CaseDetails caseDetails) {
         GeneralEmailData generalEmailData = new GeneralEmailData();
         generalEmailData.setGeneralEmailRecipient(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_RECIPIENT)));
         generalEmailData.setGeneralEmailCreatedBy(Objects.toString(caseDetails.getData().get(GENERAL_EMAIL_CREATED_BY)));
@@ -54,20 +47,18 @@ public class GeneralEmailService {
         return generalEmail;
     }
 
-    private CaseDetails populateGeneralEmailData(GeneralEmail generalEmail, CaseDetails caseDetails) {
+    private void addGeneralEmailToCollection(CaseDetails caseDetails, GeneralEmail generalEmail) {
         Map<String, Object> caseData = caseDetails.getData();
 
         List<GeneralEmail> generalEmailList = Optional.ofNullable(caseData.get(GENERAL_EMAIL_COLLECTION))
-            .map(this::convertToUploadOrderList)
+            .map(this::convertToGeneralEmailList)
             .orElse(new ArrayList<>());
 
         generalEmailList.add(generalEmail);
         caseDetails.getData().put(GENERAL_EMAIL_COLLECTION, generalEmailList);
-        return caseDetails;
     }
 
-    private List<GeneralEmail> convertToUploadOrderList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<GeneralEmail>>() {
-        });
+    private List<GeneralEmail> convertToGeneralEmailList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<>() {});
     }
 }
