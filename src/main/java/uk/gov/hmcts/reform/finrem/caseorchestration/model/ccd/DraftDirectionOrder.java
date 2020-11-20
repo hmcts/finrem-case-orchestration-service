@@ -6,15 +6,18 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class HearingOrderCollectionData {
-    @JsonProperty("id")
-    private String id;
-    @JsonProperty("value")
-    private HearingOrderDocument hearingOrderDocuments;
+@NoArgsConstructor
+public class DraftDirectionOrder {
+
+    @JsonProperty("purposeOfDocument")
+    String purposeOfDocument;
+
+    @JsonProperty("uploadDraftDocument")
+    Document uploadDraftDocument;
 }

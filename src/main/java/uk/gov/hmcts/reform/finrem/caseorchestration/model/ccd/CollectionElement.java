@@ -10,11 +10,13 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class HearingOrderCollectionData {
+@NoArgsConstructor
+public class CollectionElement<T> {
+
     @JsonProperty("id")
     private String id;
+
     @JsonProperty("value")
-    private HearingOrderDocument hearingOrderDocuments;
+    private T value;
 }

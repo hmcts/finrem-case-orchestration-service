@@ -1,11 +1,16 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.document;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Document {
+
     private String url;
     private String fileName;
     private String binaryUrl;
