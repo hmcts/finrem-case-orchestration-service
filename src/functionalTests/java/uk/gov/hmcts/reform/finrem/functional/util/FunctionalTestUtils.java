@@ -17,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
-import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
@@ -29,7 +28,6 @@ import java.nio.file.Files;
 
 import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
 @ContextConfiguration(classes = TestContextConfiguration.class)
 @Component
@@ -37,7 +35,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequiredArgsConstructor
 public class FunctionalTestUtils {
 
-    private final ServiceAuthTokenGenerator tokenGenerator;
     private final IdamUtils idamUtils;
 
     @Value("${user.id.url}")
@@ -61,7 +58,8 @@ public class FunctionalTestUtils {
 
     public Headers getHeadersWithUserId() {
         return Headers.headers(
-            new Header(SERVICE_AUTHORISATION_HEADER, tokenGenerator.generate()),
+            new Header(AUTHORIZATION_HEADER, "Bearer "
+                + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
             new Header("user-roles", "caseworker-divorce"),
             new Header("user-id", userId));
     }
@@ -178,13 +176,5 @@ public class FunctionalTestUtils {
             .contentType("application/json")
             .body(getJsonFromFile(filename, journeyType))
             .when().post(url).andReturn();
-    }
-
-    public int getStatusCode(String url, String jsonFileName, String journeyType) {
-        return SerenityRest.given()
-            .relaxedHTTPSValidation()
-            .headers(getHeaders())
-            .body(getJsonFromFile(jsonFileName, journeyType))
-            .when().post(url).getStatusCode();
     }
 }
