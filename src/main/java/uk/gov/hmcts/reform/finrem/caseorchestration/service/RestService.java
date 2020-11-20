@@ -49,7 +49,7 @@ public class RestService {
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_HEADER, userAuthToken);
         headers.add(SERVICE_AUTHORISATION_HEADER, authTokenGenerator.generate());
-        headers.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         return new HttpEntity<>(body, headers);
     }
 
