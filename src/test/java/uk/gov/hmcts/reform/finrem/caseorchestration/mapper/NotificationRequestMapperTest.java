@@ -22,7 +22,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
 
     @Test
     public void shouldCreateNotificationRequestForAppSolicitorForConsentedJourney() {
-        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(getConsentedCallbackRequest());
+        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(
+            getConsentedCallbackRequest().getCaseDetails());
 
         assertEquals("12345", notificationRequest.getCaseReferenceNumber());
         assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
@@ -36,7 +37,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     public void shouldCreateNotificationRequestForAppSolicitorForContestedJourney() {
         CallbackRequest callbackRequest = getContestedCallbackRequest();
 
-        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(callbackRequest);
+        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(
+            callbackRequest.getCaseDetails());
 
         assertEquals("12345", notificationRequest.getCaseReferenceNumber());
         assertEquals(TEST_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
@@ -50,7 +52,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     @Test
     public void shouldCreateNotificationRequestForRespSolicitorForConsentedJourney() {
         CallbackRequest callbackRequest = getConsentedCallbackRequest();
-        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
+        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(
+            callbackRequest.getCaseDetails());
 
         assertEquals("12345", notificationRequest.getCaseReferenceNumber());
         assertEquals(TEST_RESP_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
@@ -64,7 +67,8 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     public void shouldCreateNotificationRequestForRespSolicitorForContestedJourney() {
         CallbackRequest callbackRequest = getContestedCallbackRequest();
 
-        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(callbackRequest);
+        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForRespSolicitor(
+            callbackRequest.getCaseDetails());
 
         assertEquals("12345", notificationRequest.getCaseReferenceNumber());
         assertEquals(TEST_RESP_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
