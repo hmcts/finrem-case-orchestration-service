@@ -13,13 +13,11 @@ import org.pdfbox.pdfparser.PDFParser;
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.util.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
-import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
@@ -37,10 +35,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
 public class FunctionalTestUtils {
 
-    private final AuthTokenGenerator tokenGenerator;
+    private final ServiceAuthTokenGenerator tokenGenerator;
     private final IdamUtils idamUtils;
 
     @Value("${user.id.url}")
