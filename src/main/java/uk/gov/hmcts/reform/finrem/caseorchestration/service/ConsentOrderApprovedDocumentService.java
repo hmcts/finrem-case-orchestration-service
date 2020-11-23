@@ -200,7 +200,7 @@ public class ConsentOrderApprovedDocumentService {
                 .get(VALUE));
             documentHelper.getDocumentLinkAsBulkPrintDocument(lastApprovedOrder, ORDER_LETTER).ifPresent(bulkPrintDocuments::add);
             documentHelper.getDocumentLinkAsBulkPrintDocument(lastApprovedOrder, CONSENT_ORDER).ifPresent(bulkPrintDocuments::add);
-            bulkPrintDocuments.addAll(documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(lastApprovedOrder,
+            bulkPrintDocuments.addAll(documentHelper.getDocumentLinksFromCustomCollectionAsBulkPrintDocuments(lastApprovedOrder,
                 PENSION_DOCUMENTS, "uploadedDocument"));
         } else {
             log.info("Failed to extract '{}' from case data for bulk print as document list was empty.", approvedOrderCollectionFieldName);
