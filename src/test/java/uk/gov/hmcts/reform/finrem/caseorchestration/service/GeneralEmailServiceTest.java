@@ -1,39 +1,30 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralEmail;
 
 import java.io.InputStream;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_COLLECTION;
 
-public class GeneralEmailServiceTest {
+public class GeneralEmailServiceTest extends BaseServiceTest {
 
-    private DocumentHelper documentHelper;
-    private ObjectMapper mapper = new ObjectMapper();
-    private GeneralEmailService generalEmailService;
-
-    @Before
-    public void setUp() {
-        documentHelper = new DocumentHelper(mapper);
-        generalEmailService = new GeneralEmailService(documentHelper, mapper);
-    }
+    @Autowired private GeneralEmailService generalEmailService;
 
     @Test
     public void generateGeneralEmailConsented() throws Exception {
-        CaseDetails caseDetails = generalEmailService.storeGeneralEmail(caseDetailsConsented());
+        CaseDetails caseDetails = caseDetailsConsented();
+        generalEmailService.storeGeneralEmail(caseDetails);
         List<GeneralEmail> generalEmailList = (List<GeneralEmail>) caseDetails.getData().get(GENERAL_EMAIL_COLLECTION);
-        caseDetails.getData();
         assertThat(generalEmailList, hasSize(2));
 
         GeneralEmail originalEmail = generalEmailList.get(0);
@@ -51,9 +42,9 @@ public class GeneralEmailServiceTest {
 
     @Test
     public void generateGeneralEmailContested() throws Exception {
-        CaseDetails caseDetails = generalEmailService.storeGeneralEmail(caseDetailsContested());
+        CaseDetails caseDetails = caseDetailsContested();
+        generalEmailService.storeGeneralEmail(caseDetails);
         List<GeneralEmail> generalEmailList = (List<GeneralEmail>) caseDetails.getData().get(GENERAL_EMAIL_COLLECTION);
-        caseDetails.getData();
         assertThat(generalEmailList, hasSize(2));
 
         GeneralEmail originalEmail = generalEmailList.get(0);
