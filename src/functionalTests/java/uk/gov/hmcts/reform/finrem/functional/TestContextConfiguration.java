@@ -28,7 +28,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
-import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 
 import javax.annotation.PostConstruct;
@@ -49,20 +48,6 @@ public class TestContextConfiguration {
 
     @Value("${http.proxy:#{null}}")
     private String httpProxy;
-
-    @Bean
-    public ServiceAuthTokenGenerator serviceAuthTokenGenerator(@Value("${idam.s2s-auth.url}")
-                                                                   String s2sUrl,
-                                                               @Value("${idam.auth.secret}")
-                                                                   String secret,
-                                                               @Value("${idam.s2s-auth.microservice}")
-                                                                   String microservice) {
-        ServiceAuthorisationApi serviceAuthorisationApi = Feign.builder()
-            .encoder(new JacksonEncoder())
-            .contract(new SpringMvcContract())
-            .target(ServiceAuthorisationApi.class, s2sUrl);
-        return new ServiceAuthTokenGenerator(secret, microservice, serviceAuthorisationApi);
-    }
 
     @Bean
     public CoreCaseDataApi getCoreCaseDataApi(@Value("${core_case_data.api.url}") String coreCaseDataApiUrl) {

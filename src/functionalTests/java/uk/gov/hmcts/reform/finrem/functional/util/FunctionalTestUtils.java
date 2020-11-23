@@ -13,10 +13,13 @@ import org.pdfbox.pdfparser.PDFParser;
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.util.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
+import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.functional.TestContextConfiguration;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
@@ -28,13 +31,16 @@ import java.nio.file.Files;
 
 import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
 @ContextConfiguration(classes = TestContextConfiguration.class)
 @Component
 @Slf4j
 @RequiredArgsConstructor
+@EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
 public class FunctionalTestUtils {
 
+    private final AuthTokenGenerator tokenGenerator;
     private final IdamUtils idamUtils;
 
     @Value("${user.id.url}")
@@ -58,8 +64,7 @@ public class FunctionalTestUtils {
 
     public Headers getHeadersWithUserId() {
         return Headers.headers(
-            new Header(AUTHORIZATION_HEADER, "Bearer "
-                + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
+            new Header(SERVICE_AUTHORISATION_HEADER, tokenGenerator.generate()),
             new Header("user-roles", "caseworker-divorce"),
             new Header("user-id", userId));
     }
@@ -176,5 +181,13 @@ public class FunctionalTestUtils {
             .contentType("application/json")
             .body(getJsonFromFile(filename, journeyType))
             .when().post(url).andReturn();
+    }
+
+    public int getStatusCode(String url, String jsonFileName, String journeyType) {
+        return SerenityRest.given()
+            .relaxedHTTPSValidation()
+            .headers(getHeaders())
+            .body(getJsonFromFile(jsonFileName, journeyType))
+            .when().post(url).getStatusCode();
     }
 }
