@@ -60,8 +60,10 @@ public class ContestedCaseOrderService {
 
         //ADDITIONAL_HEARING_DOCUMENT FROM THE COLLECTION
         Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);
-        String latestAdditionalHearingDocLink = latestAdditionalHearingDocument.get().getDocumentBinaryUrl();
-        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, latestAdditionalHearingDocLink).ifPresent(hearingDocumentPack::add);
+        if (latestAdditionalHearingDocument.isPresent()) {
+            String latestAdditionalHearingDocLink = latestAdditionalHearingDocument.get().getDocumentBinaryUrl();
+            documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, latestAdditionalHearingDocLink).ifPresent(hearingDocumentPack::add);
+        }
 
         //ALL HEARING ORDER OTHER DOCUMENTS
         List<BulkPrintDocument> otherHearingDocuments = documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(
