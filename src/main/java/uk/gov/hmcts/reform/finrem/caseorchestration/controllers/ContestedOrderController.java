@@ -64,6 +64,8 @@ public class ContestedOrderController implements BaseController {
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, authToken);
 
+        contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, authToken);
+
         List<HearingOrderCollectionData> hearingOrderCollectionData = getHearingOrderDocuments(caseData);
 
         if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {

@@ -337,5 +337,6 @@ public class CCDConfigConstant {
     public static final String DRAFT_HEARING_ORDER_COLLECTION_RO  = "draftDirectionDetailsCollectionRO";
     public static final String DRAFT_HEARING_ORDER_COLLECTION  = "draftDirectionDetailsCollection";
     public static final String DRAFT_DIRECTION_ORDER_COLLECTION  = "draftDirectionOrderCollection";
+    public static final String HEARING_ORDER_OTHER_COLLECTION = "hearingOrderOtherDocuments";
 
 }
