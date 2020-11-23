@@ -30,7 +30,7 @@ public class ConsentOrderPrintService {
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
 
-    public Map<String, Object> sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
+    public void sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
@@ -43,8 +43,6 @@ public class ConsentOrderPrintService {
         generateCoversheetForRespondentAndSendOrders(caseDetails, authorisationToken);
 
         log.info("Bulk print is successful");
-
-        return caseData;
     }
 
     private void generateCoversheetForRespondentAndSendOrders(CaseDetails caseDetails, String authToken) {
