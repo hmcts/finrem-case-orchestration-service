@@ -15,8 +15,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_EMAIL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
@@ -44,7 +45,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldGetLatestAmendedConsentOrder() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("amend-consent-order-by-caseworker.json");
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("amend-consent-order-by-caseworker.json");
         CaseDocument latestAmendedConsentOrder = documentHelper.getLatestAmendedConsentOrder(
             callbackRequest.getCaseDetails().getData());
         assertThat(latestAmendedConsentOrder.getDocumentBinaryUrl(),
@@ -52,8 +53,24 @@ public class DocumentHelperTest {
     }
 
     @Test
+    public void shouldGetLatestContestedDraftOrderCollection() throws Exception {
+        CallbackRequest callbackRequest = prepareCallbackRequest("/fixtures/contested/hearing-order-conversion.json");
+        CaseDocument latestAmendedConsentOrder = documentHelper.getLatestContestedDraftOrderCollection(
+            callbackRequest.getCaseDetails().getData());
+        assertThat(latestAmendedConsentOrder.getDocumentFilename(), is("one.pdf"));
+    }
+
+    @Test
+    public void shouldNotGetLatestContestedDraftOrderCollectionWhenMissing() throws Exception {
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("amend-consent-order-by-caseworker.json");
+        CaseDocument latestAmendedConsentOrder = documentHelper.getLatestContestedDraftOrderCollection(
+            callbackRequest.getCaseDetails().getData());
+        assertThat(latestAmendedConsentOrder, nullValue());
+    }
+
+    @Test
     public void shouldGetPensionDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("validate-pension-collection.json");
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
         List<CaseDocument> pensionDocuments = documentHelper.getPensionDocumentsData(
             callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
@@ -61,7 +78,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldGetFormADocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("validate-form-a-collection.json");
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
         List<CaseDocument> pensionDocuments = documentHelper.getFormADocumentsData(
             callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
@@ -69,7 +86,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldGetConsentedInContestedPensionDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("consented-in-consented.json");
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("consented-in-consented.json");
         List<CaseDocument> pensionDocuments = documentHelper.getConsentedInContestedPensionDocumentsData(
             callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
@@ -77,7 +94,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldGetRespondToOrderDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("respond-to-order-solicitor.json");
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-solicitor.json");
         Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
             callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(true));
@@ -86,7 +103,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldNotGetRespondToOrderDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("respond-to-order-without-consent-order.json");
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-without-consent-order.json");
         Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
             callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(false));
@@ -94,7 +111,7 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldGetCaseDocument() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("draft-consent-order.json");
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> data = caseDetails.getData();
         CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.get(CONSENT_ORDER));
@@ -231,8 +248,14 @@ public class DocumentHelperTest {
         assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
     }
 
-    private CallbackRequest prepareCallbackRequest(String fileName) throws Exception {
+    private CallbackRequest prepareCallbackRequestForLatestConsentedConsentOrder(String fileName) throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+        }
+    }
+
+    private CallbackRequest prepareCallbackRequest(String fileName) throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(fileName)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }

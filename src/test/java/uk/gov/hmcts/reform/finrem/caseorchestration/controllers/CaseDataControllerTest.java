@@ -36,7 +36,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @MockBean private FeatureToggleService featureToggleService;
 
     @Test
-    public void shouldSuccessfullyMoveValues() throws Exception {
+    public void shouldSuccessfullyMoveCollection() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
         requestContent = objectMapper.readTree(
@@ -48,80 +48,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.uploadHearingOrderRO[0]").exists())
-            .andExpect(jsonPath("$.data.uploadHearingOrderRO[1]").exists())
-            .andExpect(jsonPath("$.data.uploadHearingOrderRO[2]").exists())
-            .andExpect(jsonPath("$.data.uploadHearingOrder").isEmpty());
-    }
-
-    @Test
-    public void shouldSuccessfullyMoveValuesToNewCollections() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
-
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(MOVE_VALUES_SAMPLE_JSON)
-                .toURI()));
-        mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/uploadHearingOrderNew")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.uploadHearingOrderNew[0]").exists())
-            .andExpect(jsonPath("$.data.uploadHearingOrder").isEmpty());
-    }
-
-    @Test
-    public void shouldDoNothingWithNonArraySourceValueMove() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
-
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(MOVE_VALUES_SAMPLE_JSON)
-                .toURI()));
-        mvc.perform(post("/case-orchestration/move-collection/someString/to/uploadHearingOrder")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
-    }
-
-    @Test
-    public void shouldDoNothingWithNonArrayDestinationValueMove() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
-
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(MOVE_VALUES_SAMPLE_JSON)
-                .toURI()));
-        mvc.perform(post("/case-orchestration/move-collection/uploadHearingOrder/to/someString")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
-    }
-
-    @Test
-    public void shouldDoNothingWhenSourceIsEmptyMove() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
-
-        requestContent = objectMapper.readTree(
-            new File(getClass()
-                .getResource(MOVE_VALUES_SAMPLE_JSON)
-                .toURI()));
-        mvc.perform(post("/case-orchestration/move-collection/empty/to/uploadHearingOrder")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.uploadHearingOrder[0]").exists());
+            .andDo(print());
     }
 
     @Test

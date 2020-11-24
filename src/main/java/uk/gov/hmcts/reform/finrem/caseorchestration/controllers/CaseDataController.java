@@ -41,7 +41,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-@SuppressWarnings("unchecked")
 public class CaseDataController implements BaseController {
 
     private final IdamService idamService;
