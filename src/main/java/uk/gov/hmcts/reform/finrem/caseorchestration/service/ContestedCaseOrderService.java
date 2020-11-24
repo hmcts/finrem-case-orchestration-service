@@ -47,7 +47,6 @@ public class ContestedCaseOrderService {
             }
 
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, createHearingDocumentPack(caseData));
-            createHearingDocumentPack(caseDetails.getData());
         }
     }
 
@@ -60,10 +59,8 @@ public class ContestedCaseOrderService {
 
         //ADDITIONAL_HEARING_DOCUMENT FROM THE COLLECTION
         Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);
-        if (latestAdditionalHearingDocument.isPresent()) {
-            String latestAdditionalHearingDocLink = latestAdditionalHearingDocument.get().getDocumentBinaryUrl();
-            documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, latestAdditionalHearingDocLink).ifPresent(hearingDocumentPack::add);
-        }
+        latestAdditionalHearingDocument.ifPresent(
+            caseDocument -> hearingDocumentPack.add(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument)));
 
         //ALL HEARING ORDER OTHER DOCUMENTS
         List<BulkPrintDocument> otherHearingDocuments = documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(
@@ -79,4 +76,5 @@ public class ContestedCaseOrderService {
     private boolean contestedGeneralOrderPresent(CaseDetails caseDetails) {
         return !isNull(caseDetails.getData().get(GENERAL_ORDER_LATEST_DOCUMENT));
     }
+
 }

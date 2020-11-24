@@ -223,6 +223,7 @@ public class DocumentHelper {
         }
         return Optional.empty();
     }
+    
 
     public CaseDetails prepareLetterToApplicantTemplateData(CaseDetails caseDetails) {
         // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
