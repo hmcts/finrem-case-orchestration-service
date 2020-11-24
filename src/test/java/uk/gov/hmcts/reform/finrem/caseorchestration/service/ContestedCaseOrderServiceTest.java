@@ -71,10 +71,11 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     @Test
     public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase() {
         CaseDetails caseDetails = hearingDocumentsContestedCaseDetails();
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
 
         contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
 
-        //verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
     }
 
