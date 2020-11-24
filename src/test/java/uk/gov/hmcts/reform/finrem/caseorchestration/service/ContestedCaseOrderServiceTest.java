@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -84,8 +85,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
         contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
 
-        verify(bulkPrintService, times(0)).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService, times(0)).printRespondentDocuments(any(), any(), any());
+        verifyNoInteractions(bulkPrintService);
     }
 
     private CaseDetails hearingDocumentsContestedCaseDetails() {
