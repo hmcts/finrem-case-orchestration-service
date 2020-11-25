@@ -29,11 +29,15 @@ public class RestService {
     private final AuthTokenGenerator authTokenGenerator;
 
     public void restApiPostCall(String userAuthToken, String url, Object body) {
-        restTemplate.exchange(
-            buildUri(url),
-            HttpMethod.POST,
-            buildAuthRequest(userAuthToken, body),
-            Map.class);
+        try {
+            restTemplate.exchange(
+                buildUri(url),
+                HttpMethod.POST,
+                buildAuthRequest(userAuthToken, body),
+                Map.class);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 
     private HttpEntity<Object> buildAuthRequest(String userAuthToken, Object body) {
