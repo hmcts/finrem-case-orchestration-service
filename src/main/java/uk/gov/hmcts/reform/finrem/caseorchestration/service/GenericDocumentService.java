@@ -49,12 +49,17 @@ public class GenericDocumentService {
         return toCaseDocument(stampedDocument);
     }
 
+    public CaseDocument convertDocumentToPdf(CaseDocument document, String authorisationToken) {
+        return toCaseDocument(documentClient.convertDocumentToPdf(authorisationToken, toDocument(document)));
+
+    }
+
     public CaseDocument stampDocument(CaseDocument document, String authorisationToken) {
         Document stampedDocument = documentClient.stampDocument(toDocument(document), authorisationToken);
         return toCaseDocument(stampedDocument);
     }
 
-    private CaseDocument toCaseDocument(Document document) {
+    public CaseDocument toCaseDocument(Document document) {
         CaseDocument caseDocument = new CaseDocument();
         caseDocument.setDocumentBinaryUrl(document.getBinaryUrl());
         caseDocument.setDocumentFilename(document.getFileName());
@@ -62,7 +67,7 @@ public class GenericDocumentService {
         return caseDocument;
     }
 
-    private Document toDocument(CaseDocument caseDocument) {
+    public Document toDocument(CaseDocument caseDocument) {
         Document document = new Document();
         document.setBinaryUrl(caseDocument.getDocumentBinaryUrl());
         document.setFileName(caseDocument.getDocumentFilename());

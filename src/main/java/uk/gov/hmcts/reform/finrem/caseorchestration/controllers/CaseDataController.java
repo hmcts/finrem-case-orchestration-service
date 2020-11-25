@@ -14,13 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -47,6 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 public class CaseDataController implements BaseController {
     private final IdamService idamService;
     private final FeatureToggleService featureToggleService;
+    private final DocumentHelper documentHelper;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for consented journey")
@@ -111,18 +110,8 @@ public class CaseDataController implements BaseController {
         @PathVariable("destination") final String destination) {
 
         validateCaseData(callbackRequest);
-        final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        if (caseData.get(source) != null && (caseData.get(source) instanceof Collection)) {
-            if (caseData.get(destination) == null || (caseData.get(destination) instanceof Collection)) {
-                final List destinationList = new ArrayList();
-                if (caseData.get(destination) != null) {
-                    destinationList.addAll((List) caseData.get(destination));
-                }
-                destinationList.addAll((List) caseData.get(source));
-                caseData.put(destination, destinationList);
-                caseData.put(source, null);
-            }
-        }
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        caseData = documentHelper.moveCollection(caseData, source, destination);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
