@@ -284,8 +284,8 @@ public class NotificationsController implements BaseController {
                 notificationService.sendConsentedGeneralOrderEmail(caseDetails);
             } else {
                 if (isConsentedInContestedCase(caseDetails)) {
-                    log.info("Sending email notification to Solicitor for 'Contested consent General Order'");
-                    notificationService.sendContestedConsentGeneralOrderEmail(caseDetails);
+                    log.info("Sending email notification to applicant Solicitor for 'Contested consent General Order'");
+                    notificationService.sendContestedConsentGeneralOrderEmailApplicantSolicitor(caseDetails);
                 } else {
                     log.info("Sending email notification to applicant solicitor for 'Contested General Order'");
                     notificationService.sendContestedGeneralOrderEmailApplicant(caseDetails);
@@ -295,9 +295,14 @@ public class NotificationsController implements BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
         if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)
-            && isContestedApplication(caseDetails) && !isConsentedInContestedCase(caseDetails)) {
-            log.info("Sending email notification to respondent solicitor for 'Contested General Order'");
-            notificationService.sendContestedGeneralOrderEmailRespondent(caseDetails);
+            && isContestedApplication(caseDetails)) {
+            if (isConsentedInContestedCase(caseDetails)) {
+                log.info("Sending email notification to respondent Solicitor for 'Contested consent General Order'");
+                notificationService.sendContestedConsentGeneralOrderEmailRespondentSolicitor(caseDetails);
+            } else {
+                log.info("Sending email notification to respondent solicitor for 'Contested General Order'");
+                notificationService.sendContestedGeneralOrderEmailRespondent(caseDetails);
+            }
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
