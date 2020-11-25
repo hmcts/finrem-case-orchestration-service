@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
 
 import java.io.File;
@@ -13,6 +14,9 @@ import java.io.File;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,8 +32,8 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
 
     private static final String PBA_CONFIRMATION_URL = "/case-orchestration/payment-confirmation";
 
-    @MockBean
-    private PaymentConfirmationService paymentConfirmationService;
+    @MockBean private PaymentConfirmationService paymentConfirmationService;
+    @MockBean private AssignCaseAccessService assignCaseAccessService;
 
     private void doConfirmationSetup(boolean isConsented, boolean isHwf) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -71,6 +75,8 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest())
             .andExpect(content().string(startsWith(GlobalExceptionHandler.SERVER_ERROR_MSG)));
+
+        verify(assignCaseAccessService, never()).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -84,6 +90,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
             .andExpect(jsonPath("$.confirmation_body", is("consented_hwf_confirmation_markup")));
         verify(paymentConfirmationService, times(1)).consentedHwfPaymentConfirmation();
+        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -97,6 +104,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
             .andExpect(jsonPath("$.confirmation_body", is("consented_pba_confirmation_markup")));
         verify(paymentConfirmationService, times(1)).consentedPbaPaymentConfirmation();
+        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -110,6 +118,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
             .andExpect(jsonPath("$.confirmation_body", is("contested_hwf_confirmation_markup")));
         verify(paymentConfirmationService, times(1)).contestedHwfPaymentConfirmation();
+        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -123,5 +132,6 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.confirmation_header", is(emptyOrNullString())))
             .andExpect(jsonPath("$.confirmation_body", is("contested_pba_confirmation_markup")));
         verify(paymentConfirmationService, times(1)).contestedPbaPaymentConfirmation();
+        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
 }

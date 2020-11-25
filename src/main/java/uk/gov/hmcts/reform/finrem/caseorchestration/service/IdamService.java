@@ -47,6 +47,11 @@ public class IdamService {
         return body.get("forename") + " " + body.get("surname");
     };
 
+    private static final Function<ResponseEntity<Map>, String> userId = responseEntity -> {
+        Map body = responseEntity.getBody();
+        return (String) body.get("id");
+    };
+
     public boolean isUserRoleAdmin(String authToken) {
         return isAdmin.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
             buildAuthRequest.apply(authToken), Map.class));
@@ -54,6 +59,11 @@ public class IdamService {
 
     public String getIdamFullName(String authorisationToken) {
         return userFullName.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
+            buildAuthRequest.apply(authorisationToken), Map.class));
+    }
+
+    public String getIdamUserId(String authorisationToken) {
+        return userId.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
             buildAuthRequest.apply(authorisationToken), Map.class));
     }
 }
