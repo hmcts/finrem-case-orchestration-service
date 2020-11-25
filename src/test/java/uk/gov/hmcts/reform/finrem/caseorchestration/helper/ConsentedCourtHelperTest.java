@@ -6,47 +6,112 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALDERSHOT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BARNSTAPLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BARROW;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BASINGSTOKE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BATH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BLACKBURN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BLACKPOOL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BODMIN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BOURNEMOUTH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOLFRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOL_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BURY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CAERNARFON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CAMBRIDGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CARLISLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHELMSFORD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DEVON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DEVON_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXETER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GLOUCESTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HERTFORD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IPSWICH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISLE_OF_WIGHT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LEYLAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LUTON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MILTON_KEYNES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MOLD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWALES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTH_WALES_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORWICH;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWOTHER_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OTHER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OXFORD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PETERBOROUGH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PLYMOUTH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PORTSMOUTH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PRESTATYN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PRESTON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.READING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REEDLEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SALISBURY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SEOTHER_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SLOUGH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHAMPTON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHWEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHWEST_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWINDON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWOTHER_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TAUNTON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.THAMESVALLEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.THAMESVALLEY_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TORQUAY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TRURO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_OTHER_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WATFORD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WELSHPOOL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WESTON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WEST_CUMBRIA;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WEYMOUTH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WINCHESTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WREXHAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.YEOVIL;
 
 public class ConsentedCourtHelperTest {
 
@@ -95,6 +160,28 @@ public class ConsentedCourtHelperTest {
 
         verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, OTHER, WALES_OTHER_COURTLIST,
             "invalid", "");
+    }
+
+    @Test
+    public void northWalesCourts() {
+        verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
+            WREXHAM, "Wrexham County Court and Family Court");
+
+        verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
+            CAERNARFON, "Caernarfon Justice Centre");
+
+        verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
+            PRESTATYN, "Prestatyn Justice Centre");
+
+        verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
+            WELSHPOOL, "Welshpool Civil and Family Court");
+
+        verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
+            MOLD, "Mold County");
+
+        verifyCorrectCourtReturned(WALES, WALES_FRC_LIST, NORTHWALES, NORTH_WALES_COURTLIST,
+            "invalid", "");
+
     }
 
     @Test
@@ -163,6 +250,65 @@ public class ConsentedCourtHelperTest {
 
         verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, KENT, KENTFRC_COURTLIST,
             "invalid", "");
+    }
+
+    @Test
+    public void bedfordshireCourts() {
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            PETERBOROUGH, "Peterborough Combined Court Centre");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            CAMBRIDGE, "Cambridge County Court and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            BURY, "Bury St Edmunds County Court and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            NORWICH, "Norwich Combined Court Centre");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            IPSWICH, "Ipswich County Court and Faily Hearing Centre");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            CHELMSFORD, "Chelmsford County Court and Family Hearing Centre");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            SOUTHEND, "Southend County Court and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            BEDFORD, "Bedford County Court and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            LUTON, "Luton Justice Centre");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            HERTFORD, "Hertford County Court and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            WATFORD, "Watford County Court and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, BEDFORDSHIRE, BEDFORDSHIRE_COURTLIST,
+            "invalid", "");
+
+    }
+
+    @Test
+    public void thamesvalleyCourts() {
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, THAMESVALLEY, THAMESVALLEY_COURTLIST,
+            OXFORD, "Oxford Combined Court Centre");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, THAMESVALLEY, THAMESVALLEY_COURTLIST,
+            READING, "Reading County Court and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, THAMESVALLEY, THAMESVALLEY_COURTLIST,
+            MILTON_KEYNES, "Milton Keynes County Court and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, THAMESVALLEY, THAMESVALLEY_COURTLIST,
+            SLOUGH, "Slough County Court and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHEAST, SOUTHEAST_FRC_LIST, THAMESVALLEY, THAMESVALLEY_COURTLIST,
+            "invalid", "");
+
     }
 
     @Test
@@ -313,6 +459,93 @@ public class ConsentedCourtHelperTest {
     }
 
     @Test
+    public void devonCourts() {
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DEVON, DEVON_COURTLIST,
+            PLYMOUTH, "Plymouth Combined Court");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DEVON, DEVON_COURTLIST,
+            EXETER, "Exeter Combined Court Centre");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DEVON, DEVON_COURTLIST,
+            TAUNTON, "Taunton Crown, County and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DEVON, DEVON_COURTLIST,
+            TORQUAY, "Torquay and Newton Abbot County and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DEVON, DEVON_COURTLIST,
+            BARNSTAPLE, "Barnstaple Magistrates, County and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DEVON, DEVON_COURTLIST,
+            TRURO, "Truro County Court and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DEVON, DEVON_COURTLIST,
+            YEOVIL, "Yeovil County, Family and Magistrates Court");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DEVON, DEVON_COURTLIST,
+            BODMIN, "Bodmin County Court and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DEVON, DEVON_COURTLIST,
+            "invalid", "");
+
+    }
+
+    @Test
+    public void dorsetCourts() {
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DORSET, DORSET_COURTLIST,
+            BOURNEMOUTH, "Bournemouth and Poole County Court and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DORSET, DORSET_COURTLIST,
+            WEYMOUTH, "Weymouth Combined Court");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DORSET, DORSET_COURTLIST,
+            WINCHESTER, "Winchester Combined Court Centre");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DORSET, DORSET_COURTLIST,
+            PORTSMOUTH, "Portsmouth Combined Court Centre");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DORSET, DORSET_COURTLIST,
+            SOUTHAMPTON, "Southampton Combined Court Centre");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DORSET, DORSET_COURTLIST,
+            ALDERSHOT, "Aldershot Justice Centre");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DORSET, DORSET_COURTLIST,
+            BASINGSTOKE, "Basingstoke County and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DORSET, DORSET_COURTLIST,
+            ISLE_OF_WIGHT, "Newport (Isle of Wight) Combined Court");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, DORSET, DORSET_COURTLIST,
+            "invalid", "");
+
+    }
+
+    @Test
+    public void bristolCourts() {
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, BRISTOLFRC, BRISTOL_COURTLIST,
+            BRISTOL, "Bristol Civil and Family Justice Centre");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, BRISTOLFRC, BRISTOL_COURTLIST,
+            GLOUCESTER, "Gloucester and Cheltenham County and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, BRISTOLFRC, BRISTOL_COURTLIST,
+            SWINDON, "Swindon Combined Court");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, BRISTOLFRC, BRISTOL_COURTLIST,
+            SALISBURY, "Salisbury Law Courts");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, BRISTOLFRC, BRISTOL_COURTLIST,
+            BATH, "Bath Law Courts");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, BRISTOLFRC, BRISTOL_COURTLIST,
+            WESTON, "Weston Super Mare County and Family Court");
+
+        verifyCorrectCourtReturned(SOUTHWEST, SOUTHWEST_FRC_LIST, BRISTOLFRC, BRISTOL_COURTLIST,
+            "invalid", "");
+
+    }
+
+    @Test
     public void cleavelandCourts() {
         verifyCorrectCourtReturned(NORTHEAST, NORTHEAST_FRC_LIST, CLEAVELAND, CLEAVELAND_COURTLIST,
             "FR_clevelandList_1", "Newcastle upon Tyne Justice Centre");
@@ -443,6 +676,39 @@ public class ConsentedCourtHelperTest {
 
         verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, "invalid", MANCHESTER_COURTLIST,
             "FR_manchesterList_3", "");
+    }
+
+    @Test
+    public void lancashireCourtList() {
+        verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
+            PRESTON, "Preston Combined Court Centre");
+
+        verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
+            BLACKBURN, "Blackburn Family Court");
+
+        verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
+            BLACKPOOL, "Blackpool Family Court");
+
+        verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
+            LANCASTER, "Lancaster Courthouse");
+
+        verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
+            LEYLAND, "Leyland Family Hearing Centre");
+
+        verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
+            REEDLEY, "Reedley Family Hearing Centre");
+
+        verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
+            BARROW, "Barrow in Furness County and Family Court");
+
+        verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
+            CARLISLE, "Carlisle Combined Court");
+
+        verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, LANCASHIRE, LANCASHIRE_COURTLIST,
+            WEST_CUMBRIA, "West Cumbria Courthouse");
+
+        verifyCorrectCourtReturned(NORTHWEST, NORTHWEST_FRC_LIST, MANCHESTER, MANCHESTER_COURTLIST,
+            "invalid", "");
     }
 
     @Test

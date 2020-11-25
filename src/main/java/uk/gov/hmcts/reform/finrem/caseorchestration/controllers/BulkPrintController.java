@@ -15,12 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
 
 import javax.validation.constraints.NotNull;
-
-import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -31,7 +28,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @Slf4j
 public class BulkPrintController implements BaseController {
 
-    private final BulkPrintService bulkPrintService;
     private final ConsentOrderPrintService consentOrderPrintService;
 
     @PostMapping(path = "/bulk-print", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -52,8 +48,8 @@ public class BulkPrintController implements BaseController {
         log.info("Received request for Bulk Print for Case ID {}", caseDetails.getId());
         validateCaseData(callback);
 
-        Map<String, Object> caseData = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authorisationToken);
+        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authorisationToken);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 }
