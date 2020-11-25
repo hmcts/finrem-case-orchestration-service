@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.util.Arrays;
@@ -27,7 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @SpringBootTest({
     "idam.url: http://localhost:8889"
 })
-public class SidamServiceConsumerTest {
+public class SidamServiceConsumerTest extends BaseTest {
 
     @Autowired
     private IdamService idamService;

@@ -13,28 +13,28 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MOLD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWALES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTH_WALES_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OTHER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PRESTATYN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWOTHER_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_OTHER_COURTLIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164Phase1FrcCourtListMigrationImpl.LONDON_TEMP;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164Phase1FrcCourtListMigrationImpl.MOLD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164Phase1FrcCourtListMigrationImpl.MOLD_OLD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164Phase1FrcCourtListMigrationImpl.NORTHWALES;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164Phase1FrcCourtListMigrationImpl.OTHER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164Phase1FrcCourtListMigrationImpl.PRESTATYN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164Phase1FrcCourtListMigrationImpl.PRESTATYN_OLD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164Phase1FrcCourtListMigrationImpl.WELSHPOOL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164Phase1FrcCourtListMigrationImpl.WELSHPOOL_OLD;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164Phase1FrcCourtListMigrationImpl.WREXHAM;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164Phase1FrcCourtListMigrationImpl.WREXHAM_OLD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WELSHPOOL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WREXHAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl.LONDON_TEMP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl.MOLD_OLD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl.PRESTATYN_OLD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl.WELSHPOOL_OLD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl.WREXHAM_OLD;
 
-public class Rpet164Phase1FrcCourtListMigrationImplWalesTests {
+public class Rpet164FrcCourtListMigrationImplWalesTests {
     Map<String, Object> caseData = new HashMap<>();
     CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(caseData).build();
-    Rpet164Phase1FrcCourtListMigrationImpl classUnderTest = new Rpet164Phase1FrcCourtListMigrationImpl();
+    Rpet164FrcCourtListMigrationImpl classUnderTest = new Rpet164FrcCourtListMigrationImpl();
 
     @Before
     public void setup() {

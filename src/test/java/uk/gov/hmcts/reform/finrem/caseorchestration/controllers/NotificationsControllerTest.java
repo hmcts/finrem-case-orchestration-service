@@ -754,7 +754,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-            .sendContestedConsentGeneralOrderEmail(any());
+            .sendContestedConsentGeneralOrderEmailApplicantSolicitor(any());
     }
 
     @Test
@@ -774,17 +774,18 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void whenShouldNotSendContestedGeneralOrderEmailToRespondent_ThentheEmailIsNotIssued() {
+    public void whenShouldNotSendContestedGeneralOrderEmailToRespondent_ThenTheEmailIsNotIssued() {
         when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
 
         notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
 
+        verify(notificationService, never()).sendContestedConsentGeneralOrderEmailRespondentSolicitor(any());
         verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any());
     }
 
     @Test
-    public void shouldNotSendContestedGeneralOrderEmailToRespondentInConsentedInContestedCase() {
+    public void shouldSendContestedConsentGeneralOrderEmailToRespondentInConsentedInContestedCase() {
         when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
@@ -793,6 +794,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         callbackRequest.getCaseDetails().getData().put(CONSENT_D81_QUESTION, YES_VALUE);
         notificationsController.sendGeneralOrderRaisedEmail(callbackRequest);
 
+        verify(notificationService, times(1)).sendContestedConsentGeneralOrderEmailRespondentSolicitor(any());
         verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any());
     }
 

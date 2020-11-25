@@ -19,6 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
@@ -49,7 +50,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.docume
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Category(IntegrationTest.class)
-public abstract class AbstractDocumentTest {
+public abstract class AbstractDocumentTest extends BaseTest {
 
     private static final String GENERATE_DOCUMENT_CONTEXT_PATH = "/version/1/generate-pdf";
     private static final String TEMP_URL = "http://doc1";
