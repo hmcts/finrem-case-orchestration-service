@@ -1,14 +1,22 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -17,6 +25,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 
 public class ContestedCaseOrderServiceTest extends BaseServiceTest {
@@ -26,6 +35,9 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
     @MockBean
     private BulkPrintService bulkPrintService;
+
+    @Captor
+    private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintArgumentCaptor;
 
     @Test
     public void givenNoGeneralOrderPresent_whenPrintAndMailGeneralOrderTriggered_thenDocumentsAreNotPrinted() {
@@ -87,6 +99,24 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
         contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
 
         verifyNoInteractions(bulkPrintService);
+    }
+
+    @Test
+    public void latestAdditionalHearingDocumentIsNotAddedToPack() {
+        CaseDetails caseDetails = hearingDocumentsContestedCaseDetails();
+        caseDetails.getData().remove(ADDITIONAL_HEARING_DOCUMENT_COLLECTION);
+
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
+
+        List<String> expectedBulkPrintDocuments = new ArrayList<>();
+        expectedBulkPrintDocuments.add("HearingOrderBinaryURL");
+        expectedBulkPrintDocuments.add("OtherHearingOrderDocumentsURL");
+
+        assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(
+            o -> o.getBinaryFileUrl()).collect(Collectors.toList()).containsAll(expectedBulkPrintDocuments),  is(true));
     }
 
     private CaseDetails hearingDocumentsContestedCaseDetails() {

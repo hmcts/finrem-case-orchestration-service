@@ -26,7 +26,7 @@
         "latestDraftHearingOrder": {
           "document_url": "http://dm-store:8080/documents/0ddb806e-54f5-4780-96d5-37cb7869a63a",
           "document_filename": "HearingOrder.pdf",
-          "document_binary_url": "http://dm-store:8080/documents/0ddb806e-54f5-4780-96d5-37cb7869a63a/binary"
+          "document_binary_url": "HearingOrderBinaryURL"
         },
         "additionalHearingDocuments": [
           {
@@ -34,7 +34,7 @@
             "value": {
               "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/35b3203c-2e4c-4cf0-b800-4e0b97d52ce2",
               "document_filename": "dummy.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/35b3203c-2e4c-4cf0-b800-4e0b97d52ce2/binary"
+              "document_binary_url": "AdditionalHearingDocumentURL"
             }
           },
           {
@@ -42,7 +42,7 @@
             "value": {
               "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/35b3203c-2e4c-4cf0-b800-4e0b97d52ce2",
               "document_filename": "test.pdf",
-              "document_binary_url": "TestBinaryURL"
+              "document_binary_url": "AdditionalHearingDocument_2_URL"
             }
           }
         ],
@@ -52,7 +52,7 @@
             "value": {
               "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/35b3203c-2e4c-4cf0-b800-4e0b97d52ce2",
               "document_filename": "dummy.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/35b3203c-2e4c-4cf0-b800-4e0b97d52ce2/binary"
+              "document_binary_url": "OtherHearingOrderDocumentsURL"
             }
           }
         ]

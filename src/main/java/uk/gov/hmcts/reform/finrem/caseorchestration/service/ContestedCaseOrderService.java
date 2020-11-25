@@ -54,8 +54,7 @@ public class ContestedCaseOrderService {
         List<BulkPrintDocument> hearingDocumentPack = new ArrayList<>();
 
         //LATEST_DRAFT_HEARING_ORDER
-        Map<String, Object> data = (Map) caseData.get(LATEST_DRAFT_HEARING_ORDER);
-        documentHelper.getDocumentLinkAsBulkPrintDocument(data, LATEST_DRAFT_HEARING_ORDER).ifPresent(hearingDocumentPack::add);
+        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, LATEST_DRAFT_HEARING_ORDER).ifPresent(hearingDocumentPack::add);
 
         //ADDITIONAL_HEARING_DOCUMENT FROM THE COLLECTION
         Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);
