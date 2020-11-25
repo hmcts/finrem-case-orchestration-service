@@ -8,11 +8,10 @@ def app = "cos"
 
 def secrets = [
         'finrem-${env}': [
-            secret("finrem-doc-s2s-auth-secret", "DGS_AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
-            secret("finrem-case-orchestration-service-s2s-key", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
-            secret("idam-secret" ,"OAUTH2_CLIENT_FINREM"),
-            secret("username-solicitor","USERNAME-SOLICITOR"),
-            secret("password-solicitor","PASSWORD-SOLICITOR")
+                secret("finrem-doc-s2s-auth-secret", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
+                secret("idam-secret" ,"OAUTH2_CLIENT_FINREM"),
+                secret("username-solicitor","USERNAME-SOLICITOR"),
+                secret("password-solicitor","PASSWORD-SOLICITOR")
         ]
 ]
 
