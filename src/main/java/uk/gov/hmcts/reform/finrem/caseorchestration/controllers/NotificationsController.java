@@ -88,11 +88,11 @@ public class NotificationsController implements BaseController {
 
             } else if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
                 log.info("Sending Consented HWF Successful email notification to Solicitor");
-                notificationService.sendConsentedHWFSuccessfulConfirmationEmail(callbackRequest);
+                notificationService.sendConsentedHWFSuccessfulConfirmationEmail(caseDetails);
             }
         } else if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending Contested HWF Successful email notification to Solicitor");
-            notificationService.sendContestedHwfSuccessfulConfirmationEmail(callbackRequest);
+            notificationService.sendContestedHwfSuccessfulConfirmationEmail(caseDetails);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -126,7 +126,7 @@ public class NotificationsController implements BaseController {
                 caseDetails.getId());
         } else if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Solicitor for Judge successfully assigned to case");
-            notificationService.sendAssignToJudgeConfirmationEmail(callbackRequest);
+            notificationService.sendAssignToJudgeConfirmationEmail(caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -180,7 +180,7 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Solicitor for 'Consent Order Made'");
-            notificationService.sendConsentOrderMadeConfirmationEmail(callbackRequest);
+            notificationService.sendConsentOrderMadeConfirmationEmail(caseDetails);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -200,17 +200,17 @@ public class NotificationsController implements BaseController {
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             if (isConsentedApplication(callbackRequest.getCaseDetails())) {
                 log.info("Sending email notification to Solicitor for 'Consent Order Not Approved'");
-                notificationService.sendConsentOrderNotApprovedEmail(callbackRequest);
+                notificationService.sendConsentOrderNotApprovedEmail(caseDetails);
             } else {
                 log.info("Sending email notification to Solicitor for 'Contest Order Not Approved'");
-                notificationService.sendContestOrderNotApprovedEmailApplicant(callbackRequest);
+                notificationService.sendContestOrderNotApprovedEmailApplicant(caseDetails);
             }
         }
 
         Map<String, Object> caseData = caseDetails.getData();
         if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)
             && isContestedApplication(caseDetails)) {
-            notificationService.sendContestOrderNotApprovedEmailRespondent(callbackRequest);
+            notificationService.sendContestOrderNotApprovedEmailRespondent(caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -231,12 +231,12 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Contested Consent Order Approved'");
-            notificationService.sendContestedConsentOrderApprovedEmailToApplicantSolicitor(callbackRequest);
+            notificationService.sendContestedConsentOrderApprovedEmailToApplicantSolicitor(caseDetails);
         }
 
         if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
             log.info("Sending email notification to Respondent Solicitor for 'Contested Consent Order Approved'");
-            notificationService.sendContestedConsentOrderApprovedEmailToRespondentSolicitor(callbackRequest);
+            notificationService.sendContestedConsentOrderApprovedEmailToRespondentSolicitor(caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -255,12 +255,12 @@ public class NotificationsController implements BaseController {
 
         if (!isPaperApplication(caseData) && isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email for 'Contested Consent Order Not Approved' to Applicant Solicitor for Case ID: {}", caseDetails.getId());
-            notificationService.sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(callbackRequest);
+            notificationService.sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(caseDetails);
         }
 
         if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
             log.info("Sending email for 'Contested Consent Order Not Approved' to Respondent Solicitor for Case ID: {}", caseDetails.getId());
-            notificationService.sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(callbackRequest);
+            notificationService.sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -281,14 +281,14 @@ public class NotificationsController implements BaseController {
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             if (isConsentedApplication(caseDetails)) {
                 log.info("Sending email notification to Solicitor for 'Consented General Order'");
-                notificationService.sendConsentedGeneralOrderEmail(callbackRequest);
+                notificationService.sendConsentedGeneralOrderEmail(caseDetails);
             } else {
                 if (isConsentedInContestedCase(caseDetails)) {
                     log.info("Sending email notification to Solicitor for 'Contested consent General Order'");
-                    notificationService.sendContestedConsentGeneralOrderEmail(callbackRequest);
+                    notificationService.sendContestedConsentGeneralOrderEmail(caseDetails);
                 } else {
                     log.info("Sending email notification to applicant solicitor for 'Contested General Order'");
-                    notificationService.sendContestedGeneralOrderEmailApplicant(callbackRequest);
+                    notificationService.sendContestedGeneralOrderEmailApplicant(caseDetails);
                 }
             }
         }
@@ -297,7 +297,7 @@ public class NotificationsController implements BaseController {
         if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)
             && isContestedApplication(caseDetails) && !isConsentedInContestedCase(caseDetails)) {
             log.info("Sending email notification to respondent solicitor for 'Contested General Order'");
-            notificationService.sendContestedGeneralOrderEmailRespondent(callbackRequest);
+            notificationService.sendContestedGeneralOrderEmailRespondent(caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -318,7 +318,7 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Solicitor for 'Consent Order Available'");
-            notificationService.sendConsentOrderAvailableEmail(callbackRequest);
+            notificationService.sendConsentOrderAvailableEmail(caseDetails);
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -338,13 +338,13 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing'");
-            notificationService.sendPrepareForHearingEmailApplicant(callbackRequest);
+            notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
         }
 
         if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(
             caseDetails.getData())) {
             log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
-            notificationService.sendPrepareForHearingEmailRespondent(callbackRequest);
+            notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         }
 
         if (isContestedPaperApplication(caseDetails)) {
@@ -376,12 +376,12 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Prepare for Hearing (after send order)'");
-            notificationService.sendPrepareForHearingOrderSentEmailApplicant(callbackRequest);
+            notificationService.sendPrepareForHearingOrderSentEmailApplicant(caseDetails);
         }
 
         if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
             log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing (after send order)'");
-            notificationService.sendPrepareForHearingOrderSentEmailRespondent(callbackRequest);
+            notificationService.sendPrepareForHearingOrderSentEmailRespondent(caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -400,13 +400,13 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending Contested 'Application Issued' email notification to Applicant Solicitor");
-            notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(callbackRequest);
+            notificationService.sendContestedApplicationIssuedEmailToApplicantSolicitor(caseDetails);
         }
 
         Map<String, Object> caseData = caseDetails.getData();
         if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
             log.info("Sending Contested 'Application Issued' email notification to Respondent Solicitor");
-            notificationService.sendContestedApplicationIssuedEmailToRespondentSolicitor(callbackRequest);
+            notificationService.sendContestedApplicationIssuedEmailToRespondentSolicitor(caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -428,13 +428,13 @@ public class NotificationsController implements BaseController {
             log.info("Received request to send email for 'Contest Order Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
             if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
                 log.info("Sending 'Contest Order Approved' email notification to Applicant Solicitor");
-                notificationService.sendContestOrderApprovedEmailApplicant(callbackRequest);
+                notificationService.sendContestOrderApprovedEmailApplicant(caseDetails);
             }
 
             if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled()
                 && notificationService.shouldEmailRespondentSolicitor(caseData)) {
                 log.info("Sending 'Contest Order Approved' email notification to Respondent Solicitor");
-                notificationService.sendContestOrderApprovedEmailRespondent(callbackRequest);
+                notificationService.sendContestOrderApprovedEmailRespondent(caseDetails);
             }
         }
 
@@ -456,14 +456,14 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorResponsibleToDraftOrder(caseData) && isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for 'Draft Order'");
-            notificationService.sendSolicitorToDraftOrderEmailApplicant(callbackRequest);
+            notificationService.sendSolicitorToDraftOrderEmailApplicant(caseDetails);
         }
 
         if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled()
             && caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData)
             && notificationService.shouldEmailRespondentSolicitor(caseData)) {
             log.info("Sending email notification to Respondent Solicitor for 'Draft Order'");
-            notificationService.sendSolicitorToDraftOrderEmailRespondent(callbackRequest);
+            notificationService.sendSolicitorToDraftOrderEmailRespondent(caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -481,15 +481,16 @@ public class NotificationsController implements BaseController {
         validateCaseData(callbackRequest);
 
         log.info("Sending general email notification");
-        if (isConsentedApplication(callbackRequest.getCaseDetails())) {
-            notificationService.sendConsentGeneralEmail(callbackRequest);
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        if (isConsentedApplication(caseDetails)) {
+            notificationService.sendConsentGeneralEmail(caseDetails);
         } else {
-            notificationService.sendContestedGeneralEmail(callbackRequest);
+            notificationService.sendContestedGeneralEmail(caseDetails);
         }
 
-        CaseDetails updatedDetails = generalEmailService.storeGeneralEmail(callbackRequest.getCaseDetails());
+        generalEmailService.storeGeneralEmail(caseDetails);
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(updatedDetails.getData()).build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
     @PostMapping(value = "/manual-payment", consumes = APPLICATION_JSON_VALUE)
@@ -525,8 +526,7 @@ public class NotificationsController implements BaseController {
         validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        notificationService.sendContestedGeneralApplicationReferToJudgeEmail(callbackRequest);
+        notificationService.sendContestedGeneralApplicationReferToJudgeEmail(caseDetails);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
@@ -542,8 +542,7 @@ public class NotificationsController implements BaseController {
         validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        notificationService.sendContestedGeneralApplicationOutcomeEmail(callbackRequest);
+        notificationService.sendContestedGeneralApplicationOutcomeEmail(caseDetails);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }

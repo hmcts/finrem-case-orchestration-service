@@ -9,7 +9,5 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 public abstract class BaseTest {
-
-    @MockBean
-    protected AuthTokenGenerator authTokenGenerator;
+    @MockBean protected AuthTokenGenerator authTokenGenerator;
 }
