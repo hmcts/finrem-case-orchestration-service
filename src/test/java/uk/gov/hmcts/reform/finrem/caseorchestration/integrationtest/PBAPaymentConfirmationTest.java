@@ -27,6 +27,7 @@ import java.io.InputStream;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -52,6 +53,7 @@ public class PBAPaymentConfirmationTest extends BaseTest {
     private MockMvc webClient;
 
     @ClassRule public static WireMockClassRule idamService = new WireMockClassRule(4501);
+    @ClassRule public static WireMockClassRule acaService = new WireMockClassRule(4454);
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -59,10 +61,12 @@ public class PBAPaymentConfirmationTest extends BaseTest {
     private CallbackRequest request;
 
     private String idamUrl = "/details";
+    private String acaUrl = "/case-assignments";
 
     @Before
     public void setUp() {
         stubForIdam();
+        stubForAca();
     }
 
     @Test
@@ -125,6 +129,16 @@ public class PBAPaymentConfirmationTest extends BaseTest {
                     .withStatus(HttpStatus.OK.value())
                     .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .withBody("{\"id\": \"1234\"}".getBytes())
+            ));
+    }
+
+    private void stubForAca() {
+        acaService.stubFor(post(urlEqualTo(acaUrl))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
+            .willReturn(
+                aResponse()
+                    .withStatus(HttpStatus.OK.value())
             ));
     }
 }
