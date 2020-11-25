@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,6 +12,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -23,7 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @TestPropertySource(locations = "/application.properties")
-public class IdamServiceTest {
+public class IdamServiceTest extends BaseServiceTest {
 
     @Autowired
     private IdamService idamService;
@@ -56,6 +58,15 @@ public class IdamServiceTest {
 
         boolean userEmailId = idamService.isUserRoleAdmin(AUTH_TOKEN);
         assertThat(userEmailId, is(Boolean.FALSE));
+    }
+
+    @Test
+    public void retrieveUserId() {
+        mockServer.expect(requestTo(toUri()))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(withSuccess("{\"id\": \"1234\"}", MediaType.APPLICATION_JSON));
+
+        Assert.assertEquals(idamService.getIdamUserId(AUTH_TOKEN), "1234");
     }
 
     private String toUri() {
