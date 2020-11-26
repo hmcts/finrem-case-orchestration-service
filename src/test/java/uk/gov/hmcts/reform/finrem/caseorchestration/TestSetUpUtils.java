@@ -296,4 +296,20 @@ public class TestSetUpUtils {
         bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/967103ad-0b95-4f0f-9712-4bf5770fb196/binary").build());
         return bulkPrintDocuments;
     }
+
+    public static Map<String, Object> caseDataWithUploadHearingOrder() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("uploadHearingOrderRO", new ArrayList<>() {
+            {
+                add(new CaseDocument());
+                add(new CaseDocument());
+            }
+        });
+        caseData.put("uploadHearingOrder", new ArrayList<>() {
+            {
+                add(new CaseDocument());
+            }
+        });
+        return caseData;
+    }
 }

@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.MigrationHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.RemoveNottinghamCourtListGaMigration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164Phase1FrcCourtListMigrationImpl;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl;
 
 import java.util.Map;
 
@@ -69,7 +69,7 @@ public class CcdDataMigrationController {
             AboutToStartOrSubmitCallbackResponse.builder();
 
         // Change the below to point to your new migration service and modify controller tests to match
-        MigrationHandler migration = new Rpet164Phase1FrcCourtListMigrationImpl();
+        MigrationHandler migration = new Rpet164FrcCourtListMigrationImpl();
         Map<String, Object> caseData = migration.migrate(caseDetails);
 
         if (caseData != null) {

@@ -38,11 +38,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BEDFORDSHIRE_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BIRMINGHAM_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_BRISTOL_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_CFC_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_CLEVELAND_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_COURT_ORDER_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DEVON_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_DORSET_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED;
@@ -52,6 +56,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_KENTSURREY_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LANCASHIRE_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LIVERPOOL_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_LONDON_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_MANCHESTER_COURT;
@@ -63,9 +68,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_NWYORKSHIRE_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_RECITALS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_SOUTHWEST_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_SWANSEA_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_THAMESVALLEY_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT;
 
 public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
@@ -107,28 +115,36 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME,
             GENERAL_APPLICATION_DIRECTIONS_HEARING_TIME_ESTIMATE,
             GENERAL_APPLICATION_DIRECTIONS_HEARING_REGION,
-            GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC,
             GENERAL_APPLICATION_DIRECTIONS_LONDON_FRC,
-            GENERAL_APPLICATION_DIRECTIONS_NORTHWEST_FRC,
+            GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC,
             GENERAL_APPLICATION_DIRECTIONS_NORTHEAST_FRC,
+            GENERAL_APPLICATION_DIRECTIONS_NORTHWEST_FRC,
             GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC,
+            GENERAL_APPLICATION_DIRECTIONS_SOUTHWEST_FRC,
             GENERAL_APPLICATION_DIRECTIONS_WALES_FRC,
-            GENERAL_APPLICATION_DIRECTIONS_NOTTINGHAM_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_CFC_COURT,
+            GENERAL_APPLICATION_DIRECTIONS_BEDFORDSHIRE_COURT,
             GENERAL_APPLICATION_DIRECTIONS_BIRMINGHAM_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_LIVERPOOL_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_MANCHESTER_COURT,
+            GENERAL_APPLICATION_DIRECTIONS_BRISTOL_COURT,
+            GENERAL_APPLICATION_DIRECTIONS_CFC_COURT,
             GENERAL_APPLICATION_DIRECTIONS_CLEVELAND_COURT,
-            GENERAL_APPLICATION_DIRECTIONS_NWYORKSHIRE_COURT,
+            GENERAL_APPLICATION_DIRECTIONS_DEVON_COURT,
+            GENERAL_APPLICATION_DIRECTIONS_DORSET_COURT,
             GENERAL_APPLICATION_DIRECTIONS_HUMBER_COURT,
             GENERAL_APPLICATION_DIRECTIONS_KENTSURREY_COURT,
+            GENERAL_APPLICATION_DIRECTIONS_LANCASHIRE_COURT,
+            GENERAL_APPLICATION_DIRECTIONS_LIVERPOOL_COURT,
+            GENERAL_APPLICATION_DIRECTIONS_MANCHESTER_COURT,
             GENERAL_APPLICATION_DIRECTIONS_NEWPORT_COURT,
+            GENERAL_APPLICATION_DIRECTIONS_NOTTINGHAM_COURT,
+            GENERAL_APPLICATION_DIRECTIONS_NWYORKSHIRE_COURT,
             GENERAL_APPLICATION_DIRECTIONS_SWANSEA_COURT,
+            GENERAL_APPLICATION_DIRECTIONS_THAMESVALLEY_COURT,
+            GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT,
             GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION,
-            GENERAL_APPLICATION_DIRECTIONS_RECITALS,
+            GENERAL_APPLICATION_DIRECTIONS_COURT_ORDER_DATE,
             GENERAL_APPLICATION_DIRECTIONS_JUDGE_TYPE,
             GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME,
-            GENERAL_APPLICATION_DIRECTIONS_COURT_ORDER_DATE,
+            GENERAL_APPLICATION_DIRECTIONS_RECITALS,
             GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE)
             .forEach(ccdFieldName -> assertThat(caseDetails.getData().get(ccdFieldName), is(nullValue())));
     }

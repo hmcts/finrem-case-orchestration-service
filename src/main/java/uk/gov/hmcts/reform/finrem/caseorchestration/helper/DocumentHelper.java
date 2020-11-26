@@ -14,7 +14,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftHearingOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -54,6 +57,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
@@ -128,6 +133,18 @@ public class DocumentHelper {
             .collect(Collectors.toList());
     }
 
+    public CaseDocument getLatestContestedDraftOrderCollection(Map<String, Object> caseData) {
+        List<DraftHearingOrderData> contestedDraftOrders = ofNullable(caseData.get(DRAFT_DIRECTION_ORDER_COLLECTION))
+            .map(this::convertToDraftHearingOrderDataList)
+            .orElse(emptyList())
+            .stream()
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+
+        return contestedDraftOrders.isEmpty() ? null :
+            contestedDraftOrders.get(contestedDraftOrders.size() - 1).getDraftHearingOrder().getCaseDocument();
+    }
+
     public CaseDocument convertToCaseDocument(Object object) {
         return objectMapper.convertValue(object, CaseDocument.class);
     }
@@ -139,6 +156,11 @@ public class DocumentHelper {
 
     private List<PensionCollectionData> convertToPensionCollectionDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<List<PensionCollectionData>>() {
+        });
+    }
+
+    private List<DraftHearingOrderData> convertToDraftHearingOrderDataList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<List<DraftHearingOrderData>>() {
         });
     }
 
@@ -164,6 +186,11 @@ public class DocumentHelper {
 
     public List<Map<String, Object>> convertToGenericList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<List<Map<String, Object>>>() {
+        });
+    }
+
+    private List<CaseDocument> convertToCaseDocumentList(Object object) {
+        return objectMapper.convertValue(object, new TypeReference<List<CaseDocument>>() {
         });
     }
 
@@ -348,5 +375,26 @@ public class DocumentHelper {
     public List<ContestedConsentOrderData> convertToContestedConsentOrderData(Object object) {
         return objectMapper.convertValue(object, new TypeReference<>() {
         });
+    }
+
+    public List<HearingOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
+        return objectMapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION),
+            new TypeReference<>() {});
+    }
+
+    public Map<String, Object> moveCollection(Map<String, Object> caseData, String source, String destination) {
+        if (caseData.get(source) != null && (caseData.get(source) instanceof Collection)) {
+            if (caseData.get(destination) == null || (caseData.get(destination) instanceof Collection)) {
+                final List destinationList = new ArrayList();
+                if (caseData.get(destination) != null) {
+                    destinationList.addAll((List) caseData.get(destination));
+                }
+                destinationList.addAll((List) caseData.get(source));
+                caseData.put(destination, destinationList);
+                caseData.put(source, null);
+            }
+        }
+
+        return caseData;
     }
 }

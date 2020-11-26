@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
@@ -21,7 +22,7 @@ public class FeatureToggleServiceTest {
         "feature.toggle.contested_print_general_order=true",
         "feature.toggle.share_a_case=true"
     })
-    public static class ApprovedConsentOrderNotificationSwitchedOn {
+    public static class ApprovedConsentOrderNotificationSwitchedOn extends BaseServiceTest {
 
         @Autowired
         private FeatureToggleService featureToggleService;
@@ -60,7 +61,7 @@ public class FeatureToggleServiceTest {
         "feature.toggle.send_to_frc=false",
         "feature.toggle.share_a_case=false"
     })
-    public static class ApprovedConsentOrderNotificationSwitchedOff {
+    public static class ApprovedConsentOrderNotificationSwitchedOff extends BaseServiceTest {
 
         @Autowired
         private FeatureToggleService featureToggleService;
