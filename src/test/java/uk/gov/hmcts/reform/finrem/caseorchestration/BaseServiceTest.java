@@ -42,8 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @DirtiesContext
 public abstract class BaseServiceTest extends BaseTest {
 
-    @Autowired
-    protected ObjectMapper mapper;
+    @Autowired protected ObjectMapper mapper;
 
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();

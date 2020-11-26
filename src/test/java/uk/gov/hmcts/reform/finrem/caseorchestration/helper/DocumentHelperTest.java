@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
@@ -50,22 +49,6 @@ public class DocumentHelperTest {
             callbackRequest.getCaseDetails().getData());
         assertThat(latestAmendedConsentOrder.getDocumentBinaryUrl(),
             is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
-    }
-
-    @Test
-    public void shouldGetLatestContestedDraftOrderCollection() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("/fixtures/contested/hearing-order-conversion.json");
-        CaseDocument latestAmendedConsentOrder = documentHelper.getLatestContestedDraftOrderCollection(
-            callbackRequest.getCaseDetails().getData());
-        assertThat(latestAmendedConsentOrder.getDocumentFilename(), is("one.pdf"));
-    }
-
-    @Test
-    public void shouldNotGetLatestContestedDraftOrderCollectionWhenMissing() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("amend-consent-order-by-caseworker.json");
-        CaseDocument latestAmendedConsentOrder = documentHelper.getLatestContestedDraftOrderCollection(
-            callbackRequest.getCaseDetails().getData());
-        assertThat(latestAmendedConsentOrder, nullValue());
     }
 
     @Test

@@ -69,5 +69,4 @@ public interface DocumentClient {
     Document convertDocumentToPdf(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
         @RequestBody Document document);
-
 }

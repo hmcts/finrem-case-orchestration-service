@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AmendedConsentOrde
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftHearingOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
@@ -56,7 +55,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
@@ -132,18 +130,6 @@ public class DocumentHelper {
             .collect(Collectors.toList());
     }
 
-    public CaseDocument getLatestContestedDraftOrderCollection(Map<String, Object> caseData) {
-        List<DraftHearingOrderData> contestedDraftOrders = ofNullable(caseData.get(DRAFT_DIRECTION_ORDER_COLLECTION))
-            .map(this::convertToDraftHearingOrderDataList)
-            .orElse(emptyList())
-            .stream()
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
-
-        return contestedDraftOrders.isEmpty() ? null :
-            contestedDraftOrders.get(contestedDraftOrders.size() - 1).getDraftHearingOrder().getCaseDocument();
-    }
-
     public CaseDocument convertToCaseDocument(Object object) {
         return objectMapper.convertValue(object, CaseDocument.class);
     }
@@ -155,11 +141,6 @@ public class DocumentHelper {
 
     private List<PensionCollectionData> convertToPensionCollectionDataList(Object object) {
         return objectMapper.convertValue(object, new TypeReference<List<PensionCollectionData>>() {
-        });
-    }
-
-    private List<DraftHearingOrderData> convertToDraftHearingOrderDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<DraftHearingOrderData>>() {
         });
     }
 
@@ -377,7 +358,6 @@ public class DocumentHelper {
     }
 
     public List<HearingOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION),
-            new TypeReference<>() {});
+        return objectMapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION), new TypeReference<>() {});
     }
 }
