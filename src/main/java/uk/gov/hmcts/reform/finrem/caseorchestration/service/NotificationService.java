@@ -91,9 +91,17 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendContestOrderApprovedEmail(CaseDetails caseDetails) {
+    public void sendContestOrderApprovedEmailApplicant(CaseDetails caseDetails) {
+        sendContestOrderApprovedEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails));
+    }
+
+    public void sendContestOrderApprovedEmailRespondent(CaseDetails caseDetails) {
+        sendContestOrderApprovedEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(caseDetails));
+    }
+
+    public void sendContestOrderApprovedEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getContestOrderApproved());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails), uri);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendPrepareForHearingEmailApplicant(CaseDetails caseDetails) {
