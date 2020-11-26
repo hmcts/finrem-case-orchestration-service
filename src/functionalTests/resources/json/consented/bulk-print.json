@@ -9,7 +9,6 @@
       "PBANumber": "PBA123",
       "d81Question": "No",
       "PBAreference": "ABCD",
-
       "approvedOrderCollection": [
         {
           "id": "00ffa155-e60f-499a-9295-77b598bf16d1",
@@ -73,12 +72,13 @@
       ],
       "respondentEmail": null,
       "respondentPhone": "9963472494",
-      "appRespondentRep": "No",
       "consentOrderText": {
         "document_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69",
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
         "document_binary_url": "http://document-management-store:8080/documents/d607c045-878e-475f-ab8e-b2f667d8af69/binary"
       },
+      "applicantRepresented": "Yes",
+      "appRespondentRep": "No",
       "solicitorAddress": {
         "County": "test",
         "Country": "United Kingdom",
@@ -91,9 +91,9 @@
       "authorisationFirm": "test",
       "authorisationName": "test",
       "divorceCaseNumber": "DD12D12345",
-      "issueDate" : "2019-03-04",
-      "hearingDate" : "2019-06-24",
-      "fastTrackDecision" : "yes",
+      "issueDate": "2019-03-04",
+      "hearingDate": "2019-06-24",
+      "fastTrackDecision": "yes",
       "respondentAddress": {
         "County": "Essex",
         "Country": "United Kingdom",
@@ -138,7 +138,7 @@
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "No",
       "caseAllocatedTo": "Yes",
-      "natureOfApplicationChecklist":[
+      "natureOfApplicationChecklist": [
         "periodicalPaymentOrder",
         "Lump Sum Order",
         "Pension Sharing Order",
@@ -147,7 +147,7 @@
         "Pension Compensation Attachment Order",
         "propertyAdjustmentOrder"
       ],
-      "MIAMDomesticViolenceChecklist":[
+      "MIAMDomesticViolenceChecklist": [
         "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_2",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_3",

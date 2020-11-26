@@ -1,9 +1,10 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrderRefusalData;
 
 import java.io.InputStream;
@@ -11,16 +12,16 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
-import static org.junit.Assert.assertThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.copyToOrderRefusalCollection;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.translateOrderRefusalCollection;
 
-public class OrderRefusalTranslatorTest {
+public class OrderRefusalTranslatorServiceTest extends BaseServiceTest {
+
+    @Autowired
+    OrderRefusalTranslatorService orderRefusalTranslatorService;
 
     private CaseDetails caseDetails;
-    private ObjectMapper mapper = new ObjectMapper();
 
     private void setUpCaseDetails(String fileName) throws Exception {
         try (InputStream resourceAsStream =
@@ -33,7 +34,7 @@ public class OrderRefusalTranslatorTest {
     public void shouldTranslateOrderRefusalCollection() throws Exception {
         setUpCaseDetails("/fixtures/model/case-details-multiple-orders.json");
 
-        CaseDetails result = translateOrderRefusalCollection(caseDetails);
+        CaseDetails result = orderRefusalTranslatorService.translateOrderRefusalCollection(caseDetails);
         Map<String, Object> data = result.getData();
         List<OrderRefusalData> orderRefusalData = orderRefusalDataList(data, "orderRefusalCollectionNew");
         List<String> orderRefusal = orderRefusalData.get(0).getOrderRefusal().getOrderRefusal();
@@ -50,7 +51,7 @@ public class OrderRefusalTranslatorTest {
     public void shouldCopyToOrderRefusalCollection() throws Exception {
         setUpCaseDetails("/fixtures/model/copy-case-details-multiple-orders.json");
 
-        Map<String, Object> data = copyToOrderRefusalCollection(caseDetails);
+        Map<String, Object> data = orderRefusalTranslatorService.copyToOrderRefusalCollection(caseDetails);
 
         List<OrderRefusalData> orderRefusalData = orderRefusalDataList(data, ORDER_REFUSAL_COLLECTION);
         List<String> orderRefusal = orderRefusalData.get(1).getOrderRefusal().getOrderRefusal();
@@ -68,7 +69,7 @@ public class OrderRefusalTranslatorTest {
     public void shouldReturnOrderRefusalCollectionNewWhenOrderRefusalCollectionIsEmpty() throws Exception {
         setUpCaseDetails("/fixtures/model/copy-order-refusal-collection-empty.json");
 
-        Map<String, Object> data = copyToOrderRefusalCollection(caseDetails);
+        Map<String, Object> data = orderRefusalTranslatorService.copyToOrderRefusalCollection(caseDetails);
 
         List<OrderRefusalData> orderRefusalData = orderRefusalDataList(data, ORDER_REFUSAL_COLLECTION);
         List<String> orderRefusal = orderRefusalData.get(0).getOrderRefusal().getOrderRefusal();
@@ -83,8 +84,6 @@ public class OrderRefusalTranslatorTest {
     }
 
     private List<OrderRefusalData> orderRefusalDataList(Map<String, Object> data, String field) {
-        return mapper.convertValue(data.get(field),
-                new TypeReference<List<OrderRefusalData>>() {
-                });
+        return mapper.convertValue(data.get(field), new TypeReference<>() {});
     }
 }

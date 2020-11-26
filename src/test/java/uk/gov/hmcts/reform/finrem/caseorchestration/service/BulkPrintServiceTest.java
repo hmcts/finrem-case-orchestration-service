@@ -36,16 +36,25 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintServ
 @ActiveProfiles("test-mock-document-client")
 public class BulkPrintServiceTest extends BaseServiceTest {
 
-    @Autowired private DocumentClient documentClient;
-    @Autowired private BulkPrintService bulkPrintService;
-    @Autowired private ObjectMapper mapper;
-    @Autowired private DocumentHelper documentHelper;
+    @Autowired
+    private DocumentClient documentClient;
+    @Autowired
+    private BulkPrintService bulkPrintService;
+    @Autowired
+    private ObjectMapper mapper;
+    @Autowired
+    private DocumentHelper documentHelper;
 
-    @MockBean private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    @MockBean private GeneralOrderService generalOrderService;
-    @MockBean private GenerateCoverSheetService coverSheetService;
-    @MockBean private GenericDocumentService genericDocumentService;
-    @MockBean private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @MockBean
+    private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+    @MockBean
+    private GeneralOrderService generalOrderService;
+    @MockBean
+    private GenerateCoverSheetService coverSheetService;
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+    @MockBean
+    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
 
     private UUID letterId;
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor;

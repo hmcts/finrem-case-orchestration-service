@@ -19,6 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 
@@ -46,7 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Slf4j
 @Category(IntegrationTest.class)
-public class FeeLookUpTest {
+public class FeeLookUpTest extends BaseTest {
     private static final String FEE_LOOKUP_URL = "/case-orchestration/fee-lookup";
     @Autowired
     private ObjectMapper objectMapper;
@@ -61,7 +62,7 @@ public class FeeLookUpTest {
 
     public CallbackRequest request(ApplicationType applicationType) throws IOException {
         String fileName = applicationType == CONSENTED
-                ? "/fixtures/fee-lookup.json" : "/fixtures/contested/fee-lookup.json";
+            ? "/fixtures/fee-lookup.json" : "/fixtures/contested/fee-lookup.json";
         try (InputStream resourceAsStream = getClass().getResourceAsStream(fileName)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
@@ -96,17 +97,17 @@ public class FeeLookUpTest {
     private String expectedBody(ApplicationType applicationType) {
         String amount = applicationType == CONSENTED ? "5000" : "25500";
         return "{\"data\":{"
-                + "\"amountToPay\":\"" + amount + "\","
-                + "\"orderSummary\":{\"PaymentReference\":\"ABCD\","
-                + "\"PaymentTotal\":\"" + amount + "\","
-                + "\"Fees\":[{\"value\":"
-                + "{\"FeeDescription\":\"Application (without notice)\","
-                + "\"FeeVersion\":\"1\","
-                + "\"FeeCode\":\"FEE0600\","
-                + "\"FeeAmount\":\"" + amount + "\"}}]}"
-                + "},"
-                + "\"errors\":null,"
-                + "\"warnings\":null}";
+            + "\"amountToPay\":\"" + amount + "\","
+            + "\"orderSummary\":{\"PaymentReference\":\"ABCD\","
+            + "\"PaymentTotal\":\"" + amount + "\","
+            + "\"Fees\":[{\"value\":"
+            + "{\"FeeDescription\":\"Application (without notice)\","
+            + "\"FeeVersion\":\"1\","
+            + "\"FeeCode\":\"FEE0600\","
+            + "\"FeeAmount\":\"" + amount + "\"}}]}"
+            + "},"
+            + "\"errors\":null,"
+            + "\"warnings\":null}";
     }
 
     private void stubFeeLookUp(ApplicationType applicationType) {
@@ -120,10 +121,10 @@ public class FeeLookUpTest {
     private String response(ApplicationType applicationType) {
         int amount = applicationType == CONSENTED ? 50 : 255;
         return "{\n"
-                + "  \"code\": \"FEE0600\",\n"
-                + "  \"description\": \"Application (without notice)\",\n"
-                + "  \"version\": 1,\n"
-                + "  \"fee_amount\": " + amount + "\n"
-                + "}";
+            + "  \"code\": \"FEE0600\",\n"
+            + "  \"description\": \"Application (without notice)\",\n"
+            + "  \"version\": 1,\n"
+            + "  \"fee_amount\": " + amount + "\n"
+            + "}";
     }
 }

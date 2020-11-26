@@ -1,11 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslatorService;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -23,6 +24,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.REJECTED_ORDER_TYPE;
 
 public class RejectionOrderTest extends AbstractDocumentTest {
+
+    @Autowired OrderRefusalTranslatorService orderRefusalTranslatorService;
 
     private static final String API_URL = "/case-orchestration/documents/consent-order-not-approved";
 
@@ -64,7 +67,7 @@ public class RejectionOrderTest extends AbstractDocumentTest {
         try {
             CaseDetails deepCopy = objectMapper
                 .readValue(objectMapper.writeValueAsString(caseDetails), CaseDetails.class);
-            return OrderRefusalTranslator.translateOrderRefusalCollection(deepCopy);
+            return orderRefusalTranslatorService.translateOrderRefusalCollection(deepCopy);
         } catch (IOException e) {
             throw new IllegalStateException();
         }

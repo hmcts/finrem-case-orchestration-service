@@ -22,7 +22,7 @@ public class GenericDocumentService {
     private final DocumentClient documentClient;
 
     public CaseDocument generateDocument(String authorisationToken, CaseDetails caseDetails,
-                                          String template, String fileName) {
+                                         String template, String fileName) {
 
         Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails);
         Document generatedPdf = documentClient.generatePdf(
@@ -49,12 +49,17 @@ public class GenericDocumentService {
         return toCaseDocument(stampedDocument);
     }
 
+    public CaseDocument convertDocumentToPdf(CaseDocument document, String authorisationToken) {
+        return toCaseDocument(documentClient.convertDocumentToPdf(authorisationToken, toDocument(document)));
+
+    }
+
     public CaseDocument stampDocument(CaseDocument document, String authorisationToken) {
         Document stampedDocument = documentClient.stampDocument(toDocument(document), authorisationToken);
         return toCaseDocument(stampedDocument);
     }
 
-    private CaseDocument toCaseDocument(Document document) {
+    public CaseDocument toCaseDocument(Document document) {
         CaseDocument caseDocument = new CaseDocument();
         caseDocument.setDocumentBinaryUrl(document.getBinaryUrl());
         caseDocument.setDocumentFilename(document.getFileName());
@@ -62,7 +67,7 @@ public class GenericDocumentService {
         return caseDocument;
     }
 
-    private Document toDocument(CaseDocument caseDocument) {
+    public Document toDocument(CaseDocument caseDocument) {
         Document document = new Document();
         document.setBinaryUrl(caseDocument.getDocumentBinaryUrl());
         document.setFileName(caseDocument.getDocumentFilename());

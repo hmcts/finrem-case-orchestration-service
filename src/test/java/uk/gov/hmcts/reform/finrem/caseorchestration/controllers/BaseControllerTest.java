@@ -7,12 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class BaseControllerTest extends BaseTest {
 
@@ -32,12 +37,12 @@ public abstract class BaseControllerTest extends BaseTest {
 
     void doEmptyCaseDataSetUp() throws IOException, URISyntaxException {
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/empty-casedata.json").toURI()));
+            .getResource("/fixtures/empty-casedata.json").toURI()));
     }
 
     void doValidCaseDataSetUp() throws IOException, URISyntaxException {
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/pba-validate.json").toURI()));
+            .getResource("/fixtures/pba-validate.json").toURI()));
     }
 
     void doValidConsentOrderApprovedSetup() throws IOException, URISyntaxException {
@@ -57,7 +62,7 @@ public abstract class BaseControllerTest extends BaseTest {
 
     void doMissingLatestConsentOrder() throws IOException, URISyntaxException {
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource("/fixtures/hwf.json").toURI()));
+            .getResource("/fixtures/hwf.json").toURI()));
     }
 
     void doValidConsentInContestWithPensionData() throws IOException, URISyntaxException {
@@ -70,12 +75,31 @@ public abstract class BaseControllerTest extends BaseTest {
             .getResource("/fixtures/refusal-order-contested.json").toURI()));
     }
 
+    void doValidCaseDataSetUpForAdditionalHearing() throws IOException, URISyntaxException {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/bulkprint/bulk-print-additional-hearing.json").toURI()));
+    }
+
+    protected CallbackRequest buildCallbackRequest() {
+        Map<String, Object> caseData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
+        return CallbackRequest.builder().caseDetails(caseDetails).build();
+    }
+
     CaseDocument getCaseDocument() {
         CaseDocument caseDocument = new CaseDocument();
         caseDocument.setDocumentUrl("http://doc1");
         caseDocument.setDocumentBinaryUrl("http://doc1/binary");
         caseDocument.setDocumentFilename("doc1");
         return caseDocument;
+    }
+
+    Document getDocument() {
+        Document document = new Document();
+        document.setUrl("http://doc1");
+        document.setBinaryUrl("http://doc1/binary");
+        document.setFileName("doc1");
+        return document;
     }
 
     protected String resourceContentAsString(String resourcePath) {

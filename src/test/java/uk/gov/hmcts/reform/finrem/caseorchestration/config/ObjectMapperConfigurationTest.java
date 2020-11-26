@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 
 import static org.hamcrest.Matchers.is;
@@ -13,7 +13,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ObjectMapperConfigurationTest {
+public class ObjectMapperConfigurationTest extends BaseTest {
 
     /**
      * Made a Spy so that the service is not mocked but calls like
@@ -32,6 +32,6 @@ public class ObjectMapperConfigurationTest {
 
     @Test
     public void createObjectMapper() {
-        assertThat(objectMapperConfiguration.objectMapper(Jackson2ObjectMapperBuilder.json()), is(notNullValue()));
+        assertThat(objectMapperConfiguration.objectMapper(), is(notNullValue()));
     }
 }

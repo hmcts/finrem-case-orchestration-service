@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.FixedListOption;
 
 import javax.annotation.PostConstruct;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -69,8 +70,8 @@ public class OptionIdToValueTranslator {
             Map<String, String> optionMap = optionsMap(optionKey);
 
             List<String> collect = originalOptionsList.stream()
-                    .map(key -> optionMap.getOrDefault(key, key))
-                    .collect(Collectors.toList());
+                .map(key -> optionMap.getOrDefault(key, key))
+                .collect(Collectors.toList());
 
             data.put(optionKey, collect);
         }

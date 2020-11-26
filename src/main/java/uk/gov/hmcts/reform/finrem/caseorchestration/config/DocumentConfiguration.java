@@ -33,6 +33,8 @@ public class DocumentConfiguration {
     private String approvedConsentOrderNotificationFileName;
     private String assignedToJudgeNotificationTemplate;
     private String assignedToJudgeNotificationFileName;
+    private String consentInContestedAssignedToJudgeNotificationTemplate;
+    private String consentInContestedAssignedToJudgeNotificationFileName;
     private String helpWithFeesSuccessfulNotificationTemplate;
     private String helpWithFeesSuccessfulNotificationFileName;
     private String consentOrderNotApprovedCoverLetterTemplate;
@@ -45,4 +47,10 @@ public class DocumentConfiguration {
     private String contestedDraftOrderNotApprovedFileName;
     private String manualPaymentTemplate;
     private String manualPaymentFileName;
+    private String generalApplicationHearingNoticeTemplate;
+    private String generalApplicationHearingNoticeFileName;
+    private String generalApplicationOrderTemplate;
+    private String generalApplicationOrderFileName;
+    private String additionalHearingTemplate;
+    private String additionalHearingFileName;
 }

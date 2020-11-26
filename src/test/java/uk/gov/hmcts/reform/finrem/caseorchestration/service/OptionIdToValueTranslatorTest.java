@@ -9,6 +9,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 
 import java.io.File;
@@ -20,7 +21,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @TestPropertySource(locations = "/application.properties")
-public class OptionIdToValueTranslatorTest {
+public class OptionIdToValueTranslatorTest extends BaseTest {
 
     @Autowired
     private OptionIdToValueTranslator translator;
@@ -49,7 +50,7 @@ public class OptionIdToValueTranslatorTest {
         new OptionIdToValueTranslator("random.json", new ObjectMapper()).initOptionValueMap();
     }
 
-    private CaseDetails caseDetailsWithEmptyOptions()  {
+    private CaseDetails caseDetailsWithEmptyOptions() {
         return CaseDetails.builder().data(ImmutableMap.of()).build();
     }
 

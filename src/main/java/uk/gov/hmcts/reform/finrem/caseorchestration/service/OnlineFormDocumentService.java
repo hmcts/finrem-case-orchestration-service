@@ -133,7 +133,7 @@ public class OnlineFormDocumentService {
         //Checklist
         caseData.put(CONSENTED_NATURE_OF_APPLICATION, caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION));
         caseData.put(CONSENTED_NATURE_OF_APPLICATION_3A, caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3A));
-        caseData.put(CONSENTED_NATURE_OF_APPLICATION_3B,caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3B));
+        caseData.put(CONSENTED_NATURE_OF_APPLICATION_3B, caseData.remove(CONSENT_IN_CONTESTED_NATURE_OF_APPLICATION_3B));
 
         //Order For Children Reasons
         caseData.put(CONSENTED_ORDER_FOR_CHILDREN, caseData.remove(CONSENT_IN_CONTESTED_ORDER_FOR_CHILDREN));

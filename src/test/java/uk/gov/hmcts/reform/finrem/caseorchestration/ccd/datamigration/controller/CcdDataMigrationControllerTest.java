@@ -15,916 +15,189 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOLFRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DEVON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWALES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWOTHER_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OXFORD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PRESTATYN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PRESTON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SALISBURY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SEOTHER_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHWEST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWOTHER_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.THAMESVALLEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TRURO;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_OTHER_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WINCHESTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl.LONDON_TEMP;
 
 @WebMvcTest(CcdDataMigrationController.class)
 public class CcdDataMigrationControllerTest extends BaseControllerTest {
 
+    private static final String MIGRATE_FRC_URL = "/ccd-data-migration/migrateFrc";
     private static final String MIGRATE_URL = "/ccd-data-migration/migrate";
 
     @Test
-    public void shouldMigrateCase_newport() throws Exception {
+    public void shouldRemove_nottinghamCourtListGA_fromCase() throws Exception {
+        String resourcePath = "/fixtures/migration/removeNottinghamCourtListGAMigration/ccd-migrate-remove-nottingham-court-list-ga.json";
+
         mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-newport.json"))
+            .content(resourceContentAsString(resourcePath))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("wales")))
-            .andExpect(jsonPath("$.data.walesFRCList", is("newport")))
-            .andExpect(jsonPath("$.data.newportCourtList", is("FR_newport_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("walesFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("newportCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
+            .andExpect(jsonPath("$.data", not(hasItem("nottinghamCourtListGA"))))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
-    public void shouldMigrateCase_newport_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-newport-ac.json"))
+    public void shouldMigrateCase_nw_preston() throws Exception {
+        mvc.perform(post(MIGRATE_FRC_URL)
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-nw-preston.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("wales")))
-            .andExpect(jsonPath("$.data.walesFRCList", is("newport")))
-            .andExpect(jsonPath("$.data.newportCourtList", is("FR_newport_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("walesFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("newportCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
+            .andExpect(jsonPath("$.data.regionList", is(NORTHWEST)))
+            .andExpect(jsonPath("$.data.northWestFRCList", is(LANCASHIRE)))
+            .andExpect(jsonPath("$.data.lancashireCourtList", is(PRESTON)))
+            .andExpect(jsonPath("$.data", not(hasItem(NWOTHER_COURTLIST))))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
-    public void shouldMigrateCase_newport_ga() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-newport-ga.json"))
+    public void shouldMigrateCase_nw_burnley_to_temp() throws Exception {
+        mvc.perform(post(MIGRATE_FRC_URL)
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-nw-burnley-to-temp.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("wales")))
-            .andExpect(jsonPath("$.data.walesFRCList", is("newport")))
-            .andExpect(jsonPath("$.data.newportCourtList", is("FR_newport_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("walesFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("newportCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
+            .andExpect(jsonPath("$.data.regionList", is(LONDON)))
+            .andExpect(jsonPath("$.data.londonFRCList", is(LONDON)))
+            .andExpect(jsonPath("$.data.londonCourtList", is(LONDON_TEMP)))
+            .andExpect(jsonPath("$.data", not(hasItem(NORTHWEST_FRC_LIST))))
+            .andExpect(jsonPath("$.data", not(hasItem(LANCASHIRE_COURTLIST))))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
-    public void shouldMigrateCase_swansea() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-swansea.json"))
+    public void shouldMigrateCase_se_bedford() throws Exception {
+        mvc.perform(post(MIGRATE_FRC_URL)
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-bedford.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("wales")))
-            .andExpect(jsonPath("$.data.walesFRCList", is("swansea")))
-            .andExpect(jsonPath("$.data.swanseaCourtList", is("FR_swansea_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("walesFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("swanseaCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
+            .andExpect(jsonPath("$.data.regionList", is(SOUTHEAST)))
+            .andExpect(jsonPath("$.data.southEastFRCList", is(BEDFORDSHIRE)))
+            .andExpect(jsonPath("$.data.bedfordshireCourtList", is(BEDFORD)))
+            .andExpect(jsonPath("$.data", not(hasItem(SEOTHER_COURTLIST))))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
-    public void shouldMigrateCase_swansea_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-swansea-ac.json"))
+    public void shouldMigrateCase_se_oxford() throws Exception {
+        mvc.perform(post(MIGRATE_FRC_URL)
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-oxford.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("wales")))
-            .andExpect(jsonPath("$.data.walesFRCList", is("swansea")))
-            .andExpect(jsonPath("$.data.swanseaCourtList", is("FR_swansea_hc_list_6")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("walesFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("swanseaCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
+            .andExpect(jsonPath("$.data.regionList", is(SOUTHEAST)))
+            .andExpect(jsonPath("$.data.southEastFRCList", is(THAMESVALLEY)))
+            .andExpect(jsonPath("$.data.thamesvalleyCourtList", is(OXFORD)))
+            .andExpect(jsonPath("$.data", not(hasItem(SEOTHER_COURTLIST))))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
-    public void shouldMigrateCase_swansea_ga() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-swansea-ga.json"))
+    public void shouldMigrateCase_se_basildon_to_temp() throws Exception {
+        mvc.perform(post(MIGRATE_FRC_URL)
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-se-basildon-to-temp.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("wales")))
-            .andExpect(jsonPath("$.data.walesFRCList", is("swansea")))
-            .andExpect(jsonPath("$.data.swanseaCourtList", is("FR_swansea_hc_list_6")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("walesFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("swanseaCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
+            .andExpect(jsonPath("$.data.regionList", is(LONDON)))
+            .andExpect(jsonPath("$.data.londonFRCList", is(LONDON)))
+            .andExpect(jsonPath("$.data.londonCourtList", is(LONDON_TEMP)))
+            .andExpect(jsonPath("$.data", not(hasItem(SOUTHEAST_FRC_LIST))))
+            .andExpect(jsonPath("$.data", not(hasItem(BEDFORDSHIRE_COURTLIST))))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
-    public void shouldMigrateCase_cfc() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-cfc.json"))
+    public void shouldMigrateCase_sw_winchester() throws Exception {
+        mvc.perform(post(MIGRATE_FRC_URL)
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-winchester.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("london")))
-            .andExpect(jsonPath("$.data.londonFRCList", is("cfc")))
-            .andExpect(jsonPath("$.data.cfcCourtList", is("FR_s_CFCList_9")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("londonFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("cfcCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
+            .andExpect(jsonPath("$.data.regionList", is(SOUTHWEST)))
+            .andExpect(jsonPath("$.data.southWestFRCList", is(DORSET)))
+            .andExpect(jsonPath("$.data.dorsetCourtList", is(WINCHESTER)))
+            .andExpect(jsonPath("$.data", not(hasItem(SWOTHER_COURTLIST))))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
-    public void shouldMigrateCase_cfc_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-cfc-ac.json"))
+    public void shouldMigrateCase_sw_truro() throws Exception {
+        mvc.perform(post(MIGRATE_FRC_URL)
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-truro.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("london")))
-            .andExpect(jsonPath("$.data.londonFRCList", is("cfc")))
-            .andExpect(jsonPath("$.data.cfcCourtList", is("FR_s_CFCList_9")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("londonFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("cfcCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
+            .andExpect(jsonPath("$.data.regionList", is(SOUTHWEST)))
+            .andExpect(jsonPath("$.data.southWestFRCList", is(DEVON)))
+            .andExpect(jsonPath("$.data.devonCourtList", is(TRURO)))
+            .andExpect(jsonPath("$.data", not(hasItem(SWOTHER_COURTLIST))))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
-    public void shouldMigrateCase_cfc_ga() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-cfc-ga.json"))
+    public void shouldMigrateCase_sw_salisbury() throws Exception {
+        mvc.perform(post(MIGRATE_FRC_URL)
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-sw-salisbury.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("london")))
-            .andExpect(jsonPath("$.data.londonFRCList", is("cfc")))
-            .andExpect(jsonPath("$.data.cfcCourtList", is("FR_s_CFCList_9")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("londonFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("cfcCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
+            .andExpect(jsonPath("$.data.regionList", is(SOUTHWEST)))
+            .andExpect(jsonPath("$.data.southWestFRCList", is(BRISTOLFRC)))
+            .andExpect(jsonPath("$.data.bristolCourtList", is(SALISBURY)))
+            .andExpect(jsonPath("$.data", not(hasItem(SWOTHER_COURTLIST))))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
-    public void shouldMigrateCase_nottingham() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-nottingham.json"))
+    public void shouldMigrateCase_w_prestatyn() throws Exception {
+        mvc.perform(post(MIGRATE_FRC_URL)
+            .content(resourceContentAsString("/fixtures/migration/rpet-164-frc-updates/migrate-request-w-prestatyn.json"))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("midlands")))
-            .andExpect(jsonPath("$.data.midlandsFRCList", is("nottingham")))
-            .andExpect(jsonPath("$.data.nottinghamCourtList", is("FR_nottingham_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("midlandsFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("nottinghamCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_nottingham_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-nottingham-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("midlands")))
-            .andExpect(jsonPath("$.data.midlandsFRCList", is("nottingham")))
-            .andExpect(jsonPath("$.data.nottinghamCourtList", is("FR_nottingham_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("midlandsFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("nottinghamCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_nottingham_ga() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-nottingham-ga.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("midlands")))
-            .andExpect(jsonPath("$.data.midlandsFRCList", is("nottingham")))
-            .andExpect(jsonPath("$.data.nottinghamCourtList", is("FR_nottingham_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("midlandsFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("nottinghamCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_birmingham() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-birmingham.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("midlands")))
-            .andExpect(jsonPath("$.data.midlandsFRCList", is("birmingham")))
-            .andExpect(jsonPath("$.data.birminghamCourtList", is("FR_birmingham_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("midlandsFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("birminghamCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_birmingham_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-birmingham-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("midlands")))
-            .andExpect(jsonPath("$.data.midlandsFRCList", is("birmingham")))
-            .andExpect(jsonPath("$.data.birminghamCourtList", is("FR_birmingham_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("midlandsFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("birminghamCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_birmingham_ga() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-birmingham-ga.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("midlands")))
-            .andExpect(jsonPath("$.data.midlandsFRCList", is("birmingham")))
-            .andExpect(jsonPath("$.data.birminghamCourtList", is("FR_birmingham_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("midlandsFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("birminghamCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_liverpool() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-liverpool.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("northwest")))
-            .andExpect(jsonPath("$.data.northWestFRCList", is("liverpool")))
-            .andExpect(jsonPath("$.data.liverpoolCourtList", is("FR_liverpool_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northWestFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("liverpoolCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_liverpool_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-liverpool-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("northwest")))
-            .andExpect(jsonPath("$.data.northWestFRCList", is("liverpool")))
-            .andExpect(jsonPath("$.data.liverpoolCourtList", is("FR_liverpool_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northWestFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("liverpoolCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_liverpool_ga() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-liverpool-ga.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("northwest")))
-            .andExpect(jsonPath("$.data.northWestFRCList", is("liverpool")))
-            .andExpect(jsonPath("$.data.liverpoolCourtList", is("FR_liverpool_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northWestFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("liverpoolCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_manchester() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-manchester.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("northwest")))
-            .andExpect(jsonPath("$.data.northWestFRCList", is("manchester")))
-            .andExpect(jsonPath("$.data.manchesterCourtList", is("FR_manchester_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northWestFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("manchesterCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_manchester_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-manchester-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("northwest")))
-            .andExpect(jsonPath("$.data.northWestFRCList", is("manchester")))
-            .andExpect(jsonPath("$.data.manchesterCourtList", is("FR_manchester_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northWestFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("manchesterCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_manchester_ga() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-manchester-ga.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("northwest")))
-            .andExpect(jsonPath("$.data.northWestFRCList", is("manchester")))
-            .andExpect(jsonPath("$.data.manchesterCourtList", is("FR_manchester_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northWestFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("manchesterCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_cleaveland() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-cleaveland.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("northeast")))
-            .andExpect(jsonPath("$.data.northEastFRCList", is("cleaveland")))
-            .andExpect(jsonPath("$.data.cleavelandCourtList", is("FR_cleaveland_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northEastFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("cleavelandCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_cleaveland_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-cleaveland-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("northeast")))
-            .andExpect(jsonPath("$.data.northEastFRCList", is("cleaveland")))
-            .andExpect(jsonPath("$.data.cleavelandCourtList", is("FR_cleaveland_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northEastFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("cleavelandCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_nwyorkshire() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-nwyorkshire.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("northeast")))
-            .andExpect(jsonPath("$.data.northEastFRCList", is("nwyorkshire")))
-            .andExpect(jsonPath("$.data.nwyorkshireCourtList", is("FR_nwyorkshire_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northEastFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("nwyorkshireCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_nwyorkshire_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-nwyorkshire-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("northeast")))
-            .andExpect(jsonPath("$.data.northEastFRCList", is("nwyorkshire")))
-            .andExpect(jsonPath("$.data.nwyorkshireCourtList", is("FR_nwyorkshire_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northEastFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("nwyorkshireCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_nwyorkshire_ga() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-nwyorkshire-ga.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("northeast")))
-            .andExpect(jsonPath("$.data.northEastFRCList", is("nwyorkshire")))
-            .andExpect(jsonPath("$.data.nwyorkshireCourtList", is("FR_nwyorkshire_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northEastFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("nwyorkshireCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_hsyorkshire() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-hsyorkshire.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("northeast")))
-            .andExpect(jsonPath("$.data.northEastFRCList", is("hsyorkshire")))
-            .andExpect(jsonPath("$.data.humberCourtList", is("FR_hsyorkshire_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northEastFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("humberCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_hsyorkshire_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-hsyorkshire-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("northeast")))
-            .andExpect(jsonPath("$.data.northEastFRCList", is("hsyorkshire")))
-            .andExpect(jsonPath("$.data.humberCourtList", is("FR_hsyorkshire_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northEastFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("humberCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_hsyorkshire_ga() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-hsyorkshire-ga.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("northeast")))
-            .andExpect(jsonPath("$.data.northEastFRCList", is("hsyorkshire")))
-            .andExpect(jsonPath("$.data.humberCourtList", is("FR_hsyorkshire_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northEastFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("humberCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_kent() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-kent.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("southeast")))
-            .andExpect(jsonPath("$.data.southEastFRCList", is("kentfrc")))
-            .andExpect(jsonPath("$.data.kentSurreyCourtList", is("FR_kent_surrey_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northEastFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("kentSurreyCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_kent_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-kent-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("southeast")))
-            .andExpect(jsonPath("$.data.southEastFRCList", is("kentfrc")))
-            .andExpect(jsonPath("$.data.kentSurreyCourtList", is("FR_kent_surrey_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northEastFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("kentSurreyCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_kent_ga() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-kent-ga.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.regionList", is("southeast")))
-            .andExpect(jsonPath("$.data.southEastFRCList", is("kentfrc")))
-            .andExpect(jsonPath("$.data.kentSurreyCourtList", is("FR_kent_surrey_hc_list_1")))
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northEastFRCListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("kentSurreyCourtListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_invalidRegion() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-invalid-region.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data.regionList", is("error")))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_invalidRegion_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-invalid-region-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data.regionList", is("error")))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_invalidFrcWales() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-invalid-frc-wales.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("walesFRCListSL"))))
-            .andExpect(jsonPath("$.data.regionList", is("wales")))
-            .andExpect(jsonPath("$.data.walesFRCList", is("birmingham")))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_invalidFrcWales_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-invalid-frc-wales-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("walesFRCListSL"))))
-            .andExpect(jsonPath("$.data.regionList", is("wales")))
-            .andExpect(jsonPath("$.data.walesFRCList", is("birmingham")))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_invalidFrcMidlands() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-invalid-frc-midlands.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("midlandsFRCListSL"))))
-            .andExpect(jsonPath("$.data.regionList", is("midlands")))
-            .andExpect(jsonPath("$.data.midlandsFRCList", is("london")))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_invalidFrcMidlands_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-invalid-frc-midlands-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("midlandsFRCListSL"))))
-            .andExpect(jsonPath("$.data.regionList", is("midlands")))
-            .andExpect(jsonPath("$.data.midlandsFRCList", is("london")))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_invalidFrcLondon() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-invalid-frc-london.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("londonFRCListSL"))))
-            .andExpect(jsonPath("$.data.regionList", is("london")))
-            .andExpect(jsonPath("$.data.londonFRCList", is("birmingham")))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_invalidFrcLondon_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-invalid-frc-london-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("londonFRCListSL"))))
-            .andExpect(jsonPath("$.data.regionList", is("london")))
-            .andExpect(jsonPath("$.data.londonFRCList", is("birmingham")))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_invalidFrcNorthwest() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-invalid-frc-northwest.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northWestFRCListSL"))))
-            .andExpect(jsonPath("$.data.regionList", is("northwest")))
-            .andExpect(jsonPath("$.data.northWestFRCList", is("birmingham")))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_invalidFrcNorthwest_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-invalid-frc-northwest-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northWestFRCListSL"))))
-            .andExpect(jsonPath("$.data.regionList", is("northwest")))
-            .andExpect(jsonPath("$.data.northWestFRCList", is("birmingham")))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_invalidFrcNortheast() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-invalid-frc-northeast.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northEastFRCListSL"))))
-            .andExpect(jsonPath("$.data.regionList", is("northeast")))
-            .andExpect(jsonPath("$.data.northEastFRCList", is("birmingham")))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_invalidFrcNortheast_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-invalid-frc-northeast-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("northEastFRCListSL"))))
-            .andExpect(jsonPath("$.data.regionList", is("northeast")))
-            .andExpect(jsonPath("$.data.northEastFRCList", is("birmingham")))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_invalidFrcSoutheast() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-invalid-frc-southeast.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("southEastFRCListSL"))))
-            .andExpect(jsonPath("$.data.regionList", is("southeast")))
-            .andExpect(jsonPath("$.data.southEastFRCList", is("birmingham")))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldMigrateCase_invalidFrcSoutheast_ac() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-migration-applicable-invalid-frc-southeast-ac.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", not(hasItem("regionListSL"))))
-            .andExpect(jsonPath("$.data", not(hasItem("southEastFRCListSL"))))
-            .andExpect(jsonPath("$.data.regionList", is("southeast")))
-            .andExpect(jsonPath("$.data.southEastFRCList", is("birmingham")))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtList"))))
-            .andExpect(jsonPath("$.data", not(hasItem("allocatedCourtListGA"))))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldNotMigrateCase() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-already-migrated.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldNotMigrateCaseConsented() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-consented.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldNotMigrateCaseInvalidCourtData() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-invalid-court-data.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldNotMigrateCaseInvalidCourtDataGA() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-invalid-court-data-ga.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldNotMigrateCaseNoCourtData() throws Exception {
-        mvc.perform(post(MIGRATE_URL)
-            .content(resourceContentAsString("/fixtures/ccd-migrate-request-no-court-data.json"))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.data.regionList", is(WALES)))
+            .andExpect(jsonPath("$.data.walesFRCList", is(NORTHWALES)))
+            .andExpect(jsonPath("$.data.northWalesCourtList", is(PRESTATYN)))
+            .andExpect(jsonPath("$.data", not(hasItem(WALES_OTHER_COURTLIST))))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 }

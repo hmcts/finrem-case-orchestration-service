@@ -10,8 +10,8 @@ public class IdamServiceHealthCheck extends AbstractServiceHealthCheck {
 
     @Autowired
     public IdamServiceHealthCheck(
-            @Value("${idam.health.url}") String uri,
-            RestTemplate restTemplate) {
+        @Value("${idam.health.url}") String uri,
+        RestTemplate restTemplate) {
         super(uri, restTemplate);
     }
 }

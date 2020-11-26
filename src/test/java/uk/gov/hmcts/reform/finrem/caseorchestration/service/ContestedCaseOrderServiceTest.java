@@ -8,18 +8,13 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 
 import java.io.InputStream;
-import java.util.List;
 
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 
 public class ContestedCaseOrderServiceTest extends BaseServiceTest {
@@ -31,35 +26,35 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     private BulkPrintService bulkPrintService;
 
     @Test
-    public void givenNoGeneralOrderPresent_whenPrintAndMailGeneralOrderTriggered_thenErrorIsReturned() {
+    public void givenNoGeneralOrderPresent_whenPrintAndMailGeneralOrderTriggered_thenDocumentsAreNotPrinted() {
         CaseDetails caseDetails = contestedCaseDetails();
         caseDetails.getData().remove(GENERAL_ORDER_LATEST_DOCUMENT);
 
-        List<String> errors = contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
+        contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
-        assertThat(errors, hasSize(1));
+        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
     }
 
     @Test
     public void whenPrintAndMailGeneralOrderTriggered_thenBothApplicantAndRespondentPacksArePrinted() {
         CaseDetails caseDetails = contestedCaseDetails();
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
 
-        List<String> errors = contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
+        contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
-        assertThat(errors, is(empty()));
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
     }
 
     @Test
-    public void givenApplicantSolicitorAgreedToReceiveEmails_whenPrintAndMailGeneralOrderTriggered_thenOnlyRespondentPacksIsPrinted() {
+    public void givenShouldNotPrintPackForApplicant_whenPrintAndMailGeneralOrderTriggered_thenOnlyRespondentPacksIsPrinted() {
         CaseDetails caseDetails = contestedCaseDetails();
-        caseDetails.getData().put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(false);
 
-        List<String> errors = contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
+        contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
-        assertThat(errors, is(empty()));
-        verify(bulkPrintService, times(0)).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
     }
 

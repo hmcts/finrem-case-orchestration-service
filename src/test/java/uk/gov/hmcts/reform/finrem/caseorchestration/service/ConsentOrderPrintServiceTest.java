@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
@@ -20,10 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -35,9 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.bulkPr
 @ActiveProfiles("test-mock-document-client")
 public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
-    @Autowired private BulkPrintService bulkPrintService;
-    @Autowired private ObjectMapper mapper = new ObjectMapper();
-    @Autowired private DocumentHelper documentHelper;
+    @Autowired private ObjectMapper mapper;
     @Autowired private ConsentOrderPrintService consentOrderPrintService;
 
     @MockBean private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
@@ -50,7 +47,6 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
     private UUID letterId;
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor = ArgumentCaptor.forClass(BulkPrintRequest.class);
     private CaseDocument caseDocument = TestSetUpUtils.caseDocument();
-    private BulkPrintDocument bulkPrintDocument;
 
     @Test
     public void shouldSendForBulkPrintPackWithRespondentAndApplicantAddress() {
@@ -63,8 +59,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
             .thenReturn(bulkPrintDocumentList());
 
-        Map<String, Object> caseData = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
+        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 
+        Map<String, Object> caseData = caseDetails.getData();
         assertThat(caseData.containsKey("bulkPrintCoverSheetRes"), is(true));
         assertThat(caseData.get("bulkPrintLetterIdRes"), is(letterId));
         assertThat(caseData.get("bulkPrintLetterIdApp"), is(letterId));
@@ -82,8 +79,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
 
-        Map<String, Object> caseData = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
+        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 
+        Map<String, Object> caseData = caseDetails.getData();
         assertThat(caseData.containsKey("bulkPrintCoverSheetRes"), is(true));
         assertThat(caseData.get("bulkPrintLetterIdRes"), is(letterId));
         assertThat(caseData.get("bulkPrintLetterIdApp"), is(letterId));
@@ -103,8 +101,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(consentOrderApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN)).thenReturn(bulkPrintDocuments);
         when(documentClient.bulkPrint(bulkPrintRequestArgumentCaptor.capture())).thenReturn(letterId);
 
-        Map<String, Object> caseData = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
+        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 
+        Map<String, Object> caseData = caseDetails.getData();
         assertThat(caseData.containsKey("bulkPrintCoverSheetRes"), is(true));
         assertThat(caseData.get("bulkPrintLetterIdRes"), is(letterId));
 
@@ -120,8 +119,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
 
-        Map<String, Object> caseData = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
+        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 
+        Map<String, Object> caseData = caseDetails.getData();
         assertThat(caseData.containsKey("bulkPrintCoverSheetRes"), is(true));
         assertThat(caseData.get("bulkPrintLetterIdRes"), is(letterId));
         assertThat(caseData.get("bulkPrintLetterIdApp"), is(letterId));
@@ -202,8 +202,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
 
-        Map<String, Object> caseData = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
+        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 
+        Map<String, Object> caseData = caseDetails.getData();
         assertThat(caseData.containsKey("bulkPrintCoverSheetRes"), is(true));
         assertThat(caseData.get("bulkPrintLetterIdRes"), is(letterId));
         assertThat(caseData.get("bulkPrintLetterIdApp"), is(letterId));
@@ -223,8 +224,9 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
         when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
         when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
 
-        Map<String, Object> caseData = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
+        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
 
+        Map<String, Object> caseData = caseDetails.getData();
         assertThat(caseData.containsKey("bulkPrintCoverSheetRes"), is(true));
         assertThat(caseData.get("bulkPrintLetterIdRes"), is(letterId));
         assertThat(caseData.get("bulkPrintLetterIdApp"), nullValue());

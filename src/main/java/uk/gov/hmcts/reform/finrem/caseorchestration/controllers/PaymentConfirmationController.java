@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
 
 import java.io.IOException;
@@ -27,14 +28,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 @SuppressWarnings("unchecked")
 public class PaymentConfirmationController implements BaseController {
+
     private final PaymentConfirmationService paymentConfirmationService;
+    private final AssignCaseAccessService assignCaseAccessService;
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/payment-confirmation", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles PBA Payments Confirmation")
     public ResponseEntity<SubmittedCallbackResponse> paymentConfirmation(
-            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-            @RequestBody CallbackRequest callbackRequest) throws IOException {
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
+        @RequestBody CallbackRequest callbackRequest) throws IOException {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for PBA confirmation for Case ID: {}", caseDetails.getId());
@@ -45,23 +48,26 @@ public class PaymentConfirmationController implements BaseController {
             .confirmationBody(confirmationBody(caseDetails))
             .build();
 
+        log.info("Assigning case access for Case ID: {}", caseDetails.getId());
+        assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
+
         return ResponseEntity.ok(callbackResponse);
     }
 
     private String confirmationBody(CaseDetails caseDetails) throws IOException {
         boolean isConsentedApplication = isConsentedApplication(caseDetails);
-        Map<String,Object> caseData = caseDetails.getData();
+        Map<String, Object> caseData = caseDetails.getData();
         log.info("Application type isConsentedApplication : {}", isConsentedApplication);
 
         String confirmationBody;
         if (isConsentedApplication) {
             log.info("Consented confirmation page to show");
-            confirmationBody = isPBAPayment(caseData) ?  paymentConfirmationService.consentedPbaPaymentConfirmation()
-                    : paymentConfirmationService.consentedHwfPaymentConfirmation();
+            confirmationBody = isPBAPayment(caseData) ? paymentConfirmationService.consentedPbaPaymentConfirmation()
+                : paymentConfirmationService.consentedHwfPaymentConfirmation();
         } else {
             log.info("Contested confirmation page to show");
-            confirmationBody = isPBAPayment(caseData) ?  paymentConfirmationService.contestedPbaPaymentConfirmation()
-                    : paymentConfirmationService.contestedHwfPaymentConfirmation();
+            confirmationBody = isPBAPayment(caseData) ? paymentConfirmationService.contestedPbaPaymentConfirmation()
+                : paymentConfirmationService.contestedHwfPaymentConfirmation();
         }
         return confirmationBody;
     }

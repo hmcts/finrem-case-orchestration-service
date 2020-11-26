@@ -7,10 +7,6 @@
         <cpe>cpe:/a:pivotal_software:spring_security</cpe>
     </suppress>
     <suppress>
-        <notes>only affects log appender over SMTP, seriously who does this...</notes>
-        <cve>CVE-2020-9488</cve>
-    </suppress>
-    <suppress>
         <notes> XSS issue, not relevant in performance tests</notes>
         <packageUrl regex="true">^pkg:maven/org\.scala\-lang/scala\-library@.*$</packageUrl>
         <vulnerabilityName>CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')</vulnerabilityName>
@@ -23,20 +19,20 @@
         <vulnerabilityName>Prototype pollution</vulnerabilityName>
     </suppress>
     <suppress>
-        <notes>Wiremock - 2.6.3 - Regex in its jQuery.htmlPrefilter</notes>
-        <packageUrl regex="true">^pkg:javascript/jquery@.*$</packageUrl>
-        <vulnerabilityName>Regex in its jQuery.htmlPrefilter  sometimes may introduce XSS</vulnerabilityName>
+        <notes><![CDATA[jquery-3.4.1.min.js - wiremock dependency]]></notes>
+        <packageUrl regex="true">^pkg:javascript/jquery.*$</packageUrl>
+        <cve>CVE-2020-11022</cve>
+        <cve>CVE-2020-11023</cve>
     </suppress>
+
     <suppress>
-        <notes>Snakeyaml</notes>
-        <packageUrl regex="true">^pkg:maven/org.yaml/snakeyaml@.*$</packageUrl>
-        <cve>CVE-2017-18640</cve>
+        <notes>Tomcat 9.0.39 - highest available version at the moment</notes>
+        <cve>CVE-2020-13943</cve>
     </suppress>
+
     <suppress>
-        <notes>
-        <![CDATA[ CVE is a json vulnerability that applies only to Ruby or Node projects]]>
-        </notes>
-        <cve>CVE-2020-10663</cve>
-        <cve>CVE-2020-7712</cve>
+        <notes><![CDATA[file name: junit-4.13.jar]]></notes>
+        <packageUrl regex="true">^pkg:maven/junit/junit@.*$</packageUrl>
+        <cve>CVE-2020-15250</cve>
     </suppress>
 </suppressions>

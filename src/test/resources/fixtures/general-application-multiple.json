@@ -2,7 +2,7 @@
   "token": "token_test",
   "event_id": "some_event_id",
   "case_details_before": {
-    "state":"applicationIssued"
+    "state": "applicationIssued"
   },
   "case_details": {
     "id": 1234567890,
@@ -32,16 +32,23 @@
         "document_filename": "app_docs.pdf",
         "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
       },
-      "generalApplicationCollection": [{
-        "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
-        "value": {
-          "generalApplicationDocument": {
-            "document_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee",
-            "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
-            "document_binary_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee/binary"
+      "generalApplicationCollection": [
+        {
+          "id": "c0c5b8cc-8bb5-41da-84bf-06be40b8fa77",
+          "value": {
+            "generalApplicationDocument": {
+              "document_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee",
+              "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",
+              "document_binary_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-c06d1e6344ee/binary"
+            }
           }
         }
-      }],
+      ],
+      "generalApplicationDirectionsDocument": {
+        "document_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-6e4e1a1d11ec",
+        "document_filename": "generalApplicationDirections.pdf",
+        "document_binary_url": "http://document-management-store:8080/documents/0abf044e-3d01-45eb-b792-6e4e1a1d11ec/binary"
+      },
       "d81Applicant": {
         "document_url": "http://document-management-store:8080/documents/2c9d3381-df6a-4817-aec3-a8a46ca0635b",
         "document_filename": "WhatsApp Image 2018-07-24 at 3.05.39 PM.jpeg",

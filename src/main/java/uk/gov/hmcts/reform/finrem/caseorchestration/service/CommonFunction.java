@@ -52,7 +52,7 @@ public class CommonFunction {
         listMap.stream().findFirst().orElse(null);
 
     public static boolean addressLineOneAndPostCodeAreBothNotEmpty(Map address) {
-        return  ObjectUtils.isNotEmpty(address)
+        return ObjectUtils.isNotEmpty(address)
             && StringUtils.isNotBlank((String) address.get(LINE_1))
             && StringUtils.isNotBlank((String) address.get(POSTCODE));
     }

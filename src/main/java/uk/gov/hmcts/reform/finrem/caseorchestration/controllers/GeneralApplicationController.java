@@ -42,15 +42,16 @@ public class GeneralApplicationController implements BaseController {
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         CaseDetails caseDetails = callback.getCaseDetails();
-        CaseDetails caseDetailsBefore = callback.getCaseDetailsBefore();
         log.info("Received request to submit general application for Case ID: {}", caseDetails.getId());
         validateCaseData(callback);
 
+        CaseDetails caseDetailsBefore = callback.getCaseDetailsBefore();
         generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
             .builder()
-            .data(caseDetails.getData()).build());
+            .data(caseDetails.getData())
+            .build());
     }
 
     @PostMapping(path = "/start-general-application", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)

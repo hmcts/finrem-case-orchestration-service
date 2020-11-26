@@ -14,13 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -34,7 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_REF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
@@ -48,6 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 public class CaseDataController implements BaseController {
     private final IdamService idamService;
     private final FeatureToggleService featureToggleService;
+    private final DocumentHelper documentHelper;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for consented journey")
@@ -65,8 +63,8 @@ public class CaseDataController implements BaseController {
     @PostMapping(path = "/contested/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for contested journey")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedDefaultValues(
-            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
-            @RequestBody final CallbackRequest callbackRequest) {
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
+        @RequestBody final CallbackRequest callbackRequest) {
         log.info("Setting default values for contested journey.");
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
@@ -87,31 +85,33 @@ public class CaseDataController implements BaseController {
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setPaperCaseData(caseData);
-        setOrganisationPolicy(callbackRequest.getCaseDetails());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
+    @PostMapping(path = "/contested/set-paper-case-org-policy",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Set default values for contested paper case journey")
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedPaperCaseOrganisationPolicy(
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
+        @RequestBody final CallbackRequest callbackRequest) {
+        log.info("Setting default values for contested paper case journey.");
+        validateCaseData(callbackRequest);
+        setOrganisationPolicy(callbackRequest.getCaseDetails());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
+    }
+
     @PostMapping(path = "/move-collection/{source}/to/{destination}", consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+        produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> moveValues(
-            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
-            @RequestBody final CallbackRequest callbackRequest,
-            @PathVariable("source") final String source,
-            @PathVariable("destination") final String destination) {
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
+        @RequestBody final CallbackRequest callbackRequest,
+        @PathVariable("source") final String source,
+        @PathVariable("destination") final String destination) {
 
         validateCaseData(callbackRequest);
-        final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        if (caseData.get(source) != null && (caseData.get(source) instanceof Collection)) {
-            if (caseData.get(destination) == null || (caseData.get(destination) instanceof Collection)) {
-                final List destinationList = new ArrayList();
-                if (caseData.get(destination) != null) {
-                    destinationList.addAll((List) caseData.get(destination));
-                }
-                destinationList.addAll((List) caseData.get(source));
-                caseData.put(destination, destinationList);
-                caseData.put(source, null);
-            }
-        }
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        caseData = documentHelper.moveCollection(caseData, source, destination);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -143,7 +143,6 @@ public class CaseDataController implements BaseController {
             appPolicy.put(ORGANISATION_POLICY_REF, null);
             Map<String, Object> org = new HashMap<>();
             org.put(ORGANISATION_POLICY_ORGANISATION_ID, null);
-            org.put(ORGANISATION_POLICY_ORGANISATION_NAME, null);
             appPolicy.put(ORGANISATION_POLICY_ORGANISATION, org);
 
             caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appPolicy);

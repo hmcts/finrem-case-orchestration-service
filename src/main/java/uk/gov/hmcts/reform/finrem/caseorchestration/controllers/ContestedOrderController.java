@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -35,7 +34,6 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Slf4j
 @RestController
@@ -50,45 +48,36 @@ public class ContestedOrderController implements BaseController {
     @PostMapping(path = "/contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
-                    response = AboutToStartOrSubmitCallbackResponse.class),
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 500, message = "Internal Server Error")
-        })
-
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> stampFinalOrder(
-            @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
 
         validateCaseData(callback);
 
         CaseDetails caseDetails = callback.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
-        List<String> errors = new ArrayList<>();
 
-        List<String> contestedCaseOrderErrors = contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, authToken);
-        errors.addAll(contestedCaseOrderErrors);
+        contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, authToken);
 
-        if (!isPaperApplication(caseData)) {
-            log.info("Received request to stampFinalOrder called with Case ID = {}", caseDetails.getId());
-            List<HearingOrderCollectionData> hearingOrderCollectionData = getHearingOrderDocuments(caseData);
+        List<HearingOrderCollectionData> hearingOrderCollectionData = getHearingOrderDocuments(caseData);
 
-            if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
-                CaseDocument latestHearingOrder = hearingOrderCollectionData
-                    .get(hearingOrderCollectionData.size() - 1)
-                    .getHearingOrderDocuments().getUploadDraftDocument();
-                log.info("FinalOrderController called with latestHearingOrder = {}", latestHearingOrder);
+        if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
+            CaseDocument latestHearingOrder = hearingOrderCollectionData
+                .get(hearingOrderCollectionData.size() - 1)
+                .getHearingOrderDocuments().getUploadDraftDocument();
 
-                stampAndAddToCollection(caseData, latestHearingOrder, authToken);
-            }
+            log.info("Received request to stampFinalOrder called with Case ID = {}, latestHearingOrder = {}", caseDetails.getId(),
+                latestHearingOrder);
+
+            stampAndAddToCollection(caseData, latestHearingOrder, authToken);
         }
 
-        return ResponseEntity.ok(
-            AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseData)
-                .errors(errors)
-                .warnings(ImmutableList.of())
-                .build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     private void stampAndAddToCollection(Map<String, Object> caseData, CaseDocument latestHearingOrder, String authToken) {

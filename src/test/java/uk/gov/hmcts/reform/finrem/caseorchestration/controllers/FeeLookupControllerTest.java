@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -36,10 +37,10 @@ public class FeeLookupControllerTest extends BaseControllerTest {
 
     private void doFeeLookupSetUp(ApplicationType applicationType) throws IOException, URISyntaxException {
         String fileName = applicationType == CONSENTED
-                ? "/fixtures/fee-lookup.json" : "/fixtures/contested/fee-lookup.json";
+            ? "/fixtures/fee-lookup.json" : "/fixtures/contested/fee-lookup.json";
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper.readTree(new File(getClass()
-                .getResource(fileName).toURI()));
+            .getResource(fileName).toURI()));
 
         when(feeService.getApplicationFee(applicationType)).thenReturn(fee(applicationType));
     }
@@ -48,44 +49,44 @@ public class FeeLookupControllerTest extends BaseControllerTest {
     public void shouldReturnBadRequestWhenCaseDataIsMissingInRequest() throws Exception {
         doEmptyCaseDataSetUp();
         mvc.perform(post(FEE_LOOKUP_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string(is(GlobalExceptionHandler.SERVER_ERROR_MSG)));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(startsWith(GlobalExceptionHandler.SERVER_ERROR_MSG)));
     }
 
     @Test
     public void shouldDoConsentedFeeLookup() throws Exception {
         doFeeLookupSetUp(CONSENTED);
         mvc.perform(post(FEE_LOOKUP_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("1000")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
-                .andExpect(jsonPath("$.data.amountToPay", is("1000")))
-                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("1000")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
+            .andExpect(jsonPath("$.data.amountToPay", is("1000")))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 
     @Test
     public void shouldDoContestedFeeLookup() throws Exception {
         doFeeLookupSetUp(CONTESTED);
         mvc.perform(post(FEE_LOOKUP_URL)
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("25500")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
-                .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
-                .andExpect(jsonPath("$.data.amountToPay", is("25500")))
-                .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-                .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeCode", is("FEE0640")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeAmount", is("25500")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
+            .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
+            .andExpect(jsonPath("$.data.amountToPay", is("25500")))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 }

@@ -2,7 +2,7 @@ import org.springframework.boot.gradle.tasks.run.BootRun
 
 buildscript {
     ext {
-        springBootVersion = '2.2.6.RELEASE'
+        springBootVersion = '2.3.4.RELEASE'
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
@@ -22,7 +22,7 @@ plugins {
     id 'jacoco'
     id 'org.owasp.dependencycheck' version '6.0.1'
     id 'org.sonarqube' version '3.0'
-    id 'org.springframework.boot' version '2.2.6.RELEASE'
+    id 'org.springframework.boot' version '2.3.4.RELEASE'
     id 'net.ltgt.apt' version '0.21'
 }
 
@@ -111,7 +111,7 @@ def versions = [
     commonsLang3            : '3.11',
     gradlePitest            : '1.5.1',
     jsonAssert              : '1.2.3',
-    junit                   : '4.13',
+    junit                   : '4.13.1',
     lombok                  : '1.18.12',
     mockito                 : '3.4.4',
     nimbus                  : '5.1',
@@ -192,6 +192,7 @@ dependencies {
     functionalImplementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
     functionalImplementation group: 'org.mockito', name: 'mockito-core', version: versions.mockito
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+    functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
     functionalImplementation group: 'org.pdfbox', name: 'com.springsource.org.pdfbox', version: '0.7.3'
     functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalImplementation group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'

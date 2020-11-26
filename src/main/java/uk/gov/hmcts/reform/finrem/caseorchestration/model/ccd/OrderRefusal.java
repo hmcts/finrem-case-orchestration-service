@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,7 +23,7 @@ public class OrderRefusal {
     @JsonProperty("orderRefusalJudgeName")
     private String orderRefusalJudgeName;
     @JsonProperty("orderRefusalDate")
-    private Date orderRefusalDate;
+    private LocalDate orderRefusalDate;
     @JsonProperty("orderRefusalAddComments")
     private String orderRefusalAddComments;
 }
