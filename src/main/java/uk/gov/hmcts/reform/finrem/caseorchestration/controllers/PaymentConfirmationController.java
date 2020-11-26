@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
 
 import java.io.IOException;
@@ -27,7 +28,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @Slf4j
 @SuppressWarnings("unchecked")
 public class PaymentConfirmationController implements BaseController {
+
     private final PaymentConfirmationService paymentConfirmationService;
+    private final AssignCaseAccessService assignCaseAccessService;
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/payment-confirmation", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -44,6 +47,9 @@ public class PaymentConfirmationController implements BaseController {
         SubmittedCallbackResponse callbackResponse = SubmittedCallbackResponse.builder()
             .confirmationBody(confirmationBody(caseDetails))
             .build();
+
+        log.info("Assigning case access for Case ID: {}", caseDetails.getId());
+        assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
 
         return ResponseEntity.ok(callbackResponse);
     }

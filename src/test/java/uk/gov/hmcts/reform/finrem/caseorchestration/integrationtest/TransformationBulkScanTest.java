@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.authorisation.validators.AuthTokenValidator;
 import uk.gov.hmcts.reform.bsp.common.model.validation.out.OcrValidationResult;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.validation.FormAValidator;
 
@@ -37,7 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @PropertySource(value = "classpath:application.yml")
 @AutoConfigureMockMvc
 @RunWith(SpringRunner.class)
-public class TransformationBulkScanTest {
+public class TransformationBulkScanTest extends BaseTest {
 
     private static final String TRANSFORMATION_URL = "/transform-exception-record";
     private static final String FORM_A_JSON_PATH = "fixtures/bulkscan/transformation/simple-FormA.json";

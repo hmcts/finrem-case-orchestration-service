@@ -45,6 +45,11 @@ public abstract class BaseServiceTest extends BaseTest {
     @Autowired
     protected ObjectMapper mapper;
 
+    protected CaseDetails buildCaseDetails() {
+        Map<String, Object> caseData = new HashMap<>();
+        return CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
+    }
+
     protected CallbackRequest getConsentedCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(SOLICITOR_EMAIL, TEST_SOLICITOR_EMAIL);
