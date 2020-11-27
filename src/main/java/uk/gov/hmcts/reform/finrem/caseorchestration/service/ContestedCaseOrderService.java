@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -19,6 +20,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ContestedCaseOrderService {
@@ -44,24 +46,23 @@ public class ContestedCaseOrderService {
 
             if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, createHearingDocumentPack(caseData));
+                log.info("Received request to send hearing pack for applicant for case{}:", caseDetails.getId());
             }
 
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, createHearingDocumentPack(caseData));
+            log.info("Received request to send hearing pack for respondent for case{}:", caseDetails.getId());
         }
     }
 
     private List<BulkPrintDocument> createHearingDocumentPack(Map<String, Object> caseData) {
         List<BulkPrintDocument> hearingDocumentPack = new ArrayList<>();
 
-        //LATEST_DRAFT_HEARING_ORDER
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, LATEST_DRAFT_HEARING_ORDER).ifPresent(hearingDocumentPack::add);
 
-        //ADDITIONAL_HEARING_DOCUMENT FROM THE COLLECTION
         Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);
         latestAdditionalHearingDocument.ifPresent(
             caseDocument -> hearingDocumentPack.add(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument)));
 
-        //ALL HEARING ORDER OTHER DOCUMENTS
         List<BulkPrintDocument> otherHearingDocuments = documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(
             caseData, HEARING_ORDER_OTHER_COLLECTION);
 
