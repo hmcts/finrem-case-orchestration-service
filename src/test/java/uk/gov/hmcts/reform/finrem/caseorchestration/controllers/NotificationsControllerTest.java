@@ -172,7 +172,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-            .sendAssignToJudgeConfirmationEmail(any());
+            .sendAssignToJudgeConfirmationEmailToApplicantSolicitor(any());
         verifyNoInteractions(assignedToJudgeDocumentService);
         verifyNoInteractions(bulkPrintService);
     }
@@ -818,6 +818,46 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService, never()).sendContestedConsentGeneralOrderEmailRespondentSolicitor(any());
         verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any());
+    }
+
+    @Test
+    public void whenToggleEnabledAndShouldSendEmailToRespSolicitor_thenSendsEmail() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+
+        verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void whenToggleEnabledAndShouldNotSendEmailToRespSolicitor_thenDoesNotSendEmail() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
+        notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+
+        verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void whenToggleDisabledAndShouldSendEmailToRespSolicitor_thenDoesNotSendEmail() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+
+        verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void whenToggleDisabledAndShouldNotSendEmailToRespSolicitor_thenDoesNotSendEmail() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
+        notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+
+        verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
     }
 
     @Test

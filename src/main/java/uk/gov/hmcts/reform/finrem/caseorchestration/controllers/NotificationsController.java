@@ -126,7 +126,12 @@ public class NotificationsController implements BaseController {
                 caseDetails.getId());
         } else if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Solicitor for Judge successfully assigned to case");
-            notificationService.sendAssignToJudgeConfirmationEmail(caseDetails);
+            notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
+        }
+
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled()
+            && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
