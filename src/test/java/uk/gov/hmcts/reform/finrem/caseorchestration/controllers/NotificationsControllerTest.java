@@ -713,6 +713,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .sendContestedConsentOrderApprovedEmailToRespondentSolicitor(any());
     }
 
+    @Test
     public void givenContestedCase_whenShouldSendRespondentNotification_thenShouldTriggerRespondentEmail() {
         when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
@@ -722,6 +723,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
 
         verify(notificationService, times(1)).sendContestOrderNotApprovedEmailRespondent(any());
+        verify(notificationService, never()).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any());
     }
 
     @Test
