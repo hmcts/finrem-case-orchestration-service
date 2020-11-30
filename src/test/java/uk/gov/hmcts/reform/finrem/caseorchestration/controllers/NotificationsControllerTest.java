@@ -281,7 +281,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-            .sendConsentOrderNotApprovedEmail(any());
+            .sendConsentOrderNotApprovedEmailToApplicantSolicitor(any());
     }
 
     @Test
@@ -713,7 +713,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .sendContestedConsentOrderApprovedEmailToRespondentSolicitor(any());
     }
 
-    public void whenShouldSendRespondentNotification_andCaseIsContested_thenShouldTriggerRespondentEmail() {
+    public void givenContestedCase_whenShouldSendRespondentNotification_thenShouldTriggerRespondentEmail() {
         when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
@@ -725,7 +725,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void whenShouldSendRespondentNotification_andCaseIsConsented_thenShouldNotTriggerRespondentEmail() {
+    public void givenConsentedCase_whenShouldSendRespondentNotification_thenShouldNotTriggerContestedRespondentEmail() {
         when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
@@ -734,6 +734,18 @@ public class NotificationsControllerTest extends BaseControllerTest {
         notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
 
         verify(notificationService, never()).sendContestOrderNotApprovedEmailRespondent(any());
+    }
+
+    @Test
+    public void givenConsentedCase_whenSendConsentOrderNotApproved_thenShouldTriggerConsentedRespondentEmail() {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
+        notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
+
+        verify(notificationService, times(1)).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any());
     }
 
     @Test
