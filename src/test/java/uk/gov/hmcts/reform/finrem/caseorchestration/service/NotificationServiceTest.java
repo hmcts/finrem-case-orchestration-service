@@ -698,13 +698,23 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendConsentedGeneralOrderNotificationEmail() {
+    public void sendConsentedGeneralOrderNotificationEmailApplicant() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENTED_GENERAL_ORDER))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendConsentedGeneralOrderEmail(callbackRequest.getCaseDetails());
+        notificationService.sendConsentedGeneralOrderEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void sendConsentedGeneralOrderNotificationEmailRespondent() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENTED_GENERAL_ORDER))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendConsentedGeneralOrderEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
