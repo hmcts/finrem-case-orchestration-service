@@ -32,17 +32,21 @@
           {
             "id": "8a921570-96bf-4a9d-ba63-6226ee267b99",
             "value": {
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/35b3203c-2e4c-4cf0-b800-4e0b97d52ce2",
-              "document_filename": "dummy.pdf",
-              "document_binary_url": "AdditionalHearingDocumentURL"
+              "additionalHearingDocument": {
+                "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/35b3203c-2e4c-4cf0-b800-4e0b97d52ce2",
+                "document_filename": "dummy.pdf",
+                "document_binary_url": "AdditionalHearingDocumentURL"
+              }
             }
           },
           {
             "id": "8a921570-96bf-4a9d-ba63-6226ee267b99",
             "value": {
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/35b3203c-2e4c-4cf0-b800-4e0b97d52ce2",
-              "document_filename": "test.pdf",
-              "document_binary_url": "AdditionalHearingDocument_2_URL"
+              "additionalHearingDocument": {
+                "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/35b3203c-2e4c-4cf0-b800-4e0b97d52ce2",
+                "document_filename": "test.pdf",
+                "document_binary_url": "AdditionalHearingDocument_2_URL"
+              }
             }
           }
         ],

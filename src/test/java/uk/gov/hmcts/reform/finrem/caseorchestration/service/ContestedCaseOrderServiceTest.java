@@ -27,6 +27,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 
 public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
@@ -87,8 +88,17 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
         contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
 
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
+
+        List<String> expectedBulkPrintDocuments = new ArrayList<>();
+        expectedBulkPrintDocuments.add("HearingOrderBinaryURL");
+        expectedBulkPrintDocuments.add("AdditionalHearingDocument_2_URL");
+        expectedBulkPrintDocuments.add("OtherHearingOrderDocumentsURL");
+
+        assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(
+            o -> o.getBinaryFileUrl()).collect(Collectors.toList()).containsAll(expectedBulkPrintDocuments),  is(true));
+
     }
 
     @Test
@@ -99,6 +109,24 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
         contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
 
         verifyNoInteractions(bulkPrintService);
+    }
+
+    @Test
+    public void latestDraftedHearingOrderDocumentIsNotAddedToPack() {
+        CaseDetails caseDetails = hearingDocumentsContestedCaseDetails();
+        caseDetails.getData().remove(LATEST_DRAFT_HEARING_ORDER);
+
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
+
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
+
+        List<String> expectedBulkPrintDocuments = new ArrayList<>();
+        expectedBulkPrintDocuments.add("AdditionalHearingDocument_2_URL");
+        expectedBulkPrintDocuments.add("OtherHearingOrderDocumentsURL");
+
+        assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(
+            o -> o.getBinaryFileUrl()).collect(Collectors.toList()).containsAll(expectedBulkPrintDocuments),  is(true));
     }
 
     @Test
