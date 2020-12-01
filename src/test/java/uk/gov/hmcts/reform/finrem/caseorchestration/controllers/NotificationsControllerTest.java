@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -36,6 +37,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -822,12 +825,17 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void whenToggleEnabledAndShouldSendEmailToRespSolicitor_thenSendsEmail() {
+        ArgumentCaptor<CaseDetails> requestCaptor = ArgumentCaptor.forClass(CaseDetails.class);
+
         when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
         notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
 
         verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
+
+        verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(requestCaptor.capture());
+        assertThat(requestCaptor.getValue().getId(), is(123L));
     }
 
     @Test
