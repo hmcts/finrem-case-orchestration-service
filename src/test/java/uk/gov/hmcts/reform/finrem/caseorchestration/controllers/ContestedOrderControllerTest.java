@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedCaseOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import java.io.File;
@@ -16,8 +17,11 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -38,6 +42,8 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
     private GenericDocumentService genericDocumentService;
     @MockBean
     private ContestedCaseOrderService contestedCaseOrderService;
+    @MockBean
+    private FeatureToggleService featureToggleService;
 
     private static final String SEND_ORDER_ENDPOINT = "/case-orchestration/contested/send-order";
 
@@ -119,6 +125,40 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
         result.andExpect(jsonPath(path + "document_url", is(DOC_URL)))
             .andExpect(jsonPath(path + "document_filename", is(FILE_NAME)))
             .andExpect(jsonPath(path + DOCUMENT_BINARY_URL, is(BINARY_URL)));
+    }
+
+    @Test
+    public void sendOrderSuccessWhenOfflineNotificationsEnabled() throws Exception {
+        doCaseDataSetUpWithoutAnyHearingOrder();
+        whenStampingDocument().thenReturn(caseDocument());
+        when(featureToggleService.isOfflineNotificationsEnabled()).thenReturn(true);
+
+        ResultActions result = mvc.perform(post(SEND_ORDER_ENDPOINT)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        result.andDo(print());
+
+        verify(contestedCaseOrderService, times(1)).printAndMailHearingDocuments(any(), any());
+    }
+
+    @Test
+    public void finalOrderSuccessWhenOfflineNotificationsDisabled() throws Exception {
+        doCaseDataSetUpWithoutAnyHearingOrder();
+        whenStampingDocument().thenReturn(caseDocument());
+        when(featureToggleService.isOfflineNotificationsEnabled()).thenReturn(false);
+
+        ResultActions result = mvc.perform(post(SEND_ORDER_ENDPOINT)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE));
+
+        result.andExpect(status().isOk());
+        result.andDo(print());
+
+        verify(contestedCaseOrderService, times(0)).printAndMailHearingDocuments(any(), any());
     }
 
     private OngoingStubbing<CaseDocument> whenStampingDocument() {

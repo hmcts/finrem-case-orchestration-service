@@ -20,7 +20,8 @@ public class FeatureToggleServiceTest {
         "feature.toggle.respondent_solicitor_email_notification=true",
         "feature.toggle.contested_print_draft_order_not_approved=true",
         "feature.toggle.contested_print_general_order=true",
-        "feature.toggle.share_a_case=true"
+        "feature.toggle.share_a_case=true",
+        "feature.toggle.offline_notifications=true"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOn extends BaseServiceTest {
 
@@ -51,6 +52,11 @@ public class FeatureToggleServiceTest {
         public void isShareACaseEnabledReturnsTrue() {
             assertThat(featureToggleService.isShareACaseEnabled(), is(true));
         }
+
+        @Test
+        public void isOfflineNotificationsEnabledReturnsTrue() {
+            assertThat(featureToggleService.isOfflineNotificationsEnabled(), is(true));
+        }
     }
 
     @RunWith(SpringRunner.class)
@@ -59,7 +65,8 @@ public class FeatureToggleServiceTest {
         "feature.toggle.contested_print_draft_order_not_approved=false",
         "feature.toggle.contested_print_general_order=false",
         "feature.toggle.send_to_frc=false",
-        "feature.toggle.share_a_case=false"
+        "feature.toggle.share_a_case=false",
+        "feature.toggle.offline_notifications=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff extends BaseServiceTest {
 
@@ -94,6 +101,11 @@ public class FeatureToggleServiceTest {
         @Test
         public void isShareACaseEnabledReturnsFalse() {
             assertThat(featureToggleService.isShareACaseEnabled(), is(false));
+        }
+
+        @Test
+        public void isOfflineNotificationsEnabledReturnsFalse() {
+            assertThat(featureToggleService.isOfflineNotificationsEnabled(), is(false));
         }
     }
 }

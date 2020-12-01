@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedCaseOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 
 import javax.validation.constraints.NotNull;
@@ -44,6 +45,7 @@ public class ContestedOrderController implements BaseController {
     private final GenericDocumentService genericDocumentService;
     private final ContestedCaseOrderService contestedCaseOrderService;
     private final ObjectMapper objectMapper;
+    private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
@@ -64,7 +66,9 @@ public class ContestedOrderController implements BaseController {
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, authToken);
 
-        contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, authToken);
+        if (featureToggleService.isOfflineNotificationsEnabled()) {
+            contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, authToken);
+        }
 
         List<HearingOrderCollectionData> hearingOrderCollectionData = getHearingOrderDocuments(caseData);
 
