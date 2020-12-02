@@ -825,7 +825,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void whenToggleEnabledAndShouldSendEmailToRespSolicitor_thenSendsEmail() {
-        ArgumentCaptor<CaseDetails> requestCaptor = ArgumentCaptor.forClass(CaseDetails.class);
+        final ArgumentCaptor<CaseDetails> requestCaptor = ArgumentCaptor.forClass(CaseDetails.class);
 
         when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
