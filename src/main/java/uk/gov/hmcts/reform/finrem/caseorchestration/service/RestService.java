@@ -7,6 +7,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
@@ -29,12 +30,19 @@ public class RestService {
     private final AuthTokenGenerator authTokenGenerator;
 
     public void restApiPostCall(String userAuthToken, String url, Object body) {
+        URI uri = buildUri(url);
+        HttpEntity<Object> request = buildAuthRequest(userAuthToken, body);
+
+        log.info("Making REST POST request to uri : {}, request : {} ", uri, request);
+
         try {
-            restTemplate.exchange(
-                buildUri(url),
+            ResponseEntity<Map> response = restTemplate.exchange(
+                uri,
                 HttpMethod.POST,
-                buildAuthRequest(userAuthToken, body),
+                request,
                 Map.class);
+
+            log.info("Received REST POST response: {} ", response);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
