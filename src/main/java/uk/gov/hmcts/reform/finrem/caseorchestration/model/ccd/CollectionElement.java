@@ -10,13 +10,13 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class CaseDocument {
-    @JsonProperty("document_url")
-    private String documentUrl;
-    @JsonProperty("document_filename")
-    private String documentFilename;
-    @JsonProperty("document_binary_url")
-    private String documentBinaryUrl;
+@NoArgsConstructor
+public class CollectionElement<T> {
+
+    @JsonProperty("id")
+    private String id;
+
+    @JsonProperty("value")
+    private T value;
 }

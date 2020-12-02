@@ -28,12 +28,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDataWithGeneralOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignError;
 
-
 @WebMvcTest(GeneralOrderController.class)
 public class GeneralOrderControllerTest extends BaseControllerTest {
 
-    @MockBean
-    private GeneralOrderService documentService;
+    @MockBean private GeneralOrderService documentService;
 
     public String generateEndpoint() {
         return "/case-orchestration/documents/preview-general-order";

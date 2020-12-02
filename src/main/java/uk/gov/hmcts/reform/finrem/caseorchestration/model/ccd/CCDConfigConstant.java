@@ -425,8 +425,7 @@ public class CCDConfigConstant {
 
     //draft hearing order
     public static final String LATEST_DRAFT_HEARING_ORDER  = "latestDraftHearingOrder";
-    public static final String DRAFT_HEARING_ORDER_COLLECTION_RO  = "draftDirectionDetailsCollectionRO";
-    public static final String DRAFT_HEARING_ORDER_COLLECTION  = "draftDirectionDetailsCollection";
     public static final String DRAFT_DIRECTION_ORDER_COLLECTION  = "draftDirectionOrderCollection";
-
+    public static final String DRAFT_DIRECTION_DETAILS_COLLECTION = "draftDirectionDetailsCollection";
+    public static final String DRAFT_DIRECTION_DETAILS_COLLECTION_RO = "draftDirectionDetailsCollectionRO";
 }

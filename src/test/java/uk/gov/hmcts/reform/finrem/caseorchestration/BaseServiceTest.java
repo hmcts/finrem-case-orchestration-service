@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
@@ -41,8 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @DirtiesContext
 public abstract class BaseServiceTest extends BaseTest {
 
-    @Autowired
-    protected ObjectMapper mapper;
+    @Autowired protected ObjectMapper mapper;
 
     protected CaseDetails buildCaseDetails() {
         Map<String, Object> caseData = new HashMap<>();
@@ -88,5 +88,13 @@ public abstract class BaseServiceTest extends BaseTest {
                 .data(caseData)
                 .build())
             .build();
+    }
+
+    protected Map<String, Object> convertCaseDataToStringRepresentation(Map<String, Object> caseData) {
+        try {
+            return mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
