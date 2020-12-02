@@ -6,6 +6,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -88,5 +89,13 @@ public abstract class BaseServiceTest extends BaseTest {
                 .data(caseData)
                 .build())
             .build();
+    }
+
+    protected CaseDocument buildCaseDocument(String url, String binaryUrl, String filename) {
+        CaseDocument document = new CaseDocument();
+        document.setDocumentUrl(url);
+        document.setDocumentBinaryUrl(binaryUrl);
+        document.setDocumentFilename(filename);
+        return document;
     }
 }

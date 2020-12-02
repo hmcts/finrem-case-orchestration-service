@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -8,11 +9,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.is;
@@ -27,6 +34,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 
 public class ContestedCaseOrderServiceTest extends BaseServiceTest {
@@ -39,6 +47,8 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintArgumentCaptor;
+
+    private CallbackRequest callbackRequest;
 
     @Test
     public void givenNoGeneralOrderPresent_whenPrintAndMailGeneralOrderTriggered_thenDocumentsAreNotPrinted() {
@@ -82,8 +92,8 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase() {
-        CaseDetails caseDetails = hearingDocumentsContestedCaseDetails();
+    public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase() throws JsonProcessingException {
+        CaseDetails caseDetails = buildHearingPackDocumentTestData();
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
 
         contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
@@ -93,17 +103,16 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
         List<String> expectedBulkPrintDocuments = new ArrayList<>();
         expectedBulkPrintDocuments.add("HearingOrderBinaryURL");
-        expectedBulkPrintDocuments.add("AdditionalHearingDocument_2_URL");
+        expectedBulkPrintDocuments.add("AdditionalHearingDocumentURL");
         expectedBulkPrintDocuments.add("OtherHearingOrderDocumentsURL");
 
         assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(
             o -> o.getBinaryFileUrl()).collect(Collectors.toList()).containsAll(expectedBulkPrintDocuments),  is(true));
-
     }
 
     @Test
-    public void givenAllHearingDocumentsArePresentThenDoNotSendToBulkPrintWhenDigitalCase() {
-        CaseDetails caseDetails = hearingDocumentsContestedCaseDetails();
+    public void givenAllHearingDocumentsArePresentThenDoNotSendToBulkPrintWhenDigitalCase() throws JsonProcessingException {
+        CaseDetails caseDetails = buildHearingPackDocumentTestData();
         caseDetails.getData().remove(PAPER_APPLICATION);
 
         contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
@@ -112,8 +121,8 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void latestDraftedHearingOrderDocumentIsNotAddedToPack() {
-        CaseDetails caseDetails = hearingDocumentsContestedCaseDetails();
+    public void latestDraftedHearingOrderDocumentIsNotAddedToPack() throws JsonProcessingException {
+        CaseDetails caseDetails = buildHearingPackDocumentTestData();
         caseDetails.getData().remove(LATEST_DRAFT_HEARING_ORDER);
 
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
@@ -122,7 +131,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
 
         List<String> expectedBulkPrintDocuments = new ArrayList<>();
-        expectedBulkPrintDocuments.add("AdditionalHearingDocument_2_URL");
+        expectedBulkPrintDocuments.add("AdditionalHearingDocumentURL");
         expectedBulkPrintDocuments.add("OtherHearingOrderDocumentsURL");
 
         assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(
@@ -130,8 +139,8 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void latestAdditionalHearingDocumentIsNotAddedToPack() {
-        CaseDetails caseDetails = hearingDocumentsContestedCaseDetails();
+    public void latestAdditionalHearingDocumentIsNotAddedToPack() throws JsonProcessingException {
+        CaseDetails caseDetails = buildHearingPackDocumentTestData();
         caseDetails.getData().remove(ADDITIONAL_HEARING_DOCUMENT_COLLECTION);
 
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
@@ -147,11 +156,36 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
             o -> o.getBinaryFileUrl()).collect(Collectors.toList()).containsAll(expectedBulkPrintDocuments),  is(true));
     }
 
-    private CaseDetails hearingDocumentsContestedCaseDetails() {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/bulkprint/bulk-print-contested-hearing.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+
+    private CaseDetails buildHearingPackDocumentTestData() throws JsonProcessingException {
+        callbackRequest = getContestedCallbackRequest();
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        caseDetails.getData().put(PAPER_APPLICATION, "Yes");
+
+        CaseDocument latestHearingOrder = buildCaseDocument("TestURL", "HearingOrderBinaryURL", "TestName");
+        caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER, latestHearingOrder);
+
+        CaseDocument hearingDocument = buildCaseDocument("TestURL", "AdditionalHearingDocumentURL", "TestName");
+        AdditionalHearingDocumentData generatedDocumentData = AdditionalHearingDocumentData.builder()
+            .additionalHearingDocument(AdditionalHearingDocument.builder()
+                .document(hearingDocument)
+                .build())
+            .build();
+        List<AdditionalHearingDocumentData> additionalHearingDocumentDataList = new ArrayList<>();
+        additionalHearingDocumentDataList.add(generatedDocumentData);
+        caseDetails.getData().put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, additionalHearingDocumentDataList);
+
+        CaseDocument otherDocument = buildCaseDocument("TestURL", "OtherHearingOrderDocumentsURL", "TestName");
+        List<CollectionElement<CaseDocument>> otherHearingDocuments = new ArrayList<>();
+        otherHearingDocuments.add(CollectionElement.<CaseDocument>builder().value(otherDocument).build());
+        caseDetails.getData().put(HEARING_ORDER_OTHER_COLLECTION, otherHearingDocuments);
+
+        //Force update case data with JSON properties
+        Map<String, Object> caseData = caseDetails.getData();
+        caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
+        caseDetails.setData(caseData);
+
+        return caseDetails;
     }
 }
