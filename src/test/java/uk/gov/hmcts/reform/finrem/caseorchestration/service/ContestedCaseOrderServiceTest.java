@@ -48,8 +48,6 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintArgumentCaptor;
 
-    private CallbackRequest callbackRequest;
-
     @Test
     public void givenNoGeneralOrderPresent_whenPrintAndMailGeneralOrderTriggered_thenDocumentsAreNotPrinted() {
         CaseDetails caseDetails = generalOrderContestedCaseDetails();
@@ -107,7 +105,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
         expectedBulkPrintDocuments.add("OtherHearingOrderDocumentsURL");
 
         assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(
-            o -> o.getBinaryFileUrl()).collect(Collectors.toList()).containsAll(expectedBulkPrintDocuments),  is(true));
+            doc -> doc.getBinaryFileUrl()).collect(Collectors.toList()).containsAll(expectedBulkPrintDocuments),  is(true));
     }
 
     @Test
@@ -158,7 +156,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
 
     private CaseDetails buildHearingPackDocumentTestData() throws JsonProcessingException {
-        callbackRequest = getContestedCallbackRequest();
+        CallbackRequest callbackRequest = getContestedCallbackRequest();
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         caseDetails.getData().put(PAPER_APPLICATION, "Yes");
