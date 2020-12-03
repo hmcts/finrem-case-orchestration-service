@@ -12,9 +12,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DraftHearingOrderData {
+public class CollectionElement<T> {
+
     @JsonProperty("id")
     private String id;
+
     @JsonProperty("value")
-    private DraftHearingOrder draftHearingOrder;
+    private T value;
 }

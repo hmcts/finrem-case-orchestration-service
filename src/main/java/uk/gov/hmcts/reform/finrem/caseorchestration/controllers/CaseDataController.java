@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -41,11 +41,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-@SuppressWarnings("unchecked")
 public class CaseDataController implements BaseController {
+
     private final IdamService idamService;
+    private final CaseDataService caseDataService;
     private final FeatureToggleService featureToggleService;
-    private final DocumentHelper documentHelper;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for consented journey")
@@ -93,7 +93,6 @@ public class CaseDataController implements BaseController {
         produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for contested paper case journey")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setContestedPaperCaseOrganisationPolicy(
-        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
         @RequestBody final CallbackRequest callbackRequest) {
         log.info("Setting default values for contested paper case journey.");
         validateCaseData(callbackRequest);
@@ -104,14 +103,14 @@ public class CaseDataController implements BaseController {
     @PostMapping(path = "/move-collection/{source}/to/{destination}", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> moveValues(
-        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
-        @RequestBody final CallbackRequest callbackRequest,
-        @PathVariable("source") final String source,
-        @PathVariable("destination") final String destination) {
+        @RequestBody CallbackRequest callbackRequest,
+        @PathVariable("source") String source,
+        @PathVariable("destination") String destination) {
 
         validateCaseData(callbackRequest);
+
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        caseData = documentHelper.moveCollection(caseData, source, destination);
+        caseDataService.moveCollection(caseData, source, destination);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }

@@ -12,11 +12,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CollectionElement<T> {
+public class DraftDirectionOrder {
 
-    @JsonProperty("id")
-    private String id;
+    @JsonProperty("purposeOfDocument")
+    String purposeOfDocument;
 
-    @JsonProperty("value")
-    private T value;
+    @JsonProperty("uploadDraftDocument")
+    CaseDocument uploadDraftDocument;
 }

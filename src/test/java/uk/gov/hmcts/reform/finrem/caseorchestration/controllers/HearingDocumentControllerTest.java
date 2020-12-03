@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 
 @WebMvcTest(HearingDocumentController.class)
 public class HearingDocumentControllerTest extends BaseControllerTest {
+
     private static final String DIRECTION_ORDER_URL = "/case-orchestration/contested-upload-direction-order";
     private static final String VALIDATE_AND_GEN_DOC_URL = "/case-orchestration/documents/hearing";
     private static final String ISSUE_DATE_FAST_TRACK_DECISION_OR_HEARING_DATE_IS_EMPTY = "Issue Date, fast track decision or hearingDate is empty";
