@@ -846,10 +846,14 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService, times(1)).sendContestedConsentGeneralOrderEmailRespondentSolicitor(any());
         verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any());
+        verify(notificationService, never()).sendConsentedGeneralOrderEmailToRespondentSolicitor(any());
     }
 
     @Test
     public void sendConsentedGeneralOrderEmail() throws Exception {
+        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
         buildCcdRequest(CONSENTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
         mockMvc.perform(post(GENERAL_ORDER_RAISED_CALLBACK_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -857,8 +861,8 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(notificationService, times(1))
-            .sendConsentedGeneralOrderEmail(any());
+        verify(notificationService, times(1)).sendConsentedGeneralOrderEmailToApplicantSolicitor(any());
+        verify(notificationService, times(1)).sendConsentedGeneralOrderEmailToRespondentSolicitor(any());
     }
 
     @Test

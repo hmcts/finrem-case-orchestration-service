@@ -217,9 +217,17 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendConsentedGeneralOrderEmail(CaseDetails caseDetails) {
+    public void sendConsentedGeneralOrderEmailToApplicantSolicitor(CaseDetails caseDetails) {
+        sendConsentedGeneralOrderEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails));
+    }
+
+    public void sendConsentedGeneralOrderEmailToRespondentSolicitor(CaseDetails caseDetails) {
+        sendConsentedGeneralOrderEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(caseDetails));
+    }
+
+    private void sendConsentedGeneralOrderEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentedGeneralOrder());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails), uri);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendContestedGeneralOrderEmailApplicant(CaseDetails caseDetails) {

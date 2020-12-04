@@ -37,7 +37,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorResponsibleToDraftOrder;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
@@ -285,8 +284,8 @@ public class NotificationsController implements BaseController {
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             if (isConsentedApplication(caseDetails)) {
-                log.info("Sending email notification to Solicitor for 'Consented General Order'");
-                notificationService.sendConsentedGeneralOrderEmail(caseDetails);
+                log.info("Sending email notification to applicant Solicitor for 'Consented General Order'");
+                notificationService.sendConsentedGeneralOrderEmailToApplicantSolicitor(caseDetails);
             } else {
                 if (isConsentedInContestedCase(caseDetails)) {
                     log.info("Sending email notification to applicant Solicitor for 'Contested consent General Order'");
@@ -299,14 +298,18 @@ public class NotificationsController implements BaseController {
         }
 
         Map<String, Object> caseData = caseDetails.getData();
-        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)
-            && isContestedApplication(caseDetails)) {
-            if (isConsentedInContestedCase(caseDetails)) {
-                log.info("Sending email notification to respondent Solicitor for 'Contested consent General Order'");
-                notificationService.sendContestedConsentGeneralOrderEmailRespondentSolicitor(caseDetails);
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            if (isConsentedApplication(caseDetails)) {
+                log.info("Sending email notification to respondent Solicitor for 'Consented General Order'");
+                notificationService.sendConsentedGeneralOrderEmailToRespondentSolicitor(caseDetails);
             } else {
-                log.info("Sending email notification to respondent solicitor for 'Contested General Order'");
-                notificationService.sendContestedGeneralOrderEmailRespondent(caseDetails);
+                if (isConsentedInContestedCase(caseDetails)) {
+                    log.info("Sending email notification to respondent Solicitor for 'Contested consent General Order'");
+                    notificationService.sendContestedConsentGeneralOrderEmailRespondentSolicitor(caseDetails);
+                } else {
+                    log.info("Sending email notification to respondent solicitor for 'Contested General Order'");
+                    notificationService.sendContestedGeneralOrderEmailRespondent(caseDetails);
+                }
             }
         }
 
