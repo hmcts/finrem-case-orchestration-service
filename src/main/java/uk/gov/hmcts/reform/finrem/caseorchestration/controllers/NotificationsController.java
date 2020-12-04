@@ -192,25 +192,30 @@ public class NotificationsController implements BaseController {
             response = AboutToStartOrSubmitCallbackResponse.class)})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderNotApprovedEmail(
         @RequestBody CallbackRequest callbackRequest) {
-
         log.info("Received request to send email for 'Consent/Contest Order Not Approved' for Case ID: {}", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
+        validateCaseData(callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            if (isConsentedApplication(callbackRequest.getCaseDetails())) {
-                log.info("Sending email notification to Solicitor for 'Consent Order Not Approved'");
-                notificationService.sendConsentOrderNotApprovedEmail(caseDetails);
+            if (isConsentedApplication(caseDetails)) {
+                log.info("Sending email notification to Applicant Solicitor for 'Consent Order Not Approved'");
+                notificationService.sendConsentOrderNotApprovedEmailToApplicantSolicitor(caseDetails);
             } else {
-                log.info("Sending email notification to Solicitor for 'Contest Order Not Approved'");
+                log.info("Sending email notification to Applicant Solicitor for 'Contest Order Not Approved'");
                 notificationService.sendContestOrderNotApprovedEmailApplicant(caseDetails);
             }
         }
 
         Map<String, Object> caseData = caseDetails.getData();
-        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)
-            && isContestedApplication(caseDetails)) {
-            notificationService.sendContestOrderNotApprovedEmailRespondent(caseDetails);
+        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            if (isConsentedApplication(caseDetails)) {
+                log.info("Sending email notification to Respondent Solicitor for 'Consent Order Not Approved'");
+                notificationService.sendConsentOrderNotApprovedEmailToRespondentSolicitor(caseDetails);
+            } else {
+                log.info("Sending email notification to Respondent Solicitor for 'Contest Order Not Approved'");
+                notificationService.sendContestOrderNotApprovedEmailRespondent(caseDetails);
+            }
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
