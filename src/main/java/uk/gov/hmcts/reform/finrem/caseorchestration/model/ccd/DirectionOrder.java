@@ -12,9 +12,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DraftHearingOrderData {
-    @JsonProperty("id")
-    private String id;
-    @JsonProperty("value")
-    private DraftHearingOrder draftHearingOrder;
+public class DirectionOrder {
+
+    @JsonProperty("uploadDraftDocument")
+    CaseDocument uploadDraftDocument;
 }
