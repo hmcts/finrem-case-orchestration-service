@@ -14,10 +14,12 @@ import java.util.UUID;
 
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderApprovedCollectionPresent;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentAddressConfidential;
 
 @Slf4j
 @Service
@@ -48,10 +50,15 @@ public class ConsentOrderPrintService {
     private void generateCoversheetForRespondentAndSendOrders(CaseDetails caseDetails, String authToken) {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authToken);
         UUID respondentLetterId = sendConsentOrderForBulkPrintRespondent(respondentCoverSheet, caseDetails);
-
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
-        caseData.put(BULK_PRINT_LETTER_ID_RES, respondentLetterId);
+
+        if (isRespondentAddressConfidential(caseData)) {
+            caseData.remove(BULK_PRINT_COVER_SHEET_RES);
+            caseData.put(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL, respondentCoverSheet);
+        } else {
+            caseData.put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
+            caseData.put(BULK_PRINT_LETTER_ID_RES, respondentLetterId);
+        }
 
         log.info("Generated Respondent CoverSheet for bulk print. coversheet: {}, letterId : {}", respondentCoverSheet, respondentLetterId);
     }
