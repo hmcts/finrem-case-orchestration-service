@@ -247,13 +247,23 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendConsentOrderNotApprovedNotificationEmail() {
+    public void sendConsentOrderNotApprovedNotificationEmailToApplicantSolicitor() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_NOT_APPROVED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendConsentOrderNotApprovedEmail(callbackRequest.getCaseDetails());
+        notificationService.sendConsentOrderNotApprovedEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void sendConsentOrderNotApprovedNotificationEmailToRespondentSolicitor() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_NOT_APPROVED))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendConsentOrderNotApprovedEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -262,7 +272,7 @@ public class NotificationServiceTest extends BaseServiceTest {
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
         try {
-            notificationService.sendConsentOrderNotApprovedEmail(callbackRequest.getCaseDetails());
+            notificationService.sendConsentOrderNotApprovedEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
@@ -698,13 +708,23 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void sendConsentedGeneralOrderNotificationEmail() {
+    public void sendConsentedGeneralOrderNotificationEmailApplicant() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENTED_GENERAL_ORDER))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
             .andRespond(MockRestResponseCreators.withNoContent());
-        notificationService.sendConsentedGeneralOrderEmail(callbackRequest.getCaseDetails());
+        notificationService.sendConsentedGeneralOrderEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void sendConsentedGeneralOrderNotificationEmailRespondent() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENTED_GENERAL_ORDER))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendConsentedGeneralOrderEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest.getCaseDetails());
     }
 
     @Test
