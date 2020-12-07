@@ -128,7 +128,7 @@ public class NotificationsController implements BaseController {
             notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
         }
 
-        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled()
+        if (featureToggleService.isRespondentJourneyEnabled()
             && notificationService.shouldEmailRespondentSolicitor(caseData)) {
             log.info("Sending email notification to Respondent Solicitor for Judge successfully assigned to case");
             notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);

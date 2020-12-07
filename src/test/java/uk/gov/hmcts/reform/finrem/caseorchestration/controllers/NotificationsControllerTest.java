@@ -841,7 +841,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     public void whenToggleEnabledAndShouldSendEmailToRespSolicitor_thenSendsEmail() {
         final ArgumentCaptor<CaseDetails> requestCaptor = ArgumentCaptor.forClass(CaseDetails.class);
 
-        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
         notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
@@ -854,7 +854,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void whenToggleEnabledAndShouldNotSendEmailToRespSolicitor_thenDoesNotSendEmail() {
-        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(true);
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
 
         notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
@@ -864,7 +864,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void whenToggleDisabledAndShouldSendEmailToRespSolicitor_thenDoesNotSendEmail() {
-        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(false);
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
         notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
@@ -874,7 +874,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void whenToggleDisabledAndShouldNotSendEmailToRespSolicitor_thenDoesNotSendEmail() {
-        when(featureToggleService.isRespondentSolicitorEmailNotificationEnabled()).thenReturn(false);
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
 
         notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
