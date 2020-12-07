@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
 
 import java.io.IOException;
@@ -31,6 +33,8 @@ public class PaymentConfirmationController implements BaseController {
 
     private final PaymentConfirmationService paymentConfirmationService;
     private final AssignCaseAccessService assignCaseAccessService;
+    private final CcdDataStoreService ccdDataStoreService;
+    private final FeatureToggleService featureToggleService;
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/payment-confirmation", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -48,8 +52,11 @@ public class PaymentConfirmationController implements BaseController {
             .confirmationBody(confirmationBody(caseDetails))
             .build();
 
-        log.info("Assigning case access for Case ID: {}", caseDetails.getId());
-        assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
+        if (featureToggleService.isRespondentJourneyEnabled()) {
+            log.info("Assigning case access for Case ID: {}", caseDetails.getId());
+            ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
+            assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
+        }
 
         return ResponseEntity.ok(callbackResponse);
     }
