@@ -39,23 +39,36 @@ public class RestServiceTest extends BaseServiceTest {
     @Captor private ArgumentCaptor<URI> uriCaptor;
     @Captor private ArgumentCaptor<HttpEntity> authRequestCaptor;
 
+    private AssignCaseAccessRequest body;
+
     @Before
     public void setUp() {
         when(authTokenGenerator.generate()).thenReturn(TEST_SERVICE_TOKEN);
-    }
 
-    @Test
-    public void restApiPostCall() {
-        AssignCaseAccessRequest body = AssignCaseAccessRequest
+        body = AssignCaseAccessRequest
             .builder()
             .case_id(TEST_CASE_ID)
             .case_type_id(CASE_TYPE_ID_CONTESTED)
             .assignee_id(TEST_USER_ID)
             .build();
+    }
 
+    @Test
+    public void restApiPostCall() {
         restService.restApiPostCall(AUTH_TOKEN, TEST_URL, body);
 
-        Mockito.verify(restTemplate, Mockito.times(1)).exchange(uriCaptor.capture(), eq(HttpMethod.POST), authRequestCaptor.capture(), eq(Map.class));
+        assertRestApiCall(HttpMethod.POST);
+    }
+
+    @Test
+    public void restApiDeleteCall() {
+        restService.restApiDeleteCall(AUTH_TOKEN, TEST_URL, body);
+
+        assertRestApiCall(HttpMethod.DELETE);
+    }
+
+    private void assertRestApiCall(HttpMethod httpMethod) {
+        Mockito.verify(restTemplate, Mockito.times(1)).exchange(uriCaptor.capture(), eq(httpMethod), authRequestCaptor.capture(), eq(Map.class));
         Mockito.verify(authTokenGenerator, Mockito.times(1)).generate();
 
         HttpHeaders headers = authRequestCaptor.getValue().getHeaders();

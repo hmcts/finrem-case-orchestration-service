@@ -35,4 +35,9 @@
         <packageUrl regex="true">^pkg:maven/junit/junit@.*$</packageUrl>
         <cve>CVE-2020-15250</cve>
     </suppress>
+
+    <suppress>
+        <notes>Apache HttpClient versions prior to version 4.5.13 and 5.0.3 can misinterpret malformed authority component in request URIs passed to the library as java.net.URI object and pick the wrong target host for request execution.</notes>
+        <cve>CVE-2020-13956</cve>
+    </suppress>
 </suppressions>
