@@ -69,9 +69,17 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendConsentOrderAvailableEmail(CaseDetails caseDetails) {
+    public void sendConsentOrderAvailableEmailToApplicantSolicitor(CaseDetails caseDetails) {
+        sendConsentOrderAvailableEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails));
+    }
+
+    public void sendConsentOrderAvailableEmailToRespondentSolicitor(CaseDetails caseDetails) {
+        sendConsentOrderAvailableEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(caseDetails));
+    }
+
+    public void sendConsentOrderAvailableEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailable());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails), uri);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendConsentOrderAvailableCtscEmail(CaseDetails caseDetails) {
