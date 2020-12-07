@@ -30,6 +30,14 @@ public class RestService {
     private final AuthTokenGenerator authTokenGenerator;
 
     public void restApiPostCall(String userAuthToken, String url, Object body) {
+        restApiCall(userAuthToken, url, body, HttpMethod.POST);
+    }
+
+    public void restApiDeleteCall(String userAuthToken, String url, Object body) {
+        restApiCall(userAuthToken, url, body, HttpMethod.DELETE);
+    }
+
+    private void restApiCall(String userAuthToken, String url, Object body, HttpMethod httpMethod) {
         URI uri = buildUri(url);
         HttpEntity<Object> request = buildAuthRequest(userAuthToken, body);
 
@@ -38,7 +46,7 @@ public class RestService {
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
                 uri,
-                HttpMethod.POST,
+                httpMethod,
                 request,
                 Map.class);
 

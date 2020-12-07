@@ -9,6 +9,9 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
+      "ApplicantOrganisationPolicy": {
+        "OrganisationID": "123"
+      },
       "state": "applicationDrafted",
       "PBANumber": "PBA123",
       "d81Question": "No",
