@@ -10,13 +10,13 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class CaseDocument {
-    @JsonProperty("document_url")
-    private String documentUrl;
-    @JsonProperty("document_filename")
-    private String documentFilename;
-    @JsonProperty("document_binary_url")
-    private String documentBinaryUrl;
+@NoArgsConstructor
+public class DraftDirectionOrder {
+
+    @JsonProperty("purposeOfDocument")
+    String purposeOfDocument;
+
+    @JsonProperty("uploadDraftDocument")
+    CaseDocument uploadDraftDocument;
 }

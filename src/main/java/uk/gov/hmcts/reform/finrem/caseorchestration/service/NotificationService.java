@@ -64,9 +64,17 @@ public class NotificationService {
         sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails), uri);
     }
 
-    public void sendConsentOrderNotApprovedEmail(CaseDetails caseDetails) {
+    public void sendConsentOrderNotApprovedEmailToApplicantSolicitor(CaseDetails caseDetails) {
+        sendConsentOrderNotApprovedEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails));
+    }
+
+    public void sendConsentOrderNotApprovedEmailToRespondentSolicitor(CaseDetails caseDetails) {
+        sendConsentOrderNotApprovedEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(caseDetails));
+    }
+
+    private void sendConsentOrderNotApprovedEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderNotApproved());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails), uri);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendConsentOrderAvailableEmail(CaseDetails caseDetails) {
@@ -217,9 +225,17 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendConsentedGeneralOrderEmail(CaseDetails caseDetails) {
+    public void sendConsentedGeneralOrderEmailToApplicantSolicitor(CaseDetails caseDetails) {
+        sendConsentedGeneralOrderEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails));
+    }
+
+    public void sendConsentedGeneralOrderEmailToRespondentSolicitor(CaseDetails caseDetails) {
+        sendConsentedGeneralOrderEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(caseDetails));
+    }
+
+    private void sendConsentedGeneralOrderEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentedGeneralOrder());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails), uri);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendContestedGeneralOrderEmailApplicant(CaseDetails caseDetails) {
