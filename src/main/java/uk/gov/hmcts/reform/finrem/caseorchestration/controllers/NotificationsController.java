@@ -124,8 +124,14 @@ public class NotificationsController implements BaseController {
             log.info("Notification letter sent to Bulk Print: {} for Case ID: {}", assignedToJudgeNotificationLetter,
                 caseDetails.getId());
         } else if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending email notification to Solicitor for Judge successfully assigned to case");
-            notificationService.sendAssignToJudgeConfirmationEmail(caseDetails);
+            log.info("Sending email notification to Applicant Solicitor for Judge successfully assigned to case");
+            notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
+        }
+
+        if (featureToggleService.isRespondentJourneyEnabled()
+            && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            log.info("Sending email notification to Respondent Solicitor for Judge successfully assigned to case");
+            notificationService.sendAssignToJudgeConfirmationEmailToRespondentSolicitor(caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
