@@ -17,7 +17,6 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_DRAFT_ORDER_NOT_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_GENERAL_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.OFFLINE_NOTIFICATIONS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.RESPONDENT_SOLICITOR_EMAIL_NOTIFICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.RESPONDENT_JOURNEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SHARE_A_CASE;
