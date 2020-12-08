@@ -66,7 +66,6 @@ public class ContestedOrderController implements BaseController {
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, authToken);
 
-        log.info("Status of Offline Notifications Toggle is {}", featureToggleService.isOfflineNotificationsEnabled());
         if (featureToggleService.isOfflineNotificationsEnabled()) {
             contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, authToken);
         }
