@@ -309,7 +309,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(notificationService, times(1))
-            .sendConsentOrderAvailableEmail(any());
+            .sendConsentOrderAvailableEmailToApplicantSolicitor(any());
     }
 
     @Test

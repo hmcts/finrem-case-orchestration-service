@@ -85,7 +85,7 @@ public class NotificationService {
         sendConsentOrderAvailableEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(caseDetails));
     }
 
-    public void sendConsentOrderAvailableEmail(NotificationRequest notificationRequest) {
+    private void sendConsentOrderAvailableEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailable());
         sendNotificationEmail(notificationRequest, uri);
     }
