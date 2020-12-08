@@ -330,16 +330,11 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            if (isConsentedApplication(caseDetails)) {
-                log.info("Sending email notification to Applicant Solicitor for 'Consent Order Available'");
-                notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
-            } else {
-                log.info("Sending email notification to Applicant Solicitor for 'Consent Order Available'");
-                notificationService.sendConsentOrderAvailableCtscEmail(caseDetails);
-            }
+            log.info("Sending email notification to Solicitor for 'Consent Order Available'");
+            notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
         }
 
-        if (featureToggleService.isRespondentSolicitorEmailNotificationEnabled()
+        if (featureToggleService.isRespondentJourneyEnabled()
             && notificationService.shouldEmailRespondentSolicitor(caseData)) {
             if (isConsentedApplication(caseDetails)) {
                 log.info("Sending email notification to Respondent Solicitor for 'Consent Order Available'");
@@ -349,6 +344,7 @@ public class NotificationsController implements BaseController {
                 notificationService.sendContestedGeneralOrderEmailRespondent(caseDetails);
             }
         }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
