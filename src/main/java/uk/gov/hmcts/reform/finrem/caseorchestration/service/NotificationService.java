@@ -46,9 +46,17 @@ public class NotificationService {
         sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails), uri);
     }
 
-    public void sendAssignToJudgeConfirmationEmail(CaseDetails caseDetails) {
+    public void sendAssignToJudgeConfirmationEmailToApplicantSolicitor(CaseDetails caseDetails) {
+        sendAssignToJudgeConfirmationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails));
+    }
+
+    public void sendAssignToJudgeConfirmationEmailToRespondentSolicitor(CaseDetails caseDetails) {
+        sendAssignToJudgeConfirmationEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(caseDetails));
+    }
+
+    private void sendAssignToJudgeConfirmationEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getAssignToJudge());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails), uri);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendConsentOrderMadeConfirmationEmail(CaseDetails caseDetails) {
