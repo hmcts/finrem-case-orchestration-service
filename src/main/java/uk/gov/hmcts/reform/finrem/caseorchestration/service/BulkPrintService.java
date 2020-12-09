@@ -92,7 +92,7 @@ public class BulkPrintService {
         CaseDocument applicantCoverSheet = coverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
 
         if (isApplicantAddressConfidential(caseDetails.getData())) {
-            //clean up the old coversheet if the applicant address is marked as confidential
+            log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", caseDetails.getId());
             caseDetails.getData().remove(BULK_PRINT_COVER_SHEET_APP);
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL, applicantCoverSheet);
         } else {
@@ -106,7 +106,7 @@ public class BulkPrintService {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
 
         if (isRespondentAddressConfidential(caseDetails.getData())) {
-            //clean up the old coversheet if the respondent address is marked as confidential
+            log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", caseDetails.getId());
             caseDetails.getData().remove(BULK_PRINT_COVER_SHEET_RES);
             caseDetails.getData().put(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL, respondentCoverSheet);
         } else {

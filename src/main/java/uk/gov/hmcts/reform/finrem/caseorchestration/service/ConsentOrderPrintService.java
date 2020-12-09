@@ -53,6 +53,7 @@ public class ConsentOrderPrintService {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (isRespondentAddressConfidential(caseData)) {
+            log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", caseDetails.getId());
             caseData.remove(BULK_PRINT_COVER_SHEET_RES);
             caseData.put(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL, respondentCoverSheet);
         } else {
