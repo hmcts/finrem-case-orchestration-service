@@ -19,8 +19,6 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
-
 public abstract class BaseControllerTest extends BaseTest {
 
     @Autowired
@@ -84,7 +82,7 @@ public abstract class BaseControllerTest extends BaseTest {
 
     protected CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
-        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).caseTypeId(CASE_TYPE_ID_CONSENTED).data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
         return CallbackRequest.builder().caseDetails(caseDetails).build();
     }
 

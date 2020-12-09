@@ -852,5 +852,4 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         assertFalse(notificationService.shouldEmailRespondentSolicitor(caseData));
     }
-
 }
