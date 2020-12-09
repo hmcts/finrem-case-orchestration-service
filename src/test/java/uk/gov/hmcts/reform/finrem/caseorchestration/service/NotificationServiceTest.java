@@ -353,6 +353,21 @@ public class NotificationServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void throwExceptionWhenConsentOrderAvailableEmailIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_AVAILABLE))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+
+        try {
+            notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(getConsentedCallbackRequest().getCaseDetails());
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
+        }
+
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
     public void sendContestedApplicationIssuedEmail() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_APPLICATION_ISSUED))
             .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
@@ -837,4 +852,5 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         assertFalse(notificationService.shouldEmailRespondentSolicitor(caseData));
     }
+
 }

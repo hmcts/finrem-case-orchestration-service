@@ -1020,4 +1020,43 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         return callbackRequest;
     }
+
+    @Test
+    public void givenConsentedCase_whenToggleEnabledAndShouldSendEmailToRespSolicitor_thenSendsEmail() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        notificationsController.sendConsentOrderAvailableEmail(callbackRequest);
+        verify(notificationService).sendConsentOrderAvailableEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void givenConsentedCase_whenToggleEnabledAndShouldNotSendEmailToRespSolicitor_thenDoesNotSendEmail() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
+        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void givenConsentedCase_whenToggleDisabledAndShouldSendEmailToRespSolicitor_thenDoesNotSendEmail() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void givenConsentedCase_whenToggleDisabledAndShouldNotSendEmailToRespSolicitor_thenDoesNotSendEmail() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
+        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
+    }
 }
