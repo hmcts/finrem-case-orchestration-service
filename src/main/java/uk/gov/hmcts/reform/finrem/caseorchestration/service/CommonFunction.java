@@ -140,11 +140,15 @@ public class CommonFunction {
     }
 
     public static boolean isApplicantAddressConfidential(Map<String, Object> caseData) {
-        return caseData.get(APPLICANT_CONFIDENTIAL_ADDRESS).equals(YES_VALUE);
+        return isAddressConfidential(caseData, APPLICANT_CONFIDENTIAL_ADDRESS);
     }
 
     public static boolean isRespondentAddressConfidential(Map<String, Object> caseData) {
-        return caseData.get(RESPONDENT_CONFIDENTIAL_ADDRESS).equals(YES_VALUE);
+        return isAddressConfidential(caseData, RESPONDENT_CONFIDENTIAL_ADDRESS);
+    }
+
+    private static boolean isAddressConfidential(Map<String, Object> caseData, String address) {
+        return YES_VALUE.equalsIgnoreCase(Objects.toString(caseData.get(address)));
     }
 
 }
