@@ -342,10 +342,8 @@ public class NotificationsController implements BaseController {
 
         if (featureToggleService.isRespondentJourneyEnabled()
             && notificationService.shouldEmailRespondentSolicitor(caseData)) {
-            if (isConsentedApplication(caseDetails)) {
-                log.info("Sending email notification to Respondent Solicitor for 'Consent Order Available'");
-                notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
-            }
+            log.info("Sending email notification to Respondent Solicitor for 'Consent Order Available'");
+            notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
