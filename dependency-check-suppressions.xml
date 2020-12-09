@@ -45,4 +45,8 @@
         <notes><![CDATA[file name: jetty-client-9.4.31.v20200723.jar]]></notes>
         <cve>CVE-2020-27218</cve>
     </suppress>
+    <suppress>
+        <notes> <![CDATA[ <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/tomcat\-embed\-websocket@.*$</packageUrl></notes>
+        <cve>CVE-2020-17527</cve>
+    </suppress>
 </suppressions>

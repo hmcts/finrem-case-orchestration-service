@@ -390,7 +390,7 @@ public class CommonFunctionTest {
         assertThat(isApplicantAddressConfidential(data), is(false));
     }
 
-        @Test
+    @Test
     public void isRespondentAddressConfidentialTrueWhenRespondentAddressIsMarkedAsConfidential() {
         Map<String, Object> data = new HashMap<>();
         data.put(RESPONDENT_CONFIDENTIAL_ADDRESS, "Yes");
