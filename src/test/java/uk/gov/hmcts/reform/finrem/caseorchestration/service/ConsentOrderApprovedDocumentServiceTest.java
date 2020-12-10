@@ -238,9 +238,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldConvertCollectionDocument() {
-        List<BulkPrintDocument> bulkPrintDocuments = consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails());
+        List<CaseDocument> documents = consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails());
 
-        assertThat(bulkPrintDocuments, hasSize(3));
+        assertThat(documents, hasSize(3));
     }
 
     private List<CaseDocument> getDocumentList(Map<String, Object> data, String field) {

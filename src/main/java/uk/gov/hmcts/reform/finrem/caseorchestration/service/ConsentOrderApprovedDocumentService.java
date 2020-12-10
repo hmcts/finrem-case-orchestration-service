@@ -100,8 +100,7 @@ public class ConsentOrderApprovedDocumentService {
             bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter));
         }
 
-        List<BulkPrintDocument> approvedOrderCollection = approvedOrderCollection(caseDetails);
-        bulkPrintDocuments.addAll(approvedOrderCollection);
+        bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(approvedOrderCollection(caseDetails)));
 
         return bulkPrintDocuments;
     }
@@ -184,9 +183,9 @@ public class ConsentOrderApprovedDocumentService {
         return detailsCopy;
     }
 
-    public List<BulkPrintDocument> approvedOrderCollection(CaseDetails caseDetails) {
+    public List<CaseDocument> approvedOrderCollection(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        List<CaseDocument> documents = new ArrayList<>();
         String approvedOrderCollectionFieldName = CommonFunction.isConsentedInContestedCase(caseDetails)
             ? CONTESTED_CONSENT_ORDER_COLLECTION : APPROVED_ORDER_COLLECTION;
 
@@ -198,14 +197,16 @@ public class ConsentOrderApprovedDocumentService {
             log.info("Extracting '{}' from case data for bulk print: {}", approvedOrderCollectionFieldName, data);
             Map<String, Object> lastApprovedOrder = (Map<String, Object>)(approvedOrderCollectionData.get(approvedOrderCollectionData.size() - 1)
                 .get(VALUE));
-            documentHelper.getDocumentLinkAsBulkPrintDocument(lastApprovedOrder, ORDER_LETTER).ifPresent(bulkPrintDocuments::add);
-            documentHelper.getDocumentLinkAsBulkPrintDocument(lastApprovedOrder, CONSENT_ORDER).ifPresent(bulkPrintDocuments::add);
-            bulkPrintDocuments.addAll(documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(lastApprovedOrder,
-                PENSION_DOCUMENTS, "uploadedDocument"));
+            documentHelper.getDocumentLinkAsCaseDocument(lastApprovedOrder, ORDER_LETTER).ifPresent(documents::add);
+            documentHelper.getDocumentLinkAsCaseDocument(lastApprovedOrder, CONSENT_ORDER).ifPresent(documents::add);
+            documents.addAll(documentHelper.getCollectionOfDocumentLinksAsCaseDocuments(
+                lastApprovedOrder,
+                PENSION_DOCUMENTS,
+                "uploadedDocument"));
         } else {
             log.info("Failed to extract '{}' from case data for bulk print as document list was empty.", approvedOrderCollectionFieldName);
         }
 
-        return bulkPrintDocuments;
+        return documents;
     }
 }

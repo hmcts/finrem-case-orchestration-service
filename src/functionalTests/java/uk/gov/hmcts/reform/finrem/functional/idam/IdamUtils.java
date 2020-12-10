@@ -39,9 +39,6 @@ public class IdamUtils {
     @Value("${idam.api.secret}")
     private String idamSecret;
 
-    @Value("${idam.api.url.local}")
-    private String idamApiLocalUrl;
-
     List<UserDetails> createdUsers = new ArrayList<>();
 
     public String generateUserTokenWithNoRoles(String username, String password) {
