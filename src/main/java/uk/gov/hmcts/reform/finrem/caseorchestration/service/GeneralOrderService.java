@@ -27,7 +27,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_ADDRESS_TO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_BODY_TEXT;
@@ -66,17 +65,11 @@ public class GeneralOrderService {
             .apply(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken);
     }
 
-    public CaseDocument getLatestGeneralOrder(Map<String, Object> caseData) {
-        if (isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
-            log.warn("Latest general order not found for printing for case");
-            return null;
-        }
-
-        return documentHelper.convertToCaseDocument(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
-    }
-
     public BulkPrintDocument getLatestGeneralOrderAsBulkPrintDocument(Map<String, Object> caseData) {
-        return BulkPrintDocument.builder().binaryFileUrl(getLatestGeneralOrder(caseData).getDocumentBinaryUrl()).build();
+        CaseDocument latestGeneralOrder = documentHelper.getLatestGeneralOrder(caseData);
+        return latestGeneralOrder != null
+            ? BulkPrintDocument.builder().binaryFileUrl(latestGeneralOrder.getDocumentBinaryUrl()).build()
+            : null;
     }
 
     private CaseDocument applyGenerateDocument(CaseDetails caseDetails, String authorisationToken) {

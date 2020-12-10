@@ -31,7 +31,6 @@ public class ConsentOrderPrintService {
 
     private final BulkPrintService bulkPrintService;
     private final GenerateCoverSheetService coverSheetService;
-    private final GeneralOrderService generalOrderService;
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
     private final DocumentHelper documentHelper;
@@ -92,7 +91,7 @@ public class ConsentOrderPrintService {
             : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails);
 
         if (!isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
-            CaseDocument generalOrder = generalOrderService.getLatestGeneralOrder(caseDetails.getData());
+            CaseDocument generalOrder = documentHelper.getLatestGeneralOrder(caseDetails.getData());
 
             if (orderDocuments.isEmpty()) {
                 bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder));
