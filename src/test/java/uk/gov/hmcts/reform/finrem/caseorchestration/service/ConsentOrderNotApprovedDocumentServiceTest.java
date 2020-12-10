@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
@@ -36,6 +36,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaul
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.matchDocumentGenerationRequestTemplateAndFilename;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_COLLECTION_CONSENTED;
@@ -55,11 +57,8 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     private static final String BULK_PRINT_TEMPLATE = "FL-FRM-LET-ENG-00522.docx";
     private static final String BULK_PRINT_FILENAME = "BulkPrintCoverSheet.pdf";
 
-    @Autowired
-    private DocumentClient documentClient;
-
-    @Autowired
-    private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+    @Autowired private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+    @Autowired private DocumentClient documentClient;
 
     private CaseDetails caseDetails;
 
@@ -79,6 +78,8 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         caseData.put(UPLOAD_ORDER, Collections.singletonList(
             ImmutableMap.of("value", ImmutableMap.of(
                 "DocumentLink", ImmutableMap.of(
+                    DOCUMENT_URL, "mockUrl",
+                    DOCUMENT_FILENAME, "mockFilename",
                     DOCUMENT_BINARY_URL, GENERAL_ORDER_URL)))));
 
         List<GeneralOrderConsentedData> generalOrders = new ArrayList<>();
