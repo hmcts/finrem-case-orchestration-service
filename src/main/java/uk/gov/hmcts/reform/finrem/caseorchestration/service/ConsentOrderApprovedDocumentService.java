@@ -199,7 +199,7 @@ public class ConsentOrderApprovedDocumentService {
                 .get(VALUE));
             documentHelper.getDocumentLinkAsCaseDocument(lastApprovedOrder, ORDER_LETTER).ifPresent(documents::add);
             documentHelper.getDocumentLinkAsCaseDocument(lastApprovedOrder, CONSENT_ORDER).ifPresent(documents::add);
-            documents.addAll(documentHelper.getCollectionOfDocumentLinksAsCaseDocuments(
+            documents.addAll(documentHelper.getDocumentLinksFromCustomCollectionAsCaseDocuments(
                 lastApprovedOrder,
                 PENSION_DOCUMENTS,
                 "uploadedDocument"));

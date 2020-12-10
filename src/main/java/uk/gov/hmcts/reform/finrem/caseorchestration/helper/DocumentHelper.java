@@ -42,6 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
@@ -181,6 +182,21 @@ public class DocumentHelper {
         return Optional.empty();
     }
 
+    public Optional<CaseDocument> getLatestAdditionalHearingDocument(Map<String, Object> caseData) {
+        Optional<AdditionalHearingDocumentData> additionalHearingDocumentData =
+            ofNullable(caseData.get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION))
+                .map(this::convertToAdditionalHearingDocumentData)
+                .orElse(emptyList())
+                .stream()
+                .reduce((first, second) -> second);
+        if (additionalHearingDocumentData.isPresent()) {
+            return additionalHearingDocumentData
+                .map(additionalHearingDocumentDataCopy -> additionalHearingDocumentData.get().getAdditionalHearingDocument().getDocument());
+        }
+        return Optional.empty();
+    }
+
+
     public CaseDetails prepareLetterToApplicantTemplateData(CaseDetails caseDetails) {
         // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
         CaseDetails caseDetailsCopy = deepCopy(caseDetails, CaseDetails.class);
@@ -313,8 +329,12 @@ public class DocumentHelper {
             : Optional.empty();
     }
 
-    public List<CaseDocument> getCollectionOfDocumentLinksAsCaseDocuments(Map<String, Object> data, String collectionName,
-                                                                          String documentName) {
+    public List<BulkPrintDocument> getCollectionOfDocumentLinksAsBulkPrintDocuments(Map<String, Object> data, String collectionName) {
+        return getCaseDocumentsAsBulkPrintDocuments(getDocumentLinksFromCustomCollectionAsCaseDocuments(data, collectionName, null));
+    }
+
+    public List<CaseDocument> getDocumentLinksFromCustomCollectionAsCaseDocuments(Map<String, Object> data, String collectionName,
+                                                                                  String documentName) {
         List<CaseDocument> documents = new ArrayList<>();
 
         List<Map<String, Object>> documentList = ofNullable(data.get(collectionName))
@@ -329,13 +349,15 @@ public class DocumentHelper {
     }
 
     public Optional<CaseDocument> getDocumentLinkAsCaseDocument(Map<String, Object> data, String documentName) {
-        Map<String, String> documentLink = (Map<String, String>) data.get(documentName);
+        Map<String, Object> documentLink = documentName != null
+            ? (Map<String, Object>) data.get(documentName)
+            : data;
 
         return documentLink != null
             ? Optional.of(CaseDocument.builder()
-                .documentUrl(documentLink.get(DOCUMENT_URL))
-                .documentFilename(documentLink.get(DOCUMENT_FILENAME))
-                .documentBinaryUrl(documentLink.get(DOCUMENT_BINARY_URL))
+                .documentUrl(documentLink.get(DOCUMENT_URL).toString())
+                .documentFilename(documentLink.get(DOCUMENT_FILENAME).toString())
+                .documentBinaryUrl(documentLink.get(DOCUMENT_BINARY_URL).toString())
                 .build())
             : Optional.empty();
     }
