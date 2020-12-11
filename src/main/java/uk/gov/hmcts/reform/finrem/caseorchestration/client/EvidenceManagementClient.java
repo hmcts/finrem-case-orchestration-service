@@ -12,7 +12,7 @@ import java.util.List;
 @FeignClient(name = "finrem-evidence-management-client", url = "${evidence.management.client.api.baseurl}", primary = false)
 public interface EvidenceManagementClient {
 
-    @GetMapping(path = "/version/1/audit")
+    @GetMapping(path = "/emclientapi/version/1/audit")
     List<FileUploadResponse> auditFileUrls(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
         @RequestParam("fileUrls") List<String> fileUrls);
