@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadRes
 
 import java.util.List;
 
-@FeignClient(name = "finrem-evidence-management-client", url = "${evidence.management.client.api.baseurl}")
+@FeignClient(name = "finrem-evidence-management-client", url = "${evidence.management.client.api.baseurl}", primary = false)
 public interface EvidenceManagementClient {
 
     @GetMapping(path = "/version/1/audit")

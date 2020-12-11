@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,7 +14,9 @@ import java.time.LocalDate;
  * when auditing a file, so it seemed reasonable to use the same class name.
  */
 @Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class FileUploadResponse {
 
     private String fileUrl;

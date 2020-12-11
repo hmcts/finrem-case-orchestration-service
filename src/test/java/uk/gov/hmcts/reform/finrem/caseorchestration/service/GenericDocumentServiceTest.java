@@ -25,14 +25,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultContestedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
 
-@ActiveProfiles("test-mock-document-client")
+@ActiveProfiles("test-mock-feign-clients")
 public class GenericDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired
-    private DocumentClient documentClientMock;
-
-    @Autowired
-    private GenericDocumentService genericDocumentService;
+    @Autowired private GenericDocumentService genericDocumentService;
+    @Autowired private DocumentClient documentClientMock;
 
     @Captor
     private ArgumentCaptor<DocumentGenerationRequest> documentGenerationRequestCaptor;

@@ -82,7 +82,7 @@ public class ConsentOrderPrintService {
         log.info("Sending order documents to recipient / solicitor for Bulk Print");
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
-        bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl(coverSheet.getDocumentBinaryUrl()).build());
+        bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverSheet));
 
         Map<String, Object> caseData = caseDetails.getData();
 

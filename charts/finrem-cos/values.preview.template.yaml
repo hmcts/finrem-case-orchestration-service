@@ -7,6 +7,7 @@ java:
     FEATURE_SHARE_A_CASE: true
     FEATURE_RESPONDENT_JOURNEY: true
     FEATURE_OFFLINE_NOTIFICATIONS: true
+    EVIDENCE_MANAGEMENT_SERVICE_BASEURL: "http://finrem-emca-pr-59.service.core-compute-preview.internal"
   keyVaults:
     finrem:
       secrets:

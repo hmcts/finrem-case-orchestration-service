@@ -10,16 +10,21 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.EvidenceManagementClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
@@ -34,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.bulkPrintDocumentList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 
-@ActiveProfiles("test-mock-document-client")
+@ActiveProfiles("test-mock-feign-clients")
 public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
     private static final UUID LETTER_ID = UUID.randomUUID();
@@ -44,6 +49,7 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
     @Autowired private ObjectMapper mapper;
     @Autowired private ConsentOrderPrintService consentOrderPrintService;
+    @Autowired private EvidenceManagementClient evidenceManagementClientMock;
 
     @MockBean private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
     @MockBean private GenerateCoverSheetService coverSheetService;
@@ -223,5 +229,27 @@ public class ConsentOrderPrintServiceTest extends BaseServiceTest {
 
         verify(coverSheetService).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
         verify(genericDocumentService, times(1)).bulkPrint(any());
+    }
+
+    @Test
+    public void givenGeneralOrderIssuedAfterNotApprovedConsentOrder_whenSendOrderToBulkPrint_generalOrderIsPrinted() {
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(
+            "/fixtures/contested/bulk_print_consent_order_not_approved.json", mapper);
+
+        when(coverSheetService.generateRespondentCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
+        when(coverSheetService.generateApplicantCoverSheet(caseDetails, AUTH_TOKEN)).thenReturn(caseDocument);
+        when(consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(caseDetails, AUTH_TOKEN))
+            .thenReturn(bulkPrintDocumentList());
+        when(consentOrderNotApprovedDocumentService.notApprovedConsentOrder(any())).thenReturn(singletonList(caseDocument));
+        LocalDate now = LocalDate.now();
+        when(evidenceManagementClientMock.auditFileUrls(eq(AUTH_TOKEN), any())).thenReturn(asList(
+            FileUploadResponse.builder().modifiedOn(now).build(),
+            FileUploadResponse.builder().modifiedOn(now.minusDays(1)).build()));
+
+        consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, AUTH_TOKEN);
+
+        verify(genericDocumentService, times(2)).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
+        assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().stream().map(BulkPrintDocument::getBinaryFileUrl)
+            .collect(Collectors.toList()), hasItem("http://document-management-store:8080/documents/015500ba-c524-4614-86e5-c569f82c718d/binary"));
     }
 }

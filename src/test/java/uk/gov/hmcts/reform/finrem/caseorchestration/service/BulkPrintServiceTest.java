@@ -6,11 +6,9 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -19,8 +17,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequ
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,28 +31,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService.FINANCIAL_REMEDY_PACK_LETTER_TYPE;
 
-@ActiveProfiles("test-mock-document-client")
 public class BulkPrintServiceTest extends BaseServiceTest {
 
-    @Autowired
-    private DocumentClient documentClient;
-    @Autowired
-    private BulkPrintService bulkPrintService;
-    @Autowired
-    private ObjectMapper mapper;
-    @Autowired
-    private DocumentHelper documentHelper;
+    @Autowired private BulkPrintService bulkPrintService;
+    @Autowired private ObjectMapper mapper;
+    @Autowired private DocumentHelper documentHelper;
 
-    @MockBean
-    private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    @MockBean
-    private GeneralOrderService generalOrderService;
-    @MockBean
-    private GenerateCoverSheetService coverSheetService;
-    @MockBean
-    private GenericDocumentService genericDocumentService;
-    @MockBean
-    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @MockBean private GenerateCoverSheetService coverSheetService;
+    @MockBean private GenericDocumentService genericDocumentService;
 
     private UUID letterId;
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor;

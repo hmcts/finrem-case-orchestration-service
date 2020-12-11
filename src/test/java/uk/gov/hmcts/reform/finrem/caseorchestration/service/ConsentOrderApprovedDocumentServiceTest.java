@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -58,7 +57,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
-@ActiveProfiles("test-mock-document-client")
+@ActiveProfiles("test-mock-feign-clients")
 public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     private static final String DEFAULT_COVERSHEET_URL = "defaultCoversheetUrl";
@@ -67,13 +66,10 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     private static final String CONSENT_ORDER_URL = "consentOrderUrl";
     private static final String PENSION_DOCUMENT_URL = "pensionDocumentUrl";
 
+    @Autowired private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     @Autowired private ObjectMapper mapper;
     @Autowired private DocumentHelper documentHelper;
-    @Autowired private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     @Autowired private DocumentClient documentClientMock;
-
-    @MockBean private BulkPrintService bulkPrintService;
-    @MockBean private ConsentOrderPrintService consentOrderPrintService;
 
     @Value("${document.bulkPrintTemplate}")
     private String documentBulkPrintTemplate;

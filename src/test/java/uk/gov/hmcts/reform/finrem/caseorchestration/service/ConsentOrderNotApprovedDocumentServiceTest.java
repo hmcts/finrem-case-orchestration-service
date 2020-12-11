@@ -44,7 +44,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 
-@ActiveProfiles("test-mock-document-client")
+@ActiveProfiles("test-mock-feign-clients")
 public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest {
 
     private static final String COVER_LETTER_URL = "cover_letter_url";
@@ -58,7 +58,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     private static final String BULK_PRINT_FILENAME = "BulkPrintCoverSheet.pdf";
 
     @Autowired private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    @Autowired private DocumentClient documentClient;
+    @Autowired private DocumentClient documentClientMock;
 
     private CaseDetails caseDetails;
 
@@ -93,7 +93,7 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
                                                                            String generatedDocumentUrl) {
         Document generatedDocument = document();
         generatedDocument.setBinaryUrl(generatedDocumentUrl);
-        when(documentClient.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(requestedTemplate, requestedFilename),
+        when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(requestedTemplate, requestedFilename),
             anyString())).thenReturn(generatedDocument);
     }
 
