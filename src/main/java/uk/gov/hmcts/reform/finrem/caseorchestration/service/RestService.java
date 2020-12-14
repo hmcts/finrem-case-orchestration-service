@@ -41,7 +41,7 @@ public class RestService {
         URI uri = buildUri(url);
         HttpEntity<Object> request = buildAuthRequest(userAuthToken, body);
 
-        log.info("Making REST POST request to uri : {}, request : {} ", uri, request);
+        log.info("Making REST {} request to uri : {}, request : {}", httpMethod, uri, request);
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
@@ -50,7 +50,7 @@ public class RestService {
                 request,
                 Map.class);
 
-            log.info("Received REST POST response: {} ", response);
+            log.info("Received REST {} response: {} ", httpMethod, response);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
