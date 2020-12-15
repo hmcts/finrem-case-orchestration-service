@@ -27,10 +27,14 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_JUDGE_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 
@@ -851,5 +855,45 @@ public class NotificationServiceTest extends BaseServiceTest {
         caseData.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
 
         assertFalse(notificationService.shouldEmailRespondentSolicitor(caseData));
+    }
+
+    @Test
+    public void shouldEmailApplicantSolicitor_contested() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
+
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
+
+        assertTrue(notificationService.shouldEmailApplicantSolicitor(caseDetails));
+    }
+
+    @Test
+    public void shouldNotEmailApplicantSolicitor_contested() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, NO_VALUE);
+
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
+
+        assertFalse(notificationService.shouldEmailApplicantSolicitor(caseDetails));
+    }
+
+    @Test
+    public void shouldEmailApplicantSolicitor_consented() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
+
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(caseData).build();
+
+        assertTrue(notificationService.shouldEmailApplicantSolicitor(caseDetails));
+    }
+
+    @Test
+    public void shouldNotEmailApplicantSolicitor_consented() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, NO_VALUE);
+
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(caseData).build();
+
+        assertFalse(notificationService.shouldEmailApplicantSolicitor(caseDetails));
     }
 }

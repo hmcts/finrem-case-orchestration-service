@@ -25,6 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresentedByASolicitor;
@@ -311,5 +312,9 @@ public class NotificationService {
         return !isPaperApplication(caseData)
             && isRespondentRepresentedByASolicitor(caseData)
             && isNotEmpty(RESP_SOLICITOR_EMAIL, caseData);
+    }
+
+    public boolean shouldEmailApplicantSolicitor(CaseDetails caseDetails) {
+        return isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
     }
 }
