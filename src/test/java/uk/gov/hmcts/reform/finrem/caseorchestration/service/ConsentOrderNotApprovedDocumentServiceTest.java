@@ -69,8 +69,8 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         mockDocumentClientToReturnUrlForDocumentGenerationRequest(BULK_PRINT_TEMPLATE, BULK_PRINT_FILENAME, DEFAULT_COVERSHEET_URL);
     }
 
-    public void setupConsentedCase() {
-        caseDetails = defaultConsentedCaseDetails();
+    public void setupContestedCase() {
+        caseDetails = defaultContestedCaseDetails();
 
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(GENERAL_ORDER_LATEST_DOCUMENT, caseDocument());
@@ -99,22 +99,21 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
 
     @Test
     public void whenApplicantLetterPackIsPrepared_thenItHasExpectedDocuments_and_caseDataIsUpdated() {
-        setupConsentedCase();
+        setupContestedCase();
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
             caseDetails, AUTH_TOKEN);
 
-        assertThat(generatedDocuments, hasSize(3));
+        assertThat(generatedDocuments, hasSize(2));
         assertThat(generatedDocuments.get(0).getBinaryFileUrl(), is(COVER_LETTER_URL));
-        assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(GENERAL_ORDER_URL));
-        assertThat(generatedDocuments.get(2).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
+        assertThat(generatedDocuments.get(1).getBinaryFileUrl(), is(TestSetUpUtils.BINARY_URL));
 
         assertThat(caseDetails.getData().get(BULK_PRINT_COVER_SHEET_APP), is(nullValue()));
     }
 
     @Test
     public void whenNoNotApprovedConsentOrderIsFound_thenApplicantPackPrintsWithoutIt() {
-        setupConsentedCase();
+        setupContestedCase();
         caseDetails.getData().put(UPLOAD_ORDER, null);
 
         List<BulkPrintDocument> generatedDocuments = consentOrderNotApprovedDocumentService.prepareApplicantLetterPack(
