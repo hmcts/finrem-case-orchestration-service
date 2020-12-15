@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 /**
  * The class name FileUploadResponse is to maintain consistency. It was created in Evidence Management Client
@@ -24,7 +24,7 @@ public class FileUploadResponse {
     private String mimeType;
     private String createdBy;
     private String lastModifiedBy;
-    private LocalDate createdOn;
-    private LocalDate modifiedOn;
+    private Date createdOn;
+    private Date modifiedOn;
     private HttpStatus status;
 }
