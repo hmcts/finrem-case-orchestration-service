@@ -21,16 +21,19 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullName;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isAmendedConsentOrderType;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantAddressConfidential;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorResponsibleToDraftOrder;
@@ -39,6 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isNotEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentAddressConfidential;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresentedByASolicitor;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
@@ -360,6 +364,53 @@ public class CommonFunctionTest {
             "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
 
         assertThat(isContestedPaperApplication(caseDetails), is(false));
+    }
+
+
+    @Test
+    public void isApplicantAddressConfidentialTrueWhenApplicantAddressIsMarkedAsConfidential() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(APPLICANT_CONFIDENTIAL_ADDRESS, "Yes");
+
+        assertThat(isApplicantAddressConfidential(data), is(true));
+    }
+
+    @Test
+    public void isApplicantAddressConfidentialFalseWhenApplicantAddressIsNotMarkedAsConfidential() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(APPLICANT_CONFIDENTIAL_ADDRESS, "No");
+
+        assertThat(isApplicantAddressConfidential(data), is(false));
+    }
+
+    @Test
+    public void isApplicantAddressConfidentialFalseWhenApplicantAddressConfidentialFieldIsNotPresent() {
+        Map<String, Object> data = new HashMap<>();
+
+        assertThat(isApplicantAddressConfidential(data), is(false));
+    }
+
+    @Test
+    public void isRespondentAddressConfidentialTrueWhenRespondentAddressIsMarkedAsConfidential() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(RESPONDENT_CONFIDENTIAL_ADDRESS, "Yes");
+
+        assertThat(isRespondentAddressConfidential(data), is(true));
+    }
+
+    @Test
+    public void isRespondentAddressConfidentialFalseWhenRespondentAddressIsNotMarkedAsConfidential() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(RESPONDENT_CONFIDENTIAL_ADDRESS, "No");
+
+        assertThat(isRespondentAddressConfidential(data), is(false));
+    }
+
+    @Test
+    public void isRespondentAddressConfidentialFalseWhenRespondentAddressConfidentialFieldIsNotPresent() {
+        Map<String, Object> data = new HashMap<>();
+
+        assertThat(isRespondentAddressConfidential(data), is(false));
     }
 
     private static RespondToOrderData getRespondToOrderData(String s) {

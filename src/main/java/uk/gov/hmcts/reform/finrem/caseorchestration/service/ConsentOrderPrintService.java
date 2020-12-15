@@ -10,8 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,10 +19,12 @@ import java.util.UUID;
 import static java.util.Arrays.asList;
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderApprovedCollectionPresent;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentAddressConfidential;
 
 @Slf4j
 @Service
@@ -54,10 +56,16 @@ public class ConsentOrderPrintService {
     private void generateCoversheetForRespondentAndSendOrders(CaseDetails caseDetails, String authorisationToken) {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
         UUID respondentLetterId = sendConsentOrderForBulkPrintRespondent(respondentCoverSheet, caseDetails, authorisationToken);
-
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
-        caseData.put(BULK_PRINT_LETTER_ID_RES, respondentLetterId);
+
+        if (isRespondentAddressConfidential(caseData)) {
+            log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", caseDetails.getId());
+            caseData.remove(BULK_PRINT_COVER_SHEET_RES);
+            caseData.put(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL, respondentCoverSheet);
+        } else {
+            caseData.put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
+            caseData.put(BULK_PRINT_LETTER_ID_RES, respondentLetterId);
+        }
 
         log.info("Generated Respondent CoverSheet for bulk print. coversheet: {}, letterId : {}", respondentCoverSheet, respondentLetterId);
     }
@@ -101,9 +109,9 @@ public class ConsentOrderPrintService {
                     generalOrder.getDocumentUrl(),
                     orderDocument.getDocumentUrl()));
 
-                LocalDate generalOrderModifiedOn = auditResponse.get(0).getModifiedOn();
-                LocalDate orderDocumentModifiedOn = auditResponse.get(1).getModifiedOn();
-                if (generalOrderModifiedOn.isAfter(orderDocumentModifiedOn)) {
+                Date generalOrderModifiedOn = auditResponse.get(0).getModifiedOn();
+                Date orderDocumentModifiedOn = auditResponse.get(1).getModifiedOn();
+                if (generalOrderModifiedOn.after(orderDocumentModifiedOn)) {
                     bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder));
                 } else {
                     bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
