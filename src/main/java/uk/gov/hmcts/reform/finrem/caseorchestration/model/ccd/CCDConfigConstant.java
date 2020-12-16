@@ -13,6 +13,7 @@ public class CCDConfigConstant {
     public static final String APPLICANT_FIRST_MIDDLE_NAME = "applicantFMName";
     public static final String APPLICANT_LAST_NAME = "applicantLName";
     public static final String APPLICANT_ADDRESS = "applicantAddress";
+    public static final String APPLICANT_CONFIDENTIAL_ADDRESS = "applicantAddressConfidential";
     public static final String APPLICANT_PHONE = "applicantPhone";
     public static final String APPLICANT_EMAIL = "applicantEmail";
 
@@ -21,6 +22,7 @@ public class CCDConfigConstant {
     public static final String CONSENTED_RESPONDENT_LAST_NAME = "appRespondentLName";
     public static final String CONTESTED_RESPONDENT_LAST_NAME = "respondentLName";
     public static final String RESPONDENT_ADDRESS = "respondentAddress";
+    public static final String RESPONDENT_CONFIDENTIAL_ADDRESS = "respondentAddressConfidential";
     public static final String RESPONDENT_PHONE = "respondentPhone";
     public static final String RESPONDENT_EMAIL = "respondentEmail";
 
@@ -382,6 +384,8 @@ public class CCDConfigConstant {
     public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
     public static final String BULK_PRINT_LETTER_ID_APP = "bulkPrintLetterIdApp";
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
+    public static final String BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL = "bulkPrintCoverSheetAppConfidential";
+    public static final String BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL = "bulkPrintCoverSheetResConfidential";
     public static final String UPLOAD_ORDER = "uploadOrder";
 
     //Contested Case Documents
@@ -407,6 +411,7 @@ public class CCDConfigConstant {
     public static final String ORGANISATION_POLICY_ORGANISATION = "Organisation";
     public static final String ORGANISATION_POLICY_ORGANISATION_ID = "OrganisationID";
     public static final String APP_SOLICITOR_POLICY = "[APPSOLICITOR]";
+    public static final String CREATOR_USER_ROLE = "[CREATOR]";
 
     //scheduled hearings
     public static final String ADDITIONAL_HEARING_DOCUMENT_COLLECTION = "additionalHearingDocuments";
@@ -428,4 +433,6 @@ public class CCDConfigConstant {
     public static final String DRAFT_DIRECTION_ORDER_COLLECTION  = "draftDirectionOrderCollection";
     public static final String DRAFT_DIRECTION_DETAILS_COLLECTION = "draftDirectionDetailsCollection";
     public static final String DRAFT_DIRECTION_DETAILS_COLLECTION_RO = "draftDirectionDetailsCollectionRO";
+    public static final String HEARING_ORDER_OTHER_COLLECTION = "hearingOrderOtherDocuments";
+
 }
