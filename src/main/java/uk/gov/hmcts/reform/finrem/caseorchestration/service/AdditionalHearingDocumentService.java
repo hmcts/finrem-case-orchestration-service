@@ -37,6 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TIME_ESTIMATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullApplicantName;
@@ -86,6 +87,11 @@ public class AdditionalHearingDocumentService {
                 directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()))) {
             log.info("Additional hearing document not required for case: {}", caseDetails.getId());
             return;
+        }
+
+        if (documentHelper.getHearingOrderDocuments(caseDetails.getData()).get(0).getHearingOrderDocuments() != null) {
+            caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
+                documentHelper.getHearingOrderDocuments(caseDetails.getData()).get(0).getHearingOrderDocuments());
         }
 
         DirectionDetailsCollection directionDetailsCollection = directionDetailsCollectionList.get(0).getDirectionDetailsCollection();
