@@ -89,8 +89,8 @@ public class AdditionalHearingDocumentService {
             return;
         }
 
-        if (documentHelper.getHearingOrderDocuments(caseDetails.getData()) != null &&
-            documentHelper.getHearingOrderDocuments(caseDetails.getData()).get(0).getHearingOrderDocuments() != null) {
+        if (documentHelper.getHearingOrderDocuments(caseDetails.getData()) != null
+            && documentHelper.getHearingOrderDocuments(caseDetails.getData()).get(0).getHearingOrderDocuments() != null) {
             caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
                 documentHelper.getHearingOrderDocuments(caseDetails.getData()).get(0).getHearingOrderDocuments());
         }
