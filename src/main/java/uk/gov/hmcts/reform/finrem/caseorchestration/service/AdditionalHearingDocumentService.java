@@ -93,7 +93,8 @@ public class AdditionalHearingDocumentService {
         List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseDetails.getData());
 
         if (hearingOrderCollectionData != null && hearingOrderCollectionData.get(0).getHearingOrderDocuments() != null) {
-            caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER, hearingOrderCollectionData.get(0).getHearingOrderDocuments().getUploadDraftDocument());
+            caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
+                hearingOrderCollectionData.get(0).getHearingOrderDocuments().getUploadDraftDocument());
         }
 
         DirectionDetailsCollection directionDetailsCollection = directionDetailsCollectionList.get(0).getDirectionDetailsCollection();

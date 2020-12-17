@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedCaseOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
@@ -46,6 +47,7 @@ public class ContestedOrderController implements BaseController {
     private final ContestedCaseOrderService contestedCaseOrderService;
     private final ObjectMapper objectMapper;
     private final FeatureToggleService featureToggleService;
+    private final DocumentHelper documentHelper;
 
     @PostMapping(path = "/contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Consent order approved generation. Serves as a callback from CCD")
@@ -70,7 +72,7 @@ public class ContestedOrderController implements BaseController {
             contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, authToken);
         }
 
-        List<HearingOrderCollectionData> hearingOrderCollectionData = getHearingOrderDocuments(caseData);
+        List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseData);
 
         if (hearingOrderCollectionData != null && !hearingOrderCollectionData.isEmpty()) {
             CaseDocument latestHearingOrder = hearingOrderCollectionData
@@ -108,12 +110,6 @@ public class ContestedOrderController implements BaseController {
             caseData.put(FINAL_ORDER_COLLECTION, finalOrderCollection);
             log.info("Finished stamping final order.");
         }
-    }
-
-    private List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
-        return objectMapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
-            new TypeReference<>() {
-            });
     }
 
     private List<HearingOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {

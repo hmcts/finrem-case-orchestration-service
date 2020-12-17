@@ -204,7 +204,7 @@ public class DocumentHelper {
         }
         return Optional.empty();
     }
-    
+
 
     public CaseDetails prepareLetterToApplicantTemplateData(CaseDetails caseDetails) {
         // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
@@ -383,7 +383,7 @@ public class DocumentHelper {
         return objectMapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION), new TypeReference<>() {});
     }
 
-    public  List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
+    public List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
         return objectMapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
             new TypeReference<>() {
             });
