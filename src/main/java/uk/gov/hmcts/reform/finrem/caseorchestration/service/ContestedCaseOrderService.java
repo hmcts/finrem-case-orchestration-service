@@ -27,12 +27,11 @@ public class ContestedCaseOrderService {
 
     private final BulkPrintService bulkPrintService;
     private final GeneralOrderService generalOrderService;
-    private final FeatureToggleService featureToggleService;
     private final DocumentHelper documentHelper;
     private final CaseDataService caseDataService;
 
     public void printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
-        if (featureToggleService.isContestedPrintGeneralOrderEnabled() && contestedGeneralOrderPresent(caseDetails)) {
+        if (contestedGeneralOrderPresent(caseDetails)) {
             BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData());
             if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, singletonList(generalOrder));

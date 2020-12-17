@@ -193,7 +193,6 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void submitSendRefusalReasonWithRefusalAndShouldPrintForApplicantTrue() throws Exception {
         doValidRefusalOrder();
-        when(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()).thenReturn(true);
         when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
@@ -209,7 +208,6 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void submitSendRefusalReasonWithRefusalAndShouldPrintForApplicantFalse() throws Exception {
         doValidRefusalOrder();
-        when(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()).thenReturn(true);
         when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(false);
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
@@ -225,23 +223,6 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
     @Test
     public void submitSendRefusalReasonWithNotRefusalReasonNotPrint() throws Exception {
         doValidCaseDataSetUpForPaperApplication();
-        when(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()).thenReturn(true);
-        mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
-        verify(contestedDraftOrderNotApprovedService, times(1)).getLatestRefusalReason(any());
-        verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService, never()).printRespondentDocuments(any(), any(), any());
-    }
-
-    @Test
-    public void submitSendRefusalReasonWithRefusalAndShouldNotPrintWhenToggleIsFalse() throws Exception {
-        doValidRefusalOrder();
-        when(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()).thenReturn(false);
-        when(contestedDraftOrderNotApprovedService.getLatestRefusalReason(any())).thenReturn(Optional.of(caseDocument()));
-        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
         mvc.perform(post(SUBMIT_REFUSAL_REASON_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)

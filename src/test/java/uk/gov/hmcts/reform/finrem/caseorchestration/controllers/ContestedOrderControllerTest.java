@@ -128,10 +128,9 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void sendOrderSuccessWhenOfflineNotificationsEnabled() throws Exception {
+    public void sendOrderSuccess() throws Exception {
         doCaseDataSetUpWithoutAnyHearingOrder();
         whenStampingDocument().thenReturn(caseDocument());
-        when(featureToggleService.isOfflineNotificationsEnabled()).thenReturn(true);
 
         ResultActions result = mvc.perform(post(SEND_ORDER_ENDPOINT)
             .content(requestContent.toString())
@@ -142,23 +141,6 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
         result.andDo(print());
 
         verify(contestedCaseOrderService, times(1)).printAndMailHearingDocuments(any(), any());
-    }
-
-    @Test
-    public void finalOrderSuccessWhenOfflineNotificationsDisabled() throws Exception {
-        doCaseDataSetUpWithoutAnyHearingOrder();
-        whenStampingDocument().thenReturn(caseDocument());
-        when(featureToggleService.isOfflineNotificationsEnabled()).thenReturn(false);
-
-        ResultActions result = mvc.perform(post(SEND_ORDER_ENDPOINT)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE));
-
-        result.andExpect(status().isOk());
-        result.andDo(print());
-
-        verify(contestedCaseOrderService, times(0)).printAndMailHearingDocuments(any(), any());
     }
 
     private OngoingStubbing<CaseDocument> whenStampingDocument() {
