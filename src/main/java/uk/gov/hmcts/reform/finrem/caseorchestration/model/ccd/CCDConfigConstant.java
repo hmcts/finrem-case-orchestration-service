@@ -401,9 +401,6 @@ public class CCDConfigConstant {
 
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
 
-    //states
-    public static final String CONSENTED_ORDER_APPROVED = "consentedOrderApproved";
-
     //organisation policy
     public static final String ORGANISATION_POLICY_APPLICANT = "ApplicantOrganisationPolicy";
     public static final String ORGANISATION_POLICY_ROLE = "OrgPolicyCaseAssignedRole";
@@ -421,12 +418,6 @@ public class CCDConfigConstant {
     public static final String HEARING_TIME = "hearingTime";
     public static final String HEARING_ADDITIONAL_INFO = "additionalInformationAboutHearing";
     public static final String DIRECTION_DETAILS_COLLECTION_CT = "directionDetailsCollection";
-    public static final String LOCAL_COURT_CT = "localCourt";
-    public static final String HEARING_TYPE_CT = "typeOfHearing";
-    public static final String TIME_ESTIMATE_CT = "timeEstimate";
-    public static final String HEARING_DATE_CT = "dateOfHearing";
-    public static final String HEARING_TIME_CT = "hearingTime";
-    public static final String IS_ANOTHER_HEARING_CT = "isAnotherHearingYN";
 
     //draft hearing order
     public static final String LATEST_DRAFT_HEARING_ORDER  = "latestDraftHearingOrder";
