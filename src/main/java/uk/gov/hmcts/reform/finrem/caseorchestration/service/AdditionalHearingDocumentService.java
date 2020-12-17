@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
@@ -89,10 +90,10 @@ public class AdditionalHearingDocumentService {
             return;
         }
 
-        if (documentHelper.getHearingOrderDocuments(caseDetails.getData()) != null
-            && documentHelper.getHearingOrderDocuments(caseDetails.getData()).get(0).getHearingOrderDocuments() != null) {
-            caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
-                documentHelper.getHearingOrderDocuments(caseDetails.getData()).get(0).getHearingOrderDocuments());
+        List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseDetails.getData());
+
+        if (hearingOrderCollectionData != null && hearingOrderCollectionData.get(0).getHearingOrderDocuments() != null) {
+            caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER, hearingOrderCollectionData.get(0).getHearingOrderDocuments().getUploadDraftDocument());
         }
 
         DirectionDetailsCollection directionDetailsCollection = directionDetailsCollectionList.get(0).getDirectionDetailsCollection();
