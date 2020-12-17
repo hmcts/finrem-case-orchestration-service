@@ -1,10 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import org.apache.http.auth.AUTH;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
-import scala.App;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.EvidenceManagementClient;
