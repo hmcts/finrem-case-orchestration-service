@@ -15,8 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
@@ -122,8 +122,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void shouldGenerateAndPopulateApprovedConsentOrderLetterForConsentInContested() {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
         consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, AUTH_TOKEN);
-        List<ApprovedOrderData> approvedOrders = getConsentInContestedApprovedOrderCollection(caseDetails.getData());
-        assertCaseDocument(approvedOrders.get(approvedOrders.size() - 1).getApprovedOrder().getOrderLetter());
+        List<CollectionElement<ApprovedOrder>> approvedOrders = consentOrderApprovedDocumentService.getConsentInContestedApprovedOrderCollection(
+            caseDetails.getData());
+        assertCaseDocument(approvedOrders.get(approvedOrders.size() - 1).getValue().getOrderLetter());
         verify(documentClientMock, atLeastOnce()).generatePdf(
             matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, documentApprovedConsentOrderFileName),
             anyString());
@@ -252,14 +253,9 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
             .pensionDocuments(singletonList(pensionData))
             .orderLetter(caseDocument(ORDER_LETTER_URL, ORDER_LETTER_URL, ORDER_LETTER_URL))
             .build();
-        ApprovedOrderData approvedOrderData = ApprovedOrderData.builder().approvedOrder(approvedOrder).build();
 
-        caseDetails.getData().put(APPROVED_ORDER_COLLECTION, singletonList(approvedOrderData));
+        caseDetails.getData().put(APPROVED_ORDER_COLLECTION, singletonList(CollectionElement.<ApprovedOrder>builder().value(approvedOrder).build()));
         caseDetails.setData(mapper.readValue(mapper.writeValueAsString(caseDetails.getData()), HashMap.class));
-    }
-
-    private List<ApprovedOrderData> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {});
     }
 
     private CaseDetails caseDetails() {

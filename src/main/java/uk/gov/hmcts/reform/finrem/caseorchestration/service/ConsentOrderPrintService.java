@@ -4,25 +4,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.EvidenceManagementClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.evidence.FileUploadResponse;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static java.util.Arrays.asList;
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedOrderNotApprovedCollectionPresent;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderApprovedCollectionPresent;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentAddressConfidential;
 
@@ -36,13 +33,13 @@ public class ConsentOrderPrintService {
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
     private final DocumentHelper documentHelper;
-    private final EvidenceManagementClient evidenceManagementClient;
+    private final DocumentOrderingService documentOrderingService;
 
     public void sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
-            UUID applicantLetterId = isOrderApprovedCollectionPresent(caseData)
+            UUID applicantLetterId = shouldPrintOrderApprovedDocuments(caseDetails, authorisationToken)
                 ? printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken)
                 : printApplicantConsentOrderNotApprovedDocuments(caseDetails, authorisationToken);
             caseData.put(BULK_PRINT_LETTER_ID_APP, applicantLetterId);
@@ -104,14 +101,7 @@ public class ConsentOrderPrintService {
             if (orderDocuments.isEmpty()) {
                 bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder));
             } else {
-                CaseDocument orderDocument = orderDocuments.get(0);
-                List<FileUploadResponse> auditResponse = evidenceManagementClient.auditFileUrls(authorisationToken, asList(
-                    generalOrder.getDocumentUrl(),
-                    orderDocument.getDocumentUrl()));
-
-                Date generalOrderModifiedOn = auditResponse.get(0).getModifiedOn();
-                Date orderDocumentModifiedOn = auditResponse.get(1).getModifiedOn();
-                if (generalOrderModifiedOn.after(orderDocumentModifiedOn)) {
+                if (documentOrderingService.isDocumentModifiedLater(generalOrder, orderDocuments.get(0), authorisationToken)) {
                     bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder));
                 } else {
                     bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
@@ -122,5 +112,13 @@ public class ConsentOrderPrintService {
         }
 
         return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), bulkPrintDocuments);
+    }
+
+    private boolean shouldPrintOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
+        boolean isOrderApprovedCollectionPresent = isOrderApprovedCollectionPresent(caseDetails.getData());
+        boolean isOrderNotApprovedCollectionPresent = isContestedOrderNotApprovedCollectionPresent(caseDetails.getData());
+
+        return isOrderApprovedCollectionPresent && (!isOrderNotApprovedCollectionPresent
+            || documentOrderingService.isOrderApprovedCollectionModifiedLaterThanNotApprovedCollection(caseDetails, authorisationToken));
     }
 }

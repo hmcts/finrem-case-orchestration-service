@@ -20,8 +20,8 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
@@ -115,8 +115,9 @@ public class ConsentOrderApprovedController implements BaseController {
     }
 
     @PostMapping(path = "/consent-in-contested/send-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "'Consent Order Approved' callback handler for consent in contested. Checks state and if "
-        + "approved generates docs else puts latest general order into uploadOrder fields. Then sends the data to bulk print")
+    @ApiOperation(value = "'Consent Order Approved' and 'Consent Order Not Approved' callback handler for consent in contested. "
+        + "Checks state and if not/approved generates docs else puts latest general order into uploadOrder fields. "
+        + "Then sends the data to bulk print")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
@@ -159,12 +160,10 @@ public class ConsentOrderApprovedController implements BaseController {
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }
 
-        ApprovedOrderData approvedOrderData = ApprovedOrderData.builder()
-            .approvedOrder(approvedOrder)
-            .build();
-        log.info("Generated ApprovedOrderData = {}", approvedOrderData);
+        List<CollectionElement<ApprovedOrder>> approvedOrders = singletonList(CollectionElement.<ApprovedOrder>builder()
+            .value(approvedOrder).build());
+        log.info("Generated ApprovedOrders = {}", approvedOrders);
 
-        List<ApprovedOrderData> approvedOrders = singletonList(approvedOrderData);
         caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
         log.info("Successfully generated documents for 'Consent Order Approved'");
