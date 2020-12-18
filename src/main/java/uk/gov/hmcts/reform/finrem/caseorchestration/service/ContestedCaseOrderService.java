@@ -29,6 +29,7 @@ public class ContestedCaseOrderService {
     private final GeneralOrderService generalOrderService;
     private final FeatureToggleService featureToggleService;
     private final DocumentHelper documentHelper;
+    private final CaseDataService caseDataService;
 
     public void printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
         if (featureToggleService.isContestedPrintGeneralOrderEnabled() && contestedGeneralOrderPresent(caseDetails)) {
@@ -59,9 +60,11 @@ public class ContestedCaseOrderService {
 
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, LATEST_DRAFT_HEARING_ORDER).ifPresent(hearingDocumentPack::add);
 
-        Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);
-        latestAdditionalHearingDocument.ifPresent(
-            caseDocument -> hearingDocumentPack.add(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument)));
+        if (caseDataService.hasAnotherHearing(caseData)) {
+            Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);
+            latestAdditionalHearingDocument.ifPresent(
+                caseDocument -> hearingDocumentPack.add(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument)));
+        }
 
         List<BulkPrintDocument> otherHearingDocuments = documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(
             caseData, HEARING_ORDER_OTHER_COLLECTION);

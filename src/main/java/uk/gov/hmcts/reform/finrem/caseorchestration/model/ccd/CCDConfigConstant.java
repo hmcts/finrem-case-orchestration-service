@@ -13,6 +13,7 @@ public class CCDConfigConstant {
     public static final String APPLICANT_FIRST_MIDDLE_NAME = "applicantFMName";
     public static final String APPLICANT_LAST_NAME = "applicantLName";
     public static final String APPLICANT_ADDRESS = "applicantAddress";
+    public static final String APPLICANT_CONFIDENTIAL_ADDRESS = "applicantAddressConfidential";
     public static final String APPLICANT_PHONE = "applicantPhone";
     public static final String APPLICANT_EMAIL = "applicantEmail";
 
@@ -21,6 +22,7 @@ public class CCDConfigConstant {
     public static final String CONSENTED_RESPONDENT_LAST_NAME = "appRespondentLName";
     public static final String CONTESTED_RESPONDENT_LAST_NAME = "respondentLName";
     public static final String RESPONDENT_ADDRESS = "respondentAddress";
+    public static final String RESPONDENT_CONFIDENTIAL_ADDRESS = "respondentAddressConfidential";
     public static final String RESPONDENT_PHONE = "respondentPhone";
     public static final String RESPONDENT_EMAIL = "respondentEmail";
 
@@ -382,6 +384,8 @@ public class CCDConfigConstant {
     public static final String BULK_PRINT_COVER_SHEET_RES = "bulkPrintCoverSheetRes";
     public static final String BULK_PRINT_LETTER_ID_APP = "bulkPrintLetterIdApp";
     public static final String BULK_PRINT_LETTER_ID_RES = "bulkPrintLetterIdRes";
+    public static final String BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL = "bulkPrintCoverSheetAppConfidential";
+    public static final String BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL = "bulkPrintCoverSheetResConfidential";
     public static final String UPLOAD_ORDER = "uploadOrder";
 
     //Contested Case Documents
@@ -396,9 +400,6 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_TRIAL_BUNDLE_COLLECTION = "respTrialBundleCollection";
 
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
-
-    //states
-    public static final String CONSENTED_ORDER_APPROVED = "consentedOrderApproved";
 
     //organisation policy
     public static final String ORGANISATION_POLICY_APPLICANT = "ApplicantOrganisationPolicy";
@@ -417,12 +418,6 @@ public class CCDConfigConstant {
     public static final String HEARING_TIME = "hearingTime";
     public static final String HEARING_ADDITIONAL_INFO = "additionalInformationAboutHearing";
     public static final String DIRECTION_DETAILS_COLLECTION_CT = "directionDetailsCollection";
-    public static final String LOCAL_COURT_CT = "localCourt";
-    public static final String HEARING_TYPE_CT = "typeOfHearing";
-    public static final String TIME_ESTIMATE_CT = "timeEstimate";
-    public static final String HEARING_DATE_CT = "dateOfHearing";
-    public static final String HEARING_TIME_CT = "hearingTime";
-    public static final String IS_ANOTHER_HEARING_CT = "isAnotherHearingYN";
 
     //draft hearing order
     public static final String LATEST_DRAFT_HEARING_ORDER  = "latestDraftHearingOrder";

@@ -134,9 +134,9 @@ dependencyManagement {
     dependencies {
         // CVE-2019-10086
         dependency group: 'commons-beanutils', name: 'commons-beanutils', version: versions.commonsBeanUtils
-        // CVE-2018-10237
-        dependency group: 'com.google.guava', name: 'guava', version: '28.1-jre'
-        // CVE-2020-9484
+        // CVE-2020-8908
+        dependency group: 'com.google.guava', name: 'guava', version: '30.1-jre'
+        // CVE-2020-9484, CVE-2020-17527
         dependencySet(group: 'org.apache.tomcat.embed', version: versions.tomcat) {
             entry 'tomcat-embed-core'
             entry 'tomcat-embed-el'
