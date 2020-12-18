@@ -14,9 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_DRAFT_ORDER_NOT_APPROVED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_GENERAL_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.OFFLINE_NOTIFICATIONS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.RESPONDENT_JOURNEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SHARE_A_CASE;
@@ -50,20 +47,8 @@ public class FeatureToggleService {
         return isFeatureEnabled(RESPONDENT_JOURNEY);
     }
 
-    public boolean isContestedPrintDraftOrderNotApprovedEnabled() {
-        return isFeatureEnabled(CONTESTED_PRINT_DRAFT_ORDER_NOT_APPROVED);
-    }
-
-    public boolean isContestedPrintGeneralOrderEnabled() {
-        return isFeatureEnabled(CONTESTED_PRINT_GENERAL_ORDER);
-    }
-
     public boolean isShareACaseEnabled() {
         return isFeatureEnabled(SHARE_A_CASE);
-    }
-
-    public boolean isOfflineNotificationsEnabled() {
-        return isFeatureEnabled(OFFLINE_NOTIFICATIONS);
     }
 
     /*
