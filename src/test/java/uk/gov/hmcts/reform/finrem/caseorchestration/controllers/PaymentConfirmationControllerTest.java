@@ -160,7 +160,6 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
 
         paymentConfirmationController.paymentConfirmation(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(paymentConfirmationService, times(1)).contestedHwfPaymentConfirmation();
         verify(ccdDataStoreService, never()).removeCreatorRole(any(), eq(AUTH_TOKEN));
         verify(assignCaseAccessService, never()).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
