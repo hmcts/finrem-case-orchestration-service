@@ -18,10 +18,7 @@ public class FeatureToggleServiceTest {
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
         "feature.toggle.respondent_journey=true",
-        "feature.toggle.contested_print_draft_order_not_approved=true",
-        "feature.toggle.contested_print_general_order=true",
-        "feature.toggle.share_a_case=true",
-        "feature.toggle.offline_notifications=true"
+        "feature.toggle.share_a_case=true"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOn extends BaseServiceTest {
 
@@ -34,16 +31,6 @@ public class FeatureToggleServiceTest {
         }
 
         @Test
-        public void isContestedPrintGeneralOrderEnabledReturnsTrue() {
-            assertThat(featureToggleService.isContestedPrintGeneralOrderEnabled(), is(true));
-        }
-
-        @Test
-        public void isContestedPrintDraftOrderNotApprovedEnabledReturnsTrue() {
-            assertThat(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled(), is(true));
-        }
-
-        @Test
         public void getFieldsIgnoredDuringSerialisationEmptyWhenFeaturesEnabled() {
             assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
         }
@@ -52,21 +39,13 @@ public class FeatureToggleServiceTest {
         public void isShareACaseEnabledReturnsTrue() {
             assertThat(featureToggleService.isShareACaseEnabled(), is(true));
         }
-
-        @Test
-        public void isOfflineNotificationsEnabledReturnsTrue() {
-            assertThat(featureToggleService.isOfflineNotificationsEnabled(), is(true));
-        }
     }
 
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
         "feature.toggle.respondent_journey=false",
-        "feature.toggle.contested_print_draft_order_not_approved=false",
-        "feature.toggle.contested_print_general_order=false",
         "feature.toggle.send_to_frc=false",
-        "feature.toggle.share_a_case=false",
-        "feature.toggle.offline_notifications=false"
+        "feature.toggle.share_a_case=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff extends BaseServiceTest {
 
@@ -84,16 +63,6 @@ public class FeatureToggleServiceTest {
         }
 
         @Test
-        public void isContestedPrintGeneralOrderEnabledReturnsFalse() {
-            assertThat(featureToggleService.isContestedPrintGeneralOrderEnabled(), is(false));
-        }
-
-        @Test
-        public void isContestedPrintDraftOrderNotApprovedEnabledReturnsFalse() {
-            assertThat(featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled(), is(false));
-        }
-
-        @Test
         public void isSendToFRCEnabledReturnsFalse() {
             assertThat(featureToggleService.isSendToFRCEnabled(), is(false));
         }
@@ -101,11 +70,6 @@ public class FeatureToggleServiceTest {
         @Test
         public void isShareACaseEnabledReturnsFalse() {
             assertThat(featureToggleService.isShareACaseEnabled(), is(false));
-        }
-
-        @Test
-        public void isOfflineNotificationsEnabledReturnsFalse() {
-            assertThat(featureToggleService.isOfflineNotificationsEnabled(), is(false));
         }
     }
 }

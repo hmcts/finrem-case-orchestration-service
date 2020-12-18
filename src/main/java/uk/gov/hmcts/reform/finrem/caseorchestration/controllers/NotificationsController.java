@@ -336,9 +336,16 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
-            log.info("Sending email notification to Solicitor for 'Consent Order Available'");
-            notificationService.sendConsentOrderAvailableEmail(caseDetails);
+            log.info("Sending email notification to Applicant Solicitor for 'Consent Order Available'");
+            notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
         }
+
+        if (featureToggleService.isRespondentJourneyEnabled()
+            && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+            log.info("Sending email notification to Respondent Solicitor for 'Consent Order Available'");
+            notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
+        }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 

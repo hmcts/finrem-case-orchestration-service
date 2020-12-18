@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -13,18 +14,26 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,8 +41,11 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 
@@ -48,8 +60,16 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     @MockBean
     private CaseDataService caseDataService;
 
+    @MockBean
+    private GenericDocumentService genericDocumentService;
+
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintArgumentCaptor;
+
+    @Before
+    public void setUp() {
+        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
+    }
 
     @Test
     public void givenNoGeneralOrderPresent_whenPrintAndMailGeneralOrderTriggered_thenDocumentsAreNotPrinted() {
@@ -220,11 +240,81 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
         otherHearingDocuments.add(CollectionElement.<CaseDocument>builder().value(otherDocument).build());
         caseDetails.getData().put(HEARING_ORDER_OTHER_COLLECTION, otherHearingDocuments);
 
+        caseDetails.getData().put(HEARING_ORDER_COLLECTION, buildHearingOrderCollectionData());
+
         //Force update case data with JSON properties
         Map<String, Object> caseData = caseDetails.getData();
         caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
         caseDetails.setData(caseData);
 
         return caseDetails;
+    }
+
+    private List<HearingOrderCollectionData> buildHearingOrderCollectionData() {
+        HearingOrderDocument hearingOrderDocument = HearingOrderDocument
+            .builder()
+            .uploadDraftDocument(caseDocument())
+            .build();
+
+        HearingOrderCollectionData hearingOrderCollectionData = HearingOrderCollectionData
+            .builder()
+            .id(UUID.randomUUID().toString())
+            .hearingOrderDocuments(hearingOrderDocument)
+            .build();
+
+        List<HearingOrderCollectionData> hearingOrderCollectionList = new ArrayList<>();
+        hearingOrderCollectionList.add(hearingOrderCollectionData);
+
+        return hearingOrderCollectionList;
+    }
+
+    @Test
+    public void finalOrderSuccess() throws Exception {
+        CaseDetails caseDetails = buildHearingPackDocumentTestData();
+
+        contestedCaseOrderService.stampFinalOrder(caseDetails, AUTH_TOKEN);
+
+        verify(genericDocumentService, times(1)).stampDocument(caseDocument(), AUTH_TOKEN);
+
+        List<HearingOrderCollectionData> expectedFinalOrderCollection =
+            (List<HearingOrderCollectionData>) caseDetails.getData().get(FINAL_ORDER_COLLECTION);
+
+        assertEquals(expectedFinalOrderCollection.size(), 1);
+        assertEquals(expectedFinalOrderCollection.get(0).getHearingOrderDocuments().getUploadDraftDocument(), caseDocument());
+    }
+
+    @Test
+    public void finalOrderSuccessWithoutAnyHearingOrder() throws Exception {
+        CaseDetails caseDetails = buildHearingPackDocumentTestData();
+
+        caseDetails.getData().put(HEARING_ORDER_COLLECTION, null);
+
+        contestedCaseOrderService.stampFinalOrder(caseDetails, AUTH_TOKEN);
+
+        assertTrue(!caseDetails.getData().containsKey(FINAL_ORDER_COLLECTION));
+    }
+
+    @Test
+    public void finalOrderSuccessWithFinalOrder() throws Exception {
+        CaseDetails caseDetails = buildHearingPackDocumentTestData();
+
+        List<HearingOrderCollectionData> finalOrderCollection = Arrays.asList(HearingOrderCollectionData.builder()
+            .hearingOrderDocuments(HearingOrderDocument
+                .builder()
+                .uploadDraftDocument(CaseDocument.builder().build())
+                .build())
+            .build());
+
+        caseDetails.getData().put(FINAL_ORDER_COLLECTION, finalOrderCollection);
+
+        contestedCaseOrderService.stampFinalOrder(caseDetails, AUTH_TOKEN);
+
+        verify(genericDocumentService, times(1)).stampDocument(caseDocument(), AUTH_TOKEN);
+
+        List<HearingOrderCollectionData> expectedFinalOrderCollection =
+            (List<HearingOrderCollectionData>) caseDetails.getData().get(FINAL_ORDER_COLLECTION);
+
+        assertEquals(expectedFinalOrderCollection.size(), 2);
+        assertEquals(expectedFinalOrderCollection.get(1).getHearingOrderDocuments().getUploadDraftDocument(), caseDocument());
     }
 }

@@ -144,7 +144,6 @@ dependencyManagement {
         }
     }
 }
-
 dependencies {
     implementation group: 'com.jayway.jsonpath', name:'json-path-assert', version: versions.jsonPathAssert
     implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
