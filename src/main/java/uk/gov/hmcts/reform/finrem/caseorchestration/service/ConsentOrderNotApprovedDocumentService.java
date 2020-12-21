@@ -26,9 +26,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService.DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getLastMapValue;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +36,7 @@ public class ConsentOrderNotApprovedDocumentService {
     private final DocumentHelper documentHelper;
     private final DocumentConfiguration documentConfiguration;
     private final GeneralOrderService generalOrderService;
+    private final CaseDataService caseDataService;
 
     public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken) {
         log.info("Generating consent order not approved documents for applicant, case ID {}", caseDetails.getId());
@@ -57,10 +55,11 @@ public class ConsentOrderNotApprovedDocumentService {
     private void addGeneralOrderIfApplicable(CaseDetails caseDetails, List<BulkPrintDocument> existingList) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        boolean isContestedCaseWithNoConsentOrders = isContestedApplication(caseDetails)
+        boolean isContestedCaseWithNoConsentOrders = caseDataService.isContestedApplication(caseDetails)
             && consentOrderInContestedNotApprovedList(caseData).isEmpty();
 
-        if ((isPaperApplication(caseData) || isContestedCaseWithNoConsentOrders) && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
+        if ((caseDataService.isPaperApplication(caseData) || isContestedCaseWithNoConsentOrders)
+            && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
             BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseData);
             if (generalOrder != null) {
                 existingList.add(generalOrder);
@@ -81,7 +80,7 @@ public class ConsentOrderNotApprovedDocumentService {
     public List<BulkPrintDocument> notApprovedConsentOrder(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (isContestedApplication(caseDetails)) {
+        if (caseDataService.isContestedApplication(caseDetails)) {
             List<ContestedConsentOrderData> consentOrders = consentOrderInContestedNotApprovedList(caseData);
             if (!consentOrders.isEmpty()) {
                 ContestedConsentOrderData contestedConsentOrderData = consentOrders.get(consentOrders.size() - 1);
@@ -94,7 +93,7 @@ public class ConsentOrderNotApprovedDocumentService {
                 .orElse(Collections.emptyList());
 
             if (!documentList.isEmpty()) {
-                Map<String, Object> value = ((Map) getLastMapValue.apply(documentList).get(VALUE));
+                Map<String, Object> value = ((Map) caseDataService.getLastMapValue.apply(documentList).get(VALUE));
                 Object documentLinkObj = value.get("DocumentLink");
                 if (documentLinkObj != null) {
                     Map documentLink = (Map) documentLinkObj;

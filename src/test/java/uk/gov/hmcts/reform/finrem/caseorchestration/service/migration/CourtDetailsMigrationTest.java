@@ -13,7 +13,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
-
 public class CourtDetailsMigrationTest extends BaseServiceTest {
 
     @Autowired private ObjectMapper mapper;

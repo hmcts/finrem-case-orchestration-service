@@ -9,6 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -46,10 +47,13 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     private BulkPrintService bulkPrintService;
 
     @MockBean
-    private CaseDataService caseDataService;
+    private DocumentHelper documentHelper;
 
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintArgumentCaptor;
+
+    @MockBean
+    private CaseDataService caseDataService;
 
     @Test
     public void givenNoGeneralOrderPresent_whenPrintAndMailGeneralOrderTriggered_thenDocumentsAreNotPrinted() {
@@ -66,6 +70,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     public void whenPrintAndMailGeneralOrderTriggered_thenBothApplicantAndRespondentPacksArePrinted() {
         CaseDetails caseDetails = generalOrderContestedCaseDetails();
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(documentHelper.convertToCaseDocument(any())).thenReturn(new CaseDocument());
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
@@ -77,6 +82,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     public void givenShouldNotPrintPackForApplicant_whenPrintAndMailGeneralOrderTriggered_thenOnlyRespondentPacksIsPrinted() {
         CaseDetails caseDetails = generalOrderContestedCaseDetails();
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(false);
+        when(documentHelper.convertToCaseDocument(any())).thenReturn(new CaseDocument());
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
@@ -95,8 +101,10 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     @Test
     public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase() throws JsonProcessingException {
         CaseDetails caseDetails = buildHearingPackDocumentTestData();
+
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
-        when(caseDataService.hasAnotherHearing(caseDetails.getData())).thenReturn(true);
+        when(documentHelper.hasAnotherHearing(caseDetails.getData())).thenReturn(true);
 
         contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
 
@@ -115,8 +123,10 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     @Test
     public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase_noNextHearing() throws JsonProcessingException {
         CaseDetails caseDetails = buildHearingPackDocumentTestData();
+
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
-        when(caseDataService.hasAnotherHearing(caseDetails.getData())).thenReturn(false);
+        when(documentHelper.hasAnotherHearing(caseDetails.getData())).thenReturn(false);
 
         contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
 
@@ -145,7 +155,8 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = buildHearingPackDocumentTestData();
         caseDetails.getData().remove(LATEST_DRAFT_HEARING_ORDER);
 
-        when(caseDataService.hasAnotherHearing(caseDetails.getData())).thenReturn(true);
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(documentHelper.hasAnotherHearing(caseDetails.getData())).thenReturn(true);
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
         contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
 
@@ -164,7 +175,8 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = buildHearingPackDocumentTestData();
         caseDetails.getData().remove(LATEST_DRAFT_HEARING_ORDER);
 
-        when(caseDataService.hasAnotherHearing(caseDetails.getData())).thenReturn(false);
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(documentHelper.hasAnotherHearing(caseDetails.getData())).thenReturn(false);
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
         contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
 
@@ -182,7 +194,9 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = buildHearingPackDocumentTestData();
         caseDetails.getData().remove(ADDITIONAL_HEARING_DOCUMENT_COLLECTION);
 
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+
         contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());

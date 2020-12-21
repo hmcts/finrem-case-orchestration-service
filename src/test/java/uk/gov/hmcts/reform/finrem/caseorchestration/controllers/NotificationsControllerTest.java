@@ -123,6 +123,10 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() throws Exception {
+        //when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        //when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        //when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+
         buildCcdRequest(CONSENTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
         mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
