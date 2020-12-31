@@ -19,8 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintRequ
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,25 +40,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintServ
 @ActiveProfiles("test-mock-document-client")
 public class BulkPrintServiceTest extends BaseServiceTest {
 
-    @Autowired
-    private DocumentClient documentClient;
-    @Autowired
-    private BulkPrintService bulkPrintService;
-    @Autowired
-    private ObjectMapper mapper;
-    @Autowired
-    private DocumentHelper documentHelper;
+    @Autowired private DocumentClient documentClient;
+    @Autowired private BulkPrintService bulkPrintService;
+    @Autowired private ObjectMapper mapper;
+    @Autowired private DocumentHelper documentHelper;
 
-    @MockBean
-    private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    @MockBean
-    private GeneralOrderService generalOrderService;
-    @MockBean
-    private GenerateCoverSheetService coverSheetService;
-    @MockBean
-    private GenericDocumentService genericDocumentService;
-    @MockBean
-    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @MockBean private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+    @MockBean private GeneralOrderService generalOrderService;
+    @MockBean private GenerateCoverSheetService coverSheetService;
+    @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
 
     private UUID letterId;
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor;

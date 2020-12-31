@@ -361,8 +361,7 @@ public class NotificationsController implements BaseController {
             notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
         }
 
-        if (featureToggleService.isRespondentJourneyEnabled() && notificationService.shouldEmailRespondentSolicitor(
-            caseDetails.getData())) {
+        if (featureToggleService.isRespondentJourneyEnabled() && notificationService.shouldEmailRespondentSolicitor(caseDetails.getData())) {
             log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         }
@@ -526,10 +525,8 @@ public class NotificationsController implements BaseController {
         validateCaseData(callbackRequest);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
         if (caseDataService.isContestedPaperApplication(caseDetails)) {
-            CaseDocument applicantManualPaymentLetter =
-                manualPaymentDocumentService.generateApplicantManualPaymentLetter(caseDetails, authToken);
+            CaseDocument applicantManualPaymentLetter = manualPaymentDocumentService.generateApplicantManualPaymentLetter(caseDetails, authToken);
             bulkPrintService.sendDocumentForPrint(applicantManualPaymentLetter, caseDetails);
         }
 

@@ -77,5 +77,4 @@ public class ContestedCaseOrderService {
     private boolean contestedGeneralOrderPresent(CaseDetails caseDetails) {
         return !isNull(caseDetails.getData().get(GENERAL_ORDER_LATEST_DOCUMENT));
     }
-
 }

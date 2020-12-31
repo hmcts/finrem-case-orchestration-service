@@ -142,6 +142,13 @@ dependencyManagement {
             entry 'tomcat-embed-el'
             entry 'tomcat-embed-websocket'
         }
+        // CVE-2020-17521
+        dependencySet(group: 'org.codehaus.groovy', version: '2.5.14') {
+            entry 'groovy'
+            entry 'groovy-json'
+        }
+        // CVE-2020-26939
+        dependency group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.61'
     }
 }
 

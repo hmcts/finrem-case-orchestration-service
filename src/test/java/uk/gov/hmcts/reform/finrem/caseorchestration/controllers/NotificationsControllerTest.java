@@ -1,19 +1,12 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -30,12 +23,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocument
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManualPaymentDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -46,60 +35,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_D81_QUESTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
 public class NotificationsControllerTest extends BaseControllerTest {
 
-    //URLs
-    private static final String HWF_SUCCESSFUL_CALLBACK_URL = "/case-orchestration/notify/hwf-successful";
-    private static final String ASSIGN_TO_JUDGE_CALLBACK_URL = "/case-orchestration/notify/assign-to-judge";
-    private static final String CONSENT_IN_CONTESTED_ASSIGN_TO_JUDGE_CALLBACK_URL = "/case-orchestration/notify/assign-to-judge-consent-in-contested";
-    private static final String CONSENT_ORDER_MADE_URL = "/case-orchestration/notify/consent-order-made";
-    private static final String ORDER_NOT_APPROVED_URL = "/case-orchestration/notify/order-not-approved";
-    private static final String CONSENT_ORDER_AVAILABLE_URL = "/case-orchestration/notify/consent-order-available";
-    private static final String PREPARE_FOR_HEARING_CALLBACK_URL = "/case-orchestration/notify/prepare-for-hearing";
-    private static final String PREPARE_FOR_HEARING_ORDER_SENT_CALLBACK_URL = "/case-orchestration/notify/prepare-for-hearing-order-sent";
-    private static final String CONTESTED_APPLICATION_ISSUED_CALLBACK_URL = "/case-orchestration/notify/contest-application-issued";
-    private static final String CONTEST_ORDER_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contest-order-approved";
-    private static final String CONTESTED_CONSENT_ORDER_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contested-consent-order-approved";
-    private static final String CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE_CALLBACK_URL =
-        "/case-orchestration/notify/general-application-refer-to-judge";
-    private static final String CONTESTED_GENERAL_APPLICATION_OUTCOME_CALLBACK_URL = "/case-orchestration/notify/general-application-outcome";
-    private static final String GENERAL_ORDER_RAISED_CALLBACK_URL = "/case-orchestration/notify/general-order-raised";
-    private static final String CONTESTED_CONSENT_ORDER_NOT_APPROVED_CALLBACK_URL = "/case-orchestration/notify/contested-consent-order-not-approved";
-    private static final String CONTESTED_DRAFT_ORDER_URL = "/case-orchestration/notify/draft-order";
-    private static final String GENERAL_EMAIL_URL = "/case-orchestration/notify/general-email";
-    private static final String CONTESTED_MANUAL_PAYMENT_URL = "/case-orchestration/notify/manual-payment";
-
-    //JSON Data
-    private static final String CCD_REQUEST_JSON = "/fixtures/model/ccd-request.json";
-    private static final String CONSENTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON = "/fixtures/consented-ccd-request-with-solicitor-agreed-to-emails.json";
-    private static final String CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON = "/fixtures/contested-ccd-request-with-solicitor-agreed-to-emails.json";
-    private static final String CONTESTED_CONSENT_SOL_SUBSCRIBED_FOR_EMAILS_JSON =
-        "/fixtures/contested-consent-ccd-request-with-solicitor-agreed-to-emails.json";
-    private static final String BULK_PRINT_PAPER_APPLICATION_JSON = "/fixtures/bulkprint/bulk-print-paper-application.json";
-    private static final String DRAFT_ORDER_SUCCESSFUL_APPLICANT_SOL = "/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json";
-    private static final String DRAFT_ORDER_UNSUCCESSFUL_APPLICANT_SOL = "/fixtures/applicant-solicitor-to-draft-order-without-email-consent.json";
-    private static final String DRAFT_ORDER_UNSUCCESSFUL_RESPONDENT_SOL = "/fixtures/respondent-solicitor-to-draft-order-with-email-consent.json";
-    private static final String GENERAL_EMAIL_CONSENTED = "/fixtures/general-email-consented.json";
-    private static final String GENERAL_EMAIL_CONTESTED = "/fixtures/contested/general-email-contested.json";
-    private static final String CONTESTED_PAPER_CASE_JSON = "/fixtures/contested/paper-case.json";
-
-    private static final String CONTESTED_PAPER_APPLICATION_HEARING_JSON =
-        "/fixtures/contested/validate-hearing-with-fastTrackDecision-paperApplication.json";
-
-    @Autowired private WebApplicationContext applicationContext;
     @Autowired private NotificationsController notificationsController;
 
     @MockBean private NotificationService notificationService;
@@ -113,313 +57,235 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @MockBean private CaseDataService caseDataService;
     @MockBean private FeatureToggleService featureToggleService;
 
-    private MockMvc mockMvc;
-    private JsonNode requestContent;
-
-    @Before
-    public void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
-    }
-
     @Test
-    public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() throws Exception {
-        //when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        //when(caseDataService.isPaperApplication(any())).thenReturn(true);
-        //when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+    public void sendHwfSuccessfulConfirmationEmailIfDigitalCase() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        buildCcdRequest(CONSENTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+        notificationsController.sendHwfSuccessfulConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(notificationService, times(1))
-            .sendConsentedHWFSuccessfulConfirmationEmail(any());
+        verify(notificationService).sendConsentedHWFSuccessfulConfirmationEmail(any());
         verifyNoInteractions(helpWithFeesDocumentService);
         verifyNoInteractions(bulkPrintService);
     }
 
     @Test
-    public void shouldNotSendHwfSuccessfulConfirmationEmail() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldNotSendHwfSuccessfulConfirmationEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendHwfSuccessfulConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void sendHwfSuccessfulNotificationLetterIfIsConsentedAndIsPaperApplication() throws Exception {
-        buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
+    public void sendHwfSuccessfulNotificationLetterIfIsConsentedAndIsPaperApplication() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
 
-        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+        notificationsController.sendHwfSuccessfulConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(helpWithFeesDocumentService, times(1))
-            .generateHwfSuccessfulNotificationLetter(any(CaseDetails.class), any());
-        verify(bulkPrintService, times(1))
-            .sendDocumentForPrint(any(), any());
+        verify(helpWithFeesDocumentService).generateHwfSuccessfulNotificationLetter(any(CaseDetails.class), any());
+        verify(bulkPrintService).sendDocumentForPrint(any(), any());
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void sendAssignToJudgeConfirmationEmailIfDigitalCase() throws Exception {
-        buildCcdRequest(CONSENTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void sendAssignToJudgeConfirmationEmailIfDigitalCase() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        verify(notificationService, times(1))
-            .sendAssignToJudgeConfirmationEmailToApplicantSolicitor(any());
+        notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+
+        verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(any());
         verifyNoInteractions(assignedToJudgeDocumentService);
         verifyNoInteractions(bulkPrintService);
     }
 
     @Test
-    public void shouldNotSendAssignToJudgeConfirmationEmail() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldNotSendAssignToJudgeConfirmationEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
+
+        notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void sendAssignToJudgeNotificationLetterIfIsPaperApplication() throws Exception {
-        buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
+    public void sendAssignToJudgeNotificationLetterIfIsPaperApplication() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
 
-        mockMvc.perform(post(ASSIGN_TO_JUDGE_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+        notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(assignedToJudgeDocumentService, times(1))
-            .generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
-        verify(bulkPrintService, times(1))
-            .sendDocumentForPrint(any(), any());
+        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
+        verify(bulkPrintService).sendDocumentForPrint(any(), any());
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void shouldNotSendApplicantConsentInContestedAssignToJudgeConfirmationEmail() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
-
+    public void shouldNotSendApplicantConsentInContestedAssignToJudgeConfirmationEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(bulkPrintService.shouldPrintForApplicant(any(CaseDetails.class))).thenReturn(false);
 
-        mockMvc.perform(post(CONSENT_IN_CONTESTED_ASSIGN_TO_JUDGE_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+        notificationsController.sendConsentInContestedAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(assignedToJudgeDocumentService, never())
-            .generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
-        verify(assignedToJudgeDocumentService, times(1))
-            .generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
-        verify(bulkPrintService, times(1))
-            .sendDocumentForPrint(any(), any());
+        verify(assignedToJudgeDocumentService, never()).generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(
+            any(CaseDetails.class), any());
+        verify(assignedToJudgeDocumentService).generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(
+            any(CaseDetails.class), any());
+        verify(bulkPrintService).sendDocumentForPrint(any(), any());
     }
 
     @Test
-    public void sendConsentInContestedAssignToJudgeNotificationLetterIfShouldSend() throws Exception {
-        buildCcdRequest(BULK_PRINT_PAPER_APPLICATION_JSON);
-
+    public void sendConsentInContestedAssignToJudgeNotificationLetterIfShouldSend() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(bulkPrintService.shouldPrintForApplicant(any(CaseDetails.class))).thenReturn(true);
 
-        mockMvc.perform(post(CONSENT_IN_CONTESTED_ASSIGN_TO_JUDGE_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+        notificationsController.sendConsentInContestedAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(assignedToJudgeDocumentService, times(1))
-            .generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(), any());
-        verify(assignedToJudgeDocumentService, times(1))
-            .generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(), any());
-        verify(bulkPrintService, times(2))
-            .sendDocumentForPrint(any(), any());
+        verify(assignedToJudgeDocumentService).generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(), any());
+        verify(assignedToJudgeDocumentService).generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(), any());
+        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any());
     }
 
     @Test
-    public void sendConsentOrderMadeConfirmationEmail() throws Exception {
-        buildCcdRequest(CONSENTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void sendConsentOrderMadeConfirmationEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        verify(notificationService, times(1))
-            .sendConsentOrderMadeConfirmationEmail(any());
+        notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
+
+        verify(notificationService).sendConsentOrderMadeConfirmationEmail(any());
     }
 
     @Test
-    public void shouldNotSendConsentOrderMadeConfirmationEmail() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(CONSENT_ORDER_MADE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldNotSendConsentOrderMadeConfirmationEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void sendConsentOrderNotApprovedEmail() throws Exception {
-        buildCcdRequest(CONSENTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(ORDER_NOT_APPROVED_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void sendConsentOrderNotApprovedEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        verify(notificationService, times(1))
-            .sendConsentOrderNotApprovedEmailToApplicantSolicitor(any());
+        notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
+
+        verify(notificationService).sendConsentOrderNotApprovedEmailToApplicantSolicitor(any());
     }
 
     @Test
-    public void shouldNotSendConsentOrderNotApprovedEmail() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(ORDER_NOT_APPROVED_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldNotSendConsentOrderNotApprovedEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void sendConsentOrderAvailableEmail() throws Exception {
-        buildCcdRequest(CONSENTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void sendConsentOrderAvailableEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        verify(notificationService, times(1))
-            .sendConsentOrderAvailableEmailToApplicantSolicitor(any());
+        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
+
+        verify(notificationService).sendConsentOrderAvailableEmailToApplicantSolicitor(any());
     }
 
     @Test
-    public void shouldNotSendConsentOrderAvailableEmail() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(CONSENT_ORDER_AVAILABLE_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldNotSendConsentOrderAvailableEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void sendConsentedHwfSuccessfulConfirmationEmail() throws Exception {
-        buildCcdRequest("/fixtures/contested/hwf.json");
-        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void sendConsentedHwfSuccessfulConfirmationEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        verify(notificationService, times(1))
-            .sendContestedHwfSuccessfulConfirmationEmail(any());
+        notificationsController.sendHwfSuccessfulConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+
+        verify(notificationService).sendContestedHwfSuccessfulConfirmationEmail(any());
     }
 
     @Test
-    public void shouldNotSendContestedHwfSuccessfulEmail() throws Exception {
-        buildCcdRequest("/fixtures/contested/contested-hwf-without-solicitor-consent.json");
-        mockMvc.perform(post(HWF_SUCCESSFUL_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldNotSendContestedHwfSuccessfulEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendHwfSuccessfulConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void givenSolAgreedToEmails_and_noPreviousHearing_shouldSendPrepareForHearingEmail_and_PrintHearingDocuments() throws Exception {
+    public void givenSolAgreedToEmails_and_noPreviousHearing_shouldSendPrepareForHearingEmail_and_PrintHearingDocuments() {
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
 
-        buildCcdRequest(CONTESTED_PAPER_APPLICATION_HEARING_JSON);
-        mockMvc.perform(post(PREPARE_FOR_HEARING_CALLBACK_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(notificationService, times(1)).sendPrepareForHearingEmailApplicant(any());
-        verify(notificationService, times(1)).sendPrepareForHearingEmailRespondent(any());
-        verify(hearingDocumentService, times(1)).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
+        verify(notificationService).sendPrepareForHearingEmailApplicant(any());
+        verify(notificationService).sendPrepareForHearingEmailRespondent(any());
+        verify(hearingDocumentService).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
     }
 
     @Test
-    public void shouldNotSendPrepareForHearingEmailWhenNotAgreed() throws Exception {
+    public void shouldNotSendPrepareForHearingEmailWhenNotAgreed() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
 
-        buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(PREPARE_FOR_HEARING_CALLBACK_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
 
         verify(notificationService, never()).sendPrepareForHearingEmailApplicant(any());
         verify(notificationService, never()).sendPrepareForHearingEmailRespondent(any());
     }
 
     @Test
-    public void givenHadPreviousHearing_whenNotifyHearingInvoked_thenPrintAdditionalHearingDocuments() throws Exception {
+    public void givenHadPreviousHearing_whenNotifyHearingInvoked_thenPrintAdditionalHearingDocuments() {
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
 
-        buildCcdRequest(CONTESTED_PAPER_APPLICATION_HEARING_JSON);
-        mockMvc.perform(post(PREPARE_FOR_HEARING_CALLBACK_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(additionalHearingDocumentService, times(1)).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
     }
 
     @Test
-    public void shouldSendPrepareForHearingOrderSentEmailWhenAgreed() throws Exception {
-        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(PREPARE_FOR_HEARING_ORDER_SENT_CALLBACK_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldSendPrepareForHearingOrderSentEmailWhenAgreed() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        verify(notificationService, times(1)).sendPrepareForHearingOrderSentEmailApplicant(any());
+        notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
+
+        verify(notificationService).sendPrepareForHearingOrderSentEmailApplicant(any());
     }
 
     @Test
-    public void shouldNotSendPrepareForHearingOrderSentEmailWhenNotAgreed() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(PREPARE_FOR_HEARING_ORDER_SENT_CALLBACK_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldNotSendPrepareForHearingOrderSentEmailWhenNotAgreed() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
 
         verify(notificationService, never()).sendPrepareForHearingOrderSentEmailApplicant(any());
     }
@@ -431,7 +297,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendPrepareForHearingOrderSentEmail(buildCallbackRequest());
 
-        verify(notificationService, times(1)).sendPrepareForHearingOrderSentEmailRespondent(any());
+        verify(notificationService).sendPrepareForHearingOrderSentEmailRespondent(any());
     }
 
     @Test
@@ -455,25 +321,21 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSendContestedApplicationIssuedEmailWhenAgreed() throws Exception {
-        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(CONTESTED_APPLICATION_ISSUED_CALLBACK_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldSendContestedApplicationIssuedEmailWhenAgreed() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        verify(notificationService, times(1)).sendContestedApplicationIssuedEmailToApplicantSolicitor(any());
+        notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
+
+        verify(notificationService).sendContestedApplicationIssuedEmailToApplicantSolicitor(any());
     }
 
     @Test
-    public void shouldNotSendContestedApplicationIssuedEmailWhenNotAgreed() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(CONTESTED_APPLICATION_ISSUED_CALLBACK_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldNotSendContestedApplicationIssuedEmailWhenNotAgreed() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
 
         verify(notificationService, never()).sendContestedApplicationIssuedEmailToApplicantSolicitor(any());
     }
@@ -485,7 +347,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendContestedApplicationIssuedEmail(buildCallbackRequest());
 
-        verify(notificationService, times(1)).sendContestedApplicationIssuedEmailToRespondentSolicitor(any());
+        verify(notificationService).sendContestedApplicationIssuedEmailToRespondentSolicitor(any());
     }
 
     @Test
@@ -509,25 +371,21 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSendContestOrderApprovedEmailWhenAgreed() throws Exception {
-        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(CONTEST_ORDER_APPROVED_CALLBACK_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldSendContestOrderApprovedEmailWhenAgreed() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        verify(notificationService, times(1)).sendContestOrderApprovedEmailApplicant(any());
+        notificationsController.sendContestOrderApprovedEmail(createCallbackRequestWithFinalOrder());
+
+        verify(notificationService).sendContestOrderApprovedEmailApplicant(any());
     }
 
     @Test
-    public void shouldNotSendContestOrderApprovedEmailWhenNotAgreed() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(CONTEST_ORDER_APPROVED_CALLBACK_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldNotSendContestOrderApprovedEmailWhenNotAgreed() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendContestOrderApprovedEmail(buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
     }
@@ -539,7 +397,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendContestOrderApprovedEmail(createCallbackRequestWithFinalOrder());
 
-        verify(notificationService, times(1)).sendContestOrderApprovedEmailRespondent(any());
+        verify(notificationService).sendContestOrderApprovedEmailRespondent(any());
     }
 
     @Test
@@ -564,35 +422,32 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
 
     @Test
-    public void sendDraftOrderEmailWhenApplicantSolicitorIsNominatedAndIsAcceptingEmails() throws Exception {
-        buildCcdRequest(DRAFT_ORDER_SUCCESSFUL_APPLICANT_SOL);
-        mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void sendDraftOrderEmailWhenApplicantSolicitorIsNominatedAndIsAcceptingEmails() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(any())).thenReturn(true);
 
-        verify(notificationService, times(1))
-            .sendSolicitorToDraftOrderEmailApplicant(any());
+        notificationsController.sendDraftOrderEmail(createCallbackRequestWithFinalOrder());
+
+        verify(notificationService).sendSolicitorToDraftOrderEmailApplicant(any());
     }
 
     @Test
-    public void shouldNotSendDraftOrderEmailAsSolicitorOptedOutOfEmailComms() throws Exception {
-        buildCcdRequest(DRAFT_ORDER_UNSUCCESSFUL_APPLICANT_SOL);
-        mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldNotSendDraftOrderEmailAsSolicitorOptedOutOfEmailComms() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendDraftOrderEmail(createCallbackRequestWithFinalOrder());
 
         verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any());
     }
 
     @Test
-    public void shouldNotSendDraftOrderEmailAsRespondentSolicitorIsNominated() throws Exception {
-        buildCcdRequest(DRAFT_ORDER_UNSUCCESSFUL_RESPONDENT_SOL);
-        mockMvc.perform(post(CONTESTED_DRAFT_ORDER_URL)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldNotSendDraftOrderEmailAsRespondentSolicitorIsNominated() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(any())).thenReturn(false);
+
+        notificationsController.sendDraftOrderEmail(createCallbackRequestWithFinalOrder());
 
         verify(notificationService, never()).sendSolicitorToDraftOrderEmailApplicant(any());
     }
@@ -605,7 +460,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendDraftOrderEmail(buildCallbackRequest());
 
-        verify(notificationService, times(1)).sendSolicitorToDraftOrderEmailRespondent(any());
+        verify(notificationService).sendSolicitorToDraftOrderEmailRespondent(any());
     }
 
     @Test
@@ -642,71 +497,52 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void sendGeneralEmailConsented() throws Exception {
-        buildCcdRequest(GENERAL_EMAIL_CONSENTED);
-        mockMvc.perform(post(GENERAL_EMAIL_URL)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void sendGeneralEmailConsented() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
-        verify(notificationService, times(1))
-            .sendConsentGeneralEmail(any());
+        notificationsController.sendGeneralEmail(createCallbackRequestWithFinalOrder());
 
-        verify(generalEmailService, times(1))
-            .storeGeneralEmail(any());
+        verify(notificationService).sendConsentGeneralEmail(any());
+        verify(generalEmailService).storeGeneralEmail(any());
     }
 
     @Test
-    public void sendGeneralEmailContested() throws Exception {
-        buildCcdRequest(GENERAL_EMAIL_CONTESTED);
-        mockMvc.perform(post(GENERAL_EMAIL_URL)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void sendGeneralEmailContested() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
 
-        verify(notificationService, times(1))
-            .sendContestedGeneralEmail(any());
+        notificationsController.sendGeneralEmail(createCallbackRequestWithFinalOrder());
 
-        verify(generalEmailService, times(1))
-            .storeGeneralEmail(any(CaseDetails.class));
+        verify(notificationService).sendContestedGeneralEmail(any());
+        verify(generalEmailService).storeGeneralEmail(any(CaseDetails.class));
     }
 
     @Test
-    public void sendContestOrderNotApprovedEmail() throws Exception {
-        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(ORDER_NOT_APPROVED_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void sendContestOrderNotApprovedEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        verify(notificationService, times(1))
-            .sendContestOrderNotApprovedEmailApplicant(any());
+        notificationsController.sendConsentOrderNotApprovedEmail(createCallbackRequestWithFinalOrder());
+
+        verify(notificationService).sendContestOrderNotApprovedEmailApplicant(any());
     }
 
     @Test
-    public void shouldNotSendContestOrderNotApprovedEmail() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(ORDER_NOT_APPROVED_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldNotSendContestOrderNotApprovedEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendConsentOrderNotApprovedEmail(createCallbackRequestWithFinalOrder());
 
         verifyNoInteractions(notificationService);
     }
 
     @Test
     public void sendContestedConsentOrderApprovedEmailToApplicantSolicitor() {
-        Map<String, Object> caseData = new HashMap<>();
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).id(123L).data(caseData).build();
-        CallbackRequest testData = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        notificationsController.sendContestedConsentOrderApprovedEmail(testData);
+        notificationsController.sendContestedConsentOrderApprovedEmail(buildCallbackRequest());
 
-        verify(notificationService, times(1))
-            .sendContestedConsentOrderApprovedEmailToApplicantSolicitor(any());
+        verify(notificationService).sendContestedConsentOrderApprovedEmailToApplicantSolicitor(any());
     }
 
     @Test
@@ -716,8 +552,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         notificationsController.sendContestedConsentOrderApprovedEmail(buildCallbackRequest());
 
-        verify(notificationService, times(1))
-            .sendContestedConsentOrderApprovedEmailToRespondentSolicitor(any());
+        verify(notificationService).sendContestedConsentOrderApprovedEmailToRespondentSolicitor(any());
     }
 
     @Test
@@ -729,24 +564,24 @@ public class NotificationsControllerTest extends BaseControllerTest {
         callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONTESTED);
         notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
 
-        verify(notificationService, times(1)).sendContestOrderNotApprovedEmailRespondent(any());
+        verify(notificationService).sendContestOrderNotApprovedEmailRespondent(any());
         verify(notificationService, never()).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any());
     }
 
     @Test
     public void givenConsentedCase_whenShouldSendRespondentNotification_thenShouldNotTriggerContestedRespondentEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
-        notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
+        notificationsController.sendConsentOrderNotApprovedEmail(buildCallbackRequest());
 
         verify(notificationService, never()).sendContestOrderNotApprovedEmailRespondent(any());
     }
 
     @Test
     public void givenConsentedCase_whenSendConsentOrderNotApproved_thenShouldTriggerConsentedRespondentEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
@@ -754,17 +589,17 @@ public class NotificationsControllerTest extends BaseControllerTest {
         callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
         notificationsController.sendConsentOrderNotApprovedEmail(callbackRequest);
 
-        verify(notificationService, times(1)).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any());
+        verify(notificationService).sendConsentOrderNotApprovedEmailToRespondentSolicitor(any());
     }
 
     @Test
-    public void sendContestedConsentOrderApprovedEmail() throws Exception {
-        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(CONTESTED_CONSENT_ORDER_APPROVED_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void sendContestedConsentOrderApprovedEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+
+        notificationsController.sendContestedConsentOrderApprovedEmail(buildCallbackRequest());
+
+        verify(notificationService).sendContestedConsentOrderApprovedEmailToApplicantSolicitor(any());
     }
 
     @Test
@@ -790,44 +625,39 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotSendGeneralOrderEmail() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(GENERAL_ORDER_RAISED_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldNotSendGeneralOrderEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void sendContestedConsentGeneralOrderEmail() throws Exception {
-        buildCcdRequest(CONTESTED_CONSENT_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(GENERAL_ORDER_RAISED_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void sendContestedConsentGeneralOrderEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedInContestedCase(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
 
-        verify(notificationService, times(1))
-            .sendContestedConsentGeneralOrderEmailApplicantSolicitor(any());
+        notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
+
+        verify(notificationService).sendContestedConsentGeneralOrderEmailApplicantSolicitor(any());
     }
 
     @Test
-    public void sendContestedGeneralOrderEmails() throws Exception {
+    public void sendContestedGeneralOrderEmails() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedInContestedCase(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
-        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(GENERAL_ORDER_RAISED_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+        notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
 
-        verify(notificationService, times(1)).sendContestedGeneralOrderEmailApplicant(any());
-        verify(notificationService, times(1)).sendContestedGeneralOrderEmailRespondent(any());
+        verify(notificationService).sendContestedGeneralOrderEmailApplicant(any());
+        verify(notificationService).sendContestedGeneralOrderEmailRespondent(any());
     }
 
     @Test
@@ -888,141 +718,94 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSendContestedConsentGeneralOrderEmailToRespondentInConsentedInContestedCase() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedInContestedCase(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
-        CallbackRequest callbackRequest = buildCallbackRequest();
-        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONTESTED);
-        callbackRequest.getCaseDetails().getData().put(CONSENT_D81_QUESTION, YES_VALUE);
-        notificationsController.sendGeneralOrderRaisedEmail(callbackRequest);
+        notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
 
-        verify(notificationService, times(1)).sendContestedConsentGeneralOrderEmailRespondentSolicitor(any());
+        verify(notificationService).sendContestedConsentGeneralOrderEmailRespondentSolicitor(any());
         verify(notificationService, never()).sendContestedGeneralOrderEmailRespondent(any());
         verify(notificationService, never()).sendConsentedGeneralOrderEmailToRespondentSolicitor(any());
     }
 
     @Test
-    public void sendConsentedGeneralOrderEmail() throws Exception {
+    public void sendConsentedGeneralOrderEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
-        buildCcdRequest(CONSENTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(GENERAL_ORDER_RAISED_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+        notificationsController.sendGeneralOrderRaisedEmail(buildCallbackRequest());
 
-        verify(notificationService, times(1)).sendConsentedGeneralOrderEmailToApplicantSolicitor(any());
-        verify(notificationService, times(1)).sendConsentedGeneralOrderEmailToRespondentSolicitor(any());
+        verify(notificationService).sendConsentedGeneralOrderEmailToApplicantSolicitor(any());
+        verify(notificationService).sendConsentedGeneralOrderEmailToRespondentSolicitor(any());
     }
 
     @Test
-    public void shouldNotSendContestedConsentOrderApprovedEmail() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(CONTESTED_CONSENT_ORDER_APPROVED_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void shouldNotSendContestedConsentOrderApprovedEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+
+        notificationsController.sendContestedConsentOrderApprovedEmail(buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void sendContestedGeneralApplicationReferToJudgeEmail() throws Exception {
-        buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void sendContestedGeneralApplicationReferToJudgeEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
 
-        verify(notificationService, times(1))
-            .sendContestedGeneralApplicationReferToJudgeEmail(any());
+        notificationsController.sendGeneralApplicationReferToJudgeEmail(buildCallbackRequest());
+
+        verify(notificationService).sendContestedGeneralApplicationReferToJudgeEmail(any());
     }
 
     @Test
-    public void sendContestedConsentOrderNotApprovedEmail() throws Exception {
+    public void sendContestedConsentOrderNotApprovedEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
-        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(CONTESTED_CONSENT_ORDER_NOT_APPROVED_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+        notificationsController.sendContestedConsentOrderNotApprovedEmail(buildCallbackRequest());
 
-        verify(notificationService, times(1)).sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(any());
-        verify(notificationService, times(1)).sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(any());
+        verify(notificationService).sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(any());
+        verify(notificationService).sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(any());
     }
 
     @Test
-    public void shouldNotSendContestedConsentOrderNotApprovedEmail() throws Exception {
+    public void shouldNotSendContestedConsentOrderNotApprovedEmail() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
 
-        buildCcdRequest(CCD_REQUEST_JSON);
-        mockMvc.perform(post(CONTESTED_CONSENT_ORDER_NOT_APPROVED_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+        notificationsController.sendContestedConsentOrderNotApprovedEmail(buildCallbackRequest());
 
         verify(notificationService, never()).sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(any());
         verify(notificationService, never()).sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(any());
     }
 
     @Test
-    public void sendContestedManualPaymentLetters() throws Exception {
-        buildCcdRequest(CONTESTED_PAPER_CASE_JSON);
-        mockMvc.perform(post(CONTESTED_MANUAL_PAYMENT_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void sendContestedManualPaymentLetters() {
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(true);
 
-        verify(manualPaymentDocumentService, times(1))
-            .generateApplicantManualPaymentLetter(any(CaseDetails.class), any());
-        verify(bulkPrintService, times(1))
-            .sendDocumentForPrint(any(), any());
+        notificationsController.sendManualPayment(AUTH_TOKEN, buildCallbackRequest());
+
+        verify(manualPaymentDocumentService).generateApplicantManualPaymentLetter(any(), any());
+        verify(bulkPrintService).sendDocumentForPrint(any(), any());
         verifyNoInteractions(notificationService);
     }
 
     @Test
-    public void sendContestedGeneralApplicationOutcomeEmail() throws Exception {
-        buildCcdRequest(CONTESTED_SOL_SUBSCRIBED_FOR_EMAILS_JSON);
-        mockMvc.perform(post(CONTESTED_GENERAL_APPLICATION_OUTCOME_CALLBACK_URL)
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .content(requestContent.toString())
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk());
+    public void sendContestedGeneralApplicationOutcomeEmail() throws IOException {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        verify(notificationService, times(1))
-            .sendContestedGeneralApplicationOutcomeEmail(any());
-    }
+        notificationsController.sendGeneralApplicationOutcomeEmail(buildCallbackRequest());
 
-    private void buildCcdRequest(String fileName) throws IOException, URISyntaxException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(fileName).toURI()));
-    }
-
-    private CallbackRequest createCallbackRequestWithFinalOrder() {
-        CallbackRequest callbackRequest = buildCallbackRequest();
-
-        ArrayList finalOrderCollection = new ArrayList<>();
-        finalOrderCollection.add(HearingOrderCollectionData.builder()
-                .hearingOrderDocuments(HearingOrderDocument
-                    .builder()
-                    .uploadDraftDocument(new CaseDocument())
-                    .build())
-                .build());
-
-        callbackRequest.getCaseDetails().getData().put(FINAL_ORDER_COLLECTION, finalOrderCollection);
-
-        return callbackRequest;
+        verify(notificationService).sendContestedGeneralApplicationOutcomeEmail(any());
     }
 
     @Test
@@ -1063,5 +846,21 @@ public class NotificationsControllerTest extends BaseControllerTest {
         notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
 
         verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
+    }
+
+    private CallbackRequest createCallbackRequestWithFinalOrder() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
+
+        ArrayList<HearingOrderCollectionData> finalOrderCollection = new ArrayList<>();
+        finalOrderCollection.add(HearingOrderCollectionData.builder()
+            .hearingOrderDocuments(HearingOrderDocument
+                .builder()
+                .uploadDraftDocument(new CaseDocument())
+                .build())
+            .build());
+
+        callbackRequest.getCaseDetails().getData().put(FINAL_ORDER_COLLECTION, finalOrderCollection);
+
+        return callbackRequest;
     }
 }
