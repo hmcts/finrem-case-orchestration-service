@@ -17,7 +17,7 @@ plugins {
     id 'checkstyle'
     id 'com.github.ben-manes.versions' version '0.36.0'
     id 'io.franzbecker.gradle-lombok' version '4.0.0'
-    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
     id "info.solidsoft.pitest" version "1.5.1"
     id 'jacoco'
     id 'org.owasp.dependencycheck' version '6.0.3'
@@ -104,16 +104,16 @@ configurations {
 }
 
 def versions = [
-    bspCommonLib            : '0.0.44',
+    bspCommonLib            : '0.0.47',
     ccdClient               : '4.7.3',
     commonsBeanUtils        : '1.9.4',
     commonsIo               : '2.7',
     commonsLang3            : '3.11',
-    gradlePitest            : '1.5.1',
+    gradlePitest            : '1.5.2',
     jsonAssert              : '1.2.3',
     junit                   : '4.13.1',
-    lombok                  : '1.18.12',
-    mockito                 : '3.4.4',
+    lombok                  : '1.18.16',
+    mockito                 : '3.6.28',
     nimbus                  : '5.1',
     pact_version            : '3.6.15',
     pdfbox                  : '2.0.8',
@@ -127,7 +127,7 @@ def versions = [
     springfoxSwagger        : '2.9.2',
     sonarPitest             : '0.5',
     tomcat                  : '9.0.40',
-    wiremock                : '2.27.1'
+    wiremock                : '2.27.2'
 ]
 
 dependencyManagement {
@@ -165,8 +165,8 @@ dependencies {
     implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
     implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version: '0.1.0'
 
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.13.3'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.14.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.14.0'
 
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
@@ -208,8 +208,8 @@ dependencies {
     contractImplementation group: 'au.com.dius', name: 'pact-jvm-consumer-junit5_2.12', version: versions.pact_version
     contractImplementation group: 'au.com.dius', name: 'pact-jvm-consumer-java8_2.12', version: versions.pact_version
     contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    contractImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0-M1'
-    contractImplementation 'org.junit.jupiter:junit-jupiter-engine:5.7.0-M1'
+    contractImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    contractImplementation 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
     contractImplementation sourceSets.main.runtimeClasspath
     contractImplementation sourceSets.test.runtimeClasspath
 }
