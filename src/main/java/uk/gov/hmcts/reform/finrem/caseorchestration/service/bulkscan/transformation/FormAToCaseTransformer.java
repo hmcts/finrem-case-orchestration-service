@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation;
 
 import com.google.common.collect.ImmutableMap;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.ExceptionRecord;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ComplexTypeCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ChildrenInfoMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.transformation.mappers.ContactDetailsMapper;
@@ -56,8 +58,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OTHER_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isNotEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.applicantRepresentedPaperToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.dischargePeriodicalPaymentSubstituteChecklistToCcdFieldNames;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.natureOfApplicationChecklistToCcdFieldNames;
@@ -66,8 +66,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.help
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.helper.BulkScanHelper.provisionMadeForToCcdFieldNames;
 
 @Slf4j
+@RequiredArgsConstructor
 @Component
 public class FormAToCaseTransformer extends BulkScanFormTransformer {
+
+    private final CaseDataService caseDataService = new CaseDataService();
 
     private static final Map<String, String> ocrToCCDMapping;
 
@@ -215,7 +218,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
         modifiedCaseData.put(CONSENTED_RESPONDENT_REPRESENTED, getRespondentRepresentedField(modifiedCaseData));
 
         // If OrderForChildren is populated then set orderForChildrenQuestion1 to Yes
-        if (isNotEmpty("natureOfApplication5b", modifiedCaseData)) {
+        if (caseDataService.isNotEmpty("natureOfApplication5b", modifiedCaseData)) {
             modifiedCaseData.put("orderForChildrenQuestion1", YES_VALUE);
         }
 
@@ -225,7 +228,7 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
     }
 
     private String getValueForIsRepresented(Map<String, Object> modifiedCaseData) {
-        String applicantRepresentedPaperValue = nullToEmpty(modifiedCaseData.get(APPLICANT_REPRESENTED_PAPER));
+        String applicantRepresentedPaperValue = caseDataService.nullToEmpty(modifiedCaseData.get(APPLICANT_REPRESENTED_PAPER));
 
         return applicantRepresentedPaperValue.equalsIgnoreCase(FR_APPLICANT_REPRESENTED_3) ? YES_VALUE : NO_VALUE;
     }
@@ -237,12 +240,12 @@ public class FormAToCaseTransformer extends BulkScanFormTransformer {
      * is provided in list of OCR fields.
      */
     private String getSolicitorAgreeToReceiveEmailsField(Map<String, Object> modifiedCaseData) {
-        return (YES_VALUE.equalsIgnoreCase(nullToEmpty(modifiedCaseData.get(APPLICANT_REPRESENTED)))
-            && isNotEmpty(APPLICANT_EMAIL, modifiedCaseData)) ? YES_VALUE : NO_VALUE;
+        return (YES_VALUE.equalsIgnoreCase(caseDataService.nullToEmpty(modifiedCaseData.get(APPLICANT_REPRESENTED)))
+            && caseDataService.isNotEmpty(APPLICANT_EMAIL, modifiedCaseData)) ? YES_VALUE : NO_VALUE;
     }
 
     private String getRespondentRepresentedField(Map<String, Object> modifiedCaseData) {
-        return isNotEmpty(RESP_SOLICITOR_NAME, modifiedCaseData) ? YES_VALUE : NO_VALUE;
+        return caseDataService.isNotEmpty(RESP_SOLICITOR_NAME, modifiedCaseData) ? YES_VALUE : NO_VALUE;
     }
 
     private void mapFormDateToCcdDate(String ocrFieldName, String ccdFieldName,

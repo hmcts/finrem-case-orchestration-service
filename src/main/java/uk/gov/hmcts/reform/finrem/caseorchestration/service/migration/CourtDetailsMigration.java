@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.migration;
 
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,9 +19,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 
 public class CourtDetailsMigration implements MigrationHandler {
+
+    private CaseDataService caseDataService = new CaseDataService();
 
     public static final String REGION_SL = "regionListSL";
     public static final String ALLOCATED_COURT_LIST = "allocatedCourtList";
@@ -106,7 +108,7 @@ public class CourtDetailsMigration implements MigrationHandler {
 
     private boolean migrationRequired(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        return isContestedApplication(caseDetails) && !hasRegionList(caseData) && hasCourtDetails(caseData);
+        return caseDataService.isContestedApplication(caseDetails) && !hasRegionList(caseData) && hasCourtDetails(caseData);
     }
 
     private boolean hasRegionList(Map<String, Object> caseData) {

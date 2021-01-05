@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ValidateHearingService;
 
@@ -30,7 +31,6 @@ import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,6 +41,7 @@ public class HearingDocumentController implements BaseController {
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
     private final ValidateHearingService validateHearingService;
+    private final CaseDataService caseDataService;
 
     @PostMapping(path = "/documents/hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
@@ -66,7 +67,7 @@ public class HearingDocumentController implements BaseController {
         }
 
         if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
-            if (isContestedPaperApplication(caseDetails)) {
+            if (caseDataService.isContestedPaperApplication(caseDetails)) {
                 additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
             }
         } else {

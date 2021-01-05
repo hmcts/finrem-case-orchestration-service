@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import uk.gov.hmcts.reform.bsp.common.model.shared.in.OcrDataField;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.bulkscan.OcrFieldName;
 
 import java.util.ArrayList;
@@ -18,7 +19,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 public class ContactDetailsMapperTest {
 
@@ -30,6 +30,8 @@ public class ContactDetailsMapperTest {
     public static final String COUNTRY = "AddressCountry";
     public static final String TEST_EMAIL = "solicitor@mail.com";
     public static final String TEST_PHONE = "077654567";
+
+    private CaseDataService caseDataService = new CaseDataService();
 
     @Test
     public void applyAddressesMappingsShouldMapAllAddresses() {
@@ -67,8 +69,8 @@ public class ContactDetailsMapperTest {
             ContactDetailsMapper.CcdFields.RESPONDENT
         );
 
-        assertThat(nullToEmpty(data.get(ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR_EMAIL)), is(TEST_EMAIL));
-        assertThat(nullToEmpty(data.get(ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR_PHONE)), is(TEST_PHONE));
+        assertThat(caseDataService.nullToEmpty(data.get(ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR_EMAIL)), is(TEST_EMAIL));
+        assertThat(caseDataService.nullToEmpty(data.get(ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR_PHONE)), is(TEST_PHONE));
     }
 
     @Test
@@ -90,8 +92,8 @@ public class ContactDetailsMapperTest {
             ContactDetailsMapper.CcdFields.RESPONDENT_SOLICITOR
         );
 
-        assertThat(nullToEmpty(data.get(ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR_EMAIL)), is(TEST_EMAIL));
-        assertThat(nullToEmpty(data.get(ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR_PHONE)), is(TEST_PHONE));
+        assertThat(caseDataService.nullToEmpty(data.get(ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR_EMAIL)), is(TEST_EMAIL));
+        assertThat(caseDataService.nullToEmpty(data.get(ContactDetailsMapper.CcdFields.APPLICANT_SOLICITOR_PHONE)), is(TEST_PHONE));
     }
 
     @Test

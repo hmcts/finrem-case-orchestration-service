@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeItem;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeValue;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.OrderSummary;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 
 import java.math.BigDecimal;
@@ -31,7 +32,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType.CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 public class FeeLookupController implements BaseController {
 
     private final FeeService feeService;
+    private final CaseDataService caseDataService;
 
     @PostMapping(path = "/fee-lookup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles looking up Case Fees")
@@ -53,7 +54,7 @@ public class FeeLookupController implements BaseController {
 
         validateCaseData(callbackRequest);
 
-        ApplicationType applicationType = isConsentedApplication(caseDetails) ? CONSENTED : CONTESTED;
+        ApplicationType applicationType = caseDataService.isConsentedApplication(caseDetails) ? CONSENTED : CONTESTED;
         FeeResponse feeResponse = feeService.getApplicationFee(applicationType);
 
         FeeCaseData feeResponseData = FeeCaseData.builder().build();

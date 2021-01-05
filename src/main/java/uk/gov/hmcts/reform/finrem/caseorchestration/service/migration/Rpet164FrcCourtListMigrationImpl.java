@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service.migration;
 
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.util.Map;
 
@@ -85,10 +86,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WINCHESTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WREXHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.YEOVIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 
 @Slf4j
 public class Rpet164FrcCourtListMigrationImpl implements MigrationHandler {
+
+    private CaseDataService caseDataService = new CaseDataService();
 
     public static final String EMPTY_STRING = "";
 
@@ -175,7 +177,7 @@ public class Rpet164FrcCourtListMigrationImpl implements MigrationHandler {
 
     private boolean migrationRequired(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        return isConsentedApplication(caseDetails) && hasRegionList(caseData);
+        return caseDataService.isConsentedApplication(caseDetails) && hasRegionList(caseData);
     }
 
     private boolean hasRegionList(Map<String, Object> caseData) {
