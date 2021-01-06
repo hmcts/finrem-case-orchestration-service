@@ -76,6 +76,16 @@ public class AdditionalHearingDocumentService {
 
     public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails)
         throws CourtDetailsParseException, JsonProcessingException {
+
+        List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseDetails.getData());
+
+        if (hearingOrderCollectionData != null
+            && !hearingOrderCollectionData.isEmpty()
+            && hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments() != null) {
+            caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
+                hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments().getUploadDraftDocument());
+        }
+
         List<DirectionDetailsCollectionData> directionDetailsCollectionList = documentHelper
             .convertToDirectionDetailsCollectionData(caseDetails
                 .getData()
@@ -86,15 +96,6 @@ public class AdditionalHearingDocumentService {
                 directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()))) {
             log.info("Additional hearing document not required for case: {}", caseDetails.getId());
             return;
-        }
-
-        List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseDetails.getData());
-
-        if (hearingOrderCollectionData != null
-            && !hearingOrderCollectionData.isEmpty()
-            && hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments() != null) {
-            caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
-                hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments().getUploadDraftDocument());
         }
 
         DirectionDetailsCollection directionDetailsCollection = directionDetailsCollectionList.get(0).getDirectionDetailsCollection();
