@@ -20,6 +20,9 @@ public class ContestedUploadedDocument {
     @JsonProperty("caseDocumentParty")
     private String caseDocumentParty;
 
+    @JsonProperty("caseDocumentConfidential")
+    private String caseDocumentConfidential;
+
     @JsonProperty("caseDocumentOther")
     private String caseDocumentOther;
 }

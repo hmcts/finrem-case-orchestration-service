@@ -708,6 +708,34 @@
             "caseDocumentOther": null,
             "caseDocumentParty": "respondent"
           }
+        },
+        {
+          "id": "c2d4437c-7126-4d11-a1c2-c0bc8c325cb1",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5a",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5e/binary"
+            },
+            "caseDocumentType": "other",
+            "caseDocumentOther": "Other Example 1",
+            "caseDocumentParty": "applicant",
+            "caseDocumentConfidential": "yes"
+          }
+        },
+        {
+          "id": "c2d4437c-7126-4d11-a1c2-c0bc8c325cb2",
+          "value": {
+            "caseDocuments": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5b",
+              "document_filename": "dummy.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2a9bb19b-df15-4a4c-a7af-f81c21f97c5e/binary"
+            },
+            "caseDocumentType": "other",
+            "caseDocumentOther": "Other Example 2",
+            "caseDocumentParty": "respondent",
+            "caseDocumentConfidential": "yes"
+          }
         }
       ]
     }
