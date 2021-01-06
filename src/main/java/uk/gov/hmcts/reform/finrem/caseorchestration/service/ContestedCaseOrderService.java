@@ -22,7 +22,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedPaperApplication;
 
 @Slf4j
 @Service
@@ -46,7 +45,7 @@ public class ContestedCaseOrderService {
     }
 
     public void printAndMailHearingDocuments(CaseDetails caseDetails, String authorisationToken) {
-        if (isContestedPaperApplication(caseDetails)) {
+        if (caseDataService.isContestedPaperApplication(caseDetails)) {
             Map<String, Object> caseData = caseDetails.getData();
 
             if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
@@ -64,7 +63,7 @@ public class ContestedCaseOrderService {
 
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, LATEST_DRAFT_HEARING_ORDER).ifPresent(hearingDocumentPack::add);
 
-        if (caseDataService.hasAnotherHearing(caseData)) {
+        if (documentHelper.hasAnotherHearing(caseData)) {
             Optional<CaseDocument> latestAdditionalHearingDocument = documentHelper.getLatestAdditionalHearingDocument(caseData);
             latestAdditionalHearingDocument.ifPresent(
                 caseDocument -> hearingDocumentPack.add(documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument)));

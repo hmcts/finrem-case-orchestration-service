@@ -34,8 +34,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_REF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 
 @RestController
 @RequiredArgsConstructor
@@ -133,8 +131,8 @@ public class CaseDataController implements BaseController {
 
     private void setOrganisationPolicy(CaseDetails caseDetails) {
         log.info("Share a case is enabled: {}", featureToggleService.isShareACaseEnabled());
-        if (featureToggleService.isShareACaseEnabled() && (isContestedApplication(caseDetails)
-            || isConsentedApplication(caseDetails))) {
+        if (featureToggleService.isShareACaseEnabled()
+            && (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails))) {
 
             Map<String, Object> appPolicy = new HashMap<>();
             appPolicy.put(ORGANISATION_POLICY_ROLE, APP_SOLICITOR_POLICY);

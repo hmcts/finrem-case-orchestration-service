@@ -25,10 +25,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isNotEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentRepresentedByASolicitor;
 
 @Service
 @Slf4j
@@ -39,6 +35,7 @@ public class NotificationService {
     private final FeatureToggleService featureToggleService;
     private final ObjectMapper objectMapper;
     private final NotificationRequestMapper notificationRequestMapper;
+    private final CaseDataService caseDataService;
 
     private String recipientEmail = "fr_applicant_sol@sharklasers.com";
 
@@ -309,12 +306,12 @@ public class NotificationService {
     }
 
     public boolean shouldEmailRespondentSolicitor(Map<String, Object> caseData) {
-        return !isPaperApplication(caseData)
-            && isRespondentRepresentedByASolicitor(caseData)
-            && isNotEmpty(RESP_SOLICITOR_EMAIL, caseData);
+        return !caseDataService.isPaperApplication(caseData)
+            && caseDataService.isRespondentRepresentedByASolicitor(caseData)
+            && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData);
     }
 
     public boolean shouldEmailApplicantSolicitor(CaseDetails caseDetails) {
-        return isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
+        return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
     }
 }

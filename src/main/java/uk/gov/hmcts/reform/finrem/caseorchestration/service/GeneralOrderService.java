@@ -40,8 +40,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_RECITALS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +50,7 @@ public class GeneralOrderService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
+    private final CaseDataService caseDataService;
 
     private BiFunction<CaseDetails, String, CaseDocument> generateDocument = this::applyGenerateDocument;
     private Function<CaseDocument, GeneralOrderPreviewDocument> createGeneralOrderData = this::applyGeneralOrderData;
@@ -90,14 +89,14 @@ public class GeneralOrderService {
         Map<String, Object> caseData = caseDetails.getData();
 
         caseData.put("DivorceCaseNumber", caseDetails.getData().get(DIVORCE_CASE_NUMBER));
-        caseData.put("ApplicantName", DocumentHelper.getApplicantFullName(caseDetails));
+        caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
 
-        if (isConsentedApplication(caseDetails)) {
-            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameConsented(caseDetails));
+        if (caseDataService.isConsentedApplication(caseDetails)) {
+            caseData.put("RespondentName", documentHelper.getRespondentFullNameConsented(caseDetails));
             caseData.put("GeneralOrderCourt", "SITTING in private");
             caseData.put("GeneralOrderHeaderOne", "Sitting in the Family Court");
         } else {
-            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameContested(caseDetails));
+            caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
             caseData.put("GeneralOrderCourtSitting", "SITTING AT the Family Court at the ");
             caseData.put("GeneralOrderCourt", ContestedCourtHelper.getSelectedCourt(caseDetails));
             caseData.put("GeneralOrderHeaderOne", "In the Family Court");
@@ -124,7 +123,7 @@ public class GeneralOrderService {
     public Map<String, Object> populateGeneralOrderCollection(CaseDetails caseDetails) {
         caseDetails.getData().put(GENERAL_ORDER_LATEST_DOCUMENT,
             documentHelper.convertToCaseDocument(caseDetails.getData().get(GENERAL_ORDER_PREVIEW_DOCUMENT)));
-        if (isConsentedApplication(caseDetails)) {
+        if (caseDataService.isConsentedApplication(caseDetails)) {
             return populateGeneralOrderCollectionConsented(caseDetails);
         } else {
             return populateGeneralOrderCollectionContested(caseDetails);
@@ -160,7 +159,7 @@ public class GeneralOrderService {
 
         GeneralOrderContestedData contestedData = new GeneralOrderContestedData(UUID.randomUUID().toString(), generalOrder);
 
-        if (isConsentedInContestedCase(caseDetails)) {
+        if (caseDataService.isConsentedInContestedCase(caseDetails)) {
             List<GeneralOrderContestedData> generalOrderList = Optional.ofNullable(caseData.get(GENERAL_ORDER_COLLECTION_CONSENTED_IN_CONTESTED))
                 .map(this::convertToGeneralOrderContestedList)
                 .orElse(new ArrayList<>());

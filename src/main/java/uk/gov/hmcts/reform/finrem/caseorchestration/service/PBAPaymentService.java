@@ -26,7 +26,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +33,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunctio
 public class PBAPaymentService {
 
     private final PaymentClient paymentClient;
+    private final CaseDataService caseDataService;
 
     @Value("${payment.api.siteId}")
     private String siteId;
@@ -79,7 +79,7 @@ public class PBAPaymentService {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode dataJsonNode = mapper.valueToTree(caseDetails.getData());
         String ccdCaseId = String.valueOf(caseDetails.getId());
-        String description = isConsentedApplication(caseDetails) ? consentedDescription : contestedDescription;
+        String description = caseDataService.isConsentedApplication(caseDetails) ? consentedDescription : contestedDescription;
         return PaymentRequest.builder()
             .accountNumber(dataJsonNode.path(PBA_NUMBER).asText())
             .caseReference(dataJsonNode.path(DIVORCE_CASE_NUMBER).asText())

@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
@@ -22,7 +23,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,6 +35,7 @@ public class PaymentConfirmationController implements BaseController {
     private final AssignCaseAccessService assignCaseAccessService;
     private final CcdDataStoreService ccdDataStoreService;
     private final FeatureToggleService featureToggleService;
+    private final CaseDataService caseDataService;
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/payment-confirmation", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -62,7 +63,7 @@ public class PaymentConfirmationController implements BaseController {
     }
 
     private String confirmationBody(CaseDetails caseDetails) throws IOException {
-        boolean isConsentedApplication = isConsentedApplication(caseDetails);
+        boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
         Map<String, Object> caseData = caseDetails.getData();
         log.info("Application type isConsentedApplication : {}", isConsentedApplication);
 

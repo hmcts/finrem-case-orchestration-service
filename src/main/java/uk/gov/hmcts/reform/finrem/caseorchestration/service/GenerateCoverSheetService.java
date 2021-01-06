@@ -35,9 +35,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.addressLineOneAndPostCodeAreBothNotEmpty;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +44,7 @@ public class GenerateCoverSheetService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
+    private final CaseDataService caseDataService;
 
     private enum AddressFoundInCaseData { SOLICITOR, PARTY, NONE }
 
@@ -55,20 +53,21 @@ public class GenerateCoverSheetService {
             documentConfiguration.getBulkPrintTemplate());
 
         return generateCoverSheet(caseDetails, authorisationToken, APPLICANT_ADDRESS,
-            isConsentedApplication(caseDetails) ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS,
-            isConsentedApplication(caseDetails) ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME,
-            APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME, CommonFunction.isApplicantRepresentedByASolicitor(caseDetails.getData()));
+            caseDataService.isConsentedApplication(caseDetails) ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS,
+            caseDataService.isConsentedApplication(caseDetails) ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME,
+            APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME,
+            caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData()));
     }
 
     public CaseDocument generateRespondentCoverSheet(final CaseDetails caseDetails, final String authorisationToken) {
         log.info("Generating Respondent cover sheet {} from {} for bulk print", documentConfiguration.getBulkPrintFileName(),
             documentConfiguration.getBulkPrintTemplate());
 
-        boolean isConsented = CommonFunction.isConsentedApplication(caseDetails);
+        boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
         return generateCoverSheet(caseDetails, authorisationToken, RESPONDENT_ADDRESS, RESP_SOLICITOR_ADDRESS, RESP_SOLICITOR_NAME,
             isConsented ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME,
             isConsented ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME,
-            CommonFunction.isRespondentRepresentedByASolicitor(caseDetails.getData()));
+            caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData()));
     }
 
     private CaseDocument generateCoverSheet(CaseDetails caseDetails, String authorisationToken, String partyAddressCcdFieldName,
@@ -109,7 +108,7 @@ public class GenerateCoverSheetService {
                 .build();
             caseData.put(ADDRESSEE, addressee);
             caseData.put(COURT_CONTACT_DETAILS, formatCtscContactDetailsForCoversheet());
-            caseData.put(CASE_NUMBER, nullToEmpty(caseDetails.getId()));
+            caseData.put(CASE_NUMBER, caseDataService.nullToEmpty(caseDetails.getId()));
         }
     }
 
@@ -129,9 +128,9 @@ public class GenerateCoverSheetService {
 
     private AddressFoundInCaseData checkAddress(Map<String, Object> caseData, String partyAddressCcdFieldName,
                                                 String solicitorAddressCcdFieldName, boolean isRepresentedByASolicitor) {
-        return isRepresentedByASolicitor && addressLineOneAndPostCodeAreBothNotEmpty((Map) caseData.get(solicitorAddressCcdFieldName))
+        return isRepresentedByASolicitor && caseDataService.addressLineOneAndPostCodeAreBothNotEmpty((Map) caseData.get(solicitorAddressCcdFieldName))
             ? AddressFoundInCaseData.SOLICITOR
-            : addressLineOneAndPostCodeAreBothNotEmpty((Map) caseData.get(partyAddressCcdFieldName)) ? AddressFoundInCaseData.PARTY
+            : caseDataService.addressLineOneAndPostCodeAreBothNotEmpty((Map) caseData.get(partyAddressCcdFieldName)) ? AddressFoundInCaseData.PARTY
             : AddressFoundInCaseData.NONE;
     }
 

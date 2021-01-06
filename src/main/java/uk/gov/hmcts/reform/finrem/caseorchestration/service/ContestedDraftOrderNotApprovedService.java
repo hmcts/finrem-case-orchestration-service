@@ -71,8 +71,8 @@ public class ContestedDraftOrderNotApprovedService {
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        caseData.put("ApplicantName", DocumentHelper.getApplicantFullName(caseDetails));
-        caseData.put("RespondentName", DocumentHelper.getRespondentFullNameContested(caseDetails));
+        caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
+        caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
         caseData.put("Court", ContestedCourtHelper.getSelectedCourt(caseDetails));
         caseData.put("JudgeDetails",
             StringUtils.joinWith(" ",

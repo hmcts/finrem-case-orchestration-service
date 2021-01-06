@@ -42,9 +42,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullApplicantName;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullRespondentName;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +52,7 @@ public class GeneralLetterService {
     private final BulkPrintService bulkPrintService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
+    private final CaseDataService caseDataService;
 
     public void previewGeneralLetter(String authorisationToken, CaseDetails caseDetails) {
         log.info("Generating General letter preview for Case ID: {}", caseDetails.getId());
@@ -82,15 +80,15 @@ public class GeneralLetterService {
         caseData.put("generalLetterCreatedDate", new Date());
         caseData.put("ccdCaseNumber", caseDetails.getId());
         caseData.put(CTSC_CONTACT_DETAILS, buildCtscContactDetails());
-        caseData.put("applicantFullName", buildFullApplicantName(caseDetails));
-        caseData.put("respondentFullName", buildFullRespondentName(caseDetails));
+        caseData.put("applicantFullName", caseDataService.buildFullApplicantName(caseDetails));
+        caseData.put("respondentFullName", caseDataService.buildFullRespondentName(caseDetails));
         populateNameAddressAndReference(caseDetails);
     }
 
     private void populateNameAddressAndReference(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         String generalLetterAddressTo = (String) data.get(GENERAL_LETTER_ADDRESS_TO);
-        boolean isConsentedApplication = isConsentedApplication(caseDetails);
+        boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
 
         Addressee.AddresseeBuilder addresseeBuilder = Addressee.builder();
         if ("applicantSolicitor".equalsIgnoreCase(generalLetterAddressTo)) {
@@ -138,7 +136,7 @@ public class GeneralLetterService {
     }
 
     public List<String> getCaseDataErrorsForCreatingPreviewOrFinalLetter(CaseDetails caseDetails) {
-        boolean isConsentedApplication = isConsentedApplication(caseDetails);
+        boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
         Map<String, String> generalLetterAddressToValueToAddressCcdFieldName = ImmutableMap.of(
             "applicantSolicitor", isConsentedApplication ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS,
             "respondentSolicitor", RESP_SOLICITOR_ADDRESS,
