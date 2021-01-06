@@ -27,8 +27,6 @@ import java.util.function.UnaryOperator;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +39,7 @@ public class RefusalOrderDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
+    private final CaseDataService caseDataService;
 
     private final Function<Pair<CaseDetails, String>, CaseDocument> generateDocument = this::applyGenerateRefusalOrder;
     private final Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
@@ -78,7 +77,7 @@ public class RefusalOrderDocumentService {
         uploadOrder.add(consentOrderData);
         caseData.put(UPLOAD_ORDER, uploadOrder);
 
-        if (isConsentedInContestedCase(caseDetails)) {
+        if (caseDataService.isConsentedInContestedCase(caseDetails)) {
             ContestedConsentOrder consentOrder = new ContestedConsentOrder(consentOrderData.getConsentOrder().getDocumentLink());
             ContestedConsentOrderData contestedConsentOrderData = new ContestedConsentOrderData(UUID.randomUUID().toString(), consentOrder);
             List<ContestedConsentOrderData> consentOrders = Optional.ofNullable(caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION))
@@ -118,15 +117,15 @@ public class RefusalOrderDocumentService {
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        caseData.put("ApplicantName", DocumentHelper.getApplicantFullName(caseDetails));
+        caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
         caseData.put("RefusalOrderHeader", "Sitting in the Family Court");
 
-        if (isConsentedApplication(caseDetails)) {
-            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameConsented(caseDetails));
+        if (caseDataService.isConsentedApplication(caseDetails)) {
+            caseData.put("RespondentName", documentHelper.getRespondentFullNameConsented(caseDetails));
             caseData.put("CourtName", "SITTING in private");
 
         } else {
-            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameContested(caseDetails));
+            caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
             caseData.put("CourtName", "SITTING AT the Family Court at the "
                 + ContestedCourtHelper.getSelectedCourt(caseDetails));
         }

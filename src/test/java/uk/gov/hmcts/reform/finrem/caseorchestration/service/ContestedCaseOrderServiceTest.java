@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -9,44 +8,39 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingDocumentData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 
 public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
-    @Autowired
-    private ContestedCaseOrderService contestedCaseOrderService;
+    @Autowired private ContestedCaseOrderService contestedCaseOrderService;
 
-    @MockBean
-    private BulkPrintService bulkPrintService;
-
-    @MockBean
-    private CaseDataService caseDataService;
+    @MockBean private BulkPrintService bulkPrintService;
+    @MockBean private DocumentHelper documentHelper;
+    @MockBean private CaseDataService caseDataService;
 
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintArgumentCaptor;
@@ -66,22 +60,130 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     public void whenPrintAndMailGeneralOrderTriggered_thenBothApplicantAndRespondentPacksArePrinted() {
         CaseDetails caseDetails = generalOrderContestedCaseDetails();
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(documentHelper.convertToCaseDocument(any())).thenReturn(new CaseDocument());
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
     }
 
     @Test
     public void givenShouldNotPrintPackForApplicant_whenPrintAndMailGeneralOrderTriggered_thenOnlyRespondentPacksIsPrinted() {
         CaseDetails caseDetails = generalOrderContestedCaseDetails();
         when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(false);
+        when(documentHelper.convertToCaseDocument(any())).thenReturn(new CaseDocument());
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
+        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+    }
+
+    @Test
+    public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase() {
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
+        mockDocumentHelperToReturnDefaultExpectedDocuments();
+
+        contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
+
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
+        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+
+        List<String> expectedBulkPrintDocuments = asList("HearingOrderBinaryURL", "AdditionalHearingDocumentURL", "OtherHearingOrderDocumentsURL");
+
+        assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(BulkPrintDocument::getBinaryFileUrl).collect(Collectors.toList()),
+            containsInAnyOrder(expectedBulkPrintDocuments.toArray()));
+    }
+
+    @Test
+    public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase_noNextHearing() {
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(documentHelper.hasAnotherHearing(any())).thenReturn(false);
+
+        contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
+
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
+        verify(bulkPrintService).printRespondentDocuments(any(), any(), any());
+
+        String notExpectedBulkPrintDocument = "AdditionalHearingDocumentURL";
+
+        assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(BulkPrintDocument::getBinaryFileUrl).collect(Collectors.toList()),
+            not(contains(notExpectedBulkPrintDocument)));
+    }
+
+    @Test
+    public void givenAllHearingDocumentsArePresentThenDoNotSendToBulkPrintWhenDigitalCase() {
+        contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
+
+        verifyNoInteractions(bulkPrintService);
+    }
+
+    @Test
+    public void latestDraftedHearingOrderDocumentIsNotAddedToPack() {
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
+        mockDocumentHelperToReturnDefaultExpectedDocuments();
+        when(documentHelper.getDocumentLinkAsBulkPrintDocument(any(), eq(LATEST_DRAFT_HEARING_ORDER))).thenReturn(Optional.empty());
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+
+        contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
+
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
+
+        List<String> expectedBulkPrintDocuments = asList("AdditionalHearingDocumentURL", "OtherHearingOrderDocumentsURL");
+
+        assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(BulkPrintDocument::getBinaryFileUrl).collect(Collectors.toList()),
+            containsInAnyOrder(expectedBulkPrintDocuments.toArray()));
+    }
+
+    @Test
+    public void latestDraftedHearingOrderDocumentIsNotAddedToPack_noNextHearing() {
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(documentHelper.hasAnotherHearing(any())).thenReturn(false);
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+
+        contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
+
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
+
+        String notExpectedBulkPrintDocument = "AdditionalHearingDocumentURL";
+
+        assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(BulkPrintDocument::getBinaryFileUrl).collect(Collectors.toList()),
+            not(contains(notExpectedBulkPrintDocument)));
+    }
+
+    @Test
+    public void latestAdditionalHearingDocumentIsNotAddedToPack() {
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
+        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
+        mockDocumentHelperToReturnDefaultExpectedDocuments();
+        when(documentHelper.getLatestAdditionalHearingDocument(any())).thenReturn(Optional.empty());
+
+        contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
+
+        verify(bulkPrintService).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
+
+        List<String> expectedBulkPrintDocuments = asList("HearingOrderBinaryURL", "OtherHearingOrderDocumentsURL");
+
+        assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(BulkPrintDocument::getBinaryFileUrl).collect(Collectors.toList()),
+            containsInAnyOrder(expectedBulkPrintDocuments.toArray()));
+    }
+
+    private void mockDocumentHelperToReturnDefaultExpectedDocuments() {
+        when(documentHelper.getDocumentLinkAsBulkPrintDocument(any(), eq(LATEST_DRAFT_HEARING_ORDER))).thenReturn(
+            Optional.of(BulkPrintDocument.builder().binaryFileUrl("HearingOrderBinaryURL").build()));
+        when(documentHelper.getCollectionOfDocumentLinksAsBulkPrintDocuments(any(), eq(HEARING_ORDER_OTHER_COLLECTION))).thenReturn(
+            singletonList(BulkPrintDocument.builder().binaryFileUrl("OtherHearingOrderDocumentsURL").build()));
+
+        CaseDocument additionalHearingDocument = CaseDocument.builder().documentBinaryUrl("AdditionalHearingDocumentURL").build();
+        when(documentHelper.getLatestAdditionalHearingDocument(any())).thenReturn(Optional.of(additionalHearingDocument));
+        when(documentHelper.getCaseDocumentAsBulkPrintDocument(eq(additionalHearingDocument))).thenReturn(
+            BulkPrintDocument.builder().binaryFileUrl(additionalHearingDocument.getDocumentBinaryUrl()).build());
     }
 
     private CaseDetails generalOrderContestedCaseDetails() {
@@ -90,141 +192,5 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Test
-    public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase() throws JsonProcessingException {
-        CaseDetails caseDetails = buildHearingPackDocumentTestData();
-        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
-        when(caseDataService.hasAnotherHearing(caseDetails.getData())).thenReturn(true);
-
-        contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
-
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
-
-        List<String> expectedBulkPrintDocuments = new ArrayList<>();
-        expectedBulkPrintDocuments.add("HearingOrderBinaryURL");
-        expectedBulkPrintDocuments.add("AdditionalHearingDocumentURL");
-        expectedBulkPrintDocuments.add("OtherHearingOrderDocumentsURL");
-
-        assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(
-            doc -> doc.getBinaryFileUrl()).collect(Collectors.toList()).containsAll(expectedBulkPrintDocuments),  is(true));
-    }
-
-    @Test
-    public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase_noNextHearing() throws JsonProcessingException {
-        CaseDetails caseDetails = buildHearingPackDocumentTestData();
-        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
-        when(caseDataService.hasAnotherHearing(caseDetails.getData())).thenReturn(false);
-
-        contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
-
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), any(), any());
-
-        List<String> notExpectedBulkPrintDocuments = new ArrayList<>();
-        notExpectedBulkPrintDocuments.add("AdditionalHearingDocumentURL");
-
-        assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(
-            doc -> doc.getBinaryFileUrl()).collect(Collectors.toList()).contains(notExpectedBulkPrintDocuments),  is(false));
-    }
-
-    @Test
-    public void givenAllHearingDocumentsArePresentThenDoNotSendToBulkPrintWhenDigitalCase() throws JsonProcessingException {
-        CaseDetails caseDetails = buildHearingPackDocumentTestData();
-        caseDetails.getData().remove(PAPER_APPLICATION);
-
-        contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
-
-        verifyNoInteractions(bulkPrintService);
-    }
-
-    @Test
-    public void latestDraftedHearingOrderDocumentIsNotAddedToPack() throws JsonProcessingException {
-        CaseDetails caseDetails = buildHearingPackDocumentTestData();
-        caseDetails.getData().remove(LATEST_DRAFT_HEARING_ORDER);
-
-        when(caseDataService.hasAnotherHearing(caseDetails.getData())).thenReturn(true);
-        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
-        contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
-
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
-
-        List<String> expectedBulkPrintDocuments = new ArrayList<>();
-        expectedBulkPrintDocuments.add("AdditionalHearingDocumentURL");
-        expectedBulkPrintDocuments.add("OtherHearingOrderDocumentsURL");
-
-        assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(
-            o -> o.getBinaryFileUrl()).collect(Collectors.toList()).containsAll(expectedBulkPrintDocuments),  is(true));
-    }
-
-    @Test
-    public void latestDraftedHearingOrderDocumentIsNotAddedToPack_noNextHearing() throws JsonProcessingException {
-        CaseDetails caseDetails = buildHearingPackDocumentTestData();
-        caseDetails.getData().remove(LATEST_DRAFT_HEARING_ORDER);
-
-        when(caseDataService.hasAnotherHearing(caseDetails.getData())).thenReturn(false);
-        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
-        contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
-
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
-
-        List<String> notExpectedBulkPrintDocuments = new ArrayList<>();
-        notExpectedBulkPrintDocuments.add("AdditionalHearingDocumentURL");
-
-        assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(
-            o -> o.getBinaryFileUrl()).collect(Collectors.toList()).contains(notExpectedBulkPrintDocuments),  is(false));
-    }
-
-    @Test
-    public void latestAdditionalHearingDocumentIsNotAddedToPack() throws JsonProcessingException {
-        CaseDetails caseDetails = buildHearingPackDocumentTestData();
-        caseDetails.getData().remove(ADDITIONAL_HEARING_DOCUMENT_COLLECTION);
-
-        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
-        contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, AUTH_TOKEN);
-
-        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), any(), bulkPrintArgumentCaptor.capture());
-
-        List<String> expectedBulkPrintDocuments = new ArrayList<>();
-        expectedBulkPrintDocuments.add("HearingOrderBinaryURL");
-        expectedBulkPrintDocuments.add("OtherHearingOrderDocumentsURL");
-
-        assertThat(bulkPrintArgumentCaptor.getAllValues().get(0).stream().map(
-            o -> o.getBinaryFileUrl()).collect(Collectors.toList()).containsAll(expectedBulkPrintDocuments),  is(true));
-    }
-
-
-    private CaseDetails buildHearingPackDocumentTestData() throws JsonProcessingException {
-        CallbackRequest callbackRequest = getContestedCallbackRequest();
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        caseDetails.getData().put(PAPER_APPLICATION, "Yes");
-
-        CaseDocument latestHearingOrder = buildCaseDocument("TestURL", "HearingOrderBinaryURL", "TestName");
-        caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER, latestHearingOrder);
-
-        CaseDocument hearingDocument = buildCaseDocument("TestURL", "AdditionalHearingDocumentURL", "TestName");
-        AdditionalHearingDocumentData generatedDocumentData = AdditionalHearingDocumentData.builder()
-            .additionalHearingDocument(AdditionalHearingDocument.builder()
-                .document(hearingDocument)
-                .build())
-            .build();
-        List<AdditionalHearingDocumentData> additionalHearingDocumentDataList = new ArrayList<>();
-        additionalHearingDocumentDataList.add(generatedDocumentData);
-        caseDetails.getData().put(ADDITIONAL_HEARING_DOCUMENT_COLLECTION, additionalHearingDocumentDataList);
-
-        CaseDocument otherDocument = buildCaseDocument("TestURL", "OtherHearingOrderDocumentsURL", "TestName");
-        List<CollectionElement<CaseDocument>> otherHearingDocuments = new ArrayList<>();
-        otherHearingDocuments.add(CollectionElement.<CaseDocument>builder().value(otherDocument).build());
-        caseDetails.getData().put(HEARING_ORDER_OTHER_COLLECTION, otherHearingDocuments);
-
-        //Force update case data with JSON properties
-        Map<String, Object> caseData = caseDetails.getData();
-        caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
-        caseDetails.setData(caseData);
-
-        return caseDetails;
     }
 }
