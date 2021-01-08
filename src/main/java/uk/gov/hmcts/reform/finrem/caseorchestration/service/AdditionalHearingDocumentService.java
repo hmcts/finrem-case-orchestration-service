@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AdditionalHearingD
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
@@ -37,11 +38,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TIME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TIME_ESTIMATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullApplicantName;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.buildFullRespondentName;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.nullToEmpty;
 
 @Service
 @Slf4j
@@ -53,6 +52,7 @@ public class AdditionalHearingDocumentService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
     private final BulkPrintService bulkPrintService;
+    private final CaseDataService caseDataService;
 
     public void createAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails) throws JsonProcessingException {
         Map<String, Object> caseData = caseDetails.getData();
@@ -76,13 +76,23 @@ public class AdditionalHearingDocumentService {
 
     public void createAndStoreAdditionalHearingDocuments(String authorisationToken, CaseDetails caseDetails)
         throws CourtDetailsParseException, JsonProcessingException {
+
+        List<HearingOrderCollectionData> hearingOrderCollectionData = documentHelper.getHearingOrderDocuments(caseDetails.getData());
+
+        if (hearingOrderCollectionData != null
+            && !hearingOrderCollectionData.isEmpty()
+            && hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments() != null) {
+            caseDetails.getData().put(LATEST_DRAFT_HEARING_ORDER,
+                hearingOrderCollectionData.get(hearingOrderCollectionData.size() - 1).getHearingOrderDocuments().getUploadDraftDocument());
+        }
+
         List<DirectionDetailsCollectionData> directionDetailsCollectionList = documentHelper
             .convertToDirectionDetailsCollectionData(caseDetails
                 .getData()
                 .get(DIRECTION_DETAILS_COLLECTION_CT));
 
         if (directionDetailsCollectionList.size() == 0
-            || !YES_VALUE.equalsIgnoreCase(nullToEmpty(
+            || !YES_VALUE.equalsIgnoreCase(caseDataService.nullToEmpty(
                 directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()))) {
             log.info("Additional hearing document not required for case: {}", caseDetails.getId());
             return;
@@ -139,8 +149,8 @@ public class AdditionalHearingDocumentService {
 
         caseData.put("CCDCaseNumber", caseDetails.getId());
         caseData.put("DivorceCaseNumber", caseData.get(DIVORCE_CASE_NUMBER));
-        caseData.put("ApplicantName", buildFullApplicantName(caseDetails));
-        caseData.put("RespondentName", buildFullRespondentName(caseDetails));
+        caseData.put("ApplicantName", caseDataService.buildFullApplicantName(caseDetails));
+        caseData.put("RespondentName", caseDataService.buildFullRespondentName(caseDetails));
     }
 
     private void addAdditionalHearingDocumentToCaseData(CaseDetails caseDetails, CaseDocument document) {

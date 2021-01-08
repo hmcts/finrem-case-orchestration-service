@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,15 +18,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import javax.validation.constraints.NotNull;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Collections.singletonList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
@@ -37,16 +35,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @Slf4j
 public class ContestedDraftOrderNotApprovedController implements BaseController {
 
-    @Autowired
-    private IdamService idamService;
-
-    @Autowired
-    private BulkPrintService bulkPrintService;
-
-    @Autowired
-    private FeatureToggleService featureToggleService;
-
-    @Autowired
+    private final IdamService idamService;
+    private final BulkPrintService bulkPrintService;
     private final ContestedDraftOrderNotApprovedService contestedNotApprovedService;
 
     @PostMapping(path = "/contested-application-not-approved-start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -135,15 +125,15 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
 
         Optional<CaseDocument> refusalReason = contestedNotApprovedService.getLatestRefusalReason(caseDetails);
 
-        if (refusalReason.isPresent() && featureToggleService.isContestedPrintDraftOrderNotApprovedEnabled()) {
+        if (refusalReason.isPresent()) {
 
             if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
-                    Arrays.asList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
+                    singletonList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
             }
 
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
-                Arrays.asList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
+                singletonList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());

@@ -16,14 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Collections.EMPTY_LIST;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.getLastMapValue;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +32,7 @@ public class ConsentOrderNotApprovedDocumentService {
     private final DocumentHelper documentHelper;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentOrderingService documentOrderingService;
+    private final CaseDataService caseDataService;
 
     public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken) {
         log.info("Generating consent order not approved documents for applicant, case ID {}", caseDetails.getId());
@@ -44,7 +43,7 @@ public class ConsentOrderNotApprovedDocumentService {
         addEitherNotApprovedOrderOrGeneralOrderIfApplicable(caseDetails, documents, authorisationToken);
 
         return documents.size() == 1
-            ? EMPTY_LIST  // if only cover letter then print nothing
+            ? emptyList()  // if only cover letter then print nothing
             : documents;
     }
 
@@ -76,7 +75,7 @@ public class ConsentOrderNotApprovedDocumentService {
     public List<CaseDocument> notApprovedConsentOrder(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (isContestedApplication(caseDetails)) {
+        if (caseDataService.isContestedApplication(caseDetails)) {
             List<ContestedConsentOrderData> consentOrders = consentOrderInContestedNotApprovedList(caseData);
             if (!consentOrders.isEmpty()) {
                 ContestedConsentOrderData contestedConsentOrderData = consentOrders.get(consentOrders.size() - 1);
@@ -89,7 +88,7 @@ public class ConsentOrderNotApprovedDocumentService {
                 .orElse(Collections.emptyList());
 
             if (!documentList.isEmpty()) {
-                Map<String, Object> value = ((Map) getLastMapValue.apply(documentList).get(VALUE));
+                Map<String, Object> value = ((Map) caseDataService.getLastMapValue.apply(documentList).get(VALUE));
                 Optional<CaseDocument> generalOrder = documentHelper.getDocumentLinkAsCaseDocument(value, "DocumentLink");
                 if (generalOrder.isPresent()) {
                     log.info("Sending general order ({}) for bulk print.", generalOrder.get().getDocumentFilename());

@@ -9,6 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.GlobalExceptionHandler;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
@@ -42,6 +43,7 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
     @MockBean private AssignCaseAccessService assignCaseAccessService;
     @MockBean private CcdDataStoreService ccdDataStoreService;
     @MockBean private FeatureToggleService featureToggleService;
+    @MockBean private CaseDataService caseDataService;
 
     @Before
     public void setUp() {
@@ -97,6 +99,8 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnConsentedHWFConfirmationMarkdown() throws Exception {
         doConfirmationSetup(true, true);
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+
         mvc.perform(post(PBA_CONFIRMATION_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -112,6 +116,8 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnConsentedPBAConfirmationMarkdown() throws Exception {
         doConfirmationSetup(true, false);
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+
         mvc.perform(post(PBA_CONFIRMATION_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -127,6 +133,8 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnContestedHWFConfirmationMarkdown() throws Exception {
         doConfirmationSetup(false, true);
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+
         mvc.perform(post(PBA_CONFIRMATION_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -142,6 +150,8 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnContestedPBAConfirmationMarkdown() throws Exception {
         doConfirmationSetup(false, false);
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+
         mvc.perform(post(PBA_CONFIRMATION_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -160,7 +170,6 @@ public class PaymentConfirmationControllerTest extends BaseControllerTest {
 
         paymentConfirmationController.paymentConfirmation(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(paymentConfirmationService, times(1)).contestedHwfPaymentConfirmation();
         verify(ccdDataStoreService, never()).removeCreatorRole(any(), eq(AUTH_TOKEN));
         verify(assignCaseAccessService, never()).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }

@@ -160,8 +160,8 @@ public class GeneralApplicationDirectionsService {
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
         caseData.put("courtDetails", buildFrcCourtDetails(caseData));
-        caseData.put("applicantName", DocumentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put("respondentName", DocumentHelper.getRespondentFullNameContested(caseDetailsCopy));
+        caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
+        caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
         caseData.put("letterDate", String.valueOf(LocalDate.now()));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
@@ -175,8 +175,8 @@ public class GeneralApplicationDirectionsService {
 
         caseData.put("ccdCaseNumber", caseDetails.getId());
         caseData.put("courtDetails", buildFrcCourtDetails(caseData));
-        caseData.put("applicantName", DocumentHelper.getApplicantFullName(caseDetailsCopy));
-        caseData.put("respondentName", DocumentHelper.getRespondentFullNameContested(caseDetailsCopy));
+        caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
+        caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
         addHearingVenueDetails(caseDetailsCopy);
         caseData.put("letterDate", String.valueOf(LocalDate.now()));
 

@@ -39,7 +39,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCUMENTS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +49,7 @@ public class ConsentOrderApprovedDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
+    private final CaseDataService caseDataService;
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         log.info("Generating Approved Consent Order Letter {} from {} for bulk print",
@@ -57,7 +57,7 @@ public class ConsentOrderApprovedDocumentService {
             documentConfiguration.getApprovedConsentOrderTemplate());
 
         return genericDocumentService.generateDocument(authToken,
-            CommonFunction.isContestedApplication(caseDetails)
+            caseDataService.isContestedApplication(caseDetails)
                 ? prepareCaseDetailsCopyForDocumentGeneratorWithContestedFields(caseDetails)
                 : caseDetails,
             documentConfiguration.getApprovedConsentOrderTemplate(),
@@ -95,7 +95,7 @@ public class ConsentOrderApprovedDocumentService {
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
 
-        if (isPaperApplication(caseData)) {
+        if (caseDataService.isPaperApplication(caseData)) {
             CaseDocument coverLetter = generateApprovedConsentOrderCoverLetter(caseDetails, authorisationToken);
             bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter));
         }
@@ -185,7 +185,7 @@ public class ConsentOrderApprovedDocumentService {
     public List<CaseDocument> approvedOrderCollection(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
         List<CaseDocument> documents = new ArrayList<>();
-        String approvedOrderCollectionFieldName = CommonFunction.isConsentedInContestedCase(caseDetails)
+        String approvedOrderCollectionFieldName = caseDataService.isConsentedInContestedCase(caseDetails)
             ? CONTESTED_CONSENT_ORDER_COLLECTION : APPROVED_ORDER_COLLECTION;
 
         List<Map> approvedOrderCollectionData = ofNullable(data.get(approvedOrderCollectionFieldName))

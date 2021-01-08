@@ -19,9 +19,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedOrderNotApprovedCollectionPresent;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderApprovedCollectionPresent;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isRespondentAddressConfidential;
 
 @Slf4j
 @Service
@@ -32,8 +29,9 @@ public class ConsentOrderPrintService {
     private final GenerateCoverSheetService coverSheetService;
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    private final DocumentHelper documentHelper;
     private final DocumentOrderingService documentOrderingService;
+    private final CaseDataService caseDataService;
+    private final DocumentHelper documentHelper;
 
     public void sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
@@ -55,7 +53,7 @@ public class ConsentOrderPrintService {
         UUID respondentLetterId = sendConsentOrderForBulkPrintRespondent(respondentCoverSheet, caseDetails, authorisationToken);
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (isRespondentAddressConfidential(caseData)) {
+        if (caseDataService.isRespondentAddressConfidential(caseData)) {
             log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", caseDetails.getId());
             caseData.remove(BULK_PRINT_COVER_SHEET_RES);
             caseData.put(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL, respondentCoverSheet);
@@ -91,7 +89,7 @@ public class ConsentOrderPrintService {
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        List<CaseDocument> orderDocuments = isOrderApprovedCollectionPresent(caseData)
+        List<CaseDocument> orderDocuments = caseDataService.isOrderApprovedCollectionPresent(caseData)
             ? consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails)
             : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails);
 
@@ -115,8 +113,8 @@ public class ConsentOrderPrintService {
     }
 
     private boolean shouldPrintOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
-        boolean isOrderApprovedCollectionPresent = isOrderApprovedCollectionPresent(caseDetails.getData());
-        boolean isOrderNotApprovedCollectionPresent = isContestedOrderNotApprovedCollectionPresent(caseDetails.getData());
+        boolean isOrderApprovedCollectionPresent = caseDataService.isOrderApprovedCollectionPresent(caseDetails.getData());
+        boolean isOrderNotApprovedCollectionPresent = caseDataService.isContestedOrderNotApprovedCollectionPresent(caseDetails.getData());
 
         return isOrderApprovedCollectionPresent && (!isOrderNotApprovedCollectionPresent
             || documentOrderingService.isOrderApprovedCollectionModifiedLaterThanNotApprovedCollection(caseDetails, authorisationToken));

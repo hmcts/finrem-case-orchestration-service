@@ -29,6 +29,7 @@ public class DocumentOrderingService {
 
     private final EvidenceManagementClient evidenceManagementClient;
     private final DocumentHelper documentHelper;
+    private final CaseDataService caseDataService;
     private final ObjectMapper objectMapper;
 
     /**
@@ -60,7 +61,7 @@ public class DocumentOrderingService {
     }
 
     private List<CollectionElement<ApprovedOrder>> getApprovedOrderCollection(CaseDetails caseDetails) {
-        String approvedOrderCollectionFieldName = CommonFunction.isConsentedInContestedCase(caseDetails)
+        String approvedOrderCollectionFieldName = caseDataService.isConsentedInContestedCase(caseDetails)
             ? CONTESTED_CONSENT_ORDER_COLLECTION : APPROVED_ORDER_COLLECTION;
 
         return objectMapper.convertValue(caseDetails.getData().get(approvedOrderCollectionFieldName), new TypeReference<>() {});

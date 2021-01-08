@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DefaultsConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
 
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -39,11 +41,9 @@ public class MiniFormAControllerTest extends BaseControllerTest {
 
     protected JsonNode requestContent;
 
-    @MockBean
-    protected OnlineFormDocumentService documentService;
-
-    @MockBean
-    protected IdamService idamService;
+    @MockBean protected OnlineFormDocumentService documentService;
+    @MockBean protected IdamService idamService;
+    @MockBean protected CaseDataService caseDataService;
 
     @MockBean
     protected DefaultsConfiguration defaultsConfiguration;
@@ -117,6 +117,7 @@ public class MiniFormAControllerTest extends BaseControllerTest {
     public void generateMiniFormAWhenConsentedInContested() throws Exception {
         doRequestSetUpContested();
         whenServiceGeneratesConsentedInContestedMiniFormA().thenReturn(caseDocument());
+        when(caseDataService.isConsentedInContestedCase(any())).thenReturn(true);
 
         mvc.perform(post(endpoint())
             .content(requestContent.toString())

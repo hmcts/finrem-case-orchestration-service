@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 
@@ -40,6 +41,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
 
     @MockBean private FeeService feeService;
     @MockBean private PBAPaymentService pbaPaymentService;
+    @MockBean private CaseDataService caseDataService;
 
     @Autowired private ObjectMapper objectMapper;
 
@@ -88,6 +90,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotDoPBAPaymentWhenPaymentIsDoneWithHWF() throws Exception {
         doHWFSetUp();
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+
         mvc.perform(post(PBA_PAYMENT_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -107,6 +111,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnErrorWhenPbaPaymentFails() throws Exception {
         doPBASetUp(false);
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+
         mvc.perform(post(PBA_PAYMENT_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -121,6 +127,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldDoPbaPayment() throws Exception {
         doPBASetUp(true);
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+
         mvc.perform(post(PBA_PAYMENT_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -139,6 +147,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+
         mvc.perform(post(PBA_PAYMENT_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
