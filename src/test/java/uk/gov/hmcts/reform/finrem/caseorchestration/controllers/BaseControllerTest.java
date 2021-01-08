@@ -7,10 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class BaseControllerTest extends BaseTest {
 
@@ -59,6 +63,12 @@ public abstract class BaseControllerTest extends BaseTest {
 
     protected void doValidCaseDataSetUpForAdditionalHearing() {
         loadRequestContentWith("/fixtures/bulkprint/bulk-print-additional-hearing.json");
+    }
+
+    protected CallbackRequest buildCallbackRequest() {
+        Map<String, Object> caseData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
+        return CallbackRequest.builder().caseDetails(caseDetails).build();
     }
 
     protected CaseDocument getCaseDocument() {

@@ -15,8 +15,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedConsentOrderData;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,10 +27,6 @@ import java.util.function.UnaryOperator;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedInContestedCase;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.copyToOrderRefusalCollection;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.OrderRefusalTranslator.translateOrderRefusalCollection;
 
 @Service
 @RequiredArgsConstructor
@@ -39,27 +35,28 @@ public class RefusalOrderDocumentService {
     private static final String DOCUMENT_COMMENT = "System Generated";
 
     private final GenericDocumentService genericDocumentService;
+    private final OrderRefusalTranslatorService orderRefusalTranslatorService;
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
+    private final CaseDataService caseDataService;
 
-    private Function<Pair<CaseDetails, String>, CaseDocument> generateDocument = this::applyGenerateRefusalOrder;
-    private Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
-    private UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
+    private final Function<Pair<CaseDetails, String>, CaseDocument> generateDocument = this::applyGenerateRefusalOrder;
+    private final Function<CaseDocument, ConsentOrderData> createConsentOrderData = this::applyCreateConsentOrderData;
+    private final UnaryOperator<CaseDetails> addExtraFields = this::applyAddExtraFields;
 
     public Map<String, Object> generateConsentOrderNotApproved(
         String authorisationToken, final CaseDetails caseDetails) {
-        translateOrderRefusalCollection
+        orderRefusalTranslatorService.translateOrderRefusalCollection
             .andThen(generateDocument)
             .andThen(createConsentOrderData)
             .andThen(consentOrderData -> populateConsentOrderData(consentOrderData, caseDetails))
             .apply(Pair.of(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken));
-        return copyToOrderRefusalCollection(caseDetails);
+        return orderRefusalTranslatorService.copyToOrderRefusalCollection(caseDetails);
     }
 
-    public Map<String, Object> previewConsentOrderNotApproved(
-        String authorisationToken, final CaseDetails caseDetails) {
-        return translateOrderRefusalCollection
+    public Map<String, Object> previewConsentOrderNotApproved(String authorisationToken, CaseDetails caseDetails) {
+        return orderRefusalTranslatorService.translateOrderRefusalCollection
             .andThen(generateDocument)
             .andThen(caseDocument -> populateConsentOrderNotApproved(caseDocument, caseDetails))
             .apply(Pair.of(documentHelper.deepCopy(caseDetails, CaseDetails.class), authorisationToken));
@@ -71,7 +68,6 @@ public class RefusalOrderDocumentService {
         return caseData;
     }
 
-
     private Map<String, Object> populateConsentOrderData(ConsentOrderData consentOrderData, CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
@@ -81,7 +77,7 @@ public class RefusalOrderDocumentService {
         uploadOrder.add(consentOrderData);
         caseData.put(UPLOAD_ORDER, uploadOrder);
 
-        if (isConsentedInContestedCase(caseDetails)) {
+        if (caseDataService.isConsentedInContestedCase(caseDetails)) {
             ContestedConsentOrder consentOrder = new ContestedConsentOrder(consentOrderData.getConsentOrder().getDocumentLink());
             ContestedConsentOrderData contestedConsentOrderData = new ContestedConsentOrderData(UUID.randomUUID().toString(), consentOrder);
             List<ContestedConsentOrderData> consentOrders = Optional.ofNullable(caseData.get(CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION))
@@ -103,7 +99,7 @@ public class RefusalOrderDocumentService {
     private ConsentOrderData applyCreateConsentOrderData(CaseDocument caseDocument) {
         ConsentOrder consentOrder = new ConsentOrder();
         consentOrder.setDocumentType(documentConfiguration.getRejectedOrderDocType());
-        consentOrder.setDocumentDateAdded(new Date());
+        consentOrder.setDocumentDateAdded(LocalDate.now());
         consentOrder.setDocumentLink(caseDocument);
         consentOrder.setDocumentComment(DOCUMENT_COMMENT);
 
@@ -115,22 +111,21 @@ public class RefusalOrderDocumentService {
     }
 
     private List<ConsentOrderData> convertToUploadOrderList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<ConsentOrderData>>() {
-        });
+        return objectMapper.convertValue(object, new TypeReference<>() {});
     }
 
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        caseData.put("ApplicantName", DocumentHelper.getApplicantFullName(caseDetails));
+        caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
         caseData.put("RefusalOrderHeader", "Sitting in the Family Court");
 
-        if (isConsentedApplication(caseDetails)) {
-            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameConsented(caseDetails));
+        if (caseDataService.isConsentedApplication(caseDetails)) {
+            caseData.put("RespondentName", documentHelper.getRespondentFullNameConsented(caseDetails));
             caseData.put("CourtName", "SITTING in private");
 
         } else {
-            caseData.put("RespondentName", DocumentHelper.getRespondentFullNameContested(caseDetails));
+            caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
             caseData.put("CourtName", "SITTING AT the Family Court at the "
                 + ContestedCourtHelper.getSelectedCourt(caseDetails));
         }

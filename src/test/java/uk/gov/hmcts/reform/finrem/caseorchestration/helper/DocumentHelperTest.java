@@ -7,16 +7,22 @@ import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollection;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_EMAIL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_OPENING_HOURS;
@@ -25,43 +31,47 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_PO_BOX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 
 public class DocumentHelperTest {
 
     private static final String PATH = "/fixtures/latestConsentedConsentOrder/";
 
-    private DocumentHelper documentHelper;
     private ObjectMapper objectMapper;
+    private DocumentHelper documentHelper;
 
     @Before
     public void setup() {
         objectMapper = new ObjectMapper();
-        documentHelper = new DocumentHelper(objectMapper);
+        CaseDataService caseDataService = new CaseDataService();
+        documentHelper = new DocumentHelper(objectMapper, caseDataService);
     }
 
     @Test
     public void shouldGetLatestAmendedConsentOrder() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("amend-consent-order-by-caseworker.json");
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("amend-consent-order-by-caseworker.json");
         CaseDocument latestAmendedConsentOrder = documentHelper.getLatestAmendedConsentOrder(
-                callbackRequest.getCaseDetails().getData());
+            callbackRequest.getCaseDetails().getData());
         assertThat(latestAmendedConsentOrder.getDocumentBinaryUrl(),
-                is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
+            is("http://dm-store:8080/documents/0bdc0d68-e654-4faa-848a-8ae3c478838/binary"));
     }
 
     @Test
     public void shouldGetPensionDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("validate-pension-collection.json");
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-pension-collection.json");
         List<CaseDocument> pensionDocuments = documentHelper.getPensionDocumentsData(
-                callbackRequest.getCaseDetails().getData());
+            callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
     }
 
     @Test
     public void shouldGetFormADocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("validate-form-a-collection.json");
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("validate-form-a-collection.json");
         List<CaseDocument> pensionDocuments = documentHelper.getFormADocumentsData(
             callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
@@ -69,32 +79,65 @@ public class DocumentHelperTest {
 
     @Test
     public void shouldGetConsentedInContestedPensionDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("consented-in-consented.json");
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("consented-in-consented.json");
         List<CaseDocument> pensionDocuments = documentHelper.getConsentedInContestedPensionDocumentsData(
             callbackRequest.getCaseDetails().getData());
         assertThat(pensionDocuments.size(), is(2));
     }
 
     @Test
+    public void hasAnotherHearing_shouldReturnTrue() {
+        Map<String, Object> caseData = new HashMap<>();
+        DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(YES_VALUE).build();
+        DirectionDetailsCollectionData directionDetailsCollectionData
+            = DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
+        List<DirectionDetailsCollectionData> directionDetailsCollectionList = Arrays.asList(directionDetailsCollectionData);
+        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
+
+        assertTrue(documentHelper.hasAnotherHearing(caseData));
+    }
+
+    @Test
+    public void hasAnotherHearing_noDirectionDetails() {
+        Map<String, Object> caseData = new HashMap<>();
+        List<DirectionDetailsCollectionData> directionDetailsCollectionList = Arrays.asList();
+        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
+
+        assertFalse(documentHelper.hasAnotherHearing(caseData));
+    }
+
+    @Test
+    public void hasAnotherHearing_noNextHearing() {
+        Map<String, Object> caseData = new HashMap<>();
+        DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(NO_VALUE).build();
+        DirectionDetailsCollectionData directionDetailsCollectionData
+            = DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
+        List<DirectionDetailsCollectionData> directionDetailsCollectionList = Arrays.asList(directionDetailsCollectionData);
+        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
+
+        assertFalse(documentHelper.hasAnotherHearing(caseData));
+    }
+
+    @Test
     public void shouldGetRespondToOrderDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("respond-to-order-solicitor.json");
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-solicitor.json");
         Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
-                callbackRequest.getCaseDetails().getData());
+            callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(true));
         assertThat(latestRespondToOrderDocuments.get().getDocumentBinaryUrl(), is("http://doc2/binary"));
     }
 
     @Test
     public void shouldNotGetRespondToOrderDocuments() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("respond-to-order-without-consent-order.json");
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("respond-to-order-without-consent-order.json");
         Optional<CaseDocument> latestRespondToOrderDocuments = documentHelper.getLatestRespondToOrderDocuments(
-                callbackRequest.getCaseDetails().getData());
+            callbackRequest.getCaseDetails().getData());
         assertThat(latestRespondToOrderDocuments.isPresent(), is(false));
     }
 
     @Test
     public void shouldGetCaseDocument() throws Exception {
-        CallbackRequest callbackRequest = prepareCallbackRequest("draft-consent-order.json");
+        CallbackRequest callbackRequest = prepareCallbackRequestForLatestConsentedConsentOrder("draft-consent-order.json");
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> data = caseDetails.getData();
         CaseDocument caseDocument = documentHelper.convertToCaseDocument(data.get(CONSENT_ORDER));
@@ -231,8 +274,14 @@ public class DocumentHelperTest {
         assertEquals(ctscContactDetails, preparedCaseDetails.getData().get(CTSC_CONTACT_DETAILS));
     }
 
-    private CallbackRequest prepareCallbackRequest(String fileName) throws Exception {
+    private CallbackRequest prepareCallbackRequestForLatestConsentedConsentOrder(String fileName) throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
+            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
+        }
+    }
+
+    private CallbackRequest prepareCallbackRequest(String fileName) throws Exception {
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(fileName)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }

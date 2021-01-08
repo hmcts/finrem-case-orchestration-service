@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderPrintService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GenericDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 
@@ -34,14 +35,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.CONSENT_ORDER_MADE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
@@ -57,6 +57,7 @@ public class ConsentOrderApprovedController implements BaseController {
     private final ConsentOrderPrintService consentOrderPrintService;
     private final NotificationService notificationService;
     private final ObjectMapper mapper;
+    private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/documents/consent-order-approved", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "'Consent Order Approved' callback handler. Generates relevant Consent Order Approved documents")
@@ -72,18 +73,17 @@ public class ConsentOrderApprovedController implements BaseController {
 
         validateCaseData(callback);
         CaseDetails caseDetails = callback.getCaseDetails();
-        Map<String, Object> caseData = caseDetails.getData();
-        CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
+        CaseDocument latestConsentOrder = getLatestConsentOrder(caseDetails.getData());
 
         if (!isEmpty(latestConsentOrder)) {
-            caseData = generateAndPrepareDocuments(authToken, callback);
+            generateAndPrepareDocuments(authToken, caseDetails);
         } else {
             log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty");
         }
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseData)
+                .data(caseDetails.getData())
                 .errors(ImmutableList.of())
                 .warnings(ImmutableList.of())
                 .build());
@@ -103,9 +103,10 @@ public class ConsentOrderApprovedController implements BaseController {
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
         validateCaseData(callback);
         CaseDetails caseDetails = callback.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
 
-        Map<String, Object> caseData = consentOrderApprovedDocumentService
-            .stampAndPopulateContestedConsentApprovedOrderCollection(caseDetails.getData(), authToken);
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, authToken);
+        consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
@@ -126,12 +127,8 @@ public class ConsentOrderApprovedController implements BaseController {
     })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedSendOrder(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) throws JsonProcessingException {
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
-
-        if (caseDetails.getState().equals(CONSENTED_ORDER_APPROVED)) {
-            consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
-        }
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
 
@@ -140,10 +137,9 @@ public class ConsentOrderApprovedController implements BaseController {
             .build());
     }
 
-    private Map<String, Object> generateAndPrepareDocuments(@RequestHeader(AUTHORIZATION_HEADER) String authToken, CallbackRequest callback) {
+    private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails) {
         log.info("Generating and preparing documents for latest consent order");
 
-        CaseDetails caseDetails = callback.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
         List<PensionCollectionData> pensionDocs = getPensionDocuments(caseData);
@@ -170,7 +166,7 @@ public class ConsentOrderApprovedController implements BaseController {
             .build();
         log.info("Generated ApprovedOrderData = {}", approvedOrderData);
 
-        List<ApprovedOrderData> approvedOrders = asList(approvedOrderData);
+        List<ApprovedOrderData> approvedOrders = singletonList(approvedOrderData);
         caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
         log.info("Successfully generated documents for 'Consent Order Approved'");
@@ -181,26 +177,31 @@ public class ConsentOrderApprovedController implements BaseController {
                 // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
                 caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
                 caseDetails.setData(caseData);
-                caseData = consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
+                consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
                 caseData.put(STATE, CONSENT_ORDER_MADE.toString());
-                notificationService.sendConsentOrderAvailableCtscEmail(callback);
+                notificationService.sendConsentOrderAvailableCtscEmail(caseDetails);
+
+                if (notificationService.shouldEmailApplicantSolicitor(caseDetails)) {
+                    log.info("Sending email notification to Applicant Solicitor for 'Consent Order Available'");
+                    notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
+                }
+
+                if (featureToggleService.isRespondentJourneyEnabled()
+                    && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+                    log.info("Sending email notification to Respondent Solicitor for 'Consent Order Available'");
+                    notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
+                }
             } catch (JsonProcessingException e) {
                 log.error(e.getMessage());
             }
         }
-
-        return caseData;
     }
 
     private CaseDocument getLatestConsentOrder(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(LATEST_CONSENT_ORDER),
-            new TypeReference<CaseDocument>() {
-            });
+        return mapper.convertValue(caseData.get(LATEST_CONSENT_ORDER), new TypeReference<>() {});
     }
 
     private List<PensionCollectionData> getPensionDocuments(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION),
-            new TypeReference<List<PensionCollectionData>>() {
-            });
+        return mapper.convertValue(caseData.get(PENSION_DOCS_COLLECTION), new TypeReference<>() {});
     }
 }

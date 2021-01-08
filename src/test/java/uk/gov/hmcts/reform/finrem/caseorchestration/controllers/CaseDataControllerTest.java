@@ -1,7 +1,8 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import org.junit.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -24,7 +25,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 
-@WebMvcTest(CaseDataController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class CaseDataControllerTest extends BaseControllerTest {
 
     private static final String MOVE_VALUES_SAMPLE_JSON = "/fixtures/move-values-sample.json";
@@ -38,7 +40,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @MockBean private FeatureToggleService featureToggleService;
 
     @Test
-    public void shouldSuccessfullyMoveValues() throws Exception {
+    public void shouldSuccessfullyMoveCollection() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.TRUE);
 
         loadRequestContentWith(MOVE_VALUES_SAMPLE_JSON);

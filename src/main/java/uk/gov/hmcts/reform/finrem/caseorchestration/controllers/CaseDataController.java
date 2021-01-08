@@ -14,14 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -36,22 +34,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_ID;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_REF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isConsentedApplication;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isContestedApplication;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
-@SuppressWarnings("unchecked")
 public class CaseDataController implements BaseController {
 
     private final UpdateSolicitorDetailsService solicitorService;
     private final IdamService idamService;
+    private final CaseDataService caseDataService;
     private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -116,18 +110,9 @@ public class CaseDataController implements BaseController {
         @PathVariable("destination") final String destination) {
 
         validateCaseData(callbackRequest);
-        final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        if (caseData.get(source) != null && (caseData.get(source) instanceof Collection)) {
-            if (caseData.get(destination) == null || (caseData.get(destination) instanceof Collection)) {
-                final List destinationList = new ArrayList();
-                if (caseData.get(destination) != null) {
-                    destinationList.addAll((List) caseData.get(destination));
-                }
-                destinationList.addAll((List) caseData.get(source));
-                caseData.put(destination, destinationList);
-                caseData.put(source, null);
-            }
-        }
+
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        caseDataService.moveCollection(caseData, source, destination);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
@@ -147,16 +132,14 @@ public class CaseDataController implements BaseController {
     }
 
     private void setOrganisationPolicy(CaseDetails caseDetails) {
-        log.info("Share a case is enabled: {}", featureToggleService.isShareACaseEnabled());
-        if (featureToggleService.isShareACaseEnabled() && (isContestedApplication(caseDetails)
-            || isConsentedApplication(caseDetails))) {
+        if (featureToggleService.isShareACaseEnabled()
+            && (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails))) {
 
             Map<String, Object> appPolicy = new HashMap<>();
             appPolicy.put(ORGANISATION_POLICY_ROLE, APP_SOLICITOR_POLICY);
             appPolicy.put(ORGANISATION_POLICY_REF, null);
             Map<String, Object> org = new HashMap<>();
             org.put(ORGANISATION_POLICY_ORGANISATION_ID, null);
-            org.put(ORGANISATION_POLICY_ORGANISATION_NAME, null);
             appPolicy.put(ORGANISATION_POLICY_ORGANISATION, org);
 
             caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appPolicy);
@@ -166,12 +149,10 @@ public class CaseDataController implements BaseController {
     }
 
     private void setApplicantSolicitorOrganisationDetails(CaseDetails caseDetails, String authToken) {
-        if (featureToggleService.isShareACaseEnabled() && isContestedApplication(caseDetails)) {
-            log.info("Share a case toggle is: {} for case ID {}", featureToggleService.isShareACaseEnabled(), caseDetails.getId());
-
-            if (isApplicantRepresentedByASolicitor(caseDetails.getData())) {
-                caseDetails.getData().put(CONTESTED_SOLICITOR_ADDRESS, solicitorService.updateApplicantSolicitorAddressFromPrd(authToken));
-            }
+        if (featureToggleService.isShareACaseEnabled()
+            && caseDataService.isContestedApplication(caseDetails)
+            && caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
+            caseDetails.getData().put(CONTESTED_SOLICITOR_ADDRESS, solicitorService.updateApplicantSolicitorAddressFromPrd(authToken));
         }
     }
 }

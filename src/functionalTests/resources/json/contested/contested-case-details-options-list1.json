@@ -1,7 +1,7 @@
 {
-  "id" : "12345678",
-  "jurisdiction":"divorce",
-  "state":"created",
+  "id": "12345678",
+  "jurisdiction": "divorce",
+  "state": "created",
   "case_type_id": "FinancialRemedyContested",
   "case_data": {
     "MIAMExemptionsChecklist": [

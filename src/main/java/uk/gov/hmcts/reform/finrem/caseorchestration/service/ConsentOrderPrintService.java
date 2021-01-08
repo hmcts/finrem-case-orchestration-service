@@ -14,10 +14,10 @@ import java.util.UUID;
 
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_APP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_LETTER_ID_RES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isOrderApprovedCollectionPresent;
 
 @Slf4j
 @Service
@@ -29,12 +29,13 @@ public class ConsentOrderPrintService {
     private final GeneralOrderService generalOrderService;
     private final ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
     private final ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+    private final CaseDataService caseDataService;
 
-    public Map<String, Object> sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
+    public void sendConsentOrderToBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
-            UUID applicantLetterId = isOrderApprovedCollectionPresent(caseData)
+            UUID applicantLetterId = caseDataService.isOrderApprovedCollectionPresent(caseData)
                 ? printApplicantConsentOrderApprovedDocuments(caseDetails, authorisationToken)
                 : printApplicantConsentOrderNotApprovedDocuments(caseDetails, authorisationToken);
             caseData.put(BULK_PRINT_LETTER_ID_APP, applicantLetterId);
@@ -43,17 +44,21 @@ public class ConsentOrderPrintService {
         generateCoversheetForRespondentAndSendOrders(caseDetails, authorisationToken);
 
         log.info("Bulk print is successful");
-
-        return caseData;
     }
 
     private void generateCoversheetForRespondentAndSendOrders(CaseDetails caseDetails, String authToken) {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authToken);
         UUID respondentLetterId = sendConsentOrderForBulkPrintRespondent(respondentCoverSheet, caseDetails);
-
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
-        caseData.put(BULK_PRINT_LETTER_ID_RES, respondentLetterId);
+
+        if (caseDataService.isRespondentAddressConfidential(caseData)) {
+            log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", caseDetails.getId());
+            caseData.remove(BULK_PRINT_COVER_SHEET_RES);
+            caseData.put(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL, respondentCoverSheet);
+        } else {
+            caseData.put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
+            caseData.put(BULK_PRINT_LETTER_ID_RES, respondentLetterId);
+        }
 
         log.info("Generated Respondent CoverSheet for bulk print. coversheet: {}, letterId : {}", respondentCoverSheet, respondentLetterId);
     }
@@ -82,13 +87,13 @@ public class ConsentOrderPrintService {
 
         Map<String, Object> caseData = caseDetails.getData();
 
-        List<BulkPrintDocument> orderDocuments = isOrderApprovedCollectionPresent(caseData)
+        List<BulkPrintDocument> orderDocuments = caseDataService.isOrderApprovedCollectionPresent(caseData)
             ? consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails)
             : consentOrderNotApprovedDocumentService.notApprovedConsentOrder(caseDetails);
 
         bulkPrintDocuments.addAll(orderDocuments);
 
-        if (!isOrderApprovedCollectionPresent(caseDetails.getData()) && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
+        if (!caseDataService.isOrderApprovedCollectionPresent(caseDetails.getData()) && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
             bulkPrintDocuments.add(generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData()));
         }
 

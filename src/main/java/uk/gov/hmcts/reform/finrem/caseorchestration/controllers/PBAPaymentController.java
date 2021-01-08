@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 
@@ -41,13 +42,14 @@ public class PBAPaymentController implements BaseController {
 
     private final FeeService feeService;
     private final PBAPaymentService pbaPaymentService;
+    private final CaseDataService caseDataService;
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles PBA Payments for Consented Journey")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPayment(
-            @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-            @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         log.info("Received request for PBA payment for consented for Case ID: {}", caseDetails.getId());
@@ -77,8 +79,8 @@ public class PBAPaymentController implements BaseController {
 
     private void feeLookup(@RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
                            @RequestBody CallbackRequest callbackRequest, Map<String, Object> caseData) {
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeResponse = new FeeLookupController(feeService)
-                .feeLookup(authToken, callbackRequest);
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> feeResponse = new FeeLookupController(feeService, caseDataService)
+            .feeLookup(authToken, callbackRequest);
         caseData.put(ORDER_SUMMARY, Objects.requireNonNull(feeResponse.getBody()).getData().get(ORDER_SUMMARY));
         caseData.put(AMOUNT_TO_PAY, Objects.requireNonNull(feeResponse.getBody()).getData().get(AMOUNT_TO_PAY));
     }

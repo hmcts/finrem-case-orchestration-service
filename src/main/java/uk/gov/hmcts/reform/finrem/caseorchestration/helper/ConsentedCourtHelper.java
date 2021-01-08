@@ -6,50 +6,115 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ALDERSHOT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BARNSTAPLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BARROW;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BASINGSTOKE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BATH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BEDFORDSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BIRMINGHAM_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BLACKBURN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BLACKPOOL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BODMIN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BOURNEMOUTH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOLFRC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BRISTOL_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BURY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CAERNARFON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CAMBRIDGE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CARLISLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHELMSFORD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CLEAVELAND_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DEVON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DEVON_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DORSET_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EXETER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GLOUCESTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HERTFORD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IPSWICH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISLE_OF_WIGHT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LEYLAND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LIVERPOOL_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LUTON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MANCHESTER_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MILTON_KEYNES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MOLD;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NEWPORT_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWALES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORTH_WALES_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NORWICH;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWOTHER_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NWYORKSHIRE_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OTHER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.OXFORD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PETERBOROUGH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PLYMOUTH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PORTSMOUTH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PRESTATYN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PRESTON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.READING;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REEDLEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SALISBURY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SEOTHER_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SLOUGH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHAMPTON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEND;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHWEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHWEST_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWANSEA_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWINDON;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SWOTHER_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TAUNTON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.THAMESVALLEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.THAMESVALLEY_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TORQUAY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TRURO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WALES_OTHER_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WATFORD;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WELSHPOOL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WESTON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WEST_CUMBRIA;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WEYMOUTH;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WINCHESTER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.WREXHAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.YEOVIL;
 
 public class ConsentedCourtHelper {
-    private ConsentedCourtHelper(){
+    private ConsentedCourtHelper() {
     }
 
     public static String getSelectedCourt(CaseDetails caseDetails) {
@@ -84,6 +149,12 @@ public class ConsentedCourtHelper {
         String southWestList = (String) caseData.get(SOUTHWEST_FRC_LIST);
         if (OTHER.equalsIgnoreCase(southWestList)) {
             return getSwOtherCourt(caseData);
+        } else if (DEVON.equalsIgnoreCase(southWestList)) {
+            return getDevonCourt(caseData);
+        } else if (DORSET.equalsIgnoreCase(southWestList)) {
+            return getDorsetCourt(caseData);
+        } else if (BRISTOLFRC.equalsIgnoreCase(southWestList)) {
+            return getBristolCourt(caseData);
         }
         return EMPTY;
     }
@@ -94,6 +165,10 @@ public class ConsentedCourtHelper {
             return getKentCourt(caseData);
         } else if (OTHER.equalsIgnoreCase(southEastList)) {
             return getSeOtherCourt(caseData);
+        } else if (BEDFORDSHIRE.equalsIgnoreCase(southEastList)) {
+            return getBedfordshireCourt(caseData);
+        } else if (THAMESVALLEY.equalsIgnoreCase(southEastList)) {
+            return getThamesValleyCourt(caseData);
         }
         return EMPTY;
     }
@@ -106,6 +181,8 @@ public class ConsentedCourtHelper {
             return getSwanseaCourt(caseData);
         } else if (OTHER.equalsIgnoreCase(walesList)) {
             return getWalesOtherCourt(caseData);
+        } else if (NORTHWALES.equalsIgnoreCase(walesList)) {
+            return getNorthWalesCourt(caseData);
         }
         return EMPTY;
     }
@@ -118,6 +195,8 @@ public class ConsentedCourtHelper {
             return getManchesterCourt(caseData);
         } else if (OTHER.equalsIgnoreCase(northWestList)) {
             return getNwOtherCourt(caseData);
+        } else if (LANCASHIRE.equalsIgnoreCase(northWestList)) {
+            return getLancashireCourt(caseData);
         }
         return EMPTY;
     }
@@ -254,6 +333,22 @@ public class ConsentedCourtHelper {
         .put("FR_manchesterList_3", "Wigan County Court and Family Court")
         .build();
 
+    public static String getLancashireCourt(Map<String, Object> caseData) {
+        return lancashireMap.getOrDefault(caseData.get(LANCASHIRE_COURTLIST), "");
+    }
+
+    private static Map<String, String> lancashireMap = ImmutableMap.<String, String>builder()
+        .put(PRESTON, "Preston Combined Court Centre")
+        .put(BLACKBURN, "Blackburn Family Court")
+        .put(BLACKPOOL, "Blackpool Family Court")
+        .put(LANCASTER, "Lancaster Courthouse")
+        .put(LEYLAND, "Leyland Family Hearing Centre")
+        .put(REEDLEY, "Reedley Family Hearing Centre")
+        .put(BARROW, "Barrow in Furness County and Family Court")
+        .put(CARLISLE, "Carlisle Combined Court")
+        .put(WEST_CUMBRIA, "West Cumbria Courthouse")
+        .build();
+
     public static String getNwYorkshireCourt(Map<String, Object> caseData) {
         return yorkshireMap.getOrDefault(caseData.get(NWYORKSHIRE_COURTLIST), "");
     }
@@ -314,6 +409,35 @@ public class ConsentedCourtHelper {
         .put("FR_SEList_21", "Thanet County Court and Family Court")
         .build();
 
+    public static String getBedfordshireCourt(Map<String, Object> caseData) {
+        return bedfordshireMap.getOrDefault(caseData.get(BEDFORDSHIRE_COURTLIST), "");
+    }
+
+    private static Map<String, String> bedfordshireMap = ImmutableMap.<String, String>builder()
+        .put(PETERBOROUGH, "Peterborough Combined Court Centre")
+        .put(CAMBRIDGE, "Cambridge County Court and Family Court")
+        .put(BURY, "Bury St Edmunds County Court and Family Court")
+        .put(NORWICH, "Norwich Combined Court Centre")
+        .put(IPSWICH, "Ipswich County Court and Faily Hearing Centre")
+        .put(CHELMSFORD, "Chelmsford County Court and Family Hearing Centre")
+        .put(SOUTHEND, "Southend County Court and Family Court")
+        .put(BEDFORD, "Bedford County Court and Family Court")
+        .put(LUTON, "Luton Justice Centre")
+        .put(HERTFORD, "Hertford County Court and Family Court")
+        .put(WATFORD, "Watford County Court and Family Court")
+        .build();
+
+    public static String getThamesValleyCourt(Map<String, Object> caseData) {
+        return thamesvalleyMap.getOrDefault(caseData.get(THAMESVALLEY_COURTLIST), "");
+    }
+
+    private static Map<String, String> thamesvalleyMap = ImmutableMap.<String, String>builder()
+        .put(OXFORD, "Oxford Combined Court Centre")
+        .put(READING, "Reading County Court and Family Court")
+        .put(MILTON_KEYNES, "Milton Keynes County Court and Family Court")
+        .put(SLOUGH, "Slough County Court and Family Court")
+        .build();
+
     public static String getSwOtherCourt(Map<String, Object> caseData) {
         return swOtherMap.getOrDefault(caseData.get(SWOTHER_COURTLIST), "");
     }
@@ -341,6 +465,49 @@ public class ConsentedCourtHelper {
         .put("FR_SWList_20", "Bournemouth and Poole County Court and Family Court")
         .put("FR_SWList_21", "Bath Law Courts")
         .put("FR_SWList_22", "Barnstaple Magistrates, County and Family Court")
+        .build();
+
+    public static String getDevonCourt(Map<String, Object> caseData) {
+        return devonMap.getOrDefault(caseData.get(DEVON_COURTLIST), "");
+    }
+
+    private static Map<String, String> devonMap = ImmutableMap.<String, String>builder()
+        .put(PLYMOUTH, "Plymouth Combined Court")
+        .put(EXETER, "Exeter Combined Court Centre")
+        .put(TAUNTON, "Taunton Crown, County and Family Court")
+        .put(TORQUAY, "Torquay and Newton Abbot County and Family Court")
+        .put(BARNSTAPLE, "Barnstaple Magistrates, County and Family Court")
+        .put(TRURO, "Truro County Court and Family Court")
+        .put(YEOVIL, "Yeovil County, Family and Magistrates Court")
+        .put(BODMIN, "Bodmin County Court and Family Court")
+        .build();
+
+    public static String getDorsetCourt(Map<String, Object> caseData) {
+        return dorsetMap.getOrDefault(caseData.get(DORSET_COURTLIST), "");
+    }
+
+    private static Map<String, String> dorsetMap = ImmutableMap.<String, String>builder()
+        .put(BOURNEMOUTH, "Bournemouth and Poole County Court and Family Court")
+        .put(WEYMOUTH, "Weymouth Combined Court")
+        .put(WINCHESTER, "Winchester Combined Court Centre")
+        .put(PORTSMOUTH, "Portsmouth Combined Court Centre")
+        .put(SOUTHAMPTON, "Southampton Combined Court Centre")
+        .put(ALDERSHOT, "Aldershot Justice Centre")
+        .put(BASINGSTOKE, "Basingstoke County and Family Court")
+        .put(ISLE_OF_WIGHT, "Newport (Isle of Wight) Combined Court")
+        .build();
+
+    public static String getBristolCourt(Map<String, Object> caseData) {
+        return bristolMap.getOrDefault(caseData.get(BRISTOL_COURTLIST), "");
+    }
+
+    private static Map<String, String> bristolMap = ImmutableMap.<String, String>builder()
+        .put(BRISTOL, "Bristol Civil and Family Justice Centre")
+        .put(GLOUCESTER, "Gloucester and Cheltenham County and Family Court")
+        .put(SWINDON, "Swindon Combined Court")
+        .put(SALISBURY, "Salisbury Law Courts")
+        .put(BATH, "Bath Law Courts")
+        .put(WESTON, "Weston Super Mare County and Family Court")
         .build();
 
     public static String getNewportCourt(Map<String, Object> caseData) {
@@ -389,5 +556,17 @@ public class ConsentedCourtHelper {
         .put("FR_WList_2", "Welshpool Civil and Family Court")
         .put("FR_WList_3", "Wrexham County Court and Family Court")
         .put("FR_WList_4", "Mold County")
+        .build();
+
+    public static String getNorthWalesCourt(Map<String, Object> caseData) {
+        return northWalesMap.getOrDefault(caseData.get(NORTH_WALES_COURTLIST), "");
+    }
+
+    private static Map<String, String> northWalesMap = ImmutableMap.<String, String>builder()
+        .put(WREXHAM, "Wrexham County Court and Family Court")
+        .put(CAERNARFON, "Caernarfon Justice Centre")
+        .put(PRESTATYN, "Prestatyn Justice Centre")
+        .put(WELSHPOOL, "Welshpool Civil and Family Court")
+        .put(MOLD, "Mold County")
         .build();
 }

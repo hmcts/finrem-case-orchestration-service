@@ -29,9 +29,9 @@ public interface PaymentClient {
 
 
     @PostMapping(path = "/payments/pba-payment",
-            headers = CONTENT_TYPE + "=" + MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
+        headers = CONTENT_TYPE + "=" + MediaType.APPLICATION_JSON_VALUE,
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
     )
     PaymentResponse pbaPayment(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
                                @RequestBody PaymentRequest paymentRequest);

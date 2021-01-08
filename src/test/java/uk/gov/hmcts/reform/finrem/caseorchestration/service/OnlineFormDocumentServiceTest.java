@@ -18,9 +18,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -121,7 +121,7 @@ public class OnlineFormDocumentServiceTest extends BaseServiceTest {
         assertThat(data.get(CONSENTED_SOLICITOR_FIRM), is("Awesome Firm"));
 
         assertThat(data, IsMapContaining.hasKey(CONSENTED_SOLICITOR_ADDRESS));
-        Map<String, Object> addressObject = (Map<String, Object>)data.get(CONSENTED_SOLICITOR_ADDRESS);
+        Map<String, Object> addressObject = (Map<String, Object>) data.get(CONSENTED_SOLICITOR_ADDRESS);
         assertThat(addressObject.get("County").toString(), is("County"));
         assertThat(addressObject.get("Country").toString(), is("UK"));
         assertThat(addressObject.get("PostCode").toString(), is("SW1A 1AA"));

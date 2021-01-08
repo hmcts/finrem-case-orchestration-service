@@ -16,8 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ApplicationType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ConsentOrderData;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetter;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralLetterData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.TypedCaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -27,15 +25,14 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
@@ -51,7 +48,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST;
@@ -71,8 +67,8 @@ public class TestSetUpUtils {
     public static final String PENSION_TYPE = "PPF1";
     public static final String PENSION_ID = "1";
 
-    public static  final int INTERNAL_SERVER_ERROR = HttpStatus.INTERNAL_SERVER_ERROR.value();
-    public static  final int BAD_REQUEST = HttpStatus.BAD_REQUEST.value();
+    public static final int INTERNAL_SERVER_ERROR = HttpStatus.INTERNAL_SERVER_ERROR.value();
+    public static final int BAD_REQUEST = HttpStatus.BAD_REQUEST.value();
 
     public static FeignException feignError() {
         Response response = Response.builder().status(INTERNAL_SERVER_ERROR)
@@ -115,25 +111,10 @@ public class TestSetUpUtils {
         return caseData;
     }
 
-    public static Map<String, Object> generalLetterDataMap() {
-        return ImmutableMap.of(GENERAL_LETTER, ImmutableList.of(generalLetterData()));
-    }
-
     public static Map<String, Object> caseDataWithGeneralOrder() {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put(GENERAL_ORDER_PREVIEW_DOCUMENT, caseDocument());
         return caseData;
-    }
-
-    private static GeneralLetterData generalLetterData() {
-        GeneralLetter generalLetter = new GeneralLetter(caseDocument());
-
-        GeneralLetterData generalLetterData = GeneralLetterData.builder()
-            .id(UUID.randomUUID().toString())
-            .generalLetter(generalLetter)
-            .build();
-
-        return generalLetterData;
     }
 
     public static Map<String, Object> caseDataWithRefusalOrder() {
@@ -146,7 +127,7 @@ public class TestSetUpUtils {
         ConsentOrder consentOrder = new ConsentOrder();
         consentOrder.setDocumentType(REJECTED_ORDER_TYPE);
         consentOrder.setDocumentLink(caseDocument());
-        consentOrder.setDocumentDateAdded(new Date());
+        consentOrder.setDocumentDateAdded(LocalDate.now());
 
         ConsentOrderData consentOrderData = new ConsentOrderData();
         consentOrderData.setId(id);
@@ -314,5 +295,21 @@ public class TestSetUpUtils {
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(BulkPrintDocument.builder().binaryFileUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/967103ad-0b95-4f0f-9712-4bf5770fb196/binary").build());
         return bulkPrintDocuments;
+    }
+
+    public static Map<String, Object> caseDataWithUploadHearingOrder() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("uploadHearingOrderRO", new ArrayList<>() {
+            {
+                add(new CaseDocument());
+                add(new CaseDocument());
+            }
+        });
+        caseData.put("uploadHearingOrder", new ArrayList<>() {
+            {
+                add(new CaseDocument());
+            }
+        });
+        return caseData;
     }
 }

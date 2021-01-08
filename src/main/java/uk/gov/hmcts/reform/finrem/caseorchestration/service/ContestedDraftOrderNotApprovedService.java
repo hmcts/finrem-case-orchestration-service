@@ -71,8 +71,8 @@ public class ContestedDraftOrderNotApprovedService {
     private CaseDetails applyAddExtraFields(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        caseData.put("ApplicantName", DocumentHelper.getApplicantFullName(caseDetails));
-        caseData.put("RespondentName", DocumentHelper.getRespondentFullNameContested(caseDetails));
+        caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
+        caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
         caseData.put("Court", ContestedCourtHelper.getSelectedCourt(caseDetails));
         caseData.put("JudgeDetails",
             StringUtils.joinWith(" ",
@@ -93,7 +93,7 @@ public class ContestedDraftOrderNotApprovedService {
                 formattedRefusalReasons.append('\n');
             }
             formattedRefusalReasons.append("- ");
-            formattedRefusalReasons.append(((Map<String, Map>)reason).get("value").get("judgeNotApprovedReasons"));
+            formattedRefusalReasons.append(((Map<String, Map>) reason).get("value").get("judgeNotApprovedReasons"));
         });
         return formattedRefusalReasons.toString();
     }
@@ -122,7 +122,8 @@ public class ContestedDraftOrderNotApprovedService {
     }
 
     private List<ContestedRefusalOrderData> convertToRefusalOrderContestedList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<>() {});
+        return objectMapper.convertValue(object, new TypeReference<>() {
+        });
     }
 
     public Optional<CaseDocument> getLatestRefusalReason(CaseDetails caseDetails) {

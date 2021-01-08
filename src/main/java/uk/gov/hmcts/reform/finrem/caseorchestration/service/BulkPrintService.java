@@ -15,10 +15,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantRepresentedByASolicitor;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isApplicantSolicitorAgreeToReceiveEmails;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CommonFunction.isPaperApplication;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL;
 
 @Service
 @Slf4j
@@ -31,15 +30,18 @@ public class BulkPrintService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final GenerateCoverSheetService coverSheetService;
+    private final CaseDataService caseDataService;
 
     public BulkPrintService(GenericDocumentService genericDocumentService,
                             ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService,
                             @Lazy ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
                             DocumentHelper documentHelper, GeneralOrderService generalOrderService,
-                            GenerateCoverSheetService coverSheetService) {
+                            GenerateCoverSheetService coverSheetService,
+                            CaseDataService caseDataService) {
         this.genericDocumentService = genericDocumentService;
         this.documentHelper = documentHelper;
         this.coverSheetService = coverSheetService;
+        this.caseDataService = caseDataService;
     }
 
     public UUID sendDocumentForPrint(final CaseDocument document, CaseDetails caseDetails) {
@@ -86,13 +88,29 @@ public class BulkPrintService {
 
     private BulkPrintDocument generateApplicantCoverSheet(CaseDetails caseDetails, String authorisationToken) {
         CaseDocument applicantCoverSheet = coverSheetService.generateApplicantCoverSheet(caseDetails, authorisationToken);
-        caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
+
+        if (caseDataService.isApplicantAddressConfidential(caseDetails.getData())) {
+            log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", caseDetails.getId());
+            caseDetails.getData().remove(BULK_PRINT_COVER_SHEET_APP);
+            caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP_CONFIDENTIAL, applicantCoverSheet);
+        } else {
+            caseDetails.getData().put(BULK_PRINT_COVER_SHEET_APP, applicantCoverSheet);
+        }
+
         return documentHelper.getCaseDocumentAsBulkPrintDocument(applicantCoverSheet);
     }
 
     private BulkPrintDocument generateRespondentCoverSheet(CaseDetails caseDetails, String authorisationToken) {
         CaseDocument respondentCoverSheet = coverSheetService.generateRespondentCoverSheet(caseDetails, authorisationToken);
-        caseDetails.getData().put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
+
+        if (caseDataService.isRespondentAddressConfidential(caseDetails.getData())) {
+            log.info("Case {}, has been marked as confidential. Adding coversheet to confidential field", caseDetails.getId());
+            caseDetails.getData().remove(BULK_PRINT_COVER_SHEET_RES);
+            caseDetails.getData().put(BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL, respondentCoverSheet);
+        } else {
+            caseDetails.getData().put(BULK_PRINT_COVER_SHEET_RES, respondentCoverSheet);
+        }
+
         return documentHelper.getCaseDocumentAsBulkPrintDocument(respondentCoverSheet);
     }
 
@@ -101,7 +119,8 @@ public class BulkPrintService {
     }
 
     public boolean shouldPrintForApplicant(CaseDetails caseDetails) {
-        return !isApplicantRepresentedByASolicitor(caseDetails.getData()) || !isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
-            || isPaperApplication(caseDetails.getData());
+        return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
+            || !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
+            || caseDataService.isPaperApplication(caseDetails.getData());
     }
 }

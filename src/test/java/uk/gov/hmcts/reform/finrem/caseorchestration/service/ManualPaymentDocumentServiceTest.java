@@ -69,7 +69,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).generateDocument(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
 
-        Map<String, Object> caseData =  documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        Map<String, Object> caseData = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
 
         Addressee addressee = (Addressee) caseData.get(ADDRESSEE);
         assertThat(addressee.getName(), is("Applicant Solicitor Firm"));
@@ -96,7 +96,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         verify(genericDocumentService, times(1)).generateDocument(any(),
             documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
 
-        Map<String, Object> caseData =  documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        Map<String, Object> caseData = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
 
         Addressee addressee = (Addressee) caseData.get(ADDRESSEE);
         assertThat(addressee.getName(), is("Applicant Name"));

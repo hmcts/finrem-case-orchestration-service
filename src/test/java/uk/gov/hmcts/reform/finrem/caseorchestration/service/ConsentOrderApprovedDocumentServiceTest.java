@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
@@ -28,9 +27,10 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
@@ -63,38 +63,34 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     private static final String DEFAULT_COVERSHEET_URL = "defaultCoversheetUrl";
     private static final String CONSENT_ORDER_APPROVED_COVER_LETTER_URL = "consentOrderApprovedCoverLetterUrl";
+    private static final String ORDER_LETTER_URL = "orderLetterUrl";
+    private static final String CONSENT_ORDER_URL = "consentOrderUrl";
+    private static final String PENSION_DOCUMENT_URL = "pensionDocumentUrl";
 
-    @Autowired
-    private ObjectMapper mapper;
+    @Autowired private ObjectMapper mapper;
+    @Autowired private DocumentHelper documentHelper;
+    @Autowired private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @Autowired private DocumentClient documentClientMock;
 
-    @Autowired
-    private DocumentHelper documentHelper;
+    @MockBean private BulkPrintService bulkPrintService;
+    @MockBean private ConsentOrderPrintService consentOrderPrintService;
 
-    @Autowired
-    private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
+    @Value("${document.bulkPrintTemplate}")
+    private String documentBulkPrintTemplate;
+    @Value("${document.bulkPrintFileName}")
+    private String documentBulkPrintFileName;
 
-    @Autowired
-    private DocumentClient documentClientMock;
+    @Value("${document.approvedConsentOrderTemplate}")
+    private String documentApprovedConsentOrderTemplate;
+    @Value("${document.approvedConsentOrderFileName}")
+    private String documentApprovedConsentOrderFileName;
 
-    @MockBean
-    private BulkPrintService bulkPrintService;
-
-    @MockBean
-    private ConsentOrderPrintService consentOrderPrintService;
-
-    @Value("${document.bulkPrintTemplate}") private String documentBulkPrintTemplate;
-    @Value("${document.bulkPrintFileName}") private String documentBulkPrintFileName;
-
-    @Value("${document.approvedConsentOrderTemplate}") private String documentApprovedConsentOrderTemplate;
-    @Value("${document.approvedConsentOrderFileName}") private String documentApprovedConsentOrderFileName;
-
-    @Value("${document.approvedConsentOrderNotificationTemplate}") private String documentApprovedConsentOrderNotificationTemplate;
-    @Value("${document.approvedConsentOrderNotificationFileName}") private String documentApprovedConsentOrderNotificationFileName;
+    @Value("${document.approvedConsentOrderNotificationTemplate}")
+    private String documentApprovedConsentOrderNotificationTemplate;
+    @Value("${document.approvedConsentOrderNotificationFileName}")
+    private String documentApprovedConsentOrderNotificationFileName;
 
     private CaseDetails caseDetails;
-    public static final String ORDER_LETTER_URL = "orderLetterUrl";
-    public static final String CONSENT_ORDER_URL = "consentOrderUrl";
-    public static final String PENSION_DOCUMENT_URL = "pensionDocumentUrl";
 
     @Before
     public void setUp() {
@@ -127,11 +123,11 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldGenerateAndPopulateApprovedConsentOrderLetterForConsentInContested() throws JsonProcessingException {
-        Map<String, Object> data = consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(
-            caseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper), AUTH_TOKEN);
-        List<ApprovedOrderData> approvedOrders = getConsentInContestedApprovedOrderCollection(data);
-        assertCaseDocument(approvedOrders.get(0).getApprovedOrder().getOrderLetter());
+    public void shouldGenerateAndPopulateApprovedConsentOrderLetterForConsentInContested() {
+        CaseDetails caseDetails = caseDetailsFromResource("/fixtures/contested/consent-in-contested-application-approved.json", mapper);
+        consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, AUTH_TOKEN);
+        List<ApprovedOrderData> approvedOrders = getConsentInContestedApprovedOrderCollection(caseDetails.getData());
+        assertCaseDocument(approvedOrders.get(approvedOrders.size() - 1).getApprovedOrder().getOrderLetter());
         verify(documentClientMock, atLeastOnce()).generatePdf(
             matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, documentApprovedConsentOrderFileName),
             anyString());
@@ -154,7 +150,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         caseDetails.getData().put(APPLICANT_REPRESENTED, NO_VALUE);
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
-                consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN);
+            consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(generatedApprovedConsentOrderNotificationLetter, CONSENT_ORDER_APPROVED_COVER_LETTER_URL);
     }
@@ -177,7 +173,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         caseData.put(CONSENTED_SOLICITOR_ADDRESS, solicitorAddress);
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter =
-                consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN);
+            consentOrderApprovedDocumentService.generateApprovedConsentOrderCoverLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(generatedApprovedConsentOrderNotificationLetter, CONSENT_ORDER_APPROVED_COVER_LETTER_URL);
     }
@@ -228,28 +224,27 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     public void stampsAndPopulatesCaseDataForContestedConsentOrder() {
         when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
         when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
-        CaseDetails caseDetails = defaultConsentedCaseDetails();
-        caseDetails.getData().put(CONSENT_ORDER, caseDocument());
-        Map<String, Object> data = consentOrderApprovedDocumentService
-            .stampAndPopulateContestedConsentApprovedOrderCollection(caseDetails.getData(), AUTH_TOKEN);
-        assertThat(getDocumentList(data, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(1));
 
-        caseDetails.setData(data);
-        data = consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseDetails.getData(), AUTH_TOKEN);
-        assertThat(getDocumentList(data, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(2));
+        CaseDetails caseDetails = defaultConsentedCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
+        caseData.put(CONSENT_ORDER, caseDocument());
+
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN);
+        assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(1));
+
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN);
+        assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(2));
     }
 
     @Test
     public void shouldConvertCollectionDocument() {
         List<BulkPrintDocument> bulkPrintDocuments = consentOrderApprovedDocumentService.approvedOrderCollection(caseDetails());
 
-        assertThat(bulkPrintDocuments, hasSize(4));
+        assertThat(bulkPrintDocuments, hasSize(3));
     }
 
     private List<CaseDocument> getDocumentList(Map<String, Object> data, String field) {
-        return mapper.convertValue(data.get(field),
-            new TypeReference<List<CaseDocument>>() {
-            });
+        return mapper.convertValue(data.get(field), new TypeReference<>() {});
     }
 
     private void addConsentOrderApprovedDataToCaseDetails(CaseDetails caseDetails) throws Exception {
@@ -258,18 +253,17 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
         ApprovedOrder approvedOrder = ApprovedOrder.builder()
             .consentOrder(caseDocument(CONSENT_ORDER_URL, CONSENT_ORDER_URL, CONSENT_ORDER_URL))
-            .pensionDocuments(asList(pensionData))
+            .pensionDocuments(singletonList(pensionData))
             .orderLetter(caseDocument(ORDER_LETTER_URL, ORDER_LETTER_URL, ORDER_LETTER_URL))
             .build();
         ApprovedOrderData approvedOrderData = ApprovedOrderData.builder().approvedOrder(approvedOrder).build();
 
-        caseDetails.getData().put(APPROVED_ORDER_COLLECTION, asList(approvedOrderData));
+        caseDetails.getData().put(APPROVED_ORDER_COLLECTION, singletonList(approvedOrderData));
         caseDetails.setData(mapper.readValue(mapper.writeValueAsString(caseDetails.getData()), HashMap.class));
     }
 
     private List<ApprovedOrderData> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
-        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<List<ApprovedOrderData>>() {
-        });
+        return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {});
     }
 
     private CaseDetails caseDetails() {

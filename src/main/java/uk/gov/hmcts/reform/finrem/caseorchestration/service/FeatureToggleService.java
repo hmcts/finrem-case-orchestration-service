@@ -14,8 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_DRAFT_ORDER_NOT_APPROVED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.CONTESTED_PRINT_GENERAL_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.RESPONDENT_JOURNEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SHARE_A_CASE;
 
@@ -44,13 +43,8 @@ public class FeatureToggleService {
             .orElse(false);
     }
 
-
-    public boolean isContestedPrintDraftOrderNotApprovedEnabled() {
-        return isFeatureEnabled(CONTESTED_PRINT_DRAFT_ORDER_NOT_APPROVED);
-    }
-
-    public boolean isContestedPrintGeneralOrderEnabled() {
-        return isFeatureEnabled(CONTESTED_PRINT_GENERAL_ORDER);
+    public boolean isRespondentJourneyEnabled() {
+        return isFeatureEnabled(RESPONDENT_JOURNEY);
     }
 
     public boolean isShareACaseEnabled() {
@@ -69,6 +63,7 @@ public class FeatureToggleService {
     /**
      * Given runtime feature toggle status, returns fields that should be ignored during serialisation (i.e. not
      * serialised to JSON).
+     *
      * @return a map with Class of ignored fields as key and field names as value
      */
     public Map<Class, List<String>> getFieldsIgnoredDuringSerialisation() {

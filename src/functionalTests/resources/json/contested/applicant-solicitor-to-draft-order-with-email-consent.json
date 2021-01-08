@@ -2,14 +2,33 @@
   "token": "test_token",
   "event_id": "event1",
   "case_details": {
-    "id" : "12345678",
+    "id": "12345678",
     "jurisdiction": "divorce",
     "state": "created",
-    "case_type_id": "FinancialRemedyContested",
     "case_data": {
-      "consentD81Question": true,
       "PBANumber": "PBA123456",
+      "d81Question": "No",
       "PBAreference": "ABCD",
+      "consentOrder": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
+      "d81Joint": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
+      "d81Applicant": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
+      "d81Respondent": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
       "solicitorFirm": "FirmA",
       "solicitorName": "Solictor",
       "applicantLName": "Guy",
@@ -34,6 +53,11 @@
       "respondentEmail": "test@test.com",
       "respondentPhone": "9963472494",
       "appRespondentRep": "No",
+      "consentOrderText": {
+        "document_url": "http://file1",
+        "document_filename": "file1",
+        "document_binary_url": "http://file1.binary"
+      },
       "solicitorAddress": {
         "County": "essex",
         "Country": "UK",
@@ -99,7 +123,8 @@
       },
       "divorceDecreeAbsoluteDate": "2010-01-01",
       "orderForChildrenQuestion1": "Yes",
-      "applicantSolicitorConsentForEmails": "Yes",
+      "solicitorAgreeToReceiveEmails": "Yes",
+      "solicitorResponsibleForDraftingOrder": "applicantSolicitor",
       "orderDirection": "test",
       "orderDirectionOpt1": {
         "document_url": "http://file1",
@@ -253,8 +278,6 @@
             "amendedConsentOrderDate": "2010-01-02"
           }
         }
-      ],
-      "finalOrderCollection": [
       ]
     }
   }

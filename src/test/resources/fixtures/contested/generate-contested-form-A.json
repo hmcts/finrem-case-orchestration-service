@@ -64,9 +64,9 @@
       "authorisationFirm": "test",
       "authorisationName": "test",
       "divorceCaseNumber": "DD12D12345",
-      "issueDate" : "2019-03-04",
-      "hearingDate" : "2019-06-24",
-      "fastTrackDecision" : "yes",
+      "issueDate": "2019-03-04",
+      "hearingDate": "2019-06-24",
+      "fastTrackDecision": "yes",
       "pensionCollection": [
         {
           "id": "ad403dd7-75da-4ca6-8cf6-24a5e42f5bf4",
@@ -124,7 +124,7 @@
       "orderForChildrenQuestion1": "Yes",
       "solicitorAgreeToReceiveEmails": "No",
       "caseAllocatedTo": "Yes",
-      "natureOfApplicationChecklist":[
+      "natureOfApplicationChecklist": [
         "periodicalPaymentOrder",
         "Lump Sum Order",
         "Pension Sharing Order",
@@ -133,7 +133,7 @@
         "Pension Compensation Attachment Order",
         "propertyAdjustmentOrder"
       ],
-      "MIAMDomesticViolenceChecklist":[
+      "MIAMDomesticViolenceChecklist": [
         "FR_ms_MIAMDomesticViolenceChecklist_Value_1",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_2",
         "FR_ms_MIAMDomesticViolenceChecklist_Value_3",

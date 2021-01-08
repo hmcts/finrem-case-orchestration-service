@@ -39,7 +39,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
     public void setupCaseData() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         callbackRequest = mapper.readValue(new File(getClass()
-                .getResource("/fixtures/pba-payment.json").toURI()), CallbackRequest.class);
+            .getResource("/fixtures/pba-payment.json").toURI()), CallbackRequest.class);
     }
 
     @Test
@@ -47,17 +47,17 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
         setupCaseData();
 
         setUpPbaPayment("{"
-                        + " \"reference\": \"RC-1545-2396-5857-4110\","
-                        + " \"date_created\": \"2018-12-19T17:14:18.572+0000\","
-                        + " \"status\": \"Success\","
-                        + " \"status_histories\": ["
-                        + "   {"
-                        + "     \"status\": \"success\","
-                        + "     \"date_created\": \"2018-12-19T17:14:18.572+0000\","
-                        + "     \"date_updated\": \"2018-12-19T17:14:18.572+0000\""
-                        + "   }"
-                        + " ]"
-                        + "}");
+            + " \"reference\": \"RC-1545-2396-5857-4110\","
+            + " \"date_created\": \"2018-12-19T17:14:18.572+0000\","
+            + " \"status\": \"Success\","
+            + " \"status_histories\": ["
+            + "   {"
+            + "     \"status\": \"success\","
+            + "     \"date_created\": \"2018-12-19T17:14:18.572+0000\","
+            + "     \"date_updated\": \"2018-12-19T17:14:18.572+0000\""
+            + "   }"
+            + " ]"
+            + "}");
 
         PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
 
@@ -73,19 +73,19 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
         setupCaseData();
 
         setUpPbaPayment("{"
-                        + " \"reference\": \"RC-1545-2396-5857-4110\","
-                        + " \"date_created\": \"2018-12-19T17:14:18.572+0000\","
-                        + " \"status\": \"Failed\","
-                        + " \"status_histories\": ["
-                        + "   {"
-                        + "     \"status\": \"failed\","
-                        + "     \"error_code\": \"CA-E0001\","
-                        + "     \"error_message\": \"You have insufficient funds available\","
-                        + "     \"date_created\": \"2018-12-19T17:14:18.572+0000\","
-                        + "     \"date_updated\": \"2018-12-19T17:14:18.572+0000\""
-                        + "   }"
-                        + " ]"
-                        + "}");
+            + " \"reference\": \"RC-1545-2396-5857-4110\","
+            + " \"date_created\": \"2018-12-19T17:14:18.572+0000\","
+            + " \"status\": \"Failed\","
+            + " \"status_histories\": ["
+            + "   {"
+            + "     \"status\": \"failed\","
+            + "     \"error_code\": \"CA-E0001\","
+            + "     \"error_message\": \"You have insufficient funds available\","
+            + "     \"date_created\": \"2018-12-19T17:14:18.572+0000\","
+            + "     \"date_updated\": \"2018-12-19T17:14:18.572+0000\""
+            + "   }"
+            + " ]"
+            + "}");
 
         PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
 
@@ -96,7 +96,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
         assertThat(paymentResponse.getStatusHistories().size(), is(1));
         assertThat(paymentResponse.getStatusHistories().get(0).getErrorCode(), is("CA-E0001"));
         assertThat(paymentResponse.getStatusHistories().get(0).getErrorMessage(),
-                is("You have insufficient funds available"));
+            is("You have insufficient funds available"));
     }
 
     @Test
@@ -104,19 +104,19 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
         setupCaseData();
 
         setUpPbaPayment("{"
-                        + " \"reference\": \"RC-1545-2396-5857-4110\","
-                        + " \"date_created\": \"2018-12-19T17:14:18.572+0000\","
-                        + " \"status\": \"Failed\","
-                        + " \"status_histories\": ["
-                        + "   {"
-                        + "     \"status\": \"failed\","
-                        + "     \"error_code\": \"CA-E0003\","
-                        + "     \"error_message\": \"Your account is on hold\","
-                        + "     \"date_created\": \"2018-12-19T17:14:18.572+0000\","
-                        + "     \"date_updated\": \"2018-12-19T17:14:18.572+0000\""
-                        + "   }"
-                        + " ]"
-                        + "}");
+            + " \"reference\": \"RC-1545-2396-5857-4110\","
+            + " \"date_created\": \"2018-12-19T17:14:18.572+0000\","
+            + " \"status\": \"Failed\","
+            + " \"status_histories\": ["
+            + "   {"
+            + "     \"status\": \"failed\","
+            + "     \"error_code\": \"CA-E0003\","
+            + "     \"error_message\": \"Your account is on hold\","
+            + "     \"date_created\": \"2018-12-19T17:14:18.572+0000\","
+            + "     \"date_updated\": \"2018-12-19T17:14:18.572+0000\""
+            + "   }"
+            + " ]"
+            + "}");
 
         PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
 
@@ -134,19 +134,19 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
         setupCaseData();
 
         setUpPbaPayment("{"
-                        + " \"reference\": \"RC-1545-2396-5857-4110\","
-                        + " \"date_created\": \"2018-12-19T17:14:18.572+0000\","
-                        + " \"status\": \"Failed\","
-                        + " \"status_histories\": ["
-                        + "   {"
-                        + "     \"status\": \"failed\","
-                        + "     \"error_code\": \"CA-E0004\","
-                        + "     \"error_message\": \"Your account is deleted\","
-                        + "     \"date_created\": \"2018-12-19T17:14:18.572+0000\","
-                        + "     \"date_updated\": \"2018-12-19T17:14:18.572+0000\""
-                        + "   }"
-                        + " ]"
-                        + "}");
+            + " \"reference\": \"RC-1545-2396-5857-4110\","
+            + " \"date_created\": \"2018-12-19T17:14:18.572+0000\","
+            + " \"status\": \"Failed\","
+            + " \"status_histories\": ["
+            + "   {"
+            + "     \"status\": \"failed\","
+            + "     \"error_code\": \"CA-E0004\","
+            + "     \"error_message\": \"Your account is deleted\","
+            + "     \"date_created\": \"2018-12-19T17:14:18.572+0000\","
+            + "     \"date_updated\": \"2018-12-19T17:14:18.572+0000\""
+            + "   }"
+            + " ]"
+            + "}");
 
         PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
 
@@ -164,12 +164,12 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
         setupCaseData();
 
         setUpPbaPayment("{"
-                        + "  \"timestamp\": \"2019-01-09T17:59:20.473+0000\","
-                        + "  \"status\": 403,"
-                        + "  \"error\": \"Forbidden\","
-                        + "  \"message\": \"Access Denied\","
-                        + "  \"path\": \"/credit-account-payments\""
-                        + "}");
+            + "  \"timestamp\": \"2019-01-09T17:59:20.473+0000\","
+            + "  \"status\": 403,"
+            + "  \"error\": \"Forbidden\","
+            + "  \"message\": \"Access Denied\","
+            + "  \"path\": \"/credit-account-payments\""
+            + "}");
 
         PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
 
@@ -182,9 +182,9 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
 
     private void setUpPbaPayment(String response) {
         paymentService.stubFor(post(urlPathEqualTo(PBA_PAYMENT_API))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.OK.value())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBody(response)));
+            .willReturn(aResponse()
+                .withStatus(HttpStatus.OK.value())
+                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                .withBody(response)));
     }
 }

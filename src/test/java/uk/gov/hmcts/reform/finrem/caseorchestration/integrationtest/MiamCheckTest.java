@@ -39,7 +39,7 @@ public class MiamCheckTest extends BaseTest {
 
     private static final String API_URL = "/case-orchestration/miam-attend-exempt-check";
     private static final String ERROR_MSG = "You cannot make this application unless the applicant has "
-            + "either attended, or is exempt from attending a MIAM";
+        + "either attended, or is exempt from attending a MIAM";
 
     @Autowired
     protected ObjectMapper objectMapper;

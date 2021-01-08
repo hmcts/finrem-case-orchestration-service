@@ -2,8 +2,10 @@ java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   environment:
-    FEATURE_CONTESTED_PRINT_DRAFT_ORDER_NOT_APPROVED: true
-    FEATURE_CONTESTED_PRINT_GENERAL_ORDER: true
     FEATURE_SHARE_A_CASE: true
-    # Disabled secrets on preview ( remove this and override keyvaults when adding secrets needed for preview)
-    SPRING_CLOUD_PROPERTIESVOLUME_ENABLED: false
+    FEATURE_RESPONDENT_JOURNEY: true
+  keyVaults:
+    finrem:
+      secrets:
+        - finrem-case-orchestration-service-s2s-key
+        - idam-secret

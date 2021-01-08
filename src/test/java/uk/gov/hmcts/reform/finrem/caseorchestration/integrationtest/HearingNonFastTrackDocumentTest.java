@@ -40,8 +40,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -69,14 +69,9 @@ public class HearingNonFastTrackDocumentTest extends BaseTest {
     private static final String API_URL = "/case-orchestration/documents/hearing";
     private static final String JSON_CONTENT_PATH = "/fixtures/contested/validate-hearing-withoutfastTrackDecision.json";
 
-    @Autowired
-    protected ObjectMapper objectMapper;
-
-    @Autowired
-    protected MockMvc webClient;
-
-    @Autowired
-    protected DocumentConfiguration config;
+    @Autowired protected ObjectMapper objectMapper;
+    @Autowired protected MockMvc webClient;
+    @Autowired protected DocumentConfiguration config;
 
     @ClassRule
     public static WireMockClassRule documentGeneratorServiceClass = new WireMockClassRule(4009);
