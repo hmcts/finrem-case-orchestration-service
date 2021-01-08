@@ -20,11 +20,11 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
@@ -44,12 +44,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class GeneralOrderServiceTest extends BaseServiceTest {
 
-    @Autowired
-    private GeneralOrderService generalOrderService;
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private DocumentConfiguration documentConfiguration;
+    @Autowired private GeneralOrderService generalOrderService;
+    @Autowired private ObjectMapper objectMapper;
+    @Autowired private DocumentConfiguration documentConfiguration;
 
     @MockBean
     private GenericDocumentService genericDocumentService;
