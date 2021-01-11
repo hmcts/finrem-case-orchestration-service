@@ -6,12 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocumentData;
 
-import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,60 +41,227 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
     private CaseDetails caseDetails;
 
+    private Map<String, Object> caseData;
+
+    private List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
 
     @Before
-    public void setUp() throws Exception {
-        caseDetails = contestedCaseDetails();
+    public void setUp() {
+        caseDetails = buildCaseDetails();
+        caseData = caseDetails.getData();
     }
 
     @Test
-    public void documentsAreFilteredBasedOnPartySpecified() {
-        Map<String, Object> caseData = caseDetails.getData();
+    public void applicantCorrespondenceDocumentsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "no", null));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(5));
         assertThat(getDocumentCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(1));
+    }
+
+    @Test
+    public void applicantFrFormsDocumentsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Applicant - Form E", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "applicant", "no", null));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        service.filterDocumentsToRelevantParty(caseData);
+
         assertThat(getDocumentCollection(caseData, APPLICANT_FR_FORM_COLLECTION), hasSize(5));
+    }
+
+    @Test
+    public void applicantEvidenceDocumentsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Statement of Issues", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Questionnaire", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Reply to Questionnaire", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Valuation Report", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Position Statement", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Offers", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "no", "Other Example"));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        service.filterDocumentsToRelevantParty(caseData);
+
         assertThat(getDocumentCollection(caseData, APPLICANT_EVIDENCE_COLLECTION), hasSize(14));
+    }
+
+    @Test
+    public void applicantTrialBundleDocumentsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "applicant", "no", null));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        service.filterDocumentsToRelevantParty(caseData);
+
         assertThat(getDocumentCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
+    }
+
+    @Test
+    public void applicantConfidentialDocumentsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "Other Example"));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        service.filterDocumentsToRelevantParty(caseData);
+
         assertThat(getDocumentCollection(caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION), hasSize(1));
+    }
+
+    @Test
+    public void respondentCorrespondenceDocumentsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "respondent", "no", null));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        service.filterDocumentsToRelevantParty(caseData);
 
         assertThat(getDocumentCollection(caseData, RESPONDENT_CORRESPONDENCE_COLLECTION), hasSize(1));
+    }
+
+    @Test
+    public void respondentFrFormsDocumentsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Applicant - Form E", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form F", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form G", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form H", "respondent", "no", null));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        service.filterDocumentsToRelevantParty(caseData);
+
         assertThat(getDocumentCollection(caseData, RESPONDENT_FR_FORM_COLLECTION), hasSize(5));
+    }
+
+    @Test
+    public void respondentEvidenceDocumentsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Statement of Issues", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Chronology", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Case Summary", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Questionnaire", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Reply to Questionnaire", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Valuation Report", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Pension Plan", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Position Statement", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Skeleton Argument", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Expert Evidence", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Witness Statement/Affidavit", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Care Plan", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Offers", "respondent", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "respondent", "no", "Other Example"));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        service.filterDocumentsToRelevantParty(caseData);
+
         assertThat(getDocumentCollection(caseData, RESPONDENT_EVIDENCE_COLLECTION), hasSize(14));
+    }
+
+    @Test
+    public void respondentTrialBundleDocumentsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "respondent", "no", null));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        service.filterDocumentsToRelevantParty(caseData);
+
         assertThat(getDocumentCollection(caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
+    }
+
+    @Test
+    public void respondentConfidentialDocumentsFiltered() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example"));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        service.filterDocumentsToRelevantParty(caseData);
+
         assertThat(getDocumentCollection(caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION), hasSize(1));
     }
 
     @Test
-    public void emptyRespondentDocumentsCollectionIsNotAddedToCaseData() throws Exception {
-        CaseDetails caseDetails = onlyApplicantCaseDocumentsUploaded();
-        Map<String, Object> caseData = caseDetails.getData();
+    public void documentsAreNotFilteredWithoutDocTypeOrPartySpecified() {
+
+        //simulating user not uploading a document into CCD Document field
+        uploadDocumentList.add(createNullDocumentUploadItem("Form B", "applicant", "no", null));
+
+        uploadDocumentList.add(createContestedUploadDocumentItem(null, "applicant", "yes", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Form B", null, "yes", null));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(1));
-        assertThat(getDocumentCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(1));
-        assertThat(getDocumentCollection(caseData, APPLICANT_FR_FORM_COLLECTION), hasSize(5));
-        assertThat(getDocumentCollection(caseData, APPLICANT_EVIDENCE_COLLECTION), hasSize(14));
-        assertThat(getDocumentCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(3));
+    }
 
+    @Test
+    public void otherDocumentTypeIsFiltered() {
+        //Valid filter to Evidence Collection
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", null, null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "no", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "no", "Other Example"));
+
+        //Valid filter to Confidential Collection
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "yes", null));
+        uploadDocumentList.add(createContestedUploadDocumentItem("other", "applicant", "yes", "Other Example"));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        service.filterDocumentsToRelevantParty(caseData);
+
+        assertThat(getDocumentCollection(caseData, APPLICANT_EVIDENCE_COLLECTION), hasSize(3));
+        assertThat(getDocumentCollection(caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION), hasSize(2));
+    }
+
+    @Test
+    public void documentsUploadedDoNotFilterToRespondentUnlessSelected() {
+        uploadDocumentList.add(createContestedUploadDocumentItem("Letter from Applicant", "applicant", "no", null));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        service.filterDocumentsToRelevantParty(caseData);
+
+        assertThat(getDocumentCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(1));
+
+        assertNull(getDocumentCollection(caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION));
         assertNull(getDocumentCollection(caseData, RESPONDENT_CORRESPONDENCE_COLLECTION));
         assertNull(getDocumentCollection(caseData, RESPONDENT_FR_FORM_COLLECTION));
         assertNull(getDocumentCollection(caseData, RESPONDENT_EVIDENCE_COLLECTION));
         assertNull(getDocumentCollection(caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION));
     }
 
-    private CaseDetails contestedCaseDetails() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream("/fixtures/contested/contested-upload-case-documents.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
+    private ContestedUploadedDocumentData createContestedUploadDocumentItem(String type, String party,
+                                                                            String isConfidential, String other) {
+
+        return ContestedUploadedDocumentData.builder()
+                .uploadedCaseDocument(ContestedUploadedDocument
+                    .builder()
+                    .caseDocuments(new CaseDocument())
+                    .caseDocumentType(type)
+                    .caseDocumentParty(party)
+                    .caseDocumentConfidential(isConfidential)
+                    .caseDocumentOther(other)
+                    .build())
+                .build();
     }
 
-    private CaseDetails onlyApplicantCaseDocumentsUploaded() throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(
-            "/fixtures/contested/contested-upload-case-documents-no-empty-collection.json")) {
-            return mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
-        }
+    private ContestedUploadedDocumentData createNullDocumentUploadItem(String type, String party,
+                                                                       String isConfidential, String other) {
+
+        return ContestedUploadedDocumentData.builder()
+                .uploadedCaseDocument(ContestedUploadedDocument
+                    .builder()
+                    .caseDocuments(null)
+                    .caseDocumentType(type)
+                    .caseDocumentParty(party)
+                    .caseDocumentConfidential(isConfidential)
+                    .caseDocumentOther(other)
+                    .build())
+                .build();
     }
 
     private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> data, String field) {
