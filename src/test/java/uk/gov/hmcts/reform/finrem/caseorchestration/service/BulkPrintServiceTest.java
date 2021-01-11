@@ -6,11 +6,9 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
-import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
@@ -37,19 +35,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService.FINANCIAL_REMEDY_PACK_LETTER_TYPE;
 
-@ActiveProfiles("test-mock-document-client")
 public class BulkPrintServiceTest extends BaseServiceTest {
 
-    @Autowired private DocumentClient documentClient;
     @Autowired private BulkPrintService bulkPrintService;
     @Autowired private ObjectMapper mapper;
     @Autowired private DocumentHelper documentHelper;
 
-    @MockBean private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    @MockBean private GeneralOrderService generalOrderService;
     @MockBean private GenerateCoverSheetService coverSheetService;
     @MockBean private GenericDocumentService genericDocumentService;
-    @MockBean private ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService;
 
     private UUID letterId;
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor;
