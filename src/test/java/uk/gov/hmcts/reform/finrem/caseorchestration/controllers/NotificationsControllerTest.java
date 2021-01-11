@@ -155,7 +155,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void sendConsentOrderMadeConfirmationEmail() {
+    public void whenIsConsentedAndSolicitorAgreedToEmail_sendConsentOrderMadeConfirmationEmail() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
@@ -165,8 +165,28 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotSendConsentOrderMadeConfirmationEmail() {
+    public void whenIsConsentedAndSolicitorNotAgreedToEmail_shouldNotSendConsentOrderMadeConfirmationEmail() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
+
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void whenIsNotConsentedAndSolicitorAgreedToEmail_sendConsentOrderMadeConfirmationEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+
+        notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
+
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void whenIsNotConsentedAndSolicitorNotAgreedToEmail_shouldNotSendConsentOrderMadeConfirmationEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
 
         notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
