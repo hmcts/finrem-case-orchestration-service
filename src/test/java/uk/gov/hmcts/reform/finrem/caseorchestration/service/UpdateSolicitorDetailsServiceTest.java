@@ -34,7 +34,7 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
     public void whenUpdateSolicitorAddressIsCalled_thenOrganisationResponseIsConvertedToMap() {
         mockPrdOrganisationService();
 
-        Map<String, Object> map = updateSolicitorDetailsService.updateApplicantSolicitorAddressFromPrd(AUTH_TOKEN);
+        Map<String, Object> map = updateSolicitorDetailsService.getApplicantSolicitorAddressFromPrd(AUTH_TOKEN);
 
         Map<String, Object> expectedMap = ImmutableMap.<String, Object>builder()
             .put("AddressLine1", ADDRESS_LINE_1)

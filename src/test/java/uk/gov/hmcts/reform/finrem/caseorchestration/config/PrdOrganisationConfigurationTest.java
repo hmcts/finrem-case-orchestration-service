@@ -22,7 +22,6 @@ public class PrdOrganisationConfigurationTest extends BaseTest {
 
     @Test
     public void shouldCreateOrganisationConfigFromAppProperties() {
-        assertThat(config.getUrl(), is("http://localhost:8090"));
-        assertThat(config.getApi(), is("/refdata/external/v1/organisations"));
+        assertThat(config.getOrganisationsUrl(), is("http://localhost:8090/refdata/external/v1/organisations"));
     }
 }

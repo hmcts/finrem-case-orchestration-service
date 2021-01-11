@@ -270,7 +270,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     public void shouldSuccessfullyPopulateApplicantSolicitorAddress() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
         when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
-        when(updateSolicitorDetailsService.updateApplicantSolicitorAddressFromPrd(
+        when(updateSolicitorDetailsService.getApplicantSolicitorAddressFromPrd(
             isA(String.class))).thenReturn(mockFirmAddress());
 
         loadRequestContentWith(CONTESTED_NO_APPLICANT_SOL_ADDRESS);
@@ -286,7 +286,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     public void givenShareCaseIsEnabledAndApplicantIsRepresented_whenCaseInitialised_appSolAddressIsPopulated() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
         when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
-        when(updateSolicitorDetailsService.updateApplicantSolicitorAddressFromPrd(
+        when(updateSolicitorDetailsService.getApplicantSolicitorAddressFromPrd(
             isA(String.class))).thenReturn(mockFirmAddress());
 
         loadRequestContentWith(CONTESTED_NO_APPLICANT_SOL_ADDRESS);

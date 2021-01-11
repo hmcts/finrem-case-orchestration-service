@@ -3,40 +3,62 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
-
-import java.net.URI;
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_URL;
 
 public class PrdOrganisationServiceTest extends BaseServiceTest {
 
     @Autowired PrdOrganisationService prdOrganisationService;
-    @MockBean RestTemplate restTemplate;
+
+    @MockBean RestService restService;
+    @MockBean PrdOrganisationConfiguration prdOrganisationConfiguration;
 
     @Test
     public void whenRetrieveOrganisationData_thenRestTemplateIsCalledWithExpectedParameters() {
-        when(restTemplate.exchange(any(), any(), any(), eq(OrganisationsResponse.class)))
-            .thenReturn(ResponseEntity.of(Optional.of(OrganisationsResponse.builder().build())));
+        String addressLine1 = "addressLine1";
+        String addressLine2 = "addressLine2";
+        String addressLine3 = "addressLine3";
+        String country = "country";
+        String county = "county";
+        String postCode = "postCode";
+        String townCity = "townCity";
+
+        OrganisationContactInformation contactInformation = OrganisationContactInformation.builder()
+            .addressLine1(addressLine1)
+            .addressLine2(addressLine2)
+            .addressLine3(addressLine3)
+            .country(country)
+            .county(county)
+            .postcode(postCode)
+            .townCity(townCity)
+            .build();
+        OrganisationsResponse restApiGetResponse = OrganisationsResponse.builder().contactInformation(contactInformation).build();
+
+        when(prdOrganisationConfiguration.getOrganisationsUrl()).thenReturn(TEST_URL);
+        when(restService.restApiGetCall(eq(AUTH_TOKEN), eq(TEST_URL))).thenReturn(restApiGetResponse);
 
         OrganisationsResponse organisationsResponse = prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN);
-        assertThat(organisationsResponse, is(notNullValue()));
 
-        String prdUrlAsPerTestProperties = "http://localhost:8090/refdata/external/v1/organisations";
-        verify(restTemplate, times(1)).exchange(eq(URI.create(prdUrlAsPerTestProperties)), eq(HttpMethod.GET),
-            any(), eq(OrganisationsResponse.class));
+        assertThat(organisationsResponse.getContactInformation().getAddressLine1(), is(contactInformation.getAddressLine1()));
+        assertThat(organisationsResponse.getContactInformation().getAddressLine2(), is(contactInformation.getAddressLine2()));
+        assertThat(organisationsResponse.getContactInformation().getAddressLine3(), is(contactInformation.getAddressLine3()));
+        assertThat(organisationsResponse.getContactInformation().getCountry(), is(contactInformation.getCountry()));
+        assertThat(organisationsResponse.getContactInformation().getCounty(), is(contactInformation.getCounty()));
+        assertThat(organisationsResponse.getContactInformation().getPostcode(), is(contactInformation.getPostcode()));
+        assertThat(organisationsResponse.getContactInformation().getTownCity(), is(contactInformation.getTownCity()));
+
+        verify(restService, times(1)).restApiGetCall(eq(AUTH_TOKEN), eq(TEST_URL));
+        verify(prdOrganisationConfiguration, times(1)).getOrganisationsUrl();
     }
 }

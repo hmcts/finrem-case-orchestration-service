@@ -12,6 +12,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessReques
 import java.net.URI;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -58,6 +60,8 @@ public class RestServiceTest extends BaseServiceTest {
         restService.restApiPostCall(AUTH_TOKEN, TEST_URL, body);
 
         assertRestApiCall(HttpMethod.POST);
+
+        Assert.assertEquals(authRequestCaptor.getValue().getBody(), body);
     }
 
     @Test
@@ -65,6 +69,23 @@ public class RestServiceTest extends BaseServiceTest {
         restService.restApiDeleteCall(AUTH_TOKEN, TEST_URL, body);
 
         assertRestApiCall(HttpMethod.DELETE);
+
+        Assert.assertEquals(authRequestCaptor.getValue().getBody(), body);
+    }
+
+    @Test
+    public void restApiGetCall() {
+        ResponseEntity<Map> mockResponse = ResponseEntity.accepted().build();
+
+        when(restTemplate.exchange(any(), eq(HttpMethod.GET), any(), eq(Map.class))).thenReturn(mockResponse);
+
+        Object response = restService.restApiGetCall(AUTH_TOKEN, TEST_URL);
+
+        Assert.assertEquals(response, mockResponse);
+
+        assertRestApiCall(HttpMethod.GET);
+
+        Assert.assertNull(authRequestCaptor.getValue().getBody());
     }
 
     private void assertRestApiCall(HttpMethod httpMethod) {
@@ -77,6 +98,5 @@ public class RestServiceTest extends BaseServiceTest {
         Assert.assertEquals(headers.get(AUTHORIZATION_HEADER).get(0), AUTH_TOKEN);
         Assert.assertEquals(headers.get(SERVICE_AUTHORISATION_HEADER).get(0), TEST_SERVICE_TOKEN);
         Assert.assertEquals(headers.get("Content-Type").get(0), MediaType.APPLICATION_JSON_VALUE);
-        Assert.assertEquals(authRequestCaptor.getValue().getBody(), body);
     }
 }

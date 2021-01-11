@@ -152,7 +152,7 @@ public class CaseDataController implements BaseController {
         if (featureToggleService.isShareACaseEnabled()
             && caseDataService.isContestedApplication(caseDetails)
             && caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
-            caseDetails.getData().put(CONTESTED_SOLICITOR_ADDRESS, solicitorService.updateApplicantSolicitorAddressFromPrd(authToken));
+            caseDetails.getData().put(CONTESTED_SOLICITOR_ADDRESS, solicitorService.getApplicantSolicitorAddressFromPrd(authToken));
         }
     }
 }

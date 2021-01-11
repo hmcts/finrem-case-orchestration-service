@@ -15,10 +15,8 @@ public class UpdateSolicitorDetailsService {
     private final PrdOrganisationService organisationService;
     private final ObjectMapper objectMapper;
 
-    public Map<String, Object> updateApplicantSolicitorAddressFromPrd(String authToken) {
-        OrganisationsResponse organisationData = organisationService.retrieveOrganisationsData(authToken);
-
-        return convertOrganisationAddressToSolicitorAddress(organisationData);
+    public Map<String, Object> getApplicantSolicitorAddressFromPrd(String authToken) {
+        return convertOrganisationAddressToSolicitorAddress(organisationService.retrieveOrganisationsData(authToken));
     }
 
     private Map<String, Object> convertOrganisationAddressToSolicitorAddress(OrganisationsResponse organisationData) {
