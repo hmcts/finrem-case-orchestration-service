@@ -31,14 +31,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
-@ActiveProfiles("test-mock-document-client")
+@ActiveProfiles("test-mock-feign-clients")
 public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired
-    private DocumentClient documentClient;
-
-    @Autowired
-    private HelpWithFeesDocumentService helpWithFeesDocumentService;
+    @Autowired private HelpWithFeesDocumentService helpWithFeesDocumentService;
+    @Autowired private DocumentClient documentClientMock;
 
     private CaseDetails caseDetails;
 
@@ -55,18 +52,18 @@ public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldGenerateHwfSuccessfulNotificationLetterForApplicant() {
 
-        when(documentClient.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
         CaseDocument generatedHwfSuccessfulNotificationLetter
             = helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(caseDetails, AUTH_TOKEN);
 
         assertCaseDocument(generatedHwfSuccessfulNotificationLetter);
-        verify(documentClient, times(1)).generatePdf(any(), anyString());
+        verify(documentClientMock, times(1)).generatePdf(any(), anyString());
     }
 
     @Test
     public void shouldGenerateHwfSuccessfulNotificationLetterForApplicantSolicitor() {
-        when(documentClient.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
         Map<String, Object> solicitorAddress = new HashMap<>();
         solicitorAddress.put("AddressLine1", "123 Applicant Solicitor Street");

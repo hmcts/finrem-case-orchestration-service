@@ -16,16 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.EMPTY_LIST;
-import static java.util.Objects.isNull;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.DOCUMENT_BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService.DOCUMENT_FILENAME;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +31,7 @@ public class ConsentOrderNotApprovedDocumentService {
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final DocumentConfiguration documentConfiguration;
-    private final GeneralOrderService generalOrderService;
+    private final DocumentOrderingService documentOrderingService;
     private final CaseDataService caseDataService;
 
     public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken) {
@@ -44,26 +40,25 @@ public class ConsentOrderNotApprovedDocumentService {
         List<BulkPrintDocument> documents = new ArrayList<>();
 
         documents.add(coverLetter(caseDetails, authorisationToken));
-        documents.addAll(notApprovedConsentOrder(caseDetails));
-        addGeneralOrderIfApplicable(caseDetails, documents);
+        addEitherNotApprovedOrderOrGeneralOrderIfApplicable(caseDetails, documents, authorisationToken);
 
         return documents.size() == 1
-            ? EMPTY_LIST  // if only cover letter then print nothing
+            ? emptyList()  // if only cover letter then print nothing
             : documents;
     }
 
-    private void addGeneralOrderIfApplicable(CaseDetails caseDetails, List<BulkPrintDocument> existingList) {
-        Map<String, Object> caseData = caseDetails.getData();
+    private void addEitherNotApprovedOrderOrGeneralOrderIfApplicable(CaseDetails caseDetails, List<BulkPrintDocument> existingList,
+                                                                     String authorisationToken) {
+        List<CaseDocument> notApprovedOrderDocuments = notApprovedConsentOrder(caseDetails);
+        Optional<CaseDocument> generalOrder = Optional.ofNullable(documentHelper.getLatestGeneralOrder(caseDetails.getData()));
 
-        boolean isContestedCaseWithNoConsentOrders = caseDataService.isContestedApplication(caseDetails)
-            && consentOrderInContestedNotApprovedList(caseData).isEmpty();
+        boolean useNotApprovedOrder = !notApprovedOrderDocuments.isEmpty() && (generalOrder.isEmpty()
+            || documentOrderingService.isDocumentModifiedLater(notApprovedOrderDocuments.get(0), generalOrder.get(), authorisationToken));
 
-        if ((caseDataService.isPaperApplication(caseData) || isContestedCaseWithNoConsentOrders)
-            && !isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
-            BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseData);
-            if (generalOrder != null) {
-                existingList.add(generalOrder);
-            }
+        if (useNotApprovedOrder) {
+            existingList.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(notApprovedOrderDocuments));
+        } else if (generalOrder.isPresent()) {
+            existingList.add(documentHelper.getCaseDocumentAsBulkPrintDocument(generalOrder.get()));
         }
     }
 
@@ -77,14 +72,14 @@ public class ConsentOrderNotApprovedDocumentService {
         return documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter);
     }
 
-    public List<BulkPrintDocument> notApprovedConsentOrder(CaseDetails caseDetails) {
+    public List<CaseDocument> notApprovedConsentOrder(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (caseDataService.isContestedApplication(caseDetails)) {
             List<ContestedConsentOrderData> consentOrders = consentOrderInContestedNotApprovedList(caseData);
             if (!consentOrders.isEmpty()) {
                 ContestedConsentOrderData contestedConsentOrderData = consentOrders.get(consentOrders.size() - 1);
-                return asList(documentHelper.getCaseDocumentAsBulkPrintDocument(contestedConsentOrderData.getConsentOrder().getConsentOrder()));
+                return singletonList(contestedConsentOrderData.getConsentOrder().getConsentOrder());
             }
         } else {
             log.info("Extracting 'uploadOrder' from case data for bulk print.");
@@ -94,14 +89,10 @@ public class ConsentOrderNotApprovedDocumentService {
 
             if (!documentList.isEmpty()) {
                 Map<String, Object> value = ((Map) caseDataService.getLastMapValue.apply(documentList).get(VALUE));
-                Object documentLinkObj = value.get("DocumentLink");
-                if (documentLinkObj != null) {
-                    Map documentLink = (Map) documentLinkObj;
-                    BulkPrintDocument generalOrder = BulkPrintDocument.builder()
-                        .binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL).toString())
-                        .build();
-                    log.info("Sending general order ({}) for bulk print.", documentLink.get(DOCUMENT_FILENAME));
-                    return asList(generalOrder);
+                Optional<CaseDocument> generalOrder = documentHelper.getDocumentLinkAsCaseDocument(value, "DocumentLink");
+                if (generalOrder.isPresent()) {
+                    log.info("Sending general order ({}) for bulk print.", generalOrder.get().getDocumentFilename());
+                    return singletonList(generalOrder.get());
                 }
             }
         }
