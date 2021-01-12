@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.io.File;
@@ -33,7 +32,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private static final String INVALID_CASE_TYPE_JSON = "/fixtures/invalid-case-type.json";
 
     @MockBean private IdamService idamService;
-    @MockBean private FeatureToggleService featureToggleService;
 
     @Test
     public void shouldSuccessfullyMoveCollection() throws Exception {
@@ -186,9 +184,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSuccessfullySetOrgPolicyIfToggleEnabled() throws Exception {
+    public void shouldSuccessfullySetOrgPolicy() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
-        when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
@@ -202,9 +199,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotSetOrgPolicyIfFeatureDisabled() throws Exception {
+    public void shouldNotSetOrgPolicy() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
-        when(featureToggleService.isShareACaseEnabled()).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
@@ -220,7 +216,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotSetOrgPolicyIfFeatureEnabledButInvalidCaseType() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
-        when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(INVALID_CASE_TYPE_JSON).toURI()));
