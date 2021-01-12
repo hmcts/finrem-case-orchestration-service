@@ -199,21 +199,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotSetOrgPolicy() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
-
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
-        mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andDo(print())
-            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").doesNotExist());
-    }
-
-    @Test
     public void shouldNotSetOrgPolicyIfInvalidCaseType() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
 
