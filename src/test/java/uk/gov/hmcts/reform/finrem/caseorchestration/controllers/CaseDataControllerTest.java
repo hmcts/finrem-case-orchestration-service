@@ -214,7 +214,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldNotSetOrgPolicyIfFeatureEnabledButInvalidCaseType() throws Exception {
+    public void shouldNotSetOrgPolicyIfInvalidCaseType() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
 
         requestContent = objectMapper.readTree(new File(getClass()
