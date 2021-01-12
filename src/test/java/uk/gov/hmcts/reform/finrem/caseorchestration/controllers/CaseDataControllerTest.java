@@ -4,11 +4,13 @@ import org.junit.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.io.File;
 
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -31,6 +33,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
     private static final String INVALID_CASE_TYPE_JSON = "/fixtures/invalid-case-type.json";
 
+    @MockBean private CaseDataService caseDataService;
     @MockBean private IdamService idamService;
 
     @Test
@@ -186,6 +189,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldSuccessfullySetOrgPolicy() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON).toURI()));
@@ -201,6 +205,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldNotSetOrgPolicyIfInvalidCaseType() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
+        when(caseDataService.isContestedApplication(any())).thenReturn(false);
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
 
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource(INVALID_CASE_TYPE_JSON).toURI()));
