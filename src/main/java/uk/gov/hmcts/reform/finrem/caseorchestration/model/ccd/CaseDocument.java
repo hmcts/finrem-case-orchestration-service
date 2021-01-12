@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CaseDocument {
+
     @JsonProperty("document_url")
     private String documentUrl;
     @JsonProperty("document_filename")

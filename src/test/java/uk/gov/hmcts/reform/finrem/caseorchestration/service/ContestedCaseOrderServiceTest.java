@@ -10,9 +10,13 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,14 +26,20 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
@@ -41,6 +51,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     @MockBean private BulkPrintService bulkPrintService;
     @MockBean private DocumentHelper documentHelper;
     @MockBean private CaseDataService caseDataService;
+    @MockBean private GenericDocumentService genericDocumentService;
 
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintArgumentCaptor;
@@ -174,6 +185,51 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
             containsInAnyOrder(expectedBulkPrintDocuments.toArray()));
     }
 
+    @Test
+    public void finalOrderSuccess() {
+        mockDocumentHelperToReturnDefaultExpectedDocuments();
+        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
+
+        CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).build();
+        contestedCaseOrderService.stampFinalOrder(caseDetails, AUTH_TOKEN);
+
+        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN);
+
+        List<HearingOrderCollectionData> expectedFinalOrderCollection =
+            (List<HearingOrderCollectionData>) caseDetails.getData().get(FINAL_ORDER_COLLECTION);
+
+        assertThat(expectedFinalOrderCollection, hasSize(1));
+        assertThat(expectedFinalOrderCollection.get(0).getHearingOrderDocuments().getUploadDraftDocument(), is(caseDocument()));
+    }
+
+    @Test
+    public void finalOrderSuccessWithoutAnyHearingOrder() {
+        CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).build();
+
+        contestedCaseOrderService.stampFinalOrder(caseDetails, AUTH_TOKEN);
+
+        assertThat(caseDetails.getData(), not(hasKey(FINAL_ORDER_COLLECTION)));
+    }
+
+    @Test
+    public void finalOrderSuccessWithFinalOrder() {
+        mockDocumentHelperToReturnDefaultExpectedDocuments();
+        when(documentHelper.getFinalOrderDocuments(any())).thenReturn(new ArrayList<>(List.of(HearingOrderCollectionData.builder().build())));
+        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
+
+        CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).build();
+
+        contestedCaseOrderService.stampFinalOrder(caseDetails, AUTH_TOKEN);
+
+        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN);
+
+        List<HearingOrderCollectionData> expectedFinalOrderCollection =
+            (List<HearingOrderCollectionData>) caseDetails.getData().get(FINAL_ORDER_COLLECTION);
+
+        assertThat(expectedFinalOrderCollection, hasSize(2));
+        assertThat(expectedFinalOrderCollection.get(1).getHearingOrderDocuments().getUploadDraftDocument(), is(caseDocument()));
+    }
+
     private void mockDocumentHelperToReturnDefaultExpectedDocuments() {
         when(documentHelper.getDocumentLinkAsBulkPrintDocument(any(), eq(LATEST_DRAFT_HEARING_ORDER))).thenReturn(
             Optional.of(BulkPrintDocument.builder().binaryFileUrl("HearingOrderBinaryURL").build()));
@@ -184,6 +240,12 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
         when(documentHelper.getLatestAdditionalHearingDocument(any())).thenReturn(Optional.of(additionalHearingDocument));
         when(documentHelper.getCaseDocumentAsBulkPrintDocument(eq(additionalHearingDocument))).thenReturn(
             BulkPrintDocument.builder().binaryFileUrl(additionalHearingDocument.getDocumentBinaryUrl()).build());
+
+        when(documentHelper.getHearingOrderDocuments(any())).thenReturn(singletonList(HearingOrderCollectionData.builder()
+            .hearingOrderDocuments(HearingOrderDocument.builder()
+                .uploadDraftDocument(caseDocument())
+                .build())
+            .build()));
     }
 
     private CaseDetails generalOrderContestedCaseDetails() {

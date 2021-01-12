@@ -8,7 +8,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -32,17 +31,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assert
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
 
-@ActiveProfiles("test-mock-document-client")
 public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
 
-    @Autowired
-    private ObjectMapper mapper;
+    @Autowired private ManualPaymentDocumentService manualPaymentDocumentService;
+    @Autowired private ObjectMapper mapper;
 
-    @Autowired
-    private ManualPaymentDocumentService manualPaymentDocumentService;
-
-    @MockBean
-    private GenericDocumentService genericDocumentService;
+    @MockBean private GenericDocumentService genericDocumentService;
 
     @Captor
     ArgumentCaptor<CaseDetails> documentGenerationRequestCaseDetailsCaptor;
