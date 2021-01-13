@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
@@ -19,6 +20,7 @@ import java.util.Map;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EVIDENCE_COLLECTION;
@@ -45,8 +47,12 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
     private List<ContestedUploadedDocumentData> uploadDocumentList = new ArrayList<>();
 
+    @MockBean
+    private FeatureToggleService featureToggleService;
+
     @Before
     public void setUp() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         caseDetails = buildCaseDetails();
         caseData = caseDetails.getData();
     }
@@ -233,6 +239,21 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         assertNull(getDocumentCollection(caseData, RESPONDENT_EVIDENCE_COLLECTION));
         assertNull(getDocumentCollection(caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION));
     }
+
+    @Test
+    public void applicantAndRespondentConfidentialDocumentsAreNotStoredWhenToggleOff() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
+
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "Other Example"));
+        uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example"));
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        service.filterDocumentsToRelevantParty(caseData);
+
+        assertNull(getDocumentCollection(caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION));
+        assertNull(getDocumentCollection(caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION));
+    }
+
 
     private ContestedUploadedDocumentData createContestedUploadDocumentItem(String type, String party,
                                                                             String isConfidential, String other) {
