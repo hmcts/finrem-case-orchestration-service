@@ -79,9 +79,9 @@ public class RestServiceTest extends BaseServiceTest {
 
         when(restTemplate.exchange(any(), eq(HttpMethod.GET), any(), eq(Map.class))).thenReturn(mockResponse);
 
-        Object response = restService.restApiGetCall(AUTH_TOKEN, TEST_URL);
+        Map response = restService.restApiGetCall(AUTH_TOKEN, TEST_URL);
 
-        Assert.assertEquals(response, mockResponse);
+        Assert.assertEquals(response, mockResponse.getBody());
 
         assertRestApiCall(HttpMethod.GET);
 

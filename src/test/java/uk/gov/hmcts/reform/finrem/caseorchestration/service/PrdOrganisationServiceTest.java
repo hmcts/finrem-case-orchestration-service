@@ -5,10 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -36,29 +37,30 @@ public class PrdOrganisationServiceTest extends BaseServiceTest {
         String postCode = "postCode";
         String townCity = "townCity";
 
-        OrganisationContactInformation contactInformation = OrganisationContactInformation.builder()
-            .addressLine1(addressLine1)
-            .addressLine2(addressLine2)
-            .addressLine3(addressLine3)
-            .country(country)
-            .county(county)
-            .postcode(postCode)
-            .townCity(townCity)
-            .build();
-        OrganisationsResponse restApiGetResponse = OrganisationsResponse.builder().contactInformation(Arrays.asList(contactInformation)).build();
+        Map<String, Object> contactInfoMap = new HashMap<>();
+        contactInfoMap.put("addressLine1", addressLine1);
+        contactInfoMap.put("addressLine2", addressLine2);
+        contactInfoMap.put("addressLine3", addressLine3);
+        contactInfoMap.put("country", country);
+        contactInfoMap.put("county", county);
+        contactInfoMap.put("postCode", postCode);
+        contactInfoMap.put("townCity", townCity);
+
+        Map<String, Object> restApiGetResponseBody = new HashMap<>();
+        restApiGetResponseBody.put("contactInformation", Arrays.asList(contactInfoMap));
 
         when(prdOrganisationConfiguration.getOrganisationsUrl()).thenReturn(TEST_URL);
-        when(restService.restApiGetCall(eq(AUTH_TOKEN), eq(TEST_URL))).thenReturn(restApiGetResponse);
+        when(restService.restApiGetCall(eq(AUTH_TOKEN), eq(TEST_URL))).thenReturn(restApiGetResponseBody);
 
         OrganisationsResponse organisationsResponse = prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN);
 
-        assertThat(organisationsResponse.getContactInformation().get(0).getAddressLine1(), is(contactInformation.getAddressLine1()));
-        assertThat(organisationsResponse.getContactInformation().get(0).getAddressLine2(), is(contactInformation.getAddressLine2()));
-        assertThat(organisationsResponse.getContactInformation().get(0).getAddressLine3(), is(contactInformation.getAddressLine3()));
-        assertThat(organisationsResponse.getContactInformation().get(0).getCountry(), is(contactInformation.getCountry()));
-        assertThat(organisationsResponse.getContactInformation().get(0).getCounty(), is(contactInformation.getCounty()));
-        assertThat(organisationsResponse.getContactInformation().get(0).getPostcode(), is(contactInformation.getPostcode()));
-        assertThat(organisationsResponse.getContactInformation().get(0).getTownCity(), is(contactInformation.getTownCity()));
+        assertThat(organisationsResponse.getContactInformation().get(0).getAddressLine1(), is(addressLine1));
+        assertThat(organisationsResponse.getContactInformation().get(0).getAddressLine2(), is(addressLine2));
+        assertThat(organisationsResponse.getContactInformation().get(0).getAddressLine3(), is(addressLine3));
+        assertThat(organisationsResponse.getContactInformation().get(0).getCountry(), is(country));
+        assertThat(organisationsResponse.getContactInformation().get(0).getCounty(), is(county));
+        assertThat(organisationsResponse.getContactInformation().get(0).getPostcode(), is(postCode));
+        assertThat(organisationsResponse.getContactInformation().get(0).getTownCity(), is(townCity));
 
         verify(restService, times(1)).restApiGetCall(eq(AUTH_TOKEN), eq(TEST_URL));
         verify(prdOrganisationConfiguration, times(1)).getOrganisationsUrl();
