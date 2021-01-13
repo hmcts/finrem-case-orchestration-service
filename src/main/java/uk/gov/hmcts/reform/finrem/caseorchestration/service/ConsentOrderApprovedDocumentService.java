@@ -10,8 +10,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrderData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 
@@ -100,8 +100,7 @@ public class ConsentOrderApprovedDocumentService {
             bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter));
         }
 
-        List<BulkPrintDocument> approvedOrderCollection = approvedOrderCollection(caseDetails);
-        bulkPrintDocuments.addAll(approvedOrderCollection);
+        bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(approvedOrderCollection(caseDetails)));
 
         return bulkPrintDocuments;
     }
@@ -115,11 +114,11 @@ public class ConsentOrderApprovedDocumentService {
     public void generateAndPopulateConsentOrderLetter(CaseDetails caseDetails, String authToken) {
         Map<String, Object> caseData = caseDetails.getData();
         CaseDocument orderLetter = generateApprovedConsentOrderLetter(caseDetails, authToken);
-        List<ApprovedOrderData> approvedOrderList = getConsentInContestedApprovedOrderCollection(caseData);
-        if (approvedOrderList != null && !approvedOrderList.isEmpty()) {
-            ApprovedOrder approvedOrder = approvedOrderList.get(approvedOrderList.size() - 1).getApprovedOrder();
+        List<CollectionElement<ApprovedOrder>> approvedOrders = getConsentInContestedApprovedOrderCollection(caseData);
+        if (approvedOrders != null && !approvedOrders.isEmpty()) {
+            ApprovedOrder approvedOrder = approvedOrders.get(approvedOrders.size() - 1).getValue();
             approvedOrder.setOrderLetter(orderLetter);
-            caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderList);
+            caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrders);
         }
     }
 
@@ -136,17 +135,16 @@ public class ConsentOrderApprovedDocumentService {
         caseData.put(CONSENT_ORDER, stampedDoc);
         caseData.put(CONTESTED_CONSENT_PENSION_COLLECTION, pensionDocs);
 
-        ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
-            .consentOrder(stampedDoc)
-            .pensionDocuments(pensionDocs);
-
-        ApprovedOrderData.ApprovedOrderDataBuilder approvedOrderData = ApprovedOrderData.builder()
-            .approvedOrder(approvedOrderBuilder.build());
-
-        List<ApprovedOrderData> approvedOrderDataList = Optional.ofNullable(getConsentInContestedApprovedOrderCollection(caseData))
+        List<CollectionElement<ApprovedOrder>> approvedOrders = Optional.ofNullable(getConsentInContestedApprovedOrderCollection(caseData))
             .orElse(new ArrayList<>());
-        approvedOrderDataList.add(approvedOrderData.build());
-        caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrderDataList);
+
+        ApprovedOrder approvedOrder = ApprovedOrder.builder()
+            .consentOrder(stampedDoc)
+            .pensionDocuments(pensionDocs)
+            .build();
+
+        approvedOrders.add(CollectionElement.<ApprovedOrder>builder().value(approvedOrder).build());
+        caseData.put(CONTESTED_CONSENT_ORDER_COLLECTION, approvedOrders);
     }
 
     private CaseDocument getLatestConsentInContestedConsentOrder(Map<String, Object> caseData) {
@@ -166,7 +164,7 @@ public class ConsentOrderApprovedDocumentService {
         return mapper.convertValue(caseData.get(CONTESTED_CONSENT_PENSION_COLLECTION), new TypeReference<>() {});
     }
 
-    private List<ApprovedOrderData> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
+    List<CollectionElement<ApprovedOrder>> getConsentInContestedApprovedOrderCollection(Map<String, Object> caseData) {
         return mapper.convertValue(caseData.get(CONTESTED_CONSENT_ORDER_COLLECTION), new TypeReference<>() {});
     }
 
@@ -184,9 +182,9 @@ public class ConsentOrderApprovedDocumentService {
         return detailsCopy;
     }
 
-    public List<BulkPrintDocument> approvedOrderCollection(CaseDetails caseDetails) {
+    public List<CaseDocument> approvedOrderCollection(CaseDetails caseDetails) {
         Map<String, Object> data = caseDetails.getData();
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+        List<CaseDocument> documents = new ArrayList<>();
         String approvedOrderCollectionFieldName = caseDataService.isConsentedInContestedCase(caseDetails)
             ? CONTESTED_CONSENT_ORDER_COLLECTION : APPROVED_ORDER_COLLECTION;
 
@@ -198,14 +196,16 @@ public class ConsentOrderApprovedDocumentService {
             log.info("Extracting '{}' from case data for bulk print: {}", approvedOrderCollectionFieldName, data);
             Map<String, Object> lastApprovedOrder = (Map<String, Object>)(approvedOrderCollectionData.get(approvedOrderCollectionData.size() - 1)
                 .get(VALUE));
-            documentHelper.getDocumentLinkAsBulkPrintDocument(lastApprovedOrder, ORDER_LETTER).ifPresent(bulkPrintDocuments::add);
-            documentHelper.getDocumentLinkAsBulkPrintDocument(lastApprovedOrder, CONSENT_ORDER).ifPresent(bulkPrintDocuments::add);
-            bulkPrintDocuments.addAll(documentHelper.getDocumentLinksFromCustomCollectionAsBulkPrintDocuments(lastApprovedOrder,
-                PENSION_DOCUMENTS, "uploadedDocument"));
+            documentHelper.getDocumentLinkAsCaseDocument(lastApprovedOrder, ORDER_LETTER).ifPresent(documents::add);
+            documentHelper.getDocumentLinkAsCaseDocument(lastApprovedOrder, CONSENT_ORDER).ifPresent(documents::add);
+            documents.addAll(documentHelper.getDocumentLinksFromCustomCollectionAsCaseDocuments(
+                lastApprovedOrder,
+                PENSION_DOCUMENTS,
+                "uploadedDocument"));
         } else {
             log.info("Failed to extract '{}' from case data for bulk print as document list was empty.", approvedOrderCollectionFieldName);
         }
 
-        return bulkPrintDocuments;
+        return documents;
     }
 }

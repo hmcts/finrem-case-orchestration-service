@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_CARE_OF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_EMAIL_ADDRESS;
@@ -60,6 +61,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FORM_A_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PENSION_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ADDRESS;
@@ -76,6 +79,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 @Slf4j
 public class DocumentHelper {
 
+    public static final String DOCUMENT_URL = "document_url";
+    public static final String DOCUMENT_FILENAME = "document_filename";
     public static final String DOCUMENT_BINARY_URL = "document_binary_url";
     public static final String ADDRESSEE = "addressee";
     public static final String CTSC_CONTACT_DETAILS = "ctscContactDetails";
@@ -141,6 +146,15 @@ public class DocumentHelper {
         return true;
     }
 
+    public CaseDocument getLatestGeneralOrder(Map<String, Object> caseData) {
+        if (isNull(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT))) {
+            log.warn("Latest general order not found for printing for case");
+            return null;
+        }
+
+        return convertToCaseDocument(caseData.get(GENERAL_ORDER_LATEST_DOCUMENT));
+    }
+
     public CaseDocument convertToCaseDocument(Object object) {
         return objectMapper.convertValue(object, CaseDocument.class);
     }
@@ -172,16 +186,6 @@ public class DocumentHelper {
 
     public List<AdditionalHearingDocumentData> convertToAdditionalHearingDocumentData(Object object) {
         return objectMapper.convertValue(object, new TypeReference<List<AdditionalHearingDocumentData>>() {
-        });
-    }
-
-    public List<Map<String, Object>> convertToGenericList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<Map<String, Object>>>() {
-        });
-    }
-
-    private List<CaseDocument> convertToCaseDocumentList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<CaseDocument>>() {
         });
     }
 
@@ -333,37 +337,51 @@ public class DocumentHelper {
         return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
     }
 
+    public List<BulkPrintDocument> getCaseDocumentsAsBulkPrintDocuments(List<CaseDocument> caseDocuments) {
+        return caseDocuments.stream()
+            .map(caseDocument -> BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build())
+            .collect(Collectors.toList());
+    }
+
     public Optional<BulkPrintDocument> getDocumentLinkAsBulkPrintDocument(Map<String, Object> data, String documentName) {
-        Map<String, Object> documentLink = (Map) data.get(documentName);
+        Map<String, String> documentLink = (Map<String, String>) data.get(documentName);
 
         return documentLink != null
-            ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL).toString()).build())
+            ? Optional.of(BulkPrintDocument.builder().binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL)).build())
             : Optional.empty();
     }
 
     public List<BulkPrintDocument> getCollectionOfDocumentLinksAsBulkPrintDocuments(Map<String, Object> data, String collectionName) {
-        return getDocumentLinksFromCustomCollectionAsBulkPrintDocuments(data, collectionName, null);
+        return getCaseDocumentsAsBulkPrintDocuments(getDocumentLinksFromCustomCollectionAsCaseDocuments(data, collectionName, null));
     }
 
-    public List<BulkPrintDocument> getDocumentLinksFromCustomCollectionAsBulkPrintDocuments(Map<String, Object> data, String collectionName,
-                                                                                            String documentName) {
-        List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
+    public List<CaseDocument> getDocumentLinksFromCustomCollectionAsCaseDocuments(Map<String, Object> data, String collectionName,
+                                                                                  String documentName) {
+        List<CaseDocument> documents = new ArrayList<>();
 
-        List<Map> documentList = ofNullable(data.get(collectionName))
-            .map(i -> (List<Map>) i)
+        List<Map<String, Object>> documentList = ofNullable(data.get(collectionName))
+            .map(i -> (List<Map<String, Object>>) i)
             .orElse(new ArrayList<>());
 
-        for (Map document : documentList) {
-            Map value = (Map) document.get(VALUE);
-            Map<String, Object> documentLink = documentName != null ? (Map) value.get(documentName) : value;
-
-            if (documentLink != null) {
-                bulkPrintDocuments.add(BulkPrintDocument.builder()
-                    .binaryFileUrl(documentLink.get(DOCUMENT_BINARY_URL).toString())
-                    .build());
-            }
+        for (Map<String, Object> document : documentList) {
+            Map<String, Object> value = (Map<String, Object>) document.get(VALUE);
+            getDocumentLinkAsCaseDocument(value, documentName).ifPresent(documents::add);
         }
-        return bulkPrintDocuments;
+        return documents;
+    }
+
+    public Optional<CaseDocument> getDocumentLinkAsCaseDocument(Map<String, Object> data, String documentName) {
+        Map<String, Object> documentLink = documentName != null
+            ? (Map<String, Object>) data.get(documentName)
+            : data;
+
+        return documentLink != null
+            ? Optional.of(CaseDocument.builder()
+                .documentUrl(documentLink.get(DOCUMENT_URL).toString())
+                .documentFilename(documentLink.get(DOCUMENT_FILENAME).toString())
+                .documentBinaryUrl(documentLink.get(DOCUMENT_BINARY_URL).toString())
+                .build())
+            : Optional.empty();
     }
 
     public String getApplicantFullName(CaseDetails caseDetails) {
@@ -390,5 +408,11 @@ public class DocumentHelper {
 
     public List<HearingOrderCollectionData> getFinalOrderDocuments(Map<String, Object> caseData) {
         return objectMapper.convertValue(caseData.get(FINAL_ORDER_COLLECTION), new TypeReference<>() {});
+    }
+
+    public List<HearingOrderCollectionData> getHearingOrderDocuments(Map<String, Object> caseData) {
+        return objectMapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
+            new TypeReference<>() {
+            });
     }
 }
