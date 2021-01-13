@@ -149,7 +149,7 @@ public class CaseDataController implements BaseController {
     }
 
     private void setApplicantSolicitorOrganisationDetails(CaseDetails caseDetails, String authToken) {
-        if (featureToggleService.isShareACaseEnabled()
+        if (featureToggleService.isRespondentJourneyEnabled()
             && caseDataService.isContestedApplication(caseDetails)
             && caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
             caseDetails.getData().put(CONTESTED_SOLICITOR_ADDRESS, solicitorService.getApplicantSolicitorAddressFromPrd(authToken));

@@ -229,7 +229,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSuccessfullyPopulateApplicantSolicitorAddress() {
-        when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
         when(updateSolicitorDetailsService.getApplicantSolicitorAddressFromPrd(
@@ -245,7 +245,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotPopulateApplicantSolicitorAddress_toggledOff() {
-        when(featureToggleService.isShareACaseEnabled()).thenReturn(false);
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
         when(updateSolicitorDetailsService.getApplicantSolicitorAddressFromPrd(
@@ -261,7 +261,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotPopulateApplicantSolicitorAddress_consentedApp() {
-        when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isContestedApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
         when(updateSolicitorDetailsService.getApplicantSolicitorAddressFromPrd(
@@ -277,7 +277,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotPopulateApplicantSolicitorAddress_notRepresented() {
-        when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
         when(updateSolicitorDetailsService.getApplicantSolicitorAddressFromPrd(
