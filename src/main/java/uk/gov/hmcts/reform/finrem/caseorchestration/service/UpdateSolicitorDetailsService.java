@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
@@ -9,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.Organisat
 import java.util.Map;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class UpdateSolicitorDetailsService {
 
@@ -20,6 +22,7 @@ public class UpdateSolicitorDetailsService {
     }
 
     private Map<String, Object> convertOrganisationAddressToSolicitorAddress(OrganisationsResponse organisationData) {
+        log.info("convertOrganisationAddressToSolicitorAddress - organisationData: {}", organisationData);
         return objectMapper.convertValue(Address.builder()
             .addressLine1(organisationData.getContactInformation().get(0).getAddressLine1())
             .addressLine2(organisationData.getContactInformation().get(0).getAddressLine2())
