@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,5 +16,5 @@ import lombok.NoArgsConstructor;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OrganisationsResponse {
     @JsonProperty(value = "contactInformation")
-    private OrganisationContactInformation contactInformation;
+    private List<OrganisationContactInformation> contactInformation;
 }

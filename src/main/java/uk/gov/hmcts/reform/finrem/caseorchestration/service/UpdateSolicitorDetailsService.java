@@ -21,13 +21,13 @@ public class UpdateSolicitorDetailsService {
 
     private Map<String, Object> convertOrganisationAddressToSolicitorAddress(OrganisationsResponse organisationData) {
         return objectMapper.convertValue(Address.builder()
-            .addressLine1(organisationData.getContactInformation().getAddressLine1())
-            .addressLine2(organisationData.getContactInformation().getAddressLine2())
-            .addressLine3(organisationData.getContactInformation().getAddressLine3())
-            .county(organisationData.getContactInformation().getCounty())
-            .country(organisationData.getContactInformation().getCountry())
-            .postTown(organisationData.getContactInformation().getTownCity())
-            .postCode(organisationData.getContactInformation().getPostcode())
+            .addressLine1(organisationData.getContactInformation().get(0).getAddressLine1())
+            .addressLine2(organisationData.getContactInformation().get(0).getAddressLine2())
+            .addressLine3(organisationData.getContactInformation().get(0).getAddressLine3())
+            .county(organisationData.getContactInformation().get(0).getCounty())
+            .country(organisationData.getContactInformation().get(0).getCountry())
+            .postTown(organisationData.getContactInformation().get(0).getTownCity())
+            .postCode(organisationData.getContactInformation().get(0).getPostcode())
             .build(), Map.class);
     }
 }

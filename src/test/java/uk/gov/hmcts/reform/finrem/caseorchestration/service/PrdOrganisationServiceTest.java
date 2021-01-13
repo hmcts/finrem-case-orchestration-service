@@ -8,6 +8,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfig
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
+import java.util.Arrays;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,20 +45,20 @@ public class PrdOrganisationServiceTest extends BaseServiceTest {
             .postcode(postCode)
             .townCity(townCity)
             .build();
-        OrganisationsResponse restApiGetResponse = OrganisationsResponse.builder().contactInformation(contactInformation).build();
+        OrganisationsResponse restApiGetResponse = OrganisationsResponse.builder().contactInformation(Arrays.asList(contactInformation)).build();
 
         when(prdOrganisationConfiguration.getOrganisationsUrl()).thenReturn(TEST_URL);
         when(restService.restApiGetCall(eq(AUTH_TOKEN), eq(TEST_URL))).thenReturn(restApiGetResponse);
 
         OrganisationsResponse organisationsResponse = prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN);
 
-        assertThat(organisationsResponse.getContactInformation().getAddressLine1(), is(contactInformation.getAddressLine1()));
-        assertThat(organisationsResponse.getContactInformation().getAddressLine2(), is(contactInformation.getAddressLine2()));
-        assertThat(organisationsResponse.getContactInformation().getAddressLine3(), is(contactInformation.getAddressLine3()));
-        assertThat(organisationsResponse.getContactInformation().getCountry(), is(contactInformation.getCountry()));
-        assertThat(organisationsResponse.getContactInformation().getCounty(), is(contactInformation.getCounty()));
-        assertThat(organisationsResponse.getContactInformation().getPostcode(), is(contactInformation.getPostcode()));
-        assertThat(organisationsResponse.getContactInformation().getTownCity(), is(contactInformation.getTownCity()));
+        assertThat(organisationsResponse.getContactInformation().get(0).getAddressLine1(), is(contactInformation.getAddressLine1()));
+        assertThat(organisationsResponse.getContactInformation().get(0).getAddressLine2(), is(contactInformation.getAddressLine2()));
+        assertThat(organisationsResponse.getContactInformation().get(0).getAddressLine3(), is(contactInformation.getAddressLine3()));
+        assertThat(organisationsResponse.getContactInformation().get(0).getCountry(), is(contactInformation.getCountry()));
+        assertThat(organisationsResponse.getContactInformation().get(0).getCounty(), is(contactInformation.getCounty()));
+        assertThat(organisationsResponse.getContactInformation().get(0).getPostcode(), is(contactInformation.getPostcode()));
+        assertThat(organisationsResponse.getContactInformation().get(0).getTownCity(), is(contactInformation.getTownCity()));
 
         verify(restService, times(1)).restApiGetCall(eq(AUTH_TOKEN), eq(TEST_URL));
         verify(prdOrganisationConfiguration, times(1)).getOrganisationsUrl();
