@@ -26,6 +26,8 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_DIRECTION_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 
 @Service
@@ -40,13 +42,11 @@ public class HearingOrderService {
     public void convertToPdfAndStampAndStoreLatestDraftHearingOrder(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
 
-        List<CollectionElement<DraftDirectionOrder>> draftDirectionOrders = Optional.ofNullable(caseData.get(DRAFT_DIRECTION_ORDER_COLLECTION))
-            .map(this::convertToListOfDraftDirectionOrder)
-            .orElse(emptyList());
+        Optional<DraftDirectionOrder> judgeApprovedHearingOrder = getJudgeApprovedHearingOrder(caseDetails);
 
-        if (!draftDirectionOrders.isEmpty()) {
+        if (judgeApprovedHearingOrder.isPresent()) {
             CaseDocument latestDraftDirectionOrderDocument = convertDocumentToPdfIfRequired(
-                draftDirectionOrders.get(draftDirectionOrders.size() - 1).getValue().getUploadDraftDocument(),
+                judgeApprovedHearingOrder.get().getUploadDraftDocument(),
                 authorisationToken);
             CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(latestDraftDirectionOrderDocument, authorisationToken);
             updateCaseDataForLatestDraftHearingOrder(caseData, stampedHearingOrder);
@@ -55,6 +55,35 @@ public class HearingOrderService {
         } else {
             throw new InvalidCaseDataException(BAD_REQUEST.value(), "Missing data from callbackRequest.");
         }
+    }
+
+    private Optional<DraftDirectionOrder> getJudgeApprovedHearingOrder(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+
+        List<CollectionElement<DraftDirectionOrder>> draftDirectionOrders = Optional.ofNullable(caseData.get(DRAFT_DIRECTION_ORDER_COLLECTION))
+            .map(this::convertToListOfDraftDirectionOrder)
+            .orElse(emptyList());
+
+        if (draftDirectionOrders.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return latestDraftDirectionOrderOverridesSolicitorCollection(caseDetails)
+            ? Optional.ofNullable(caseData.get(LATEST_DRAFT_DIRECTION_ORDER)).map(this::convertToDraftDirectionOrder)
+            : Optional.of(draftDirectionOrders.get(draftDirectionOrders.size() - 1).getValue());
+    }
+
+    public boolean latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+
+        List<CollectionElement<DraftDirectionOrder>> draftDirectionOrders = convertToListOfDraftDirectionOrder(
+            caseData.get(DRAFT_DIRECTION_ORDER_COLLECTION));
+        DraftDirectionOrder lastOrderInDraftDirectionOrdersCollection = draftDirectionOrders.get(draftDirectionOrders.size() - 1).getValue();
+
+        Optional<DraftDirectionOrder> latestDraftDirectionOrder = Optional.ofNullable(caseData.get(LATEST_DRAFT_DIRECTION_ORDER))
+            .map(this::convertToDraftDirectionOrder);
+
+        return latestDraftDirectionOrder.isPresent() && !latestDraftDirectionOrder.get().equals(lastOrderInDraftDirectionOrdersCollection);
     }
 
     private void appendDocumentToHearingOrderCollection(CaseDetails caseDetails, CaseDocument document) {
@@ -91,6 +120,29 @@ public class HearingOrderService {
             .build());
 
         caseData.put(FINAL_ORDER_COLLECTION, finalOrderCollection);
+    }
+
+    public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+
+        List<CollectionElement<DraftDirectionOrder>> judgesAmendedDirectionOrders = Optional.ofNullable(caseData.get(
+            JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION))
+            .map(this::convertToListOfDraftDirectionOrder)
+            .orElse(new ArrayList<>());
+
+        Optional<DraftDirectionOrder> latestDraftDirectionOrder = Optional.ofNullable(caseData.get(LATEST_DRAFT_DIRECTION_ORDER))
+            .map(this::convertToDraftDirectionOrder);
+
+        if (latestDraftDirectionOrder.isPresent()) {
+            judgesAmendedDirectionOrders.add(CollectionElement.<DraftDirectionOrder>builder()
+                .value(latestDraftDirectionOrder.get())
+                .build());
+            caseData.put(JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION, judgesAmendedDirectionOrders);
+        }
+    }
+
+    private DraftDirectionOrder convertToDraftDirectionOrder(Object value) {
+        return objectMapper.convertValue(value, new TypeReference<>() {});
     }
 
     private List<CollectionElement<DraftDirectionOrder>> convertToListOfDraftDirectionOrder(Object value) {

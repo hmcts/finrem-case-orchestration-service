@@ -22,7 +22,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -58,7 +57,7 @@ public class HearingOrderServiceTest extends BaseServiceTest {
 
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, AUTH_TOKEN);
 
-        verify(genericDocumentService, times(1)).stampDocument(any(), eq(AUTH_TOKEN));
+        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN));
 
         CaseDocument latestDraftHearingOrder = (CaseDocument) caseData.get(LATEST_DRAFT_HEARING_ORDER);
         assertThat(latestDraftHearingOrder, is(notNullValue()));
