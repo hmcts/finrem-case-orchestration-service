@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -8,13 +7,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
-
-import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +30,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -232,15 +228,12 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-        when(updateSolicitorDetailsService.getApplicantSolicitorAddressFromPrd(
-            isA(String.class))).thenReturn(mockFirmAddress());
 
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
-            caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
+        CallbackRequest callbackRequest = buildCallbackRequest();
 
-        Assert.assertEquals(response.getBody().getData().get(CONTESTED_SOLICITOR_ADDRESS), mockFirmAddress());
+        caseDataController.setContestedDefaultValues(AUTH_TOKEN, callbackRequest);
 
-        verify(updateSolicitorDetailsService, times(1)).getApplicantSolicitorAddressFromPrd(AUTH_TOKEN);
+        verify(updateSolicitorDetailsService, times(1)).setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -248,15 +241,11 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-        when(updateSolicitorDetailsService.getApplicantSolicitorAddressFromPrd(
-            isA(String.class))).thenReturn(mockFirmAddress());
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
             caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
 
-        Assert.assertFalse(response.getBody().getData().containsKey(CONTESTED_SOLICITOR_ADDRESS));
-
-        verify(updateSolicitorDetailsService, never()).getApplicantSolicitorAddressFromPrd(AUTH_TOKEN);
+        verify(updateSolicitorDetailsService, never()).setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, buildCallbackRequest().getCaseDetails());
     }
 
     @Test
@@ -264,15 +253,11 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isContestedApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-        when(updateSolicitorDetailsService.getApplicantSolicitorAddressFromPrd(
-            isA(String.class))).thenReturn(mockFirmAddress());
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
             caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
 
-        Assert.assertFalse(response.getBody().getData().containsKey(CONTESTED_SOLICITOR_ADDRESS));
-
-        verify(updateSolicitorDetailsService, never()).getApplicantSolicitorAddressFromPrd(AUTH_TOKEN);
+        verify(updateSolicitorDetailsService, never()).setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, buildCallbackRequest().getCaseDetails());
     }
 
     @Test
@@ -280,26 +265,10 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
-        when(updateSolicitorDetailsService.getApplicantSolicitorAddressFromPrd(
-            isA(String.class))).thenReturn(mockFirmAddress());
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
             caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
 
-        Assert.assertFalse(response.getBody().getData().containsKey(CONTESTED_SOLICITOR_ADDRESS));
-
-        verify(updateSolicitorDetailsService, never()).getApplicantSolicitorAddressFromPrd(AUTH_TOKEN);
-    }
-
-    private Map<String, Object> mockFirmAddress() {
-        return objectMapper.convertValue(Address.builder()
-            .addressLine1("Applicant Solicitor Firm")
-            .addressLine2("AddressLine2")
-            .addressLine3("AddressLine3")
-            .county("County")
-            .country("Country")
-            .postTown("Town")
-            .postCode("Postcode")
-            .build(), Map.class);
+        verify(updateSolicitorDetailsService, never()).setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, buildCallbackRequest().getCaseDetails());
     }
 }

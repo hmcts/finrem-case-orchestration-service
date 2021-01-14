@@ -4,10 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
 import java.util.Map;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 @Service
 @Slf4j
@@ -17,12 +22,17 @@ public class UpdateSolicitorDetailsService {
     private final PrdOrganisationService organisationService;
     private final ObjectMapper objectMapper;
 
-    public Map<String, Object> getApplicantSolicitorAddressFromPrd(String authToken) {
-        return convertOrganisationAddressToSolicitorAddress(organisationService.retrieveOrganisationsData(authToken));
+    public void setApplicantSolicitorOrganisationDetails(String authToken, CaseDetails caseDetails) {
+        OrganisationsResponse organisationsResponse = organisationService.retrieveOrganisationsData(authToken);
+
+        if (organisationsResponse != null) {
+            caseDetails.getData().put(CONTESTED_SOLICITOR_ADDRESS, convertOrganisationAddressToSolicitorAddress(organisationsResponse));
+            caseDetails.getData().put(CONTESTED_SOLICITOR_FIRM, organisationsResponse.getName());
+            caseDetails.getData().put(SOLICITOR_REFERENCE, organisationsResponse.getOrganisationIdentifier());
+        }
     }
 
     private Map<String, Object> convertOrganisationAddressToSolicitorAddress(OrganisationsResponse organisationData) {
-        log.info("convertOrganisationAddressToSolicitorAddress - organisationData: {}", organisationData);
         return objectMapper.convertValue(Address.builder()
             .addressLine1(organisationData.getContactInformation().get(0).getAddressLine1())
             .addressLine2(organisationData.getContactInformation().get(0).getAddressLine2())

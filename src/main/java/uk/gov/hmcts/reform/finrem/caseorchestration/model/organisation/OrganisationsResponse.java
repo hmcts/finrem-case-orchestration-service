@@ -17,4 +17,8 @@ import java.util.List;
 public class OrganisationsResponse {
     @JsonProperty(value = "contactInformation")
     private List<OrganisationContactInformation> contactInformation;
+    @JsonProperty(value = "name")
+    private String name;
+    @JsonProperty(value = "organisationIdentifier")
+    private String organisationIdentifier;
 }

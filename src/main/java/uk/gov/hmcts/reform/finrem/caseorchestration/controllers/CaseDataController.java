@@ -28,7 +28,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
@@ -152,7 +151,7 @@ public class CaseDataController implements BaseController {
         if (featureToggleService.isRespondentJourneyEnabled()
             && caseDataService.isContestedApplication(caseDetails)
             && caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
-            caseDetails.getData().put(CONTESTED_SOLICITOR_ADDRESS, solicitorService.getApplicantSolicitorAddressFromPrd(authToken));
+            solicitorService.setApplicantSolicitorOrganisationDetails(authToken, caseDetails);
         }
     }
 }
