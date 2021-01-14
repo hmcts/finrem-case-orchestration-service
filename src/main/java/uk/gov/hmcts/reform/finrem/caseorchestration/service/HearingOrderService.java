@@ -58,32 +58,33 @@ public class HearingOrderService {
     }
 
     private Optional<DraftDirectionOrder> getJudgeApprovedHearingOrder(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
+        Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(caseDetails);
 
-        List<CollectionElement<DraftDirectionOrder>> draftDirectionOrders = Optional.ofNullable(caseData.get(DRAFT_DIRECTION_ORDER_COLLECTION))
-            .map(this::convertToListOfDraftDirectionOrder)
-            .orElse(emptyList());
-
-        if (draftDirectionOrders.isEmpty()) {
-            return Optional.empty();
-        }
-
-        return latestDraftDirectionOrderOverridesSolicitorCollection(caseDetails)
-            ? Optional.ofNullable(caseData.get(LATEST_DRAFT_DIRECTION_ORDER)).map(this::convertToDraftDirectionOrder)
-            : Optional.of(draftDirectionOrders.get(draftDirectionOrders.size() - 1).getValue());
+        return draftDirectionOrderCollectionTail.isEmpty()
+            ? Optional.empty()
+            : latestDraftDirectionOrderOverridesSolicitorCollection(caseDetails)
+            ? Optional.ofNullable(caseDetails.getData().get(LATEST_DRAFT_DIRECTION_ORDER)).map(this::convertToDraftDirectionOrder)
+            : draftDirectionOrderCollectionTail;
     }
 
     public boolean latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
+        DraftDirectionOrder draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(caseDetails).get();
 
-        List<CollectionElement<DraftDirectionOrder>> draftDirectionOrders = convertToListOfDraftDirectionOrder(
-            caseData.get(DRAFT_DIRECTION_ORDER_COLLECTION));
-        DraftDirectionOrder lastOrderInDraftDirectionOrdersCollection = draftDirectionOrders.get(draftDirectionOrders.size() - 1).getValue();
-
-        Optional<DraftDirectionOrder> latestDraftDirectionOrder = Optional.ofNullable(caseData.get(LATEST_DRAFT_DIRECTION_ORDER))
+        Optional<DraftDirectionOrder> latestDraftDirectionOrder = Optional.ofNullable(caseDetails.getData().get(LATEST_DRAFT_DIRECTION_ORDER))
             .map(this::convertToDraftDirectionOrder);
 
-        return latestDraftDirectionOrder.isPresent() && !latestDraftDirectionOrder.get().equals(lastOrderInDraftDirectionOrdersCollection);
+        return latestDraftDirectionOrder.isPresent() && !latestDraftDirectionOrder.get().equals(draftDirectionOrderCollectionTail);
+    }
+
+    public Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail(CaseDetails caseDetails) {
+        List<CollectionElement<DraftDirectionOrder>> draftDirectionOrders = Optional.ofNullable(caseDetails.getData()
+            .get(DRAFT_DIRECTION_ORDER_COLLECTION))
+            .map(this::convertToListOfDraftDirectionOrder)
+            .orElse(emptyList());
+
+        return draftDirectionOrders.isEmpty()
+            ? Optional.empty()
+            : Optional.of(draftDirectionOrders.get(draftDirectionOrders.size() - 1).getValue());
     }
 
     private void appendDocumentToHearingOrderCollection(CaseDetails caseDetails, CaseDocument document) {
