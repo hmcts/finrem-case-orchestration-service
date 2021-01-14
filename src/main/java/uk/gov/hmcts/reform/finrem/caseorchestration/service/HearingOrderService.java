@@ -57,16 +57,6 @@ public class HearingOrderService {
         }
     }
 
-    private Optional<DraftDirectionOrder> getJudgeApprovedHearingOrder(CaseDetails caseDetails) {
-        Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(caseDetails);
-
-        return draftDirectionOrderCollectionTail.isEmpty()
-            ? Optional.empty()
-            : latestDraftDirectionOrderOverridesSolicitorCollection(caseDetails)
-            ? Optional.ofNullable(caseDetails.getData().get(LATEST_DRAFT_DIRECTION_ORDER)).map(this::convertToDraftDirectionOrder)
-            : draftDirectionOrderCollectionTail;
-    }
-
     public boolean latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails caseDetails) {
         DraftDirectionOrder draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(caseDetails).get();
 
@@ -74,6 +64,25 @@ public class HearingOrderService {
             .map(this::convertToDraftDirectionOrder);
 
         return latestDraftDirectionOrder.isPresent() && !latestDraftDirectionOrder.get().equals(draftDirectionOrderCollectionTail);
+    }
+
+    public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+
+        List<CollectionElement<DraftDirectionOrder>> judgesAmendedDirectionOrders = Optional.ofNullable(caseData.get(
+            JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION))
+            .map(this::convertToListOfDraftDirectionOrder)
+            .orElse(new ArrayList<>());
+
+        Optional<DraftDirectionOrder> latestDraftDirectionOrder = Optional.ofNullable(caseData.get(LATEST_DRAFT_DIRECTION_ORDER))
+            .map(this::convertToDraftDirectionOrder);
+
+        if (latestDraftDirectionOrder.isPresent()) {
+            judgesAmendedDirectionOrders.add(CollectionElement.<DraftDirectionOrder>builder()
+                .value(latestDraftDirectionOrder.get())
+                .build());
+            caseData.put(JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION, judgesAmendedDirectionOrders);
+        }
     }
 
     public Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail(CaseDetails caseDetails) {
@@ -85,6 +94,16 @@ public class HearingOrderService {
         return draftDirectionOrders.isEmpty()
             ? Optional.empty()
             : Optional.of(draftDirectionOrders.get(draftDirectionOrders.size() - 1).getValue());
+    }
+
+    private Optional<DraftDirectionOrder> getJudgeApprovedHearingOrder(CaseDetails caseDetails) {
+        Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(caseDetails);
+
+        return draftDirectionOrderCollectionTail.isEmpty()
+            ? Optional.empty()
+            : latestDraftDirectionOrderOverridesSolicitorCollection(caseDetails)
+            ? Optional.ofNullable(caseDetails.getData().get(LATEST_DRAFT_DIRECTION_ORDER)).map(this::convertToDraftDirectionOrder)
+            : draftDirectionOrderCollectionTail;
     }
 
     private void appendDocumentToHearingOrderCollection(CaseDetails caseDetails, CaseDocument document) {
@@ -121,25 +140,6 @@ public class HearingOrderService {
             .build());
 
         caseData.put(FINAL_ORDER_COLLECTION, finalOrderCollection);
-    }
-
-    public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-
-        List<CollectionElement<DraftDirectionOrder>> judgesAmendedDirectionOrders = Optional.ofNullable(caseData.get(
-            JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION))
-            .map(this::convertToListOfDraftDirectionOrder)
-            .orElse(new ArrayList<>());
-
-        Optional<DraftDirectionOrder> latestDraftDirectionOrder = Optional.ofNullable(caseData.get(LATEST_DRAFT_DIRECTION_ORDER))
-            .map(this::convertToDraftDirectionOrder);
-
-        if (latestDraftDirectionOrder.isPresent()) {
-            judgesAmendedDirectionOrders.add(CollectionElement.<DraftDirectionOrder>builder()
-                .value(latestDraftDirectionOrder.get())
-                .build());
-            caseData.put(JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION, judgesAmendedDirectionOrders);
-        }
     }
 
     private DraftDirectionOrder convertToDraftDirectionOrder(Object value) {
