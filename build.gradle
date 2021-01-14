@@ -7,7 +7,7 @@ buildscript {
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath("net.serenity-bdd:serenity-gradle-plugin:2.2.12")
-        classpath group: 'org.sonarsource.scanner.gradle', name: 'sonarqube-gradle-plugin', version: '3.0'
+        classpath group: 'org.sonarsource.scanner.gradle', name: 'sonarqube-gradle-plugin', version: '3.1'
     }
 }
 
@@ -21,7 +21,7 @@ plugins {
     id "info.solidsoft.pitest" version "1.5.2"
     id 'jacoco'
     id 'org.owasp.dependencycheck' version '6.0.5'
-    id 'org.sonarqube' version '3.0'
+    id 'org.sonarqube' version '3.1'
     id 'org.springframework.boot' version '2.3.4.RELEASE'
     id 'net.ltgt.apt' version '0.21'
 }
@@ -104,7 +104,7 @@ configurations {
 }
 
 def versions = [
-    bspCommonLib            : '0.0.44',
+    bspCommonLib            : '0.0.47',
     ccdClient               : '4.7.3',
     commonsBeanUtils        : '1.9.4',
     commonsIo               : '2.7',
@@ -113,21 +113,21 @@ def versions = [
     jsonAssert              : '1.2.3',
     junit                   : '4.13.1',
     lombok                  : '1.18.16',
-    mockito                 : '3.4.4',
+    mockito                 : '3.7.0',
     nimbus                  : '5.1',
     pact_version            : '3.6.15',
     pdfbox                  : '2.0.8',
     pitest                  : '1.5.2',
     powerMock               : '1.7.3',
-    reformLogging           : '5.1.5',
+    reformLogging           : '5.1.7',
     restAssured             : '3.0.3',
-    serenity                : '2.2.12',
+    serenity                : '2.3.12',
     serenityCucumber        : '1.9.51',
     serviceTokenGenerator   : '3.1.1',
     springfoxSwagger        : '2.9.2',
     sonarPitest             : '0.5',
     tomcat                  : '9.0.40',
-    wiremock                : '2.27.1'
+    wiremock                : '2.27.2'
 ]
 
 dependencyManagement {
