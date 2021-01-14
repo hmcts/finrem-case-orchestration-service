@@ -58,7 +58,8 @@ public class HearingOrderService {
     }
 
     public boolean latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails caseDetails) {
-        DraftDirectionOrder draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(caseDetails).get();
+        DraftDirectionOrder draftDirectionOrderCollectionTail = draftDirectionOrderCollectionTail(caseDetails)
+            .orElseThrow(IllegalArgumentException::new);
 
         Optional<DraftDirectionOrder> latestDraftDirectionOrder = Optional.ofNullable(caseDetails.getData().get(LATEST_DRAFT_DIRECTION_ORDER))
             .map(this::convertToDraftDirectionOrder);
