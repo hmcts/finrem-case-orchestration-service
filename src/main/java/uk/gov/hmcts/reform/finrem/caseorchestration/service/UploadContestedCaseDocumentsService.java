@@ -13,11 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_EVIDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FR_FORM_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_TRIAL_BUNDLE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EVIDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_FR_FORM_COLLECTION;
@@ -32,16 +34,26 @@ public class UploadContestedCaseDocumentsService {
     private static final String RESPONDENT = "respondent";
 
     private final ObjectMapper mapper;
+    private final FeatureToggleService featureToggleService;
 
     public Map<String, Object> filterDocumentsToRelevantParty(Map<String, Object> caseData) {
 
+        boolean respondentJourneyEnabled = featureToggleService.isRespondentJourneyEnabled();
+        log.info("Respondent Solicitor Journey toggle is: {}", respondentJourneyEnabled);
+
         List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS);
 
+        if (respondentJourneyEnabled) {
+            filterConfidentialDocs(uploadedDocuments, caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION, APPLICANT);
+        }
         filterCorrespondence(uploadedDocuments, caseData, APPLICANT_CORRESPONDENCE_COLLECTION, APPLICANT);
         filterForms(uploadedDocuments, caseData, APPLICANT_FR_FORM_COLLECTION, APPLICANT);
         filterEvidence(uploadedDocuments, caseData, APPLICANT_EVIDENCE_COLLECTION, APPLICANT);
         filterTrialBundle(uploadedDocuments, caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION, APPLICANT);
 
+        if (respondentJourneyEnabled) {
+            filterConfidentialDocs(uploadedDocuments, caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION, RESPONDENT);
+        }
         filterCorrespondence(uploadedDocuments, caseData, RESPONDENT_CORRESPONDENCE_COLLECTION, RESPONDENT);
         filterForms(uploadedDocuments, caseData, RESPONDENT_FR_FORM_COLLECTION, RESPONDENT);
         filterEvidence(uploadedDocuments, caseData, RESPONDENT_EVIDENCE_COLLECTION, RESPONDENT);
@@ -110,7 +122,7 @@ public class UploadContestedCaseDocumentsService {
 
         List<ContestedUploadedDocumentData> correspondenceCollection = getDocumentCollection(caseData, collection);
         correspondenceCollection.addAll(correspondenceFiltered);
-        log.info("Adding items: {}, to Applicant Correspondence Collection", correspondenceFiltered);
+        log.info("Adding items: {}, to Correspondence Collection", correspondenceFiltered);
         uploadedDocuments.removeAll(correspondenceFiltered);
 
         if (!correspondenceCollection.isEmpty()) {
@@ -132,7 +144,7 @@ public class UploadContestedCaseDocumentsService {
 
         List<ContestedUploadedDocumentData> formCollection = getDocumentCollection(caseData, collection);
         formCollection.addAll(frFormsFiltered);
-        log.info("Adding items: {}, to Applicant FR Forms Collection", frFormsFiltered);
+        log.info("Adding items: {}, to FR Forms Collection", frFormsFiltered);
         uploadedDocuments.removeAll(frFormsFiltered);
 
         if (!formCollection.isEmpty()) {
@@ -154,7 +166,7 @@ public class UploadContestedCaseDocumentsService {
 
         List<ContestedUploadedDocumentData> evidenceCollection = getDocumentCollection(caseData, collection);
         evidenceCollection.addAll(evidenceInSupportFiltered);
-        log.info("Adding items: {}, to Applicant Evidence In Support Collection", evidenceInSupportFiltered);
+        log.info("Adding items: {}, to Evidence In Support Collection", evidenceInSupportFiltered);
         uploadedDocuments.removeAll(evidenceInSupportFiltered);
 
         if (!evidenceCollection.isEmpty()) {
@@ -176,11 +188,36 @@ public class UploadContestedCaseDocumentsService {
 
         List<ContestedUploadedDocumentData> trialBundleCollection = getDocumentCollection(caseData, collection);
         trialBundleCollection.addAll(trialBundleFiltered);
-        log.info("Adding items: {}, to Applicant Trial Bundle Collection", trialBundleFiltered);
+        log.info("Adding items: {}, to Trial Bundle Collection", trialBundleFiltered);
         uploadedDocuments.removeAll(trialBundleFiltered);
 
         if (!trialBundleCollection.isEmpty()) {
             caseData.put(collection, trialBundleCollection);
+        }
+    }
+
+    private void filterConfidentialDocs(List<ContestedUploadedDocumentData> uploadedDocuments,
+                                        Map<String, Object> caseData,
+                                        String collection,
+                                        String party) {
+
+        log.info("UploadDocuments Collection: {}", uploadedDocuments);
+        List<ContestedUploadedDocumentData> confidentialFiltered = uploadedDocuments.stream()
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty() != null
+                && d.getUploadedCaseDocument().getCaseDocumentParty().equals(party))
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null
+                && d.getUploadedCaseDocument().getCaseDocumentConfidential() != null
+                && d.getUploadedCaseDocument().getCaseDocumentConfidential().equalsIgnoreCase("Yes"))
+            .collect(Collectors.toList());
+
+        List<ContestedUploadedDocumentData> confidentialDocsCollection = getDocumentCollection(caseData, collection);
+        confidentialDocsCollection.addAll(confidentialFiltered);
+        log.info("Adding items: {}, to Confidential Documents Collection", confidentialFiltered);
+        uploadedDocuments.removeAll(confidentialFiltered);
+
+        if (!confidentialDocsCollection.isEmpty()) {
+            caseData.put(collection, confidentialDocsCollection);
         }
     }
 }
