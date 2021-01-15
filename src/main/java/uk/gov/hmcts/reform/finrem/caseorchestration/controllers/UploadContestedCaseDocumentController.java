@@ -38,8 +38,8 @@ public class UploadContestedCaseDocumentController implements BaseController {
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> uploadCaseDocuments(
-        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @RequestBody CallbackRequest ccdRequest) throws Exception {
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false)
+        @RequestBody CallbackRequest ccdRequest) {
 
         validateCaseData(ccdRequest);
 
@@ -56,5 +56,4 @@ public class UploadContestedCaseDocumentController implements BaseController {
                 .warnings(ImmutableList.of())
                 .build());
     }
-
 }
