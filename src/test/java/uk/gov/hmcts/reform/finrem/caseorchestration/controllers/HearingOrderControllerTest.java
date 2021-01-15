@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
@@ -14,9 +15,10 @@ import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -42,11 +44,23 @@ public class HearingOrderControllerTest extends BaseControllerTest {
 
     @Test
     public void givenDraftDirectionOrderCollectionIsNotEmpty_whenStartingHearingOrderApproval_thenLatestDraftDirOrderIsPopulated() {
-        when(hearingOrderService.draftDirectionOrderCollectionTail(any())).thenReturn(Optional.of(DraftDirectionOrder.builder().build()));
+        DraftDirectionOrder draftDirectionOrder = DraftDirectionOrder.builder().build();
+        when(hearingOrderService.draftDirectionOrderCollectionTail(any())).thenReturn(Optional.of(draftDirectionOrder));
 
         ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = hearingOrderController.startHearingOrderApproval(buildCallbackRequest());
 
-        assertThat(response.getBody().getData().get(LATEST_DRAFT_DIRECTION_ORDER), is(notNullValue()));
+        assertThat(response.getBody().getData().get(LATEST_DRAFT_DIRECTION_ORDER), is(draftDirectionOrder));
+    }
+
+    @Test
+    public void givenDraftDirectionOrderCollectionIsEmpty_whenStartingHearingOrderApproval_thenLatestDraftDirOrderIsCleared() {
+        when(hearingOrderService.draftDirectionOrderCollectionTail(any())).thenReturn(Optional.empty());
+
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().getData().put(LATEST_DRAFT_DIRECTION_ORDER, "any non-null value");
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = hearingOrderController.startHearingOrderApproval(callbackRequest);
+
+        assertThat(response.getBody().getData().get(LATEST_DRAFT_DIRECTION_ORDER), is(nullValue()));
     }
 
     @Test
@@ -55,6 +69,17 @@ public class HearingOrderControllerTest extends BaseControllerTest {
 
         hearingOrderController.storeApprovedHearingOrder(AUTH_TOKEN, buildCallbackRequest());
 
+        verify(hearingOrderService).convertToPdfAndStampAndStoreLatestDraftHearingOrder(any(), eq(AUTH_TOKEN));
+        verify(caseDataService).moveCollection(any(), eq(DRAFT_DIRECTION_DETAILS_COLLECTION), eq(DRAFT_DIRECTION_DETAILS_COLLECTION_RO));
         verify(hearingOrderService).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(any());
+    }
+
+    @Test
+    public void givenLatestDraftDirectionOrderDoesntOverrideSolicitorCollection_whenStoringApprovedOrder_thenItIsNotAppendedToJudgesAmendedOrders() {
+        when(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(any())).thenReturn(false);
+
+        hearingOrderController.storeApprovedHearingOrder(AUTH_TOKEN, buildCallbackRequest());
+
+        verify(hearingOrderService, never()).appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(any());
     }
 }
