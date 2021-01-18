@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsen
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralOrderConsentedData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.BulkPrintDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.DocumentGenerationRequest;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,7 +26,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -49,13 +51,6 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
 
     private static final String COVER_LETTER_URL = "cover_letter_url";
     private static final String GENERAL_ORDER_URL = "general_letter_url";
-    private static final String DEFAULT_COVERSHEET_URL = "default_coversheet_url";
-
-    private static final String CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_TEMPLATE = "FL-FRM-LET-ENG-00319.docx";
-    private static final String CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_FILENAME = "consentOrderNotApprovedCoverLetter.pdf";
-
-    private static final String BULK_PRINT_TEMPLATE = "FL-FRM-LET-ENG-00522.docx";
-    private static final String BULK_PRINT_FILENAME = "BulkPrintCoverSheet.pdf";
 
     @Autowired private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
     @Autowired private DocumentClient documentClientMock;
@@ -64,9 +59,10 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
 
     @Before
     public void setupDocumentGenerationMocks() {
-        mockDocumentClientToReturnUrlForDocumentGenerationRequest(CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_TEMPLATE,
-            CONSENT_ORDER_NOT_APPROVED_COVER_LETTER_FILENAME, COVER_LETTER_URL);
-        mockDocumentClientToReturnUrlForDocumentGenerationRequest(BULK_PRINT_TEMPLATE, BULK_PRINT_FILENAME, DEFAULT_COVERSHEET_URL);
+        Document generatedDocument = document();
+        generatedDocument.setBinaryUrl(COVER_LETTER_URL);
+
+        when(documentClientMock.generatePdf(any(DocumentGenerationRequest.class), eq(AUTH_TOKEN))).thenReturn(generatedDocument);
     }
 
     public void setupContestedCase() {
@@ -93,8 +89,8 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
                                                                            String generatedDocumentUrl) {
         Document generatedDocument = document();
         generatedDocument.setBinaryUrl(generatedDocumentUrl);
-        when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(requestedTemplate, requestedFilename),
-            anyString())).thenReturn(generatedDocument);
+        DocumentGenerationRequest request = matchDocumentGenerationRequestTemplateAndFilename(requestedTemplate, requestedFilename);
+        when(documentClientMock.generatePdf(request, AUTH_TOKEN)).thenReturn(generatedDocument);
     }
 
     @Test
