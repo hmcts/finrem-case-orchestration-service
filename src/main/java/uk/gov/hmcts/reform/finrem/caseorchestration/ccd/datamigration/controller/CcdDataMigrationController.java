@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.MigrationHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.RemoveNottinghamCourtListGaMigration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.RemoveRespondentSolOrg;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl;
 
 import java.util.Map;
@@ -28,6 +28,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequestMapping(value = "/ccd-data-migration")
 @Slf4j
 public class CcdDataMigrationController {
+
+    public final RemoveRespondentSolOrg removeRespondentSolOrg;
 
     @PostMapping(value = "/migrate", consumes = APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
@@ -44,8 +46,7 @@ public class CcdDataMigrationController {
             AboutToStartOrSubmitCallbackResponse.builder();
 
         // Change the below to point to your new migration service and modify controller tests to match
-        RemoveNottinghamCourtListGaMigration removeNottinghamCourtListGaMigration = new RemoveNottinghamCourtListGaMigration();
-        Map<String, Object> caseData = removeNottinghamCourtListGaMigration.migrate(caseDetails);
+        Map<String, Object> caseData = removeRespondentSolOrg.migrateCaseData(caseDetails.getData());
 
         if (caseData != null) {
             responseBuilder.data(caseData);

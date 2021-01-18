@@ -1,13 +1,19 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.ccd.datamigration.controller;
 
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.controllers.BaseControllerTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.RemoveRespondentSolOrg;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNot.not;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -49,6 +55,19 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
 
     private static final String MIGRATE_FRC_URL = "/ccd-data-migration/migrateFrc";
     private static final String MIGRATE_URL = "/ccd-data-migration/migrate";
+
+    @Autowired
+    CcdDataMigrationController CcdDataMigrationController;
+
+    @MockBean
+    RemoveRespondentSolOrg removeRespondentSolOrg;
+
+    @Test
+    public void shouldRemoveRespOrgPolicyFromCaseData() {
+        CcdDataMigrationController.migrate(authTokenGenerator.generate(), buildCallbackRequest());
+
+        verify(removeRespondentSolOrg, times(1)).migrateCaseData(buildCallbackRequest().getCaseDetails().getData());
+    }
 
     @Test
     public void shouldRemove_nottinghamCourtListGA_fromCase() throws Exception {
