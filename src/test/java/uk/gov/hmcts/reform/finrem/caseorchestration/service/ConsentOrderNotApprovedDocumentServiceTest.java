@@ -85,14 +85,6 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         caseData.put(GENERAL_ORDER_COLLECTION_CONSENTED, generalOrders);
     }
 
-    private void mockDocumentClientToReturnUrlForDocumentGenerationRequest(String requestedTemplate, String requestedFilename,
-                                                                           String generatedDocumentUrl) {
-        Document generatedDocument = document();
-        generatedDocument.setBinaryUrl(generatedDocumentUrl);
-        DocumentGenerationRequest request = matchDocumentGenerationRequestTemplateAndFilename(requestedTemplate, requestedFilename);
-        when(documentClientMock.generatePdf(request, AUTH_TOKEN)).thenReturn(generatedDocument);
-    }
-
     @Test
     public void whenApplicantLetterPackIsPrepared_thenItHasExpectedDocuments_and_caseDataIsUpdated() {
         setupContestedCase();
