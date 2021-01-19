@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.migration;
 
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -8,7 +9,10 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import java.util.HashMap;
 import java.util.Map;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.springframework.util.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_REF;
@@ -19,8 +23,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class RemoveRespondentSolOrgTest extends BaseServiceTest {
 
-    @MockBean
-    RemoveRespondentSolOrg removeRespondentSolOrg;
+    @Autowired
+    private RemoveRespondentSolOrg removeRespondentSolOrg;
 
     @Test
     public void shouldRemoveRespOrgPolicyFromCaseData() {
@@ -44,6 +48,6 @@ public class RemoveRespondentSolOrgTest extends BaseServiceTest {
         CaseDetails caseDetails = buildCaseDetails();
         Map<String, Object> migratedCaseData = removeRespondentSolOrg.migrateCaseData(caseDetails.getData());
 
-        assertNull(migratedCaseData.get(ORGANISATION_POLICY_RESPONDENT));
+        assertTrue(isEmpty(migratedCaseData.get(ORGANISATION_POLICY_RESPONDENT)));
     }
 }
