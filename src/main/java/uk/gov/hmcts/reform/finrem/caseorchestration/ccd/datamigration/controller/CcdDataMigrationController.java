@@ -40,7 +40,7 @@ public class CcdDataMigrationController {
         @RequestBody @ApiParam("CaseData") final CallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
-        log.info("FR case migration request received for case {}", caseDetails.getId());
+        log.info("FR case migration for removing respondent org policy. Request received for case {}", caseDetails.getId());
 
         AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder responseBuilder =
             AboutToStartOrSubmitCallbackResponse.builder();
