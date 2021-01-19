@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service.migration;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -20,4 +21,3 @@ public class RemoveRespondentSolOrg {
         return caseData;
     }
 }
-i
