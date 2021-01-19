@@ -56,10 +56,10 @@ public class CcdDataMigrationControllerTest extends BaseControllerTest {
     private static final String MIGRATE_URL = "/ccd-data-migration/migrate";
 
     @Autowired
-    CcdDataMigrationController CcdDataMigrationController;
+    private CcdDataMigrationController CcdDataMigrationController;
 
     @MockBean
-    RemoveRespondentSolOrg removeRespondentSolOrg;
+    private RemoveRespondentSolOrg removeRespondentSolOrg;
 
     @Test
     public void shouldRemoveRespOrgPolicyFromCaseData() {
