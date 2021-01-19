@@ -24,21 +24,4 @@
         <cve>CVE-2020-11022</cve>
         <cve>CVE-2020-11023</cve>
     </suppress>
-    <suppress>
-        <notes><![CDATA[file name: junit-4.13.jar]]></notes>
-        <packageUrl regex="true">^pkg:maven/junit/junit@.*$</packageUrl>
-        <cve>CVE-2020-15250</cve>
-    </suppress>
-    <suppress>
-        <notes>Apache HttpClient versions prior to version 4.5.13 and 5.0.3 can misinterpret malformed authority component in request URIs passed to the library as java.net.URI object and pick the wrong target host for request execution.</notes>
-        <cve>CVE-2020-13956</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[file name: jetty-client-9.4.31.v20200723.jar]]></notes>
-        <cve>CVE-2020-27216</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[file name: jetty-client-9.4.31.v20200723.jar]]></notes>
-        <cve>CVE-2020-27218</cve>
-    </suppress>
 </suppressions>
