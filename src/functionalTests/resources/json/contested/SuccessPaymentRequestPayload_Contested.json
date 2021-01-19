@@ -83,7 +83,7 @@
         "Fees": [
           {
             "value": {
-              "FeeCode": "FEE0229",
+              "FeeCode": "FEE0230",
               "FeeAmount": "1000",
               "FeeDescription": "Application for a financial order",
               "FeeVersion": "1"
