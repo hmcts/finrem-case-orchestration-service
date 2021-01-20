@@ -16,7 +16,6 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.RESPONDENT_JOURNEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SHARE_A_CASE;
 
 /**
  * To add a feature toggle flag:
@@ -45,10 +44,6 @@ public class FeatureToggleService {
 
     public boolean isRespondentJourneyEnabled() {
         return isFeatureEnabled(RESPONDENT_JOURNEY);
-    }
-
-    public boolean isShareACaseEnabled() {
-        return isFeatureEnabled(SHARE_A_CASE);
     }
 
     /*

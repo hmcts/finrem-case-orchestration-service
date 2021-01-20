@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.util.HashMap;
@@ -43,7 +42,6 @@ public class CaseDataController implements BaseController {
 
     private final IdamService idamService;
     private final CaseDataService caseDataService;
-    private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for consented journey")
@@ -130,9 +128,7 @@ public class CaseDataController implements BaseController {
     }
 
     private void setOrganisationPolicy(CaseDetails caseDetails) {
-        log.info("Share a case is enabled: {}", featureToggleService.isShareACaseEnabled());
-        if (featureToggleService.isShareACaseEnabled()
-            && (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails))) {
+        if  (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails)) {
 
             Map<String, Object> appPolicy = new HashMap<>();
             appPolicy.put(ORGANISATION_POLICY_ROLE, APP_SOLICITOR_POLICY);

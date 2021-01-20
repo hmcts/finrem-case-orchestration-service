@@ -2,7 +2,6 @@ java:
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   environment:
-    FEATURE_SHARE_A_CASE: true
     FEATURE_RESPONDENT_JOURNEY: true
   keyVaults:
     finrem:
