@@ -907,6 +907,18 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
     }
 
+    @Test
+    public void whenConsentOrderNotApprovedSentEmail_thenNotificationEmailsSentToSolicitors() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailApplicantSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendConsentOrderNotApprovedSentEmail(buildCallbackRequest());
+
+        verify(notificationService).sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(any());
+        verify(notificationService).sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(any());
+    }
+
     private CallbackRequest createCallbackRequestWithFinalOrder() {
         CallbackRequest callbackRequest = buildCallbackRequest();
 
