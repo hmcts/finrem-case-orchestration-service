@@ -838,6 +838,7 @@ public class NotificationServiceTest extends BaseServiceTest {
 
         verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest.getCaseDetails());
     }
+
     @Test
     public void sendConsentOrderNotApprovedSentEmailToRespondentSolicitor() {
         mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_NOT_APPROVED_SENT))
