@@ -26,7 +26,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @TestPropertySource(locations = "/application.properties")
 public class IdamServiceTest extends BaseServiceTest {
-
     @Autowired
     private IdamService idamService;
 
