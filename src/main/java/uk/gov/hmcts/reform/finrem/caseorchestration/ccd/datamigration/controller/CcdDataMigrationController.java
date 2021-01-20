@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.MigrationHandler;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.RemoveNottinghamCourtListGaMigration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.RemoveRespondentSolOrg;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.migration.Rpet164FrcCourtListMigrationImpl;
 
 import java.util.Map;
@@ -29,6 +29,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @Slf4j
 public class CcdDataMigrationController {
 
+    public final RemoveRespondentSolOrg removeRespondentSolOrg;
+
     @PostMapping(value = "/migrate", consumes = APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
@@ -38,14 +40,13 @@ public class CcdDataMigrationController {
         @RequestBody @ApiParam("CaseData") final CallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
-        log.info("FR case migration request received for case {}", caseDetails.getId());
+        log.info("FR case migration for removing respondent org policy. Request received for case {}", caseDetails.getId());
 
         AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder responseBuilder =
             AboutToStartOrSubmitCallbackResponse.builder();
 
         // Change the below to point to your new migration service and modify controller tests to match
-        RemoveNottinghamCourtListGaMigration removeNottinghamCourtListGaMigration = new RemoveNottinghamCourtListGaMigration();
-        Map<String, Object> caseData = removeNottinghamCourtListGaMigration.migrate(caseDetails);
+        Map<String, Object> caseData = removeRespondentSolOrg.migrateCaseData(caseDetails.getData());
 
         if (caseData != null) {
             responseBuilder.data(caseData);

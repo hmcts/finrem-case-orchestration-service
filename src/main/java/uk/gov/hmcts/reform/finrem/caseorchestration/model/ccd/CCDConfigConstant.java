@@ -405,11 +405,13 @@ public class CCDConfigConstant {
 
     //organisation policy
     public static final String ORGANISATION_POLICY_APPLICANT = "ApplicantOrganisationPolicy";
+    public static final String ORGANISATION_POLICY_RESPONDENT = "RespondentOrganisationPolicy";
     public static final String ORGANISATION_POLICY_ROLE = "OrgPolicyCaseAssignedRole";
     public static final String ORGANISATION_POLICY_REF = "OrgPolicyReference";
     public static final String ORGANISATION_POLICY_ORGANISATION = "Organisation";
     public static final String ORGANISATION_POLICY_ORGANISATION_ID = "OrganisationID";
     public static final String APP_SOLICITOR_POLICY = "[APPSOLICITOR]";
+    public static final String RESP_SOLICITOR_POLICY = "[RESPSOLICITOR]";
     public static final String CREATOR_USER_ROLE = "[CREATOR]";
 
     //scheduled hearings

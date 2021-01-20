@@ -131,9 +131,7 @@ public class CaseDataController implements BaseController {
     }
 
     private void setOrganisationPolicy(CaseDetails caseDetails) {
-        if (featureToggleService.isShareACaseEnabled()
-            && (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails))) {
-
+        if  (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails)) {
             Map<String, Object> appPolicy = new HashMap<>();
             appPolicy.put(ORGANISATION_POLICY_ROLE, APP_SOLICITOR_POLICY);
             appPolicy.put(ORGANISATION_POLICY_REF, null);

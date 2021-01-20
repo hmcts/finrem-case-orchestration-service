@@ -178,9 +178,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldSuccessfullySetOrgPolicyIfToggleEnabled() throws Exception {
+    public void shouldSuccessfullySetOrgPolicy() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
 
         loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
@@ -192,25 +191,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.OrgPolicyCaseAssignedRole", is(APP_SOLICITOR_POLICY)));
     }
 
-    @Test
-    public void shouldNotSetOrgPolicyIfFeatureDisabled() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(featureToggleService.isShareACaseEnabled()).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
-
-        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
-        mvc.perform(post("/case-orchestration/contested/set-paper-case-org-policy")
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").doesNotExist());
-    }
-
-    @Test
-    public void shouldNotSetOrgPolicyIfFeatureEnabledButInvalidCaseType() throws Exception {
-        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(false);
-        when(featureToggleService.isShareACaseEnabled()).thenReturn(true);
+    public void shouldNotSetOrgPolicyIfInvalidCaseType() throws Exception {
+        when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(Boolean.FALSE);
         when(caseDataService.isContestedApplication(any())).thenReturn(false);
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
 

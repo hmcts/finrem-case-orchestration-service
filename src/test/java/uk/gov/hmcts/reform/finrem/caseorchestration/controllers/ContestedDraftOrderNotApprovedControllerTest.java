@@ -11,7 +11,6 @@ import org.springframework.web.client.HttpServerErrorException;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.io.File;
@@ -53,9 +52,6 @@ public class ContestedDraftOrderNotApprovedControllerTest extends BaseController
 
     @MockBean
     private BulkPrintService bulkPrintService;
-
-    @MockBean
-    private FeatureToggleService featureToggleService;
 
     @MockBean
     private ContestedDraftOrderNotApprovedService contestedDraftOrderNotApprovedService;
