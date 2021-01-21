@@ -12,13 +12,6 @@
         <vulnerabilityName>CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')</vulnerabilityName>
     </suppress>
     <suppress>
-        <notes>Wiremock - 2.6.3 - A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</notes>
-        <packageUrl regex="true">^pkg:javascript/handlebars@.*$</packageUrl>
-        <vulnerabilityName>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</vulnerabilityName>
-        <vulnerabilityName>Disallow calling helperMissing and blockHelperMissing directly</vulnerabilityName>
-        <vulnerabilityName>Prototype pollution</vulnerabilityName>
-    </suppress>
-    <suppress>
         <notes><![CDATA[jquery-3.4.1.min.js - wiremock dependency]]></notes>
         <packageUrl regex="true">^pkg:javascript/jquery.*$</packageUrl>
         <cve>CVE-2020-11022</cve>
