@@ -15,6 +15,7 @@ public class NotificationServiceConfiguration {
     private String assignToJudge;
     private String consentOrderMade;
     private String consentOrderNotApproved;
+    private String consentOrderNotApprovedSent;
     private String consentOrderAvailable;
     private String consentOrderAvailableCtsc;
     private String ctscEmail;
