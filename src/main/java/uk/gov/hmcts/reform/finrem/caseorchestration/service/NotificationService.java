@@ -57,9 +57,17 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
-    public void sendConsentOrderMadeConfirmationEmail(CaseDetails caseDetails) {
+    public void sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(CaseDetails caseDetails) {
+        sendConsentOrderMadeConfirmationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails));
+    }
+
+    public void sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(CaseDetails caseDetails) {
+        sendConsentOrderMadeConfirmationEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(caseDetails));
+    }
+
+    public void sendConsentOrderMadeConfirmationEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderMade());
-        sendNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails), uri);
+        sendNotificationEmail(notificationRequest, uri);
     }
 
     public void sendConsentOrderNotApprovedEmailToApplicantSolicitor(CaseDetails caseDetails) {
@@ -279,6 +287,19 @@ public class NotificationService {
         sendNotificationEmail(notificationRequest, uri);
     }
 
+    public void sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(CaseDetails caseDetails) {
+        sendConsentOrderNotApprovedSentEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails));
+    }
+
+    public void sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(CaseDetails caseDetails) {
+        sendConsentOrderNotApprovedSentEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(caseDetails));
+    }
+
+    private void sendConsentOrderNotApprovedSentEmail(NotificationRequest notificationRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getConsentOrderNotApprovedSent());
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
     private void sendNotificationEmail(NotificationRequest notificationRequest, URI uri) {
         HttpEntity<NotificationRequest> request = new HttpEntity<>(notificationRequest, buildHeaders());
         try {
@@ -289,6 +310,16 @@ public class NotificationService {
                 notificationRequest.getNotificationEmail(),
                 ex.getMessage()));
         }
+    }
+
+    public boolean shouldEmailRespondentSolicitor(Map<String, Object> caseData) {
+        return !caseDataService.isPaperApplication(caseData)
+            && caseDataService.isRespondentRepresentedByASolicitor(caseData)
+            && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData);
+    }
+
+    public boolean shouldEmailApplicantSolicitor(CaseDetails caseDetails) {
+        return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
     }
 
     private URI buildUri(String endPoint) {
@@ -303,15 +334,5 @@ public class NotificationService {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
         return headers;
-    }
-
-    public boolean shouldEmailRespondentSolicitor(Map<String, Object> caseData) {
-        return !caseDataService.isPaperApplication(caseData)
-            && caseDataService.isRespondentRepresentedByASolicitor(caseData)
-            && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData);
-    }
-
-    public boolean shouldEmailApplicantSolicitor(CaseDetails caseDetails) {
-        return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
     }
 }

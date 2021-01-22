@@ -155,18 +155,38 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void sendConsentOrderMadeConfirmationEmail() {
+    public void whenIsConsentedAndSolicitorAgreedToEmail_sendConsentOrderMadeConfirmationEmail() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
         notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
 
-        verify(notificationService).sendConsentOrderMadeConfirmationEmail(any());
+        verify(notificationService).sendConsentOrderMadeConfirmationEmailToApplicantSolicitor(any());
     }
 
     @Test
-    public void shouldNotSendConsentOrderMadeConfirmationEmail() {
+    public void whenIsConsentedAndSolicitorNotAgreedToEmail_shouldNotSendConsentOrderMadeConfirmationEmail() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
+
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void whenIsNotConsentedAndSolicitorAgreedToEmail_sendConsentOrderMadeConfirmationEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+
+        notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
+
+        verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void whenIsNotConsentedAndSolicitorNotAgreedToEmail_shouldNotSendConsentOrderMadeConfirmationEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
 
         notificationsController.sendConsentOrderMadeConfirmationEmail(buildCallbackRequest());
@@ -846,6 +866,69 @@ public class NotificationsControllerTest extends BaseControllerTest {
         notificationsController.sendConsentOrderAvailableEmail(buildCallbackRequest());
 
         verify(notificationService, never()).sendConsentOrderAvailableEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void sendConsentOrderMadeEmailToRespSolicitor() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        notificationsController.sendConsentOrderMadeConfirmationEmail(callbackRequest);
+        verify(notificationService).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void doesNotSendConsentOrderMadeEmailToRespSolicitor() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        notificationsController.sendConsentOrderMadeConfirmationEmail(callbackRequest);
+        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void doesNotSendConsentOrderMadeEmailToRespSolicitor_toggledOffAndgivenSolAgreedToEmails() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+        notificationsController.sendConsentOrderMadeConfirmationEmail(callbackRequest);
+        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void doesNotSendConsentOrderMadeEmailToRespSolicitor_toggledOff() {
+        CallbackRequest callbackRequest = buildCallbackRequest();
+        callbackRequest.getCaseDetails().setCaseTypeId(CASE_TYPE_ID_CONSENTED);
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+        notificationsController.sendConsentOrderMadeConfirmationEmail(callbackRequest);
+        verify(notificationService, never()).sendConsentOrderMadeConfirmationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void whenConsentOrderNotApprovedSentEmail_thenNotificationEmailsSentToSolicitors() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        when(notificationService.shouldEmailApplicantSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendConsentOrderNotApprovedSentEmail(buildCallbackRequest());
+
+        verify(notificationService).sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(any());
+        verify(notificationService).sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void given_RespondentJourneyIsToggledOff_whenConsentOrderNotApprovedSentEmail_thenNoEmailsSentToSolicitors() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
+        when(notificationService.shouldEmailApplicantSolicitor(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendConsentOrderNotApprovedSentEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(any());
+        verify(notificationService, never()).sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(any());
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {

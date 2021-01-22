@@ -127,7 +127,7 @@ def versions = [
     springfoxSwagger        : '2.9.2',
     sonarPitest             : '0.5',
     tomcat                  : '9.0.40',
-    wiremock                : '2.27.1'
+    wiremock                : '2.27.2'
 ]
 
 dependencyManagement {
@@ -149,6 +149,29 @@ dependencyManagement {
         }
         // CVE-2020-26939
         dependency group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.61'
+        // CVE-2020-13956
+        dependencySet(group: 'org.apache.httpcomponents', version: '4.5.13') {
+            entry 'httpclient'
+            entry 'fluent-hc'
+        }
+        // CVE-2020-15250
+        dependency group: 'junit', name: 'junit', version: '4.13.1'
+        // CVE-2020-27216, CVE-2020-27218
+        dependencySet(group: 'org.eclipse.jetty', version: '9.4.35.v20201120') {
+            entry 'jetty-client'
+            entry 'jetty-continuation'
+            entry 'jetty-http'
+            entry 'jetty-security'
+            entry 'jetty-server'
+            entry 'jetty-servlet'
+            entry 'jetty-servlets'
+            entry 'jetty-util'
+            entry 'jetty-util-ajax'
+            entry 'jetty-webapp'
+            entry 'jetty-xml'
+        }
+        // prototype pollution vulnerability in handlebars
+        dependency group: 'com.github.jknack', name: 'handlebars', version: '4.2.0'
     }
 }
 

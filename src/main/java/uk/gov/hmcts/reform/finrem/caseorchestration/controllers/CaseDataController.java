@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +42,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class CaseDataController implements BaseController {
 
+    private final UpdateSolicitorDetailsService solicitorService;
     private final IdamService idamService;
     private final CaseDataService caseDataService;
     private final FeatureToggleService featureToggleService;
@@ -68,6 +70,7 @@ public class CaseDataController implements BaseController {
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setOrganisationPolicy(callbackRequest.getCaseDetails());
+        setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails(), authToken);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -101,9 +104,9 @@ public class CaseDataController implements BaseController {
     @PostMapping(path = "/move-collection/{source}/to/{destination}", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> moveValues(
-        @RequestBody CallbackRequest callbackRequest,
-        @PathVariable("source") String source,
-        @PathVariable("destination") String destination) {
+        @RequestBody final CallbackRequest callbackRequest,
+        @PathVariable("source") final String source,
+        @PathVariable("destination") final String destination) {
 
         validateCaseData(callbackRequest);
 
@@ -115,10 +118,8 @@ public class CaseDataController implements BaseController {
 
     private void setData(final String authToken, final Map<String, Object> caseData) {
         if (idamService.isUserRoleAdmin(authToken)) {
-            log.info("Admin users.");
             caseData.put(IS_ADMIN, YES_VALUE);
         } else {
-            log.info("other users.");
             caseData.put(IS_ADMIN, NO_VALUE);
             caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
         }
@@ -130,10 +131,7 @@ public class CaseDataController implements BaseController {
     }
 
     private void setOrganisationPolicy(CaseDetails caseDetails) {
-        log.info("Share a case is enabled: {}", featureToggleService.isShareACaseEnabled());
-        if (featureToggleService.isShareACaseEnabled()
-            && (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails))) {
-
+        if  (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails)) {
             Map<String, Object> appPolicy = new HashMap<>();
             appPolicy.put(ORGANISATION_POLICY_ROLE, APP_SOLICITOR_POLICY);
             appPolicy.put(ORGANISATION_POLICY_REF, null);
@@ -143,7 +141,15 @@ public class CaseDataController implements BaseController {
 
             caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appPolicy);
 
-            log.info("App policy added to case : {}", appPolicy);
+            log.info("App policy added to case: {}, case ID {}", appPolicy, caseDetails.getId());
+        }
+    }
+
+    private void setApplicantSolicitorOrganisationDetails(CaseDetails caseDetails, String authToken) {
+        if (featureToggleService.isRespondentJourneyEnabled()
+            && caseDataService.isContestedApplication(caseDetails)
+            && caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
+            solicitorService.setApplicantSolicitorOrganisationDetails(authToken, caseDetails);
         }
     }
 }

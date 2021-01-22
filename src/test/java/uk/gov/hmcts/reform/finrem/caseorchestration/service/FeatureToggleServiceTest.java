@@ -17,8 +17,7 @@ public class FeatureToggleServiceTest {
 
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
-        "feature.toggle.respondent_journey=true",
-        "feature.toggle.share_a_case=true"
+        "feature.toggle.respondent_journey=true"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOn extends BaseServiceTest {
 
@@ -35,17 +34,12 @@ public class FeatureToggleServiceTest {
             assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
         }
 
-        @Test
-        public void isShareACaseEnabledReturnsTrue() {
-            assertThat(featureToggleService.isShareACaseEnabled(), is(true));
-        }
     }
 
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
         "feature.toggle.respondent_journey=false",
         "feature.toggle.send_to_frc=false",
-        "feature.toggle.share_a_case=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff extends BaseServiceTest {
 
@@ -67,9 +61,5 @@ public class FeatureToggleServiceTest {
             assertThat(featureToggleService.isSendToFRCEnabled(), is(false));
         }
 
-        @Test
-        public void isShareACaseEnabledReturnsFalse() {
-            assertThat(featureToggleService.isShareACaseEnabled(), is(false));
-        }
     }
 }

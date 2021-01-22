@@ -30,18 +30,21 @@ public class RestService {
     private final AuthTokenGenerator authTokenGenerator;
 
     public void restApiPostCall(String userAuthToken, String url, Object body) {
-        restApiCall(userAuthToken, url, body, HttpMethod.POST);
+        restApiCall(url, buildAuthRequestWithBody(userAuthToken, body), HttpMethod.POST);
     }
 
     public void restApiDeleteCall(String userAuthToken, String url, Object body) {
-        restApiCall(userAuthToken, url, body, HttpMethod.DELETE);
+        restApiCall(url, buildAuthRequestWithBody(userAuthToken, body), HttpMethod.DELETE);
     }
 
-    private void restApiCall(String userAuthToken, String url, Object body, HttpMethod httpMethod) {
-        URI uri = buildUri(url);
-        HttpEntity<Object> request = buildAuthRequest(userAuthToken, body);
+    public Map restApiGetCall(String userAuthToken, String url) {
+        return restApiCall(url, buildAuthRequestWithoutBody(userAuthToken), HttpMethod.GET);
+    }
 
-        log.info("Making REST {} request to uri : {}, request : {}", httpMethod, uri, request);
+    private Map restApiCall(String url, HttpEntity<Object> request, HttpMethod httpMethod) {
+        URI uri = buildUri(url);
+
+        log.info("Making {} request to uri : {}, request : {}", httpMethod, uri, request);
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
@@ -51,17 +54,29 @@ public class RestService {
                 Map.class);
 
             log.info("Received REST {} response: {} ", httpMethod, response);
+
+            return response.getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
         }
+
+        return null;
     }
 
-    private HttpEntity<Object> buildAuthRequest(String userAuthToken, Object body) {
+    private HttpEntity<Object> buildAuthRequestWithBody(String userAuthToken, Object body) {
+        return new HttpEntity<>(body, buildHeaders(userAuthToken));
+    }
+
+    private HttpEntity<Object> buildAuthRequestWithoutBody(String userAuthToken) {
+        return new HttpEntity<>(buildHeaders(userAuthToken));
+    }
+
+    private HttpHeaders buildHeaders(String userAuthToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(AUTHORIZATION_HEADER, userAuthToken);
         headers.add(SERVICE_AUTHORISATION_HEADER, authTokenGenerator.generate());
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        return new HttpEntity<>(body, headers);
+        return headers;
     }
 
     private URI buildUri(String url) {

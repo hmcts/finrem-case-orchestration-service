@@ -12,33 +12,9 @@
         <vulnerabilityName>CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')</vulnerabilityName>
     </suppress>
     <suppress>
-        <notes>Wiremock - 2.6.3 - A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</notes>
-        <packageUrl regex="true">^pkg:javascript/handlebars@.*$</packageUrl>
-        <vulnerabilityName>A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template</vulnerabilityName>
-        <vulnerabilityName>Disallow calling helperMissing and blockHelperMissing directly</vulnerabilityName>
-        <vulnerabilityName>Prototype pollution</vulnerabilityName>
-    </suppress>
-    <suppress>
         <notes><![CDATA[jquery-3.4.1.min.js - wiremock dependency]]></notes>
         <packageUrl regex="true">^pkg:javascript/jquery.*$</packageUrl>
         <cve>CVE-2020-11022</cve>
         <cve>CVE-2020-11023</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[file name: junit-4.13.jar]]></notes>
-        <packageUrl regex="true">^pkg:maven/junit/junit@.*$</packageUrl>
-        <cve>CVE-2020-15250</cve>
-    </suppress>
-    <suppress>
-        <notes>Apache HttpClient versions prior to version 4.5.13 and 5.0.3 can misinterpret malformed authority component in request URIs passed to the library as java.net.URI object and pick the wrong target host for request execution.</notes>
-        <cve>CVE-2020-13956</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[file name: jetty-client-9.4.31.v20200723.jar]]></notes>
-        <cve>CVE-2020-27216</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[file name: jetty-client-9.4.31.v20200723.jar]]></notes>
-        <cve>CVE-2020-27218</cve>
     </suppress>
 </suppressions>

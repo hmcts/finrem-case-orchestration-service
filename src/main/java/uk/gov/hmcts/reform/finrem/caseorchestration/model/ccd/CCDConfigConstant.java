@@ -394,20 +394,24 @@ public class CCDConfigConstant {
     public static final String APPLICANT_FR_FORM_COLLECTION = "appFRFormsCollection";
     public static final String APPLICANT_EVIDENCE_COLLECTION = "appEvidenceCollection";
     public static final String APPLICANT_TRIAL_BUNDLE_COLLECTION = "appTrialBundleCollection";
+    public static final String APPLICANT_CONFIDENTIAL_DOCS_COLLECTION = "appConfidentialDocsCollection";
     public static final String RESPONDENT_CORRESPONDENCE_COLLECTION = "respCorrespondenceCollection";
     public static final String RESPONDENT_FR_FORM_COLLECTION = "respFRFormsCollection";
     public static final String RESPONDENT_EVIDENCE_COLLECTION = "respEvidenceCollection";
     public static final String RESPONDENT_TRIAL_BUNDLE_COLLECTION = "respTrialBundleCollection";
+    public static final String RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION = "respConfidentialDocsCollection";
 
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
 
     //organisation policy
     public static final String ORGANISATION_POLICY_APPLICANT = "ApplicantOrganisationPolicy";
+    public static final String ORGANISATION_POLICY_RESPONDENT = "RespondentOrganisationPolicy";
     public static final String ORGANISATION_POLICY_ROLE = "OrgPolicyCaseAssignedRole";
     public static final String ORGANISATION_POLICY_REF = "OrgPolicyReference";
     public static final String ORGANISATION_POLICY_ORGANISATION = "Organisation";
     public static final String ORGANISATION_POLICY_ORGANISATION_ID = "OrganisationID";
     public static final String APP_SOLICITOR_POLICY = "[APPSOLICITOR]";
+    public static final String RESP_SOLICITOR_POLICY = "[RESPSOLICITOR]";
     public static final String CREATOR_USER_ROLE = "[CREATOR]";
 
     //scheduled hearings

@@ -11,21 +11,15 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.Document;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class BaseControllerTest extends BaseTest {
 
-    @Autowired
-    protected WebApplicationContext applicationContext;
-
-    @Autowired
-    protected ObjectMapper objectMapper;
+    @Autowired protected WebApplicationContext applicationContext;
+    @Autowired protected ObjectMapper objectMapper;
 
     protected MockMvc mvc;
     protected JsonNode requestContent;
@@ -35,49 +29,40 @@ public abstract class BaseControllerTest extends BaseTest {
         mvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
     }
 
-    void doEmptyCaseDataSetUp() throws IOException, URISyntaxException {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/empty-casedata.json").toURI()));
+    protected void doEmptyCaseDataSetUp() {
+        loadRequestContentWith("/fixtures/empty-casedata.json");
     }
 
-    void doValidCaseDataSetUp() throws IOException, URISyntaxException {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/pba-validate.json").toURI()));
+    protected void doValidCaseDataSetUp() {
+        loadRequestContentWith("/fixtures/pba-validate.json");
     }
 
-    void doValidConsentOrderApprovedSetup() throws IOException, URISyntaxException {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/consent-in-contested-application-approved.json").toURI()));
+    protected void doValidConsentOrderApprovedSetup() {
+        loadRequestContentWith("/fixtures/contested/consent-in-contested-application-approved.json");
     }
 
-    void doValidCaseDataSetUpForPaperApplication() throws IOException, URISyntaxException {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/bulkprint/bulk-print-paper-application.json").toURI()));
+    protected void doValidCaseDataSetUpForPaperApplication() {
+        loadRequestContentWith("/fixtures/bulkprint/bulk-print-paper-application.json");
     }
 
-    void doValidCaseDataSetUpNoPensionCollection() throws IOException, URISyntaxException {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/bulkprint/bulk-print-no-pension-collection.json").toURI()));
+    protected void doValidCaseDataSetUpNoPensionCollection() {
+        loadRequestContentWith("/fixtures/bulkprint/bulk-print-no-pension-collection.json");
     }
 
-    void doMissingLatestConsentOrder() throws IOException, URISyntaxException {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/hwf.json").toURI()));
+    protected void doMissingLatestConsentOrder() {
+        loadRequestContentWith("/fixtures/hwf.json");
     }
 
-    void doValidConsentInContestWithPensionData() throws IOException, URISyntaxException {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/contested/consent-in-contested-with-pension.json").toURI()));
+    protected void doValidConsentInContestWithPensionData() {
+        loadRequestContentWith("/fixtures/contested/consent-in-contested-with-pension.json");
     }
 
-    void doValidRefusalOrder() throws IOException, URISyntaxException {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/refusal-order-contested.json").toURI()));
+    protected void doValidRefusalOrder() {
+        loadRequestContentWith("/fixtures/refusal-order-contested.json");
     }
 
-    void doValidCaseDataSetUpForAdditionalHearing() throws IOException, URISyntaxException {
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/bulkprint/bulk-print-additional-hearing.json").toURI()));
+    protected void doValidCaseDataSetUpForAdditionalHearing() {
+        loadRequestContentWith("/fixtures/bulkprint/bulk-print-additional-hearing.json");
     }
 
     protected CallbackRequest buildCallbackRequest() {
@@ -86,7 +71,7 @@ public abstract class BaseControllerTest extends BaseTest {
         return CallbackRequest.builder().caseDetails(caseDetails).build();
     }
 
-    CaseDocument getCaseDocument() {
+    protected CaseDocument getCaseDocument() {
         CaseDocument caseDocument = new CaseDocument();
         caseDocument.setDocumentUrl("http://doc1");
         caseDocument.setDocumentBinaryUrl("http://doc1/binary");
@@ -94,19 +79,22 @@ public abstract class BaseControllerTest extends BaseTest {
         return caseDocument;
     }
 
-    Document getDocument() {
-        Document document = new Document();
-        document.setUrl("http://doc1");
-        document.setBinaryUrl("http://doc1/binary");
-        document.setFileName("doc1");
-        return document;
+    protected String resourceContentAsString(String resourcePath) {
+        return readJsonNodeFromFile(resourcePath).toString();
     }
 
-    protected String resourceContentAsString(String resourcePath) {
+    protected void loadRequestContentWith(String jsonPath) {
+        requestContent = readJsonNodeFromFile(jsonPath);
+    }
+
+    private JsonNode readJsonNodeFromFile(String jsonPath) {
         try {
-            return objectMapper.readTree(new File(getClass().getResource(resourcePath).toURI())).toString();
+            return objectMapper.readTree(
+                new File(getClass()
+                    .getResource(jsonPath)
+                    .toURI()));
         } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 }
