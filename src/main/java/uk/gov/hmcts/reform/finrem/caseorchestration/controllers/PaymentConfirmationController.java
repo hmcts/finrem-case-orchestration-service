@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
 
 import java.io.IOException;
@@ -34,7 +33,6 @@ public class PaymentConfirmationController implements BaseController {
     private final PaymentConfirmationService paymentConfirmationService;
     private final AssignCaseAccessService assignCaseAccessService;
     private final CcdDataStoreService ccdDataStoreService;
-    private final FeatureToggleService featureToggleService;
     private final CaseDataService caseDataService;
 
     @SuppressWarnings("unchecked")
@@ -49,17 +47,13 @@ public class PaymentConfirmationController implements BaseController {
 
         validateCaseData(callbackRequest);
 
-        SubmittedCallbackResponse callbackResponse = SubmittedCallbackResponse.builder()
+        log.info("Assigning case access for Case ID: {}", caseDetails.getId());
+        ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
+        assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
+
+        return ResponseEntity.ok(SubmittedCallbackResponse.builder()
             .confirmationBody(confirmationBody(caseDetails))
-            .build();
-
-        if (featureToggleService.isRespondentJourneyEnabled()) {
-            log.info("Assigning case access for Case ID: {}", caseDetails.getId());
-            ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
-            assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
-        }
-
-        return ResponseEntity.ok(callbackResponse);
+            .build());
     }
 
     private String confirmationBody(CaseDetails caseDetails) throws IOException {
