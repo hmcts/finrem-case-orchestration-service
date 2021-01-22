@@ -214,7 +214,6 @@ public class CaseDataControllerTest extends BaseControllerTest {
         caseDataController.setContestedDefaultValues(AUTH_TOKEN, callbackRequest);
 
         verify(updateSolicitorDetailsService, times(1)).setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails());
-        verify(updateSolicitorDetailsService, times(1)).setRespondentSolicitorOrganisationDetails(callbackRequest.getCaseDetails());
     }
 
     @Test

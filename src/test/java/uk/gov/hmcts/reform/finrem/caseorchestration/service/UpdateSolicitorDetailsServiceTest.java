@@ -11,15 +11,23 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.Organisat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_RESPONDENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
@@ -47,7 +55,7 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
 
     @Before
     public void setUp() {
-        when(prdOrganisationService.retrieveOrganisationsData(eq(AUTH_TOKEN))).thenReturn(OrganisationsResponse.builder()
+        when(prdOrganisationService.retrieveOrganisationsData(eq(TEST_CASE_ID))).thenReturn(OrganisationsResponse.builder()
             .contactInformation(Arrays.asList(organisationContactInformation))
             .name(TEST_SOLICITOR_NAME)
             .organisationIdentifier(TEST_SOLICITOR_REFERENCE)
@@ -57,6 +65,7 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
     @Test
     public void shouldSuccessfullySetApplicantSolicitorOrganisationDetails() {
         CaseDetails caseDetails = buildCaseDetails();
+        caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, buildOrgPolicy());
 
         updateSolicitorDetailsService.setApplicantSolicitorOrganisationDetails(caseDetails);
 
@@ -74,15 +83,59 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldSuccessfullySetRespondentSolicitorOrganisationDetails() {
+        CaseDetails caseDetails = buildCaseDetails();
+        caseDetails.getData().put(ORGANISATION_POLICY_RESPONDENT, buildOrgPolicy());
+
+        updateSolicitorDetailsService.setRespondentSolicitorOrganisationDetails(caseDetails);
+
+        Map<String, Object> addressMap = (Map<String, Object>) caseDetails.getData().get(RESP_SOLICITOR_ADDRESS);
+
+        Assert.assertEquals(addressMap.get("AddressLine1"), organisationContactInformation.getAddressLine1());
+        Assert.assertEquals(addressMap.get("AddressLine2"), organisationContactInformation.getAddressLine2());
+        Assert.assertEquals(addressMap.get("AddressLine3"), organisationContactInformation.getAddressLine3());
+        Assert.assertEquals(addressMap.get("County"), organisationContactInformation.getCounty());
+        Assert.assertEquals(addressMap.get("Country"), organisationContactInformation.getCountry());
+        Assert.assertEquals(addressMap.get("PostTown"), organisationContactInformation.getTownCity());
+        Assert.assertEquals(addressMap.get("PostCode"), organisationContactInformation.getPostcode());
+        Assert.assertEquals(caseDetails.getData().get(RESP_SOLICITOR_FIRM), TEST_SOLICITOR_NAME);
+        Assert.assertEquals(caseDetails.getData().get(RESP_SOLICITOR_REFERENCE), TEST_SOLICITOR_REFERENCE);
+    }
+
+    private Map<String, Object> buildOrgPolicy() {
+        Map<String, Object> orgPolicy = new HashMap<>();
+        Map<String, Object> org = new HashMap<>();
+        org.put(ORGANISATION_POLICY_ORGANISATION_ID, TEST_CASE_ID);
+        orgPolicy.put(ORGANISATION_POLICY_ORGANISATION, org);
+
+        return orgPolicy;
+    }
+
+    @Test
     public void shouldNotSetApplicantSolicitorOrganisationDetails_orgRespNull() {
-        when(prdOrganisationService.retrieveOrganisationsData(eq(AUTH_TOKEN))).thenReturn(null);
+        when(prdOrganisationService.retrieveOrganisationsData(eq(TEST_CASE_ID))).thenReturn(null);
 
         CaseDetails caseDetails = buildCaseDetails();
+        caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, buildOrgPolicy());
 
         updateSolicitorDetailsService.setApplicantSolicitorOrganisationDetails(caseDetails);
 
         Assert.assertFalse(caseDetails.getData().containsKey(CONTESTED_SOLICITOR_ADDRESS));
         Assert.assertFalse(caseDetails.getData().containsKey(CONTESTED_SOLICITOR_FIRM));
         Assert.assertFalse(caseDetails.getData().containsKey(SOLICITOR_REFERENCE));
+    }
+
+    @Test
+    public void shouldNotSetRespondentSolicitorOrganisationDetails_orgRespNull() {
+        when(prdOrganisationService.retrieveOrganisationsData(eq(TEST_CASE_ID))).thenReturn(null);
+
+        CaseDetails caseDetails = buildCaseDetails();
+        caseDetails.getData().put(ORGANISATION_POLICY_RESPONDENT, buildOrgPolicy());
+
+        updateSolicitorDetailsService.setRespondentSolicitorOrganisationDetails(caseDetails);
+
+        Assert.assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_ADDRESS));
+        Assert.assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_FIRM));
+        Assert.assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_REFERENCE));
     }
 }

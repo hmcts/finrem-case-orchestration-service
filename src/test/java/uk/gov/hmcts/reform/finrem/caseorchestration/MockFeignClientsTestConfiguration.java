@@ -8,8 +8,6 @@ import org.springframework.context.annotation.Profile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.EvidenceManagementClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.PrdClient;
-import uk.gov.hmcts.reform.idam.client.IdamApi;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
 
 @Profile("test-mock-feign-clients")
 @Configuration

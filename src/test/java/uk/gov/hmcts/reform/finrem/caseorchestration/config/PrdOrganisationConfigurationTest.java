@@ -22,7 +22,7 @@ public class PrdOrganisationConfigurationTest extends BaseTest {
 
     @Test
     public void shouldCreateConfigFromAppProperties() {
-        assertThat(config.getUsername(), is("http://localhost:8090/refdata/external/v1/organisations"));
-        assertThat(config.getPassword(), is("http://localhost:8090/refdata/external/v1/organisations"));
+        assertThat(config.getUsername(), is("AAAAAAAA"));
+        assertThat(config.getPassword(), is("AAAAAAAA"));
     }
 }

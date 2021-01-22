@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,7 +37,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
 
 @RestController
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 public class CaseDataController implements BaseController {
@@ -151,7 +150,6 @@ public class CaseDataController implements BaseController {
             && caseDataService.isContestedApplication(caseDetails)
             && caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
             solicitorService.setApplicantSolicitorOrganisationDetails(caseDetails);
-            solicitorService.setRespondentSolicitorOrganisationDetails(caseDetails);
         }
     }
 }
