@@ -8,3 +8,5 @@ spring:
         AppInsightsInstrumentationKey: azure.application-insights.instrumentation-key
         finrem-case-orchestration-service-s2s-key: AUTH_PROVIDER_SERVICE_CLIENT_KEY
         idam-secret: OAUTH2_CLIENT_FINREM
+        prd-service-user-username: PRD_SERVICE_USER_USERNAME
+        prd-service-user-password: PRD_SERVICE_USER_PASSWORD

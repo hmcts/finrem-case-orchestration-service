@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.ResponseEntity;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
@@ -17,9 +15,9 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -215,7 +213,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
         caseDataController.setContestedDefaultValues(AUTH_TOKEN, callbackRequest);
 
-        verify(updateSolicitorDetailsService, times(1)).setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, callbackRequest.getCaseDetails());
+        verify(updateSolicitorDetailsService, times(1)).setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails());
+        verify(updateSolicitorDetailsService, times(1)).setRespondentSolicitorOrganisationDetails(callbackRequest.getCaseDetails());
     }
 
     @Test
@@ -224,10 +223,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
 
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
-            caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
+        caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(updateSolicitorDetailsService, never()).setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, buildCallbackRequest().getCaseDetails());
+        verifyNoInteractions(updateSolicitorDetailsService);
     }
 
     @Test
@@ -236,10 +234,9 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(caseDataService.isContestedApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
 
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
-            caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
+        caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(updateSolicitorDetailsService, never()).setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, buildCallbackRequest().getCaseDetails());
+        verifyNoInteractions(updateSolicitorDetailsService);
     }
 
     @Test
@@ -248,9 +245,8 @@ public class CaseDataControllerTest extends BaseControllerTest {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
 
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response =
-            caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
+        caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(updateSolicitorDetailsService, never()).setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, buildCallbackRequest().getCaseDetails());
+        verifyNoInteractions(updateSolicitorDetailsService);
     }
 }

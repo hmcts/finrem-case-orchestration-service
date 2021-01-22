@@ -18,10 +18,11 @@ import static org.hamcrest.Matchers.is;
 public class PrdOrganisationConfigurationTest extends BaseTest {
 
     @Autowired
-    private PrdOrganisationConfiguration config;
+    private PrdConfiguration config;
 
     @Test
-    public void shouldCreateOrganisationConfigFromAppProperties() {
-        assertThat(config.getOrganisationsUrl(), is("http://localhost:8090/refdata/external/v1/organisations"));
+    public void shouldCreateConfigFromAppProperties() {
+        assertThat(config.getUsername(), is("http://localhost:8090/refdata/external/v1/organisations"));
+        assertThat(config.getPassword(), is("http://localhost:8090/refdata/external/v1/organisations"));
     }
 }

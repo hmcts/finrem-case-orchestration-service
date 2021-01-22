@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "prd.organisations")
-public class PrdOrganisationConfiguration {
-    private String organisationsUrl;
+@ConfigurationProperties(prefix = "prd.service-user")
+public class PrdConfiguration {
+    private String username;
+    private String password;
 }

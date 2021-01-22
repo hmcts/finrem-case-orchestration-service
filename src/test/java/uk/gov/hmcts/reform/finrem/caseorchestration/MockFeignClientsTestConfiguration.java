@@ -7,6 +7,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DocumentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.EvidenceManagementClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.PrdClient;
+import uk.gov.hmcts.reform.idam.client.IdamApi;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 
 @Profile("test-mock-feign-clients")
 @Configuration
@@ -22,5 +25,11 @@ public class MockFeignClientsTestConfiguration {
     @Primary
     public EvidenceManagementClient evidenceManagementClient() {
         return Mockito.mock(EvidenceManagementClient.class);
+    }
+
+    @Bean
+    @Primary
+    public PrdClient prdClient() {
+        return Mockito.mock(PrdClient.class);
     }
 }

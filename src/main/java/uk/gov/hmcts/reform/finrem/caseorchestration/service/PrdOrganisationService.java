@@ -1,25 +1,28 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.PrdClient;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class PrdOrganisationService {
 
-    private final PrdOrganisationConfiguration prdOrganisationConfiguration;
-    private final RestService restService;
-    private final ObjectMapper objectMapper;
+    private final PrdConfiguration prdOrganisationConfiguration;
+    private final PrdClient prdClient;
+    private final AuthTokenGenerator authTokenGenerator;
+    private final IdamService idamService;
 
-    public OrganisationsResponse retrieveOrganisationsData(String authToken) {
-        return objectMapper.convertValue(
-            restService.restApiGetCall(authToken, prdOrganisationConfiguration.getOrganisationsUrl()),
-            OrganisationsResponse.class
-        );
+    public OrganisationsResponse retrieveOrganisationsData(String organisationId) {
+        return prdClient.getOrganisationById(
+            idamService.authenticateUser(prdOrganisationConfiguration.getUsername(), prdOrganisationConfiguration.getPassword()),
+            authTokenGenerator.generate(),
+            organisationId);
     }
 }

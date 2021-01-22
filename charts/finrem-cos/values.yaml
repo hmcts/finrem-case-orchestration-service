@@ -20,3 +20,5 @@ java:
         - AppInsightsInstrumentationKey
         - finrem-case-orchestration-service-s2s-key
         - idam-secret
+        - prd-service-user-username
+        - prd-service-user-password

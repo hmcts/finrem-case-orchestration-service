@@ -3,17 +3,22 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -23,8 +28,10 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 
 @RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = CaseOrchestrationApplication.class)
 @TestPropertySource(locations = "/application.properties")
+@ActiveProfiles("test-mock-feign-clients")
 public class IdamServiceTest extends BaseServiceTest {
     @Autowired
     private IdamService idamService;
@@ -32,7 +39,13 @@ public class IdamServiceTest extends BaseServiceTest {
     @Autowired
     protected RestTemplate restTemplate;
 
+    @Autowired
+    private IdamClient idamClient;
+
     private MockRestServiceServer mockServer;
+
+    private String username = "username";
+    private String password = "password";
 
     @Before
     public void setUp() {
@@ -66,6 +79,12 @@ public class IdamServiceTest extends BaseServiceTest {
             .andRespond(withSuccess("{\"id\": \"1234\"}", MediaType.APPLICATION_JSON));
 
         Assert.assertEquals(idamService.getIdamUserId(AUTH_TOKEN), "1234");
+    }
+
+    @Test
+    public void authenticateUser() {
+        idamService.authenticateUser(username, password);
+        Mockito.verify(idamClient, Mockito.times(1)).authenticateUser(username, password);
     }
 
     private String toUri() {

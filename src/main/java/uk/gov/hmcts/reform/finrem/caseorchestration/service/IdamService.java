@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.IdamServiceConfiguration;
+import uk.gov.hmcts.reform.idam.client.IdamClient;
 
 import java.net.URI;
 import java.util.List;
@@ -21,12 +23,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ROLES;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__({@Autowired}))
 @Slf4j
 public class IdamService {
 
     private final IdamServiceConfiguration serviceConfig;
     private final RestTemplate restTemplate;
+    private final IdamClient idamClient;
 
     private static final Function<IdamServiceConfiguration, URI> uriSupplier =
         serviceConfig -> fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi()).build().toUri();
@@ -65,5 +68,9 @@ public class IdamService {
     public String getIdamUserId(String authorisationToken) {
         return userId.apply(restTemplate.exchange(uriSupplier.apply(serviceConfig), HttpMethod.GET,
             buildAuthRequest.apply(authorisationToken), Map.class));
+    }
+
+    public String authenticateUser(String username, String password) {
+        return idamClient.authenticateUser(username, password);
     }
 }

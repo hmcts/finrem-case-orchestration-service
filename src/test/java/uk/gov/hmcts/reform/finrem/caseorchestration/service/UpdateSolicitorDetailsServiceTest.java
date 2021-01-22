@@ -58,7 +58,7 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
     public void shouldSuccessfullySetApplicantSolicitorOrganisationDetails() {
         CaseDetails caseDetails = buildCaseDetails();
 
-        updateSolicitorDetailsService.setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, caseDetails);
+        updateSolicitorDetailsService.setApplicantSolicitorOrganisationDetails(caseDetails);
 
         Map<String, Object> addressMap = (Map<String, Object>) caseDetails.getData().get(CONTESTED_SOLICITOR_ADDRESS);
 
@@ -79,7 +79,7 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
 
         CaseDetails caseDetails = buildCaseDetails();
 
-        updateSolicitorDetailsService.setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, caseDetails);
+        updateSolicitorDetailsService.setApplicantSolicitorOrganisationDetails(caseDetails);
 
         Assert.assertFalse(caseDetails.getData().containsKey(CONTESTED_SOLICITOR_ADDRESS));
         Assert.assertFalse(caseDetails.getData().containsKey(CONTESTED_SOLICITOR_FIRM));
