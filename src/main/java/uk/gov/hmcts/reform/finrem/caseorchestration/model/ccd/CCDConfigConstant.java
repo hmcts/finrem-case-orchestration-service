@@ -429,5 +429,6 @@ public class CCDConfigConstant {
     public static final String DRAFT_DIRECTION_DETAILS_COLLECTION = "draftDirectionDetailsCollection";
     public static final String DRAFT_DIRECTION_DETAILS_COLLECTION_RO = "draftDirectionDetailsCollectionRO";
     public static final String HEARING_ORDER_OTHER_COLLECTION = "hearingOrderOtherDocuments";
-
+    public static final String LATEST_DRAFT_DIRECTION_ORDER = "latestDraftDirectionOrder";
+    public static final String JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION = "judgesAmendedOrderCollection";
 }

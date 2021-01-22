@@ -22,7 +22,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -31,6 +30,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_N
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_DIRECTION_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
 
 public class HearingOrderServiceTest extends BaseServiceTest {
@@ -46,19 +47,12 @@ public class HearingOrderServiceTest extends BaseServiceTest {
     public void convertPdfDocument() {
         when(genericDocumentService.stampDocument(any(), eq(AUTH_TOKEN))).thenReturn(caseDocument());
 
-        List<CollectionElement<DraftDirectionOrder>> draftDirectionOrderCollection = new ArrayList<>();
-        draftDirectionOrderCollection.add(CollectionElement.<DraftDirectionOrder>builder()
-            .value(DraftDirectionOrder.builder().uploadDraftDocument(CaseDocument.builder()
-                .documentBinaryUrl(DRAFT_DIRECTION_ORDER_BIN_URL)
-                .documentFilename(FILENAME_ENDING_WITH_DOCX)
-                .build()).build()).build());
-
-        Map<String, Object> caseData = prepareCaseData(draftDirectionOrderCollection);
+        Map<String, Object> caseData = prepareCaseData(makeDraftDirectionOrderCollectionWithOneElement());
         CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
 
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, AUTH_TOKEN);
 
-        verify(genericDocumentService, times(1)).stampDocument(any(), eq(AUTH_TOKEN));
+        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN));
 
         CaseDocument latestDraftHearingOrder = (CaseDocument) caseData.get(LATEST_DRAFT_HEARING_ORDER);
         assertThat(latestDraftHearingOrder, is(notNullValue()));
@@ -76,6 +70,60 @@ public class HearingOrderServiceTest extends BaseServiceTest {
         CaseDetails emptyCaseDetails = CaseDetails.builder().data(new HashMap<>()).build();
 
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(emptyCaseDetails, AUTH_TOKEN);
+    }
+
+    @Test
+    public void whenLatestDraftDirOrderIsSameAsLastDraftOrder_itDoesntOverrideIt() {
+        List<CollectionElement<DraftDirectionOrder>> draftDirectionOrders = makeDraftDirectionOrderCollectionWithOneElement();
+        Map<String, Object> caseData = prepareCaseData(draftDirectionOrders);
+        caseData.put(LATEST_DRAFT_DIRECTION_ORDER, DraftDirectionOrder.builder()
+            .uploadDraftDocument(draftDirectionOrders.get(0).getValue().getUploadDraftDocument())
+            .purposeOfDocument(draftDirectionOrders.get(0).getValue().getPurposeOfDocument())
+            .build());
+
+        assertThat(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails.builder().data(caseData).build()),
+            is(false));
+    }
+
+    @Test
+    public void whenLatestDraftDirOrderIsDifferentThanLastDraftOrder_itDoesOverrideIt() {
+        Map<String, Object> caseData = prepareCaseData(makeDraftDirectionOrderCollectionWithOneElement());
+        caseData.put(LATEST_DRAFT_DIRECTION_ORDER, DraftDirectionOrder.builder()
+            .uploadDraftDocument(caseDocument())
+            .purposeOfDocument("some other purpose")
+            .build());
+
+        assertThat(hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(CaseDetails.builder().data(caseData).build()),
+            is(true));
+    }
+
+    @Test
+    public void appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders() {
+        Map<String, Object> caseData = new HashMap<>();
+        DraftDirectionOrder latestDraftDirectionOrder = makeDraftDirectionOrder();
+        caseData.put(LATEST_DRAFT_DIRECTION_ORDER, latestDraftDirectionOrder);
+
+        hearingOrderService.appendLatestDraftDirectionOrderToJudgesAmendedDirectionOrders(CaseDetails.builder().data(caseData).build());
+
+        assertThat(((List<CollectionElement>)caseData.get(JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION)).get(0).getValue(),
+            is(latestDraftDirectionOrder));
+    }
+
+    private List<CollectionElement<DraftDirectionOrder>> makeDraftDirectionOrderCollectionWithOneElement() {
+        List<CollectionElement<DraftDirectionOrder>> draftDirectionOrderCollection = new ArrayList<>();
+
+        draftDirectionOrderCollection.add(CollectionElement.<DraftDirectionOrder>builder()
+            .value(makeDraftDirectionOrder())
+            .build());
+
+        return draftDirectionOrderCollection;
+    }
+
+    private DraftDirectionOrder makeDraftDirectionOrder() {
+        return DraftDirectionOrder.builder().uploadDraftDocument(CaseDocument.builder()
+            .documentBinaryUrl(DRAFT_DIRECTION_ORDER_BIN_URL)
+            .documentFilename(FILENAME_ENDING_WITH_DOCX)
+            .build()).build();
     }
 
     private Map<String, Object> prepareCaseData(List<CollectionElement<DraftDirectionOrder>> draftDirectionOrders) {
