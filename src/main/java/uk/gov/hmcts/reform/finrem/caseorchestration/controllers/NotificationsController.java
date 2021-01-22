@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
@@ -571,5 +572,32 @@ public class NotificationsController implements BaseController {
         notificationService.sendContestedGeneralApplicationOutcomeEmail(caseDetails);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+    }
+
+    @PostMapping(value = "/consent-order-not-approved-sent", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send consent order not approved sent email")
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "Consent order not approved sent email sent successfully",
+            response = SubmittedCallbackResponse.class)})
+    public ResponseEntity<SubmittedCallbackResponse> sendConsentOrderNotApprovedSentEmail(
+        @RequestBody CallbackRequest callbackRequest) {
+        validateCaseData(callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
+
+        if (featureToggleService.isRespondentJourneyEnabled()) {
+            if (notificationService.shouldEmailApplicantSolicitor(caseDetails)) {
+                log.info("Sending email notification to Applicant Solicitor about consent order not approved being sent");
+                notificationService.sendConsentOrderNotApprovedSentEmailToApplicantSolicitor(caseDetails);
+            }
+
+            if (notificationService.shouldEmailRespondentSolicitor(caseData)) {
+                log.info("Sending email notification to Respondent Solicitor about consent order not approved being sent");
+                notificationService.sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(caseDetails);
+            }
+        }
+
+        return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
     }
 }
