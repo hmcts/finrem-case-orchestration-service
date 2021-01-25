@@ -70,6 +70,6 @@ public class IdamService {
     }
 
     public String authenticateUser(String username, String password) {
-        return idamClient.authenticateUser(username, password);
+        return idamClient.getAccessToken(username, password);
     }
 }

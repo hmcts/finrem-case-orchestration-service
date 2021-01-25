@@ -110,7 +110,7 @@ def versions = [
     commonsIo               : '2.7',
     commonsLang3            : '3.11',
     gradlePitest            : '1.5.1',
-    idamClient              : '1.3.0',
+    idamClient              : '1.5.5',
     jsonAssert              : '1.2.3',
     junit                   : '4.13.1',
     lombok                  : '1.18.12',

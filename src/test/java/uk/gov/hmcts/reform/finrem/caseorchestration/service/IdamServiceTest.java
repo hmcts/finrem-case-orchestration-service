@@ -75,7 +75,7 @@ public class IdamServiceTest extends BaseServiceTest {
     @Test
     public void authenticateUser() {
         idamService.authenticateUser(username, password);
-        Mockito.verify(idamClient, Mockito.times(1)).authenticateUser(username, password);
+        Mockito.verify(idamClient, Mockito.times(1)).getAccessToken(username, password);
     }
 
     private String toUri() {
