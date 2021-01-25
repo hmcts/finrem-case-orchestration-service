@@ -6,8 +6,12 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
+      "applicantRepresented": "Yes",
       "ApplicantOrganisationPolicy": {
-        "OrganisationID": "123"
+        "OrganisationID": "A31PTVA"
+      },
+      "RespondentOrganisationPolicy": {
+        "OrganisationID": "A31PTVA"
       },
       "d81Question": "No",
       "PBAreference": "ABCD",

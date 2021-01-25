@@ -138,4 +138,26 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
         Assert.assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_FIRM));
         Assert.assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_REFERENCE));
     }
+
+    @Test
+    public void shouldNotSetRespondentSolicitorOrganisationDetails_orgPolicyNotExist() {
+        CaseDetails caseDetails = buildCaseDetails();
+
+        updateSolicitorDetailsService.setRespondentSolicitorOrganisationDetails(caseDetails);
+
+        Assert.assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_ADDRESS));
+        Assert.assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_FIRM));
+        Assert.assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_REFERENCE));
+    }
+
+    @Test
+    public void shouldNotSetApplicantSolicitorOrganisationDetails_orgPolicyNotExist() {
+        CaseDetails caseDetails = buildCaseDetails();
+
+        updateSolicitorDetailsService.setApplicantSolicitorOrganisationDetails(caseDetails);
+
+        Assert.assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_ADDRESS));
+        Assert.assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_FIRM));
+        Assert.assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_REFERENCE));
+    }
 }
