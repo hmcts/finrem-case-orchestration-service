@@ -73,7 +73,7 @@ public abstract class AbstractDocumentTest extends BaseTest {
     public static WireMockClassRule documentGeneratorService = new WireMockClassRule(4009);
 
     @ClassRule
-    public static WireMockClassRule idamService = new WireMockClassRule(4501);
+    public static WireMockClassRule idamService = new WireMockClassRule(8080);
 
     protected CallbackRequest request;
 

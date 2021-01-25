@@ -31,7 +31,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 public class IdamServiceTest extends BaseServiceTest {
     @Autowired private IdamService idamService;
 
-    @Autowired()protected RestTemplate restTemplate;
+    @Autowired protected RestTemplate restTemplate;
 
     private MockRestServiceServer mockServer;
 
@@ -79,6 +79,6 @@ public class IdamServiceTest extends BaseServiceTest {
     }
 
     private String toUri() {
-        return "http://localhost:4501/details";
+        return "http://localhost:8080/details";
     }
 }

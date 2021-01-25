@@ -52,7 +52,7 @@ public class PBAPaymentConfirmationTest extends BaseTest {
     @Autowired
     private MockMvc webClient;
 
-    @ClassRule public static WireMockClassRule idamService = new WireMockClassRule(4501);
+    @ClassRule public static WireMockClassRule idamService = new WireMockClassRule(8080);
     @ClassRule public static WireMockClassRule acaService = new WireMockClassRule(4454);
 
     @Autowired

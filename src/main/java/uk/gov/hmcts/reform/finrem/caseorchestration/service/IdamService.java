@@ -31,7 +31,7 @@ public class IdamService {
     private final IdamClient idamClient;
 
     private static final Function<IdamServiceConfiguration, URI> uriSupplier =
-        serviceConfig -> fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getApi()).build().toUri();
+        serviceConfig -> fromHttpUrl(serviceConfig.getUrl() + serviceConfig.getDetails()).build().toUri();
 
     private static final Function<String, HttpEntity> buildAuthRequest = authToken -> {
         HttpHeaders headers = new HttpHeaders();
