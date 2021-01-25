@@ -70,7 +70,6 @@ public class CaseDataController implements BaseController {
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setOrganisationPolicy(callbackRequest.getCaseDetails());
-        setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -98,6 +97,27 @@ public class CaseDataController implements BaseController {
         log.info("Setting default values for contested paper case journey.");
         validateCaseData(callbackRequest);
         setOrganisationPolicy(callbackRequest.getCaseDetails());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
+    }
+
+    @PostMapping(path = "/set-solicitor-organisation-details",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Set solicitor organisation details")
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setSolicitorOrganisationDetails(
+        @RequestBody final CallbackRequest callbackRequest) {
+        log.info("Setting solicitor organisation details.");
+        validateCaseData(callbackRequest);
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        if (featureToggleService.isRespondentJourneyEnabled()) {
+            if (caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
+                solicitorService.setApplicantSolicitorOrganisationDetails(caseDetails);
+            }
+
+            solicitorService.setRespondentSolicitorOrganisationDetails(caseDetails);
+        }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
 
@@ -142,14 +162,6 @@ public class CaseDataController implements BaseController {
             caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appPolicy);
 
             log.info("App policy added to case: {}, case ID {}", appPolicy, caseDetails.getId());
-        }
-    }
-
-    private void setApplicantSolicitorOrganisationDetails(CaseDetails caseDetails) {
-        if (featureToggleService.isRespondentJourneyEnabled()
-            && caseDataService.isContestedApplication(caseDetails)
-            && caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
-            solicitorService.setApplicantSolicitorOrganisationDetails(caseDetails);
         }
     }
 }

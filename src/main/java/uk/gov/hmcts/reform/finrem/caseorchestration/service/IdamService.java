@@ -22,7 +22,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ROLES;
 
 @Service
-@RequiredArgsConstructor()
+@RequiredArgsConstructor
 @Slf4j
 public class IdamService {
 

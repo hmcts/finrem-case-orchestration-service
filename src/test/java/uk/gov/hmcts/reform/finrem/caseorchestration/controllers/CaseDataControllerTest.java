@@ -15,9 +15,9 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -206,46 +206,37 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @Test
     public void shouldSuccessfullyPopulateApplicantSolicitorAddress() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
 
         CallbackRequest callbackRequest = buildCallbackRequest();
 
-        caseDataController.setContestedDefaultValues(AUTH_TOKEN, callbackRequest);
+        caseDataController.setSolicitorOrganisationDetails(callbackRequest);
 
         verify(updateSolicitorDetailsService, times(1)).setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails());
+        verify(updateSolicitorDetailsService, times(1)).setRespondentSolicitorOrganisationDetails(callbackRequest.getCaseDetails());
     }
 
     @Test
     public void shouldNotPopulateApplicantSolicitorAddress_toggledOff() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
 
-        caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
+        caseDataController.setSolicitorOrganisationDetails(buildCallbackRequest());
 
-        verifyNoInteractions(updateSolicitorDetailsService);
-    }
-
-    @Test
-    public void shouldNotPopulateApplicantSolicitorAddress_consentedApp() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(caseDataService.isContestedApplication(any())).thenReturn(false);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-
-        caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
-
-        verifyNoInteractions(updateSolicitorDetailsService);
+        verify(updateSolicitorDetailsService, never()).setApplicantSolicitorOrganisationDetails(any());
+        verify(updateSolicitorDetailsService, never()).setRespondentSolicitorOrganisationDetails(any());
     }
 
     @Test
     public void shouldNotPopulateApplicantSolicitorAddress_notRepresented() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
 
-        caseDataController.setContestedDefaultValues(AUTH_TOKEN, buildCallbackRequest());
+        CallbackRequest callbackRequest = buildCallbackRequest();
 
-        verifyNoInteractions(updateSolicitorDetailsService);
+        caseDataController.setSolicitorOrganisationDetails(buildCallbackRequest());
+
+        verify(updateSolicitorDetailsService, never()).setApplicantSolicitorOrganisationDetails(any());
+        verify(updateSolicitorDetailsService, times(1)).setRespondentSolicitorOrganisationDetails(callbackRequest.getCaseDetails());
     }
 }

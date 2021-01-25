@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
 @Service
-@RequiredArgsConstructor()
+@RequiredArgsConstructor
 @Slf4j
 public class PrdOrganisationService {
 

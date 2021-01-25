@@ -23,7 +23,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 @Service
 @Slf4j
-@RequiredArgsConstructor()
+@RequiredArgsConstructor
 public class UpdateSolicitorDetailsService {
 
     private final PrdOrganisationService organisationService;
@@ -50,9 +50,14 @@ public class UpdateSolicitorDetailsService {
     }
 
     private OrganisationsResponse retrieveOrganisationsData(CaseDetails caseDetails, String orgPolicyFieldName) {
-        Map<String, Object> orgPolicy = (Map<String, Object>) caseDetails.getData().get(orgPolicyFieldName);
-        Map<String, Object> org = (Map<String, Object>) orgPolicy.get(ORGANISATION_POLICY_ORGANISATION);
-        return organisationService.retrieveOrganisationsData((String) org.get(ORGANISATION_POLICY_ORGANISATION_ID));
+        try {
+            Map<String, Object> orgPolicy = (Map<String, Object>) caseDetails.getData().get(orgPolicyFieldName);
+            Map<String, Object> org = (Map<String, Object>) orgPolicy.get(ORGANISATION_POLICY_ORGANISATION);
+            return organisationService.retrieveOrganisationsData((String) org.get(ORGANISATION_POLICY_ORGANISATION_ID));
+        } catch (Exception e) {
+            log.info("Failed to retrieve organisation data for case: {}", caseDetails.getId());
+            return null;
+        }
     }
 
     private Map<String, Object> convertOrganisationAddressToSolicitorAddress(OrganisationsResponse organisationData) {
