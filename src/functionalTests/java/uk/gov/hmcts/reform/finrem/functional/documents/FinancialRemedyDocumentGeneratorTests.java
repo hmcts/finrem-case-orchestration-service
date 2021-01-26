@@ -11,7 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.BINARY_URL_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MINI_FORM_A;
 
@@ -25,7 +26,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private static final String SOLICITOR_REF = "JAW052018";
     private static final String GENERAL_ORDER_JSON = "document-rejected-order1.json";
     private static final String CONTESTED_FORM_G_JSON = "validate-hearing-without-fastTrackDecision1.json";
-    private static final String CONTESTED_HEARING_ORDER_CONVERT_TO_PDF_JSON="contested-hearing-order-conversion.json";
+    private static final String CONTESTED_HEARING_ORDER_CONVERT_TO_PDF_JSON = "contested-hearing-order-conversion.json";
     private static final String MINI_FORM_A_JSON = "documentGeneratePayload1.json";
     private static final String MINI_FORM_A_CONTESTED_JSON = "generate-contested-form-A1.json";
     private static final String CONTESTED_FORM_C_JSON = "validate-hearing-with-fastTrackDecision1.json";
