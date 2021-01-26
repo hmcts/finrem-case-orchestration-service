@@ -19,8 +19,13 @@ public class PrdOrganisationService {
     private final IdamService idamService;
 
     public OrganisationsResponse retrieveOrganisationsData(String organisationId) {
+        log.info("Calling IDAM client authenticateUser");
+        String serviceUserToken = idamService.authenticateUser(prdOrganisationConfiguration.getUsername(), prdOrganisationConfiguration.getPassword());
+        log.info("serviceUserToken: {}", serviceUserToken);
+
+        log.info("Calling PRD client getOrganisationById");
         return prdClient.getOrganisationById(
-            idamService.authenticateUser(prdOrganisationConfiguration.getUsername(), prdOrganisationConfiguration.getPassword()),
+            serviceUserToken,
             authTokenGenerator.generate(),
             organisationId);
     }
