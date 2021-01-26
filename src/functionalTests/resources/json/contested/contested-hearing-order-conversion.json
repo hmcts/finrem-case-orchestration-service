@@ -1,0 +1,200 @@
+{
+  "event_id": "someEventid",
+  "case_details": {
+    "id": "123",
+    "jurisdiction": "DIVORCE",
+    "state": "reviewOrder",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "propertyAdjutmentOrderDetail": [],
+      "divorceUploadEvidence1": {
+        "document_url": "http://document-management-store:8080/documents/a8ae8d4d-8f7a-4e13-8884-2b18724dc905",
+        "document_filename": "fileupload.txt",
+        "document_binary_url": "http://document-management-store:8080/documents/a8ae8d4d-8f7a-4e13-8884-2b18724dc905/binary"
+      },
+      "divorceUploadEvidence2": null,
+      "hearingDate": "2020-01-01",
+      "divorceStageReached": "Decree Nisi",
+      "otherReasonForComplexity": null,
+      "applicantFMName": "Tik",
+      "fastTrackDecision": "No",
+      "potentialAllegationChecklist": null,
+      "applicantSolicitorAddress": {
+        "County": "Middlesex",
+        "Country": "United Kingdom",
+        "PostCode": "TW3 1SS",
+        "PostTown": "Hounslow",
+        "AddressLine1": "67 Pears Road",
+        "AddressLine2": "Near Roundabout",
+        "AddressLine3": "Opposite Tesco"
+      },
+      "nameOfCourtDivorceCentre": "Brentford Court",
+      "rSolicitorDXnumber": "078890",
+      "netValueOfHome": null,
+      "dateOfSepration": "2010-03-02",
+      "promptForAnyDocument": "No",
+      "claimingExemptionMIAM": null,
+      "solicitorFirm": "Abc Org",
+      "propertyAddress": "26 Riverside gardens, SW10XE",
+      "applicantSolicitorConsentForEmails": "No",
+      "isAdmin": "No",
+      "orderSummary": {
+        "Fees": [
+          {
+            "id": "44ad2e55-40db-418c-b8ca-50d225bbfa0b",
+            "value": {
+              "FeeCode": "FEE0229",
+              "FeeAmount": "25500",
+              "FeeVersion": "1",
+              "FeeDescription": "Application for a financial order"
+            }
+          }
+        ],
+        "PaymentTotal": "25500",
+        "PaymentReference": "null"
+      },
+      "hearingTime": "11:30 am",
+      "formC": {
+        "document_url": "http://document-management-store:8080/documents/64a1b76b-2143-401a-af74-bac409731b45",
+        "document_filename": "Form-C.pdf",
+        "document_binary_url": "http://document-management-store:8080/documents/64a1b76b-2143-401a-af74-bac409731b45/binary"
+      },
+      "applicantSolicitorName": "Parrot",
+      "HWFNumber": "HWF22345",
+      "familyMediatorServiceName": "mediator",
+      "specificArrangementsRequired": "Not required",
+      "respondentRepresented": "Yes",
+      "miniFormA": {
+        "document_url": "http://document-management-store:8080/documents/971bcc93-20fe-41a8-838c-1e51569df8cc",
+        "document_filename": "OnlineForm.pdf",
+        "document_binary_url": "http://document-management-store:8080/documents/971bcc93-20fe-41a8-838c-1e51569df8cc/binary"
+      },
+      "directionDetailsCollection": [
+        {
+          "id": "b2952af2-344b-4565-90ff-6128d987d97f",
+          "value": {
+            "isAnotherHearingYN": "No"
+          }
+        }
+      ],
+      "cfcCourtList": "FR_s_CFCList_9",
+      "familyMediatorMIAM": null,
+      "applicantRepresented": "Yes",
+      "applicantAttendedMIAM": "Yes",
+      "specialAssistanceRequired": "Not required",
+      "respondentPhone": null,
+      "isApplicantsHomeCourt": "No",
+      "fastTrackDecisionReason": null,
+      "MIAMOtherGroundsChecklist": null,
+      "solicitorResponsibleForDraftingOrder": "applicantSolicitor",
+      "attendingCourtWithArrangement": "no",
+      "divorceCaseNumber": "EM18D33333",
+      "additionalPropertyOrderDecision": "No",
+      "estimatedAssetsChecklist": null,
+      "latestDraftDirectionOrder": {
+        "purposeOfDocument": "Draft order",
+        "uploadDraftDocument": {
+          "document_url": "http://document-management-store:8080/documents/0fa425c8-7603-4687-adfe-b4c97c69fdb7",
+          "document_binary_url": "http://document-management-store:8080/documents/0fa425c8-7603-4687-adfe-b4c97c69fdb7/binary",
+          "document_filename": "approvedConvertedHearingOrder.docx"
+        }
+      },
+      "londonFRCList": "cfc",
+      "draftDirectionOrderCollection": [
+        {
+          "id": "null",
+          "value": {
+            "purposeOfDocument": "Draft order",
+            "uploadDraftDocument": {
+              "document_url": "http://document-management-store:8080/documents/a9958f9f-997d-47aa-8c02-fb34f4703209",
+              "document_filename": "AdditionalHearingDocument.pdf",
+              "document_binary_url": "http://document-management-store:8080/documents/a9958f9f-997d-47aa-8c02-fb34f4703209/binary"
+            }
+          }
+        }
+      ],
+      "MIAMDomesticViolenceChecklist": null,
+      "amountToPay": "25500",
+      "hearingType": "Directions (DIR)",
+      "rSolicitorAddress": {
+        "County": "Essex",
+        "Country": "United Kingdom",
+        "PostCode": "TW3 1SS",
+        "PostTown": "Hounslow",
+        "AddressLine1": "75 Pears Road",
+        "AddressLine2": "Flat2",
+        "AddressLine3": "Ring Road"
+      },
+      "divorcePetitionIssuedDate": "2020-08-14",
+      "rSolicitorName": "ResSol",
+      "timeEstimate": "1 hour",
+      "authorisationName": "Viasda",
+      "soleTraderName1": null,
+      "divorceDecreeNisiDate": "2020-08-15",
+      "otherReasonForComplexityText": null,
+      "uploadAdditionalDocument": [],
+      "authorisation3": "2020-08-10",
+      "applicantSolicitorFirm": "MSN Firm",
+      "applicantLName": "Tok",
+      "rSolicitorEmail": "vivcontestedupdatesol@mailinator.com",
+      "respondentAddress": {},
+      "natureOfApplicationChecklist": [
+        "periodicalPaymentOrder",
+        "Lump Sum Order",
+        "Pension Sharing Order",
+        "Pension Attachment Order",
+        "Pension Compensation Sharing Order",
+        "Pension Compensation Attachment Order",
+        "propertyAdjustmentOrder"
+      ],
+      "mediatorRegistrationNumber1": null,
+      "applicantSolicitorDXnumber": "776890",
+      "applicantSolicitorEmail": "fr_applicant_sol@sharklasers.com",
+      "paymentForChildrenDecision": "No",
+      "attendingCourtWithAssistance": "no",
+      "mortgageDetail": "Halifax mortgage",
+      "familyMediatorServiceName1": null,
+      "respondentLName": "Whisper",
+      "reasonForLocalCourt": null,
+      "rSolicitorPhone": "07889009908",
+      "benefitPaymentChecklist": null,
+      "rSolicitorReference": "MahSol73",
+      "formG": {
+        "document_url": "http://document-management-store:8080/documents/d5d03de2-402c-48d7-a2f5-2ecd7e8433ff",
+        "document_filename": "Form-G.pdf",
+        "document_binary_url": "http://document-management-store:8080/documents/d5d03de2-402c-48d7-a2f5-2ecd7e8433ff/binary"
+      },
+      "rSolicitorFirm": "MahFirm",
+      "hearingOrderOtherDocuments": [],
+      "applicantSolicitorPhone": "07766121111",
+      "additionalInformationAboutHearing": null,
+      "solicitorReference": "AUTO-1597825039849",
+      "MIAMExemptionsChecklist": null,
+      "soleTraderName": "sole trading",
+      "authorisation2b": "Sol Org reb",
+      "divorceUploadPetition": null,
+      "issueDate": "2020-02-01",
+      "mediatorRegistrationNumber": "765234",
+      "draftDirectionDetailsCollection": [
+        {
+          "id": "null",
+          "value": {
+            "isThisFinalYN": "Yes",
+            "isAnotherHearingYN": "No"
+          }
+        }
+      ],
+      "detailPotentialAllegation": null,
+      "benefitForChildrenDecision": null,
+      "regionList": "london",
+      "dateOfMarriage": "2000-02-01",
+      "divorceDecreeAbsoluteDate": null,
+      "MIAMPreviousAttendanceChecklist": null,
+      "MIAMUrgencyReasonChecklist": null,
+      "respondentEmail": null,
+      "respondentFMName": "Qunatico",
+      "helpWithFeesQuestion": "Yes",
+      "addToComplexityListOfCourts": "falseNo"
+    }
+  }
+}
