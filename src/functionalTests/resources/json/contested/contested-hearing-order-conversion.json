@@ -41,7 +41,7 @@
       "orderSummary": {
         "Fees": [
           {
-            "id": "44ad2e55-40db-418c-b8ca-50d225bbfa0b",
+            "id": null,
             "value": {
               "FeeCode": "FEE0229",
               "FeeAmount": "25500",
@@ -71,7 +71,7 @@
       },
       "directionDetailsCollection": [
         {
-          "id": "b2952af2-344b-4565-90ff-6128d987d97f",
+          "id": null,
           "value": {
             "isAnotherHearingYN": "No"
           }
@@ -102,7 +102,7 @@
       "londonFRCList": "cfc",
       "draftDirectionOrderCollection": [
         {
-          "id": "null",
+          "id": null,
           "value": {
             "purposeOfDocument": "Draft order",
             "uploadDraftDocument": {
@@ -177,7 +177,7 @@
       "mediatorRegistrationNumber": "765234",
       "draftDirectionDetailsCollection": [
         {
-          "id": "null",
+          "id": null,
           "value": {
             "isThisFinalYN": "Yes",
             "isAnotherHearingYN": "No"
