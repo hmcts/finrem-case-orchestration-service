@@ -20,13 +20,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -40,18 +39,13 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 
 public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
 
-    @MockBean
-    private GenericDocumentService genericDocumentService;
+    @Autowired private ContestedDraftOrderNotApprovedService refusalOrderService;
+    @Autowired private ObjectMapper objectMapper;
+    @Autowired private DocumentConfiguration documentConfiguration;
 
-    @Autowired
-    private ContestedDraftOrderNotApprovedService refusalOrderService;
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private DocumentConfiguration documentConfiguration;
+    @MockBean private GenericDocumentService genericDocumentService;
 
-    @Captor
-    private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
+    @Captor private ArgumentCaptor<CaseDetails> caseDetailsArgumentCaptor;
 
     @Before
     public void setUp() {
@@ -118,7 +112,7 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
 
     @Test
     public void getLatestRefusalReasonShouldReturnEmptyOptionalIfNoReason() {
-        Optional<CaseDocument> doc = refusalOrderService.getLatestRefusalReason(CaseDetails.builder().data(new HashMap<String, Object>()).build());
+        Optional<CaseDocument> doc = refusalOrderService.getLatestRefusalReason(CaseDetails.builder().data(new HashMap<>()).build());
         assertThat(doc.isPresent(), is(false));
     }
 
@@ -141,10 +135,9 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
     }
 
     void verifyAdditionalFieldsWithMultipleReasons() {
-        verify(genericDocumentService, times(1))
-            .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq(documentConfiguration.getContestedDraftOrderNotApprovedTemplate()),
-                eq(documentConfiguration.getContestedDraftOrderNotApprovedFileName()));
+        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            eq(documentConfiguration.getContestedDraftOrderNotApprovedTemplate()),
+            eq(documentConfiguration.getContestedDraftOrderNotApprovedFileName()));
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));
@@ -156,10 +149,9 @@ public class ContestedDraftOrderNotApprovedServiceTest extends BaseServiceTest {
     }
 
     void verifyAdditionalFieldsWithSingularReason() {
-        verify(genericDocumentService, times(1))
-            .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq(documentConfiguration.getContestedDraftOrderNotApprovedTemplate()),
-                eq(documentConfiguration.getContestedDraftOrderNotApprovedFileName()));
+        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            eq(documentConfiguration.getContestedDraftOrderNotApprovedTemplate()),
+            eq(documentConfiguration.getContestedDraftOrderNotApprovedFileName()));
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
         assertThat(data.get("ApplicantName"), is("Contested Applicant Name"));

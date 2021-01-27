@@ -47,7 +47,8 @@ public class HearingOrderControllerTest extends BaseControllerTest {
         DraftDirectionOrder draftDirectionOrder = DraftDirectionOrder.builder().build();
         when(hearingOrderService.draftDirectionOrderCollectionTail(any())).thenReturn(Optional.of(draftDirectionOrder));
 
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = hearingOrderController.startHearingOrderApproval(buildCallbackRequest());
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = hearingOrderController.startHearingOrderApproval(AUTH_TOKEN,
+            buildCallbackRequest());
 
         assertThat(response.getBody().getData().get(LATEST_DRAFT_DIRECTION_ORDER), is(draftDirectionOrder));
     }
@@ -58,7 +59,8 @@ public class HearingOrderControllerTest extends BaseControllerTest {
 
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(LATEST_DRAFT_DIRECTION_ORDER, "any non-null value");
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = hearingOrderController.startHearingOrderApproval(callbackRequest);
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = hearingOrderController.startHearingOrderApproval(AUTH_TOKEN,
+            callbackRequest);
 
         assertThat(response.getBody().getData().get(LATEST_DRAFT_DIRECTION_ORDER), is(nullValue()));
     }
