@@ -26,6 +26,7 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     private static final String SOLICITOR_REF = "JAW052018";
     private static final String GENERAL_ORDER_JSON = "document-rejected-order1.json";
     private static final String CONTESTED_FORM_G_JSON = "validate-hearing-without-fastTrackDecision1.json";
+    private static final String CONTESTED_HEARING_ORDER_CONVERT_TO_PDF_JSON = "contested-hearing-order-conversion.json";
     private static final String MINI_FORM_A_JSON = "documentGeneratePayload1.json";
     private static final String MINI_FORM_A_CONTESTED_JSON = "generate-contested-form-A1.json";
     private static final String CONTESTED_FORM_C_JSON = "validate-hearing-with-fastTrackDecision1.json";
@@ -55,8 +56,20 @@ public class FinancialRemedyDocumentGeneratorTests extends IntegrationTestBase {
     @Value("${cos.document.hearing.api}")
     private String generateHearingUrl;
 
+    @Value("${case.orchestration.api}/hearing-order/store")
+    private String hearingOrderStoreUrl;
+
     @Value("${case.orchestration.api}")
     private String caseOrchestration;
+
+    @Test
+    public void convertDocumentToPdf()  {
+
+        JsonPath jsonPathEvaluator = generateDocument(CONTESTED_HEARING_ORDER_CONVERT_TO_PDF_JSON, hearingOrderStoreUrl, contestedDir);
+
+        assertTrue(jsonPathEvaluator.get("data.latestDraftHearingOrder.document_filename").toString()
+            .equalsIgnoreCase("approvedConvertedHearingOrder.pdf"));
+    }
 
     @Test
     public void verifyBulkPrintDocumentGenerationShouldReturnOkResponseCode() {

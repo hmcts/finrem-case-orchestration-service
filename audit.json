@@ -57,6 +57,7 @@
   "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/transform-exception-record_POST": "ignore",
   "100000_A Server Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/payment-confirmation_POST": "ignore",
   "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/hearing-order/store_POST": "ignore",
+  "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/hearing-order/approval-store_POST": "ignore",
   "10021_X-Content-Type-Options Header Missing_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested/set-paper-case-org-policy_POST": "ignore",
   "10021_X-Content-Type-Options Header Missing_http://finrem-cos-aat.service.core-compute-aat.internal/ccd-data-migration/migrateFrc_POST": "ignore",
   "10021_X-Content-Type-Options Header Missing_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/upload-contested-case-documents_POST": "ignore",
