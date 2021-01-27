@@ -55,7 +55,7 @@ public class UpdateSolicitorDetailsService {
             Map<String, Object> org = (Map<String, Object>) orgPolicy.get(ORGANISATION_POLICY_ORGANISATION);
             return organisationService.retrieveOrganisationsData((String) org.get(ORGANISATION_POLICY_ORGANISATION_ID));
         } catch (Exception e) {
-            log.info("Failed to retrieve organisation data for case: {}", caseDetails.getId());
+            log.info("Failed to retrieve organisation data for case: {}, {}", caseDetails.getId(), e.getMessage());
             return null;
         }
     }
