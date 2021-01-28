@@ -19,15 +19,12 @@ public class PrdOrganisationService {
     private final IdamService idamService;
 
     public OrganisationsResponse retrieveOrganisationsData(String organisationId) {
-        log.info("Calling IDAM client authenticateUser");
-        String serviceUserToken =
-            idamService.authenticateUser(prdOrganisationConfiguration.getUsername(), prdOrganisationConfiguration.getPassword());
-        log.info("serviceUserToken: {}", serviceUserToken);
-
-        log.info("Calling PRD client getOrganisationById");
-        return prdClient.getOrganisationById(
-            serviceUserToken,
+        log.info("Calling PRD to retrieve organisation data for orgId: {}", organisationId);
+        OrganisationsResponse orgData = prdClient.getOrganisationById(
+            idamService.authenticateUser(prdOrganisationConfiguration.getUsername(), prdOrganisationConfiguration.getPassword()),
             authTokenGenerator.generate(),
             organisationId);
+        log.info("Retrieved organisation data from PRD: {}", orgData);
+        return orgData;
     }
 }
