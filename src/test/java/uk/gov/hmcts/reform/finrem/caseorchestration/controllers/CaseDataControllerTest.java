@@ -5,17 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,9 +34,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Autowired private CaseDataController caseDataController;
 
-    @MockBean private UpdateSolicitorDetailsService updateSolicitorDetailsService;
     @MockBean private IdamService idamService;
-    @MockBean private FeatureToggleService featureToggleService;
     @MockBean private CaseDataService caseDataService;
 
     @Test
@@ -201,42 +195,5 @@ public class CaseDataControllerTest extends BaseControllerTest {
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").doesNotExist());
-    }
-
-    @Test
-    public void shouldSuccessfullyPopulateApplicantSolicitorAddress() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-
-        CallbackRequest callbackRequest = buildCallbackRequest();
-
-        caseDataController.setSolicitorOrganisationDetails(callbackRequest);
-
-        verify(updateSolicitorDetailsService, times(1)).setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails());
-        verify(updateSolicitorDetailsService, times(1)).setRespondentSolicitorOrganisationDetails(callbackRequest.getCaseDetails());
-    }
-
-    @Test
-    public void shouldNotPopulateApplicantSolicitorAddress_toggledOff() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-
-        caseDataController.setSolicitorOrganisationDetails(buildCallbackRequest());
-
-        verify(updateSolicitorDetailsService, never()).setApplicantSolicitorOrganisationDetails(any());
-        verify(updateSolicitorDetailsService, never()).setRespondentSolicitorOrganisationDetails(any());
-    }
-
-    @Test
-    public void shouldNotPopulateApplicantSolicitorAddress_notRepresented() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
-
-        CallbackRequest callbackRequest = buildCallbackRequest();
-
-        caseDataController.setSolicitorOrganisationDetails(buildCallbackRequest());
-
-        verify(updateSolicitorDetailsService, never()).setApplicantSolicitorOrganisationDetails(any());
-        verify(updateSolicitorDetailsService, times(1)).setRespondentSolicitorOrganisationDetails(callbackRequest.getCaseDetails());
     }
 }

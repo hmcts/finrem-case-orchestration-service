@@ -5,13 +5,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.OnlineFormDocumentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,8 +25,12 @@ import java.net.URISyntaxException;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -39,11 +48,13 @@ public class DraftOnlineDocumentControllerTest extends BaseControllerTest {
 
     protected JsonNode requestContent;
 
-    @MockBean
-    protected OnlineFormDocumentService documentService;
+    @Autowired DraftOnlineDocumentController draftOnlineDocumentController;
 
-    @MockBean
-    protected IdamService idamService;
+    @MockBean protected OnlineFormDocumentService documentService;
+    @MockBean protected IdamService idamService;
+    @MockBean private UpdateSolicitorDetailsService updateSolicitorDetailsService;
+    @MockBean private FeatureToggleService featureToggleService;
+    @MockBean private CaseDataService caseDataService;
 
     @Before
     public void setUp() {
@@ -103,6 +114,43 @@ public class DraftOnlineDocumentControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void shouldSuccessfullyPopulateApplicantSolicitorAddress() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+
+        CallbackRequest callbackRequest = buildCallbackRequest();
+
+        draftOnlineDocumentController.generateContestedMiniFormA(AUTH_TOKEN, callbackRequest);
+
+        verify(updateSolicitorDetailsService, times(1)).setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails());
+        verify(updateSolicitorDetailsService, times(1)).setRespondentSolicitorOrganisationDetails(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void shouldNotPopulateApplicantSolicitorAddress_toggledOff() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+
+        draftOnlineDocumentController.generateContestedMiniFormA(AUTH_TOKEN, buildCallbackRequest());
+
+        verify(updateSolicitorDetailsService, never()).setApplicantSolicitorOrganisationDetails(any());
+        verify(updateSolicitorDetailsService, never()).setRespondentSolicitorOrganisationDetails(any());
+    }
+
+    @Test
+    public void shouldNotPopulateApplicantSolicitorAddress_notRepresented() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
+
+        CallbackRequest callbackRequest = buildCallbackRequest();
+
+        draftOnlineDocumentController.generateContestedMiniFormA(AUTH_TOKEN, callbackRequest);
+
+        verify(updateSolicitorDetailsService, never()).setApplicantSolicitorOrganisationDetails(any());
+        verify(updateSolicitorDetailsService, times(1)).setRespondentSolicitorOrganisationDetails(callbackRequest.getCaseDetails());
     }
 
     String jsonFixture() {

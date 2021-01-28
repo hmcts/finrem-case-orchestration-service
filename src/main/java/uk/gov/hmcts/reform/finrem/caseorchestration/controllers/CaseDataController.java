@@ -15,9 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,10 +40,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class CaseDataController implements BaseController {
 
-    private final UpdateSolicitorDetailsService solicitorService;
     private final IdamService idamService;
     private final CaseDataService caseDataService;
-    private final FeatureToggleService featureToggleService;
 
     @PostMapping(path = "/consented/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Set default values for consented journey")
@@ -97,27 +93,6 @@ public class CaseDataController implements BaseController {
         log.info("Setting default values for contested paper case journey.");
         validateCaseData(callbackRequest);
         setOrganisationPolicy(callbackRequest.getCaseDetails());
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
-    }
-
-    @PostMapping(path = "/set-solicitor-organisation-details",
-        consumes = MediaType.APPLICATION_JSON_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Set solicitor organisation details")
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setSolicitorOrganisationDetails(
-        @RequestBody final CallbackRequest callbackRequest) {
-        log.info("Setting solicitor organisation details.");
-        validateCaseData(callbackRequest);
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-
-        if (featureToggleService.isRespondentJourneyEnabled()) {
-            if (caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
-                solicitorService.setApplicantSolicitorOrganisationDetails(caseDetails);
-            }
-
-            solicitorService.setRespondentSolicitorOrganisationDetails(caseDetails);
-        }
-
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
 

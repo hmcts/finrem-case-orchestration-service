@@ -30,6 +30,8 @@ public class UpdateSolicitorDetailsService {
     private final ObjectMapper objectMapper;
 
     public void setApplicantSolicitorOrganisationDetails(CaseDetails caseDetails) {
+        log.info("Retrieving applicant organisation data for case: {}", caseDetails.getId());
+
         OrganisationsResponse organisationsResponse = retrieveOrganisationsData(caseDetails, ORGANISATION_POLICY_APPLICANT);
 
         if (organisationsResponse != null) {
@@ -40,6 +42,8 @@ public class UpdateSolicitorDetailsService {
     }
 
     public void setRespondentSolicitorOrganisationDetails(CaseDetails caseDetails) {
+        log.info("Retrieving respondent organisation data for case: {}", caseDetails.getId());
+
         OrganisationsResponse organisationsResponse = retrieveOrganisationsData(caseDetails, ORGANISATION_POLICY_RESPONDENT);
 
         if (organisationsResponse != null) {
