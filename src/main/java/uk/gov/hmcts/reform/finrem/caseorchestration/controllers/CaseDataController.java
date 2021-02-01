@@ -53,11 +53,8 @@ public class CaseDataController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
         @RequestBody final CallbackRequest callbackRequest) {
         log.info("Setting default values for consented journey.");
-        validateCaseData(callbackRequest);
-        final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-        setData(authToken, caseData);
-        setOrganisationPolicy(callbackRequest.getCaseDetails());
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+        setDefaultValues(callbackRequest, authToken);
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
 
     @PostMapping(path = "/contested/set-defaults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -66,12 +63,16 @@ public class CaseDataController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) final String authToken,
         @RequestBody final CallbackRequest callbackRequest) {
         log.info("Setting default values for contested journey.");
+        setDefaultValues(callbackRequest, authToken);
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
+    }
+
+    private void setDefaultValues(CallbackRequest callbackRequest, String authToken) {
         validateCaseData(callbackRequest);
         final Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         setData(authToken, caseData);
         setOrganisationPolicy(callbackRequest.getCaseDetails());
         setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails(), authToken);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     @PostMapping(path = "/contested/set-paper-case-defaults",
@@ -147,7 +148,6 @@ public class CaseDataController implements BaseController {
 
     private void setApplicantSolicitorOrganisationDetails(CaseDetails caseDetails, String authToken) {
         if (featureToggleService.isRespondentJourneyEnabled()
-            && caseDataService.isContestedApplication(caseDetails)
             && caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())) {
             solicitorService.setApplicantSolicitorOrganisationDetails(authToken, caseDetails);
         }
