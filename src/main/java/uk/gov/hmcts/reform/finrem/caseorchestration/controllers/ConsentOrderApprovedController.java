@@ -173,7 +173,9 @@ public class ConsentOrderApprovedController implements BaseController {
         log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseDetails.getId());
 
         if (isEmpty(pensionDocs)) {
-            log.info("Case {} has no pension documents, updating status to {} and sending for bulk print", caseDetails.getId(), CONSENT_ORDER_MADE.toString());
+            log.info("Case {} has no pension documents, updating status to {} and sending for bulk print",
+                caseDetails.getId(),
+                CONSENT_ORDER_MADE.toString());
             try {
                 // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
                 caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
