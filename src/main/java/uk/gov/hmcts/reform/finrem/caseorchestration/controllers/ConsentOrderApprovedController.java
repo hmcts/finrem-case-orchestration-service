@@ -78,7 +78,8 @@ public class ConsentOrderApprovedController implements BaseController {
         if (!isEmpty(latestConsentOrder)) {
             generateAndPrepareDocuments(authToken, caseDetails);
         } else {
-            log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty");
+            log.info("Failed to handle 'Consent Order Approved' callback because 'latestConsentOrder' is empty for case: {}",
+                caseDetails.getId());
         }
 
         return ResponseEntity.ok(
@@ -155,23 +156,24 @@ public class ConsentOrderApprovedController implements BaseController {
         ApprovedOrder approvedOrder = approvedOrderBuilder.build();
 
         if (!isEmpty(pensionDocs)) {
-            log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder");
+            log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for case {}",
+                caseDetails.getId());
 
             List<PensionCollectionData> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocs, authToken);
-            log.info("Generated StampedPensionDocs = {}", stampedPensionDocs);
+            log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseDetails.getId());
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }
 
         List<CollectionElement<ApprovedOrder>> approvedOrders = singletonList(CollectionElement.<ApprovedOrder>builder()
             .value(approvedOrder).build());
-        log.info("Generated ApprovedOrders = {}", approvedOrders);
+        log.info("Generated ApprovedOrders = {} for case {}", approvedOrders, caseDetails.getId());
 
         caseData.put(APPROVED_ORDER_COLLECTION, approvedOrders);
 
-        log.info("Successfully generated documents for 'Consent Order Approved'");
+        log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseDetails.getId());
 
         if (isEmpty(pensionDocs)) {
-            log.info("Case has no pension documents, updating status to {} and sending for bulk print", CONSENT_ORDER_MADE.toString());
+            log.info("Case {} has no pension documents, updating status to {} and sending for bulk print", caseDetails.getId(), CONSENT_ORDER_MADE.toString());
             try {
                 // Render Case Data with @JSONProperty names, required to re-use sendToBulkPrint code
                 caseData = mapper.readValue(mapper.writeValueAsString(caseData), HashMap.class);
@@ -181,17 +183,17 @@ public class ConsentOrderApprovedController implements BaseController {
                 notificationService.sendConsentOrderAvailableCtscEmail(caseDetails);
 
                 if (notificationService.shouldEmailApplicantSolicitor(caseDetails)) {
-                    log.info("Sending email notification to Applicant Solicitor for 'Consent Order Available'");
+                    log.info("case - {}: Sending email notification for to Applicant Solicitor for 'Consent Order Available'", caseDetails.getId());
                     notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
                 }
 
                 if (featureToggleService.isRespondentJourneyEnabled()
                     && notificationService.shouldEmailRespondentSolicitor(caseData)) {
-                    log.info("Sending email notification to Respondent Solicitor for 'Consent Order Available'");
+                    log.info("case - {}: Sending email notification to Respondent Solicitor for 'Consent Order Available'", caseDetails.getId());
                     notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
                 }
             } catch (JsonProcessingException e) {
-                log.error(e.getMessage());
+                log.error("case - {}: Error encountered trying to update status and send for bulk print: {}", caseDetails.getId(), e.getMessage());
             }
         }
     }
