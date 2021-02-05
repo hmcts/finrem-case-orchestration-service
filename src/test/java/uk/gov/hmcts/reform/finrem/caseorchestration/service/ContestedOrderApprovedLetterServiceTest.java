@@ -83,7 +83,6 @@ public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
         assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
         assertThat(data.get("Court"), is("Nottingham County Court and Family Court"));
         assertThat(data.get("JudgeDetails"), is("Her Honour Judge Contested"));
-        System.out.println(data.get("letterDate"));
         assertThat(data.get("letterDate"), is(LocalDate.now()));
     }
 }
