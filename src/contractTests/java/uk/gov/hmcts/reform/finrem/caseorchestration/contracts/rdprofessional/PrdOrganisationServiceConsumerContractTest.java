@@ -32,7 +32,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 public class PrdOrganisationServiceConsumerContractTest extends BaseTest {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String authorizationToken = "Bearer some-access-token";
+    private static final String AUTHORIZATION_TOKEN = "Bearer some-access-token";
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     private static final String ASSIGNEE_ID = "0a5874a4-3f38-4bbd-ba4c";
     private final String someServiceAuthToken = "someServiceAuthToken";
@@ -46,22 +46,21 @@ public class PrdOrganisationServiceConsumerContractTest extends BaseTest {
     @MockBean
     PrdOrganisationConfiguration prdOrganisationConfiguration;
 
-    @Rule // TODO check provider Name.
-    public PactProviderRule mockProvider = new PactProviderRule("referenceData_organisationalInternal", "localhost", 8889, this);
+    @Rule
+    public PactProviderRule mockProvider = new PactProviderRule("referenceData_organisationalExternalUsers", "localhost", 8889, this);
 
-    // TODO check provider Name.
-    @Pact(provider = "referenceData_organisationalInternal", consumer = "fr_caseOrchestratorService")
-    public RequestResponsePact generatePactFragment(PactDslWithProvider builder) throws JSONException{
+    @Pact(provider = "referenceData_organisationalExternalUsers", consumer = "fr_caseOrchestratorService")
+    public RequestResponsePact generatePactFragment(PactDslWithProvider builder) {
         // @formatter:off
         return builder
-            .given("An Organisation exists")
+            .given("Organisation with Id exists")
             .uponReceiving("A Request to get the details of the Organisation")
             .method("GET")
-            .headers(SERVICE_AUTHORIZATION_HEADER, someServiceAuthToken, AUTHORIZATION_HEADER, authorizationToken)
+            .headers(SERVICE_AUTHORIZATION_HEADER, someServiceAuthToken, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
             .path("/refdata/external/v1/organisations")
             .willRespondWith()
             .body(buildOrganisationResponseDsl())
-            .status(HttpStatus.SC_CREATED)
+            .status(HttpStatus.SC_OK)
             .toPact();
     }
 
@@ -73,7 +72,7 @@ public class PrdOrganisationServiceConsumerContractTest extends BaseTest {
         given(prdOrganisationConfiguration.getOrganisationsUrl()).willReturn("http://localhost:8889/refdata/external/v1/organisations");
         given(authTokenGenerator.generate()).willReturn(someServiceAuthToken);
 
-        OrganisationsResponse response = prdOrganisationService.retrieveOrganisationsData(authorizationToken);
+        OrganisationsResponse response = prdOrganisationService.retrieveOrganisationsData(AUTHORIZATION_TOKEN);
         assertThat(response.getName(), is("theKCompany"));
         assertThat(response.getOrganisationIdentifier(), is("BJMSDFDS80808"));
 
@@ -81,18 +80,16 @@ public class PrdOrganisationServiceConsumerContractTest extends BaseTest {
     }
 
     private DslPart buildOrganisationResponseDsl(){
-        return newJsonBody((o) -> {
+        return newJsonBody(o -> {
             o.stringType("name", "theKCompany")
                 .stringType("organisationIdentifier", "BJMSDFDS80808")
                 .minArrayLike("contactInformation", 1, 1,
-                    (sh) -> {
+                    sh -> {
                         sh.stringType("addressLine1", "addressLine1")
                             .stringType("addressLine2", "addressLine2")
-                            .stringType("addressLine3", "addressLine3")
                             .stringType("country", "UK")
-                            .stringType("county", "Surrey")
-                            .stringType("postCode", "SM12SX")
-                            .stringType("townCity", "Sutton");
+                            .stringType("postCode", "SM12SX");
+
                     });
         }).build();
     }
@@ -101,10 +98,7 @@ public class PrdOrganisationServiceConsumerContractTest extends BaseTest {
         List<OrganisationContactInformation> contactInformationList = response.getContactInformation();
         assertThat(contactInformationList.get(0).getAddressLine1(), is("addressLine1"));
         assertThat(contactInformationList.get(0).getAddressLine2(), is("addressLine2"));
-        assertThat(contactInformationList.get(0).getAddressLine3(), is("addressLine3"));
         assertThat(contactInformationList.get(0).getCountry(), is("UK"));
-        assertThat(contactInformationList.get(0).getCounty(), is("Surrey"));
         assertThat(contactInformationList.get(0).getPostcode(), is("SM12SX"));
-        assertThat(contactInformationList.get(0).getTownCity(), is("Sutton"));
     }
 }
