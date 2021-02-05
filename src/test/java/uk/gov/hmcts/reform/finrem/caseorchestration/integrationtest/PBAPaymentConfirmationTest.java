@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.CaseOrchestrationApplication
 import java.io.InputStream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -54,6 +55,7 @@ public class PBAPaymentConfirmationTest extends BaseTest {
 
     @ClassRule public static WireMockClassRule idamService = new WireMockClassRule(4501);
     @ClassRule public static WireMockClassRule acaService = new WireMockClassRule(4454);
+    @ClassRule public static WireMockClassRule dataStoreService = new WireMockClassRule(4452);
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -62,11 +64,13 @@ public class PBAPaymentConfirmationTest extends BaseTest {
 
     private String idamUrl = "/details";
     private String acaUrl = "/case-assignments";
+    private String dataStoreUrl = "/case-users";
 
     @Before
     public void setUp() {
         stubForIdam();
         stubForAca();
+        stubForDataStore();
     }
 
     @Test
@@ -134,6 +138,16 @@ public class PBAPaymentConfirmationTest extends BaseTest {
 
     private void stubForAca() {
         acaService.stubFor(post(urlEqualTo(acaUrl))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
+            .willReturn(
+                aResponse()
+                    .withStatus(HttpStatus.OK.value())
+            ));
+    }
+
+    private void stubForDataStore() {
+        dataStoreService.stubFor(delete(urlEqualTo(dataStoreUrl))
             .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
             .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
             .willReturn(
