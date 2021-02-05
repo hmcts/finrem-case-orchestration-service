@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_COVER_LETTER;
@@ -46,5 +47,6 @@ public class ContestedOrderApprovedLetterService {
             StringUtils.joinWith(" ",
                 caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_TYPE),
                 caseDetails.getData().get(CONTESTED_ORDER_APPROVED_JUDGE_NAME)));
+        caseData.put("letterDate", LocalDate.now());
     }
 }

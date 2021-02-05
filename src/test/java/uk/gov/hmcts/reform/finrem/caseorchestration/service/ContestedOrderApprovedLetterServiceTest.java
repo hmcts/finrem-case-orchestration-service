@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.DocumentConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -82,5 +83,7 @@ public class ContestedOrderApprovedLetterServiceTest extends BaseServiceTest {
         assertThat(data.get("RespondentName"), is("Contested Respondent Name"));
         assertThat(data.get("Court"), is("Nottingham County Court and Family Court"));
         assertThat(data.get("JudgeDetails"), is("Her Honour Judge Contested"));
+        System.out.println(data.get("letterDate"));
+        assertThat(data.get("letterDate"), is(LocalDate.now()));
     }
 }
