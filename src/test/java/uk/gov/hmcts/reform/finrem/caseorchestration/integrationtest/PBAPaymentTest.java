@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -26,16 +27,18 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.delete;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -86,8 +89,21 @@ public class PBAPaymentTest extends BaseTest {
 
     private CallbackRequest request;
 
-    @ClassRule
-    public static WireMockClassRule feeLookUpService = new WireMockClassRule(9001);
+    @ClassRule public static WireMockClassRule feeLookUpService = new WireMockClassRule(9001);
+    @ClassRule public static WireMockClassRule idamService = new WireMockClassRule(4501);
+    @ClassRule public static WireMockClassRule acaService = new WireMockClassRule(4454);
+    @ClassRule public static WireMockClassRule dataStoreService = new WireMockClassRule(4452);
+
+    private String idamUrl = "/details";
+    private String acaUrl = "/case-assignments";
+    private String dataStoreUrl = "/case-users";
+
+    @Before
+    public void setUp() {
+        stubForIdam();
+        stubForAca(HttpStatus.OK);
+        stubForDataStore();
+    }
 
     @Test
     public void shouldDoPBAPayment() throws Exception {
@@ -109,8 +125,7 @@ public class PBAPaymentTest extends BaseTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
 
-        verify(getRequestedFor(urlMatching(FEE_LOOKUP_URL)));
-        verify(postRequestedFor(urlMatching(PBA_URL)));
+        verify(postRequestedFor(urlMatching(acaUrl)));
     }
 
     @Test
@@ -138,6 +153,7 @@ public class PBAPaymentTest extends BaseTest {
         setUpPbaPayment("/fixtures/pba-payment.json");
         stubFeeLookUp();
         stubPayment(PAYMENT_FAILURE_RESPONSE);
+
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
             .content(objectMapper.writeValueAsString(request))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -145,13 +161,30 @@ public class PBAPaymentTest extends BaseTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(getRequestedFor(urlMatching(FEE_LOOKUP_URL)));
-        verify(postRequestedFor(urlMatching(PBA_URL)));
+    }
+
+    @Test
+    public void shouldFailWhenAcaCallFails() throws Exception {
+        setUpPbaPayment("/fixtures/pba-payment.json");
+        stubFeeLookUp();
+        stubForAca(HttpStatus.NOT_FOUND);
+        stubPayment(PAYMENT_RESPONSE);
+
+        webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+
+        verify(postRequestedFor(urlMatching(acaUrl)));
     }
 
     @Test
     public void shouldReturnBadRequestError() throws Exception {
         setUpPbaPayment("/fixtures/empty-casedata.json");
+
         webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
             .content(objectMapper.writeValueAsString(request))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -160,7 +193,7 @@ public class PBAPaymentTest extends BaseTest {
     }
 
     private void stubPayment(String paymentResponse) {
-        stubFor(post(PBA_URL)
+        feeLookUpService.stubFor(post(PBA_URL)
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -168,7 +201,7 @@ public class PBAPaymentTest extends BaseTest {
     }
 
     private void stubFeeLookUp() {
-        stubFor(get(urlMatching(FEE_LOOKUP_URL))
+        feeLookUpService.stubFor(get(urlMatching(FEE_LOOKUP_URL))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -183,5 +216,37 @@ public class PBAPaymentTest extends BaseTest {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(name)) {
             request = objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
+    }
+
+    private void stubForIdam() {
+        idamService.stubFor(get(urlEqualTo(idamUrl))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
+            .willReturn(
+                aResponse()
+                    .withStatus(HttpStatus.OK.value())
+                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("{\"id\": \"1234\"}".getBytes())
+            ));
+    }
+
+    private void stubForAca(HttpStatus httpStatus) {
+        acaService.stubFor(post(urlEqualTo(acaUrl))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
+            .willReturn(
+                aResponse()
+                    .withStatus(httpStatus.value())
+            ));
+    }
+
+    private void stubForDataStore() {
+        dataStoreService.stubFor(delete(urlEqualTo(dataStoreUrl))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
+            .willReturn(
+                aResponse()
+                    .withStatus(HttpStatus.OK.value())
+            ));
     }
 }

@@ -1,13 +1,17 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 
@@ -18,10 +22,12 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -42,8 +48,17 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @MockBean private FeeService feeService;
     @MockBean private PBAPaymentService pbaPaymentService;
     @MockBean private CaseDataService caseDataService;
+    @MockBean private AssignCaseAccessService assignCaseAccessService;
+    @MockBean private CcdDataStoreService ccdDataStoreService;
+    @MockBean private FeatureToggleService featureToggleService;
 
     @Autowired private ObjectMapper objectMapper;
+
+    @Before
+    public void setUp() {
+        super.setUp();
+        when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
+    }
 
     private static PaymentResponse paymentResponse(boolean success) {
         PaymentResponse paymentResponse = PaymentResponse.builder()
@@ -63,6 +78,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest())
             .andExpect(content().string(startsWith(SERVER_ERROR_MSG)));
+        verifyNoInteractions(ccdDataStoreService);
+        verifyNoInteractions(assignCaseAccessService);
     }
 
     private void doPBASetUp(boolean success) throws Exception {
@@ -106,6 +123,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
+        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
+        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -121,7 +140,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
-
+        verifyNoInteractions(ccdDataStoreService);
+        verifyNoInteractions(assignCaseAccessService);
     }
 
     @Test
@@ -142,6 +162,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
+        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
+        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -157,5 +179,25 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
+        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
+        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists_assignCaseAccessToggledOff() throws Exception {
+        doPBAPaymentReferenceAlreadyExistsSetup();
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(false);
+
+        mvc.perform(post(PBA_PAYMENT_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+        verify(pbaPaymentService, never()).makePayment(anyString(), any());
+        verifyNoInteractions(ccdDataStoreService);
+        verifyNoInteractions(assignCaseAccessService);
     }
 }

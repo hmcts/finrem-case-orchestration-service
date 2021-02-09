@@ -3,6 +3,7 @@ java:
   ingressHost: ${SERVICE_FQDN}
   environment:
     FEATURE_RESPONDENT_JOURNEY: true
+    FEATURE_ASSIGN_CASE_ACCESS: false
   keyVaults:
     finrem:
       secrets:

@@ -24,6 +24,9 @@ public class PaymentServiceTests extends IntegrationTestBase {
     @Value("${cos.payment.pba.api}")
     private String pbaPayment;
 
+    @Value("${cos.payment.pba.confirmation.api}")
+    private String pbaConfirmation;
+
     @Value("${pba.account.liberata.check.enabled}")
     private boolean pbaAccountLiberataCheckEnabled;
 
@@ -31,6 +34,8 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private String consentedDir = "/json/consented/";
     private String dataPath = "data";
     private String feesPath = "data.orderSummary.Fees[0].value";
+    private String hwf = "HWF";
+    private String pba = "PBA";
 
     @Test
     public void verifyPBAPaymentSuccessTestContested() {
@@ -62,6 +67,26 @@ public class PaymentServiceTests extends IntegrationTestBase {
         validateFailurePBAPayment(pbaPayment, "FailurePaymentRequestPayload.json", consentedDir);
     }
 
+    @Test
+    public void verifyPaymentConfirmationMessageForHwfConsented() {
+        validatePaymentConfirmationMessage(pbaConfirmation, "hwfPayment.json", consentedDir, hwf);
+    }
+
+    @Test
+    public void verifyPaymentConfirmationMessageForPBAPaymentConsented() {
+        validatePaymentConfirmationMessage(pbaConfirmation, "pba-payment.json", consentedDir, pba);
+    }
+
+    @Test
+    public void verifyPBAConfirmationMessageForHwfContested() {
+        validatePaymentConfirmationMessage(pbaConfirmation, "hwfPayment.json", contestedDir, hwf);
+    }
+
+    @Test
+    public void verifyPBAConfirmationMessageForPBAPaymentContested() {
+        validatePaymentConfirmationMessage(pbaConfirmation, "pba-payment_contested.json", contestedDir, pba);
+    }
+
     /**
      * Verify a "duplicate payment" error is received when sending a fee with the same fee code more than once within
      * 2 minutes.
@@ -71,6 +96,27 @@ public class PaymentServiceTests extends IntegrationTestBase {
         String filename = "SuccessPaymentRequestPayload_Contested_Duplicate.json";
         utils.validatePostSuccess(pbaPayment, filename, contestedDir);
         assertThat(utils.getResponse(pbaPayment, filename, contestedDir).jsonPath().get("errors[0]"), is("duplicate payment"));
+    }
+
+    private void validatePaymentConfirmationMessage(String url, String fileName,
+                                                    String journeyType, String paymentType) {
+        if (paymentType.equals(pba)) {
+            if (journeyType.equals(consentedDir)) {
+                assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
+                    .toString().contains("Your application will be issued by Court staff and referred to a Judge"));
+            } else {
+                assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
+                    .toString().contains("The application will be sent to the Judge for gatekeeping"));
+            }
+        } else if (paymentType.equals(hwf)) {
+            if (journeyType.equals(consentedDir)) {
+                assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
+                    .toString().contains("Process the application for help with fees"));
+            } else {
+                assertTrue(utils.getResponseData(url, fileName, journeyType, "").get("confirmation_body")
+                    .toString().contains("process the application for help with fees"));
+            }
+        }
     }
 
     private void validateFailurePBAPayment(String url, String fileName, String journeyType) {

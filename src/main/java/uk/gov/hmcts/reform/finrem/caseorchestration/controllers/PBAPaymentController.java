@@ -16,7 +16,10 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 
@@ -43,6 +46,9 @@ public class PBAPaymentController implements BaseController {
     private final FeeService feeService;
     private final PBAPaymentService pbaPaymentService;
     private final CaseDataService caseDataService;
+    private final AssignCaseAccessService assignCaseAccessService;
+    private final CcdDataStoreService ccdDataStoreService;
+    private final FeatureToggleService featureToggleService;
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -74,6 +80,22 @@ public class PBAPaymentController implements BaseController {
             log.info("Not PBA Payment - Moving state to Awaiting HWF Decision");
             mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
         }
+
+        if (featureToggleService.isAssignCaseAccessEnabled()) {
+            try {
+                log.info("Assigning case access for Case ID: {}", caseDetails.getId());
+                ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
+                assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
+            } catch (Exception e) {
+                log.error("Assigning case access failed for Case ID: {}", caseDetails.getId());
+
+                return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(ImmutableList.of(e.getMessage()))
+                    .build());
+            }
+
+        }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
     }
 
