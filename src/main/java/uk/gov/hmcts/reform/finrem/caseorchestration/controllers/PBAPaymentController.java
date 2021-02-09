@@ -68,7 +68,7 @@ public class PBAPaymentController implements BaseController {
 
         validateCaseData(callbackRequest);
 
-        if (featureToggleService.isAssignCaseAccessEnabled() && featureToggleService.isRespondentJourneyEnabled()) {
+        if (featureToggleService.isAssignCaseAccessEnabled()) {
             try {
                 String applicantOrgId = getApplicantOrgId(caseDetails);
 

@@ -85,7 +85,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     public void setUp() {
         super.setUp();
         when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
             .contactInformation(Arrays.asList(organisationContactInformation))
             .name(TEST_SOLICITOR_NAME)
@@ -221,24 +220,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         doPBAPaymentReferenceAlreadyExistsSetup();
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(false);
-
-        mvc.perform(post(PBA_PAYMENT_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(pbaPaymentService, never()).makePayment(anyString(), any());
-        verifyNoInteractions(ccdDataStoreService);
-        verifyNoInteractions(assignCaseAccessService);
-    }
-
-    @Test
-    public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists_respondentToggledOff() throws Exception {
-        doPBAPaymentReferenceAlreadyExistsSetup();
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
 
         mvc.perform(post(PBA_PAYMENT_URL)
             .content(requestContent.toString())
