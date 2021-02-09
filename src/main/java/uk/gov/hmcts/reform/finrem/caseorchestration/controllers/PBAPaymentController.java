@@ -70,18 +70,18 @@ public class PBAPaymentController implements BaseController {
 
         if (featureToggleService.isAssignCaseAccessEnabled()) {
             try {
-                Map<String, Object> applicantOrgPolicy = (Map<String, Object>) caseDetails.getData().get(ORGANISATION_POLICY_APPLICANT);
+                String applicantOrgId = getApplicantOrgId(caseDetails);
 
-                if (applicantOrgPolicy != null) {
-                    Map<String, Object> applicantOrganisation = (Map<String, Object>) applicantOrgPolicy.get(ORGANISATION_POLICY_ORGANISATION);
+                if (applicantOrgId != null) {
+                    OrganisationsResponse prdOrganisation = prdOrganisationService.retrieveOrganisationsData(authToken);
 
-                    if (applicantOrganisation != null) {
-                        OrganisationsResponse prdOrganisation = prdOrganisationService.retrieveOrganisationsData(authToken);
-                        if (prdOrganisation.getOrganisationIdentifier().equals(applicantOrganisation.get(ORGANISATION_POLICY_ORGANISATION_ID))) {
-                            log.info("Assigning case access for Case ID: {}", caseDetails.getId());
-                            ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
+                    if (prdOrganisation.getOrganisationIdentifier().equals(applicantOrgId)) {
+                        log.info("Assigning case access for Case ID: {}", caseDetails.getId());
+                        ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
+                        try {
                             assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
-                        } else {
+                        } catch (Exception e) {
+                            ccdDataStoreService.addCreatorRole(caseDetails, authToken, prdOrganisation.getOrganisationIdentifier());
                             return assignCaseAccessFailure(caseDetails);
                         }
                     } else {
@@ -115,6 +115,19 @@ public class PBAPaymentController implements BaseController {
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
+    }
+
+    private String getApplicantOrgId(CaseDetails caseDetails) {
+        Map<String, Object> applicantOrgPolicy = (Map<String, Object>) caseDetails.getData().get(ORGANISATION_POLICY_APPLICANT);
+        if (applicantOrgPolicy != null) {
+            Map<String, Object> applicantOrganisation = (Map<String, Object>) applicantOrgPolicy.get(ORGANISATION_POLICY_ORGANISATION);
+
+            if (applicantOrganisation != null) {
+                return (String) applicantOrganisation.get(ORGANISATION_POLICY_ORGANISATION_ID);
+            }
+        }
+
+        return null;
     }
 
     private ResponseEntity<AboutToStartOrSubmitCallbackResponse> assignCaseAccessFailure(CaseDetails caseDetails) {
