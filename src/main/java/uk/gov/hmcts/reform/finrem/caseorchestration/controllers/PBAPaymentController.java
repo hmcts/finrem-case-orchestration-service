@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 
 import javax.validation.constraints.NotNull;
 
@@ -32,6 +34,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMOUNT_TO_PAY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_SUMMARY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_PAYMENT_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
@@ -49,6 +54,7 @@ public class PBAPaymentController implements BaseController {
     private final AssignCaseAccessService assignCaseAccessService;
     private final CcdDataStoreService ccdDataStoreService;
     private final FeatureToggleService featureToggleService;
+    private final PrdOrganisationService prdOrganisationService;
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -61,6 +67,36 @@ public class PBAPaymentController implements BaseController {
         log.info("Received request for PBA payment for consented for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callbackRequest);
+
+        if (featureToggleService.isAssignCaseAccessEnabled() && featureToggleService.isRespondentJourneyEnabled()) {
+            try {
+                Map<String, Object> applicantOrgPolicy = (Map<String, Object>) caseDetails.getData().get(ORGANISATION_POLICY_APPLICANT);
+
+                if (applicantOrgPolicy != null) {
+                    Map<String, Object> applicantOrganisation = (Map<String, Object>) applicantOrgPolicy.get(ORGANISATION_POLICY_ORGANISATION);
+
+                    if (applicantOrganisation != null) {
+                        OrganisationsResponse prdOrganisation = prdOrganisationService.retrieveOrganisationsData(authToken);
+                        log.info("pbaPayment, prdOrganisation: {}", prdOrganisation);
+
+                        log.info("pbaPayment, applicantOrgPolicy: {}", applicantOrgPolicy);
+                        if (prdOrganisation.getOrganisationIdentifier().equals(applicantOrganisation.get(ORGANISATION_POLICY_ORGANISATION_ID))) {
+                            log.info("Assigning case access for Case ID: {}", caseDetails.getId());
+                            ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
+                            assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
+                        } else {
+                            return assignCaseAccessFailure(caseDetails);
+                        }
+                    } else {
+                        return assignCaseAccessFailure(caseDetails);
+                    }
+                } else {
+                    return assignCaseAccessFailure(caseDetails);
+                }
+            } catch (Exception e) {
+                return assignCaseAccessFailure(caseDetails);
+            }
+        }
 
         final Map<String, Object> mapOfCaseData = caseDetails.getData();
         feeLookup(authToken, callbackRequest, mapOfCaseData);
@@ -81,22 +117,16 @@ public class PBAPaymentController implements BaseController {
             mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
         }
 
-        if (featureToggleService.isAssignCaseAccessEnabled()) {
-            try {
-                log.info("Assigning case access for Case ID: {}", caseDetails.getId());
-                ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
-                assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
-            } catch (Exception e) {
-                log.error("Assigning case access failed for Case ID: {}", caseDetails.getId());
-
-                return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors(ImmutableList.of("Failed to assign applicant solicitor to case, "
-                        + "please ensure you have selected the correct applicant organisation on case"))
-                    .build());
-            }
-        }
-
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
+    }
+
+    private ResponseEntity<AboutToStartOrSubmitCallbackResponse> assignCaseAccessFailure(CaseDetails caseDetails) {
+        log.error("Assigning case access failed for Case ID: {}", caseDetails.getId());
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+            .errors(ImmutableList.of("Failed to assign applicant solicitor to case, "
+                + "please ensure you have selected the correct applicant organisation on case"))
+            .build());
     }
 
     private void feeLookup(@RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,

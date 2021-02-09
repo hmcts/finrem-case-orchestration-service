@@ -81,6 +81,12 @@ public class PBAPaymentTest extends BaseTest {
         + "\"status\":\"failed\""
         + "}";
 
+    private static final String PRD_RESPONSE = "{\n"
+        + "\"contactInformation\":[],"
+        + "\"name\":\"Org Name\","
+        + "\"organisationIdentifier\":\"RG-123456789\""
+        + "}";
+
     @Autowired
     private MockMvc webClient;
 
@@ -93,16 +99,19 @@ public class PBAPaymentTest extends BaseTest {
     @ClassRule public static WireMockClassRule idamService = new WireMockClassRule(4501);
     @ClassRule public static WireMockClassRule acaService = new WireMockClassRule(4454);
     @ClassRule public static WireMockClassRule dataStoreService = new WireMockClassRule(4452);
+    @ClassRule public static WireMockClassRule prdService = new WireMockClassRule(8090);
 
     private String idamUrl = "/details";
     private String acaUrl = "/case-assignments";
     private String dataStoreUrl = "/case-users";
+    private String prdUrl = "/refdata/external/v1/organisations";
 
     @Before
     public void setUp() {
         stubForIdam();
         stubForAca(HttpStatus.OK);
         stubForDataStore();
+        stubForPrd();
     }
 
     @Test
@@ -247,6 +256,18 @@ public class PBAPaymentTest extends BaseTest {
             .willReturn(
                 aResponse()
                     .withStatus(HttpStatus.OK.value())
+            ));
+    }
+
+    private void stubForPrd() {
+        prdService.stubFor(get(urlEqualTo(prdUrl))
+            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+            .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
+            .willReturn(
+                aResponse()
+                    .withStatus(HttpStatus.OK.value())
+                    .withHeader(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(PRD_RESPONSE)
             ));
     }
 }
