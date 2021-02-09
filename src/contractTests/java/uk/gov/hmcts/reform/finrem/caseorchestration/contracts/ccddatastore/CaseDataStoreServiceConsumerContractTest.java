@@ -34,8 +34,8 @@ public class CaseDataStoreServiceConsumerContractTest extends BaseTest {
     private static final String AUTHORIZATION_TOKEN = "Bearer some-access-token";
     private static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     private static final String ASSIGNEE_ID = "0a5874a4-3f38-4bbd-ba4c";
-    public static final long CASE_ID = 1583841721773828L;
-    public static final String CASE_TYPE_ID = "FinancialRemedyMVP2";
+    private static final long CASE_ID = 1583841721773828L;
+    private static final String CASE_TYPE_ID = "FinancialRemedyMVP2";
     private static final String SERVICE_AUTH_TOKEN = "someServiceAuthToken";
 
     @MockBean
@@ -73,7 +73,7 @@ public class CaseDataStoreServiceConsumerContractTest extends BaseTest {
 
     @Test
     @PactVerification()
-    public void removeRole() {
+    public void verifyRemoveRole() {
 
         given(idamService.getIdamUserId(anyString())).willReturn(ASSIGNEE_ID);
         given(ccdDataStoreServiceConfiguration.getRemoveCaseRolesUrl()).willReturn("http://localhost:8891/case-users");
