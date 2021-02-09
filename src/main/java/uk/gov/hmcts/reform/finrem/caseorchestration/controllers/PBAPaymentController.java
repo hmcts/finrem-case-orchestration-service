@@ -68,7 +68,7 @@ public class PBAPaymentController implements BaseController {
 
         validateCaseData(callbackRequest);
 
-        if (featureToggleService.isAssignCaseAccessEnabled() && featureToggleService.isRespondentJourneyEnabled()) {
+        if (featureToggleService.isAssignCaseAccessEnabled()) {
             try {
                 Map<String, Object> applicantOrgPolicy = (Map<String, Object>) caseDetails.getData().get(ORGANISATION_POLICY_APPLICANT);
 
@@ -77,9 +77,6 @@ public class PBAPaymentController implements BaseController {
 
                     if (applicantOrganisation != null) {
                         OrganisationsResponse prdOrganisation = prdOrganisationService.retrieveOrganisationsData(authToken);
-                        log.info("pbaPayment, prdOrganisation: {}", prdOrganisation);
-
-                        log.info("pbaPayment, applicantOrgPolicy: {}", applicantOrgPolicy);
                         if (prdOrganisation.getOrganisationIdentifier().equals(applicantOrganisation.get(ORGANISATION_POLICY_ORGANISATION_ID))) {
                             log.info("Assigning case access for Case ID: {}", caseDetails.getId());
                             ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
