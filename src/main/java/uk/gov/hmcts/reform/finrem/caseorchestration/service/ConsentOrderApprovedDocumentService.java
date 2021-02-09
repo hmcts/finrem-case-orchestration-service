@@ -52,9 +52,10 @@ public class ConsentOrderApprovedDocumentService {
     private final CaseDataService caseDataService;
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
-        log.info("Generating Approved Consent Order Letter {} from {} for bulk print",
+        log.info("Generating Approved Consent Order Letter {} from {} for bulk print, case: {}",
             documentConfiguration.getApprovedConsentOrderFileName(),
-            documentConfiguration.getApprovedConsentOrderTemplate());
+            documentConfiguration.getApprovedConsentOrderTemplate(),
+            caseDetails.getId());
 
         return genericDocumentService.generateDocument(authToken,
             caseDataService.isContestedApplication(caseDetails)
