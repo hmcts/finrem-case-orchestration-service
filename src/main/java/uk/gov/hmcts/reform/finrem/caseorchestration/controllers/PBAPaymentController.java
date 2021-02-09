@@ -90,10 +90,10 @@ public class PBAPaymentController implements BaseController {
                 log.error("Assigning case access failed for Case ID: {}", caseDetails.getId());
 
                 return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors(ImmutableList.of(e.getMessage()))
+                    .errors(ImmutableList.of("Failed to assign applicant solicitor to case, "
+                        + "please ensure you have selected the correct applicant organisation on case"))
                     .build());
             }
-
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
