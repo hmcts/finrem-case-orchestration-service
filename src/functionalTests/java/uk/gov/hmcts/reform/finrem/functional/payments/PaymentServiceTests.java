@@ -8,8 +8,6 @@ import uk.gov.hmcts.reform.finrem.functional.IntegrationTestBase;
 
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SerenityRunner.class)
@@ -92,13 +90,13 @@ public class PaymentServiceTests extends IntegrationTestBase {
      * 2 minutes.
      *
      * Not working since assign case access added.
-    @Test
-    public void verifyDuplicatePaymentReturnsErrorWithin2MinutesForContested() {
-        String filename = "SuccessPaymentRequestPayload_Contested_Duplicate.json";
-        utils.validatePostSuccess(pbaPayment, filename, contestedDir);
-        assertThat(utils.getResponse(pbaPayment, filename, contestedDir).jsonPath().get("errors[0]"), is("duplicate payment"));
-    }
      */
+    //@Test
+    //public void verifyDuplicatePaymentReturnsErrorWithin2MinutesForContested() {
+    //   String filename = "SuccessPaymentRequestPayload_Contested_Duplicate.json";
+    //    utils.validatePostSuccess(pbaPayment, filename, contestedDir);
+    //    assertThat(utils.getResponse(pbaPayment, filename, contestedDir).jsonPath().get("errors[0]"), is("duplicate payment"));
+    //}
 
     private void validatePaymentConfirmationMessage(String url, String fileName,
                                                     String journeyType, String paymentType) {
