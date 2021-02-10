@@ -172,8 +172,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
-        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
-        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
+        verifyNoInteractions(ccdDataStoreService);
+        verifyNoInteractions(assignCaseAccessService);
     }
 
     @Test
@@ -257,8 +257,9 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists_organisationEmpty() throws Exception {
+        doPBASetUp(true);
         requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/hwf-no-app-org.json").toURI()));
+            .getResource("/fixtures/pba-payment-no-app-org.json").toURI()));
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         mvc.perform(post(PBA_PAYMENT_URL)
@@ -268,7 +269,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(pbaPaymentService, never()).makePayment(anyString(), any());
+        verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
         verifyNoInteractions(ccdDataStoreService);
         verifyNoInteractions(assignCaseAccessService);
     }
@@ -286,7 +287,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(pbaPaymentService, never()).makePayment(anyString(), any());
+        verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
         verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
         verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
