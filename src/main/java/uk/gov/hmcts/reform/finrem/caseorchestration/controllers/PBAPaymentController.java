@@ -68,6 +68,25 @@ public class PBAPaymentController implements BaseController {
 
         validateCaseData(callbackRequest);
 
+        final Map<String, Object> mapOfCaseData = caseDetails.getData();
+        feeLookup(authToken, callbackRequest, mapOfCaseData);
+
+        if (isPBAPayment(mapOfCaseData)) {
+            if (isPBAPaymentReferenceDoesNotExists(mapOfCaseData)) {
+                PaymentResponse paymentResponse = pbaPaymentService.makePayment(authToken, caseDetails);
+                if (!paymentResponse.isPaymentSuccess()) {
+                    return paymentFailure(mapOfCaseData, paymentResponse);
+                }
+                mapOfCaseData.put(PBA_PAYMENT_REFERENCE, paymentResponse.getReference());
+                log.info("Consented Payment Succeeded.");
+            } else {
+                log.info("PBA Payment Reference for Consented case already exists.");
+            }
+        } else {
+            log.info("Not PBA Payment - Moving state to Awaiting HWF Decision");
+            mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
+        }
+
         if (featureToggleService.isAssignCaseAccessEnabled()) {
             try {
                 String applicantOrgId = getApplicantOrgId(caseDetails);
@@ -92,25 +111,6 @@ public class PBAPaymentController implements BaseController {
             } catch (Exception e) {
                 return assignCaseAccessFailure(caseDetails);
             }
-        }
-
-        final Map<String, Object> mapOfCaseData = caseDetails.getData();
-        feeLookup(authToken, callbackRequest, mapOfCaseData);
-
-        if (isPBAPayment(mapOfCaseData)) {
-            if (isPBAPaymentReferenceDoesNotExists(mapOfCaseData)) {
-                PaymentResponse paymentResponse = pbaPaymentService.makePayment(authToken, caseDetails);
-                if (!paymentResponse.isPaymentSuccess()) {
-                    return paymentFailure(mapOfCaseData, paymentResponse);
-                }
-                mapOfCaseData.put(PBA_PAYMENT_REFERENCE, paymentResponse.getReference());
-                log.info("Consented Payment Succeeded.");
-            } else {
-                log.info("PBA Payment Reference for Consented case already exists.");
-            }
-        } else {
-            log.info("Not PBA Payment - Moving state to Awaiting HWF Decision");
-            mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
