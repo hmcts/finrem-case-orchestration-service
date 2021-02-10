@@ -62,7 +62,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService).sendConsentedHWFSuccessfulConfirmationEmail(any());
         verifyNoInteractions(helpWithFeesDocumentService);
-        verifyNoInteractions(paperNotificationService);
     }
 
     @Test

@@ -5,7 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -76,5 +79,39 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         verify(manualPaymentDocumentService).generateManualPaymentLetter(any(), any(), eq(APPLICANT));
         verify(manualPaymentDocumentService).generateManualPaymentLetter(any(), any(), eq(RESPONDENT));
         verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any());
+    }
+
+    @Test
+    public void shouldPrintForApplicantIfNotRepresented() {
+        final String json
+            = "/fixtures/refusal-order-contested.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
+        caseDetails.getData().put("applicantRepresented", "No");
+        caseDetails.getData().remove("applicantSolicitorConsentForEmails");
+        caseDetails.getData().put("paperApplication", "No");
+
+        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
+    }
+
+    @Test
+    public void shouldPrintForApplicantIfRepresentedButNotAgreedToEmail() {
+        final String json
+            = "/fixtures/refusal-order-contested.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
+        caseDetails.getData().put("applicantRepresented", "Yes");
+        caseDetails.getData().put("applicantSolicitorConsentForEmails", "No");
+        caseDetails.getData().put("paperApplication", "No");
+
+        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
+    }
+
+    @Test
+    public void shouldPrintForApplicantIfPaperCase() {
+        final String json
+            = "/fixtures/refusal-order-contested.json";
+        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
+        caseDetails.getData().put("paperApplication", "YES");
+
+        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
     }
 }

@@ -133,40 +133,6 @@ public class BulkPrintServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldPrintForApplicantIfNotRepresented() {
-        final String json
-            = "/fixtures/refusal-order-contested.json";
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
-        caseDetails.getData().put("applicantRepresented", "No");
-        caseDetails.getData().remove("applicantSolicitorConsentForEmails");
-        caseDetails.getData().put("paperApplication", "No");
-
-        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
-    }
-
-    @Test
-    public void shouldPrintForApplicantIfRepresentedButNotAgreedToEmail() {
-        final String json
-            = "/fixtures/refusal-order-contested.json";
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
-        caseDetails.getData().put("applicantRepresented", "Yes");
-        caseDetails.getData().put("applicantSolicitorConsentForEmails", "No");
-        caseDetails.getData().put("paperApplication", "No");
-
-        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
-    }
-
-    @Test
-    public void shouldPrintForApplicantIfPaperCase() {
-        final String json
-            = "/fixtures/refusal-order-contested.json";
-        CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
-        caseDetails.getData().put("paperApplication", "YES");
-
-        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
-    }
-
-    @Test
     public void shouldSaveApplicantDocumentsToConfidentialCollectionWhenAddressIsConfidential() {
         final String consentedBulkPrintConsentOrderNotApprovedJson
             = "/fixtures/contested/bulk_print_consent_order_not_approved.json";
