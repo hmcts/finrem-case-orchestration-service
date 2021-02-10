@@ -81,7 +81,6 @@ public class PBAPaymentController implements BaseController {
                         try {
                             assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
                         } catch (Exception e) {
-                            ccdDataStoreService.addCreatorRole(caseDetails, authToken, prdOrganisation.getOrganisationIdentifier());
                             return assignCaseAccessFailure(caseDetails);
                         }
                     } else {

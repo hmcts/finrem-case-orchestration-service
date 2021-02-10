@@ -289,6 +289,5 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
         verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
         verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
-        verify(ccdDataStoreService, times(1)).addCreatorRole(any(), eq(AUTH_TOKEN), any());
     }
 }
