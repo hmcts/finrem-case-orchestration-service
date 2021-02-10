@@ -8,13 +8,12 @@
     "case_data": {
       "ApplicantOrganisationPolicy": {
         "Organisation": {
-          "OrganisationID": "RG-123456789",
-          "OrganisationName": "Solicitor Org"
+          "OrganisationID": null,
+          "OrganisationName": null
         },
         "OrgPolicyReference": "<org name>",
         "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
       },
-      "PBANumber": "PBA123",
       "d81Question": "No",
       "PBAreference": "ABCD",
       "consentOrder": {
@@ -100,7 +99,7 @@
       "solicitorReference": "LL01",
       "appRespondentFMName": "test",
       "divorceStageReached": "Decree Nisi",
-      "helpWithFeesQuestion": "No",
+      "helpWithFeesQuestion": "Yes",
       "natureOfApplication2": [
         "Lump Sum Order",
         "Periodical Payment Order",
@@ -128,22 +127,7 @@
         "document_binary_url": "http://document-management-store:8080/documents/0ee78bf4-4b0c-433f-a054-f21ce6f99336/binary"
       },
       "orderForChildrenQuestion1": "Yes",
-      "solicitorAgreeToReceiveEmails": "No",
-      "amountToPay": "1000",
-      "orderSummary": {
-        "PaymentReference": "Ref1",
-        "PaymentTotal": "1000",
-        "Fees": [
-          {
-            "value": {
-              "FeeDescription": "desc",
-              "FeeVersion": "v1",
-              "FeeCode": "code1",
-              "FeeAmount": "1000"
-            }
-          }
-        ]
-      }
+      "solicitorAgreeToReceiveEmails": "No"
     }
   }
 }

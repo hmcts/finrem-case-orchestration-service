@@ -56,7 +56,7 @@ public class CcdDataStoreServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void assignCaseAccess() {
+    public void removeCreatorRole() {
         CaseDetails caseDetails = buildCaseDetails();
 
         ccdDataStoreService.removeCreatorRole(caseDetails, AUTH_TOKEN);
