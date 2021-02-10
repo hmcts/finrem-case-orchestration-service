@@ -1,19 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.contracts.rdprofessional;
 
-import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-
-import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
-import java.util.List;
-
 import au.com.dius.pact.consumer.dsl.DslPart;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit.PactProviderRule;
@@ -27,6 +13,19 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.config.PrdOrganisationConfiguration;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
+import java.util.List;
+
+import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 
 @SpringBootTest
 public class PrdOrganisationServiceConsumerContractTest extends BaseTest {
@@ -79,7 +78,7 @@ public class PrdOrganisationServiceConsumerContractTest extends BaseTest {
         assertOrganisationResponse(response);
     }
 
-    private DslPart buildOrganisationResponseDsl(){
+    private DslPart buildOrganisationResponseDsl() {
         return newJsonBody(o -> {
             o.stringType("name", "theKCompany")
                 .stringType("organisationIdentifier", "BJMSDFDS80808")
