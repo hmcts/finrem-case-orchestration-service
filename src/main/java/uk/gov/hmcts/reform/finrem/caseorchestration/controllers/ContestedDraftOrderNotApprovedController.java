@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedDraftOrderNotApprovedService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 
 import javax.validation.constraints.NotNull;
 
@@ -35,9 +37,11 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @Slf4j
 public class ContestedDraftOrderNotApprovedController implements BaseController {
 
-    private final IdamService idamService;
-    private final BulkPrintService bulkPrintService;
     private final ContestedDraftOrderNotApprovedService contestedNotApprovedService;
+    private final BulkPrintService bulkPrintService;
+    private final PaperNotificationService paperNotificationService;
+    private final DocumentHelper documentHelper;
+    private final IdamService idamService;
 
     @PostMapping(path = "/contested-application-not-approved-start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Clears previous entered field values. Serves as a callback from CCD")
@@ -126,14 +130,13 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
         Optional<CaseDocument> refusalReason = contestedNotApprovedService.getLatestRefusalReason(caseDetails);
 
         if (refusalReason.isPresent()) {
-
-            if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
+            if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken,
-                    singletonList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
+                    singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
             }
 
             bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
-                singletonList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
+                singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());

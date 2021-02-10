@@ -13,15 +13,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.HearingOrderDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManualPaymentDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +29,6 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -47,9 +44,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @Autowired private NotificationsController notificationsController;
 
     @MockBean private NotificationService notificationService;
-    @MockBean private ManualPaymentDocumentService manualPaymentDocumentService;
-    @MockBean private BulkPrintService bulkPrintService;
-    @MockBean private AssignedToJudgeDocumentService assignedToJudgeDocumentService;
+    @MockBean private PaperNotificationService paperNotificationService;
     @MockBean private GeneralEmailService generalEmailService;
     @MockBean private HelpWithFeesDocumentService helpWithFeesDocumentService;
     @MockBean private HearingDocumentService hearingDocumentService;
@@ -63,11 +58,11 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isPaperApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        notificationsController.sendHwfSuccessfulConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verify(notificationService).sendConsentedHWFSuccessfulConfirmationEmail(any());
         verifyNoInteractions(helpWithFeesDocumentService);
-        verifyNoInteractions(bulkPrintService);
+        verifyNoInteractions(paperNotificationService);
     }
 
     @Test
@@ -76,7 +71,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isPaperApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
 
-        notificationsController.sendHwfSuccessfulConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
     }
@@ -86,10 +81,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isPaperApplication(any())).thenReturn(true);
 
-        notificationsController.sendHwfSuccessfulConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
-        verify(helpWithFeesDocumentService).generateHwfSuccessfulNotificationLetter(any(CaseDetails.class), any());
-        verify(bulkPrintService).sendDocumentForPrint(any(), any());
+        verify(paperNotificationService).printHwfSuccessfulNotification(any(CaseDetails.class), eq(AUTH_TOKEN));
         verifyNoInteractions(notificationService);
     }
 
@@ -99,11 +93,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isPaperApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verify(notificationService).sendAssignToJudgeConfirmationEmailToApplicantSolicitor(any());
-        verifyNoInteractions(assignedToJudgeDocumentService);
-        verifyNoInteractions(bulkPrintService);
     }
 
     @Test
@@ -111,47 +103,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isPaperApplication(any())).thenReturn(true);
 
-        notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
-    }
-
-    @Test
-    public void sendAssignToJudgeNotificationLetterIfIsPaperApplication() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(caseDataService.isPaperApplication(any())).thenReturn(true);
-
-        notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), any());
-        verify(bulkPrintService).sendDocumentForPrint(any(), any());
-        verifyNoInteractions(notificationService);
-    }
-
-    @Test
-    public void shouldNotSendApplicantConsentInContestedAssignToJudgeConfirmationEmail() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(bulkPrintService.shouldPrintForApplicant(any(CaseDetails.class))).thenReturn(false);
-
-        notificationsController.sendConsentInContestedAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(assignedToJudgeDocumentService, never()).generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(
-            any(CaseDetails.class), any());
-        verify(assignedToJudgeDocumentService).generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(
-            any(CaseDetails.class), any());
-        verify(bulkPrintService).sendDocumentForPrint(any(), any());
-    }
-
-    @Test
-    public void sendConsentInContestedAssignToJudgeNotificationLetterIfShouldSend() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        when(bulkPrintService.shouldPrintForApplicant(any(CaseDetails.class))).thenReturn(true);
-
-        notificationsController.sendConsentInContestedAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(assignedToJudgeDocumentService).generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(any(), any());
-        verify(assignedToJudgeDocumentService).generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(any(), any());
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any());
     }
 
     @Test
@@ -239,7 +193,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
 
-        notificationsController.sendHwfSuccessfulConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verify(notificationService).sendContestedHwfSuccessfulConfirmationEmail(any());
     }
@@ -249,7 +203,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
 
-        notificationsController.sendHwfSuccessfulConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendHwfSuccessfulConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verifyNoInteractions(notificationService);
     }
@@ -698,7 +652,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
-        notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verify(notificationService).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
 
@@ -711,7 +665,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
 
-        notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
     }
@@ -721,7 +675,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
 
-        notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
     }
@@ -731,7 +685,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
         when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
 
-        notificationsController.sendAssignToJudgeConfirmationEmail(AUTH_TOKEN, buildCallbackRequest());
+        notificationsController.sendAssignToJudgeConfirmationNotification(AUTH_TOKEN, buildCallbackRequest());
 
         verify(notificationService, never()).sendAssignToJudgeConfirmationEmailToRespondentSolicitor(any());
     }
@@ -804,18 +758,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService, never()).sendContestedConsentOrderNotApprovedEmailApplicantSolicitor(any());
         verify(notificationService, never()).sendContestedConsentOrderNotApprovedEmailRespondentSolicitor(any());
-    }
-
-    @Test
-    public void sendContestedManualPaymentLetters() {
-        when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(caseDataService.isPaperApplication(any())).thenReturn(true);
-
-        notificationsController.sendManualPayment(AUTH_TOKEN, buildCallbackRequest());
-
-        verify(manualPaymentDocumentService).generateApplicantManualPaymentLetter(any(), any());
-        verify(bulkPrintService).sendDocumentForPrint(any(), any());
-        verifyNoInteractions(notificationService);
     }
 
     @Test

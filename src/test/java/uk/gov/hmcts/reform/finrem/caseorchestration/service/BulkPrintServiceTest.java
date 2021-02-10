@@ -20,7 +20,6 @@ import java.util.UUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -43,17 +42,16 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
     @MockBean private GenerateCoverSheetService coverSheetService;
     @MockBean private GenericDocumentService genericDocumentService;
+    @MockBean private PaperNotificationService paperNotificationService;
 
+    private final CaseDocument caseDocument = TestSetUpUtils.caseDocument();
     private UUID letterId;
     private ArgumentCaptor<BulkPrintRequest> bulkPrintRequestArgumentCaptor;
-    private CaseDocument caseDocument = TestSetUpUtils.caseDocument();
-    private BulkPrintDocument bulkPrintDocument;
 
     @Before
     public void setUp() {
         letterId = UUID.randomUUID();
         bulkPrintRequestArgumentCaptor = ArgumentCaptor.forClass(BulkPrintRequest.class);
-        bulkPrintDocument = documentHelper.getCaseDocumentAsBulkPrintDocument(caseDocument);
         when(genericDocumentService.bulkPrint(any())).thenReturn(letterId);
     }
 
@@ -64,7 +62,6 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         assertThat(bulkPrintLetterId, is(letterId));
     }
-
 
     @Test
     public void whenPrintingDocument_thenDocumentIsSentToPrinting() {
@@ -88,8 +85,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         assertThat(uuid, is(letterId));
 
-        verify(coverSheetService, times(1)).generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
-        verify(genericDocumentService, times(1)).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
+        verify(coverSheetService).generateApplicantCoverSheet(caseDetails, AUTH_TOKEN);
+        verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
 
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
@@ -111,8 +108,8 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
         assertThat(uuid, is(letterId));
 
-        verify(coverSheetService, times(1)).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
-        verify(genericDocumentService, times(1)).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
+        verify(coverSheetService).generateRespondentCoverSheet(caseDetails, AUTH_TOKEN);
+        verify(genericDocumentService).bulkPrint(bulkPrintRequestArgumentCaptor.capture());
 
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getBulkPrintDocuments().containsAll(bulkPrintDocuments), is(true));
         assertThat(bulkPrintRequestArgumentCaptor.getValue().getLetterType(), is(FINANCIAL_REMEDY_PACK_LETTER_TYPE));
@@ -122,7 +119,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldConvertCaseDocumentToBulkPrintDocument() {
-        BulkPrintDocument bulkPrintDoc = bulkPrintService.getBulkPrintDocumentFromCaseDocument(caseDocument());
+        BulkPrintDocument bulkPrintDoc = documentHelper.getBulkPrintDocumentFromCaseDocument(caseDocument());
         assertThat(bulkPrintDoc.getBinaryFileUrl(), is(BINARY_URL));
     }
 
@@ -132,7 +129,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
             = "/fixtures/refusal-order-contested.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
 
-        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails), is(false));
+        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(false));
     }
 
     @Test
@@ -144,7 +141,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         caseDetails.getData().remove("applicantSolicitorConsentForEmails");
         caseDetails.getData().put("paperApplication", "No");
 
-        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails), is(true));
+        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
     }
 
     @Test
@@ -156,7 +153,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         caseDetails.getData().put("applicantSolicitorConsentForEmails", "No");
         caseDetails.getData().put("paperApplication", "No");
 
-        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails), is(true));
+        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
     }
 
     @Test
@@ -166,7 +163,7 @@ public class BulkPrintServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
         caseDetails.getData().put("paperApplication", "YES");
 
-        assertThat(bulkPrintService.shouldPrintForApplicant(caseDetails), is(true));
+        assertThat(paperNotificationService.shouldPrintForApplicant(caseDetails), is(true));
     }
 
     @Test

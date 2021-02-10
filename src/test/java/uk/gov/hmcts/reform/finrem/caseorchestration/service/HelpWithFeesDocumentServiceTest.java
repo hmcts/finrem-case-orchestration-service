@@ -16,7 +16,6 @@ import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -26,6 +25,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.document;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
@@ -54,11 +54,11 @@ public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
 
         when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
 
-        CaseDocument generatedHwfSuccessfulNotificationLetter
-            = helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(caseDetails, AUTH_TOKEN);
+        CaseDocument generatedHwfSuccessfulNotificationLetter = helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(
+            caseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generatedHwfSuccessfulNotificationLetter);
-        verify(documentClientMock, times(1)).generatePdf(any(), anyString());
+        verify(documentClientMock).generatePdf(any(), anyString());
     }
 
     @Test
@@ -80,8 +80,8 @@ public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
         caseData.put(SOLICITOR_REFERENCE, TEST_SOLICITOR_REFERENCE);
         caseData.put(CONSENTED_SOLICITOR_ADDRESS, solicitorAddress);
 
-        CaseDocument generatedHwfSuccessfulNotificationLetter
-            = helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(caseDetails, AUTH_TOKEN);
+        CaseDocument generatedHwfSuccessfulNotificationLetter = helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(
+            caseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generatedHwfSuccessfulNotificationLetter);
     }

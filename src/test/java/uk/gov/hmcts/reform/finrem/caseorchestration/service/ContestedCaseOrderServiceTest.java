@@ -48,10 +48,11 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
     @Autowired private ContestedCaseOrderService contestedCaseOrderService;
 
+    @MockBean private GenericDocumentService genericDocumentService;
     @MockBean private BulkPrintService bulkPrintService;
+    @MockBean private PaperNotificationService paperNotificationService;
     @MockBean private DocumentHelper documentHelper;
     @MockBean private CaseDataService caseDataService;
-    @MockBean private GenericDocumentService genericDocumentService;
 
     @Captor
     private ArgumentCaptor<List<BulkPrintDocument>> bulkPrintArgumentCaptor;
@@ -70,7 +71,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     @Test
     public void whenPrintAndMailGeneralOrderTriggered_thenBothApplicantAndRespondentPacksArePrinted() {
         CaseDetails caseDetails = generalOrderContestedCaseDetails();
-        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(new CaseDocument());
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
@@ -82,7 +83,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     @Test
     public void givenShouldNotPrintPackForApplicant_whenPrintAndMailGeneralOrderTriggered_thenOnlyRespondentPacksIsPrinted() {
         CaseDetails caseDetails = generalOrderContestedCaseDetails();
-        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(false);
+        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(false);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(new CaseDocument());
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
@@ -94,7 +95,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     @Test
     public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
         mockDocumentHelperToReturnDefaultExpectedDocuments();
 
@@ -112,7 +113,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     @Test
     public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase_noNextHearing() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(false);
 
         contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
@@ -139,7 +140,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
         when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(documentHelper.getDocumentLinkAsBulkPrintDocument(any(), eq(LATEST_DRAFT_HEARING_ORDER))).thenReturn(Optional.empty());
-        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
 
         contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
 
@@ -155,7 +156,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     public void latestDraftedHearingOrderDocumentIsNotAddedToPack_noNextHearing() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(false);
-        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
 
         contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
 
@@ -170,7 +171,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     @Test
     public void latestAdditionalHearingDocumentIsNotAddedToPack() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
-        when(bulkPrintService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(documentHelper.getLatestAdditionalHearingDocument(any())).thenReturn(Optional.empty());
