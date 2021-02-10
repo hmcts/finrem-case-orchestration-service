@@ -13,9 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
 
 import java.io.IOException;
@@ -31,8 +29,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class PaymentConfirmationController implements BaseController {
 
     private final PaymentConfirmationService paymentConfirmationService;
-    private final AssignCaseAccessService assignCaseAccessService;
-    private final CcdDataStoreService ccdDataStoreService;
     private final CaseDataService caseDataService;
 
     @SuppressWarnings("unchecked")
@@ -46,10 +42,6 @@ public class PaymentConfirmationController implements BaseController {
         log.info("Received request for PBA confirmation for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callbackRequest);
-
-        log.info("Assigning case access for Case ID: {}", caseDetails.getId());
-        ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
-        assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
 
         return ResponseEntity.ok(SubmittedCallbackResponse.builder()
             .confirmationBody(confirmationBody(caseDetails))

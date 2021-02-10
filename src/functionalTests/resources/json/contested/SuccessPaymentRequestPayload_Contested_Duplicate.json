@@ -8,6 +8,14 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
     "case_data": {
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVA",
+          "OrganisationName": "FRApplicantSolicitorFirm"
+        },
+        "OrgPolicyReference": "FRApplicant",
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
       "ignore_warning": false,
       "event_data": {
         "applicantRepresented": "Yes",

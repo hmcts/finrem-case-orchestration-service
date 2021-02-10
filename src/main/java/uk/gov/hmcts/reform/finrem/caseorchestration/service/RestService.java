@@ -58,9 +58,8 @@ public class RestService {
             return response.getBody();
         } catch (Exception e) {
             log.error(e.getMessage());
+            throw e;
         }
-
-        return null;
     }
 
     private HttpEntity<Object> buildAuthRequestWithBody(String userAuthToken, Object body) {

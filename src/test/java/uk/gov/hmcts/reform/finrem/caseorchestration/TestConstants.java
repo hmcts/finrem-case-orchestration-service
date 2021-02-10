@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration;
 public class TestConstants {
     public static final String TEST_CASE_ID = "test.case.id";
     public static final String TEST_USER_ID = "test.user.id";
+    public static final String TEST_ORG_ID = "test.org.id";
     public static final String TEST_CASE_ROLE = "[ROLE]";
     public static final String TEST_DIVORCE_CASE_NUMBER = "DD12D12345";
     public static final String TEST_SERVICE_TOKEN = "testServiceToken";
