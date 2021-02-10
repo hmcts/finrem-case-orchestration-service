@@ -33,6 +33,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     public void sendAssignToJudgeNotificationLetterIfIsPaperApplication() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
 
         paperNotificationService.printAssignToJudgeNotification(buildCaseDetails(), AUTH_TOKEN);
 
@@ -46,6 +47,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
 
         paperNotificationService.printConsentInContestedAssignToJudgeConfirmationNotification(buildCaseDetails(), AUTH_TOKEN);
 
@@ -60,6 +62,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
     public void sendConsentInContestedAssignToJudgeNotificationLetterIfShouldSend() {
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
 
         paperNotificationService.printConsentInContestedAssignToJudgeConfirmationNotification(buildCaseDetails(), AUTH_TOKEN);
 
@@ -73,6 +76,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
         when(caseDataService.isContestedApplication(any())).thenReturn(true);
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(caseDataService.isPaperApplication(any())).thenReturn(true);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
 
         paperNotificationService.printManualPaymentNotification(buildCaseDetails(), AUTH_TOKEN);
 

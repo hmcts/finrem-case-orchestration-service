@@ -86,9 +86,11 @@ public class PaperNotificationService {
 
         log.info("Sending respondent Consent in Contested AssignedToJudge notification letter for bulk print for Case ID: {}", caseDetails.getId());
 
-        CaseDocument respondentAssignedToJudgeNotificationLetter =
-            assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken, RESPONDENT);
-        bulkPrintService.sendDocumentForPrint(respondentAssignedToJudgeNotificationLetter, caseDetails);
+        if (shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
+            CaseDocument respondentAssignedToJudgeNotificationLetter =
+                assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken, RESPONDENT);
+            bulkPrintService.sendDocumentForPrint(respondentAssignedToJudgeNotificationLetter, caseDetails);
+        }
     }
 
     public void printManualPaymentNotification(CaseDetails caseDetails, String authToken) {
@@ -97,7 +99,7 @@ public class PaperNotificationService {
             bulkPrintService.sendDocumentForPrint(applicantManualPaymentLetter, caseDetails);
         }
 
-        if (caseDataService.isContestedApplication(caseDetails)) {
+        if (shouldPrintNotificationForRespondentSolicitor(caseDetails) && caseDataService.isContestedApplication(caseDetails)) {
             CaseDocument respondentManualPaymentLetter = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken, RESPONDENT);
             bulkPrintService.sendDocumentForPrint(respondentManualPaymentLetter, caseDetails);
         }
@@ -110,6 +112,7 @@ public class PaperNotificationService {
     }
 
     private boolean shouldPrintNotificationForRespondentSolicitor(CaseDetails caseDetails) {
-        return !YES_VALUE.equalsIgnoreCase(nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
+        return caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
+            && !YES_VALUE.equalsIgnoreCase(nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
     }
 }
