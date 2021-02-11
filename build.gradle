@@ -383,3 +383,23 @@ task contractTest(type: Test) {
     systemProperty 'pact.rootDir', "pacts"
 }
 
+project.ext {
+    pactVersion = getCheckedOutGitCommitHash()
+}
+
+task runAndPublishConsumerPactTests(type: Test){
+    logger.lifecycle("Runs pact Tests")
+    testClassesDirs = sourceSets.contract.output.classesDirs
+    classpath = sourceSets.contract.runtimeClasspath
+
+}
+
+runAndPublishConsumerPactTests.dependsOn contractTest
+
+runAndPublishConsumerPactTests.finalizedBy pactPublish
+
+def getCheckedOutGitCommitHash() {
+    'git rev-parse --verify --short HEAD'.execute().text.trim()
+}
+
+
