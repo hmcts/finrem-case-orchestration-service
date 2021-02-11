@@ -100,17 +100,26 @@ public class PBAPaymentController implements BaseController {
                         try {
                             assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
                         } catch (Exception e) {
+                            log.error("Assigning case access threw exception for Case ID: {}, {}",
+                                caseDetails.getId(), e.getMessage());
                             return assignCaseAccessFailure(caseDetails);
                         }
                     } else {
+                        log.info("Applicant solicitor does not belong to chosen applicant "
+                            + "organisation for Case ID: {}", caseDetails.getId());
                         return assignCaseAccessFailure(caseDetails);
                     }
                 } else {
+                    log.info("Applicant organisation not selected for Case ID: {}", caseDetails.getId());
                     return assignCaseAccessFailure(caseDetails);
                 }
             } catch (Exception e) {
+                log.error("Exception when trying to assign case access for Case ID: {}, {}",
+                    caseDetails.getId(), e.getMessage());
                 return assignCaseAccessFailure(caseDetails);
             }
+        } else {
+            log.info("Assign case info not enabled, Case ID: {}", caseDetails.getId());
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
@@ -130,7 +139,7 @@ public class PBAPaymentController implements BaseController {
     }
 
     private ResponseEntity<AboutToStartOrSubmitCallbackResponse> assignCaseAccessFailure(CaseDetails caseDetails) {
-        log.error("Assigning case access failed for Case ID: {}", caseDetails.getId());
+        log.info("Assigning case access failed for Case ID: {}", caseDetails.getId());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .errors(ImmutableList.of("Failed to assign applicant solicitor to case, "
