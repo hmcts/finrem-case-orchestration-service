@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.RESPONDENT_JOURNEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
 
@@ -42,6 +43,13 @@ public class FeatureToggleService {
         return Optional.ofNullable(toggle.get(feature.getName()))
             .map(Boolean::parseBoolean)
             .orElse(false);
+    }
+
+    /*
+     * Defaulted to true. Only to be set to false in Preview as ACA API is not deployed there
+     */
+    public boolean isAssignCaseAccessEnabled() {
+        return isFeatureEnabled(ASSIGN_CASE_ACCESS);
     }
 
     public boolean isRespondentJourneyEnabled() {

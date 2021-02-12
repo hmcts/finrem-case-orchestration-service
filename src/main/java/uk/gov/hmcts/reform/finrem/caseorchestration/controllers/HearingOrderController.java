@@ -17,7 +17,9 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import javax.validation.constraints.NotNull;
 
@@ -26,6 +28,9 @@ import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DRAFT_DIRECTION_DETAILS_COLLECTION_RO;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_DIRECTION_ORDER;
@@ -37,7 +42,27 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class HearingOrderController implements BaseController {
 
     private final HearingOrderService hearingOrderService;
+    private final ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
+    private final IdamService idamService;
     private final CaseDataService caseDataService;
+
+    @PostMapping(path = "/hearing-order/start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Cleans data before event that stores hearing order")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> startHearingOrder(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("Received request to start event storing hearing order for case: {}", caseDetails.getId());
+
+        prepareFieldsForOrderApprovedCoverLetter(caseDetails, authorisationToken);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+    }
 
     @PostMapping(path = "/hearing-order/store", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles conversion of hearing order if required and storage")
@@ -56,6 +81,7 @@ public class HearingOrderController implements BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, authorisationToken);
+        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
         caseDataService.moveCollection(caseData, DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
@@ -69,9 +95,12 @@ public class HearingOrderController implements BaseController {
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> startHearingOrderApproval(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
         CaseDetails caseDetails = callback.getCaseDetails();
         validateCaseData(callback);
+
+        prepareFieldsForOrderApprovedCoverLetter(caseDetails, authorisationToken);
 
         Map<String, Object> caseData = caseDetails.getData();
         Optional<DraftDirectionOrder> draftDirectionOrderCollectionTail = hearingOrderService.draftDirectionOrderCollectionTail(caseDetails);
@@ -100,6 +129,7 @@ public class HearingOrderController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, authorisationToken);
+        contestedOrderApprovedLetterService.generateAndStoreContestedOrderApprovedLetter(caseDetails, authorisationToken);
         caseDataService.moveCollection(caseData, DRAFT_DIRECTION_DETAILS_COLLECTION, DRAFT_DIRECTION_DETAILS_COLLECTION_RO);
 
         if (hearingOrderService.latestDraftDirectionOrderOverridesSolicitorCollection(caseDetails)) {
@@ -109,5 +139,12 @@ public class HearingOrderController implements BaseController {
         caseData.remove(LATEST_DRAFT_DIRECTION_ORDER);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    private void prepareFieldsForOrderApprovedCoverLetter(CaseDetails caseDetails, String authorisationToken) {
+        Map<String, Object> caseData = caseDetails.getData();
+        caseData.remove(CONTESTED_ORDER_APPROVED_JUDGE_TYPE);
+        caseData.put(CONTESTED_ORDER_APPROVED_JUDGE_NAME, idamService.getIdamFullName(authorisationToken));
+        caseData.remove(CONTESTED_ORDER_APPROVED_DATE);
     }
 }
