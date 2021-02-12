@@ -401,6 +401,30 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_TRIAL_BUNDLE_COLLECTION = "respTrialBundleCollection";
     public static final String RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION = "respConfidentialDocsCollection";
 
+    //Contested Case New Documents collections
+    public static final String APP_HEARING_BUNDLES_COLLECTION = "applicantHearingBundlesCollection";
+    public static final String APP_FORM_E_EXHIBITS_COLLECTION = "applicantFormEExhibitsCollection";
+    public static final String APP_CHRONOLOGIES_STATEMENTS_COLLECTION = "applicantChronologiesStatementsCollection";
+    public static final String APP_QUESTIONNAIRES_ANSWERS_COLLECTION = "applicantQuestionnairesAnswersCollection";
+    public static final String APP_STATEMENTS_EXHIBITS_COLLECTION = "applicantStatementsExhibitsCollection";
+    public static final String APP_CASE_SUMMARIES_COLLECTION = "applicantCaseSummariesCollection";
+    public static final String APP_FORMS_H_COLLECTION = "applicantFormsHCollection";
+    public static final String APP_EXPERT_EVIDENCE_COLLECTION = "applicantExpertEvidenceCollection";
+    public static final String APP_CORRESPONDENCE_COLLECTION = "applicantCorrespondenceCollection";
+    public static final String APP_OTHER_COLLECTION = "applicantOtherCollection";
+    public static final String RESP_HEARING_BUNDLES_COLLECTION = "respondentHearingBundlesCollection";
+    public static final String RESP_FORM_E_EXHIBITS_COLLECTION = "respondentFormEExhibitsCollection";
+    public static final String RESP_CHRONOLOGIES_STATEMENTS_COLLECTION = "respondentChronologiesStatementsCollection";
+    public static final String RESP_QUESTIONNAIRES_ANSWERS_COLLECTION = "respondentQuestionnairesAnswersCollection";
+    public static final String RESP_STATEMENTS_EXHIBITS_COLLECTION = "respondentStatementsExhibitsCollection";
+    public static final String RESP_CASE_SUMMARIES_COLLECTION = "respondentCaseSummariesCollection";
+    public static final String RESP_FORM_H_COLLECTION = "respondentFormsHCollection";
+    public static final String RESP_EXPERT_EVIDENCE_COLLECTION = "respondentExpertEvidenceCollection";
+    public static final String RESP_CORRESPONDENCE_COLLECTION = "respondentCorrespondenceCollection";
+    public static final String RESP_OTHER_COLLECTION = "respondentOtherCollection";
+
+
+
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
 
     //organisation policy

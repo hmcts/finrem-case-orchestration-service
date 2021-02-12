@@ -67,7 +67,7 @@ public class FeatureToggleService {
         Map<Class, List<String>> ignoredFields = Maps.newHashMap();
 
         if (!isRespondentJourneyEnabled()) {
-            ignoredFields.put(ContestedUploadedDocument.class, Arrays.asList("caseDocumentConfidential"));
+            ignoredFields.put(ContestedUploadedDocument.class, Arrays.asList("caseDocumentConfidential", "hearingDetails"));
         }
 
         return ignoredFields;

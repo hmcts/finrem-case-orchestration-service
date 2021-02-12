@@ -27,4 +27,7 @@ public class ContestedUploadedDocument {
 
     @JsonProperty("caseDocumentOther")
     private String caseDocumentOther;
+
+    @JsonProperty("hearingDetails")
+    private String hearingDetails;
 }
