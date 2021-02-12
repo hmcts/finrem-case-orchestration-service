@@ -18,6 +18,7 @@ import java.util.Optional;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.isNull;
 import static org.springframework.util.ObjectUtils.isEmpty;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_ORDER_APPROVED_COVER_LETTER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_ORDER_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_OTHER_COLLECTION;
@@ -52,18 +53,19 @@ public class ContestedCaseOrderService {
             List<BulkPrintDocument> hearingDocumentPack = createHearingDocumentPack(caseData);
 
             if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
-                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, hearingDocumentPack);
                 log.info("Received request to send hearing pack for applicant for case {}:", caseDetails.getId());
+                bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, hearingDocumentPack);
             }
 
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, hearingDocumentPack);
             log.info("Received request to send hearing pack for respondent for case {}:", caseDetails.getId());
+            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, hearingDocumentPack);
         }
     }
 
     private List<BulkPrintDocument> createHearingDocumentPack(Map<String, Object> caseData) {
         List<BulkPrintDocument> hearingDocumentPack = new ArrayList<>();
 
+        documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, CONTESTED_ORDER_APPROVED_COVER_LETTER).ifPresent(hearingDocumentPack::add);
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, LATEST_DRAFT_HEARING_ORDER).ifPresent(hearingDocumentPack::add);
 
         if (documentHelper.hasAnotherHearing(caseData)) {

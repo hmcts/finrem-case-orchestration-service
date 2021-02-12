@@ -219,7 +219,7 @@ public class CCDConfigConstant {
     public static final String APPLICANT_SOLICITOR = "applicantSolicitor";
     public static final String RESPONDENT_SOLICITOR = "respondentSolicitor";
 
-    //Refusal Order / Application Not Approved (Contested)
+    // Refusal Order / Application Not Approved (Contested)
     public static final String CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL = "judgeNotApprovedReasons";
     public static final String CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT = "refusalOrderPreviewDocument";
     public static final String CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION = "refusalOrderCollection";
@@ -227,6 +227,12 @@ public class CCDConfigConstant {
     public static final String CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME = "refusalOrderJudgeName";
     public static final String CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE = "refusalOrderJudgeType";
     public static final String CONTESTED_APPLICATION_NOT_APPROVED_DATE = "refusalOrderDate";
+
+    // Application Approved (Contested)
+    public static final String CONTESTED_ORDER_APPROVED_JUDGE_TYPE = "orderApprovedJudgeType";
+    public static final String CONTESTED_ORDER_APPROVED_JUDGE_NAME = "orderApprovedJudgeName";
+    public static final String CONTESTED_ORDER_APPROVED_DATE = "orderApprovedDate";
+    public static final String CONTESTED_ORDER_APPROVED_COVER_LETTER = "orderApprovedCoverLetter";
 
     //Application Type related
     public static final String CONSENT_D81_QUESTION = "consentD81Question";

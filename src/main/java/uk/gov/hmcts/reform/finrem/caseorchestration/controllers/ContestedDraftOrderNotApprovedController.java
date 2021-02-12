@@ -30,6 +30,10 @@ import java.util.Optional;
 import static java.util.Collections.singletonList;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT;
 
 @RestController
 @RequestMapping(value = "/case-orchestration")
@@ -60,11 +64,11 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
         validateCaseData(callback);
 
         Map<String, Object> caseData = caseDetails.getData();
-        caseData.put("refusalOrderJudgeType", null);
-        caseData.put("refusalOrderDate", null);
-        caseData.put("refusalOrderPreviewDocument", null);
+        caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE, null);
+        caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_DATE, null);
+        caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT, null);
 
-        caseData.put("refusalOrderJudgeName", idamService.getIdamFullName(authorisationToken));
+        caseData.put(CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME, idamService.getIdamFullName(authorisationToken));
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
