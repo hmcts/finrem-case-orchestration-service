@@ -42,6 +42,7 @@ public class RestServiceTest extends BaseServiceTest {
     @Captor private ArgumentCaptor<HttpEntity> authRequestCaptor;
 
     private AssignCaseAccessRequest body;
+    private ResponseEntity<Map> mockResponse;
 
     @Before
     public void setUp() {
@@ -53,10 +54,14 @@ public class RestServiceTest extends BaseServiceTest {
             .case_type_id(CASE_TYPE_ID_CONTESTED)
             .assignee_id(TEST_USER_ID)
             .build();
+
+        mockResponse = ResponseEntity.accepted().build();
     }
 
     @Test
     public void restApiPostCall() {
+        when(restTemplate.exchange(any(), eq(HttpMethod.POST), any(), eq(Map.class))).thenReturn(mockResponse);
+
         restService.restApiPostCall(AUTH_TOKEN, TEST_URL, body);
 
         assertRestApiCall(HttpMethod.POST);
@@ -64,8 +69,17 @@ public class RestServiceTest extends BaseServiceTest {
         Assert.assertEquals(authRequestCaptor.getValue().getBody(), body);
     }
 
+    @Test(expected = NullPointerException.class)
+    public void restApiPostCall_exception() {
+        when(restTemplate.exchange(any(), eq(HttpMethod.POST), any(), eq(Map.class))).thenThrow(NullPointerException.class);
+
+        restService.restApiPostCall(AUTH_TOKEN, TEST_URL, body);
+    }
+
     @Test
     public void restApiDeleteCall() {
+        when(restTemplate.exchange(any(), eq(HttpMethod.DELETE), any(), eq(Map.class))).thenReturn(mockResponse);
+
         restService.restApiDeleteCall(AUTH_TOKEN, TEST_URL, body);
 
         assertRestApiCall(HttpMethod.DELETE);
@@ -73,10 +87,15 @@ public class RestServiceTest extends BaseServiceTest {
         Assert.assertEquals(authRequestCaptor.getValue().getBody(), body);
     }
 
+    @Test(expected = NullPointerException.class)
+    public void restApiDeleteCall_exception() {
+        when(restTemplate.exchange(any(), eq(HttpMethod.DELETE), any(), eq(Map.class))).thenThrow(NullPointerException.class);
+
+        restService.restApiDeleteCall(AUTH_TOKEN, TEST_URL, body);
+    }
+
     @Test
     public void restApiGetCall() {
-        ResponseEntity<Map> mockResponse = ResponseEntity.accepted().build();
-
         when(restTemplate.exchange(any(), eq(HttpMethod.GET), any(), eq(Map.class))).thenReturn(mockResponse);
 
         Map response = restService.restApiGetCall(AUTH_TOKEN, TEST_URL);
@@ -86,6 +105,13 @@ public class RestServiceTest extends BaseServiceTest {
         assertRestApiCall(HttpMethod.GET);
 
         Assert.assertNull(authRequestCaptor.getValue().getBody());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void restApiGetCall_exception() {
+        when(restTemplate.exchange(any(), eq(HttpMethod.GET), any(), eq(Map.class))).thenThrow(NullPointerException.class);
+
+        restService.restApiGetCall(AUTH_TOKEN, TEST_URL);
     }
 
     private void assertRestApiCall(HttpMethod httpMethod) {
