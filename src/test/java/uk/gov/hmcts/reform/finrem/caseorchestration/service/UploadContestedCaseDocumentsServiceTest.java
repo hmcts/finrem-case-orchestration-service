@@ -140,7 +140,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
     @Test
     public void applicantConfidentialDocumentsFiltered() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "applicant", "yes", "Other Example", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
@@ -212,7 +212,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
     @Test
     public void respondentConfidentialDocumentsFiltered() {
-        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
         uploadDocumentList.add(createContestedUploadDocumentItem("Other", "respondent", "yes", "Other Example", null));
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
