@@ -171,7 +171,7 @@ public class UploadContestedCaseDocumentsService {
 
     private boolean isTypeValidForStatementsExhibits(String caseDocumentType) {
         return caseDocumentType.equals("Statement/Affidavit")
-            || caseDocumentType.equals("Witness statement/Affidavit");
+            || caseDocumentType.equals("Witness Statement/Affidavit");
     }
 
     private boolean isTypeValidForCaseSummaries(String caseDocumentType) {
