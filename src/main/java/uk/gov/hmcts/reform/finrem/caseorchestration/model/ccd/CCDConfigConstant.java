@@ -426,7 +426,7 @@ public class CCDConfigConstant {
     public static final String RESP_CASE_SUMMARIES_COLLECTION = "respCaseSummariesCollection";
     public static final String RESP_FORM_H_COLLECTION = "respFormsHCollection";
     public static final String RESP_EXPERT_EVIDENCE_COLLECTION = "respExpertEvidenceCollection";
-    public static final String RESP_CORRESPONDENCE_COLLECTION = "respCorrespondenceCollection";
+    public static final String RESP_CORRESPONDENCE_COLLECTION = "respCorrespondenceDocsColl";
     public static final String RESP_OTHER_COLLECTION = "respOtherCollection";
 
 
