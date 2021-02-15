@@ -536,6 +536,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
         assertNull(getDocumentCollection(caseData, RESP_CORRESPONDENCE_COLLECTION));
         assertNull(getDocumentCollection(caseData, RESP_OTHER_COLLECTION));
     }
+
     @Test
     public void applicantAndRespondentConfidentialDocumentsAreNotStoredWhenToggleOff() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(false);
