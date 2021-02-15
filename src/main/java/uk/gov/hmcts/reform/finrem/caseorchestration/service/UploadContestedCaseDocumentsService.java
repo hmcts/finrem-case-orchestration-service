@@ -155,7 +155,7 @@ public class UploadContestedCaseDocumentsService {
     }
 
     private boolean isTypeValidForFormEExhibits(String caseDocumentType) {
-        return caseDocumentType.equals("Form E & Exhibits");
+        return caseDocumentType.equals("Applicant - Form E");
     }
 
     private boolean isTypeValidForChronologiesStatements(String caseDocumentType) {
@@ -170,8 +170,8 @@ public class UploadContestedCaseDocumentsService {
     }
 
     private boolean isTypeValidForStatementsExhibits(String caseDocumentType) {
-        return caseDocumentType.equals("Statement / Affidavit")
-            || caseDocumentType.equals("Witness statement / Affidavit");
+        return caseDocumentType.equals("Statement/Affidavit")
+            || caseDocumentType.equals("Witness statement/Affidavit");
     }
 
     private boolean isTypeValidForCaseSummaries(String caseDocumentType) {
@@ -191,11 +191,11 @@ public class UploadContestedCaseDocumentsService {
 
     private boolean isTypeValidForCorrespondenceDocs(String caseDocumentType) {
         return caseDocumentType.equals("Offers")
-            || caseDocumentType.equals("Correspondence");
+            || caseDocumentType.equals("Letter from Applicant");
     }
 
     private boolean isTypeValidForOtherDocs(String caseDocumentType) {
-        return caseDocumentType.equals("Other")
+        return caseDocumentType.equals("other")
             || caseDocumentType.equals("Form B")
             || caseDocumentType.equals("Form F")
             || caseDocumentType.equals("Care Plan")
