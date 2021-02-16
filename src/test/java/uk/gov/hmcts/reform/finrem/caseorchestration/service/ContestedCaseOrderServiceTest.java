@@ -70,11 +70,11 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void whenPrintAndMailGeneralOrderTriggered_thenBothApplicantAndRespondentPacksArePrinted() {
-        CaseDetails caseDetails = generalOrderContestedCaseDetails();
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(new CaseDocument());
 
+        CaseDetails caseDetails = generalOrderContestedCaseDetails();
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService).printApplicantDocuments(any(), any(), any());
@@ -83,11 +83,11 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void givenShouldNotPrintPackForApplicant_whenPrintAndMailGeneralOrderTriggered_thenOnlyRespondentPacksIsPrinted() {
-        CaseDetails caseDetails = generalOrderContestedCaseDetails();
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(false);
         when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(new CaseDocument());
 
+        CaseDetails caseDetails = generalOrderContestedCaseDetails();
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
 
         verify(bulkPrintService, never()).printApplicantDocuments(any(), any(), any());
