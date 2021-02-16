@@ -72,6 +72,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     public void whenPrintAndMailGeneralOrderTriggered_thenBothApplicantAndRespondentPacksArePrinted() {
         CaseDetails caseDetails = generalOrderContestedCaseDetails();
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(new CaseDocument());
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
@@ -84,6 +85,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     public void givenShouldNotPrintPackForApplicant_whenPrintAndMailGeneralOrderTriggered_thenOnlyRespondentPacksIsPrinted() {
         CaseDetails caseDetails = generalOrderContestedCaseDetails();
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(false);
+        when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
         when(documentHelper.convertToCaseDocument(any())).thenReturn(new CaseDocument());
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, AUTH_TOKEN);
@@ -96,6 +98,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(true);
         mockDocumentHelperToReturnDefaultExpectedDocuments();
 
@@ -114,6 +117,7 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     public void givenAllHearingDocumentsArePresentThenSendToBulkPrintWhenPaperCase_noNextHearing() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(paperNotificationService.shouldPrintForApplicant(any())).thenReturn(true);
+        when(paperNotificationService.shouldPrintForRespondent(any())).thenReturn(true);
         when(documentHelper.hasAnotherHearing(any())).thenReturn(false);
 
         contestedCaseOrderService.printAndMailHearingDocuments(CaseDetails.builder().build(), AUTH_TOKEN);
