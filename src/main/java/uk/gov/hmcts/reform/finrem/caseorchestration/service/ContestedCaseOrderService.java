@@ -39,10 +39,14 @@ public class ContestedCaseOrderService {
     public void printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
         if (contestedGeneralOrderPresent(caseDetails)) {
             BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData());
+
             if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
             }
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
+
+            if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
+                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
+            }
         }
     }
 
@@ -57,8 +61,10 @@ public class ContestedCaseOrderService {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, hearingDocumentPack);
             }
 
-            log.info("Received request to send hearing pack for respondent for case {}:", caseDetails.getId());
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, hearingDocumentPack);
+            if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
+                log.info("Received request to send hearing pack for respondent for case {}:", caseDetails.getId());
+                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, hearingDocumentPack);
+            }
         }
     }
 

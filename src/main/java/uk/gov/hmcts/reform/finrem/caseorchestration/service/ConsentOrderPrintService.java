@@ -44,7 +44,9 @@ public class ConsentOrderPrintService {
             caseData.put(BULK_PRINT_LETTER_ID_APP, applicantLetterId);
         }
 
-        generateCoversheetForRespondentAndSendOrders(caseDetails, authorisationToken);
+        if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
+            generateCoversheetForRespondentAndSendOrders(caseDetails, authorisationToken);
+        }
 
         log.info("Bulk print is successful");
     }

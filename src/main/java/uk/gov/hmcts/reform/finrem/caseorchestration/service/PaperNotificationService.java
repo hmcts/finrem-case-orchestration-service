@@ -84,9 +84,11 @@ public class PaperNotificationService {
             bulkPrintService.sendDocumentForPrint(applicantAssignedToJudgeNotificationLetter, caseDetails);
         }
 
-        log.info("Sending respondent Consent in Contested AssignedToJudge notification letter for bulk print for Case ID: {}", caseDetails.getId());
 
-        if (shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
+        if (shouldPrintForRespondent(caseDetails)) {
+            log.info("Sending respondent Consent in Contested AssignedToJudge notification letter for bulk print for Case ID: {}",
+                caseDetails.getId());
+
             CaseDocument respondentAssignedToJudgeNotificationLetter =
                 assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken, RESPONDENT);
             bulkPrintService.sendDocumentForPrint(respondentAssignedToJudgeNotificationLetter, caseDetails);
@@ -99,7 +101,7 @@ public class PaperNotificationService {
             bulkPrintService.sendDocumentForPrint(applicantManualPaymentLetter, caseDetails);
         }
 
-        if (shouldPrintNotificationForRespondentSolicitor(caseDetails) && caseDataService.isContestedApplication(caseDetails)) {
+        if (caseDataService.isContestedApplication(caseDetails) && shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
             CaseDocument respondentManualPaymentLetter = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken, RESPONDENT);
             bulkPrintService.sendDocumentForPrint(respondentManualPaymentLetter, caseDetails);
         }
@@ -109,6 +111,11 @@ public class PaperNotificationService {
         return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
             || !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
             || caseDataService.isPaperApplication(caseDetails.getData());
+    }
+
+    public boolean shouldPrintForRespondent(CaseDetails caseDetails) {
+        return !caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())
+            || !YES_VALUE.equalsIgnoreCase(nullToEmpty(caseDetails.getData().get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
     }
 
     private boolean shouldPrintNotificationForRespondentSolicitor(CaseDetails caseDetails) {
