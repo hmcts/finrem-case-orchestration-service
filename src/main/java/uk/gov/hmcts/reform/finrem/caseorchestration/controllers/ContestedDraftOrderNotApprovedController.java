@@ -139,8 +139,10 @@ public class ContestedDraftOrderNotApprovedController implements BaseController 
                     singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
             }
 
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
-                singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
+            if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
+                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken,
+                    singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(refusalReason.get())));
+            }
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
