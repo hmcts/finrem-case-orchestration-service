@@ -50,6 +50,10 @@ public class CaseDataService {
 
     public final Function<List<Map>, Map> getLastMapValue = listMap -> listMap.stream().reduce((first, second) -> second).get();
 
+    public static String nullToEmpty(Object o) {
+        return Objects.toString(o, "");
+    }
+
     public boolean isRespondentSolicitorResponsibleToDraftOrder(Map<String, Object> caseData) {
         return RESPONDENT_SOLICITOR.equals(nullToEmpty(caseData.get(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER)));
     }
@@ -66,10 +70,6 @@ public class CaseDataService {
                 caseData.put(sourceFieldName, null);
             }
         }
-    }
-
-    public String nullToEmpty(Object o) {
-        return o == null ? StringUtils.EMPTY : o.toString();
     }
 
     public boolean addressLineOneAndPostCodeAreBothNotEmpty(Map address) {

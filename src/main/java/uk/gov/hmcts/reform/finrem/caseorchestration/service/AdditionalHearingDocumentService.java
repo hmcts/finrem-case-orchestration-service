@@ -178,11 +178,10 @@ public class AdditionalHearingDocumentService {
 
         AdditionalHearingDocumentData additionalHearingDocument = additionalHearingDocumentData.get(additionalHearingDocumentData.size() - 1);
 
-        List<BulkPrintDocument> document = singletonList(bulkPrintService.getBulkPrintDocumentFromCaseDocument(
+        List<BulkPrintDocument> document = singletonList(documentHelper.getBulkPrintDocumentFromCaseDocument(
                 additionalHearingDocument.getAdditionalHearingDocument().getDocument()));
 
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
     }
 }
-

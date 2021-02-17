@@ -17,12 +17,14 @@ public class AssignedToJudgeDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
 
-    public CaseDocument generateAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken) {
-        log.info("Generating Assigned To Judge Notification Letter {} from {} for bulk print",
+    public CaseDocument generateAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken,
+                                                                  DocumentHelper.PaperNotificationRecipient recipient) {
+        log.info("Generating Assigned To Judge Notification Letter {} from {} for bulk print for {}",
             documentConfiguration.getAssignedToJudgeNotificationTemplate(),
-            documentConfiguration.getAssignedToJudgeNotificationFileName());
+            documentConfiguration.getAssignedToJudgeNotificationFileName(),
+            recipient);
 
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
 
         CaseDocument generatedAssignedToJudgeNotificationLetter = genericDocumentService.generateDocument(authToken,
             caseDetailsForBulkPrint,
@@ -34,14 +36,10 @@ public class AssignedToJudgeDocumentService {
         return generatedAssignedToJudgeNotificationLetter;
     }
 
-    public CaseDocument generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken) {
+    public CaseDocument generateConsentInContestedAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken,
+                                                                                    DocumentHelper.PaperNotificationRecipient recipient) {
         return generateConsentInContestedAssignedToJudgeNotificationLetter(
-            documentHelper.prepareLetterToApplicantTemplateData(caseDetails), authToken);
-    }
-
-    public CaseDocument generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken) {
-        return generateConsentInContestedAssignedToJudgeNotificationLetter(
-            documentHelper.prepareLetterToRespondentTemplateData(caseDetails), authToken);
+            documentHelper.prepareLetterTemplateData(caseDetails, recipient), authToken);
     }
 
     private CaseDocument generateConsentInContestedAssignedToJudgeNotificationLetter(CaseDetails caseDetails, String authToken) {

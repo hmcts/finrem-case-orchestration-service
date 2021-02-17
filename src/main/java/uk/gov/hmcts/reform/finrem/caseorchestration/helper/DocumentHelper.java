@@ -44,6 +44,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_SERVICE_CENTRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CTSC_TOWN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ADDRESS;
@@ -72,12 +74,15 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class DocumentHelper {
+
+    public enum PaperNotificationRecipient { APPLICANT, RESPONDENT }
 
     public static final String DOCUMENT_URL = "document_url";
     public static final String DOCUMENT_FILENAME = "document_filename";
@@ -138,12 +143,8 @@ public class DocumentHelper {
             convertToDirectionDetailsCollectionData(caseData
                 .get(DIRECTION_DETAILS_COLLECTION_CT));
 
-        if (directionDetailsCollectionList.isEmpty() || !YES_VALUE.equalsIgnoreCase(
-            caseDataService.nullToEmpty(directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()))) {
-            return false;
-        }
-
-        return true;
+        return !directionDetailsCollectionList.isEmpty() && YES_VALUE.equalsIgnoreCase(
+            nullToEmpty(directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()));
     }
 
     public CaseDocument getLatestGeneralOrder(Map<String, Object> caseData) {
@@ -160,32 +161,32 @@ public class DocumentHelper {
     }
 
     private List<AmendedConsentOrderData> convertToAmendedConsentOrderDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<AmendedConsentOrderData>>() {
+        return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
 
     private List<PensionCollectionData> convertToPensionCollectionDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<PensionCollectionData>>() {
+        return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
 
     private List<RespondToOrderData> convertToRespondToOrderDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<RespondToOrderData>>() {
+        return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
 
     public List<GeneralLetterData> convertToGeneralLetterData(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<GeneralLetterData>>() {
+        return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
 
     public List<DirectionDetailsCollectionData> convertToDirectionDetailsCollectionData(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<DirectionDetailsCollectionData>>() {
+        return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
 
     public List<AdditionalHearingDocumentData> convertToAdditionalHearingDocumentData(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<AdditionalHearingDocumentData>>() {
+        return objectMapper.convertValue(object, new TypeReference<>() {
         });
     }
 
@@ -219,7 +220,7 @@ public class DocumentHelper {
     }
 
 
-    public CaseDetails prepareLetterToApplicantTemplateData(CaseDetails caseDetails) {
+    public CaseDetails prepareLetterTemplateData(CaseDetails caseDetails, PaperNotificationRecipient recipient) {
         // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
         CaseDetails caseDetailsCopy = deepCopy(caseDetails, CaseDetails.class);
         Map<String, Object> caseData = caseDetailsCopy.getData();
@@ -228,55 +229,36 @@ public class DocumentHelper {
         String reference = "";
         String addresseeName;
         Map addressToSendTo;
-        String applicantName = caseDataService.buildFullName(caseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME);
 
-        if (caseDataService.isApplicantRepresentedByASolicitor(caseData)) {
+        if (recipient == APPLICANT && caseDataService.isApplicantRepresentedByASolicitor(caseData)) {
             log.info("Applicant is represented by a solicitor");
-            reference = caseDataService.nullToEmpty((caseData.get(SOLICITOR_REFERENCE)));
-            addresseeName = caseDataService.nullToEmpty((caseData.get(isConsentedApplication ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME)));
+            reference = nullToEmpty((caseData.get(SOLICITOR_REFERENCE)));
+            addresseeName = nullToEmpty((caseData.get(isConsentedApplication ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME)));
             addressToSendTo = (Map) caseData.get(isConsentedApplication ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS);
-        } else {
-            log.info("Applicant is not represented by a solicitor");
-            addresseeName = applicantName;
-            addressToSendTo = (Map) caseData.get(APPLICANT_ADDRESS);
-        }
-        return prepareLetterTemplateData(caseDetailsCopy, reference, addresseeName, addressToSendTo, isConsentedApplication);
-    }
-
-    public CaseDetails prepareLetterToRespondentTemplateData(CaseDetails caseDetails) {
-        // need to create a deep copy of CaseDetails.data, the copy is modified and sent later to Docmosis
-        CaseDetails caseDetailsCopy = deepCopy(caseDetails, CaseDetails.class);
-        Map<String, Object> caseData = caseDetailsCopy.getData();
-        boolean isConsentedApplication = caseDataService.isConsentedApplication(caseDetails);
-        String reference = "";
-        String addresseeName;
-        Map addressToSendTo;
-
-        String respondentName = caseDataService.buildFullName(caseData,
-            isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME,
-            isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME);
-
-        if (caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
+        } else if (recipient == RESPONDENT && caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
             log.info("Respondent is represented by a solicitor");
-            reference = caseDataService.nullToEmpty((caseData.get(RESP_SOLICITOR_REFERENCE)));
-            addresseeName = caseDataService.nullToEmpty((caseData.get(RESP_SOLICITOR_NAME)));
+            reference = nullToEmpty((caseData.get(RESP_SOLICITOR_REFERENCE)));
+            addresseeName = nullToEmpty((caseData.get(RESP_SOLICITOR_NAME)));
             addressToSendTo = (Map) caseData.get(RESP_SOLICITOR_ADDRESS);
         } else {
-            log.info("Respondent is not represented by a solicitor");
-            addresseeName = respondentName;
-            addressToSendTo = (Map) caseData.get(RESPONDENT_ADDRESS);
+            log.info("{} is not represented by a solicitor", recipient);
+            addresseeName = recipient == APPLICANT
+                ? caseDataService.buildFullName(caseData, APPLICANT_FIRST_MIDDLE_NAME, APPLICANT_LAST_NAME)
+                : caseDataService.buildFullName(caseData,
+                isConsentedApplication ? CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME : CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME,
+                isConsentedApplication ? CONSENTED_RESPONDENT_LAST_NAME : CONTESTED_RESPONDENT_LAST_NAME);
+            addressToSendTo = (Map) caseData.get(recipient == APPLICANT ? APPLICANT_ADDRESS : RESPONDENT_ADDRESS);
         }
 
         return prepareLetterTemplateData(caseDetailsCopy, reference, addresseeName, addressToSendTo, isConsentedApplication);
     }
 
-    private CaseDetails prepareLetterTemplateData(CaseDetails caseDetailsCopy, String reference,
-                                                  String addresseeName, Map addressToSendTo,
+    private CaseDetails prepareLetterTemplateData(CaseDetails caseDetailsCopy, String reference, String addresseeName, Map addressToSendTo,
                                                   boolean isConsentedApplication) {
 
         Map<String, Object> caseData = caseDetailsCopy.getData();
 
-        String ccdNumber = caseDataService.nullToEmpty((caseDetailsCopy.getId()));
+        String ccdNumber = nullToEmpty((caseDetailsCopy.getId()));
         String applicantName = getApplicantFullName(caseDetailsCopy);
         String respondentName = getRespondentFullName(caseDetailsCopy, isConsentedApplication);
 
@@ -414,5 +396,9 @@ public class DocumentHelper {
         return objectMapper.convertValue(caseData.get(HEARING_ORDER_COLLECTION),
             new TypeReference<>() {
             });
+    }
+
+    public BulkPrintDocument getBulkPrintDocumentFromCaseDocument(CaseDocument caseDocument) {
+        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
     }
 }
