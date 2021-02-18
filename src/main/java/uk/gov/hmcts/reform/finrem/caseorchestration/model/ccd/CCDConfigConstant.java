@@ -54,6 +54,7 @@ public class CCDConfigConstant {
     public static final String RESP_SOLICITOR_PHONE = "rSolicitorPhone";
     public static final String RESP_SOLICITOR_EMAIL = "rSolicitorEmail";
     public static final String RESP_SOLICITOR_DX_NUMBER = "rSolicitorDXnumber";
+    public static final String RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT = "RespSolNotificationsEmailConsent";
 
     //Court related
     public static final String REGION = "regionList";

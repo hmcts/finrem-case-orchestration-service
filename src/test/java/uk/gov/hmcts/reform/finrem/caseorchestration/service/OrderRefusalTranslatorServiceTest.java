@@ -19,7 +19,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class OrderRefusalTranslatorServiceTest extends BaseServiceTest {
 
     @Autowired
-    OrderRefusalTranslatorService orderRefusalTranslatorService;
+    private OrderRefusalTranslatorService orderRefusalTranslatorService;
 
     private CaseDetails caseDetails;
 
