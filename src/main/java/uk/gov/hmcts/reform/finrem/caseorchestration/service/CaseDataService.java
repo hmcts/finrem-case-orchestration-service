@@ -55,20 +55,29 @@ public class CaseDataService {
     }
 
     public void moveCollection(Map<String, Object> caseData, String sourceFieldName, String destinationFieldName) {
-        if (caseData.get(sourceFieldName) != null && (caseData.get(sourceFieldName) instanceof Collection)) {
-            if (caseData.get(destinationFieldName) == null || (caseData.get(destinationFieldName) instanceof Collection)) {
-                final List destinationList = new ArrayList();
-                if (caseData.get(destinationFieldName) != null) {
-                    destinationList.addAll((List) caseData.get(destinationFieldName));
-                }
-                destinationList.addAll((List) caseData.get(sourceFieldName));
-                caseData.put(destinationFieldName, destinationList);
-                caseData.put(sourceFieldName, null);
-            }
+        if (canCollectionsBeCopiedFromTo(caseData, sourceFieldName, destinationFieldName)) {
+            copyCollection(caseData, sourceFieldName, destinationFieldName);
+            caseData.put(sourceFieldName, null);
         }
     }
 
-    public String nullToEmpty(Object o) {
+    public void copyCollection(Map<String, Object> caseData, String sourceFieldName, String destinationFieldName) {
+        if (canCollectionsBeCopiedFromTo(caseData, sourceFieldName, destinationFieldName)) {
+            final List destinationList = new ArrayList();
+            if (caseData.get(destinationFieldName) != null) {
+                destinationList.addAll((List) caseData.get(destinationFieldName));
+            }
+            destinationList.addAll((List) caseData.get(sourceFieldName));
+            caseData.put(destinationFieldName, destinationList);
+        }
+    }
+
+    private boolean canCollectionsBeCopiedFromTo(Map<String, Object> caseData, String sourceFieldName, String destinationFieldName) {
+        return caseData.get(sourceFieldName) != null && (caseData.get(sourceFieldName) instanceof Collection)
+            && (caseData.get(destinationFieldName) == null || (caseData.get(destinationFieldName) instanceof Collection));
+    }
+
+    public static String nullToEmpty(Object o) {
         return o == null ? StringUtils.EMPTY : o.toString();
     }
 
