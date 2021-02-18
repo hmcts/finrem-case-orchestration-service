@@ -31,17 +31,22 @@ public class ContestedCaseOrderService {
 
     private final BulkPrintService bulkPrintService;
     private final GeneralOrderService generalOrderService;
-    private final DocumentHelper documentHelper;
-    private final CaseDataService caseDataService;
     private final GenericDocumentService genericDocumentService;
+    private final PaperNotificationService paperNotificationService;
+    private final CaseDataService caseDataService;
+    private final DocumentHelper documentHelper;
 
     public void printAndMailGeneralOrderToParties(CaseDetails caseDetails, String authorisationToken) {
         if (contestedGeneralOrderPresent(caseDetails)) {
             BulkPrintDocument generalOrder = generalOrderService.getLatestGeneralOrderAsBulkPrintDocument(caseDetails.getData());
-            if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
+
+            if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
             }
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
+
+            if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
+                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, singletonList(generalOrder));
+            }
         }
     }
 
@@ -51,13 +56,15 @@ public class ContestedCaseOrderService {
 
             List<BulkPrintDocument> hearingDocumentPack = createHearingDocumentPack(caseData);
 
-            if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
+            if (paperNotificationService.shouldPrintForApplicant(caseDetails)) {
                 log.info("Received request to send hearing pack for applicant for case {}:", caseDetails.getId());
                 bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, hearingDocumentPack);
             }
 
-            log.info("Received request to send hearing pack for respondent for case {}:", caseDetails.getId());
-            bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, hearingDocumentPack);
+            if (paperNotificationService.shouldPrintForRespondent(caseDetails)) {
+                log.info("Received request to send hearing pack for respondent for case {}:", caseDetails.getId());
+                bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, hearingDocumentPack);
+            }
         }
     }
 

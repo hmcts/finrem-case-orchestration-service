@@ -12,12 +12,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DirectionDetailsCo
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -35,6 +36,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.defaultConsentedCaseDetails;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.CTSC_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIRECTION_DETAILS_COLLECTION_CT;
 
@@ -91,7 +94,7 @@ public class DocumentHelperTest {
         DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(YES_VALUE).build();
         DirectionDetailsCollectionData directionDetailsCollectionData
             = DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList = Arrays.asList(directionDetailsCollectionData);
+        List<DirectionDetailsCollectionData> directionDetailsCollectionList = singletonList(directionDetailsCollectionData);
         caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
 
         assertTrue(documentHelper.hasAnotherHearing(caseData));
@@ -100,8 +103,7 @@ public class DocumentHelperTest {
     @Test
     public void hasAnotherHearing_noDirectionDetails() {
         Map<String, Object> caseData = new HashMap<>();
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList = Arrays.asList();
-        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
+        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, emptyList());
 
         assertFalse(documentHelper.hasAnotherHearing(caseData));
     }
@@ -112,7 +114,7 @@ public class DocumentHelperTest {
         DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(NO_VALUE).build();
         DirectionDetailsCollectionData directionDetailsCollectionData
             = DirectionDetailsCollectionData.builder().directionDetailsCollection(directionDetailsCollection).build();
-        List<DirectionDetailsCollectionData> directionDetailsCollectionList = Arrays.asList(directionDetailsCollectionData);
+        List<DirectionDetailsCollectionData> directionDetailsCollectionList = singletonList(directionDetailsCollectionData);
         caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollectionList);
 
         assertFalse(documentHelper.hasAnotherHearing(caseData));
@@ -240,7 +242,7 @@ public class DocumentHelperTest {
 
     @Test
     public void whenPreparingLetterToApplicantTemplateData_CtscDataIsPopulated() {
-        CaseDetails preparedCaseDetails = documentHelper.prepareLetterToApplicantTemplateData(defaultConsentedCaseDetails());
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), APPLICANT);
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
@@ -258,7 +260,7 @@ public class DocumentHelperTest {
 
     @Test
     public void whenPreparingLetterToRespondentTemplateData_CtscDataIsPopulated() {
-        CaseDetails preparedCaseDetails = documentHelper.prepareLetterToRespondentTemplateData(defaultConsentedCaseDetails());
+        CaseDetails preparedCaseDetails = documentHelper.prepareLetterTemplateData(defaultConsentedCaseDetails(), RESPONDENT);
 
         CtscContactDetails ctscContactDetails = CtscContactDetails.builder()
             .serviceCentre(CTSC_SERVICE_CENTRE)
@@ -276,12 +278,6 @@ public class DocumentHelperTest {
 
     private CallbackRequest prepareCallbackRequestForLatestConsentedConsentOrder(String fileName) throws Exception {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + fileName)) {
-            return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
-        }
-    }
-
-    private CallbackRequest prepareCallbackRequest(String fileName) throws Exception {
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(fileName)) {
             return objectMapper.readValue(resourceAsStream, CallbackRequest.class);
         }
     }

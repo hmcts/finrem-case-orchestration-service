@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
@@ -20,29 +20,17 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.BULK_PRINT_COVER_SHEET_RES_CONFIDENTIAL;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class BulkPrintService {
 
     public static final String FINANCIAL_REMEDY_PACK_LETTER_TYPE = "FINANCIAL_REMEDY_PACK";
     private static final String FINANCIAL_REMEDY_GENERAL_LETTER = "FINREM002";
-    static final String DOCUMENT_FILENAME = "document_filename";
 
     private final GenericDocumentService genericDocumentService;
     private final DocumentHelper documentHelper;
     private final GenerateCoverSheetService coverSheetService;
     private final CaseDataService caseDataService;
-
-    public BulkPrintService(GenericDocumentService genericDocumentService,
-                            ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService,
-                            @Lazy ConsentOrderApprovedDocumentService consentOrderApprovedDocumentService,
-                            DocumentHelper documentHelper, GeneralOrderService generalOrderService,
-                            GenerateCoverSheetService coverSheetService,
-                            CaseDataService caseDataService) {
-        this.genericDocumentService = genericDocumentService;
-        this.documentHelper = documentHelper;
-        this.coverSheetService = coverSheetService;
-        this.caseDataService = caseDataService;
-    }
 
     public UUID sendDocumentForPrint(final CaseDocument document, CaseDetails caseDetails) {
         List<BulkPrintDocument> bulkPrintDocument = Collections.singletonList(
@@ -53,6 +41,16 @@ public class BulkPrintService {
 
     public UUID bulkPrintFinancialRemedyLetterPack(Long caseId, List<BulkPrintDocument> documents) {
         return bulkPrintDocuments(caseId, FINANCIAL_REMEDY_PACK_LETTER_TYPE, documents);
+    }
+
+    public UUID printApplicantDocuments(CaseDetails caseDetails, String authorisationToken,
+                                        List<BulkPrintDocument> caseDocuments) {
+        return printDocumentsWithCoversheet(caseDetails, generateApplicantCoverSheet(caseDetails, authorisationToken), caseDocuments);
+    }
+
+    public UUID printRespondentDocuments(CaseDetails caseDetails, String authorisationToken,
+                                         List<BulkPrintDocument> caseDocuments) {
+        return printDocumentsWithCoversheet(caseDetails, generateRespondentCoverSheet(caseDetails, authorisationToken), caseDocuments);
     }
 
     private UUID bulkPrintDocuments(Long caseId, String letterType, List<BulkPrintDocument> documents) {
@@ -68,18 +66,7 @@ public class BulkPrintService {
         return letterId;
     }
 
-    public UUID printApplicantDocuments(CaseDetails caseDetails, String authorisationToken,
-                                        List<BulkPrintDocument> caseDocuments) {
-        return printDocuments(caseDetails, generateApplicantCoverSheet(caseDetails, authorisationToken), caseDocuments);
-    }
-
-    public UUID printRespondentDocuments(CaseDetails caseDetails, String authorisationToken,
-                                         List<BulkPrintDocument> caseDocuments) {
-        return printDocuments(caseDetails, generateRespondentCoverSheet(caseDetails, authorisationToken), caseDocuments);
-    }
-
-    private UUID printDocuments(CaseDetails caseDetails, BulkPrintDocument coverSheet,
-                                List<BulkPrintDocument> caseDocuments) {
+    private UUID printDocumentsWithCoversheet(CaseDetails caseDetails, BulkPrintDocument coverSheet, List<BulkPrintDocument> caseDocuments) {
         List<BulkPrintDocument> documents = new ArrayList<>();
         documents.add(coverSheet);
         documents.addAll(caseDocuments);
@@ -112,15 +99,5 @@ public class BulkPrintService {
         }
 
         return documentHelper.getCaseDocumentAsBulkPrintDocument(respondentCoverSheet);
-    }
-
-    public BulkPrintDocument getBulkPrintDocumentFromCaseDocument(CaseDocument caseDocument) {
-        return BulkPrintDocument.builder().binaryFileUrl(caseDocument.getDocumentBinaryUrl()).build();
-    }
-
-    public boolean shouldPrintForApplicant(CaseDetails caseDetails) {
-        return !caseDataService.isApplicantRepresentedByASolicitor(caseDetails.getData())
-            || !caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)
-            || caseDataService.isPaperApplication(caseDetails.getData());
     }
 }

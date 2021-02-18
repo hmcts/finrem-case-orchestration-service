@@ -26,7 +26,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
@@ -135,8 +134,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
 
-        verify(bulkPrintService, times(1)).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
-        verify(bulkPrintService, times(1)).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
+        verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
+        verify(bulkPrintService).printRespondentDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
 
         assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(3));
         assertThat(bulkPrintDocumentsCaptor.getValue().get(0).getBinaryFileUrl(), is(BINARY_URL));
@@ -152,7 +151,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
         hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, AUTH_TOKEN);
 
-        verify(bulkPrintService, times(1)).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
+        verify(bulkPrintService).printApplicantDocuments(eq(caseDetails), eq(AUTH_TOKEN), bulkPrintDocumentsCaptor.capture());
 
         assertThat(bulkPrintDocumentsCaptor.getValue().size(), is(5));
         assertThat(bulkPrintDocumentsCaptor.getValue().get(0).getBinaryFileUrl(), is(BINARY_URL));
@@ -417,9 +416,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     }
 
     void verifyAdditionalFastTrackFields() {
-        verify(genericDocumentService, times(1))
-            .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq(documentConfiguration.getFormCFastTrackTemplate()), eq(documentConfiguration.getFormCFileName()));
+        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            eq(documentConfiguration.getFormCFastTrackTemplate()), eq(documentConfiguration.getFormCFileName()));
         verify(genericDocumentService, never()).generateDocument(any(), any(), eq(documentConfiguration.getFormCNonFastTrackTemplate()), any());
         verify(genericDocumentService, never()).generateDocument(any(), any(), eq(documentConfiguration.getFormGTemplate()), any());
 
@@ -443,12 +441,11 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
     }
 
     void verifyAdditionalNonFastTrackFields() {
-        verify(genericDocumentService, times(1))
-            .generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
-                eq(documentConfiguration.getFormCNonFastTrackTemplate()), eq(documentConfiguration.getFormCFileName()));
+        verify(genericDocumentService).generateDocument(eq(AUTH_TOKEN), caseDetailsArgumentCaptor.capture(),
+            eq(documentConfiguration.getFormCNonFastTrackTemplate()), eq(documentConfiguration.getFormCFileName()));
         verify(genericDocumentService, never())
             .generateDocument(any(), any(), eq(documentConfiguration.getFormCFastTrackTemplate()), any());
-        verify(genericDocumentService, times(1))
+        verify(genericDocumentService)
             .generateDocument(eq(AUTH_TOKEN), any(), eq(documentConfiguration.getFormGTemplate()), eq(documentConfiguration.getFormGFileName()));
 
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();

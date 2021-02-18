@@ -17,12 +17,14 @@ public class HelpWithFeesDocumentService {
     private final DocumentConfiguration documentConfiguration;
     private final DocumentHelper documentHelper;
 
-    public CaseDocument generateHwfSuccessfulNotificationLetter(CaseDetails caseDetails, String authToken) {
-        log.info("Generating Help With Fees Successful Notification Letter {} from {} for bulk print",
+    public CaseDocument generateHwfSuccessfulNotificationLetter(CaseDetails caseDetails, String authToken,
+                                                                DocumentHelper.PaperNotificationRecipient recipient) {
+        log.info("Generating Help With Fees Successful Notification Letter {} from {} for bulk print for {}",
             documentConfiguration.getHelpWithFeesSuccessfulNotificationFileName(),
-            documentConfiguration.getHelpWithFeesSuccessfulNotificationTemplate());
+            documentConfiguration.getHelpWithFeesSuccessfulNotificationTemplate(),
+            recipient);
 
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
 
         CaseDocument generatedHwfSuccessfulNotificationLetter = genericDocumentService.generateDocument(authToken,
             caseDetailsForBulkPrint,

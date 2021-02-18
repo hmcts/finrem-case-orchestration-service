@@ -18,25 +18,21 @@ public class ManualPaymentDocumentService {
     private final DocumentHelper documentHelper;
     private final HearingDocumentService hearingDocumentService;
 
-    public CaseDocument generateApplicantManualPaymentLetter(CaseDetails caseDetails, String authToken) {
-        log.info("Generating Applicant Manual Payment Letter {} from {} for bulk print",
+    public CaseDocument generateManualPaymentLetter(CaseDetails caseDetails, String authToken,
+                                                    DocumentHelper.PaperNotificationRecipient recipient) {
+        log.info("Generating Applicant Manual Payment Letter {} from {} for bulk print for {}",
             documentConfiguration.getManualPaymentFileName(),
-            documentConfiguration.getManualPaymentTemplate());
+            documentConfiguration.getManualPaymentTemplate(),
+            recipient);
 
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
-
-        return generateManualPaymentLetter(caseDetailsForBulkPrint, authToken);
-    }
-
-    public CaseDocument generateManualPaymentLetter(CaseDetails caseDetailsForBulkPrint, String authToken) {
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, recipient);
 
         hearingDocumentService.addCourtFields(caseDetailsForBulkPrint);
 
-        CaseDocument manualPaymentLetter = genericDocumentService.generateDocument(authToken,
-            caseDetailsForBulkPrint,
-            documentConfiguration.getManualPaymentTemplate(),
-            documentConfiguration.getManualPaymentFileName());
-        log.info("Generated Manual Payment Letter: {}", manualPaymentLetter);
+        CaseDocument manualPaymentLetter = genericDocumentService.generateDocument(authToken, caseDetailsForBulkPrint,
+            documentConfiguration.getManualPaymentTemplate(), documentConfiguration.getManualPaymentFileName());
+
+        log.info("Generated Manual Payment Letter to {}: {}", recipient, manualPaymentLetter);
 
         return manualPaymentLetter;
     }
