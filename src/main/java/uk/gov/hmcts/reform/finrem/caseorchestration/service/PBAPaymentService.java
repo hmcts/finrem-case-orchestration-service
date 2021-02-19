@@ -35,9 +35,6 @@ public class PBAPaymentService {
     private final PaymentClient paymentClient;
     private final CaseDataService caseDataService;
 
-    @Value("${payment.api.siteId}")
-    private String siteId;
-
     @Value("${payment.api.consented-description}")
     private String consentedDescription;
 
@@ -87,7 +84,6 @@ public class PBAPaymentService {
             .ccdCaseNumber(ccdCaseId)
             .description(description)
             .organisationName(dataJsonNode.path(CONSENTED_SOLICITOR_FIRM).asText())
-            .siteId(siteId)
             .amount(fee.getCalculatedAmount())
             .feesList(ImmutableList.of(fee))
             .build();

@@ -24,7 +24,7 @@ public class PaymentRequestTest {
             + " \"amount\": 1000,"
             + " \"currency\": \"GBP\","
             + " \"service\": \"FINREM\","
-            + " \"site_id\": \"AA09\","
+            + " \"case_type\": \"FinancialRemedyMVP2\","
             + " \"fees\": ["
             + "   {"
             + " \"calculated_amount\": 1000,"
@@ -44,7 +44,7 @@ public class PaymentRequestTest {
         assertThat(paymentRequest.getAmount(), is(BigDecimal.valueOf(1000)));
         assertThat(paymentRequest.getCurrency(), is("GBP"));
         assertThat(paymentRequest.getService(), is("FINREM"));
-        assertThat(paymentRequest.getSiteId(), is("AA09"));
+        assertThat(paymentRequest.getCaseType(), is("FinancialRemedyMVP2"));
         assertThat(paymentRequest.getFeesList().size(), is(1));
         assertThat(paymentRequest.getFeesList().get(0).getCalculatedAmount(), is(BigDecimal.valueOf(1000)));
         assertThat(paymentRequest.getFeesList().get(0).getCode(), is("Fee1"));
