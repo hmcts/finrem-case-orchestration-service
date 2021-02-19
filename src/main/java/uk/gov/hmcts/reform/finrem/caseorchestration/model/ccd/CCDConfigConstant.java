@@ -408,6 +408,30 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_TRIAL_BUNDLE_COLLECTION = "respTrialBundleCollection";
     public static final String RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION = "respConfidentialDocsCollection";
 
+    //Contested Case New Documents collections
+    public static final String APP_HEARING_BUNDLES_COLLECTION = "appHearingBundlesCollection";
+    public static final String APP_FORM_E_EXHIBITS_COLLECTION = "appFormEExhibitsCollection";
+    public static final String APP_CHRONOLOGIES_STATEMENTS_COLLECTION = "appChronologiesCollection";
+    public static final String APP_QUESTIONNAIRES_ANSWERS_COLLECTION = "appQACollection";
+    public static final String APP_STATEMENTS_EXHIBITS_COLLECTION = "appStatementsExhibitsCollection";
+    public static final String APP_CASE_SUMMARIES_COLLECTION = "appCaseSummariesCollection";
+    public static final String APP_FORMS_H_COLLECTION = "appFormsHCollection";
+    public static final String APP_EXPERT_EVIDENCE_COLLECTION = "appExpertEvidenceCollection";
+    public static final String APP_CORRESPONDENCE_COLLECTION = "appCorrespondenceDocsColl";
+    public static final String APP_OTHER_COLLECTION = "appOtherCollection";
+    public static final String RESP_HEARING_BUNDLES_COLLECTION = "respHearingBundlesCollection";
+    public static final String RESP_FORM_E_EXHIBITS_COLLECTION = "respFormEExhibitsCollection";
+    public static final String RESP_CHRONOLOGIES_STATEMENTS_COLLECTION = "respChronologiesCollection";
+    public static final String RESP_QUESTIONNAIRES_ANSWERS_COLLECTION = "respQACollection";
+    public static final String RESP_STATEMENTS_EXHIBITS_COLLECTION = "respStatementsExhibitsCollection";
+    public static final String RESP_CASE_SUMMARIES_COLLECTION = "respCaseSummariesCollection";
+    public static final String RESP_FORM_H_COLLECTION = "respFormsHCollection";
+    public static final String RESP_EXPERT_EVIDENCE_COLLECTION = "respExpertEvidenceCollection";
+    public static final String RESP_CORRESPONDENCE_COLLECTION = "respCorrespondenceDocsColl";
+    public static final String RESP_OTHER_COLLECTION = "respOtherCollection";
+
+
+
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
 
     //organisation policy
