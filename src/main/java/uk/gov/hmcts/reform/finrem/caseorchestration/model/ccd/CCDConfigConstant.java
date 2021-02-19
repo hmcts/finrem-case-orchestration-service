@@ -55,6 +55,7 @@ public class CCDConfigConstant {
     public static final String RESP_SOLICITOR_PHONE = "rSolicitorPhone";
     public static final String RESP_SOLICITOR_EMAIL = "rSolicitorEmail";
     public static final String RESP_SOLICITOR_DX_NUMBER = "rSolicitorDXnumber";
+    public static final String RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT = "RespSolNotificationsEmailConsent";
     public static final String RESPONDENT_SHARE_DOCUMENTS = "respondentShareDocs";
 
     //Court related

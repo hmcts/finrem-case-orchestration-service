@@ -50,6 +50,10 @@ public class CaseDataService {
 
     public final Function<List<Map>, Map> getLastMapValue = listMap -> listMap.stream().reduce((first, second) -> second).get();
 
+    public static String nullToEmpty(Object o) {
+        return Objects.toString(o, "");
+    }
+
     public boolean isRespondentSolicitorResponsibleToDraftOrder(Map<String, Object> caseData) {
         return RESPONDENT_SOLICITOR.equals(nullToEmpty(caseData.get(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER)));
     }
@@ -75,10 +79,6 @@ public class CaseDataService {
     private boolean canCollectionsBeCopiedFromTo(Map<String, Object> caseData, String sourceFieldName, String destinationFieldName) {
         return caseData.get(sourceFieldName) != null && (caseData.get(sourceFieldName) instanceof Collection)
             && (caseData.get(destinationFieldName) == null || (caseData.get(destinationFieldName) instanceof Collection));
-    }
-
-    public static String nullToEmpty(Object o) {
-        return o == null ? StringUtils.EMPTY : o.toString();
     }
 
     public boolean addressLineOneAndPostCodeAreBothNotEmpty(Map address) {
