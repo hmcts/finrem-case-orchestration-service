@@ -43,11 +43,11 @@ public class ShareDocumentsService {
     private final CaseDataService caseDataService;
 
     public void shareDocumentsWithRespondent(CaseDetails caseDetails) {
-        copyDocumentCollections(caseDetails, APPLICANT_DOCUMENT_COLLECTIONS_SHARING_MAP);
+        overwriteDocumentCollections(caseDetails, APPLICANT_DOCUMENT_COLLECTIONS_SHARING_MAP);
     }
 
     public void shareDocumentsWithApplicant(CaseDetails caseDetails) {
-        copyDocumentCollections(caseDetails, RESPONDENT_DOCUMENT_COLLECTIONS_SHARING_MAP);
+        overwriteDocumentCollections(caseDetails, RESPONDENT_DOCUMENT_COLLECTIONS_SHARING_MAP);
     }
 
     public void clearSharedDocumentsVisibleToRespondent(CaseDetails caseDetails) {
@@ -58,9 +58,9 @@ public class ShareDocumentsService {
         clearSharedDocumentCollections(caseDetails, RESPONDENT_DOCUMENT_COLLECTIONS_SHARING_MAP.values());
     }
 
-    private void copyDocumentCollections(CaseDetails caseDetails, Map<String, String> documentCollectionsSharingMap) {
-        documentCollectionsSharingMap.entrySet().stream().forEach(sourceToDestinationMapEntry -> caseDataService.overwriteCollection(caseDetails.getData(),
-            sourceToDestinationMapEntry.getKey(), sourceToDestinationMapEntry.getValue()));
+    private void overwriteDocumentCollections(CaseDetails caseDetails, Map<String, String> documentCollectionsSharingMap) {
+        documentCollectionsSharingMap.entrySet().stream().forEach(sourceToDestinationMapEntry -> caseDataService.overwriteCollection(
+            caseDetails.getData(), sourceToDestinationMapEntry.getKey(), sourceToDestinationMapEntry.getValue()));
     }
 
     private void clearSharedDocumentCollections(CaseDetails caseDetails, Collection<String> documentCollectionsToClear) {
