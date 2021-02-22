@@ -55,7 +55,7 @@ public class ShareDocumentsServiceTest extends BaseServiceTest {
         shareDocumentsService.shareDocumentsWithRespondent(caseDetails);
 
         APPLICANT_DOCUMENT_COLLECTIONS_SHARING_MAP.entrySet().forEach(sourceToDestinationEntry ->
-            verify(caseDataService).copyCollection(any(), eq(sourceToDestinationEntry.getKey()), eq(sourceToDestinationEntry.getValue())));
+            verify(caseDataService).overwriteCollection(any(), eq(sourceToDestinationEntry.getKey()), eq(sourceToDestinationEntry.getValue())));
     }
 
     @Test
@@ -65,6 +65,6 @@ public class ShareDocumentsServiceTest extends BaseServiceTest {
         shareDocumentsService.shareDocumentsWithApplicant(caseDetails);
 
         RESPONDENT_DOCUMENT_COLLECTIONS_SHARING_MAP.entrySet().forEach(sourceToDestinationEntry ->
-            verify(caseDataService).copyCollection(any(), eq(sourceToDestinationEntry.getKey()), eq(sourceToDestinationEntry.getValue())));
+            verify(caseDataService).overwriteCollection(any(), eq(sourceToDestinationEntry.getKey()), eq(sourceToDestinationEntry.getValue())));
     }
 }

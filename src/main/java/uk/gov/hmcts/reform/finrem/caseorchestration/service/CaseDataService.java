@@ -60,15 +60,19 @@ public class CaseDataService {
 
     public void moveCollection(Map<String, Object> caseData, String sourceFieldName, String destinationFieldName) {
         if (canCollectionsBeCopiedFromTo(caseData, sourceFieldName, destinationFieldName)) {
-            copyCollection(caseData, sourceFieldName, destinationFieldName);
+            copyCollection(caseData, sourceFieldName, destinationFieldName, true);
             caseData.put(sourceFieldName, null);
         }
     }
 
-    public void copyCollection(Map<String, Object> caseData, String sourceFieldName, String destinationFieldName) {
+    public void overwriteCollection(Map<String, Object> caseData, String sourceFieldName, String destinationFieldName) {
+        copyCollection(caseData, sourceFieldName, destinationFieldName, false);
+    }
+
+    private void copyCollection(Map<String, Object> caseData, String sourceFieldName, String destinationFieldName, boolean appendToDestination) {
         if (canCollectionsBeCopiedFromTo(caseData, sourceFieldName, destinationFieldName)) {
             final List destinationList = new ArrayList();
-            if (caseData.get(destinationFieldName) != null) {
+            if (appendToDestination && caseData.get(destinationFieldName) != null) {
                 destinationList.addAll((List) caseData.get(destinationFieldName));
             }
             destinationList.addAll((List) caseData.get(sourceFieldName));

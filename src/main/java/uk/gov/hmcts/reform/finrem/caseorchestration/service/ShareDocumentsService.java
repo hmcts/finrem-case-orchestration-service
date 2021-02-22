@@ -59,7 +59,7 @@ public class ShareDocumentsService {
     }
 
     private void copyDocumentCollections(CaseDetails caseDetails, Map<String, String> documentCollectionsSharingMap) {
-        documentCollectionsSharingMap.entrySet().stream().forEach(sourceToDestinationMapEntry -> caseDataService.copyCollection(caseDetails.getData(),
+        documentCollectionsSharingMap.entrySet().stream().forEach(sourceToDestinationMapEntry -> caseDataService.overwriteCollection(caseDetails.getData(),
             sourceToDestinationMapEntry.getKey(), sourceToDestinationMapEntry.getValue()));
     }
 
