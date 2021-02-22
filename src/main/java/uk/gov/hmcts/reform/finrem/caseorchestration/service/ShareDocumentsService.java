@@ -28,16 +28,16 @@ public class ShareDocumentsService {
         .build();
 
     static final Map<String, String> RESPONDENT_DOCUMENT_COLLECTIONS_SHARING_MAP = ImmutableMap.<String, String>builder()
-        .put("respHearingBundlesCollectionShared", "respHearingBundlesCollShared")
-        .put("respFormEExhibitsCollectionShared", "respFormEExhibitsCollectionShared")
-        .put("respChronologiesCollectionShared", "respChronologiesCollectionShared")
-        .put("respQACollectionShared", "respQACollectionShared")
-        .put("respStatementsExhibitsCollectionShared", "respStatementsExhibitsCollShared")
-        .put("respCaseSummariesCollectionShared", "respCaseSummariesCollectionShared")
-        .put("respFormsHCollectionShared", "respFormsHCollectionShared")
-        .put("respExpertEvidenceCollectionShared", "respExpertEvidenceCollShared")
-        .put("respCorrespondenceDocsCollShared", "respCorrespondenceDocsCollShared")
-        .put("respOtherCollectionShared", "respOtherCollectionShared")
+        .put("respHearingBundlesCollection", "respHearingBundlesCollShared")
+        .put("respFormEExhibitsCollection", "respFormEExhibitsCollectionShared")
+        .put("respChronologiesCollection", "respChronologiesCollectionShared")
+        .put("respQACollection", "respQACollectionShared")
+        .put("respStatementsExhibitsCollection", "respStatementsExhibitsCollShared")
+        .put("respCaseSummariesCollection", "respCaseSummariesCollectionShared")
+        .put("respFormsHCollection", "respFormsHCollectionShared")
+        .put("respExpertEvidenceCollection", "respExpertEvidenceCollShared")
+        .put("respCorrespondenceDocsColl", "respCorrespondenceDocsCollShared")
+        .put("respOtherCollection", "respOtherCollectionShared")
         .build();
 
     private final CaseDataService caseDataService;
