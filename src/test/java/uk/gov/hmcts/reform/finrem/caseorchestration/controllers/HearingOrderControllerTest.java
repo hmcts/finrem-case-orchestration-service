@@ -9,7 +9,9 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DraftDirectionOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.ContestedOrderApprovedLetterService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingOrderService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.util.Optional;
 
@@ -32,6 +34,8 @@ public class HearingOrderControllerTest extends BaseControllerTest {
     @Autowired HearingOrderController hearingOrderController;
 
     @MockBean private HearingOrderService hearingOrderService;
+    @MockBean private ContestedOrderApprovedLetterService contestedOrderApprovedLetterService;
+    @MockBean private IdamService idamService;
     @MockBean private CaseDataService caseDataService;
 
     @Test
@@ -47,7 +51,8 @@ public class HearingOrderControllerTest extends BaseControllerTest {
         DraftDirectionOrder draftDirectionOrder = DraftDirectionOrder.builder().build();
         when(hearingOrderService.draftDirectionOrderCollectionTail(any())).thenReturn(Optional.of(draftDirectionOrder));
 
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = hearingOrderController.startHearingOrderApproval(buildCallbackRequest());
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = hearingOrderController.startHearingOrderApproval(AUTH_TOKEN,
+            buildCallbackRequest());
 
         assertThat(response.getBody().getData().get(LATEST_DRAFT_DIRECTION_ORDER), is(draftDirectionOrder));
     }
@@ -58,7 +63,8 @@ public class HearingOrderControllerTest extends BaseControllerTest {
 
         CallbackRequest callbackRequest = buildCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(LATEST_DRAFT_DIRECTION_ORDER, "any non-null value");
-        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = hearingOrderController.startHearingOrderApproval(callbackRequest);
+        ResponseEntity<AboutToStartOrSubmitCallbackResponse> response = hearingOrderController.startHearingOrderApproval(AUTH_TOKEN,
+            callbackRequest);
 
         assertThat(response.getBody().getData().get(LATEST_DRAFT_DIRECTION_ORDER), is(nullValue()));
     }

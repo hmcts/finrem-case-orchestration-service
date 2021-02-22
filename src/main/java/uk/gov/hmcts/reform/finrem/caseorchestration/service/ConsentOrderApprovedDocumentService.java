@@ -22,6 +22,7 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPROVED_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_ORDER_DIRECTION_JUDGE_NAME;
@@ -52,9 +53,10 @@ public class ConsentOrderApprovedDocumentService {
     private final CaseDataService caseDataService;
 
     public CaseDocument generateApprovedConsentOrderLetter(CaseDetails caseDetails, String authToken) {
-        log.info("Generating Approved Consent Order Letter {} from {} for bulk print",
+        log.info("Generating Approved Consent Order Letter {} from {} for bulk print, case: {}",
             documentConfiguration.getApprovedConsentOrderFileName(),
-            documentConfiguration.getApprovedConsentOrderTemplate());
+            documentConfiguration.getApprovedConsentOrderTemplate(),
+            caseDetails.getId());
 
         return genericDocumentService.generateDocument(authToken,
             caseDataService.isContestedApplication(caseDetails)
@@ -65,7 +67,7 @@ public class ConsentOrderApprovedDocumentService {
     }
 
     public CaseDocument generateApprovedConsentOrderCoverLetter(CaseDetails caseDetails, String authToken) {
-        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterToApplicantTemplateData(caseDetails);
+        CaseDetails caseDetailsForBulkPrint = documentHelper.prepareLetterTemplateData(caseDetails, APPLICANT);
 
         CaseDocument generatedApprovedConsentOrderNotificationLetter = genericDocumentService.generateDocument(authToken, caseDetailsForBulkPrint,
             documentConfiguration.getApprovedConsentOrderNotificationTemplate(),

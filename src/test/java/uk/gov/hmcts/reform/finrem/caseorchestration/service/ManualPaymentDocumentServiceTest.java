@@ -30,6 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.ADDRESSEE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper.PaperNotificationRecipient.APPLICANT;
 
 public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
 
@@ -56,7 +57,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         CaseDocument generatedManualPaymentLetter
-            = manualPaymentDocumentService.generateApplicantManualPaymentLetter(caseDetails, AUTH_TOKEN);
+            = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generatedManualPaymentLetter);
 
@@ -83,7 +84,7 @@ public class ManualPaymentDocumentServiceTest extends BaseServiceTest {
         when(genericDocumentService.generateDocument(any(), any(), any(), any())).thenReturn(caseDocument());
 
         CaseDocument generatedManualPaymentLetter
-            = manualPaymentDocumentService.generateApplicantManualPaymentLetter(caseDetails, AUTH_TOKEN);
+            = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generatedManualPaymentLetter);
 

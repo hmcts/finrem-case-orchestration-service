@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.Organisat
 
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
@@ -21,13 +23,20 @@ public class UpdateSolicitorDetailsService {
 
     private final PrdOrganisationService organisationService;
     private final ObjectMapper objectMapper;
+    private final CaseDataService caseDataService;
 
     public void setApplicantSolicitorOrganisationDetails(String authToken, CaseDetails caseDetails) {
         OrganisationsResponse organisationsResponse = organisationService.retrieveOrganisationsData(authToken);
 
         if (organisationsResponse != null) {
-            caseDetails.getData().put(CONTESTED_SOLICITOR_ADDRESS, convertOrganisationAddressToSolicitorAddress(organisationsResponse));
-            caseDetails.getData().put(CONTESTED_SOLICITOR_FIRM, organisationsResponse.getName());
+            if (caseDataService.isContestedApplication(caseDetails)) {
+                caseDetails.getData().put(CONTESTED_SOLICITOR_ADDRESS, convertOrganisationAddressToSolicitorAddress(organisationsResponse));
+                caseDetails.getData().put(CONTESTED_SOLICITOR_FIRM, organisationsResponse.getName());
+            } else {
+                caseDetails.getData().put(CONSENTED_SOLICITOR_ADDRESS, convertOrganisationAddressToSolicitorAddress(organisationsResponse));
+                caseDetails.getData().put(CONSENTED_SOLICITOR_FIRM, organisationsResponse.getName());
+            }
+
             caseDetails.getData().put(SOLICITOR_REFERENCE, organisationsResponse.getOrganisationIdentifier());
         }
     }

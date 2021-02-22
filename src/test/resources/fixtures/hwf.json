@@ -7,7 +7,12 @@
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
       "ApplicantOrganisationPolicy": {
-        "OrganisationID": "123"
+        "Organisation": {
+          "OrganisationID": "RG-123456789",
+          "OrganisationName": "Solicitor Org"
+        },
+        "OrgPolicyReference": "<org name>",
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
       },
       "d81Question": "No",
       "PBAreference": "ABCD",

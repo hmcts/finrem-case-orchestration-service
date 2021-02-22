@@ -6,14 +6,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.Features;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
 
 import javax.validation.constraints.NotNull;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.RESPONDENT_JOURNEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
 
@@ -42,6 +45,13 @@ public class FeatureToggleService {
             .orElse(false);
     }
 
+    /*
+     * Defaulted to true. Only to be set to false in Preview as ACA API is not deployed there
+     */
+    public boolean isAssignCaseAccessEnabled() {
+        return isFeatureEnabled(ASSIGN_CASE_ACCESS);
+    }
+
     public boolean isRespondentJourneyEnabled() {
         return isFeatureEnabled(RESPONDENT_JOURNEY);
     }
@@ -63,6 +73,10 @@ public class FeatureToggleService {
      */
     public Map<Class, List<String>> getFieldsIgnoredDuringSerialisation() {
         Map<Class, List<String>> ignoredFields = Maps.newHashMap();
+
+        if (!isRespondentJourneyEnabled()) {
+            ignoredFields.put(ContestedUploadedDocument.class, Arrays.asList("caseDocumentConfidential", "hearingDetails"));
+        }
 
         return ignoredFields;
     }

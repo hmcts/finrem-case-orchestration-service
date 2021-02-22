@@ -26,6 +26,8 @@ import java.util.function.UnaryOperator;
 
 import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_LATEST_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_PREVIEW_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL;
@@ -76,8 +78,8 @@ public class ContestedDraftOrderNotApprovedService {
         caseData.put("Court", ContestedCourtHelper.getSelectedCourt(caseDetails));
         caseData.put("JudgeDetails",
             StringUtils.joinWith(" ",
-                caseDetails.getData().get("refusalOrderJudgeType"),
-                caseDetails.getData().get("refusalOrderJudgeName")));
+                caseDetails.getData().get(CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_TYPE),
+                caseDetails.getData().get(CONTESTED_APPLICATION_NOT_APPROVED_JUDGE_NAME)));
         caseData.put("ContestOrderNotApprovedRefusalReasonsFormatted", formatRefusalReasons(caseDetails));
 
         return caseDetails;
@@ -93,7 +95,7 @@ public class ContestedDraftOrderNotApprovedService {
                 formattedRefusalReasons.append('\n');
             }
             formattedRefusalReasons.append("- ");
-            formattedRefusalReasons.append(((Map<String, Map>) reason).get("value").get("judgeNotApprovedReasons"));
+            formattedRefusalReasons.append(((Map<String, Map>) reason).get("value").get(CONTESTED_APPLICATION_NOT_APPROVED_REASONS_FOR_REFUSAL));
         });
         return formattedRefusalReasons.toString();
     }

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.collect.Maps;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -7,6 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ContestedUploadedDocument;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
@@ -17,7 +23,9 @@ public class FeatureToggleServiceTest {
 
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
-        "feature.toggle.respondent_journey=true"
+        "feature.toggle.respondent_journey=true",
+        "feature.toggle.send_to_frc=true",
+        "feature.toggle.assign_case_access=true"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOn extends BaseServiceTest {
 
@@ -34,12 +42,22 @@ public class FeatureToggleServiceTest {
             assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
         }
 
+        @Test
+        public void isSendToFRCEnabledReturnsTrue() {
+            assertThat(featureToggleService.isSendToFRCEnabled(), is(true));
+        }
+
+        @Test
+        public void isAssignCaseAccessEnabledReturnsTrue() {
+            assertThat(featureToggleService.isAssignCaseAccessEnabled(), is(true));
+        }
     }
 
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
         "feature.toggle.respondent_journey=false",
         "feature.toggle.send_to_frc=false",
+        "feature.toggle.assign_case_access=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff extends BaseServiceTest {
 
@@ -53,7 +71,9 @@ public class FeatureToggleServiceTest {
 
         @Test
         public void getFieldsIgnoredDuringSerialisationContainsElementsWhenFeaturesDisabled() {
-            assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(anEmptyMap()));
+            Map<Class, List<String>> ignoredFields = Maps.newHashMap();
+            ignoredFields.put(ContestedUploadedDocument.class, Arrays.asList("caseDocumentConfidential", "hearingDetails"));
+            assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(ignoredFields));
         }
 
         @Test
@@ -61,5 +81,9 @@ public class FeatureToggleServiceTest {
             assertThat(featureToggleService.isSendToFRCEnabled(), is(false));
         }
 
+        @Test
+        public void isAssignCaseAccessEnabledReturnsFalse() {
+            assertThat(featureToggleService.isAssignCaseAccessEnabled(), is(false));
+        }
     }
 }

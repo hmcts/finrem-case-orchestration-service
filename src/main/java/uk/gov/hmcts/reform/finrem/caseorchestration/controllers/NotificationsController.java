@@ -15,17 +15,13 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AdditionalHearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignedToJudgeDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.BulkPrintService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.ManualPaymentDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -42,10 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class NotificationsController implements BaseController {
 
     private final NotificationService notificationService;
-    private final BulkPrintService bulkPrintService;
-    private final AssignedToJudgeDocumentService assignedToJudgeDocumentService;
-    private final HelpWithFeesDocumentService helpWithFeesDocumentService;
-    private final ManualPaymentDocumentService manualPaymentDocumentService;
+    private final PaperNotificationService paperNotificationService;
     private final GeneralEmailService generalEmailService;
     private final CaseDataService caseDataService;
     private final HearingDocumentService hearingDocumentService;
@@ -57,7 +50,7 @@ public class NotificationsController implements BaseController {
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "HWFSuccessful notification sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendHwfSuccessfulConfirmationEmail(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendHwfSuccessfulConfirmationNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody CallbackRequest callbackRequest) {
 
@@ -67,20 +60,9 @@ public class NotificationsController implements BaseController {
         Map<String, Object> caseData = caseDetails.getData();
 
         if (caseDataService.isConsentedApplication(callbackRequest.getCaseDetails())) {
-            if (caseDataService.isPaperApplication(caseData)) {
-                log.info("Case is paper application");
-                log.info("Sending Consented HWF Successful notification letter for bulk print");
+            paperNotificationService.printHwfSuccessfulNotification(caseDetails, authToken);
 
-                // Generate PDF notification letter
-                CaseDocument hwfSuccessfulNotificationLetter =
-                    helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(caseDetails, authToken);
-
-                // Send notification letter to Bulk Print
-                bulkPrintService.sendDocumentForPrint(hwfSuccessfulNotificationLetter, caseDetails);
-                log.info("Notification letter sent to Bulk Print: {} for Case ID: {}", hwfSuccessfulNotificationLetter,
-                    caseDetails.getId());
-
-            } else if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+            if (!caseDataService.isPaperApplication(caseData) && caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
                 log.info("Sending Consented HWF Successful email notification to Solicitor");
                 notificationService.sendConsentedHWFSuccessfulConfirmationEmail(caseDetails);
             }
@@ -88,6 +70,7 @@ public class NotificationsController implements BaseController {
             log.info("Sending Contested HWF Successful email notification to Solicitor");
             notificationService.sendContestedHwfSuccessfulConfirmationEmail(caseDetails);
         }
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
@@ -96,7 +79,7 @@ public class NotificationsController implements BaseController {
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Case assigned to Judge notification sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendAssignToJudgeConfirmationEmail(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendAssignToJudgeConfirmationNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody CallbackRequest callbackRequest) {
 
@@ -106,19 +89,9 @@ public class NotificationsController implements BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        if (caseDataService.isPaperApplication(caseData)) {
-            log.info("Sending AssignedToJudge notification letter for bulk print for Case ID: {}",
-                callbackRequest.getCaseDetails().getId());
+        paperNotificationService.printAssignToJudgeNotification(caseDetails, authToken);
 
-            // Generate PDF notification letter
-            CaseDocument assignedToJudgeNotificationLetter =
-                assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, authToken);
-
-            // Send notification letter to Bulk Print
-            bulkPrintService.sendDocumentForPrint(assignedToJudgeNotificationLetter, caseDetails);
-            log.info("Notification letter sent to Bulk Print: {} for Case ID: {}", assignedToJudgeNotificationLetter,
-                caseDetails.getId());
-        } else if (caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
+        if (!caseDataService.isPaperApplication(caseData) && caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails)) {
             log.info("Sending email notification to Applicant Solicitor for Judge successfully assigned to case");
             notificationService.sendAssignToJudgeConfirmationEmailToApplicantSolicitor(caseDetails);
         }
@@ -137,7 +110,7 @@ public class NotificationsController implements BaseController {
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Case assigned to Judge notification sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentInContestedAssignToJudgeConfirmationEmail(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentInContestedAssignToJudgeConfirmationPaperNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody CallbackRequest callbackRequest) {
 
@@ -146,21 +119,7 @@ public class NotificationsController implements BaseController {
         validateCaseData(callbackRequest);
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        if (bulkPrintService.shouldPrintForApplicant(caseDetails)) {
-            log.info("Sending applicant Consent in Contested AssignedToJudge notification letter for bulk print for Case ID: {}",
-                callbackRequest.getCaseDetails().getId());
-
-            CaseDocument applicantAssignedToJudgeNotificationLetter =
-                assignedToJudgeDocumentService.generateApplicantConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken);
-            bulkPrintService.sendDocumentForPrint(applicantAssignedToJudgeNotificationLetter, caseDetails);
-        }
-
-        log.info("Sending respondent Consent in Contested AssignedToJudge notification letter for bulk print for Case ID: {}",
-            callbackRequest.getCaseDetails().getId());
-
-        CaseDocument respondentAssignedToJudgeNotificationLetter =
-            assignedToJudgeDocumentService.generateRespondentConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken);
-        bulkPrintService.sendDocumentForPrint(respondentAssignedToJudgeNotificationLetter, caseDetails);
+        paperNotificationService.printConsentInContestedAssignToJudgeConfirmationNotification(caseDetails, authToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
@@ -527,17 +486,14 @@ public class NotificationsController implements BaseController {
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Manual Payment letter sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendManualPayment(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendManualPaymentPaperNotification(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("Received request to send Manual Payment Letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Received request to send Manual Payment Letter for Case ID: {}", caseDetails.getId());
         validateCaseData(callbackRequest);
 
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        if (caseDataService.isContestedPaperApplication(caseDetails)) {
-            CaseDocument applicantManualPaymentLetter = manualPaymentDocumentService.generateApplicantManualPaymentLetter(caseDetails, authToken);
-            bulkPrintService.sendDocumentForPrint(applicantManualPaymentLetter, caseDetails);
-        }
+        paperNotificationService.printManualPaymentNotification(caseDetails, authToken);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }

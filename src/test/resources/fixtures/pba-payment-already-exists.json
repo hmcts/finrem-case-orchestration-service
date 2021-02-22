@@ -6,6 +6,14 @@
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyMVP2",
     "case_data": {
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "RG-123456789",
+          "OrganisationName": "Solicitor Org"
+        },
+        "OrgPolicyReference": "<org name>",
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
       "PBANumber": "PBA123",
       "PBAPaymentReference": "RC-123456",
       "d81Question": "No",

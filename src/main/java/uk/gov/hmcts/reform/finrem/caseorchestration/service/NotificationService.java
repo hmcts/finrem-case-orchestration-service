@@ -20,16 +20,20 @@ import java.util.Map;
 import java.util.Objects;
 
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_REFER_TO_JUDGE_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class NotificationService {
+
     private final NotificationServiceConfiguration notificationServiceConfiguration;
     private final RestTemplate restTemplate;
     private final FeatureToggleService featureToggleService;
@@ -315,7 +319,8 @@ public class NotificationService {
     public boolean shouldEmailRespondentSolicitor(Map<String, Object> caseData) {
         return !caseDataService.isPaperApplication(caseData)
             && caseDataService.isRespondentRepresentedByASolicitor(caseData)
-            && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData);
+            && caseDataService.isNotEmpty(RESP_SOLICITOR_EMAIL, caseData)
+            && !NO_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT)));
     }
 
     public boolean shouldEmailApplicantSolicitor(CaseDetails caseDetails) {
