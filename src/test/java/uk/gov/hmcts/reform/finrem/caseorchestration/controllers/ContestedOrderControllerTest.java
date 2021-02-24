@@ -14,7 +14,6 @@ import java.net.URISyntaxException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -59,8 +58,8 @@ public class ContestedOrderControllerTest extends BaseControllerTest {
         result.andExpect(status().isOk());
         result.andDo(print());
 
-        verify(contestedCaseOrderService, times(1)).printAndMailHearingDocuments(any(), eq(AUTH_TOKEN));
-        verify(contestedCaseOrderService, times(1)).printAndMailHearingDocuments(any(), eq(AUTH_TOKEN));
-        verify(contestedCaseOrderService, times(1)).stampFinalOrder(any(), eq(AUTH_TOKEN));
+        verify(contestedCaseOrderService).printAndMailHearingDocuments(any(), eq(AUTH_TOKEN));
+        verify(contestedCaseOrderService).printAndMailHearingDocuments(any(), eq(AUTH_TOKEN));
+        verify(contestedCaseOrderService).stampFinalOrder(any(), eq(AUTH_TOKEN));
     }
 }
