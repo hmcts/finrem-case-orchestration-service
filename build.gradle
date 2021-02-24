@@ -12,7 +12,7 @@ buildscript {
 }
 
 plugins {
-    id 'au.com.dius.pact' version '4.1.6'
+    id 'au.com.dius.pact' version '4.1.0'
     id 'application'
     id 'checkstyle'
     id 'com.github.ben-manes.versions' version '0.36.0'
@@ -75,14 +75,14 @@ sourceSets {
 
     contract {
         java {
-            compileClasspath += main.output + test.output
-            runtimeClasspath += main.output + test.output
+            compileClasspath += main.output
+            runtimeClasspath += main.output
             srcDirs = ['src/contractTests/java']
         }
-        resources {
-            srcDirs = ['src/contractTests/resources']
-        }
+        resources.srcDir file('src/contractTest/resources')
     }
+
+
 }
 
 sourceSets {
@@ -104,30 +104,30 @@ configurations {
 }
 
 def versions = [
-    bspCommonLib            : '0.0.44',
-    ccdClient               : '4.7.3',
-    commonsBeanUtils        : '1.9.4',
-    commonsIo               : '2.7',
-    commonsLang3            : '3.11',
-    gradlePitest            : '1.5.1',
-    jsonAssert              : '1.2.3',
-    junit                   : '4.13.1',
-    lombok                  : '1.18.12',
-    mockito                 : '3.4.4',
-    nimbus                  : '5.1',
-    pact_version            : '3.6.15',
-    pdfbox                  : '2.0.8',
-    pitest                  : '1.5.2',
-    powerMock               : '1.7.3',
-    reformLogging           : '5.1.5',
-    restAssured             : '3.0.3',
-    serenity                : '2.2.12',
-    serenityCucumber        : '1.9.51',
-    serviceTokenGenerator   : '3.1.1',
-    springfoxSwagger        : '2.9.2',
-    sonarPitest             : '0.5',
-    tomcat                  : '9.0.40',
-    wiremock                : '2.27.2'
+        bspCommonLib         : '0.0.44',
+        ccdClient            : '4.7.3',
+        commonsBeanUtils     : '1.9.4',
+        commonsIo            : '2.7',
+        commonsLang3         : '3.11',
+        gradlePitest         : '1.5.1',
+        jsonAssert           : '1.2.3',
+        junit                : '4.13.1',
+        lombok               : '1.18.12',
+        mockito              : '3.4.4',
+        nimbus               : '5.1',
+        pact_version         : '4.1.11',
+        pdfbox               : '2.0.8',
+        pitest               : '1.5.2',
+        powerMock            : '1.7.3',
+        reformLogging        : '5.1.5',
+        restAssured          : '3.0.3',
+        serenity             : '2.2.12',
+        serenityCucumber     : '1.9.51',
+        serviceTokenGenerator: '3.1.1',
+        springfoxSwagger     : '2.9.2',
+        sonarPitest          : '0.5',
+        tomcat               : '9.0.40',
+        wiremock             : '2.27.2'
 ]
 
 dependencyManagement {
@@ -176,12 +176,12 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation group: 'com.jayway.jsonpath', name:'json-path-assert', version: versions.jsonPathAssert
+    implementation group: 'com.jayway.jsonpath', name: 'json-path-assert', version: versions.jsonPathAssert
     implementation group: 'commons-io', name: 'commons-io', version: versions.commonsIo
     implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
     implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: versions.springfoxSwagger
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3
-    implementation group: 'org.codehaus.sonar-plugins', name:'sonar-pitest-plugin', version: versions.sonarPitest
+    implementation group: 'org.codehaus.sonar-plugins', name: 'sonar-pitest-plugin', version: versions.sonarPitest
     implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     implementation group: 'org.springframework.boot', name: 'spring-boot-configuration-processor'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
@@ -202,8 +202,7 @@ dependencies {
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-web'
 
-    testImplementation group: 'au.com.dius', name: 'pact-jvm-provider-spring_2.12', version: versions.pact_version
-    testImplementation group: 'com.github.tomakehurst', name:'wiremock', version: versions.wiremock
+    testImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 
@@ -234,12 +233,13 @@ dependencies {
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
-    contractImplementation group: 'au.com.dius', name: 'pact-jvm-provider-spring_2.12', version: versions.pact_version
-    contractImplementation group: 'au.com.dius', name: 'pact-jvm-consumer-junit5_2.12', version: versions.pact_version
-    contractImplementation group: 'au.com.dius', name: 'pact-jvm-consumer-java8_2.12', version: versions.pact_version
-    contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    contractImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0-M1'
-    contractImplementation 'org.junit.jupiter:junit-jupiter-engine:5.7.0-M1'
+    contractCompile group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact_version
+    contractCompile group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact_version
+    contractRuntime group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact_version
+    contractRuntime group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact_version
+
+    contractCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+
     contractImplementation sourceSets.main.runtimeClasspath
     contractImplementation sourceSets.test.runtimeClasspath
 }
@@ -329,7 +329,7 @@ build.dependsOn jacocoTestReport
 bootJar {
     manifest {
         attributes 'Implementation-Title': project.name,
-            'Implementation-Version': project.version
+                'Implementation-Version': project.version
     }
     archiveFileName = 'finrem-case-orchestration.jar'
 }
@@ -340,9 +340,9 @@ wrapper {
 
 pact {
     publish {
-        pactDirectory = 'target/pacts'
-        pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?:'http://localhost:80'
-        tags = [System.getenv("PACT_BRANCH_NAME") ?:'Dev']
+        pactDirectory = 'pacts'
+        pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
+        tags = [System.getenv("PACT_BRANCH_NAME") ?: 'Dev']
         version = versions.pact_version
     }
 }
@@ -376,8 +376,30 @@ task functional(type: Test) {
 }
 
 task contractTest(type: Test) {
-    description = "Runs Contract Tests"
+    group = 'Delivery pipeline'
+    description = 'Runs the consumer Pact tests'
     setTestClassesDirs(sourceSets.contract.output.classesDirs)
     setClasspath(sourceSets.contract.runtimeClasspath)
-    finalizedBy aggregate
+    systemProperty 'pact.rootDir', "pacts"
 }
+
+project.ext {
+    pactVersion = getCheckedOutGitCommitHash()
+}
+
+task runAndPublishConsumerPactTests(type: Test){
+    logger.lifecycle("Runs pact Tests")
+    testClassesDirs = sourceSets.contract.output.classesDirs
+    classpath = sourceSets.contract.runtimeClasspath
+
+}
+
+runAndPublishConsumerPactTests.dependsOn contractTest
+
+runAndPublishConsumerPactTests.finalizedBy pactPublish
+
+def getCheckedOutGitCommitHash() {
+    'git rev-parse --verify --short HEAD'.execute().text.trim()
+}
+
+
