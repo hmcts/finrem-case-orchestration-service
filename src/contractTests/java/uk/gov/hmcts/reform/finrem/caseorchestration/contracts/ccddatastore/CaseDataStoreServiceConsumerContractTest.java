@@ -66,7 +66,7 @@ public class CaseDataStoreServiceConsumerContractTest extends BaseTest {
             .method("POST")
             .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
             .path("/case-users")
-            .body(createJsonObject(buildRemoveRoleRequest(caseDetails)))
+            .body(createJsonObject(buildCaseAssignedUserRolesRequest(caseDetails)))
             .willRespondWith()
             .status(HttpStatus.SC_OK)
             .toPact();
@@ -82,7 +82,7 @@ public class CaseDataStoreServiceConsumerContractTest extends BaseTest {
         ccdDataStoreService.addApplicantSolicitorRole(caseDetails, AUTHORIZATION_TOKEN, TEST_ORG_ID);
     }
 
-    private CaseAssignedUserRolesRequest buildRemoveRoleRequest(CaseDetails caseDetails) {
+    private CaseAssignedUserRolesRequest buildCaseAssignedUserRolesRequest(CaseDetails caseDetails) {
         return new CaseAssignedUserRolesRequestMapper().mapToCaseAssignedUserRolesRequest(caseDetails, ASSIGNEE_ID, CREATOR_USER_ROLE, TEST_ORG_ID);
     }
 
