@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.Organisat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
@@ -57,7 +56,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @MockBean private PBAPaymentService pbaPaymentService;
     @MockBean private CaseDataService caseDataService;
     @MockBean private AssignCaseAccessService assignCaseAccessService;
-    @MockBean private CcdDataStoreService ccdDataStoreService;
     @MockBean private FeatureToggleService featureToggleService;
     @MockBean private PrdOrganisationService prdOrganisationService;
 
@@ -110,7 +108,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest())
             .andExpect(content().string(startsWith(SERVER_ERROR_MSG)));
-        verifyNoInteractions(ccdDataStoreService);
         verifyNoInteractions(assignCaseAccessService);
     }
 
@@ -155,7 +152,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
-        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
         verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
 
@@ -172,7 +168,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
-        verifyNoInteractions(ccdDataStoreService);
         verifyNoInteractions(assignCaseAccessService);
     }
 
@@ -194,7 +189,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
-        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
         verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
 
@@ -211,7 +205,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
-        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
         verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
 
@@ -229,7 +222,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
-        verifyNoInteractions(ccdDataStoreService);
         verifyNoInteractions(assignCaseAccessService);
     }
 
@@ -251,7 +243,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
-        verifyNoInteractions(ccdDataStoreService);
         verifyNoInteractions(assignCaseAccessService);
     }
 
@@ -270,7 +261,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
-        verifyNoInteractions(ccdDataStoreService);
         verifyNoInteractions(assignCaseAccessService);
     }
 
@@ -288,7 +278,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
-        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
         verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
 }
