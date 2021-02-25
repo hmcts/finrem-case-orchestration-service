@@ -8,5 +8,5 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "ccd.data-store.api")
 public class CcdDataStoreServiceConfiguration {
-    private String removeCaseRolesUrl;
+    private String caseUsersUrl;
 }

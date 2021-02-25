@@ -10,8 +10,8 @@ import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
@@ -55,7 +55,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     @MockBean private FeeService feeService;
     @MockBean private PBAPaymentService pbaPaymentService;
     @MockBean private CaseDataService caseDataService;
-    @MockBean private AssignCaseAccessService assignCaseAccessService;
+    @MockBean private CcdDataStoreService ccdDataStoreService;
     @MockBean private FeatureToggleService featureToggleService;
     @MockBean private PrdOrganisationService prdOrganisationService;
 
@@ -108,7 +108,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isBadRequest())
             .andExpect(content().string(startsWith(SERVER_ERROR_MSG)));
-        verifyNoInteractions(assignCaseAccessService);
+        verifyNoInteractions(ccdDataStoreService);
     }
 
     private void doPBASetUp(boolean success) throws Exception {
@@ -152,7 +152,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
-        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
+        verify(ccdDataStoreService, times(1)).addApplicantSolicitorRole(any(), eq(AUTH_TOKEN), eq(TEST_SOLICITOR_REFERENCE));
     }
 
     @Test
@@ -168,7 +168,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
-        verifyNoInteractions(assignCaseAccessService);
+        verifyNoInteractions(ccdDataStoreService);
     }
 
     @Test
@@ -189,7 +189,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
-        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
+        verify(ccdDataStoreService, times(1)).addApplicantSolicitorRole(any(), eq(AUTH_TOKEN), eq(TEST_SOLICITOR_REFERENCE));
     }
 
     @Test
@@ -205,7 +205,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
-        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
+        verify(ccdDataStoreService, times(1)).addApplicantSolicitorRole(any(), eq(AUTH_TOKEN), eq(TEST_SOLICITOR_REFERENCE));
     }
 
     @Test
@@ -222,7 +222,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
-        verifyNoInteractions(assignCaseAccessService);
+        verifyNoInteractions(ccdDataStoreService);
     }
 
     @Test
@@ -243,7 +243,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
-        verifyNoInteractions(assignCaseAccessService);
+        verifyNoInteractions(ccdDataStoreService);
     }
 
     @Test
@@ -261,14 +261,14 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
-        verifyNoInteractions(assignCaseAccessService);
+        verifyNoInteractions(ccdDataStoreService);
     }
 
     @Test
-    public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists_acaApiFailure() throws Exception {
+    public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists_ccdDataStoreApiFailure() throws Exception {
         doPBASetUp(true);
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-        doThrow(feignError()).when(assignCaseAccessService).assignCaseAccess(any(), eq(AUTH_TOKEN));
+        doThrow(feignError()).when(ccdDataStoreService).addApplicantSolicitorRole(any(), eq(AUTH_TOKEN), eq(TEST_SOLICITOR_REFERENCE));
 
         mvc.perform(post(PBA_PAYMENT_URL)
             .content(requestContent.toString())
@@ -278,6 +278,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
-        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
+        verify(ccdDataStoreService, times(1)).addApplicantSolicitorRole(any(), eq(AUTH_TOKEN), eq(TEST_SOLICITOR_REFERENCE));
     }
 }

@@ -7,6 +7,6 @@ import java.util.List;
 
 @Builder
 @Getter
-public class RemoveUserRolesRequest {
+public class CaseAssignedUserRolesRequest {
     private List<CaseUsers> case_users;
 }

@@ -7,9 +7,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CcdDataStoreServiceConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.RemoveUserRolesRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CaseAssignedUserRolesRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseAssignedUserRolesRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseUsers;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.RemoveUserRolesRequest;
 
 import java.util.Arrays;
 
@@ -20,8 +20,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_CASE_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_USER_ID;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CREATOR_USER_ROLE;
 
 public class CcdDataStoreServiceTest extends BaseServiceTest {
@@ -29,15 +31,15 @@ public class CcdDataStoreServiceTest extends BaseServiceTest {
     @Autowired private CcdDataStoreService ccdDataStoreService;
 
     @MockBean private CcdDataStoreServiceConfiguration ccdDataStoreServiceConfiguration;
-    @MockBean private RemoveUserRolesRequestMapper removeUserRolesRequestMapper;
+    @MockBean private CaseAssignedUserRolesRequestMapper caseAssignedUserRolesRequestMapper;
     @MockBean private IdamService idamService;
     @MockBean private RestService restService;
 
-    RemoveUserRolesRequest removeUserRolesRequest;
+    CaseAssignedUserRolesRequest caseAssignedUserRolesRequest;
 
     @Before
     public void setUp() {
-        removeUserRolesRequest = RemoveUserRolesRequest
+        caseAssignedUserRolesRequest = CaseAssignedUserRolesRequest
             .builder()
             .case_users(
                 Arrays.asList(
@@ -46,24 +48,27 @@ public class CcdDataStoreServiceTest extends BaseServiceTest {
                         .case_id(TEST_CASE_ID)
                         .user_id(TEST_USER_ID)
                         .case_role(CREATOR_USER_ROLE)
+                        .organisation_id(TEST_ORG_ID)
                         .build()))
             .build();
 
         when(idamService.getIdamUserId(AUTH_TOKEN)).thenReturn(TEST_USER_ID);
-        when(removeUserRolesRequestMapper.mapToRemoveUserRolesRequest(any(CaseDetails.class), eq(TEST_USER_ID), eq(CREATOR_USER_ROLE)))
-            .thenReturn(removeUserRolesRequest);
-        when(ccdDataStoreServiceConfiguration.getRemoveCaseRolesUrl()).thenReturn(TEST_URL);
+        when(caseAssignedUserRolesRequestMapper.mapToCaseAssignedUserRolesRequest(
+            any(CaseDetails.class), eq(TEST_USER_ID), eq(APP_SOLICITOR_POLICY), eq(TEST_ORG_ID)))
+            .thenReturn(caseAssignedUserRolesRequest);
+        when(ccdDataStoreServiceConfiguration.getCaseUsersUrl()).thenReturn(TEST_URL);
     }
 
     @Test
-    public void removeCreatorRole() {
+    public void addCreatorRole() {
         CaseDetails caseDetails = buildCaseDetails();
 
-        ccdDataStoreService.removeCreatorRole(caseDetails, AUTH_TOKEN);
+        ccdDataStoreService.addApplicantSolicitorRole(caseDetails, AUTH_TOKEN, TEST_ORG_ID);
 
         verify(idamService, times(1)).getIdamUserId(AUTH_TOKEN);
-        verify(removeUserRolesRequestMapper, times(1)).mapToRemoveUserRolesRequest(caseDetails, TEST_USER_ID, CREATOR_USER_ROLE);
-        verify(ccdDataStoreServiceConfiguration, times(1)).getRemoveCaseRolesUrl();
-        verify(restService, times(1)).restApiDeleteCall(AUTH_TOKEN, TEST_URL, removeUserRolesRequest);
+        verify(caseAssignedUserRolesRequestMapper, times(1))
+            .mapToCaseAssignedUserRolesRequest(caseDetails, TEST_USER_ID, APP_SOLICITOR_POLICY, TEST_ORG_ID);
+        verify(ccdDataStoreServiceConfiguration, times(1)).getCaseUsersUrl();
+        verify(restService, times(1)).restApiPostCall(AUTH_TOKEN, TEST_URL, caseAssignedUserRolesRequest);
     }
 }

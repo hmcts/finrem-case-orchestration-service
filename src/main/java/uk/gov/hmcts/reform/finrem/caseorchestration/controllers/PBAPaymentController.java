@@ -17,8 +17,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeeService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
@@ -50,7 +50,7 @@ public class PBAPaymentController implements BaseController {
     private final FeeService feeService;
     private final PBAPaymentService pbaPaymentService;
     private final CaseDataService caseDataService;
-    private final AssignCaseAccessService assignCaseAccessService;
+    private final CcdDataStoreService ccdDataStoreService;
     private final FeatureToggleService featureToggleService;
     private final PrdOrganisationService prdOrganisationService;
 
@@ -95,7 +95,7 @@ public class PBAPaymentController implements BaseController {
                     if (prdOrganisation.getOrganisationIdentifier().equals(applicantOrgId)) {
                         log.info("Assigning case access for Case ID: {}", caseDetails.getId());
                         try {
-                            assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
+                            ccdDataStoreService.addApplicantSolicitorRole(caseDetails, authToken, applicantOrgId);
                         } catch (Exception e) {
                             log.error("Assigning case access threw exception for Case ID: {}, {}",
                                 caseDetails.getId(), e.getMessage());

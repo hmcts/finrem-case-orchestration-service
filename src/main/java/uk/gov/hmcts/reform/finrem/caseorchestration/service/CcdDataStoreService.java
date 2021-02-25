@@ -5,10 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CcdDataStoreServiceConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.RemoveUserRolesRequestMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.RemoveUserRolesRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CaseAssignedUserRolesRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseAssignedUserRolesRequest;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CREATOR_USER_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 
 @Service
 @Slf4j
@@ -16,21 +16,22 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class CcdDataStoreService {
 
     private final CcdDataStoreServiceConfiguration ccdDataStoreServiceConfiguration;
-    private final RemoveUserRolesRequestMapper removeUserRolesRequestMapper;
+    private final CaseAssignedUserRolesRequestMapper caseAssignedUserRolesRequestMapper;
     private final IdamService idamService;
     private final RestService restService;
 
-    public void removeCreatorRole(CaseDetails caseDetails, String authorisationToken) {
-        removeRole(caseDetails, authorisationToken, CREATOR_USER_ROLE);
+    public void addApplicantSolicitorRole(CaseDetails caseDetails, String authorisationToken, String organisationId) {
+        addRole(caseDetails, authorisationToken, APP_SOLICITOR_POLICY, organisationId);
     }
 
-    private void removeRole(CaseDetails caseDetails, String authorisationToken, String role) {
+    private void addRole(CaseDetails caseDetails, String authorisationToken, String role, String organisationId) {
         String userId = idamService.getIdamUserId(authorisationToken);
-        RemoveUserRolesRequest removeUserRolesRequest = removeUserRolesRequestMapper.mapToRemoveUserRolesRequest(caseDetails, userId, role);
+        CaseAssignedUserRolesRequest caseAssignedUserRolesRequest =
+            caseAssignedUserRolesRequestMapper.mapToCaseAssignedUserRolesRequest(caseDetails, userId, role, organisationId);
 
-        restService.restApiDeleteCall(
+        restService.restApiPostCall(
             authorisationToken,
-            ccdDataStoreServiceConfiguration.getRemoveCaseRolesUrl(),
-            removeUserRolesRequest);
+            ccdDataStoreServiceConfiguration.getCaseUsersUrl(),
+            caseAssignedUserRolesRequest);
     }
 }

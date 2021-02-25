@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -97,19 +96,16 @@ public class PBAPaymentTest extends BaseTest {
 
     @ClassRule public static WireMockClassRule feeLookUpService = new WireMockClassRule(9001);
     @ClassRule public static WireMockClassRule idamService = new WireMockClassRule(4501);
-    @ClassRule public static WireMockClassRule acaService = new WireMockClassRule(4454);
     @ClassRule public static WireMockClassRule dataStoreService = new WireMockClassRule(4452);
     @ClassRule public static WireMockClassRule prdService = new WireMockClassRule(8090);
 
     private String idamUrl = "/details";
-    private String acaUrl = "/case-assignments";
     private String dataStoreUrl = "/case-users";
     private String prdUrl = "/refdata/external/v1/organisations";
 
     @Before
     public void setUp() {
         stubForIdam();
-        stubForAca(HttpStatus.OK);
         stubForDataStore();
         stubForPrd();
     }
@@ -134,7 +130,7 @@ public class PBAPaymentTest extends BaseTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
 
-        verify(postRequestedFor(urlMatching(acaUrl)));
+        verify(postRequestedFor(urlMatching(dataStoreUrl)));
     }
 
     @Test
@@ -170,24 +166,6 @@ public class PBAPaymentTest extends BaseTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void shouldFailWhenAcaCallFails() throws Exception {
-        setUpPbaPayment("/fixtures/pba-payment.json");
-        stubFeeLookUp();
-        stubForAca(HttpStatus.NOT_FOUND);
-        stubPayment(PAYMENT_RESPONSE);
-
-        webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
-            .content(objectMapper.writeValueAsString(request))
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.errors", hasSize(1)))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-
-        verify(postRequestedFor(urlMatching(acaUrl)));
     }
 
     @Test
@@ -239,18 +217,8 @@ public class PBAPaymentTest extends BaseTest {
             ));
     }
 
-    private void stubForAca(HttpStatus httpStatus) {
-        acaService.stubFor(post(urlEqualTo(acaUrl))
-            .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
-            .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
-            .willReturn(
-                aResponse()
-                    .withStatus(httpStatus.value())
-            ));
-    }
-
     private void stubForDataStore() {
-        dataStoreService.stubFor(delete(urlEqualTo(dataStoreUrl))
+        dataStoreService.stubFor(post(urlEqualTo(dataStoreUrl))
             .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
             .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
             .willReturn(

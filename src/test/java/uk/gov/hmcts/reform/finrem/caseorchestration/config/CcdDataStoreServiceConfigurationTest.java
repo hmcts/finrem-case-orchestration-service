@@ -11,6 +11,6 @@ public class CcdDataStoreServiceConfigurationTest extends BaseServiceTest {
 
     @Test
     public void shouldReturnTheConfiguration() {
-        assertEquals("http://localhost:4452/case-users", ccdDataStoreServiceConfiguration.getRemoveCaseRolesUrl());
+        assertEquals("http://localhost:4452/case-users", ccdDataStoreServiceConfiguration.getCaseUsersUrl());
     }
 }

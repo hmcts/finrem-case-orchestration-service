@@ -15,8 +15,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.CcdDataStoreServiceConfiguration;
-import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.RemoveUserRolesRequestMapper;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.RemoveUserRolesRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.CaseAssignedUserRolesRequestMapper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.CaseAssignedUserRolesRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CcdDataStoreService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_ORG_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CREATOR_USER_ROLE;
 
 @SpringBootTest
@@ -61,8 +62,8 @@ public class CaseDataStoreServiceConsumerContractTest extends BaseTest {
         // @formatter:off
         return builder
             .given("A User Role exists for a Case")
-            .uponReceiving("A Request to remove a User Role")
-            .method("DELETE")
+            .uponReceiving("A Request to add a User Role")
+            .method("POST")
             .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
             .path("/case-users")
             .body(createJsonObject(buildRemoveRoleRequest(caseDetails)))
@@ -73,16 +74,16 @@ public class CaseDataStoreServiceConsumerContractTest extends BaseTest {
 
     @Test
     @PactVerification()
-    public void verifyRemoveRole() {
+    public void verifyAddApplicantSolicitorRole() {
 
         given(idamService.getIdamUserId(anyString())).willReturn(ASSIGNEE_ID);
-        given(ccdDataStoreServiceConfiguration.getRemoveCaseRolesUrl()).willReturn("http://localhost:8891/case-users");
+        given(ccdDataStoreServiceConfiguration.getCaseUsersUrl()).willReturn("http://localhost:8891/case-users");
         given(authTokenGenerator.generate()).willReturn(SERVICE_AUTH_TOKEN);
-        ccdDataStoreService.removeCreatorRole(caseDetails, AUTHORIZATION_TOKEN);
+        ccdDataStoreService.addApplicantSolicitorRole(caseDetails, AUTHORIZATION_TOKEN, TEST_ORG_ID);
     }
 
-    private RemoveUserRolesRequest buildRemoveRoleRequest(CaseDetails caseDetails) {
-        return new RemoveUserRolesRequestMapper().mapToRemoveUserRolesRequest(caseDetails, ASSIGNEE_ID, CREATOR_USER_ROLE);
+    private CaseAssignedUserRolesRequest buildRemoveRoleRequest(CaseDetails caseDetails) {
+        return new CaseAssignedUserRolesRequestMapper().mapToCaseAssignedUserRolesRequest(caseDetails, ASSIGNEE_ID, CREATOR_USER_ROLE, TEST_ORG_ID);
     }
 
     private String createJsonObject(Object obj) throws IOException {

@@ -9,4 +9,5 @@ public class CaseUsers {
     private String case_id;
     private String user_id;
     private String case_role;
+    private String organisation_id;
 }
