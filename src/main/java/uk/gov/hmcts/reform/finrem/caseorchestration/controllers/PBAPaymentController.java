@@ -31,8 +31,10 @@ import java.util.Map;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMOUNT_TO_PAY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOLICITOR_ASSIGNED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_SUMMARY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
@@ -87,6 +89,27 @@ public class PBAPaymentController implements BaseController {
             mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
         }
 
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
+    }
+
+    @SuppressWarnings("unchecked")
+    @PostMapping(path = "/assign-applicant-solicitor", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Handles assign applicant solicitor call")
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> applicantOrganisationCheck(
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Received request for assign applicant solicitor for Case ID: {}", caseDetails.getId());
+
+        validateCaseData(callbackRequest);
+
+        if (caseDetails.getData().containsKey(APPLICANT_SOLICITOR_ASSIGNED)
+            && caseDetails.getData().get(APPLICANT_SOLICITOR_ASSIGNED).equals(YES_VALUE)) {
+            log.info("Applicant solicitor already assign on case, Case ID: {}", caseDetails.getId());
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        }
+
         if (featureToggleService.isAssignCaseAccessEnabled()) {
             try {
                 String applicantOrgId = getApplicantOrgId(caseDetails);
@@ -99,6 +122,7 @@ public class PBAPaymentController implements BaseController {
                         ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
                         try {
                             assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
+                            caseDetails.getData().put(APPLICANT_SOLICITOR_ASSIGNED, YES_VALUE);
                         } catch (Exception e) {
                             log.error("Assigning case access threw exception for Case ID: {}, {}",
                                 caseDetails.getId(), e.getMessage());
@@ -122,7 +146,7 @@ public class PBAPaymentController implements BaseController {
             log.info("Assign case info not enabled, Case ID: {}", caseDetails.getId());
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 
     private String getApplicantOrgId(CaseDetails caseDetails) {
@@ -140,10 +164,8 @@ public class PBAPaymentController implements BaseController {
 
     private ResponseEntity<AboutToStartOrSubmitCallbackResponse> assignCaseAccessFailure(CaseDetails caseDetails) {
         log.info("Assigning case access failed for Case ID: {}", caseDetails.getId());
-        log.info("Returning case data with payment reference: {}", caseDetails.getData());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDetails.getData())
             .errors(ImmutableList.of("Failed to assign applicant solicitor to case, "
                 + "please ensure you have selected the correct applicant organisation on case"))
             .build());
