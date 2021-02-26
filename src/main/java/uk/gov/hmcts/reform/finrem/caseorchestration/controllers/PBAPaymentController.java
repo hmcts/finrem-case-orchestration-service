@@ -140,6 +140,7 @@ public class PBAPaymentController implements BaseController {
 
     private ResponseEntity<AboutToStartOrSubmitCallbackResponse> assignCaseAccessFailure(CaseDetails caseDetails) {
         log.info("Assigning case access failed for Case ID: {}", caseDetails.getId());
+        log.info("Returning case data with payment reference: {}", caseDetails.getData());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDetails.getData())
