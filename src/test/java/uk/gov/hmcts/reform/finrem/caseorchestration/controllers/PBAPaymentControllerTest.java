@@ -24,6 +24,7 @@ import java.util.Arrays;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -221,7 +222,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.applicantSolicitorAssigned", is("Yes")))
+            .andExpect(jsonPath("$.data.authorisation3", is(notNullValue())))
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
@@ -299,22 +300,5 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
         verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
-    }
-
-    @Test
-    public void shouldNotAssignApplicantSolicitor_applicantSolicitorAlreadyAssigned() throws Exception {
-        doPBASetUp(true);
-        requestContent = objectMapper.readTree(new File(getClass()
-            .getResource("/fixtures/pba-payment-app-assigned.json").toURI()));
-
-        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verifyNoInteractions(ccdDataStoreService);
-        verifyNoInteractions(assignCaseAccessService);
     }
 }

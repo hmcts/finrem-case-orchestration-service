@@ -27,14 +27,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationServi
 
 import javax.validation.constraints.NotNull;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMOUNT_TO_PAY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOLICITOR_ASSIGNED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_SUMMARY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
@@ -42,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_PAYMENT_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SUBMIT_CASE_DATE;
 
 @RestController
 @RequiredArgsConstructor
@@ -103,12 +103,7 @@ public class PBAPaymentController implements BaseController {
         log.info("Received request for assign applicant solicitor for Case ID: {}", caseDetails.getId());
 
         validateCaseData(callbackRequest);
-
-        if (caseDetails.getData().containsKey(APPLICANT_SOLICITOR_ASSIGNED)
-            && caseDetails.getData().get(APPLICANT_SOLICITOR_ASSIGNED).equals(YES_VALUE)) {
-            log.info("Applicant solicitor already assign on case, Case ID: {}", caseDetails.getId());
-            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
-        }
+        final Map<String, Object> mapOfCaseData = caseDetails.getData();
 
         if (featureToggleService.isAssignCaseAccessEnabled()) {
             try {
@@ -122,7 +117,6 @@ public class PBAPaymentController implements BaseController {
                         ccdDataStoreService.removeCreatorRole(caseDetails, authToken);
                         try {
                             assignCaseAccessService.assignCaseAccess(caseDetails, authToken);
-                            caseDetails.getData().put(APPLICANT_SOLICITOR_ASSIGNED, YES_VALUE);
                         } catch (Exception e) {
                             log.error("Assigning case access threw exception for Case ID: {}, {}",
                                 caseDetails.getId(), e.getMessage());
@@ -146,7 +140,9 @@ public class PBAPaymentController implements BaseController {
             log.info("Assign case info not enabled, Case ID: {}", caseDetails.getId());
         }
 
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        mapOfCaseData.put(SUBMIT_CASE_DATE, LocalDate.now());
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
     }
 
     private String getApplicantOrgId(CaseDetails caseDetails) {
