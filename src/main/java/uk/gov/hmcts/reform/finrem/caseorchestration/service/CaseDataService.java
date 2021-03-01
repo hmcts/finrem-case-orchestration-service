@@ -59,17 +59,30 @@ public class CaseDataService {
     }
 
     public void moveCollection(Map<String, Object> caseData, String sourceFieldName, String destinationFieldName) {
-        if (caseData.get(sourceFieldName) != null && (caseData.get(sourceFieldName) instanceof Collection)) {
-            if (caseData.get(destinationFieldName) == null || (caseData.get(destinationFieldName) instanceof Collection)) {
-                final List destinationList = new ArrayList();
-                if (caseData.get(destinationFieldName) != null) {
-                    destinationList.addAll((List) caseData.get(destinationFieldName));
-                }
-                destinationList.addAll((List) caseData.get(sourceFieldName));
-                caseData.put(destinationFieldName, destinationList);
-                caseData.put(sourceFieldName, null);
-            }
+        if (canCollectionsBeCopiedFromTo(caseData, sourceFieldName, destinationFieldName)) {
+            copyCollection(caseData, sourceFieldName, destinationFieldName, true);
+            caseData.put(sourceFieldName, null);
         }
+    }
+
+    public void overwriteCollection(Map<String, Object> caseData, String sourceFieldName, String destinationFieldName) {
+        copyCollection(caseData, sourceFieldName, destinationFieldName, false);
+    }
+
+    private void copyCollection(Map<String, Object> caseData, String sourceFieldName, String destinationFieldName, boolean appendToDestination) {
+        if (canCollectionsBeCopiedFromTo(caseData, sourceFieldName, destinationFieldName)) {
+            final List destinationList = new ArrayList();
+            if (appendToDestination && caseData.get(destinationFieldName) != null) {
+                destinationList.addAll((List) caseData.get(destinationFieldName));
+            }
+            destinationList.addAll((List) caseData.get(sourceFieldName));
+            caseData.put(destinationFieldName, destinationList);
+        }
+    }
+
+    private boolean canCollectionsBeCopiedFromTo(Map<String, Object> caseData, String sourceFieldName, String destinationFieldName) {
+        return caseData.get(sourceFieldName) != null && (caseData.get(sourceFieldName) instanceof Collection)
+            && (caseData.get(destinationFieldName) == null || (caseData.get(destinationFieldName) instanceof Collection));
     }
 
     public boolean addressLineOneAndPostCodeAreBothNotEmpty(Map address) {

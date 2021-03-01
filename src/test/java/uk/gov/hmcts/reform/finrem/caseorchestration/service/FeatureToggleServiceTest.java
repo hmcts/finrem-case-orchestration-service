@@ -72,7 +72,7 @@ public class FeatureToggleServiceTest {
         @Test
         public void getFieldsIgnoredDuringSerialisationContainsElementsWhenFeaturesDisabled() {
             Map<Class, List<String>> ignoredFields = Maps.newHashMap();
-            ignoredFields.put(ContestedUploadedDocument.class, Arrays.asList("caseDocumentConfidential"));
+            ignoredFields.put(ContestedUploadedDocument.class, Arrays.asList("caseDocumentConfidential", "hearingDetails"));
             assertThat(featureToggleService.getFieldsIgnoredDuringSerialisation(), is(ignoredFields));
         }
 

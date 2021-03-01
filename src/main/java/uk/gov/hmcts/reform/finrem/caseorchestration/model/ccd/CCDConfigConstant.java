@@ -43,6 +43,7 @@ public class CCDConfigConstant {
     public static final String APPLICANT_REPRESENTED_PAPER = "applicantRepresentedPaper";
     public static final String CONSENTED_SOLICITOR_DX_NUMBER = "solicitorDXnumber";
     public static final String CONTESTED_SOLICITOR_DX_NUMBER = "applicantSolicitorDXnumber";
+    public static final String APPLICANT_SHARE_DOCUMENTS = "applicantShareDocs";
 
     //Respondent Solicitor Related
     public static final String CONSENTED_RESPONDENT_REPRESENTED = "appRespondentRep";
@@ -55,6 +56,7 @@ public class CCDConfigConstant {
     public static final String RESP_SOLICITOR_EMAIL = "rSolicitorEmail";
     public static final String RESP_SOLICITOR_DX_NUMBER = "rSolicitorDXnumber";
     public static final String RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT = "RespSolNotificationsEmailConsent";
+    public static final String RESPONDENT_SHARE_DOCUMENTS = "respondentShareDocs";
 
     //Court related
     public static final String REGION = "regionList";
@@ -408,6 +410,30 @@ public class CCDConfigConstant {
     public static final String RESPONDENT_TRIAL_BUNDLE_COLLECTION = "respTrialBundleCollection";
     public static final String RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION = "respConfidentialDocsCollection";
 
+    //Contested Case New Documents collections
+    public static final String APP_HEARING_BUNDLES_COLLECTION = "appHearingBundlesCollection";
+    public static final String APP_FORM_E_EXHIBITS_COLLECTION = "appFormEExhibitsCollection";
+    public static final String APP_CHRONOLOGIES_STATEMENTS_COLLECTION = "appChronologiesCollection";
+    public static final String APP_QUESTIONNAIRES_ANSWERS_COLLECTION = "appQACollection";
+    public static final String APP_STATEMENTS_EXHIBITS_COLLECTION = "appStatementsExhibitsCollection";
+    public static final String APP_CASE_SUMMARIES_COLLECTION = "appCaseSummariesCollection";
+    public static final String APP_FORMS_H_COLLECTION = "appFormsHCollection";
+    public static final String APP_EXPERT_EVIDENCE_COLLECTION = "appExpertEvidenceCollection";
+    public static final String APP_CORRESPONDENCE_COLLECTION = "appCorrespondenceDocsColl";
+    public static final String APP_OTHER_COLLECTION = "appOtherCollection";
+    public static final String RESP_HEARING_BUNDLES_COLLECTION = "respHearingBundlesCollection";
+    public static final String RESP_FORM_E_EXHIBITS_COLLECTION = "respFormEExhibitsCollection";
+    public static final String RESP_CHRONOLOGIES_STATEMENTS_COLLECTION = "respChronologiesCollection";
+    public static final String RESP_QUESTIONNAIRES_ANSWERS_COLLECTION = "respQACollection";
+    public static final String RESP_STATEMENTS_EXHIBITS_COLLECTION = "respStatementsExhibitsCollection";
+    public static final String RESP_CASE_SUMMARIES_COLLECTION = "respCaseSummariesCollection";
+    public static final String RESP_FORM_H_COLLECTION = "respFormsHCollection";
+    public static final String RESP_EXPERT_EVIDENCE_COLLECTION = "respExpertEvidenceCollection";
+    public static final String RESP_CORRESPONDENCE_COLLECTION = "respCorrespondenceDocsColl";
+    public static final String RESP_OTHER_COLLECTION = "respOtherCollection";
+
+
+
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
 
     //organisation policy
@@ -420,6 +446,7 @@ public class CCDConfigConstant {
     public static final String APP_SOLICITOR_POLICY = "[APPSOLICITOR]";
     public static final String RESP_SOLICITOR_POLICY = "[RESPSOLICITOR]";
     public static final String CREATOR_USER_ROLE = "[CREATOR]";
+    public static final String SUBMIT_CASE_DATE = "authorisation3";
 
     //scheduled hearings
     public static final String ADDITIONAL_HEARING_DOCUMENT_COLLECTION = "additionalHearingDocuments";

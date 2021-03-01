@@ -1,4 +1,5 @@
 #!groovy
+import uk.gov.hmcts.contino.AppPipelineDsl
 
 @Library("Infrastructure")
 
@@ -23,6 +24,9 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
       envVariable: envVar
     ]
 }
+
+// Vars for Kubernetes
+env.PACT_BROKER_FULL_URL = 'https://pact-broker.platform.hmcts.net'
 
 withPipeline(type, product, app) {
     loadVaultSecrets(secrets)
@@ -51,4 +55,8 @@ withPipeline(type, product, app) {
     enableSlackNotifications('#finrem-dev')
     enableAksStagingDeployment()
     disableLegacyDeployment()
+
+    onMaster() {
+        enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
+    }
 }

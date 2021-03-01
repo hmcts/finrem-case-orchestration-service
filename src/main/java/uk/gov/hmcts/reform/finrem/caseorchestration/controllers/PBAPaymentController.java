@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationServi
 
 import javax.validation.constraints.NotNull;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Objects;
 
@@ -40,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.PBA_PAYMENT_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SUBMIT_CASE_DATE;
 
 @RestController
 @RequiredArgsConstructor
@@ -87,6 +89,22 @@ public class PBAPaymentController implements BaseController {
             mapOfCaseData.put(STATE, AWAITING_HWF_DECISION.toString());
         }
 
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
+    }
+
+    @SuppressWarnings("unchecked")
+    @PostMapping(path = "/assign-applicant-solicitor", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Handles assign applicant solicitor call")
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> applicantOrganisationCheck(
+        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Received request for assign applicant solicitor for Case ID: {}", caseDetails.getId());
+
+        validateCaseData(callbackRequest);
+        final Map<String, Object> mapOfCaseData = caseDetails.getData();
+
         if (featureToggleService.isAssignCaseAccessEnabled()) {
             try {
                 String applicantOrgId = getApplicantOrgId(caseDetails);
@@ -121,6 +139,8 @@ public class PBAPaymentController implements BaseController {
         } else {
             log.info("Assign case info not enabled, Case ID: {}", caseDetails.getId());
         }
+
+        mapOfCaseData.put(SUBMIT_CASE_DATE, LocalDate.now());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(mapOfCaseData).build());
     }

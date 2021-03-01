@@ -7,7 +7,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UploadContestedCaseDocumentsService;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @WebMvcTest(UploadContestedCaseDocumentController.class)
@@ -23,6 +22,6 @@ public class UploadContestedCaseDocumentControllerTest extends BaseControllerTes
     public void controllerShouldFilterDocumentsByParty() {
         controller.uploadCaseDocuments(buildCallbackRequest());
 
-        verify(service, times(1)).filterDocumentsToRelevantParty(any());
+        verify(service).filterDocumentsToRelevantParty(any());
     }
 }
