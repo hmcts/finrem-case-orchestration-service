@@ -421,6 +421,7 @@ public class CCDConfigConstant {
     public static final String APP_EXPERT_EVIDENCE_COLLECTION = "appExpertEvidenceCollection";
     public static final String APP_CORRESPONDENCE_COLLECTION = "appCorrespondenceDocsColl";
     public static final String APP_OTHER_COLLECTION = "appOtherCollection";
+    public static final String HEARING_BUNDLES_COLLECTION = "genHearingBundlesCollection";
     public static final String RESP_HEARING_BUNDLES_COLLECTION = "respHearingBundlesCollection";
     public static final String RESP_FORM_E_EXHIBITS_COLLECTION = "respFormEExhibitsCollection";
     public static final String RESP_CHRONOLOGIES_STATEMENTS_COLLECTION = "respChronologiesCollection";
@@ -431,8 +432,6 @@ public class CCDConfigConstant {
     public static final String RESP_EXPERT_EVIDENCE_COLLECTION = "respExpertEvidenceCollection";
     public static final String RESP_CORRESPONDENCE_COLLECTION = "respCorrespondenceDocsColl";
     public static final String RESP_OTHER_COLLECTION = "respOtherCollection";
-
-
 
     public static final String AMENDED_CONSENT_ORDER = "AmendedConsentOrder";
 

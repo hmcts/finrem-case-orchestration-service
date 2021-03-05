@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_STATEMENTS_EXHIBITS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_BUNDLES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EVIDENCE_COLLECTION;
@@ -45,7 +46,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_QUESTIONNAIRES_ANSWERS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_STATEMENTS_EXHIBITS_COLLECTION;
 
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -53,6 +53,8 @@ public class UploadContestedCaseDocumentsService {
 
     private static final String APPLICANT = "applicant";
     private static final String RESPONDENT = "respondent";
+
+    private static final String TRIAL_DOCUMENT_TYPE = "Trial Bundle";
 
     private final ObjectMapper mapper;
     private final FeatureToggleService featureToggleService;
@@ -65,8 +67,10 @@ public class UploadContestedCaseDocumentsService {
         List<ContestedUploadedDocumentData> uploadedDocuments = getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS);
 
         if (respondentJourneyEnabled) {
-            filterConfidentialDocs(uploadedDocuments, caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION, APPLICANT);
+            filterHearingBundlesNoParty(uploadedDocuments, caseData, HEARING_BUNDLES_COLLECTION);
+
             filterHearingBundles(uploadedDocuments, caseData, APP_HEARING_BUNDLES_COLLECTION, APPLICANT);
+            filterConfidentialDocs(uploadedDocuments, caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION, APPLICANT);
             filterFormEExhibits(uploadedDocuments, caseData, APP_FORM_E_EXHIBITS_COLLECTION, APPLICANT);
             filterChronologiesStatements(uploadedDocuments, caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION, APPLICANT);
             filterQuestionnairesAnswers(uploadedDocuments, caseData, APP_QUESTIONNAIRES_ANSWERS_COLLECTION, APPLICANT);
@@ -77,8 +81,8 @@ public class UploadContestedCaseDocumentsService {
             filterCorrespondenceDocs(uploadedDocuments, caseData, APP_CORRESPONDENCE_COLLECTION, APPLICANT);
             filterOtherDocs(uploadedDocuments, caseData, APP_OTHER_COLLECTION, APPLICANT);
 
-            filterConfidentialDocs(uploadedDocuments, caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION, RESPONDENT);
             filterHearingBundles(uploadedDocuments, caseData, RESP_HEARING_BUNDLES_COLLECTION, RESPONDENT);
+            filterConfidentialDocs(uploadedDocuments, caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION, RESPONDENT);
             filterFormEExhibits(uploadedDocuments, caseData, RESP_FORM_E_EXHIBITS_COLLECTION, RESPONDENT);
             filterChronologiesStatements(uploadedDocuments, caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION, RESPONDENT);
             filterQuestionnairesAnswers(uploadedDocuments, caseData, RESP_QUESTIONNAIRES_ANSWERS_COLLECTION, RESPONDENT);
@@ -143,11 +147,7 @@ public class UploadContestedCaseDocumentsService {
     }
 
     private boolean isTypeValidForTrialBundle(String caseDocumentType) {
-        return caseDocumentType.equals("Trial Bundle");
-    }
-
-    private boolean isTypeValidForHearingBundle(String caseDocumentType) {
-        return caseDocumentType.equals("Trial Bundle");
+        return caseDocumentType.equals(TRIAL_DOCUMENT_TYPE);
     }
 
     private boolean isTypeValidForFormEExhibits(String caseDocumentType) {
@@ -311,25 +311,53 @@ public class UploadContestedCaseDocumentsService {
         }
     }
 
-    private void filterHearingBundles(List<ContestedUploadedDocumentData> uploadedDocuments,
-                        Map<String, Object> caseData,
-                        String collection,
-                        String party) {
-        List<ContestedUploadedDocumentData> hearingBundlesFiltered = uploadedDocuments.stream()
-            .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null
-                && d.getUploadedCaseDocument().getCaseDocumentParty() != null
-                && d.getUploadedCaseDocument().getCaseDocumentParty().equals(party))
-            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null
-                && isTypeValidForHearingBundle(d.getUploadedCaseDocument().getCaseDocumentType()))
+    private void filterHearingBundlesNoParty(List<ContestedUploadedDocumentData> uploadedDocuments,
+                                             Map<String, Object> caseData,
+                                             String collection) {
+        List<ContestedUploadedDocumentData> filteredHearingBundle = filterByCaseDocumentType(uploadedDocuments, TRIAL_DOCUMENT_TYPE)
+            .stream()
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty() == null)
             .collect(Collectors.toList());
 
-        List<ContestedUploadedDocumentData> hearingBundlesCollection = getDocumentCollection(caseData, collection);
-        hearingBundlesCollection.addAll(hearingBundlesFiltered);
-        log.info("Adding items: {}, to Hearing Bundles Collection", hearingBundlesFiltered);
-        uploadedDocuments.removeAll(hearingBundlesFiltered);
+        addFilteredDocumentsToCaseData(filteredHearingBundle, caseData, collection,
+            String.format("Adding items: {}, to Hearing Bundles Collection", filteredHearingBundle));
+        uploadedDocuments.removeAll(filteredHearingBundle);
+    }
 
-        if (!hearingBundlesCollection.isEmpty()) {
-            caseData.put(collection, hearingBundlesCollection);
+    private void filterHearingBundles(List<ContestedUploadedDocumentData> uploadedDocuments,
+                                             Map<String, Object> caseData,
+                                             String collection,
+                                             String party) {
+        List<ContestedUploadedDocumentData> filteredHearingBundle = filterByCaseDocumentType(uploadedDocuments, TRIAL_DOCUMENT_TYPE)
+            .stream()
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty() != null)
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentParty().equals(party))
+            .collect(Collectors.toList());
+
+        addFilteredDocumentsToCaseData(filteredHearingBundle, caseData, collection,
+            String.format("Adding items: {}, to Hearing Bundles Collection", filteredHearingBundle));
+        uploadedDocuments.removeAll(filteredHearingBundle);
+    }
+
+    private List<ContestedUploadedDocumentData> filterByCaseDocumentType(
+        List<ContestedUploadedDocumentData> uploadedDocuments, String type) {
+        return uploadedDocuments.stream()
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocuments() != null)
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType() != null)
+            .filter(d -> d.getUploadedCaseDocument().getCaseDocumentType().equals(type))
+            .collect(Collectors.toList());
+    }
+
+    private void addFilteredDocumentsToCaseData(List<ContestedUploadedDocumentData> filteredDocuments,
+                                                Map<String, Object> caseData,
+                                                String collection,
+                                                String logMsg) {
+        List<ContestedUploadedDocumentData> bundlesCollection = getDocumentCollection(caseData, collection);
+        bundlesCollection.addAll(filteredDocuments);
+        log.info(logMsg);
+
+        if (!bundlesCollection.isEmpty()) {
+            caseData.put(collection, bundlesCollection);
         }
     }
 
