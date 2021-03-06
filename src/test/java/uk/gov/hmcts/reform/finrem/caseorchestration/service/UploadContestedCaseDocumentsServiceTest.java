@@ -224,8 +224,12 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
     @Test
     public void appHearingBundlesFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        ContestedUploadedDocumentData applicantPartyIsConfidential = createContestedUploadDocumentItem("Trial Bundle", "applicant", "yes", null, null);
-        ContestedUploadedDocumentData applicantPartyNotConfidential = createContestedUploadDocumentItem("Trial Bundle", "applicant", "no", null, null);
+        ContestedUploadedDocumentData applicantPartyIsConfidential = createContestedUploadDocumentItem(
+            "Trial Bundle", "applicant", "yes", null, null
+        );
+        ContestedUploadedDocumentData applicantPartyNotConfidential = createContestedUploadDocumentItem(
+            "Trial Bundle", "applicant", "no", null, null
+        );
         uploadDocumentList.add(applicantPartyIsConfidential);
         uploadDocumentList.add(applicantPartyNotConfidential);
 
@@ -376,8 +380,12 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
     @Test
     public void respHearingBundlesFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        ContestedUploadedDocumentData respondentPartyIsConfidential = createContestedUploadDocumentItem("Trial Bundle", "respondent", "yes", null, null);
-        ContestedUploadedDocumentData respondentPartyNotConfidential = createContestedUploadDocumentItem("Trial Bundle", "respondent", "no", null, null);
+        ContestedUploadedDocumentData respondentPartyIsConfidential = createContestedUploadDocumentItem(
+            "Trial Bundle", "respondent", "yes", null, null
+        );
+        ContestedUploadedDocumentData respondentPartyNotConfidential = createContestedUploadDocumentItem(
+            "Trial Bundle", "respondent", "no", null, null
+        );
         uploadDocumentList.add(respondentPartyIsConfidential);
         uploadDocumentList.add(respondentPartyNotConfidential);
 
