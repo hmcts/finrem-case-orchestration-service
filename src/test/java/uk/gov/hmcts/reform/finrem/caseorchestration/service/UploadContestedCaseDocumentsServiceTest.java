@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CORRESPONDENCE_COLLECTION;
@@ -87,7 +85,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, APPLICANT_CORRESPONDENCE_COLLECTION)).hasSize(1);
     }
 
     @Test
@@ -102,7 +100,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APPLICANT_FR_FORM_COLLECTION), hasSize(5));
+        assertThat(getDocumentCollection(caseData, APPLICANT_FR_FORM_COLLECTION)).hasSize(5);
     }
 
     @Test
@@ -126,7 +124,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APPLICANT_EVIDENCE_COLLECTION), hasSize(14));
+        assertThat(getDocumentCollection(caseData, APPLICANT_EVIDENCE_COLLECTION)).hasSize(14);
     }
 
     @Test
@@ -137,7 +135,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION)).hasSize(1);
     }
 
     @Test
@@ -148,7 +146,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION)).hasSize(1);
     }
 
     @Test
@@ -159,7 +157,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESPONDENT_CORRESPONDENCE_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, RESPONDENT_CORRESPONDENCE_COLLECTION)).hasSize(1);
     }
 
     @Test
@@ -174,7 +172,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESPONDENT_FR_FORM_COLLECTION), hasSize(5));
+        assertThat(getDocumentCollection(caseData, RESPONDENT_FR_FORM_COLLECTION)).hasSize(5);
     }
 
     @Test
@@ -198,7 +196,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESPONDENT_EVIDENCE_COLLECTION), hasSize(14));
+        assertThat(getDocumentCollection(caseData, RESPONDENT_EVIDENCE_COLLECTION)).hasSize(14);
     }
 
     @Test
@@ -209,7 +207,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION)).hasSize(1);
     }
 
     @Test
@@ -220,7 +218,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION)).hasSize(1);
     }
 
     @Test
@@ -235,7 +233,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APP_HEARING_BUNDLES_COLLECTION), hasSize(2));
+        assertThat(getDocumentCollection(caseData, APP_HEARING_BUNDLES_COLLECTION)).hasSize(2);
     }
 
     @Test
@@ -247,7 +245,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APP_FORM_E_EXHIBITS_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, APP_FORM_E_EXHIBITS_COLLECTION)).hasSize(1);
     }
 
     @Test
@@ -261,7 +259,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(3));
+        assertThat(getDocumentCollection(caseData, APP_CHRONOLOGIES_STATEMENTS_COLLECTION)).hasSize(3);
     }
 
     @Test
@@ -274,7 +272,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APP_QUESTIONNAIRES_ANSWERS_COLLECTION), hasSize(2));
+        assertThat(getDocumentCollection(caseData, APP_QUESTIONNAIRES_ANSWERS_COLLECTION)).hasSize(2);
     }
 
     @Test
@@ -287,7 +285,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APP_STATEMENTS_EXHIBITS_COLLECTION), hasSize(2));
+        assertThat(getDocumentCollection(caseData, APP_STATEMENTS_EXHIBITS_COLLECTION)).hasSize(2);
     }
 
     @Test
@@ -301,7 +299,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APP_CASE_SUMMARIES_COLLECTION), hasSize(3));
+        assertThat(getDocumentCollection(caseData, APP_CASE_SUMMARIES_COLLECTION)).hasSize(3);
     }
 
     @Test
@@ -313,7 +311,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APP_FORMS_H_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, APP_FORMS_H_COLLECTION)).hasSize(1);
     }
 
     @Test
@@ -325,7 +323,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APP_EXPERT_EVIDENCE_COLLECTION), hasSize(2));
+        assertThat(getDocumentCollection(caseData, APP_EXPERT_EVIDENCE_COLLECTION)).hasSize(2);
     }
 
     @Test
@@ -338,7 +336,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APP_CORRESPONDENCE_COLLECTION), hasSize(2));
+        assertThat(getDocumentCollection(caseData, APP_CORRESPONDENCE_COLLECTION)).hasSize(2);
     }
 
     @Test
@@ -354,7 +352,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APP_OTHER_COLLECTION), hasSize(5));
+        assertThat(getDocumentCollection(caseData, APP_OTHER_COLLECTION)).hasSize(5);
     }
 
     @Test
@@ -372,7 +370,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        Assertions.assertThat(getDocumentCollection(caseData, HEARING_BUNDLES_COLLECTION)).hasSize(3);
+        assertThat(getDocumentCollection(caseData, HEARING_BUNDLES_COLLECTION)).hasSize(3);
     }
 
     @Test
@@ -387,7 +385,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESP_HEARING_BUNDLES_COLLECTION), hasSize(2));
+        assertThat(getDocumentCollection(caseData, RESP_HEARING_BUNDLES_COLLECTION)).hasSize(2);
     }
 
     @Test
@@ -399,7 +397,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESP_FORM_E_EXHIBITS_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, RESP_FORM_E_EXHIBITS_COLLECTION)).hasSize(1);
     }
 
     @Test
@@ -413,7 +411,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION), hasSize(3));
+        assertThat(getDocumentCollection(caseData, RESP_CHRONOLOGIES_STATEMENTS_COLLECTION)).hasSize(3);
     }
 
     @Test
@@ -426,7 +424,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESP_QUESTIONNAIRES_ANSWERS_COLLECTION), hasSize(2));
+        assertThat(getDocumentCollection(caseData, RESP_QUESTIONNAIRES_ANSWERS_COLLECTION)).hasSize(2);
     }
 
     @Test
@@ -439,7 +437,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESP_STATEMENTS_EXHIBITS_COLLECTION), hasSize(2));
+        assertThat(getDocumentCollection(caseData, RESP_STATEMENTS_EXHIBITS_COLLECTION)).hasSize(2);
     }
 
     @Test
@@ -453,7 +451,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESP_CASE_SUMMARIES_COLLECTION), hasSize(3));
+        assertThat(getDocumentCollection(caseData, RESP_CASE_SUMMARIES_COLLECTION)).hasSize(3);
     }
 
     @Test
@@ -465,7 +463,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESP_FORM_H_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, RESP_FORM_H_COLLECTION)).hasSize(1);
     }
 
     @Test
@@ -477,7 +475,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESP_EXPERT_EVIDENCE_COLLECTION), hasSize(2));
+        assertThat(getDocumentCollection(caseData, RESP_EXPERT_EVIDENCE_COLLECTION)).hasSize(2);
     }
 
     @Test
@@ -490,7 +488,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESP_CORRESPONDENCE_COLLECTION), hasSize(2));
+        assertThat(getDocumentCollection(caseData, RESP_CORRESPONDENCE_COLLECTION)).hasSize(2);
     }
 
     @Test
@@ -506,7 +504,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESP_OTHER_COLLECTION), hasSize(5));
+        assertThat(getDocumentCollection(caseData, RESP_OTHER_COLLECTION)).hasSize(5);
     }
 
     @Test
@@ -521,7 +519,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS), hasSize(3));
+        assertThat(getDocumentCollection(caseData, CONTESTED_UPLOADED_DOCUMENTS)).hasSize(3);
     }
 
     @Test
@@ -538,8 +536,8 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APP_OTHER_COLLECTION), hasSize(3));
-        assertThat(getDocumentCollection(caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION), hasSize(2));
+        assertThat(getDocumentCollection(caseData, APP_OTHER_COLLECTION)).hasSize(3);
+        assertThat(getDocumentCollection(caseData, APPLICANT_CONFIDENTIAL_DOCS_COLLECTION)).hasSize(2);
     }
 
     @Test
@@ -549,7 +547,7 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APP_CORRESPONDENCE_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, APP_CORRESPONDENCE_COLLECTION)).hasSize(1);
 
         assertNull(getDocumentCollection(caseData, RESP_HEARING_BUNDLES_COLLECTION));
         assertNull(getDocumentCollection(caseData, RESP_FORM_E_EXHIBITS_COLLECTION));
