@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_QUESTIONNAIRES_ANSWERS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_STATEMENTS_EXHIBITS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_UPLOADED_DOCUMENTS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_BUNDLES_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CORRESPONDENCE_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EVIDENCE_COLLECTION;
@@ -224,13 +226,16 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
     @Test
     public void appHearingBundlesFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "applicant", "no", null, null));
+        ContestedUploadedDocumentData applicantPartyIsConfidential = createContestedUploadDocumentItem("Trial Bundle", "applicant", "yes", null, null);
+        ContestedUploadedDocumentData applicantPartyNotConfidential = createContestedUploadDocumentItem("Trial Bundle", "applicant", "no", null, null);
+        uploadDocumentList.add(applicantPartyIsConfidential);
+        uploadDocumentList.add(applicantPartyNotConfidential);
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, APP_HEARING_BUNDLES_COLLECTION), hasSize(1));
+        assertThat(getDocumentCollection(caseData, APP_HEARING_BUNDLES_COLLECTION), hasSize(2));
     }
 
     @Test
@@ -353,15 +358,36 @@ public class UploadContestedCaseDocumentsServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void respHearingBundlesFiltered() {
+    public void noPartyHearingBundlesFiltered() {
         when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
-        uploadDocumentList.add(createContestedUploadDocumentItem("Trial Bundle", "respondent", "no", null, null));
+        ContestedUploadedDocumentData noParty = createContestedUploadDocumentItem("Trial Bundle", null, null, null, null);
+        ContestedUploadedDocumentData noPartyIsConfidential = createContestedUploadDocumentItem("Trial Bundle", null, "yes", null, null);
+        ContestedUploadedDocumentData noPartyNotConfidential = createContestedUploadDocumentItem("Trial Bundle", null, "no", null, null);
+
+        uploadDocumentList.add(noParty);
+        uploadDocumentList.add(noPartyIsConfidential);
+        uploadDocumentList.add(noPartyNotConfidential);
 
         caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
 
         service.filterDocumentsToRelevantParty(caseData);
 
-        assertThat(getDocumentCollection(caseData, RESP_HEARING_BUNDLES_COLLECTION), hasSize(1));
+        Assertions.assertThat(getDocumentCollection(caseData, HEARING_BUNDLES_COLLECTION)).hasSize(3);
+    }
+
+    @Test
+    public void respHearingBundlesFiltered() {
+        when(featureToggleService.isRespondentJourneyEnabled()).thenReturn(true);
+        ContestedUploadedDocumentData respondentPartyIsConfidential = createContestedUploadDocumentItem("Trial Bundle", "respondent", "yes", null, null);
+        ContestedUploadedDocumentData respondentPartyNotConfidential = createContestedUploadDocumentItem("Trial Bundle", "respondent", "no", null, null);
+        uploadDocumentList.add(respondentPartyIsConfidential);
+        uploadDocumentList.add(respondentPartyNotConfidential);
+
+        caseDetails.getData().put(CONTESTED_UPLOADED_DOCUMENTS, uploadDocumentList);
+
+        service.filterDocumentsToRelevantParty(caseData);
+
+        assertThat(getDocumentCollection(caseData, RESP_HEARING_BUNDLES_COLLECTION), hasSize(2));
     }
 
     @Test
