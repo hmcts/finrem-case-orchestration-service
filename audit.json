@@ -353,5 +353,6 @@
   "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/submit-general-order_POST": "ignore",
   "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested/set-defaults_POST": "ignore",
   "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested-upload-direction-order_POST": "ignore",
-  "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested/set-paper-case-org-policy_POST": "ignorre"
+  "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested/set-paper-case-org-policy_POST": "ignorre",
+  "10096_Timestamp Disclosure - Unix_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/consent-order-not-approved_POST": "ignore"
   }
