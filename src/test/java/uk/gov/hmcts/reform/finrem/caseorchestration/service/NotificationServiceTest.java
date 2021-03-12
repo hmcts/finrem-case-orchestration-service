@@ -48,6 +48,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/consent-order-not-approved";
     private static final String END_POINT_CONSENT_ORDER_NOT_APPROVED_SENT = "http://localhost:8086/notify/consent-order-not-approved-sent";
     private static final String END_POINT_CONSENT_ORDER_AVAILABLE = "http://localhost:8086/notify/consent-order-available";
+    private static final String END_POINT_CONSENT_ORDER_HEARING_REQUEST = "http://localhost:8086/notify/consent-order-hearing-request";
     private static final String END_POINT_CONSENT_ORDER_AVAILABLE_CTSC = "http://localhost:8086/notify/consent-order-available-ctsc";
     private static final String END_POINT_CONTESTED_HWF_SUCCESSFUL = "http://localhost:8086/notify/contested/hwf-successful";
     private static final String END_POINT_CONTESTED_APPLICATION_ISSUED = "http://localhost:8086/notify/contested/application-issued";
@@ -327,6 +328,16 @@ public class NotificationServiceTest extends BaseServiceTest {
         notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
 
         verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void sendConsentOrderHearingRequestNotificationEmail() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONSENT_ORDER_HEARING_REQUEST))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendConsentOrderHearingRequest(callbackRequest.getCaseDetails());
+
+        verify(notificationRequestMapper).createNotificationRequestForHearingRequest(callbackRequest.getCaseDetails());
     }
 
     @Test

@@ -25,4 +25,11 @@ public class TestConstants {
     public static final String TEST_FORM_TYPE = "testFormType";
     public static final String TEST_BULK_UNSUPPORTED_FORM_TYPE = "unsupportedFormType";
     public static final String TEST_URL = "https://test.com";
+
+    public static final String TEST_APPLICATION_FIRST_NAME = "Jim";
+    public static final String TEST_APPLICANT_LAST_NAME = "Kerry";
+    public static final String TEST_RESPONDENT_FIRST_NAME = "Sofie";
+    public static final String TEST_RESPONDENT_LAST_NAME = "Eva";
+    public static final String TEST_EMAIL_ADDRESS_OF_LOCAL_COURT = "localcourt@email.com";
+    public static final String TEST_INSTRUCTION_TO_LOCAL_COURT = "Instructions";
 }

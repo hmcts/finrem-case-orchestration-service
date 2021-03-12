@@ -17,6 +17,7 @@ public class NotificationServiceConfiguration {
     private String consentOrderNotApproved;
     private String consentOrderNotApprovedSent;
     private String consentOrderAvailable;
+    private String consentOrderHearingRequest;
     private String consentOrderAvailableCtsc;
     private String ctscEmail;
     private String consentGeneralEmail;

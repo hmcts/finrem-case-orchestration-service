@@ -91,12 +91,21 @@ public class NotificationService {
         sendConsentOrderAvailableEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails));
     }
 
+    public void sendConsentOrderHearingRequest(CaseDetails caseDetails) {
+        sendConsentOrderHearingRequestEmail(notificationRequestMapper.createNotificationRequestForHearingRequest(caseDetails));
+    }
+
     public void sendConsentOrderAvailableEmailToRespondentSolicitor(CaseDetails caseDetails) {
         sendConsentOrderAvailableEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(caseDetails));
     }
 
     private void sendConsentOrderAvailableEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderAvailable());
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+    private void sendConsentOrderHearingRequestEmail(NotificationRequest notificationRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getConsentOrderHearingRequest());
         sendNotificationEmail(notificationRequest, uri);
     }
 

@@ -7,7 +7,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 
 import static org.junit.Assert.assertEquals;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_APPLICANT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_APPLICATION_FIRST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_EMAIL_ADDRESS_OF_LOCAL_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_INSTRUCTION_TO_LOCAL_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESPONDENT_FIRST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_REFERENCE;
@@ -77,5 +83,24 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
         assertEquals(TEST_RESP_SOLICITOR_EMAIL, notificationRequest.getNotificationEmail());
         assertEquals("contested", notificationRequest.getCaseType());
         assertEquals("nottingham", notificationRequest.getSelectedCourt());
+    }
+
+    @Test
+    public void shouldCreateNotificationRequestForHearingRequest() {
+        CallbackRequest callbackRequest = getConsentedCallbackRequest();
+
+        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForHearingRequest(
+            callbackRequest.getCaseDetails());
+
+        final String name = String.format("%s %s and %s %s", TEST_APPLICATION_FIRST_NAME, TEST_APPLICANT_LAST_NAME,
+            TEST_RESPONDENT_FIRST_NAME, TEST_RESPONDENT_LAST_NAME);
+
+        assertEquals("12345", notificationRequest.getCaseReferenceNumber());
+        assertEquals(TEST_RESP_SOLICITOR_REFERENCE, notificationRequest.getSolicitorReferenceNumber());
+        assertEquals(TEST_DIVORCE_CASE_NUMBER, notificationRequest.getDivorceCaseNumber());
+        assertEquals(name, notificationRequest.getName());
+        assertEquals(TEST_EMAIL_ADDRESS_OF_LOCAL_COURT, notificationRequest.getNotificationEmail());
+        assertEquals("consented", notificationRequest.getCaseType());
+        assertEquals(TEST_INSTRUCTION_TO_LOCAL_COURT, notificationRequest.getGeneralEmailBody());
     }
 }

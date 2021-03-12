@@ -311,6 +311,25 @@ public class NotificationsController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
+    @PostMapping(value = "/consent-order-hearing-request", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send e-mail for Consent order hearing request.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "Consent order hearing request e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendConsentOrderHearingRequestEmail(
+        @RequestBody CallbackRequest callbackRequest) {
+
+        log.info("Received request to send email for 'Consent Order hearing request' for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        Map<String, Object> caseData = caseDetails.getData();
+
+        log.info("Sending email notification to Local Court for 'Consent Order Hearing Request'");
+        notificationService.sendConsentOrderHearingRequest(caseDetails);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
     @PostMapping(value = "/prepare-for-hearing", consumes = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "send e-mail for 'Prepare for Hearing'.")
     @ApiResponses(value = {

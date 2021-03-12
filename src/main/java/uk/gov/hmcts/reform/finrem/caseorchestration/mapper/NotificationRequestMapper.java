@@ -11,11 +11,17 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import java.util.Map;
 import java.util.Objects;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_LAST_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.DIVORCE_CASE_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.EMAIL_ADDRESS_OF_LOCAL_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_BODY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INSTRUCTION_TO_LOCAL_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_REFERENCE;
@@ -31,6 +37,7 @@ public class NotificationRequestMapper {
 
     private static final String CONSENTED = "consented";
     private static final String CONTESTED = "contested";
+    private static final String CONSENTED_APPLICANT_RESPONDENT_NAME = "%s %s and %s %s";
 
     public NotificationRequest createNotificationRequestForAppSolicitor(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
@@ -42,6 +49,23 @@ public class NotificationRequestMapper {
         return caseDataService.isConsentedApplication(caseDetails)
             ? buildNotificationRequest(caseDetails, RESP_SOLICITOR_REFERENCE, RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONSENTED)
             : buildNotificationRequest(caseDetails, RESP_SOLICITOR_REFERENCE, RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONTESTED);
+    }
+
+    public NotificationRequest createNotificationRequestForHearingRequest(CaseDetails caseDetails) {
+        final NotificationRequest notificationRequest = new NotificationRequest();
+        final Map<String, Object> mapOfCaseData = caseDetails.getData();
+        final String name = String.format(CONSENTED_APPLICANT_RESPONDENT_NAME, mapOfCaseData.get(APPLICANT_FIRST_MIDDLE_NAME),
+            mapOfCaseData.get(APPLICANT_LAST_NAME), mapOfCaseData.get(CONSENTED_RESPONDENT_FIRST_MIDDLE_NAME),
+            mapOfCaseData.get(CONSENTED_RESPONDENT_LAST_NAME));
+        notificationRequest.setCaseReferenceNumber(Objects.toString(caseDetails.getId()));
+        notificationRequest.setSolicitorReferenceNumber(Objects.toString(mapOfCaseData.get(RESP_SOLICITOR_REFERENCE)));
+        notificationRequest.setDivorceCaseNumber(Objects.toString(mapOfCaseData.get(DIVORCE_CASE_NUMBER)));
+        notificationRequest.setName(name);
+        notificationRequest.setNotificationEmail(Objects.toString(mapOfCaseData.get(EMAIL_ADDRESS_OF_LOCAL_COURT)));
+        notificationRequest.setGeneralEmailBody(Objects.toString(mapOfCaseData.get(INSTRUCTION_TO_LOCAL_COURT)));
+        notificationRequest.setCaseType(CONSENTED);
+
+        return notificationRequest;
     }
 
     private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
