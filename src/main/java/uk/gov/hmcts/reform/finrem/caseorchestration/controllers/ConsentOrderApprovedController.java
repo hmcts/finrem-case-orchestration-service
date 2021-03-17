@@ -140,11 +140,10 @@ public class ConsentOrderApprovedController implements BaseController {
     }
 
     private void generateAndPrepareDocuments(String authToken, CaseDetails caseDetails) {
-        log.info("Generating and preparing documents for latest consent order");
+        log.info("Generating and preparing documents for latest consent order, case {}", caseDetails.getId());
 
         Map<String, Object> caseData = caseDetails.getData();
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
-        List<PensionCollectionData> pensionDocs = getPensionDocuments(caseData);
 
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
         CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken);
@@ -155,6 +154,7 @@ public class ConsentOrderApprovedController implements BaseController {
 
         ApprovedOrder approvedOrder = approvedOrderBuilder.build();
 
+        List<PensionCollectionData> pensionDocs = getPensionDocuments(caseData);
         if (!isEmpty(pensionDocs)) {
             log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for case {}",
                 caseDetails.getId());
