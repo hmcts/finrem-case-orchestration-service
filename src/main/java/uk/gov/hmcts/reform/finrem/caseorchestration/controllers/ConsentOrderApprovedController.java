@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ApprovedOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CollectionElement;
@@ -56,6 +57,7 @@ public class ConsentOrderApprovedController implements BaseController {
     private final GenericDocumentService genericDocumentService;
     private final ConsentOrderPrintService consentOrderPrintService;
     private final NotificationService notificationService;
+    private final DocumentHelper documentHelper;
     private final ObjectMapper mapper;
     private final FeatureToggleService featureToggleService;
 
@@ -154,12 +156,12 @@ public class ConsentOrderApprovedController implements BaseController {
 
         ApprovedOrder approvedOrder = approvedOrderBuilder.build();
 
-        List<PensionCollectionData> pensionDocs = getPensionDocuments(caseData);
-        if (!isEmpty(pensionDocs)) {
+        if (!documentHelper.getPensionDocumentsData(caseData).isEmpty()) {
             log.info("Pension Documents not empty for case - stamping Pension Documents and adding to approvedOrder for case {}",
                 caseDetails.getId());
 
-            List<PensionCollectionData> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocs, authToken);
+            List<PensionCollectionData> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
+                getPensionDocuments(caseData), authToken);
             log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseDetails.getId());
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }
@@ -172,7 +174,7 @@ public class ConsentOrderApprovedController implements BaseController {
 
         log.info("Successfully generated documents for 'Consent Order Approved' for case {}", caseDetails.getId());
 
-        if (isEmpty(pensionDocs)) {
+        if (documentHelper.getPensionDocumentsData(caseData).isEmpty()) {
             log.info("Case {} has no pension documents, updating status to {} and sending for bulk print",
                 caseDetails.getId(),
                 CONSENT_ORDER_MADE.toString());
