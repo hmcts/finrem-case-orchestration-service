@@ -260,7 +260,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors", hasSize(2)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verifyNoInteractions(ccdDataStoreService);
         verifyNoInteractions(assignCaseAccessService);
@@ -278,7 +278,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors", hasSize(2)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verifyNoInteractions(ccdDataStoreService);
         verifyNoInteractions(assignCaseAccessService);
