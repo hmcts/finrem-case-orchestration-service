@@ -28,9 +28,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationServi
 import javax.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus.AWAITING_HWF_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMOUNT_TO_PAY;
@@ -120,21 +123,22 @@ public class PBAPaymentController implements BaseController {
                         } catch (Exception e) {
                             log.error("Assigning case access threw exception for Case ID: {}, {}",
                                 caseDetails.getId(), e.getMessage());
-                            return assignCaseAccessFailure(caseDetails);
+                            return assignCaseAccessFailure(caseDetails, emptyList());
                         }
                     } else {
-                        log.info("Applicant solicitor does not belong to chosen applicant "
-                            + "organisation for Case ID: {}", caseDetails.getId());
-                        return assignCaseAccessFailure(caseDetails);
+                        String errorMessage = "Applicant solicitor does not belong to chosen applicant organisation";
+                        log.info("{} for Case ID: {}", errorMessage, caseDetails.getId());
+                        return assignCaseAccessFailure(caseDetails, singletonList(errorMessage));
                     }
                 } else {
-                    log.info("Applicant organisation not selected for Case ID: {}", caseDetails.getId());
-                    return assignCaseAccessFailure(caseDetails);
+                    String errorMessage = "Applicant organisation not selected";
+                    log.info("{} for Case ID: {}", errorMessage, caseDetails.getId());
+                    return assignCaseAccessFailure(caseDetails, singletonList(errorMessage));
                 }
             } catch (Exception e) {
                 log.error("Exception when trying to assign case access for Case ID: {}, {}",
                     caseDetails.getId(), e.getMessage());
-                return assignCaseAccessFailure(caseDetails);
+                return assignCaseAccessFailure(caseDetails, emptyList());
             }
         } else {
             log.info("Assign case info not enabled, Case ID: {}", caseDetails.getId());
@@ -158,12 +162,15 @@ public class PBAPaymentController implements BaseController {
         return null;
     }
 
-    private ResponseEntity<AboutToStartOrSubmitCallbackResponse> assignCaseAccessFailure(CaseDetails caseDetails) {
+    private ResponseEntity<AboutToStartOrSubmitCallbackResponse> assignCaseAccessFailure(CaseDetails caseDetails, List<String> errorDetails) {
         log.info("Assigning case access failed for Case ID: {}", caseDetails.getId());
 
+
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
-            .errors(ImmutableList.of("Failed to assign applicant solicitor to case, "
-                + "please ensure you have selected the correct applicant organisation on case"))
+            .errors(ImmutableList.<String>builder()
+                .addAll(errorDetails != null ? errorDetails : emptyList())
+                .add("Failed to assign applicant solicitor to case, please ensure you have selected the correct applicant organisation on case")
+                .build())
             .build());
     }
 
