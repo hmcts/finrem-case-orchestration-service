@@ -77,13 +77,6 @@ public class UploadContestedCaseDocumentsService {
             filterCorrespondenceDocs(uploadedDocuments, caseData, APP_CORRESPONDENCE_COLLECTION, APPLICANT);
             filterOtherDocs(uploadedDocuments, caseData, APP_OTHER_COLLECTION, APPLICANT);
 
-        } else {
-            filterCorrespondence(uploadedDocuments, caseData, APPLICANT_CORRESPONDENCE_COLLECTION, APPLICANT);
-            filterForms(uploadedDocuments, caseData, APPLICANT_FR_FORM_COLLECTION, APPLICANT);
-            filterEvidence(uploadedDocuments, caseData, APPLICANT_EVIDENCE_COLLECTION, APPLICANT);
-            filterTrialBundle(uploadedDocuments, caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION, APPLICANT);
-        }
-        if (respondentJourneyEnabled) {
             filterConfidentialDocs(uploadedDocuments, caseData, RESPONDENT_CONFIDENTIAL_DOCS_COLLECTION, RESPONDENT);
             filterHearingBundles(uploadedDocuments, caseData, RESP_HEARING_BUNDLES_COLLECTION, RESPONDENT);
             filterFormEExhibits(uploadedDocuments, caseData, RESP_FORM_E_EXHIBITS_COLLECTION, RESPONDENT);
@@ -96,25 +89,28 @@ public class UploadContestedCaseDocumentsService {
             filterCorrespondenceDocs(uploadedDocuments, caseData, RESP_CORRESPONDENCE_COLLECTION, RESPONDENT);
             filterOtherDocs(uploadedDocuments, caseData, RESP_OTHER_COLLECTION, RESPONDENT);
         } else {
+            filterCorrespondence(uploadedDocuments, caseData, APPLICANT_CORRESPONDENCE_COLLECTION, APPLICANT);
+            filterForms(uploadedDocuments, caseData, APPLICANT_FR_FORM_COLLECTION, APPLICANT);
+            filterEvidence(uploadedDocuments, caseData, APPLICANT_EVIDENCE_COLLECTION, APPLICANT);
+            filterTrialBundle(uploadedDocuments, caseData, APPLICANT_TRIAL_BUNDLE_COLLECTION, APPLICANT);
+
             filterCorrespondence(uploadedDocuments, caseData, RESPONDENT_CORRESPONDENCE_COLLECTION, RESPONDENT);
             filterForms(uploadedDocuments, caseData, RESPONDENT_FR_FORM_COLLECTION, RESPONDENT);
             filterEvidence(uploadedDocuments, caseData, RESPONDENT_EVIDENCE_COLLECTION, RESPONDENT);
             filterTrialBundle(uploadedDocuments, caseData, RESPONDENT_TRIAL_BUNDLE_COLLECTION, RESPONDENT);
         }
+
         caseData.put(CONTESTED_UPLOADED_DOCUMENTS, uploadedDocuments);
 
         return caseData;
     }
 
     private List<ContestedUploadedDocumentData> getDocumentCollection(Map<String, Object> caseData, String collection) {
-
         if (StringUtils.isEmpty(caseData.get(collection))) {
             return new ArrayList<>();
         }
 
-        return mapper.convertValue(caseData.get(collection),
-            new TypeReference<List<ContestedUploadedDocumentData>>() {
-            });
+        return mapper.convertValue(caseData.get(collection), new TypeReference<>() {});
     }
 
     private boolean isTypeValidForCorrespondence(String caseDocumentType) {
@@ -335,7 +331,6 @@ public class UploadContestedCaseDocumentsService {
         if (!hearingBundlesCollection.isEmpty()) {
             caseData.put(collection, hearingBundlesCollection);
         }
-
     }
 
     private void filterFormEExhibits(List<ContestedUploadedDocumentData> uploadedDocuments,

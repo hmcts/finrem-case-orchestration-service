@@ -43,6 +43,7 @@ public class CCDConfigConstant {
     public static final String APPLICANT_REPRESENTED_PAPER = "applicantRepresentedPaper";
     public static final String CONSENTED_SOLICITOR_DX_NUMBER = "solicitorDXnumber";
     public static final String CONTESTED_SOLICITOR_DX_NUMBER = "applicantSolicitorDXnumber";
+    public static final String APPLICANT_SHARE_DOCUMENTS = "applicantShareDocs";
 
     //Respondent Solicitor Related
     public static final String CONSENTED_RESPONDENT_REPRESENTED = "appRespondentRep";
@@ -55,6 +56,7 @@ public class CCDConfigConstant {
     public static final String RESP_SOLICITOR_EMAIL = "rSolicitorEmail";
     public static final String RESP_SOLICITOR_DX_NUMBER = "rSolicitorDXnumber";
     public static final String RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT = "RespSolNotificationsEmailConsent";
+    public static final String RESPONDENT_SHARE_DOCUMENTS = "respondentShareDocs";
 
     //Court related
     public static final String REGION = "regionList";
@@ -444,6 +446,7 @@ public class CCDConfigConstant {
     public static final String APP_SOLICITOR_POLICY = "[APPSOLICITOR]";
     public static final String RESP_SOLICITOR_POLICY = "[RESPSOLICITOR]";
     public static final String CREATOR_USER_ROLE = "[CREATOR]";
+    public static final String SUBMIT_CASE_DATE = "authorisation3";
 
     //scheduled hearings
     public static final String ADDITIONAL_HEARING_DOCUMENT_COLLECTION = "additionalHearingDocuments";

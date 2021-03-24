@@ -118,6 +118,17 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldOverwriteTargetCollection() {
+        Map<String, Object> caseData = TestSetUpUtils.caseDataWithUploadHearingOrder();
+        assertThat(((Collection<CaseDocument>)caseData.get(HEARING_ORDER_COLLECTION)), hasSize(1));
+        assertThat(((Collection<CaseDocument>)caseData.get("uploadHearingOrderRO")), hasSize(2));
+
+        caseDataService.overwriteCollection(caseData, HEARING_ORDER_COLLECTION, "uploadHearingOrderRO");
+
+        assertThat(((Collection<CaseDocument>)caseData.get("uploadHearingOrderRO")), hasSize(1));
+    }
+
+    @Test
     public void nullToEmptyShouldReturnEmptyWhenNull() {
         assertThat(caseDataService.nullToEmpty(null), is(""));
     }
