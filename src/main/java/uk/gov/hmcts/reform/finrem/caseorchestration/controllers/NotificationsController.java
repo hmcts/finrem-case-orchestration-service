@@ -556,4 +556,26 @@ public class NotificationsController implements BaseController {
 
         return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
     }
+
+    @PostMapping(value = "/transfer-to-local-court", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send a transfer to local courts email")
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "Transfer to Local Courts e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendTransferCourtsEmail(
+        @RequestBody CallbackRequest callbackRequest) {
+
+        log.info("Received request to send transfer courts email for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        if (caseDataService.isConsentedApplication(caseDetails)) {
+
+            log.info("Sending transfer courts email notification");
+            notificationService.sendTransferToLocalCourtEmail(caseDetails);
+        }
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+    }
 }

@@ -872,6 +872,24 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, never()).sendConsentOrderNotApprovedSentEmailToRespondentSolicitor(any());
     }
 
+    @Test
+    public void sendTransferToLocalCourtEmailConsented() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+
+        notificationsController.sendTransferCourtsEmail(buildCallbackRequest());
+
+        verify(notificationService).sendTransferToLocalCourtEmail(any());
+    }
+
+    @Test
+    public void sendTransferToLocalCourtEmailContested() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+
+        notificationsController.sendTransferCourtsEmail(buildCallbackRequest());
+
+        verify(notificationService, never()).sendTransferToLocalCourtEmail(any());
+    }
+
     private CallbackRequest createCallbackRequestWithFinalOrder() {
         CallbackRequest callbackRequest = buildCallbackRequest();
 
