@@ -19,11 +19,12 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 
 import java.io.File;
-import java.util.Arrays;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -52,6 +53,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus
 public class PBAPaymentControllerTest extends BaseControllerTest {
 
     private static final String PBA_PAYMENT_URL = "/case-orchestration/pba-payment";
+    private static final String ASSIGN_APPLICANT_SOLICITOR_URL = "/case-orchestration/assign-applicant-solicitor";
 
     @MockBean private FeeService feeService;
     @MockBean private PBAPaymentService pbaPaymentService;
@@ -86,19 +88,18 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         super.setUp();
         when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
         when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
-            .contactInformation(Arrays.asList(organisationContactInformation))
+            .contactInformation(singletonList(organisationContactInformation))
             .name(TEST_SOLICITOR_NAME)
             .organisationIdentifier(TEST_SOLICITOR_REFERENCE)
             .build());
     }
 
     private static PaymentResponse paymentResponse(boolean success) {
-        PaymentResponse paymentResponse = PaymentResponse.builder()
+        return PaymentResponse.builder()
             .reference("RC1")
             .status(success ? "success" : "failed")
             .message(success ? null : "Access denied")
             .build();
-        return paymentResponse;
     }
 
     @Test
@@ -155,8 +156,6 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
-        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
-        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -191,11 +190,10 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeDescription", is("finrem")))
             .andExpect(jsonPath("$.data.orderSummary.Fees[0].value.FeeVersion", is("v1")))
             .andExpect(jsonPath("$.data.amountToPay", is("1000")))
+            .andExpect(jsonPath("$.data.PBAPaymentReference", is("RC1")))
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
-        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
-        verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -211,83 +209,94 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(pbaPaymentService, never()).makePayment(anyString(), any());
+    }
+
+    @Test
+    public void shouldAssignApplicantSolicitor() throws Exception {
+        doPBAPaymentReferenceAlreadyExistsSetup();
+        when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
+
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.authorisation3", is(notNullValue())))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
         verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
 
     @Test
-    public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists_assignCaseAccessToggledOff() throws Exception {
+    public void shouldNotAssignApplicantSolicitor_assignCaseAccessToggledOff() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(false);
 
-        mvc.perform(post(PBA_PAYMENT_URL)
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(pbaPaymentService, never()).makePayment(anyString(), any());
         verifyNoInteractions(ccdDataStoreService);
         verifyNoInteractions(assignCaseAccessService);
     }
 
     @Test
-    public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists_organisationIdNoMatch() throws Exception {
+    public void shouldNotAssignApplicantSolicitor_organisationIdNoMatch() throws Exception {
         doPBAPaymentReferenceAlreadyExistsSetup();
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
-            .contactInformation(Arrays.asList(organisationContactInformation))
+            .contactInformation(singletonList(organisationContactInformation))
             .name(TEST_SOLICITOR_NAME)
             .organisationIdentifier("INCORRECT_IDENTIFIER")
             .build());
 
-        mvc.perform(post(PBA_PAYMENT_URL)
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors", hasSize(2)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(pbaPaymentService, never()).makePayment(anyString(), any());
         verifyNoInteractions(ccdDataStoreService);
         verifyNoInteractions(assignCaseAccessService);
     }
 
     @Test
-    public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists_organisationEmpty() throws Exception {
+    public void shouldNotAssignApplicantSolicitor_organisationEmpty() throws Exception {
         doPBASetUp(true);
         requestContent = objectMapper.readTree(new File(getClass()
             .getResource("/fixtures/pba-payment-no-app-org.json").toURI()));
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
-        mvc.perform(post(PBA_PAYMENT_URL)
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors", hasSize(2)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
         verifyNoInteractions(ccdDataStoreService);
         verifyNoInteractions(assignCaseAccessService);
     }
 
     @Test
-    public void shouldNotDoPbaPaymentWhenPBAPaymentAlreadyExists_acaApiFailure() throws Exception {
+    public void shouldNotAssignApplicantSolicitor_acaApiFailure() throws Exception {
         doPBASetUp(true);
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         doThrow(feignError()).when(assignCaseAccessService).assignCaseAccess(any(), eq(AUTH_TOKEN));
 
-        mvc.perform(post(PBA_PAYMENT_URL)
+        mvc.perform(post(ASSIGN_APPLICANT_SOLICITOR_URL)
             .content(requestContent.toString())
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(pbaPaymentService, times(1)).makePayment(anyString(), any());
         verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
         verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
     }
