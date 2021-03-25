@@ -446,6 +446,7 @@ public class CCDConfigConstant {
     public static final String APP_SOLICITOR_POLICY = "[APPSOLICITOR]";
     public static final String RESP_SOLICITOR_POLICY = "[RESPSOLICITOR]";
     public static final String CREATOR_USER_ROLE = "[CREATOR]";
+    public static final String SUBMIT_CASE_DATE = "authorisation3";
 
     //scheduled hearings
     public static final String ADDITIONAL_HEARING_DOCUMENT_COLLECTION = "additionalHearingDocuments";
