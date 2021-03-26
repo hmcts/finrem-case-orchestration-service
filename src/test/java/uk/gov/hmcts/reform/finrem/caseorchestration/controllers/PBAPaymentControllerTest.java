@@ -19,8 +19,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.PBAPaymentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PrdOrganisationService;
 
 import java.io.File;
-import java.util.Arrays;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -88,19 +88,18 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         super.setUp();
         when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
         when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
-            .contactInformation(Arrays.asList(organisationContactInformation))
+            .contactInformation(singletonList(organisationContactInformation))
             .name(TEST_SOLICITOR_NAME)
             .organisationIdentifier(TEST_SOLICITOR_REFERENCE)
             .build());
     }
 
     private static PaymentResponse paymentResponse(boolean success) {
-        PaymentResponse paymentResponse = PaymentResponse.builder()
+        return PaymentResponse.builder()
             .reference("RC1")
             .status(success ? "success" : "failed")
             .message(success ? null : "Access denied")
             .build();
-        return paymentResponse;
     }
 
     @Test
@@ -251,7 +250,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
         doPBAPaymentReferenceAlreadyExistsSetup();
         when(caseDataService.isConsentedApplication(any())).thenReturn(true);
         when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
-            .contactInformation(Arrays.asList(organisationContactInformation))
+            .contactInformation(singletonList(organisationContactInformation))
             .name(TEST_SOLICITOR_NAME)
             .organisationIdentifier("INCORRECT_IDENTIFIER")
             .build());
@@ -261,7 +260,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors", hasSize(2)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verifyNoInteractions(ccdDataStoreService);
         verifyNoInteractions(assignCaseAccessService);
@@ -279,7 +278,7 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.errors", hasSize(2)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
         verifyNoInteractions(ccdDataStoreService);
         verifyNoInteractions(assignCaseAccessService);
