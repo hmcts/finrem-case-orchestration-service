@@ -61,7 +61,8 @@ public class BulkPrintService {
                 .bulkPrintDocuments(documents)
                 .build());
 
-        log.info("Letter ID {} for {} document(s) of type {} sent to bulk print: {}", letterId, documents.size(), letterType, documents);
+        log.info("Case {} Letter ID {} for {} document(s) of type {} sent to bulk print: {}", caseId, letterId, documents.size(), letterType,
+            documents);
 
         return letterId;
     }
