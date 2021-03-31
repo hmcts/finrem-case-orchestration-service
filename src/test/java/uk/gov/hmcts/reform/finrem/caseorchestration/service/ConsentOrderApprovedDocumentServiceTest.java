@@ -188,6 +188,22 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void givenNullDocumentInPensionDocuments_whenStampingDocuments_thenTheNullValueIsIgnored() {
+        Mockito.reset(documentClientMock);
+        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
+
+        PensionCollectionData pensionCollectionDataWithNullDocument = pensionDocumentData();
+        pensionCollectionDataWithNullDocument.getTypedCaseDocument().setPensionDocument(null);
+        List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionCollectionDataWithNullDocument);
+
+        List<PensionCollectionData> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
+
+        assertThat(stampPensionDocuments, hasSize(1));
+        stampPensionDocuments.forEach(data -> assertCaseDocument(data.getTypedCaseDocument().getPensionDocument()));
+        verify(documentClientMock, times(1)).stampDocument(any(), anyString());
+    }
+
+    @Test
     public void whenPreparingApplicantLetterPack() throws Exception {
         CaseDetails caseDetailsTemp = documentHelper.deepCopy(caseDetails, CaseDetails.class);
         addConsentOrderApprovedDataToCaseDetails(caseDetailsTemp);
