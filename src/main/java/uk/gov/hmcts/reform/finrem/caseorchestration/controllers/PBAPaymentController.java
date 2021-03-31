@@ -58,7 +58,7 @@ public class PBAPaymentController implements BaseController {
 
     @SuppressWarnings("unchecked")
     @PostMapping(path = "/pba-payment", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Handles PBA Payments for Consented Journey")
+    @ApiOperation(value = "Handles PBA Payments for Consented and Contested Journeys")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> pbaPayment(
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) {
@@ -78,9 +78,9 @@ public class PBAPaymentController implements BaseController {
                     return paymentFailure(mapOfCaseData, paymentResponse);
                 }
                 mapOfCaseData.put(PBA_PAYMENT_REFERENCE, paymentResponse.getReference());
-                log.info("Consented Payment Succeeded.");
+                log.info("Payment Succeeded.");
             } else {
-                log.info("PBA Payment Reference for Consented case already exists.");
+                log.info("PBA Payment Reference for case already exists.");
             }
         } else {
             log.info("Not PBA Payment - Moving state to Awaiting HWF Decision");
