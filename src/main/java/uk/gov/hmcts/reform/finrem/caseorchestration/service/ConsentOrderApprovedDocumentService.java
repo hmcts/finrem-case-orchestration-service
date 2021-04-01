@@ -80,7 +80,8 @@ public class ConsentOrderApprovedDocumentService {
 
     public List<PensionCollectionData> stampPensionDocuments(List<PensionCollectionData> pensionList, String authToken) {
         return pensionList.stream()
-            .map(data -> stampPensionDocuments(data, authToken)).collect(toList());
+            .filter(pensionCollectionData -> pensionCollectionData.getTypedCaseDocument().getPensionDocument() != null)
+            .map(pensionCollectionData -> stampPensionDocuments(pensionCollectionData, authToken)).collect(toList());
     }
 
     private PensionCollectionData stampPensionDocuments(PensionCollectionData pensionDocument, String authToken) {
@@ -92,7 +93,7 @@ public class ConsentOrderApprovedDocumentService {
     }
 
     public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken) {
-        log.info("Sending Approved Consent Order to applicant / solicitor for Bulk Print");
+        log.info("Sending Approved Consent Order to applicant / solicitor for Bulk Print, case {}", caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
@@ -195,7 +196,7 @@ public class ConsentOrderApprovedDocumentService {
             .orElse(new ArrayList<>());
 
         if (!approvedOrderCollectionData.isEmpty()) {
-            log.info("Extracting '{}' from case data for bulk print: {}", approvedOrderCollectionFieldName, data);
+            log.info("Extracting '{}' from case data for bulk print, case {}", approvedOrderCollectionFieldName, caseDetails.getId());
             Map<String, Object> lastApprovedOrder = (Map<String, Object>)(approvedOrderCollectionData.get(approvedOrderCollectionData.size() - 1)
                 .get(VALUE));
             documentHelper.getDocumentLinkAsCaseDocument(lastApprovedOrder, ORDER_LETTER).ifPresent(documents::add);
@@ -205,7 +206,8 @@ public class ConsentOrderApprovedDocumentService {
                 PENSION_DOCUMENTS,
                 "uploadedDocument"));
         } else {
-            log.info("Failed to extract '{}' from case data for bulk print as document list was empty.", approvedOrderCollectionFieldName);
+            log.info("Failed to extract '{}' from case data for bulk print as document list was empty, case {}",
+                approvedOrderCollectionFieldName, caseDetails.getId());
         }
 
         return documents;

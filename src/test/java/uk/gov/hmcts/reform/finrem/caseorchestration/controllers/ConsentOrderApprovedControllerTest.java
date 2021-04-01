@@ -7,6 +7,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.PensionCollectionData;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderApprovedDocumentService;
@@ -51,6 +52,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
     @MockBean private GenericDocumentService genericDocumentService;
     @MockBean private ConsentOrderPrintService consentOrderPrintService;
     @MockBean private NotificationService notificationService;
+    @MockBean private DocumentHelper documentHelper;
     @MockBean private FeatureToggleService featureToggleService;
 
     public String consentOrderApprovedEndpoint() {
@@ -114,6 +116,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -134,6 +137,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -233,6 +237,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
         whenAnnexStampingDocument().thenReturn(caseDocument());
         whenStampingDocument().thenReturn(caseDocument());
         whenStampingPensionDocuments().thenReturn(singletonList(pensionDocumentData()));
+        when(documentHelper.getPensionDocumentsData(any())).thenReturn(singletonList(caseDocument()));
 
         ResultActions result = mvc.perform(post(consentOrderApprovedEndpoint())
             .content(requestContent.toString())
@@ -270,7 +275,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
 
-        verify(consentOrderApprovedDocumentService, times(1)).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN));
+        verify(consentOrderApprovedDocumentService).stampAndPopulateContestedConsentApprovedOrderCollection(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -284,7 +289,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .andExpect(status().isOk());
 
         verify(consentOrderApprovedDocumentService, never()).generateApprovedConsentOrderLetter(any(), eq(AUTH_TOKEN));
-        verify(consentOrderPrintService, times(1)).sendConsentOrderToBulkPrint(any(), eq(AUTH_TOKEN));
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), eq(AUTH_TOKEN));
     }
 
     @Test
@@ -299,7 +304,7 @@ public class ConsentOrderApprovedControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE));
 
         result.andExpect(status().isOk());
-        verify(consentOrderPrintService, times(1)).sendConsentOrderToBulkPrint(any(), eq(AUTH_TOKEN));
+        verify(consentOrderPrintService).sendConsentOrderToBulkPrint(any(), eq(AUTH_TOKEN));
     }
 
     private OngoingStubbing<CaseDocument> whenServiceGeneratesDocument() {
