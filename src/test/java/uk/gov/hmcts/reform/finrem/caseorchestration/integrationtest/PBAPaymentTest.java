@@ -38,6 +38,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -57,6 +58,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ConsentedStatus
 @Category(IntegrationTest.class)
 public class PBAPaymentTest extends BaseTest {
     private static final String PBA_PAYMENT_URL = "/case-orchestration/pba-payment";
+    private static final String ASSIGN_APPLICANT_SOLICITOR_URL = "/case-orchestration/assign-applicant-solicitor";
     private static final String FEE_LOOKUP_URL = "/payments/fee-lookup\\?application-type=consented";
     private static final String PBA_URL = "/payments/pba-payment";
     private static final String FEE_RESPONSE = "{\n"
@@ -175,16 +177,31 @@ public class PBAPaymentTest extends BaseTest {
     @Test
     public void shouldFailWhenAcaCallFails() throws Exception {
         setUpPbaPayment("/fixtures/pba-payment.json");
-        stubFeeLookUp();
         stubForAca(HttpStatus.NOT_FOUND);
-        stubPayment(PAYMENT_RESPONSE);
 
-        webClient.perform(MockMvcRequestBuilders.post(PBA_PAYMENT_URL)
+        webClient.perform(MockMvcRequestBuilders.post(ASSIGN_APPLICANT_SOLICITOR_URL)
             .content(objectMapper.writeValueAsString(request))
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
+
+        verify(postRequestedFor(urlMatching(acaUrl)));
+    }
+
+    @Test
+    public void shouldDoAssignApplicantSolicitor() throws Exception {
+        setUpPbaPayment("/fixtures/pba-payment.json");
+        stubForAca(HttpStatus.OK);
+
+        webClient.perform(MockMvcRequestBuilders.post(ASSIGN_APPLICANT_SOLICITOR_URL)
+            .content(objectMapper.writeValueAsString(request))
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.authorisation3", is(notNullValue())))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
 
         verify(postRequestedFor(urlMatching(acaUrl)));
