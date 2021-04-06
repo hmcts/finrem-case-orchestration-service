@@ -6,6 +6,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -19,6 +20,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -28,12 +30,16 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
     @Autowired
     private PBAPaymentService pbaPaymentService;
 
+    @MockBean
+    private FeatureToggleService featureToggleService;
+
     private CallbackRequest callbackRequest;
 
     @ClassRule
     public static WireMockClassRule paymentService = new WireMockClassRule(9001);
 
     private static final String PBA_PAYMENT_API = "/payments/pba-payment";
+    private static final String PBA_PAYMENT_API_FOR_CASE_TYPE = "/payments/new-pba-payment";
 
     @Before
     public void setupCaseData() throws Exception {
@@ -45,6 +51,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
     @Test
     public void paymentSuccessful() throws Exception {
         setupCaseData();
+        when(featureToggleService.isPBAUsingCaseTypeEnabled()).thenReturn(false);
 
         setUpPbaPayment("{"
             + " \"reference\": \"RC-1545-2396-5857-4110\","
@@ -71,6 +78,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
     @Test
     public void invalidFunds() throws Exception {
         setupCaseData();
+        when(featureToggleService.isPBAUsingCaseTypeEnabled()).thenReturn(false);
 
         setUpPbaPayment("{"
             + " \"reference\": \"RC-1545-2396-5857-4110\","
@@ -102,6 +110,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
     @Test
     public void accountOnHold() throws Exception {
         setupCaseData();
+        when(featureToggleService.isPBAUsingCaseTypeEnabled()).thenReturn(false);
 
         setUpPbaPayment("{"
             + " \"reference\": \"RC-1545-2396-5857-4110\","
@@ -132,6 +141,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
     @Test
     public void accountDeleted() throws Exception {
         setupCaseData();
+        when(featureToggleService.isPBAUsingCaseTypeEnabled()).thenReturn(false);
 
         setUpPbaPayment("{"
             + " \"reference\": \"RC-1545-2396-5857-4110\","
@@ -162,6 +172,7 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
     @Test
     public void accessIsDenied() throws Exception {
         setupCaseData();
+        when(featureToggleService.isPBAUsingCaseTypeEnabled()).thenReturn(false);
 
         setUpPbaPayment("{"
             + "  \"timestamp\": \"2019-01-09T17:59:20.473+0000\","
@@ -180,8 +191,42 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
         assertThat(paymentResponse.getStatusHistories(), nullValue());
     }
 
+    @Test
+    public void paymentSuccessfulWithCaseType() throws Exception {
+        setupCaseData();
+        when(featureToggleService.isPBAUsingCaseTypeEnabled()).thenReturn(true);
+
+        setUpPbaPayment("{"
+            + " \"reference\": \"RC-1545-2396-5857-4110\","
+            + " \"date_created\": \"2018-12-19T17:14:18.572+0000\","
+            + " \"status\": \"Success\","
+            + " \"status_histories\": ["
+            + "   {"
+            + "     \"status\": \"success\","
+            + "     \"date_created\": \"2018-12-19T17:14:18.572+0000\","
+            + "     \"date_updated\": \"2018-12-19T17:14:18.572+0000\""
+            + "   }"
+            + " ]"
+            + "}");
+
+        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
+
+        assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
+        assertThat(paymentResponse.getStatus(), is("Success"));
+        assertThat(paymentResponse.isPaymentSuccess(), is(true));
+        assertThat(paymentResponse.getPaymentError(), nullValue());
+        assertThat(paymentResponse.getStatusHistories().size(), is(1));
+    }
+
     private void setUpPbaPayment(String response) {
-        paymentService.stubFor(post(urlPathEqualTo(PBA_PAYMENT_API))
+        String API;
+
+        if (featureToggleService.isPBAUsingCaseTypeEnabled()){
+            API = PBA_PAYMENT_API_FOR_CASE_TYPE;
+        } else {
+            API = PBA_PAYMENT_API;
+        }
+        paymentService.stubFor(post(urlPathEqualTo(API))
             .willReturn(aResponse()
                 .withStatus(HttpStatus.OK.value())
                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)

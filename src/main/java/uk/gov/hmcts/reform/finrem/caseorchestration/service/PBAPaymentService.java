@@ -68,14 +68,14 @@ public class PBAPaymentService {
         }
     }
 
-    private PaymentRequestWithCaseType buildPaymentRequestWithCaseType(CaseDetails caseDetails) {
+    protected PaymentRequestWithCaseType buildPaymentRequestWithCaseType(CaseDetails caseDetails) {
         FeeRequest feeRequest = buildFeeRequest(caseDetails.getData());
         log.info("Fee request : {} ", feeRequest);
 
         return buildPaymentRequestWithCaseTypeAndFee(caseDetails, feeRequest);
     }
 
-    private PaymentRequestWithSiteID buildPaymentRequest(CaseDetails caseDetails) {
+    protected PaymentRequestWithSiteID buildPaymentRequest(CaseDetails caseDetails) {
         FeeRequest feeRequest = buildFeeRequest(caseDetails.getData());
         log.info("Fee request : {} ", feeRequest);
 
