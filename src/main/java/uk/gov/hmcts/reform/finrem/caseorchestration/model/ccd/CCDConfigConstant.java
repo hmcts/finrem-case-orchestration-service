@@ -467,7 +467,8 @@ public class CCDConfigConstant {
     public static final String JUDGES_AMENDED_DIRECTION_ORDER_COLLECTION = "judgesAmendedOrderCollection";
 
     //transfer to local courts
-    public static final String TRANSFER_COURTS_NAME  = "transferLocalCourtName";
-    public static final String TRANSFER_COURTS_EMAIL  = "transferLocalCourtEmail";
-    public static final String TRANSFER_COURTS_INSTRUCTIONS  = "transferLocalCourtInstructions";
+    public static final String TRANSFER_COURTS_COLLECTION = "transferLocalCourtEmailCollection";
+    public static final String TRANSFER_COURTS_NAME = "transferLocalCourtName";
+    public static final String TRANSFER_COURTS_EMAIL = "transferLocalCourtEmail";
+    public static final String TRANSFER_COURTS_INSTRUCTIONS = "transferLocalCourtInstructions";
 }

@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -43,6 +44,7 @@ public class NotificationsController implements BaseController {
     private final CaseDataService caseDataService;
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
+    private final TransferCourtService transferCourtService;
     private final FeatureToggleService featureToggleService;
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
@@ -571,9 +573,10 @@ public class NotificationsController implements BaseController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
         if (caseDataService.isConsentedApplication(caseDetails)) {
-
             log.info("Sending transfer courts email notification");
             notificationService.sendTransferToLocalCourtEmail(caseDetails);
+
+            transferCourtService.storeTransferToCourtEmail(caseDetails);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());

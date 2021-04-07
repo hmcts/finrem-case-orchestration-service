@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HelpWithFeesDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,6 +51,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     @MockBean private HearingDocumentService hearingDocumentService;
     @MockBean private AdditionalHearingDocumentService additionalHearingDocumentService;
     @MockBean private CaseDataService caseDataService;
+    @MockBean private TransferCourtService transferCourtService;
     @MockBean private FeatureToggleService featureToggleService;
 
     @Test
@@ -879,15 +881,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
         notificationsController.sendTransferCourtsEmail(buildCallbackRequest());
 
         verify(notificationService).sendTransferToLocalCourtEmail(any());
-    }
-
-    @Test
-    public void sendTransferToLocalCourtEmailContested() {
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-
-        notificationsController.sendTransferCourtsEmail(buildCallbackRequest());
-
-        verify(notificationService, never()).sendTransferToLocalCourtEmail(any());
+        verify(transferCourtService).storeTransferToCourtEmail(any());
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {
