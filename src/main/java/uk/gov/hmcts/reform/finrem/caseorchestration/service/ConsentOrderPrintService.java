@@ -48,7 +48,7 @@ public class ConsentOrderPrintService {
             generateCoversheetForRespondentAndSendOrders(caseDetails, authorisationToken);
         }
 
-        log.info("Bulk print is successful");
+        log.info("Bulk print is successful, case {}", caseDetails.getId());
     }
 
     private void generateCoversheetForRespondentAndSendOrders(CaseDetails caseDetails, String authorisationToken) {
@@ -65,7 +65,8 @@ public class ConsentOrderPrintService {
             caseData.put(BULK_PRINT_LETTER_ID_RES, respondentLetterId);
         }
 
-        log.info("Generated Respondent CoverSheet for bulk print. coversheet: {}, letterId : {}", respondentCoverSheet, respondentLetterId);
+        log.info("Generated Respondent CoverSheet for bulk print, case {}. coversheet: {}, letterId : {}", caseDetails.getId(),
+            respondentCoverSheet, respondentLetterId);
     }
 
     private UUID printApplicantConsentOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {
@@ -85,7 +86,7 @@ public class ConsentOrderPrintService {
     }
 
     private UUID sendConsentOrderForBulkPrintRespondent(CaseDocument coverSheet, CaseDetails caseDetails, String authorisationToken) {
-        log.info("Sending order documents to recipient / solicitor for Bulk Print");
+        log.info("Sending order documents to recipient / solicitor for Bulk Print, case {}", caseDetails.getId());
 
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
         bulkPrintDocuments.add(documentHelper.getCaseDocumentAsBulkPrintDocument(coverSheet));
