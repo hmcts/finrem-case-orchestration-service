@@ -20,6 +20,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -32,6 +33,9 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
 
     @MockBean
     private FeatureToggleService featureToggleService;
+
+    @MockBean
+    private CaseDataService caseDataService;
 
     private CallbackRequest callbackRequest;
 
@@ -192,9 +196,10 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void paymentSuccessfulWithCaseType() throws Exception {
+    public void paymentSuccessfulWithCaseType_Consented() throws Exception {
         setupCaseData();
         when(featureToggleService.isPBAUsingCaseTypeEnabled()).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
 
         setUpPbaPaymentForCaseType("{"
             + " \"reference\": \"RC-1545-2396-5857-4110\","
@@ -209,6 +214,35 @@ public class PBAPaymentServiceTest extends BaseServiceTest {
             + " ]"
             + "}");
 
+        PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
+
+        assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
+        assertThat(paymentResponse.getStatus(), is("Success"));
+        assertThat(paymentResponse.isPaymentSuccess(), is(true));
+        assertThat(paymentResponse.getPaymentError(), nullValue());
+        assertThat(paymentResponse.getStatusHistories().size(), is(1));
+    }
+
+    @Test
+    public void paymentSuccessfulWithCaseType_Contested() throws Exception {
+        setupCaseData();
+        when(featureToggleService.isPBAUsingCaseTypeEnabled()).thenReturn(true);
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+
+        setUpPbaPaymentForCaseType("{"
+            + " \"reference\": \"RC-1545-2396-5857-4110\","
+            + " \"date_created\": \"2018-12-19T17:14:18.572+0000\","
+            + " \"status\": \"Success\","
+            + " \"status_histories\": ["
+            + "   {"
+            + "     \"status\": \"success\","
+            + "     \"date_created\": \"2018-12-19T17:14:18.572+0000\","
+            + "     \"date_updated\": \"2018-12-19T17:14:18.572+0000\""
+            + "   }"
+            + " ]"
+            + "}");
+
+        callbackRequest.getCaseDetails().setCaseTypeId("FinancialRemedyContested");
         PaymentResponse paymentResponse = pbaPaymentService.makePayment(AUTH_TOKEN, callbackRequest.getCaseDetails());
 
         assertThat(paymentResponse.getReference(), is("RC-1545-2396-5857-4110"));
