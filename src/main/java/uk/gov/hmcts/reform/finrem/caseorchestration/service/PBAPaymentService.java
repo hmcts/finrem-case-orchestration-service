@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.PaymentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.FeeRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequestWithCaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequestWithSiteID;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 
@@ -53,7 +53,7 @@ public class PBAPaymentService {
 
         if (featureToggleService.isPBAUsingCaseTypeEnabled()) {
             log.info("Inside makePayment for ccdCaseId : {}", caseDetails.getId());
-            PaymentRequestWithCaseType paymentRequest = buildPaymentRequestWithCaseType(caseDetails);
+            PaymentRequest paymentRequest = buildPaymentRequestWithCaseType(caseDetails);
             log.info("paymentRequest with case type: {}", paymentRequest);
             PaymentResponse paymentResponse = paymentClient.pbaPaymentWithCaseType(authToken, paymentRequest);
             log.info("paymentResponse with case type: {} ", paymentResponse);
@@ -68,7 +68,7 @@ public class PBAPaymentService {
         }
     }
 
-    protected PaymentRequestWithCaseType buildPaymentRequestWithCaseType(CaseDetails caseDetails) {
+    protected PaymentRequest buildPaymentRequestWithCaseType(CaseDetails caseDetails) {
         FeeRequest feeRequest = buildFeeRequest(caseDetails.getData());
         log.info("Fee request : {} ", feeRequest);
 
@@ -98,13 +98,13 @@ public class PBAPaymentService {
             .build();
     }
 
-    private PaymentRequestWithCaseType buildPaymentRequestWithCaseTypeAndFee(CaseDetails caseDetails, FeeRequest fee) {
+    private PaymentRequest buildPaymentRequestWithCaseTypeAndFee(CaseDetails caseDetails, FeeRequest fee) {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode dataJsonNode = mapper.valueToTree(caseDetails.getData());
         String ccdCaseId = String.valueOf(caseDetails.getId());
 
         if (caseDataService.isConsentedApplication(caseDetails)) {
-            return PaymentRequestWithCaseType.builder()
+            return PaymentRequest.builder()
                 .accountNumber(dataJsonNode.path(PBA_NUMBER).asText())
                 .caseReference(dataJsonNode.path(DIVORCE_CASE_NUMBER).asText())
                 .customerReference(dataJsonNode.path(PBA_REFERENCE).asText())
@@ -116,7 +116,7 @@ public class PBAPaymentService {
                 .feesList(ImmutableList.of(fee))
                 .build();
         } else {
-            return PaymentRequestWithCaseType.builder()
+            return PaymentRequest.builder()
                 .accountNumber(dataJsonNode.path(PBA_NUMBER).asText())
                 .caseReference(dataJsonNode.path(DIVORCE_CASE_NUMBER).asText())
                 .customerReference(dataJsonNode.path(PBA_REFERENCE).asText())

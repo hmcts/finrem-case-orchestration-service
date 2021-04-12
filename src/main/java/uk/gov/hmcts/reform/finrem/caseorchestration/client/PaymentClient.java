@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.fee.FeeResponse;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequestWithCaseType;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequestWithSiteID;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.validation.PBAValidationResponse;
@@ -44,5 +44,5 @@ public interface PaymentClient {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     PaymentResponse pbaPaymentWithCaseType(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
-                               @RequestBody PaymentRequestWithCaseType paymentRequestWithCaseType);
+                               @RequestBody PaymentRequest paymentRequest);
 }

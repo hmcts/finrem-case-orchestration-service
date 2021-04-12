@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PaymentRequestWithCaseType {
+public class PaymentRequest {
     @JsonProperty(value = "account_number")
     private String accountNumber;
 

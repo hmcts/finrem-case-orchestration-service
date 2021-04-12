@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-public class PaymentRequestWithCaseTypeTest {
+public class PaymentRequestTest {
 
     ObjectMapper mapper = new ObjectMapper();
 
@@ -34,7 +34,7 @@ public class PaymentRequestWithCaseTypeTest {
             + "   }"
             + " ]"
             + "}";
-        PaymentRequestWithCaseType paymentRequest = mapper.readValue(json, PaymentRequestWithCaseType.class);
+        PaymentRequest paymentRequest = mapper.readValue(json, PaymentRequest.class);
         assertThat(paymentRequest.getAccountNumber(), is("PBA1"));
         assertThat(paymentRequest.getCaseReference(), is("caseRef"));
         assertThat(paymentRequest.getCcdCaseNumber(), is("123"));
@@ -74,7 +74,7 @@ public class PaymentRequestWithCaseTypeTest {
             + "   }"
             + " ]"
             + "}";
-        PaymentRequestWithCaseType paymentRequest = mapper.readValue(json, PaymentRequestWithCaseType.class);
+        PaymentRequest paymentRequest = mapper.readValue(json, PaymentRequest.class);
         assertThat(paymentRequest.getAccountNumber(), is("PBA1"));
         assertThat(paymentRequest.getCaseReference(), is("caseRef"));
         assertThat(paymentRequest.getCcdCaseNumber(), is("123"));
