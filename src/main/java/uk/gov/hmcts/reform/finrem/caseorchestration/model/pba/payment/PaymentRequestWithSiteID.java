@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PaymentRequest {
+public class PaymentRequestWithSiteID {
     @JsonProperty(value = "account_number")
     private String accountNumber;
 
@@ -45,8 +45,8 @@ public class PaymentRequest {
     @Builder.Default
     private String service = "FINREM";
 
-    @JsonProperty(value = "case_type_id")
-    private String caseType;
+    @JsonProperty(value = "site_id")
+    private String siteId;
 
     @JsonProperty(value = "fees")
     private List<FeeRequest> feesList;

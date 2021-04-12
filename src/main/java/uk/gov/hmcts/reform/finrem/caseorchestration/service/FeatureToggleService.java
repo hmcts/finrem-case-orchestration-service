@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.ASSIGN_CASE_ACCESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.PAYMENT_REQUEST_USING_CASE_TYPE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.RESPONDENT_JOURNEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.Features.SEND_TO_FRC;
 
@@ -54,6 +55,10 @@ public class FeatureToggleService {
 
     public boolean isRespondentJourneyEnabled() {
         return isFeatureEnabled(RESPONDENT_JOURNEY);
+    }
+
+    public boolean isPBAUsingCaseTypeEnabled() {
+        return isFeatureEnabled(PAYMENT_REQUEST_USING_CASE_TYPE);
     }
 
     /*
