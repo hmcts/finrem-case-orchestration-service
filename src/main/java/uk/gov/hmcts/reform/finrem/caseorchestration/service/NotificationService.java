@@ -26,6 +26,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_EMAIL_RECIPIENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TRANSFER_COURTS_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.TRANSFER_COURTS_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService.nullToEmpty;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.getCourtDetailsString;
 
@@ -301,6 +303,17 @@ public class NotificationService {
 
     private void sendConsentOrderNotApprovedSentEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderNotApprovedSent());
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
+    public void sendTransferToLocalCourtEmail(CaseDetails caseDetails) {
+        URI uri = buildUri(notificationServiceConfiguration.getTransferToLocalCourt());
+        NotificationRequest notificationRequest = notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails);
+        //Overwrite the email, set to the court provided, and use general body to include the Events "Free Text" field
+        notificationRequest.setNotificationEmail(Objects.toString(caseDetails.getData().get(TRANSFER_COURTS_EMAIL)));
+        notificationRequest.setGeneralEmailBody("The Judge has also ordered that:\n"
+            + Objects.toString(caseDetails.getData().get(TRANSFER_COURTS_INSTRUCTIONS)));
+
         sendNotificationEmail(notificationRequest, uri);
     }
 

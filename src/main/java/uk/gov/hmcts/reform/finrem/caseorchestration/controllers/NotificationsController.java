@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.GeneralEmailService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.HearingDocumentService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NotificationService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaperNotificationService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.TransferCourtService;
 
 import java.io.IOException;
 import java.util.Map;
@@ -43,6 +44,7 @@ public class NotificationsController implements BaseController {
     private final CaseDataService caseDataService;
     private final HearingDocumentService hearingDocumentService;
     private final AdditionalHearingDocumentService additionalHearingDocumentService;
+    private final TransferCourtService transferCourtService;
     private final FeatureToggleService featureToggleService;
 
     @PostMapping(value = "/hwf-successful", consumes = APPLICATION_JSON_VALUE)
@@ -555,5 +557,28 @@ public class NotificationsController implements BaseController {
         }
 
         return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
+    }
+
+    @PostMapping(value = "/transfer-to-local-court", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "send a transfer to local courts email")
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "Transfer to Local Courts e-mail sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendTransferCourtsEmail(
+        @RequestBody CallbackRequest callbackRequest) {
+
+        log.info("Received request to send transfer courts email for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        if (caseDataService.isConsentedApplication(caseDetails)) {
+            log.info("Sending transfer courts email notification");
+            notificationService.sendTransferToLocalCourtEmail(caseDetails);
+
+            transferCourtService.storeTransferToCourtEmail(caseDetails);
+        }
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 }
