@@ -19,6 +19,7 @@ public class NotificationServiceConfiguration {
     private String consentOrderAvailable;
     private String consentOrderAvailableCtsc;
     private String ctscEmail;
+    private String transferToLocalCourt;
     private String consentGeneralEmail;
     private String prepareForHearing;
     private String prepareForHearingOrderSent;

@@ -63,6 +63,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE = "http://localhost:8086/notify/contested/general-application-refer-to-judge";
     private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME = "http://localhost:8086/notify/contested/general-application-outcome";
     private static final String END_POINT_CONTESTED_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/contested/consent-order-not-approved";
+    private static final String END_POINT_TRANSFER_TO_LOCAL_COURT = "http://localhost:8086/notify/transfer-to-local-court";
 
     private static final String ERROR_500_MESSAGE = "500 Internal Server Error";
     private static final String TEST_USER_EMAIL = "fr_applicant_sol@sharklasers.com";
@@ -926,5 +927,27 @@ public class NotificationServiceTest extends BaseServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(caseData).build();
 
         assertFalse(notificationService.shouldEmailApplicantSolicitor(caseDetails));
+    }
+
+    @Test
+    public void sendTransferToCourtEmailConsented() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_TRANSFER_TO_LOCAL_COURT))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendTransferToLocalCourtEmail(callbackRequest.getCaseDetails());
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void throwExceptionWhenTransferToCourtEmailIsRequested() {
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_TRANSFER_TO_LOCAL_COURT))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withStatus(HttpStatus.INTERNAL_SERVER_ERROR));
+        try {
+            notificationService.sendTransferToLocalCourtEmail(callbackRequest.getCaseDetails());
+        } catch (Exception ex) {
+            assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
+        }
     }
 }
