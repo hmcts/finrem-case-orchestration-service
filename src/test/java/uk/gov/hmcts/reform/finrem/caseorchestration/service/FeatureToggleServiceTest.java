@@ -25,7 +25,8 @@ public class FeatureToggleServiceTest {
     @SpringBootTest(properties = {
         "feature.toggle.respondent_journey=true",
         "feature.toggle.send_to_frc=true",
-        "feature.toggle.assign_case_access=true"
+        "feature.toggle.assign_case_access=true",
+        "feature.toggle.pba_case_type=true"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOn extends BaseServiceTest {
 
@@ -51,13 +52,19 @@ public class FeatureToggleServiceTest {
         public void isAssignCaseAccessEnabledReturnsTrue() {
             assertThat(featureToggleService.isAssignCaseAccessEnabled(), is(true));
         }
+
+        @Test
+        public void isPbaToggleEnabledReturnsTrue() {
+            assertThat(featureToggleService.isPBAUsingCaseTypeEnabled(), is(true));
+        }
     }
 
     @RunWith(SpringRunner.class)
     @SpringBootTest(properties = {
         "feature.toggle.respondent_journey=false",
         "feature.toggle.send_to_frc=false",
-        "feature.toggle.assign_case_access=false"
+        "feature.toggle.assign_case_access=false",
+        "feature.toggle.pba_case_type=false"
     })
     public static class ApprovedConsentOrderNotificationSwitchedOff extends BaseServiceTest {
 
@@ -84,6 +91,11 @@ public class FeatureToggleServiceTest {
         @Test
         public void isAssignCaseAccessEnabledReturnsFalse() {
             assertThat(featureToggleService.isAssignCaseAccessEnabled(), is(false));
+        }
+
+        @Test
+        public void isPbaToggleEnabledReturnsFalse() {
+            assertThat(featureToggleService.isPBAUsingCaseTypeEnabled(), is(false));
         }
     }
 }
