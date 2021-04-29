@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matchers;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -41,29 +42,34 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER;
 
 public class  CaseDataServiceTest extends BaseServiceTest {
 
     @Autowired CaseDataService caseDataService;
+    public Map<String, Object> caseData;
+
+    @Before
+    public void setUp() {
+         caseData = new HashMap<>();
+    }
+
 
     @Test
     public void isRespondentSolicitorResponsibleToDraftOrder_shouldReturnTrue() {
-        Map<String, Object> caseData = new HashMap<>();
         caseData.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, RESPONDENT_SOLICITOR);
         assertTrue(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData));
     }
 
     @Test
     public void isRespondentSolicitorResponsibleToDraftOrder_appSolicitor() {
-        Map<String, Object> caseData = new HashMap<>();
         caseData.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, APPLICANT_SOLICITOR);
         assertFalse(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData));
     }
 
     @Test
     public void isRespondentSolicitorResponsibleToDraftOrder_fieldNotExist() {
-        Map<String, Object> caseData = new HashMap<>();
         assertFalse(caseDataService.isRespondentSolicitorResponsibleToDraftOrder(caseData));
     }
 
@@ -223,36 +229,32 @@ public class  CaseDataServiceTest extends BaseServiceTest {
 
     @Test
     public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnTrueWhenAppSolAgreedToReceiveEmailsIsYesForConsented() {
-        Map<String, Object> data = new HashMap<>();
-        data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(data).build();
+        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(caseData).build();
 
         assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails), is(true));
     }
 
     @Test
     public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnFalseWhenAppSolAgreedToReceiveEmailsIsNoForConsented() {
-        Map<String, Object> data = new HashMap<>();
-        data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, null);
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(data).build();
+        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, null);
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(caseData).build();
 
         assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails), is(false));
     }
 
     @Test
     public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnTrueWhenAppSolAgreedToReceiveEmailsIsYesForContested() {
-        Map<String, Object> data = new HashMap<>();
-        data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(data).build();
+        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
 
         assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails), is(true));
     }
 
     @Test
     public void isApplicantSolicitorAgreeToReceiveEmailsShouldReturnFalseWhenAppSolAgreedToReceiveEmailsIsNoForContested() {
-        Map<String, Object> data = new HashMap<>();
-        data.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, null);
-        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(data).build();
+        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, null);
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(caseData).build();
 
         assertThat(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails), is(false));
     }
@@ -354,26 +356,23 @@ public class  CaseDataServiceTest extends BaseServiceTest {
 
     @Test
     public void isApplicantSolicitorResponsibleToDraftOrderTrueWhenTheyHaveBeenNominated() {
-        Map<String, Object> data = new HashMap<>();
-        data.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, APPLICANT_SOLICITOR);
+        caseData.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, APPLICANT_SOLICITOR);
 
-        assertThat(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data), is(true));
+        assertThat(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(caseData), is(true));
     }
 
     @Test
     public void isApplicantSolicitorResponsibleToDraftOrderFalseWhenRespondentSolicitorIsNominated() {
-        Map<String, Object> data = new HashMap<>();
-        data.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, RESPONDENT_SOLICITOR);
+        caseData.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, RESPONDENT_SOLICITOR);
 
-        assertThat(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data), is(false));
+        assertThat(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(caseData), is(false));
     }
 
     @Test
     public void isApplicantSolicitorResponsibleToDraftOrderFalseWhenNull() {
-        Map<String, Object> data = new HashMap<>();
-        data.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, null);
+        caseData.put(SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER, null);
 
-        assertThat(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(data), is(false));
+        assertThat(caseDataService.isApplicantSolicitorResponsibleToDraftOrder(caseData), is(false));
     }
 
     @Test
@@ -467,48 +466,59 @@ public class  CaseDataServiceTest extends BaseServiceTest {
 
     @Test
     public void isApplicantAddressConfidentialTrueWhenApplicantAddressIsMarkedAsConfidential() {
-        Map<String, Object> data = new HashMap<>();
-        data.put(APPLICANT_CONFIDENTIAL_ADDRESS, "Yes");
+        caseData.put(APPLICANT_CONFIDENTIAL_ADDRESS, "Yes");
 
-        assertThat(caseDataService.isApplicantAddressConfidential(data), is(true));
+        assertThat(caseDataService.isApplicantAddressConfidential(caseData), is(true));
     }
 
     @Test
     public void isApplicantAddressConfidentialFalseWhenApplicantAddressIsNotMarkedAsConfidential() {
-        Map<String, Object> data = new HashMap<>();
-        data.put(APPLICANT_CONFIDENTIAL_ADDRESS, "No");
+        caseData.put(APPLICANT_CONFIDENTIAL_ADDRESS, "No");
 
-        assertThat(caseDataService.isApplicantAddressConfidential(data), is(false));
+        assertThat(caseDataService.isApplicantAddressConfidential(caseData), is(false));
     }
 
     @Test
     public void isApplicantAddressConfidentialFalseWhenApplicantAddressConfidentialFieldIsNotPresent() {
-        Map<String, Object> data = new HashMap<>();
-
-        assertThat(caseDataService.isApplicantAddressConfidential(data), is(false));
+        assertThat(caseDataService.isApplicantAddressConfidential(caseData), is(false));
     }
 
     @Test
     public void isRespondentAddressConfidentialTrueWhenRespondentAddressIsMarkedAsConfidential() {
-        Map<String, Object> data = new HashMap<>();
-        data.put(RESPONDENT_CONFIDENTIAL_ADDRESS, "Yes");
+        caseData.put(RESPONDENT_CONFIDENTIAL_ADDRESS, "Yes");
 
-        assertThat(caseDataService.isRespondentAddressConfidential(data), is(true));
+        assertThat(caseDataService.isRespondentAddressConfidential(caseData), is(true));
     }
 
     @Test
     public void isRespondentAddressConfidentialFalseWhenRespondentAddressIsNotMarkedAsConfidential() {
-        Map<String, Object> data = new HashMap<>();
-        data.put(RESPONDENT_CONFIDENTIAL_ADDRESS, "No");
+        caseData.put(RESPONDENT_CONFIDENTIAL_ADDRESS, "No");
 
-        assertThat(caseDataService.isRespondentAddressConfidential(data), is(false));
+        assertThat(caseDataService.isRespondentAddressConfidential(caseData), is(false));
     }
 
     @Test
     public void isRespondentAddressConfidentialFalseWhenRespondentAddressConfidentialFieldIsNotPresent() {
-        Map<String, Object> data = new HashMap<>();
+        assertThat(caseDataService.isRespondentAddressConfidential(caseData), is(false));
+    }
 
-        assertThat(caseDataService.isRespondentAddressConfidential(data), is(false));
+    @Test
+    public void isRespondentSolicitorAgreeToReceiveEmails_whenYes() {
+        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
+
+        assertThat(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseData), is(true));
+    }
+
+    @Test
+    public void isRespondentSolicitorAgreeToReceiveEmails_whenNo() {
+        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, NO_VALUE);
+
+        assertThat(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseData), is(false));
+    }
+
+    @Test
+    public void isRespondentSolicitorAgreeToReceiveEmails_whenNullOrFieldNotPresent() {
+        assertThat(caseDataService.isRespondentSolicitorAgreeToReceiveEmails(caseData), is(false));
     }
 
     private static RespondToOrderData getRespondToOrderData(String s) {
