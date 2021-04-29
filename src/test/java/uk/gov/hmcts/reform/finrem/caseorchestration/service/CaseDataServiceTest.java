@@ -52,9 +52,8 @@ public class  CaseDataServiceTest extends BaseServiceTest {
 
     @Before
     public void setUp() {
-         caseData = new HashMap<>();
+        caseData = new HashMap<>();
     }
-
 
     @Test
     public void isRespondentSolicitorResponsibleToDraftOrder_shouldReturnTrue() {
