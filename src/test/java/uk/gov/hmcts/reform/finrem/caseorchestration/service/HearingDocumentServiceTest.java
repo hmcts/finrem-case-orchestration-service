@@ -225,7 +225,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         verifyAdditionalNonFastTrackFields();
 
         verifyCourtDetailsFields(
-            "Newcastle Upon Tyne Justice Centre", "The Law Courts, The Quayside, Newcastle-upon-Tyne, NE1 3LA",
+            "Newcastle Upon Tyne Justice Centre", "Barras Bridge, Newcastle upon Tyne, NE18QF",
             "0191 2012000", "Family.newcastle.countycourt@justice.gov.uk");
     }
 
