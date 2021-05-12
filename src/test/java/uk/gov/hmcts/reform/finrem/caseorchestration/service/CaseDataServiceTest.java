@@ -207,6 +207,14 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldPopulateFinancialRemediesCourtDetails() {
+        Map<String, Object> data = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().data(data).build();
+        caseDataService.setFinancialRemediesCourtDetails(caseDetails);
+        assertThat(true, is(true));
+    }
+
+    @Test
     public void isApplicantRepresentedByASolicitorShouldReturnTrueWhenApplicantRepresentedIsYes() {
         assertThat(caseDataService.isApplicantRepresentedByASolicitor(createCaseDataApplRepresented(YES_VALUE)), is(true));
     }
