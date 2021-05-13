@@ -24,7 +24,8 @@ public class AssignCaseAccessService {
 
         restService.restApiPostCall(
             authorisationToken,
-            assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl(),
-            assignCaseAccessRequest);
+            assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl() + "?use_user_token=true",
+            assignCaseAccessRequest
+        );
     }
 }
