@@ -209,6 +209,9 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void shouldPopulateFinancialRemediesCourtDetails() {
         Map<String, Object> data = new HashMap<>();
+        data.put("regionList", "london");
+        data.put("londonFRCList", "cfc");
+        data.put("cfcCourtList", "FR_s_CFCList_11");
         CaseDetails caseDetails = CaseDetails.builder().data(data).build();
         caseDataService.setFinancialRemediesCourtDetails(caseDetails);
         assertThat(true, is(true));

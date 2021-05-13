@@ -282,7 +282,10 @@ public class CCDConfigConstant {
     public static final String HEARING_ORDER_COLLECTION = "uploadHearingOrder";
     public static final String RESPOND_TO_ORDER_DOCUMENTS = "respondToOrderDocuments";
     public static final String CONSENT_ORDER = "consentOrder";
-    public static final String CONSENT_ORDER_FRC_TEXT = "consentOrderFRCText";
+    public static final String CONSENT_ORDER_FRC_NAME = "consentOrderFRCName";
+    public static final String CONSENT_ORDER_FRC_ADDRESS = "consentOrderFRCAddress";
+    public static final String CONSENT_ORDER_FRC_EMAIL = "consentOrderFRCEmail";
+    public static final String CONSENT_ORDER_FRC_PHONE = "consentOrderFRCPhone";
     public static final String LATEST_CONSENT_ORDER = "latestConsentOrder";
     public static final String AMENDED_CONSENT_ORDER_COLLECTION = "amendedConsentOrderCollection";
     public static final String ORDER_REFUSAL_COLLECTION = "orderRefusalCollection";
