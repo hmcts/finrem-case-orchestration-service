@@ -115,11 +115,14 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldPopulateFinancialRemediesCourtDetails() throws Exception {
-        loadRequestContentWith(CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON);
+        doValidCaseDataSetUp();
+
         mvc.perform(post("/case-orchestration/contested/set-frc-details")
             .content(requestContent.toString())
             .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk());
+
+        verify(caseDataService, times(1)).setFinancialRemediesCourtDetails(any());
     }
 
     @Test

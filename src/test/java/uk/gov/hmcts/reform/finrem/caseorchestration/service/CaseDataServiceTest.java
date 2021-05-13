@@ -36,9 +36,18 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_FRC_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_FRC_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_FRC_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_FRC_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_CFC;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER;
@@ -209,12 +218,18 @@ public class  CaseDataServiceTest extends BaseServiceTest {
     @Test
     public void shouldPopulateFinancialRemediesCourtDetails() {
         Map<String, Object> data = new HashMap<>();
-        data.put("regionList", "london");
-        data.put("londonFRCList", "cfc");
-        data.put("cfcCourtList", "FR_s_CFCList_11");
+        data.put(REGION, LONDON);
+        data.put(LONDON_FRC_LIST, LONDON_CFC);
+        data.put(CFC_COURTLIST, "FR_s_CFCList_11");
         CaseDetails caseDetails = CaseDetails.builder().data(data).build();
+
         caseDataService.setFinancialRemediesCourtDetails(caseDetails);
-        assertThat(true, is(true));
+
+        assertThat(caseDetails.getData().get(CONSENT_ORDER_FRC_NAME), is("East London Family Court"));
+        assertThat(caseDetails.getData().get(CONSENT_ORDER_FRC_ADDRESS),
+            is("East London Family Court, 6th and 7th Floor, 11 Westferry Circus, London, E14 4HD"));
+        assertThat(caseDetails.getData().get(CONSENT_ORDER_FRC_EMAIL), is("eastlondonfamilyenquiries@justice.gov.uk"));
+        assertThat(caseDetails.getData().get(CONSENT_ORDER_FRC_PHONE), is("0203 197 2886"));
     }
 
     @Test
