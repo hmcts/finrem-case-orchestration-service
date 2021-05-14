@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.integrationtest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -257,7 +258,7 @@ public class PBAPaymentTest extends BaseTest {
     }
 
     private void stubForAca(HttpStatus httpStatus) {
-        acaService.stubFor(post(urlEqualTo(acaUrl))
+        acaService.stubFor(WireMock.post(acaUrl)
             .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
             .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
             .willReturn(
