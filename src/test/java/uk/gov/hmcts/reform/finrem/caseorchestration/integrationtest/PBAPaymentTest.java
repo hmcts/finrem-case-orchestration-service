@@ -104,7 +104,7 @@ public class PBAPaymentTest extends BaseTest {
     @ClassRule public static WireMockClassRule prdService = new WireMockClassRule(8090);
 
     private String idamUrl = "/details";
-    private String acaUrl = "/case-assignments";
+    private String acaUrl = "/case-assignments?use_user_token=true";
     private String dataStoreUrl = "/case-users";
     private String prdUrl = "/refdata/external/v1/organisations";
 
