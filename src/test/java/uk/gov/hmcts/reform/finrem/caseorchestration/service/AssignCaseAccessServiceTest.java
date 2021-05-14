@@ -23,6 +23,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_US
 
 public class AssignCaseAccessServiceTest extends BaseServiceTest {
 
+    private static final String ACA_ENDPOINT = TEST_URL + "?use_user_token=true";
+
     @Autowired private AssignCaseAccessService assignCaseAccessService;
 
     @MockBean private AssignCaseAccessServiceConfiguration assignCaseAccessServiceConfiguration;
@@ -54,8 +56,10 @@ public class AssignCaseAccessServiceTest extends BaseServiceTest {
         assignCaseAccessService.assignCaseAccess(caseDetails, AUTH_TOKEN);
 
         verify(idamService, times(1)).getIdamUserId(AUTH_TOKEN);
-        verify(assignCaseAccessRequestMapper, times(1)).mapToAssignCaseAccessRequest(caseDetails, TEST_USER_ID);
+        verify(assignCaseAccessRequestMapper, times(1))
+            .mapToAssignCaseAccessRequest(caseDetails, TEST_USER_ID);
         verify(assignCaseAccessServiceConfiguration, times(1)).getCaseAssignmentsUrl();
-        verify(restService, times(1)).restApiPostCall(AUTH_TOKEN, TEST_URL, assignCaseAccessRequest);
+        verify(restService, times(1))
+            .restApiPostCall(AUTH_TOKEN, ACA_ENDPOINT, assignCaseAccessRequest);
     }
 }
