@@ -5,6 +5,7 @@
 target/
 smoke-output/
 functional-output/
+pacts/
 
 ### STS ###
 .apt_generated
