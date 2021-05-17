@@ -7,7 +7,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.Features;
 
 @Service
 @Slf4j
