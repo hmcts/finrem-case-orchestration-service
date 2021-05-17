@@ -83,7 +83,8 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
     public void verifyCaseAssignment() throws IOException, JSONException {
 
         given(idamService.getIdamUserId(anyString())).willReturn(ASSIGNEE_ID);
-        given(assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl()).willReturn("http://localhost:8889/case-assignments");
+        given(assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl())
+            .willReturn("http://localhost:8889/case-assignments?use_user_token=true");
         given(authTokenGenerator.generate()).willReturn(someServiceAuthToken);
 
         assignCaseAccessService
