@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.Features;
 
 @Service
 @Slf4j
@@ -18,13 +19,18 @@ public class AssignCaseAccessService {
     private final IdamService idamService;
     private final RestService restService;
 
+    private final FeatureToggleService featureToggleService;
+
     public void assignCaseAccess(CaseDetails caseDetails, String authorisationToken) {
         String userId = idamService.getIdamUserId(authorisationToken);
         AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(caseDetails, userId);
 
+        String url = assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl() +
+            (featureToggleService.isUseUserTokenEnabled() ? "?use_user_token=true" : "");
+
         restService.restApiPostCall(
             authorisationToken,
-            assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl() + "?use_user_token=true",
+            url,
             assignCaseAccessRequest
         );
     }
