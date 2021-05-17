@@ -64,7 +64,7 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
             .method("POST")
             .headers(SERVICE_AUTHORIZATION_HEADER, someServiceAuthToken, AUTHORIZATION_HEADER, authorizationToken)
             .body(createJsonObject(buildAssignCaseRequest()))
-            .path("/case-assignments")
+            .path("/case-assignments?use_user_token=true")
             .willRespondWith()
             .body(buildAssignCasesResponseDsl())
             .status(HttpStatus.SC_CREATED)
