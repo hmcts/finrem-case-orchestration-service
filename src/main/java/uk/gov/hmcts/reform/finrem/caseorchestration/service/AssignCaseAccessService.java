@@ -18,13 +18,19 @@ public class AssignCaseAccessService {
     private final IdamService idamService;
     private final RestService restService;
 
+    private final FeatureToggleService featureToggleService;
+
     public void assignCaseAccess(CaseDetails caseDetails, String authorisationToken) {
         String userId = idamService.getIdamUserId(authorisationToken);
         AssignCaseAccessRequest assignCaseAccessRequest = assignCaseAccessRequestMapper.mapToAssignCaseAccessRequest(caseDetails, userId);
 
+        String url = assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl()
+            + (featureToggleService.isUseUserTokenEnabled() ? "?use_user_token=true" : "");
+
         restService.restApiPostCall(
             authorisationToken,
-            assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl(),
-            assignCaseAccessRequest);
+            url,
+            assignCaseAccessRequest
+        );
     }
 }

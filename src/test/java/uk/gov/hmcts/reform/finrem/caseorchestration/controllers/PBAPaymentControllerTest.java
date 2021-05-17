@@ -87,6 +87,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
     public void setUp() {
         super.setUp();
         when(featureToggleService.isAssignCaseAccessEnabled()).thenReturn(true);
+        when(featureToggleService.isUseUserTokenEnabled()).thenReturn(true);
+
         when(prdOrganisationService.retrieveOrganisationsData(AUTH_TOKEN)).thenReturn(OrganisationsResponse.builder()
             .contactInformation(singletonList(organisationContactInformation))
             .name(TEST_SOLICITOR_NAME)
@@ -297,7 +299,8 @@ public class PBAPaymentControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-        verify(ccdDataStoreService, times(1)).removeCreatorRole(any(), eq(AUTH_TOKEN));
         verify(assignCaseAccessService, times(1)).assignCaseAccess(any(), eq(AUTH_TOKEN));
+
+        verifyNoInteractions(ccdDataStoreService);
     }
 }

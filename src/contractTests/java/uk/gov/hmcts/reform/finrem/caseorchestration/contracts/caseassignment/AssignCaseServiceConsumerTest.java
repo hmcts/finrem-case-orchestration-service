@@ -65,6 +65,7 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
             .headers(SERVICE_AUTHORIZATION_HEADER, someServiceAuthToken, AUTHORIZATION_HEADER, authorizationToken)
             .body(createJsonObject(buildAssignCaseRequest()))
             .path("/case-assignments")
+            .query("use_user_token=true")
             .willRespondWith()
             .body(buildAssignCasesResponseDsl())
             .status(HttpStatus.SC_CREATED)
@@ -83,7 +84,8 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
     public void verifyCaseAssignment() throws IOException, JSONException {
 
         given(idamService.getIdamUserId(anyString())).willReturn(ASSIGNEE_ID);
-        given(assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl()).willReturn("http://localhost:8889/case-assignments");
+        given(assignCaseAccessServiceConfiguration.getCaseAssignmentsUrl())
+            .willReturn("http://localhost:8889/case-assignments");
         given(authTokenGenerator.generate()).willReturn(someServiceAuthToken);
 
         assignCaseAccessService
@@ -95,7 +97,6 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
         return objectMapper.writeValueAsString(obj);
     }
 
-
     private AssignCaseAccessRequest buildAssignCaseRequest() {
         return AssignCaseAccessRequest
             .builder()
@@ -104,6 +105,5 @@ public class AssignCaseServiceConsumerTest extends BaseTest {
             .assignee_id(ASSIGNEE_ID)
             .build();
     }
-
 
 }

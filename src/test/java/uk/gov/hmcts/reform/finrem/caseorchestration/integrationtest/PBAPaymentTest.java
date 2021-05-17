@@ -31,10 +31,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -104,7 +102,7 @@ public class PBAPaymentTest extends BaseTest {
     @ClassRule public static WireMockClassRule prdService = new WireMockClassRule(8090);
 
     private String idamUrl = "/details";
-    private String acaUrl = "/case-assignments";
+    private String acaUrl = "/case-assignments?use_user_token=true";
     private String dataStoreUrl = "/case-users";
     private String prdUrl = "/refdata/external/v1/organisations";
 
@@ -135,8 +133,6 @@ public class PBAPaymentTest extends BaseTest {
             .andExpect(jsonPath("$.data.amountToPay", is("5000")))
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-
-        verify(postRequestedFor(urlMatching(acaUrl)));
     }
 
     @Test
@@ -186,8 +182,6 @@ public class PBAPaymentTest extends BaseTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.errors", hasSize(1)))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-
-        verify(postRequestedFor(urlMatching(acaUrl)));
     }
 
     @Test
@@ -203,8 +197,6 @@ public class PBAPaymentTest extends BaseTest {
             .andExpect(jsonPath("$.data.authorisation3", is(notNullValue())))
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-
-        verify(postRequestedFor(urlMatching(acaUrl)));
     }
 
     @Test
@@ -257,7 +249,7 @@ public class PBAPaymentTest extends BaseTest {
     }
 
     private void stubForAca(HttpStatus httpStatus) {
-        acaService.stubFor(post(urlEqualTo(acaUrl))
+        acaService.stubFor(post(acaUrl)
             .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
             .withHeader(CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON_VALUE))
             .willReturn(
