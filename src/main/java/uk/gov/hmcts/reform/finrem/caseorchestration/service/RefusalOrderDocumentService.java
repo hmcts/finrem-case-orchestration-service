@@ -120,6 +120,7 @@ public class RefusalOrderDocumentService {
         caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
         caseData.put("RefusalOrderHeader", "Sitting in the Family Court");
 
+
         if (caseDataService.isConsentedApplication(caseDetails)) {
             caseData.put("RespondentName", documentHelper.getRespondentFullNameConsented(caseDetails));
             caseData.put("CourtName", "SITTING in private");
