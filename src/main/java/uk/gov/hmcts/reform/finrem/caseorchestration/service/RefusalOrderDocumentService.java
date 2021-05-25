@@ -27,6 +27,8 @@ import java.util.function.UnaryOperator;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORDER_REFUSAL_PREVIEW_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.UPLOAD_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildConsentedFrcCourtDetails;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.buildFrcCourtDetails;
 
 @Service
 @RequiredArgsConstructor
@@ -119,18 +121,17 @@ public class RefusalOrderDocumentService {
 
         caseData.put("ApplicantName", documentHelper.getApplicantFullName(caseDetails));
         caseData.put("RefusalOrderHeader", "Sitting in the Family Court");
-
-
         if (caseDataService.isConsentedApplication(caseDetails)) {
             caseData.put("RespondentName", documentHelper.getRespondentFullNameConsented(caseDetails));
             caseData.put("CourtName", "SITTING in private");
+            caseData.put("courtDetails", buildConsentedFrcCourtDetails());
 
         } else {
             caseData.put("RespondentName", documentHelper.getRespondentFullNameContested(caseDetails));
             caseData.put("CourtName", "SITTING AT the Family Court at the "
                 + ContestedCourtHelper.getSelectedCourt(caseDetails));
+            caseData.put("courtDetails", buildFrcCourtDetails(caseData));
         }
-
         return caseDetails;
     }
 }
