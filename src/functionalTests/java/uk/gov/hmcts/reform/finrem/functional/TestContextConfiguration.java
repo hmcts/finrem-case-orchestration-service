@@ -31,14 +31,6 @@ import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
 import uk.gov.hmcts.reform.authorisation.generators.ServiceAuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 
-import javax.annotation.PostConstruct;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.URL;
-
-import static org.assertj.core.util.Strings.isNullOrEmpty;
-
 @Configuration
 @ComponentScan("uk.gov.hmcts.reform.finrem.functional")
 @EnableFeignClients(basePackageClasses = ServiceAuthorisationApi.class)
