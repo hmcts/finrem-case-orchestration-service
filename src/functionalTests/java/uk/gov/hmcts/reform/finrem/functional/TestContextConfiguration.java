@@ -47,9 +47,6 @@ import static org.assertj.core.util.Strings.isNullOrEmpty;
 @Slf4j
 public class TestContextConfiguration {
 
-    @Value("${http.proxy:#{null}}")
-    private String httpProxy;
-
     @Bean
     public ServiceAuthTokenGenerator serviceAuthTokenGenerator(@Value("${idam.s2s-auth.url}")
                                                                    String s2sUrl,
@@ -101,24 +98,5 @@ public class TestContextConfiguration {
                 template.header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
             }
         };
-    }
-
-    @PostConstruct
-    public void configureProxy() {
-        if (!isNullOrEmpty(httpProxy)) {
-            try {
-                URL proxy = new URL(httpProxy);
-                if (!InetAddress.getByName(proxy.getHost()).isReachable(2000)) {
-                    throw new IOException("Proxy host is not reachable");
-                }
-                System.setProperty("http.proxyHost", proxy.getHost());
-                System.setProperty("http.proxyPort", Integer.toString(proxy.getPort()));
-                System.setProperty("https.proxyHost", proxy.getHost());
-                System.setProperty("https.proxyPort", Integer.toString(proxy.getPort()));
-            } catch (IOException e) {
-                log.error("Error setting up proxy - are you connected to the VPN?", e);
-                throw new RuntimeException(e);
-            }
-        }
     }
 }
