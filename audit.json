@@ -379,5 +379,6 @@
   "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested/set-defaults_POST":"ignore",
   "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested/set-paper-case-defaults_POST":"ignore",
   "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/documents/consent-order-not-approved_POST":"ignore",
-  "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/submit-general-application-directions_POST":"ignore"
+  "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/submit-general-application-directions_POST":"ignore",
+  "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/consented/set-defaults_POST": "ignore"
 }
