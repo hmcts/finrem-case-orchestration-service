@@ -114,6 +114,18 @@ public class CaseDataControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void shouldPopulateFinancialRemediesCourtDetails() throws Exception {
+        doValidCaseDataSetUp();
+
+        mvc.perform(post("/case-orchestration/contested/set-frc-details")
+            .content(requestContent.toString())
+            .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
+
+        verify(caseDataService, times(1)).setFinancialRemediesCourtDetails(any());
+    }
+
+    @Test
     public void shouldSuccessfullyReturnAsAdminConsentedPaperCase() throws Exception {
         when(idamService.isUserRoleAdmin(isA(String.class))).thenReturn(true);
 
