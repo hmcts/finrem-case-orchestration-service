@@ -43,8 +43,8 @@ targetCompatibility = 11
 
 repositories {
     jcenter()
-    maven { url "https://dl.bintray.com/hmcts/hmcts-maven" }
     maven { url 'https://repo.spring.io/libs-milestone' }
+    maven { url "https://jitpack.io" }
 }
 
 sourceSets {
@@ -104,7 +104,7 @@ configurations {
 }
 
 def versions = [
-        bspCommonLib         : '0.0.47',
+        bspCommonLib         : '0.0.49',
         ccdClient            : '4.7.3',
         commonsBeanUtils     : '1.9.4',
         commonsIo            : '2.7',
@@ -180,13 +180,13 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
-    implementation group: 'uk.gov.hmcts.reform', name: 'bsp-common-lib', version: versions.bspCommonLib
     implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
     implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
     implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
     implementation group: 'uk.gov.hmcts.reform', name: 'logging-spring', version: versions.reformLogging
     implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
     implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version: '0.1.0'
+    implementation "com.github.hmcts:bsp-common-lib:${versions.bspCommonLib}"
 
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.13.3'
@@ -218,9 +218,9 @@ dependencies {
     functionalImplementation group: 'org.pdfbox', name: 'com.springsource.org.pdfbox', version: '0.7.3'
     functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalImplementation group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
-    functionalImplementation group: 'uk.gov.hmcts.reform', name: 'bsp-common-lib', version: versions.bspCommonLib
     functionalImplementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
     functionalImplementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
+    functionalImplementation "com.github.hmcts:bsp-common-lib:${versions.bspCommonLib}"
 
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
