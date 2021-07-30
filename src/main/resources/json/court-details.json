@@ -115,62 +115,62 @@
   },
   "FR_birmingham_hc_list_1": {
     "courtName": "Birmingham Civil And Family Justice Centre",
-    "courtAddress": "Pipers Row, Wolverhampton, WV1 3LQ",
-    "phoneNumber": "0121 250 6794",
+    "courtAddress": "Priory Courts, 33 Bull Street, Birmingham, B4 6DS",
+    "phoneNumber": "0300 123 5577",
     "email": "FRCBirmingham@justice.gov.uk"
   },
   "FR_birmingham_hc_list_2": {
     "courtName": "Coventry Combined Court Centre",
     "courtAddress": "140 Much Park Street, Coventry, CV1 2SN",
-    "phoneNumber": "0121 250 6794",
+    "phoneNumber": "0300 123 5577",
     "email": "FRCBirmingham@justice.gov.uk"
   },
   "FR_birmingham_hc_list_3": {
     "courtName": "Telford County Court And Family Court",
     "courtAddress": "Telford Justice Centre, Telford Square, Malinsgate, Telford, TF3 4HX",
-    "phoneNumber": "0121 250 6794",
+    "phoneNumber": "0300 123 5577",
     "email": "FRCBirmingham@justice.gov.uk"
   },
   "FR_birmingham_hc_list_4": {
     "courtName": "Wolverhampton Combined Court Centre",
     "courtAddress": "Pipers Row, Wolverhampton, WV1 3LQ",
-    "phoneNumber": "0121 250 6794",
+    "phoneNumber": "0300 123 5577",
     "email": "FRCBirmingham@justice.gov.uk"
   },
   "FR_birmingham_hc_list_5": {
     "courtName": "Dudley County Court And Family Court",
     "courtAddress": "The Inhedge, Dudley, DY1 1RY",
-    "phoneNumber": "0121 250 6794",
+    "phoneNumber": "0300 123 5577",
     "email": "FRCBirmingham@justice.gov.uk"
   },
   "FR_birmingham_hc_list_6": {
     "courtName": "Walsall County And Family Court",
     "courtAddress": "Bridge House, Bridge Street, Walsall, WS1 1JQ",
-    "phoneNumber": "0121 250 6794",
+    "phoneNumber": "0300 123 5577",
     "email": "FRCBirmingham@justice.gov.uk"
   },
   "FR_birmingham_hc_list_7": {
     "courtName": "Stoke On Trent Combined Court",
     "courtAddress": "Bethesda Street, Hanley, Stoke-on-Trent, ST1 3BP",
-    "phoneNumber": "0121 250 6794",
+    "phoneNumber": "0300 123 5577",
     "email": "FRCBirmingham@justice.gov.uk"
   },
   "FR_birmingham_hc_list_8": {
     "courtName": "Worcester Combined Court",
     "courtAddress": "The Shirehall, Foregate, Worcester, WR1 1EQ",
-    "phoneNumber": "0121 250 6794",
+    "phoneNumber": "0300 123 5577",
     "email": "FRCBirmingham@justice.gov.uk"
   },
   "FR_birmingham_hc_list_9": {
     "courtName": "Stafford Combined Court",
     "courtAddress": "Victoria Square, Stafford, ST16 2QQ",
-    "phoneNumber": "0121 250 6794",
+    "phoneNumber": "0300 123 5577",
     "email": "FRCBirmingham@justice.gov.uk"
   },
   "FR_birmingham_hc_list_10": {
     "courtName": "Hereford County Court And Family Court",
-    "courtAddress": "Worcester Combined Court Centre, The Shirehall, Foregate Street, Worcester, WR1 1EQ",
-    "phoneNumber": "0121 250 6794",
+    "courtAddress": "The Court House, Bath Street, Hereford, HR1 2HE",
+    "phoneNumber": "0300 123 5577",
     "email": "FRCBirmingham@justice.gov.uk"
   },
   "FR_cleaveland_hc_list_1": {
@@ -349,7 +349,7 @@
   },
   "FR_kent_surrey_hc_list_4": {
     "courtName": "Medway County Court And Family Court",
-    "courtAddress": "Anchorage House, 47-67 High Street, Chatham, ME4 4DW",
+    "courtAddress": "The Holiday Inn, Maidstone Road, Rochester, Kent, ME5 9SF",
     "phoneNumber": "01634 887900",
     "email": "FRCKSS@justice.gov.uk"
   },
@@ -541,7 +541,7 @@
   },
   "FR_bedfordshireList_3": {
     "courtName": "Bury St Edmunds County Court and Family Court",
-    "courtAddress": "Norwich Combined Court, The Law Courts, Bishop Gate, Norwich, NR3 1UR",
+    "courtAddress": "2nd Floor, Triton House, St Andrews Street (N), Bury St Edmunds, Suffolk, IP33 1TR",
     "phoneNumber": "0344 892 4000",
     "email": "FRC.NES.BCH@justice.gov.uk"
   },

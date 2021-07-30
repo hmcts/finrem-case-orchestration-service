@@ -75,6 +75,17 @@ public class CaseDataController implements BaseController {
         setApplicantSolicitorOrganisationDetails(callbackRequest.getCaseDetails(), authToken);
     }
 
+    @PostMapping(path = "/contested/set-frc-details",
+        consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Set Financial Remedies Court details")
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setFinancialRemediesCourtDetails(
+        @RequestBody final CallbackRequest callbackRequest) {
+        log.info("Setting Financial Remedies Court details.");
+        caseDataService.setFinancialRemediesCourtDetails(callbackRequest.getCaseDetails());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
+    }
+
     @PostMapping(path = "/contested/set-paper-case-defaults",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
