@@ -14,12 +14,17 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.PaymentConfirmationService;
 
 import java.io.IOException;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,8 +48,16 @@ public class PaymentConfirmationController implements BaseController {
 
         validateCaseData(callbackRequest);
 
+        Map<String, Object> courtDetails = CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData());
+        String body = String.format(confirmationBody(caseDetails),
+            courtDetails.get(COURT_DETAILS_NAME_KEY),
+            courtDetails.get(COURT_DETAILS_ADDRESS_KEY),
+            courtDetails.get(COURT_DETAILS_EMAIL_KEY),
+            courtDetails.get(COURT_DETAILS_PHONE_KEY)
+        );
+
         return ResponseEntity.ok(SubmittedCallbackResponse.builder()
-            .confirmationBody(confirmationBody(caseDetails))
+            .confirmationBody(body)
             .build());
     }
 
