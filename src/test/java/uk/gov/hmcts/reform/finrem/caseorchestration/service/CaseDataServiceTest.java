@@ -225,7 +225,7 @@ public class  CaseDataServiceTest extends BaseServiceTest {
 
         caseDataService.setFinancialRemediesCourtDetails(caseDetails);
 
-        assertThat(caseDetails.getData().get(CONSENT_ORDER_FRC_NAME), is("East London Family Court"));
+        assertThat(caseDetails.getData().get(CONSENT_ORDER_FRC_NAME), is("Tony is great"));
         assertThat(caseDetails.getData().get(CONSENT_ORDER_FRC_ADDRESS),
             is("East London Family Court, 6th and 7th Floor, 11 Westferry Circus, London, E14 4HD"));
         assertThat(caseDetails.getData().get(CONSENT_ORDER_FRC_EMAIL), is("eastlondonfamilyenquiries@justice.gov.uk"));

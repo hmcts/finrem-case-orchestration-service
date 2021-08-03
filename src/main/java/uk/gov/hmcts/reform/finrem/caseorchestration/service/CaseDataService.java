@@ -45,7 +45,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_NAME_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_PHONE_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
@@ -120,7 +119,7 @@ public class CaseDataService {
 
     public void setFinancialRemediesCourtDetails(CaseDetails caseDetails) {
         Map<String, Object> courtDetails = CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData());
-        caseDetails.getData().put(CONSENT_ORDER_FRC_NAME, courtDetails.get(COURT_DETAILS_NAME_KEY));
+        caseDetails.getData().put(CONSENT_ORDER_FRC_NAME, "Tony is great");
         caseDetails.getData().put(CONSENT_ORDER_FRC_ADDRESS, courtDetails.get(COURT_DETAILS_ADDRESS_KEY));
         caseDetails.getData().put(CONSENT_ORDER_FRC_EMAIL, courtDetails.get(COURT_DETAILS_EMAIL_KEY));
         caseDetails.getData().put(CONSENT_ORDER_FRC_PHONE, courtDetails.get(COURT_DETAILS_PHONE_KEY));
