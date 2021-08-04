@@ -339,8 +339,8 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
         verifyAdditionalNonFastTrackFields();
 
         verifyCourtDetailsFields(
-            "Birmingham Civil And Family Justice Centre", "Pipers Row, Wolverhampton, WV1 3LQ",
-            "0121 250 6794", "FRCBirmingham@justice.gov.uk");
+            "Birmingham Civil And Family Justice Centre", "Priory Courts, 33 Bull Street, Birmingham, B4 6DS",
+            "0300 123 5577", "FRCBirmingham@justice.gov.uk");
     }
 
     @Test
@@ -428,6 +428,7 @@ public class HearingDocumentServiceTest extends BaseServiceTest {
 
     void verifyCourtDetailsFields(String courtName, String courtAddress, String phone, String email) {
         Map<String, Object> data = caseDetailsArgumentCaptor.getValue().getData();
+        @SuppressWarnings("unchecked")
         Map<String, Object> courtDetails = (Map<String, Object>) data.get("courtDetails");
         assertThat(courtDetails.get(COURT_DETAILS_NAME_KEY), is(courtName));
         assertThat(courtDetails.get(COURT_DETAILS_ADDRESS_KEY), is(courtAddress));

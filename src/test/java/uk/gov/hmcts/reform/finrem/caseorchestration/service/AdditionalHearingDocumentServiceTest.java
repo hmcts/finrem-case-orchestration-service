@@ -46,6 +46,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LATEST_DRAFT_HEARING_ORDER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.MIDLANDS_FRC_LIST_CT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOTTINGHAM_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION_CT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOUTHEAST_FRC_LIST_CT;
@@ -132,6 +136,49 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         assertThat(data.get("CourtAddress"), is("The Law Courts, Bohemia Road, Hastings, TN34 1QX"));
         assertThat(data.get("CourtPhone"), is("01634 887900"));
         assertThat(data.get("CourtEmail"), is("FRCKSS@justice.gov.uk"));
+
+        assertThat(caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION), is(notNullValue()));
+    }
+
+    @Test
+    public void createAndStoreAdditionalHearingDocuments_withMultipleHearingsInList() throws JsonProcessingException {
+        Map<String, Object> caseData = baseCaseData();
+
+        List<DirectionDetailsCollectionData> directionDetailsCollection = buildDirectionDetailsCollectionDataList(true);
+        addEntryToDirectionDetailsCollectionDataList(directionDetailsCollection);
+
+        caseData.put(DIRECTION_DETAILS_COLLECTION_CT, directionDetailsCollection);
+
+        CaseDetails caseDetails = CaseDetails
+            .builder()
+            .id(1234567890L)
+            .data(caseData)
+            .build();
+
+        additionalHearingDocumentService.createAndStoreAdditionalHearingDocuments(AUTH_TOKEN, caseDetails);
+
+        verify(genericDocumentService, times(1)).generateDocument(any(),
+            documentGenerationRequestCaseDetailsCaptor.capture(), any(), any());
+
+        CaseDetails captorCaseDetails = documentGenerationRequestCaseDetailsCaptor.getValue();
+        Map<String, Object> data = captorCaseDetails.getData();
+
+        assertThat(data.get("CCDCaseNumber"), is(1234567890L));
+        assertThat(data.get("DivorceCaseNumber"), is("AB01D23456"));
+        assertThat(data.get("ApplicantName"), is("Test Applicant"));
+        assertThat(data.get("RespondentName"), is("Name Respondent"));
+
+        assertThat(data.get("HearingType"), is("Final Hearing (FH)"));
+        assertThat(data.get("HearingVenue"), is("Nottingham County Court And Family Court"));
+        assertThat(data.get("HearingDate"), is("2021-01-01"));
+        assertThat(data.get("HearingLength"), is("1 hour"));
+        assertThat(data.get("HearingTime"), is("15:00"));
+        assertThat(data.get("AdditionalHearingDated"), is(notNullValue()));
+
+        assertThat(data.get("CourtName"), is("Nottingham County Court And Family Court"));
+        assertThat(data.get("CourtAddress"), is("60 Canal Street, Nottingham NG1 7EJ"));
+        assertThat(data.get("CourtPhone"), is("0115 910 3504"));
+        assertThat(data.get("CourtEmail"), is("FRCNottingham@justice.gov.uk"));
 
         assertThat(caseDetails.getData().get(ADDITIONAL_HEARING_DOCUMENT_COLLECTION), is(notNullValue()));
     }
@@ -277,6 +324,33 @@ public class AdditionalHearingDocumentServiceTest extends BaseServiceTest {
         directionDetailsCollectionList.add(directionDetailsCollectionData);
 
         return directionDetailsCollectionList;
+    }
+
+    private void addEntryToDirectionDetailsCollectionDataList(
+        List<DirectionDetailsCollectionData> directionDetailsCollectionList) {
+
+        Map<String, Object> localCourtMap = new HashMap<>();
+        localCourtMap.put(REGION_CT, MIDLANDS);
+        localCourtMap.put(MIDLANDS_FRC_LIST_CT, NOTTINGHAM);
+        localCourtMap.put(NOTTINGHAM_COURTLIST, "FR_s_NottinghamList_1");
+
+        DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection
+            .builder()
+            .isAnotherHearingYN("Yes")
+            .typeOfHearing("Final Hearing (FH)")
+            .dateOfHearing("2021-01-01")
+            .timeEstimate("1 hour")
+            .hearingTime("15:00")
+            .localCourt(localCourtMap)
+            .build();
+
+        DirectionDetailsCollectionData directionDetailsCollectionData = DirectionDetailsCollectionData
+            .builder()
+            .id(UUID.randomUUID().toString())
+            .directionDetailsCollection(directionDetailsCollection)
+            .build();
+
+        directionDetailsCollectionList.add(directionDetailsCollectionData);
     }
 
 
