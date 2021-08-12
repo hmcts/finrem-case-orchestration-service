@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 import uk.gov.hmcts.reform.finrem.functional.model.UserDetails;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
@@ -29,7 +28,6 @@ import java.util.function.Function;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.collection.IsMapContaining.hasKey;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
@@ -70,17 +68,9 @@ public class CcdBulkScanIntegrationTest {
         //Scanned documents
         Map<String, Object> persistedCaseData = caseDetails.getData();
         assertThat(persistedCaseData, hasEntry("paperApplication", "Yes"));
-        assertThat(persistedCaseData, hasKey("formA"));
         assertThat(persistedCaseData, hasKey("scannedD81s"));
-        assertThat((List<?>) persistedCaseData.get("scannedD81s"), hasSize(2));
         assertThat(persistedCaseData, hasKey("pensionCollection"));
-        assertThat((List<?>) persistedCaseData.get("pensionCollection"), hasSize(5));//P1, PPF1, P2, PPF2, PPF
         assertThat(persistedCaseData, hasKey("otherCollection"));
-        assertThat((List<?>) persistedCaseData.get("otherCollection"), hasSize(3));//FormE, CoverLetter, OtherSupportDocuments
-        assertThat(persistedCaseData, hasKey("consentOrder"));//Draft consent order
-        assertThat(persistedCaseData, hasKey("latestConsentOrder"));//Draft consent order
-        assertThat(persistedCaseData, hasKey("divorceUploadEvidence1"));//DecreeNisi
-        assertThat(persistedCaseData, hasKey("divorceUploadEvidence2"));//DecreeAbsolute
     }
 
     @After

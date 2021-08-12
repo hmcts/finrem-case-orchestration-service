@@ -274,36 +274,6 @@ public class FormAValidator extends BulkScanFormValidator {
 
         List<String> attachedDocumentsValidationErrorMessages = new ArrayList<>();
 
-        long numberOfFormADocumentsAttached = inputScannedDocs.stream()
-            .filter(doc -> doc.getSubtype().equals(FORM_A_DOCUMENT))
-            .count();
-
-        long numberOfDraftConsentOrderDocumentsAttached = inputScannedDocs.stream()
-            .filter(doc -> doc.getSubtype().equals(DRAFT_CONSENT_ORDER_DOCUMENT))
-            .count();
-
-        long numberOfD81DocumentsAttached = inputScannedDocs.stream()
-            .filter(doc -> doc.getSubtype().equals(D81_DOCUMENT))
-            .count();
-
-        if (numberOfFormADocumentsAttached != 1) {
-            attachedDocumentsValidationErrorMessages.add("Must be only a single document with subtype of 'FormA'");
-            log.info("Form A Validation of Scanned Documents failed."
-                + " Expected 1 Form A attached, received {}", numberOfFormADocumentsAttached);
-        }
-
-        if (numberOfDraftConsentOrderDocumentsAttached != 1) {
-            attachedDocumentsValidationErrorMessages.add("Must be only a single document with subtype of 'DraftConsentOrder'");
-            log.info("Form A Validation of Scanned Documents failed."
-                + " Expected 1 Draft Consent Order attached, received {}", numberOfDraftConsentOrderDocumentsAttached);
-        }
-
-        if (numberOfD81DocumentsAttached == 0) {
-            attachedDocumentsValidationErrorMessages.add("Must be at least one document with subtype of 'D81'");
-            log.info("Form A Validation of Scanned Documents failed."
-                + " Expected at least 1 D81 attached, received {}", numberOfD81DocumentsAttached);
-        }
-
         return attachedDocumentsValidationErrorMessages;
     }
 
