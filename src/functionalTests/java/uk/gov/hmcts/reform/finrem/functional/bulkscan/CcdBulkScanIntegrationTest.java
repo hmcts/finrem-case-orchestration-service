@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.functional.bulkscan;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.rest.SerenityRest;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.finrem.functional.idam.IdamUtils;
 import uk.gov.hmcts.reform.finrem.functional.model.UserDetails;
+import uk.gov.hmcts.reform.finrem.functional.util.ServiceUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -51,6 +53,9 @@ public class CcdBulkScanIntegrationTest {
     @Autowired
     private CoreCaseDataApi coreCaseDataApi;
 
+    @Autowired
+    private ServiceUtils serviceUtils;
+
     @Value("${case.orchestration.api-bsp}")
     private String cosBaseUrl;
 
@@ -59,11 +64,14 @@ public class CcdBulkScanIntegrationTest {
 
     @Test
     public void givenOcrPayload_whenTransformedPayloadUploadedToCcd_thenCaseIsCreated() throws Exception {
-        String transformedOcrData = transformOcrData(FORM_A_JSON);
-        Map caseCreationDetails = ResourceLoader.jsonToObject(transformedOcrData.getBytes(StandardCharsets.UTF_8), Map.class);
-        Object caseData = ((Map) caseCreationDetails.get("case_creation_details")).get("case_data");
+        var formA = ResourceLoader.loadJsonToObject(FORM_A_JSON, Map.class);
+        setScannedDocumentsUrls(formA);
 
-        UserDetails userDetails = idamUtils.createCaseworkerUser();
+        var transformedOcrData = transformOcrData(new JSONObject(formA).toString());
+        var caseCreationDetails = ResourceLoader.jsonToObject(transformedOcrData.getBytes(StandardCharsets.UTF_8), Map.class);
+        var caseData = ((Map) caseCreationDetails.get("case_creation_details")).get("case_data");
+        var userDetails = idamUtils.createCaseworkerUser();
+
         log.info("case data = {}, user details = {}", caseData, userDetails);
         CaseDetails caseDetails = submitCase(caseData, userDetails);
 
@@ -88,9 +96,8 @@ public class CcdBulkScanIntegrationTest {
         idamUtils.deleteTestUsers();
     }
 
-    private String transformOcrData(String path) throws Exception {
+    private String transformOcrData(String body) {
         String token = idamUtils.generateServiceTokenWithValidMicroservice(bulkScanTransformationAndUpdateMicroservice);
-        String body = ResourceLoader.loadResourceAsString(path);
         Response response = SerenityRest.given()
             .header("Content-Type", APPLICATION_JSON_VALUE)
             .header(SERVICE_AUTHORISATION_HEADER, token)
@@ -101,6 +108,16 @@ public class CcdBulkScanIntegrationTest {
         assertThat(response.getStatusCode(), is(HttpStatus.OK.value()));
 
         return response.body().asString();
+    }
+
+    private void setScannedDocumentsUrls(Map<String, Object> formA) throws Exception {
+        var uploadedDoc = serviceUtils.uploadFileToEmStore("fileTypes/sample.pdf", "application/pdf");
+        var scannedDocuments = (List)formA.get("scanned_documents");
+        for (var document : scannedDocuments) {
+            var url = (Map)((Map)document).get("url");
+            url.put("document_url", uploadedDoc.get("document_url"));
+            url.put("document_binary_url", uploadedDoc.get("document_binary_url"));
+        }
     }
 
     private CaseDetails submitCase(Object caseData, UserDetails userDetails) {
