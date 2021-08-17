@@ -67,9 +67,9 @@ public class PaymentConfirmationController implements BaseController {
             log.info("Contested confirmation page to show");
             confirmationBody = isPBAPayment(caseData) ? paymentConfirmationService.contestedPbaPaymentConfirmation()
                 : paymentConfirmationService.contestedHwfPaymentConfirmation();
-
-            addCourtContactInformation(confirmationBody, caseDetails);
+            confirmationBody = addCourtContactInformation(confirmationBody, caseDetails);
         }
+
         return confirmationBody;
     }
 
