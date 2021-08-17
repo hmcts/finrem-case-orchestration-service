@@ -48,16 +48,8 @@ public class PaymentConfirmationController implements BaseController {
 
         validateCaseData(callbackRequest);
 
-        Map<String, Object> courtDetails = CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData());
-        String body = String.format(confirmationBody(caseDetails),
-            courtDetails.get(COURT_DETAILS_NAME_KEY),
-            courtDetails.get(COURT_DETAILS_ADDRESS_KEY),
-            courtDetails.get(COURT_DETAILS_EMAIL_KEY),
-            courtDetails.get(COURT_DETAILS_PHONE_KEY)
-        );
-
         return ResponseEntity.ok(SubmittedCallbackResponse.builder()
-            .confirmationBody(body)
+            .confirmationBody(confirmationBody(caseDetails))
             .build());
     }
 
@@ -75,7 +67,21 @@ public class PaymentConfirmationController implements BaseController {
             log.info("Contested confirmation page to show");
             confirmationBody = isPBAPayment(caseData) ? paymentConfirmationService.contestedPbaPaymentConfirmation()
                 : paymentConfirmationService.contestedHwfPaymentConfirmation();
+
+            addCourtContactInformation(confirmationBody, caseDetails);
         }
         return confirmationBody;
+    }
+
+    private String addCourtContactInformation(String confirmationBody, CaseDetails caseDetails) {
+        Map<String, Object> courtDetails = CaseHearingFunctions.buildFrcCourtDetails(caseDetails.getData());
+        String body = String.format(confirmationBody,
+            courtDetails.get(COURT_DETAILS_NAME_KEY),
+            courtDetails.get(COURT_DETAILS_ADDRESS_KEY),
+            courtDetails.get(COURT_DETAILS_EMAIL_KEY),
+            courtDetails.get(COURT_DETAILS_PHONE_KEY)
+        );
+
+        return body;
     }
 }
