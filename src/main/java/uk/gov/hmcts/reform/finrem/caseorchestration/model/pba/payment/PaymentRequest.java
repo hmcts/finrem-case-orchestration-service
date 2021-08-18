@@ -45,6 +45,9 @@ public class PaymentRequest {
     @Builder.Default
     private String service = "FINREM";
 
+    @JsonProperty(value = "site_id")
+    private String siteId;
+
     @JsonProperty(value = "case_type")
     private String caseType;
 

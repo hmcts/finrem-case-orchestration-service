@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.PaymentClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.FeeRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentRequestWithSiteID;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.pba.payment.PaymentResponse;
 
 import java.math.BigDecimal;
@@ -55,12 +54,12 @@ public class PBAPaymentService {
             log.info("Inside makePayment for ccdCaseId : {}", caseDetails.getId());
             PaymentRequest paymentRequest = buildPaymentRequestWithCaseType(caseDetails);
             log.info("paymentRequest with case type: {}", paymentRequest);
-            PaymentResponse paymentResponse = paymentClient.pbaPaymentWithCaseType(authToken, paymentRequest);
+            PaymentResponse paymentResponse = paymentClient.pbaPayment(authToken, paymentRequest);
             log.info("paymentResponse with case type: {} ", paymentResponse);
             return paymentResponse;
         } else {
             log.info("Inside makePayment for ccdCaseId : {}", caseDetails.getId());
-            PaymentRequestWithSiteID paymentRequest = buildPaymentRequest(caseDetails);
+            PaymentRequest paymentRequest = buildPaymentRequest(caseDetails);
             log.info("paymentRequest: {}", paymentRequest);
             PaymentResponse paymentResponse = paymentClient.pbaPayment(authToken, paymentRequest);
             log.info("paymentResponse : {} ", paymentResponse);
@@ -75,7 +74,7 @@ public class PBAPaymentService {
         return buildPaymentRequestWithCaseTypeAndFee(caseDetails, feeRequest);
     }
 
-    protected PaymentRequestWithSiteID buildPaymentRequest(CaseDetails caseDetails) {
+    protected PaymentRequest buildPaymentRequest(CaseDetails caseDetails) {
         FeeRequest feeRequest = buildFeeRequest(caseDetails.getData());
         log.info("Fee request : {} ", feeRequest);
 
@@ -130,12 +129,12 @@ public class PBAPaymentService {
         }
     }
 
-    private PaymentRequestWithSiteID buildPaymentRequestWithFee(CaseDetails caseDetails, FeeRequest fee) {
+    private PaymentRequest buildPaymentRequestWithFee(CaseDetails caseDetails, FeeRequest fee) {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode dataJsonNode = mapper.valueToTree(caseDetails.getData());
         String ccdCaseId = String.valueOf(caseDetails.getId());
         String description = caseDataService.isConsentedApplication(caseDetails) ? consentedDescription : contestedDescription;
-        return PaymentRequestWithSiteID.builder()
+        return PaymentRequest.builder()
             .accountNumber(dataJsonNode.path(PBA_NUMBER).asText())
             .caseReference(dataJsonNode.path(DIVORCE_CASE_NUMBER).asText())
             .customerReference(dataJsonNode.path(PBA_REFERENCE).asText())
