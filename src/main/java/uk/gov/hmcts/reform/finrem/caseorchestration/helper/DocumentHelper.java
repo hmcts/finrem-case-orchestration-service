@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import uk.gov.hmcts.reform.bsp.common.model.document.Addressee;
 import uk.gov.hmcts.reform.bsp.common.model.document.CtscContactDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -143,7 +144,8 @@ public class DocumentHelper {
             convertToDirectionDetailsCollectionData(caseData
                 .get(DIRECTION_DETAILS_COLLECTION_CT));
 
-        return !directionDetailsCollectionList.isEmpty() && YES_VALUE.equalsIgnoreCase(
+        // use a utility to handle directionDetailsCollectionList being null as well as empty
+        return !CollectionUtils.isEmpty(directionDetailsCollectionList) && YES_VALUE.equalsIgnoreCase(
             nullToEmpty(directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()));
     }
 
