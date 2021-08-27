@@ -109,6 +109,13 @@ public class DocumentHelperTest {
     }
 
     @Test
+    public void hasAnotherHearing_missingDirectionDetails() {
+        Map<String, Object> caseData = new HashMap<>();
+
+        assertFalse(documentHelper.hasAnotherHearing(caseData));
+    }
+
+    @Test
     public void hasAnotherHearing_noNextHearing() {
         Map<String, Object> caseData = new HashMap<>();
         DirectionDetailsCollection directionDetailsCollection = DirectionDetailsCollection.builder().isAnotherHearingYN(NO_VALUE).build();
