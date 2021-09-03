@@ -45,10 +45,13 @@ public class ContestedOrderController implements BaseController {
         validateCaseData(callback);
 
         CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("Starting to send contested order for case {}", caseDetails.getId());
 
         contestedCaseOrderService.printAndMailGeneralOrderToParties(caseDetails, authToken);
         contestedCaseOrderService.printAndMailHearingDocuments(caseDetails, authToken);
         contestedCaseOrderService.stampFinalOrder(caseDetails, authToken);
+
+        log.info("Finished sending contested order for case {}", caseDetails.getId());
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
