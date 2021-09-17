@@ -203,6 +203,8 @@ dependencies {
     testSmokeImplementation sourceSets.main.runtimeClasspath
     testSmokeImplementation sourceSets.test.runtimeClasspath
 
+    testCompile('com.github.hmcts:fortify-client:1.2.0:all')
+
     functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
     functionalImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
     functionalImplementation group: 'junit', name: 'junit', version: versions.junit
@@ -393,4 +395,9 @@ def getCheckedOutGitCommitHash() {
     'git rev-parse --verify --short HEAD'.execute().text.trim()
 }
 
+task fortifyScan(type: JavaExec)  {
+    main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+    classpath += sourceSets.test.runtimeClasspath
+    jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
+}
 
