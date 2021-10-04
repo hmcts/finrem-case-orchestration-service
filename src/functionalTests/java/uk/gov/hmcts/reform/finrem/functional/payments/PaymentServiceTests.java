@@ -133,13 +133,13 @@ public class PaymentServiceTests extends IntegrationTestBase {
     private void validateFeeLookUpPayment(String url, String fileName, String journeyType) {
         if (journeyType.equals(consentedDir)) {
             assertTrue(utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeAmount")
-                .toString().equalsIgnoreCase("5000"));
+                .toString().equalsIgnoreCase("5300"));
 
             assertTrue(utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeCode")
                 .toString().equalsIgnoreCase("FEE0228"));
         } else {
             assertTrue(utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeAmount")
-                .toString().equalsIgnoreCase("25500"));
+                .toString().equalsIgnoreCase("27500"));
 
             assertTrue(utils.getResponseData(url, fileName, journeyType, feesPath).get("FeeCode")
                 .toString().equalsIgnoreCase("FEE0229"));
