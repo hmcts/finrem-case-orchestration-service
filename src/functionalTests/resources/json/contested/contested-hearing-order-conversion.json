@@ -44,7 +44,7 @@
             "id": null,
             "value": {
               "FeeCode": "FEE0229",
-              "FeeAmount": "25500",
+              "FeeAmount": "27500",
               "FeeVersion": "1",
               "FeeDescription": "Application for a financial order"
             }
