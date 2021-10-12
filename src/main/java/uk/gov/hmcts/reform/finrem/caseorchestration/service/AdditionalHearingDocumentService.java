@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.singletonList;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ADDITIONAL_HEARING_DOCUMENT_COLLECTION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_ADDRESS_KEY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.COURT_DETAILS_EMAIL_KEY;
@@ -91,29 +91,39 @@ public class AdditionalHearingDocumentService {
                 .getData()
                 .get(DIRECTION_DETAILS_COLLECTION_CT));
 
-        if (directionDetailsCollectionList.size() == 0
-            || !YES_VALUE.equalsIgnoreCase(caseDataService.nullToEmpty(
-                directionDetailsCollectionList.get(0).getDirectionDetailsCollection().getIsAnotherHearingYN()))) {
+        //check that the list contains one or more values for the court hearing information
+        if (! directionDetailsCollectionList.isEmpty()) {
+            DirectionDetailsCollection latestDirectionDetailsCollectionItem =
+                directionDetailsCollectionList.get(directionDetailsCollectionList.size() - 1).getDirectionDetailsCollection();
+
+            //if the latest court hearing has specified another hearing as No, dont create an additional hearing document
+            if (NO_VALUE.equalsIgnoreCase(caseDataService.nullToEmpty(latestDirectionDetailsCollectionItem.getIsAnotherHearingYN()))) {
+                log.info("Additional hearing document not required for case: {}", caseDetails.getId());
+                return;
+            }
+
+            //Otherwise, proceed to extract data from collection
+            //Generate and store new additional hearing document using latestDirectionDetailsCollectionItem
+            Map<String, Object> courtData = latestDirectionDetailsCollectionItem.getLocalCourt();
+            Map<String, Object> courtDetailsMap;
+
+            courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
+
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(
+                courtData.get(CaseHearingFunctions.getSelectedCourtComplexType(courtData)));
+
+            CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
+            prepareHearingCaseDetails(caseDetailsCopy, courtDetails,
+                latestDirectionDetailsCollectionItem.getTypeOfHearing(),
+                latestDirectionDetailsCollectionItem.getDateOfHearing(),
+                latestDirectionDetailsCollectionItem.getHearingTime(),
+                latestDirectionDetailsCollectionItem.getTimeEstimate());
+
+            CaseDocument document = generateAdditionalHearingDocument(caseDetailsCopy, authorisationToken);
+            addAdditionalHearingDocumentToCaseData(caseDetails, document);
+        } else {
             log.info("Additional hearing document not required for case: {}", caseDetails.getId());
-            return;
         }
-
-        DirectionDetailsCollection directionDetailsCollection = directionDetailsCollectionList.get(0).getDirectionDetailsCollection();
-
-        Map<String, Object> courtData = directionDetailsCollection.getLocalCourt();
-        Map<String, Object> courtDetailsMap;
-
-        courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-
-        Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(
-            courtData.get(CaseHearingFunctions.getSelectedCourtComplexType(courtData)));
-
-        CaseDetails caseDetailsCopy = documentHelper.deepCopy(caseDetails, CaseDetails.class);
-        prepareHearingCaseDetails(caseDetailsCopy, courtDetails, directionDetailsCollection.getTypeOfHearing(),
-            directionDetailsCollection.getDateOfHearing(), directionDetailsCollection.getHearingTime(), directionDetailsCollection.getTimeEstimate());
-
-        CaseDocument document = generateAdditionalHearingDocument(caseDetailsCopy, authorisationToken);
-        addAdditionalHearingDocumentToCaseData(caseDetails, document);
     }
 
     private CaseDocument generateAdditionalHearingDocument(CaseDetails caseDetailsCopy, String authorisationToken) {

@@ -8,8 +8,8 @@
       "type": "Other",
       "subtype": "D81",
       "url": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4ea4369a-57d0-4c88-ba86-949ed0faae12",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4ea4369a-57d0-4c88-ba86-949ed0faae12/binary",
+        "document_url": "This will be set in test",
+        "document_binary_url": "This will be set in test",
         "document_filename": "d81-1-scan.pdf"
       },
       "control_number": "123452",
@@ -21,8 +21,8 @@
       "type": "Form",
       "subtype": "FormA",
       "url": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b220382d-3ea9-44a8-9306-ae71d693dca9",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b220382d-3ea9-44a8-9306-ae71d693dca9/binary",
+        "document_url": "This will be set in test",
+        "document_binary_url": "This will be set in test",
         "document_filename": "formA-scan.pdf"
       },
       "control_number": "123456",
@@ -34,8 +34,8 @@
       "type": "Other",
       "subtype": "D81",
       "url": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d/binary",
+        "document_url": "This will be set in test",
+        "document_binary_url": "This will be set in test",
         "document_filename": "d81-2-scan.pdf"
       },
       "control_number": "123453",
@@ -47,8 +47,8 @@
       "type": "Other",
       "subtype": "P1",
       "url": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d/binary",
+        "document_url": "This will be set in test",
+        "document_binary_url": "This will be set in test",
         "document_filename": "p1.pdf"
       },
       "control_number": "123453",
@@ -60,8 +60,8 @@
       "type": "Other",
       "subtype": "PPF1",
       "url": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d/binary",
+        "document_url": "This will be set in test",
+        "document_binary_url": "This will be set in test",
         "document_filename": "PPF1.pdf"
       },
       "control_number": "123453",
@@ -73,8 +73,8 @@
       "type": "Other",
       "subtype": "P2",
       "url": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d/binary",
+        "document_url": "This will be set in test",
+        "document_binary_url": "This will be set in test",
         "document_filename": "P2.pdf"
       },
       "control_number": "123453",
@@ -86,8 +86,8 @@
       "type": "Other",
       "subtype": "PPF2",
       "url": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d/binary",
+        "document_url": "This will be set in test",
+        "document_binary_url": "This will be set in test",
         "document_filename": "PPF2.pdf"
       },
       "control_number": "123453",
@@ -99,8 +99,8 @@
       "type": "Other",
       "subtype": "PPF",
       "url": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d/binary",
+        "document_url": "This will be set in test",
+        "document_binary_url": "This will be set in test",
         "document_filename": "PPF.pdf"
       },
       "control_number": "123453",
@@ -112,8 +112,8 @@
       "type": "Other",
       "subtype": "FormE",
       "url": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d/binary",
+        "document_url": "This will be set in test",
+        "document_binary_url": "This will be set in test",
         "document_filename": "FormE.pdf"
       },
       "control_number": "123453",
@@ -125,8 +125,8 @@
       "type": "Other",
       "subtype": "CoverLetter",
       "url": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d/binary",
+        "document_url": "This will be set in test",
+        "document_binary_url": "This will be set in test",
         "document_filename": "CoverLetter.pdf"
       },
       "control_number": "123453",
@@ -138,8 +138,8 @@
       "type": "Other",
       "subtype": "DraftConsentOrder",
       "url": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d/binary",
+        "document_url": "This will be set in test",
+        "document_binary_url": "This will be set in test",
         "document_filename": "DraftConsentOrder.pdf"
       },
       "control_number": "123453",
@@ -151,8 +151,8 @@
       "type": "Other",
       "subtype": "DecreeNisi",
       "url": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d/binary",
+        "document_url": "This will be set in test",
+        "document_binary_url": "This will be set in test",
         "document_filename": "DecreeNisi.pdf"
       },
       "control_number": "123453",
@@ -164,8 +164,8 @@
       "type": "Other",
       "subtype": "DecreeAbsolute",
       "url": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d/binary",
+        "document_url": "This will be set in test",
+        "document_binary_url": "This will be set in test",
         "document_filename": "DecreeAbsolute.pdf"
       },
       "control_number": "123453",
@@ -177,8 +177,8 @@
       "type": "Other",
       "subtype": "OtherSupportDocuments",
       "url": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e6a1b61a-4f8a-435f-910e-674bceecbe6d/binary",
+        "document_url": "This will be set in test",
+        "document_binary_url": "This will be set in test",
         "document_filename": "OtherSupportDocuments.pdf"
       },
       "control_number": "123453",
