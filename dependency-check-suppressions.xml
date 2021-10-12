@@ -25,4 +25,9 @@
         <cpe>cpe:/a:pivotal_software:spring_security</cpe>
         <cve>CVE-2021-22118</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[file name: jakarta.el-3.0.3.jar]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.glassfish/jakarta\.el@.*$</packageUrl>
+        <cve>CVE-2021-28170</cve>
+    </suppress>
 </suppressions>
