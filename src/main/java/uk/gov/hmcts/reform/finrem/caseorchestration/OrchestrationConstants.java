@@ -40,6 +40,9 @@ public class OrchestrationConstants {
     public static final String REGION = "region";
 
     // CTSC Contact Details
+
+    public static final String CTSC_COURT_NAME = "Family Court at the Courts and Tribunal Service Centre";
+    public static final String CTSC_COURT_ADDRESS = "PO Box 12746, Harlow, CM20 9QZ";
     public static final String CTSC_SERVICE_CENTRE = "Courts and Tribunals Service Centre";
     public static final String CTSC_CARE_OF = "c/o HMCTS Digital Financial Remedy";
     public static final String CTSC_PO_BOX = "12746";
