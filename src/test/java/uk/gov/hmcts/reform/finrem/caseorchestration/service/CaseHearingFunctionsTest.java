@@ -196,4 +196,14 @@ public class CaseHearingFunctionsTest {
         assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("hmctsfinancialremedy@justice.gov.uk"));
     }
 
+    @Test
+    public void shouldPopulateConsentedCourtDetails() {
+
+        Map<String, Object> stringObjectMap = CaseHearingFunctions.buildConsentedFrcCourtDetails();
+        assertThat(stringObjectMap.get(COURT_DETAILS_NAME_KEY), is("Family Court at the Courts and Tribunal Service Centre"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_ADDRESS_KEY), is("PO Box 12746, Harlow, CM20 9QZ"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_PHONE_KEY), is("0300 303 0642"));
+        assertThat(stringObjectMap.get(COURT_DETAILS_EMAIL_KEY), is("contactFinancialRemedy@justice.gov.uk"));
+    }
+
 }
