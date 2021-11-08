@@ -261,21 +261,21 @@ public class UpdateContestedCaseController implements BaseController {
     private void updateDivorceDetailsForContestedCase(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get(DIVORCE_STAGE_REACHED), "Decree Nisi")) {
             // remove Decree Absolute details
-            caseData.put(DIVORCE_UPLOAD_EVIDENCE_2, null);
-            caseData.put(DIVORCE_DECREE_ABSOLUTE_DATE, null);
-            caseData.put(DIVORCE_UPLOAD_PETITION, null);
+            caseData.put(DIVORCE_UPLOAD_EVIDENCE_2, "");
+            caseData.put(DIVORCE_DECREE_ABSOLUTE_DATE, "");
+            caseData.put(DIVORCE_UPLOAD_PETITION, "");
         } else if (equalsTo((String) caseData.get(DIVORCE_STAGE_REACHED), "Decree Absolute")) {
             // remove Decree Nisi details
-            caseData.put(DIVORCE_UPLOAD_EVIDENCE_1, null);
-            caseData.put(DIVORCE_DECREE_NISI_DATE, null);
-            caseData.put(DIVORCE_UPLOAD_PETITION, null);
+            caseData.put(DIVORCE_UPLOAD_EVIDENCE_1, "");
+            caseData.put(DIVORCE_DECREE_NISI_DATE, "");
+            caseData.put(DIVORCE_UPLOAD_PETITION, "");
         } else {
             // remove Decree Nisi details
-            caseData.put(DIVORCE_UPLOAD_EVIDENCE_1, null);
-            caseData.put(DIVORCE_DECREE_NISI_DATE, null);
+            caseData.put(DIVORCE_UPLOAD_EVIDENCE_1, "");
+            caseData.put(DIVORCE_DECREE_NISI_DATE, "");
             // remove Decree Absolute date
-            caseData.put(DIVORCE_UPLOAD_EVIDENCE_2, null);
-            caseData.put(DIVORCE_DECREE_ABSOLUTE_DATE, null);
+            caseData.put(DIVORCE_UPLOAD_EVIDENCE_2, "");
+            caseData.put(DIVORCE_DECREE_ABSOLUTE_DATE, "");
         }
     }
 
