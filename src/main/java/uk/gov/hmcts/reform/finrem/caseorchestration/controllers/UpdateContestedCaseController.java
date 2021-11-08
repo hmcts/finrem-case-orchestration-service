@@ -92,13 +92,13 @@ public class UpdateContestedCaseController implements BaseController {
 
     private void cleanupAdditionalDocuments(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("promptForAnyDocument"), NO_VALUE)) {
-            caseData.put("uploadAdditionalDocument", null);
+            caseData.remove("uploadAdditionalDocument");
         }
     }
 
     private void updateContestedFastTrackProcedureDetail(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get(FAST_TRACK_DECISION), NO_VALUE)) {
-            caseData.put("fastTrackDecisionReason", null);
+            caseData.remove("fastTrackDecisionReason");
         }
     }
 
@@ -112,22 +112,22 @@ public class UpdateContestedCaseController implements BaseController {
 
     private void updateComplexityDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("otherReasonForComplexity"), NO_VALUE)) {
-            caseData.put("otherReasonForComplexityText", null);
+            caseData.remove("otherReasonForComplexityText");
         }
     }
 
     private void removeContestedComplexityDetails(Map<String, Object> caseData) {
-        caseData.put("estimatedAssetsChecklist", null);
-        caseData.put("netValueOfHome", null);
-        caseData.put("potentialAllegationChecklist", null);
-        caseData.put("otherReasonForComplexity", null);
-        caseData.put("otherReasonForComplexityText", null);
-        caseData.put("detailPotentialAllegation", null);
+        caseData.remove("estimatedAssetsChecklist");
+        caseData.remove("netValueOfHome");
+        caseData.remove("potentialAllegationChecklist");
+        caseData.remove("otherReasonForComplexity");
+        caseData.remove("otherReasonForComplexityText");
+        caseData.remove("detailPotentialAllegation");
     }
 
     private void isApplicantsHomeCourt(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("isApplicantsHomeCourt"), NO_VALUE)) {
-            caseData.put("reasonForLocalCourt", null);
+            caseData.remove("reasonForLocalCourt");
         }
     }
 
@@ -143,7 +143,7 @@ public class UpdateContestedCaseController implements BaseController {
 
     private void updateWhenClaimingExemptionMiam(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get(CLAIMING_EXEMPTION_MIAM), NO_VALUE)) {
-            caseData.put(FAMILY_MEDIATOR_MIAM, null);
+            caseData.remove(FAMILY_MEDIATOR_MIAM);
             removeMiamExceptionDetails(caseData);
         } else {
             updateClaimingExemptionMiamDetails(caseData);
@@ -151,21 +151,21 @@ public class UpdateContestedCaseController implements BaseController {
     }
 
     private void removeMiamCertificationDetailsForApplicantAttendedMiam(Map<String, Object> caseData) {
-        caseData.put("soleTraderName1", null);
-        caseData.put("familyMediatorServiceName1", null);
-        caseData.put("mediatorRegistrationNumber1", null);
+        caseData.remove("soleTraderName1");
+        caseData.remove("familyMediatorServiceName1");
+        caseData.remove("mediatorRegistrationNumber1");
     }
 
     private void removeMiamCertificationDetails(Map<String, Object> caseData) {
         removeMiamCertificationDetailsForApplicantAttendedMiam(caseData);
-        caseData.put("soleTraderName", null);
-        caseData.put("familyMediatorServiceName", null);
-        caseData.put("mediatorRegistrationNumber", null);
+        caseData.remove("soleTraderName");
+        caseData.remove("familyMediatorServiceName");
+        caseData.remove("mediatorRegistrationNumber");
     }
 
     private void removeAllMiamExceptionDetails(Map<String, Object> caseData) {
-        caseData.put(CLAIMING_EXEMPTION_MIAM, null);
-        caseData.put(FAMILY_MEDIATOR_MIAM, null);
+        caseData.remove(CLAIMING_EXEMPTION_MIAM);
+        caseData.remove(FAMILY_MEDIATOR_MIAM);
         removeMiamExceptionDetails(caseData);
     }
 
@@ -196,16 +196,16 @@ public class UpdateContestedCaseController implements BaseController {
     private void removeExemptionCheckLists(Map<String, Object> caseData, ArrayList miamExemptionsChecklist,
                                            String other, String miamOtherGroundsChecklist) {
         if (hasNotSelected(miamExemptionsChecklist, other)) {
-            caseData.put(miamOtherGroundsChecklist, null);
+            caseData.remove(miamOtherGroundsChecklist);
         }
     }
 
     private void removeMiamExceptionDetails(Map<String, Object> caseData) {
-        caseData.put("MIAMExemptionsChecklist", null);
-        caseData.put("MIAMDomesticViolenceChecklist", null);
-        caseData.put("MIAMUrgencyReasonChecklist", null);
-        caseData.put("MIAMPreviousAttendanceChecklist", null);
-        caseData.put("MIAMOtherGroundsChecklist", null);
+        caseData.remove("MIAMExemptionsChecklist");
+        caseData.remove("MIAMDomesticViolenceChecklist");
+        caseData.remove("MIAMUrgencyReasonChecklist");
+        caseData.remove("MIAMPreviousAttendanceChecklist");
+        caseData.remove("MIAMOtherGroundsChecklist");
     }
 
     private void updateContestedPeriodicPaymentOrder(Map<String, Object> caseData) {
@@ -222,18 +222,18 @@ public class UpdateContestedCaseController implements BaseController {
             removeBenefitsDetails(caseData);
         } else {
             if (equalsTo((String) caseData.get("benefitForChildrenDecision"), YES_VALUE)) {
-                caseData.put("benefitPaymentChecklist", null);
+                caseData.remove("benefitPaymentChecklist");
             }
         }
     }
 
     private void removeBenefitsDetails(Map<String, Object> caseData) {
-        caseData.put("benefitForChildrenDecision", null);
-        caseData.put("benefitPaymentChecklist", null);
+        caseData.remove("benefitForChildrenDecision");
+        caseData.remove("benefitPaymentChecklist");
     }
 
     private void removeContestedPeriodicalPaymentOrderDetails(Map<String, Object> caseData) {
-        caseData.put("paymentForChildrenDecision", null);
+        caseData.remove("paymentForChildrenDecision");
         removeBenefitsDetails(caseData);
     }
 
@@ -248,45 +248,45 @@ public class UpdateContestedCaseController implements BaseController {
 
     private void updatePropertyAdjustmentOrderDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get("additionalPropertyOrderDecision"), NO_VALUE)) {
-            caseData.put("propertyAdjutmentOrderDetail", null);
+            caseData.remove("propertyAdjutmentOrderDetail");
         }
     }
 
     private void removePropertyAdjustmentOrder(Map<String, Object> caseData) {
-        caseData.put("propertyAddress", null);
-        caseData.put("mortgageDetail", null);
-        caseData.put("propertyAdjutmentOrderDetail", null);
+        caseData.remove("propertyAddress");
+        caseData.remove("mortgageDetail");
+        caseData.remove("propertyAdjutmentOrderDetail");
     }
 
     private void updateDivorceDetailsForContestedCase(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get(DIVORCE_STAGE_REACHED), "Decree Nisi")) {
             // remove Decree Absolute details
-            caseData.put(DIVORCE_UPLOAD_EVIDENCE_2, "");
-            caseData.put(DIVORCE_DECREE_ABSOLUTE_DATE, "");
-            caseData.put(DIVORCE_UPLOAD_PETITION, "");
+            caseData.remove(DIVORCE_UPLOAD_EVIDENCE_2);
+            caseData.remove(DIVORCE_DECREE_ABSOLUTE_DATE);
+            caseData.remove(DIVORCE_UPLOAD_PETITION);
         } else if (equalsTo((String) caseData.get(DIVORCE_STAGE_REACHED), "Decree Absolute")) {
             // remove Decree Nisi details
-            caseData.put(DIVORCE_UPLOAD_EVIDENCE_1, "");
-            caseData.put(DIVORCE_DECREE_NISI_DATE, "");
-            caseData.put(DIVORCE_UPLOAD_PETITION, "");
+            caseData.remove(DIVORCE_UPLOAD_EVIDENCE_1);
+            caseData.remove(DIVORCE_DECREE_NISI_DATE);
+            caseData.remove(DIVORCE_UPLOAD_PETITION);
         } else {
             // remove Decree Nisi details
-            caseData.put(DIVORCE_UPLOAD_EVIDENCE_1, "");
-            caseData.put(DIVORCE_DECREE_NISI_DATE, "");
+            caseData.remove(DIVORCE_UPLOAD_EVIDENCE_1);
+            caseData.remove(DIVORCE_DECREE_NISI_DATE);
             // remove Decree Absolute date
-            caseData.put(DIVORCE_UPLOAD_EVIDENCE_2, "");
-            caseData.put(DIVORCE_DECREE_ABSOLUTE_DATE, "");
+            caseData.remove(DIVORCE_UPLOAD_EVIDENCE_2);
+            caseData.remove(DIVORCE_DECREE_ABSOLUTE_DATE);
         }
     }
 
     private void removeRespondentSolicitorAddress(Map<String, Object> caseData) {
-        caseData.put(RESP_SOLICITOR_NAME, null);
-        caseData.put(RESP_SOLICITOR_FIRM, null);
-        caseData.put(RESP_SOLICITOR_REFERENCE, null);
-        caseData.put(RESP_SOLICITOR_ADDRESS, null);
-        caseData.put(RESP_SOLICITOR_PHONE, null);
-        caseData.put(RESP_SOLICITOR_EMAIL, null);
-        caseData.put(RESP_SOLICITOR_DX_NUMBER, null);
+        caseData.remove(RESP_SOLICITOR_NAME);
+        caseData.remove(RESP_SOLICITOR_FIRM);
+        caseData.remove(RESP_SOLICITOR_REFERENCE);
+        caseData.remove(RESP_SOLICITOR_ADDRESS);
+        caseData.remove(RESP_SOLICITOR_PHONE);
+        caseData.remove(RESP_SOLICITOR_EMAIL);
+        caseData.remove(RESP_SOLICITOR_DX_NUMBER);
     }
 
     private void updateContestedRespondentDetails(Map<String, Object> caseData) {
@@ -298,9 +298,9 @@ public class UpdateContestedCaseController implements BaseController {
     }
 
     private void removeContestedRespondentAddress(Map<String, Object> caseData) {
-        caseData.put(RESPONDENT_ADDRESS, null);
-        caseData.put(RESPONDENT_PHONE, null);
-        caseData.put(RESPONDENT_EMAIL, null);
+        caseData.remove(RESPONDENT_ADDRESS);
+        caseData.remove(RESPONDENT_PHONE);
+        caseData.remove(RESPONDENT_EMAIL);
     }
 
     private boolean equalsTo(String fieldData, String value) {
