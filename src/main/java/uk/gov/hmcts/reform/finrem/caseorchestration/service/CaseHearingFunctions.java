@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants;
 import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.document.FrcCourtDetails;
 
@@ -267,6 +268,15 @@ public final class CaseHearingFunctions {
         } catch (IOException | NullPointerException e) {
             return null;
         }
+    }
+
+    public static Map<String, Object> buildConsentedFrcCourtDetails() {
+        return new ObjectMapper().convertValue(FrcCourtDetails.builder()
+                .courtName(OrchestrationConstants.CTSC_COURT_NAME)
+                .courtAddress(OrchestrationConstants.CTSC_COURT_ADDRESS)
+                .phoneNumber(OrchestrationConstants.CTSC_PHONE_NUMBER)
+                .email((OrchestrationConstants.CTSC_EMAIL_ADDRESS))
+                .build(), Map.class);
     }
 
     static String getCourtDetailsString() {

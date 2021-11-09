@@ -76,15 +76,15 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
 
         assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION), hasSize(1));
         assertCaseDataExtraFields();
-        assertContestedCaseDataExtraFields();
+        assertContestedCaseDataExtraFields("Birmingham Civil And Family Justice Centre");
     }
 
     @Test
     public void multipleConsentOrderNotApprovedConsentInContested() throws Exception {
         CaseDetails caseDetails = caseDetails("/fixtures/refusal-order-consent-in-contested.json");
 
-
         Map<String, Object> caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
+
         assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION), hasSize(1));
         caseData = refusalOrderDocumentService.generateConsentOrderNotApproved(AUTH_TOKEN, caseDetails);
         assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_NOT_APPROVED_COLLECTION), hasSize(2));
@@ -132,6 +132,7 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         assertThat(caseData.get("ApplicantName"), is("Poor Guy"));
         assertThat(caseData.get("RespondentName"), is("john smith"));
         assertThat(caseData.get("RefusalOrderHeader"), is("Sitting in the Family Court"));
+
     }
 
     private void assertConsentedCaseDataExtraFields() {
@@ -140,14 +141,21 @@ public class RefusalOrderDocumentServiceTest extends BaseServiceTest {
         Map<String, Object> caseData = generateDocumentCaseDetailsCaptor.getValue().getData();
 
         assertThat(caseData.get("CourtName"), is("SITTING in private"));
+
+        Map<String, Object> courtDetails = (Map<String, Object>) caseData.get("courtDetails");
+        assertThat(courtDetails.get("courtName"), is("Family Court at the Courts and Tribunal Service Centre"));
     }
 
-    private void assertContestedCaseDataExtraFields() {
+    private void assertContestedCaseDataExtraFields(String expectedCourtDetailsCourtName) {
         verify(genericDocumentService, times(1)).generateDocument(any(), generateDocumentCaseDetailsCaptor.capture(),
             any(), any());
         Map<String, Object> caseData = generateDocumentCaseDetailsCaptor.getValue().getData();
 
         assertThat(caseData.get("CourtName"), is("SITTING AT the Family Court at the Birmingham Civil and Family Justice Centre"));
+
+        Map<String, Object> courtDetails = (Map<String, Object>) caseData.get("courtDetails");
+        assertThat(courtDetails.get("courtName"), is(expectedCourtDetailsCourtName));
+
     }
 
     private CaseDocument getCaseDocument(Map<String, Object> caseData) {

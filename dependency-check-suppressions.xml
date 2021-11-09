@@ -30,4 +30,15 @@
         <packageUrl regex="true">^pkg:maven/org\.glassfish/jakarta\.el@.*$</packageUrl>
         <cve>CVE-2021-28170</cve>
     </suppress>
+    <suppress until="2022-11-01Z">
+        <notes><![CDATA[Suppress tomcat CVE as there is no updated version.]]></notes>
+        <vulnerabilityName>CVE-2021-42340</vulnerabilityName>
+    </suppress>
+    <suppress until="2030-01-01">
+        <notes><![CDATA[
+                 https://nvd.nist.gov/vuln/detail/CVE-2021-22096#range-7096083
+                 Temporary suppression until upgrade to Spring Boot 2.5.6 (current) https://docs.spring.io/spring-boot/docs/current/reference/html/dependency-versions.html#dependency-versions
+                ]]></notes>
+        <cve>CVE-2021-22096</cve>
+    </suppress>
 </suppressions>
