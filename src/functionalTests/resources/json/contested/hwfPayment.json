@@ -107,7 +107,10 @@
         "notApplicable"
       ],
       "additionalPropertyOrderDecision": "No",
-      "applicantSolicitorConsentForEmails": "No"
+      "applicantSolicitorConsentForEmails": "No",
+      "regionList": "london",
+      "londonFRCList": "cfc",
+      "cfcCourtList": "FR_s_CFCList_9"
     }
   }
 }
