@@ -81,7 +81,7 @@ sourceSets {
 }
 
 configurations {
-    functionalImplemnetion.extendsFrom testImplemnetion
+    functionalImplementation.extendsFrom testImplementation
     functionalRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
@@ -189,7 +189,7 @@ dependencies {
     testSmokeImplementation sourceSets.main.runtimeClasspath
     testSmokeImplementation sourceSets.test.runtimeClasspath
 
-    testImplemnetion('com.github.hmcts:fortify-client:1.2.0:all')
+    testImplementation('com.github.hmcts:fortify-client:1.2.0:all')
 
     functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
     functionalImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
