@@ -69,7 +69,9 @@ sourceSets {
         java {
             compileClasspath += main.output
             runtimeClasspath += main.output
+            srcDirs = ['src/contractTests/java']
         }
+        resources.srcDir file('src/contractTest/resources')
     }
 
     integrationTest {
