@@ -71,7 +71,7 @@ sourceSets {
             runtimeClasspath += main.output
             srcDirs = ['src/contractTests/java']
         }
-        resources.srcDir file('src/contractTests/resources')
+        resources.srcDir file('src/contractTest/resources')
     }
 
     integrationTest {
