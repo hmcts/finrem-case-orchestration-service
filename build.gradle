@@ -51,17 +51,24 @@ sourceSets {
         java {
             compileClasspath += main.output
             runtimeClasspath += main.output
+            srcDir file('src/smokeTest/java')
         }
+        resources.srcDir file('src/smokeTest/resources')
     }
 
     test {
         java.srcDir 'src/test/java'
+        resources.srcDir 'src/test/resources'
     }
 
     functional {
         java {
             compileClasspath += main.output + test.output
             runtimeClasspath += main.output + test.output
+            srcDirs = ['src/functionalTests/java']
+        }
+        resources {
+            srcDirs = ['src/functionalTests/resources']
         }
     }
 
@@ -78,6 +85,10 @@ sourceSets {
         java {
             compileClasspath += main.output + test.output
             runtimeClasspath += main.output + test.output
+            srcDir('src/integrationTest/java')
+        }
+        resources {
+            srcDir('src/integrationTest/resources')
         }
     }
 }
@@ -226,6 +237,10 @@ dependencies {
 
     contractImplementation sourceSets.main.runtimeClasspath
     contractImplementation sourceSets.test.runtimeClasspath
+}
+
+processTestResources {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 // https://jeremylong.github.io/DependencyCheck/dependency-check-gradle/configuration.html
