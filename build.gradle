@@ -23,7 +23,6 @@ plugins {
     id 'org.owasp.dependencycheck' version '6.2.2'
     id 'org.sonarqube' version '3.0'
     id 'org.springframework.boot' version '2.3.11.RELEASE'
-    id 'net.ltgt.apt' version '0.21'
 }
 
 apply plugin: 'au.com.dius.pact'
@@ -42,8 +41,8 @@ sourceCompatibility = 11
 targetCompatibility = 11
 
 repositories {
-    jcenter()
-    maven { url 'https://repo.spring.io/libs-milestone' }
+    mavenLocal()
+    mavenCentral()
     maven { url "https://jitpack.io" }
 }
 
@@ -52,24 +51,17 @@ sourceSets {
         java {
             compileClasspath += main.output
             runtimeClasspath += main.output
-            srcDir file('src/smokeTest/java')
         }
-        resources.srcDir file('src/smokeTest/resources')
     }
 
     test {
         java.srcDir 'src/test/java'
-        resources.srcDir 'src/test/resources'
     }
 
     functional {
         java {
             compileClasspath += main.output + test.output
             runtimeClasspath += main.output + test.output
-            srcDirs = ['src/functionalTests/java']
-        }
-        resources {
-            srcDirs = ['src/functionalTests/resources']
         }
     }
 
@@ -77,30 +69,20 @@ sourceSets {
         java {
             compileClasspath += main.output
             runtimeClasspath += main.output
-            srcDirs = ['src/contractTests/java']
         }
-        resources.srcDir file('src/contractTest/resources')
     }
 
-
-}
-
-sourceSets {
     integrationTest {
         java {
             compileClasspath += main.output + test.output
             runtimeClasspath += main.output + test.output
-            srcDir('src/integrationTest/java')
-        }
-        resources {
-            srcDir('src/integrationTest/resources')
         }
     }
 }
 
 configurations {
-    functionalCompile.extendsFrom testCompile
-    functionalRuntime.extendsFrom testRuntime
+    functionalImplementation.extendsFrom testImplementation
+    functionalRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
 def versions = [
@@ -180,13 +162,17 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
-    implementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
-    implementation group: 'uk.gov.hmcts.reform', name: 'logging', version: versions.reformLogging
-    implementation group: 'uk.gov.hmcts.reform', name: 'logging-appinsights', version: versions.reformLogging
-    implementation group: 'uk.gov.hmcts.reform', name: 'logging-spring', version: versions.reformLogging
-    implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
-    implementation group: 'uk.gov.hmcts.reform', name: 'properties-volume-spring-boot-starter', version: '0.1.0'
-    implementation "com.github.hmcts:bsp-common-lib:${versions.bspCommonLib}"
+
+    implementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
+    implementation group: 'com.github.hmcts.java-logging', name: 'java-logging', version: versions.reformLogging
+    implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-appinsights', version: versions.reformLogging
+    implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-spring', version: versions.reformLogging
+    implementation group: 'com.github.hmcts', name: 'properties-volume-spring-boot-starter', version: '0.0.4'
+    implementation group: 'com.github.hmcts', name:'service-auth-provider-java-client', version: versions.serviceTokenGenerator
+
+    implementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib ,{
+        exclude group: 'uk.gov.hmcts.reform', module: 'service-auth-provider-client'
+    }
 
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.13.3'
@@ -203,7 +189,7 @@ dependencies {
     testSmokeImplementation sourceSets.main.runtimeClasspath
     testSmokeImplementation sourceSets.test.runtimeClasspath
 
-    testCompile('com.github.hmcts:fortify-client:1.2.0:all')
+    testImplementation('com.github.hmcts:fortify-client:1.2.0:all')
 
     functionalImplementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
     functionalImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
@@ -220,20 +206,21 @@ dependencies {
     functionalImplementation group: 'org.pdfbox', name: 'com.springsource.org.pdfbox', version: '0.7.3'
     functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalImplementation group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
-    functionalImplementation group: 'uk.gov.hmcts.reform', name: 'core-case-data-store-client', version: versions.ccdClient
-    functionalImplementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceTokenGenerator
+    functionalImplementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
+    functionalImplementation group: 'com.github.hmcts', name:'service-auth-provider-java-client', version: versions.serviceTokenGenerator
+
     functionalImplementation "com.github.hmcts:bsp-common-lib:${versions.bspCommonLib}"
 
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 
-    contractCompile group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact_version
-    contractCompile group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact_version
-    contractRuntime group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact_version
-    contractRuntime group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact_version
+    contractImplementation group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact_version
+    contractImplementation group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact_version
+    contractRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'junit', version: versions.pact_version
+    contractRuntimeOnly group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact_version
 
-    contractCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+    contractImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 
     contractImplementation sourceSets.main.runtimeClasspath
     contractImplementation sourceSets.test.runtimeClasspath
@@ -275,9 +262,9 @@ jacocoTestReport {
     executionData(test)
 
     reports {
-        xml.enabled = true
-        csv.enabled = false
-        xml.destination file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+        xml.required = true
+        csv.required = false
+        xml.outputLocation = file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
     }
 }
 
@@ -391,12 +378,12 @@ runAndPublishConsumerPactTests.dependsOn contractTest
 
 runAndPublishConsumerPactTests.finalizedBy pactPublish
 
-def getCheckedOutGitCommitHash() {
+static def getCheckedOutGitCommitHash() {
     'git rev-parse --verify --short HEAD'.execute().text.trim()
 }
 
 task fortifyScan(type: JavaExec)  {
-    main = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+    mainClass.set("uk.gov.hmcts.fortifyclient.FortifyClientMainApp")
     classpath += sourceSets.test.runtimeClasspath
     jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 }
