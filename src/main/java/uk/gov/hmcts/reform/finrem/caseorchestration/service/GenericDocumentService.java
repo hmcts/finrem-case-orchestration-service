@@ -34,8 +34,8 @@ public class GenericDocumentService {
         return toCaseDocument(generatedPdf);
     }
 
-    public UUID bulkPrint(BulkPrintRequest bulkPrintRequest) {
-        return documentClient.bulkPrint(bulkPrintRequest);
+    public UUID bulkPrint(BulkPrintRequest bulkPrintRequest, String authorisationToken) {
+        return documentClient.bulkPrint(bulkPrintRequest, authorisationToken);
     }
 
     public void deleteDocument(String documentUrl, String authorisationToken) {

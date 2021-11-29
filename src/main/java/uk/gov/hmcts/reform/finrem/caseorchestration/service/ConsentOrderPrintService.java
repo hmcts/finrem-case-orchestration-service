@@ -113,7 +113,7 @@ public class ConsentOrderPrintService {
             bulkPrintDocuments.addAll(documentHelper.getCaseDocumentsAsBulkPrintDocuments(orderDocuments));
         }
 
-        return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), bulkPrintDocuments);
+        return bulkPrintService.bulkPrintFinancialRemedyLetterPack(caseDetails.getId(), bulkPrintDocuments, authorisationToken);
     }
 
     private boolean shouldPrintOrderApprovedDocuments(CaseDetails caseDetails, String authorisationToken) {

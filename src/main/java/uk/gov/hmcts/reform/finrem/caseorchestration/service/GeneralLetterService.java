@@ -64,7 +64,7 @@ public class GeneralLetterService {
         log.info("Generating General letter for Case ID: {}", caseDetails.getId());
         CaseDocument document = generateGeneralLetterDocument(caseDetails, authorisationToken);
         addGeneralLetterToCaseData(caseDetails, document);
-        printLatestGeneralLetter(caseDetails);
+        printLatestGeneralLetter(caseDetails, authorisationToken);
     }
 
     private CaseDocument generateGeneralLetterDocument(CaseDetails caseDetails, String authorisationToken) {
@@ -153,9 +153,10 @@ public class GeneralLetterService {
         }
     }
 
-    private UUID printLatestGeneralLetter(CaseDetails caseDetails) {
+    private UUID printLatestGeneralLetter(CaseDetails caseDetails, String authorisationToken) {
         List<GeneralLetterData> generalLettersData = documentHelper.convertToGeneralLetterData(caseDetails.getData().get(GENERAL_LETTER));
         GeneralLetterData latestGeneralLetterData = generalLettersData.get(generalLettersData.size() - 1);
-        return bulkPrintService.sendDocumentForPrint(latestGeneralLetterData.getGeneralLetter().getGeneratedLetter(), caseDetails);
+        return bulkPrintService.sendDocumentForPrint(latestGeneralLetterData.getGeneralLetter().getGeneratedLetter(),
+            caseDetails, authorisationToken);
     }
 }

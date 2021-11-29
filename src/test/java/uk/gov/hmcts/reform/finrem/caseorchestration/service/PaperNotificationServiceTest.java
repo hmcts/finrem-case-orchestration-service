@@ -39,7 +39,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
 
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), eq(AUTH_TOKEN), eq(APPLICANT));
         verify(assignedToJudgeDocumentService).generateAssignedToJudgeNotificationLetter(any(CaseDetails.class), eq(AUTH_TOKEN), eq(RESPONDENT));
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any(), any());
     }
 
     @Test
@@ -55,7 +55,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
             any(CaseDetails.class), eq(AUTH_TOKEN), eq(APPLICANT));
         verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(
             any(CaseDetails.class), eq(AUTH_TOKEN), eq(RESPONDENT));
-        verify(bulkPrintService).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService).sendDocumentForPrint(any(), any(), any());
     }
 
     @Test
@@ -68,7 +68,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
 
         verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(any(), eq(AUTH_TOKEN), eq(APPLICANT));
         verify(assignedToJudgeDocumentService).generateConsentInContestedAssignedToJudgeNotificationLetter(any(), eq(AUTH_TOKEN), eq(RESPONDENT));
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any(), any());
     }
 
     @Test
@@ -82,13 +82,12 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
 
         verify(manualPaymentDocumentService).generateManualPaymentLetter(any(), any(), eq(APPLICANT));
         verify(manualPaymentDocumentService).generateManualPaymentLetter(any(), any(), eq(RESPONDENT));
-        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any());
+        verify(bulkPrintService, times(2)).sendDocumentForPrint(any(), any(), any());
     }
 
     @Test
     public void shouldPrintForApplicantIfNotRepresented() {
-        final String json
-            = "/fixtures/refusal-order-contested.json";
+        final String json = "/fixtures/refusal-order-contested.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
         caseDetails.getData().put("applicantRepresented", "No");
         caseDetails.getData().remove("applicantSolicitorConsentForEmails");
@@ -99,8 +98,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldPrintForApplicantIfRepresentedButNotAgreedToEmail() {
-        final String json
-            = "/fixtures/refusal-order-contested.json";
+        final String json = "/fixtures/refusal-order-contested.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
         caseDetails.getData().put("applicantRepresented", "Yes");
         caseDetails.getData().put("applicantSolicitorConsentForEmails", "No");
@@ -111,8 +109,7 @@ public class PaperNotificationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldPrintForApplicantIfPaperCase() {
-        final String json
-            = "/fixtures/refusal-order-contested.json";
+        final String json = "/fixtures/refusal-order-contested.json";
         CaseDetails caseDetails = TestSetUpUtils.caseDetailsFromResource(json, mapper);
         caseDetails.getData().put("paperApplication", "YES");
 

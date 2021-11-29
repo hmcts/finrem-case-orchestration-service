@@ -33,7 +33,9 @@ public interface DocumentClient {
         path = "/version/1/bulk-print",
         headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE
     )
-    UUID bulkPrint(@RequestBody BulkPrintRequest bulkPrintRequest);
+    UUID bulkPrint(
+        @RequestBody BulkPrintRequest bulkPrintRequest,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
 
     @DeleteMapping(path = "/version/1/delete-pdf-document")
     void deleteDocument(

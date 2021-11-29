@@ -38,7 +38,7 @@ public class PaperNotificationService {
                 caseDetails, authToken, APPLICANT);
 
             // Send notification letter to Bulk Print
-            bulkPrintService.sendDocumentForPrint(hwfSuccessfulNotificationLetter, caseDetails);
+            bulkPrintService.sendDocumentForPrint(hwfSuccessfulNotificationLetter, caseDetails, authToken);
             log.info("Applicant notification letter sent to Bulk Print: {} for Case ID: {}", hwfSuccessfulNotificationLetter,
                 caseDetails.getId());
         }
@@ -46,7 +46,7 @@ public class PaperNotificationService {
         if (shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
             UUID respondentLetterId = bulkPrintService.sendDocumentForPrint(
                 helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(caseDetails, authToken, RESPONDENT),
-                caseDetails);
+                caseDetails, authToken);
             log.info("Respondent notification letter sent to Bulk Print: {} for Case ID: {}", respondentLetterId, caseDetails.getId());
         }
     }
@@ -61,7 +61,7 @@ public class PaperNotificationService {
                 caseDetails, authToken, APPLICANT);
 
             // Send notification letter to Bulk Print
-            bulkPrintService.sendDocumentForPrint(assignedToJudgeNotificationLetter, caseDetails);
+            bulkPrintService.sendDocumentForPrint(assignedToJudgeNotificationLetter, caseDetails, authToken);
             log.info("Applicant notification letter sent to Bulk Print: {} for Case ID: {}", assignedToJudgeNotificationLetter,
                 caseDetails.getId());
         }
@@ -69,7 +69,7 @@ public class PaperNotificationService {
         if (shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
             UUID respondentLetterId = bulkPrintService.sendDocumentForPrint(
                 assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, authToken, RESPONDENT),
-                caseDetails);
+                caseDetails, authToken);
             log.info("Respondent notification letter sent to Bulk Print: {} for Case ID: {}", respondentLetterId, caseDetails.getId());
         }
     }
@@ -81,7 +81,7 @@ public class PaperNotificationService {
 
             CaseDocument applicantAssignedToJudgeNotificationLetter =
                 assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken, APPLICANT);
-            bulkPrintService.sendDocumentForPrint(applicantAssignedToJudgeNotificationLetter, caseDetails);
+            bulkPrintService.sendDocumentForPrint(applicantAssignedToJudgeNotificationLetter, caseDetails, authToken);
         }
 
 
@@ -91,19 +91,19 @@ public class PaperNotificationService {
 
             CaseDocument respondentAssignedToJudgeNotificationLetter =
                 assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, authToken, RESPONDENT);
-            bulkPrintService.sendDocumentForPrint(respondentAssignedToJudgeNotificationLetter, caseDetails);
+            bulkPrintService.sendDocumentForPrint(respondentAssignedToJudgeNotificationLetter, caseDetails, authToken);
         }
     }
 
     public void printManualPaymentNotification(CaseDetails caseDetails, String authToken) {
         if (caseDataService.isContestedPaperApplication(caseDetails)) {
             CaseDocument applicantManualPaymentLetter = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken, APPLICANT);
-            bulkPrintService.sendDocumentForPrint(applicantManualPaymentLetter, caseDetails);
+            bulkPrintService.sendDocumentForPrint(applicantManualPaymentLetter, caseDetails, authToken);
         }
 
         if (caseDataService.isContestedApplication(caseDetails) && shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
             CaseDocument respondentManualPaymentLetter = manualPaymentDocumentService.generateManualPaymentLetter(caseDetails, authToken, RESPONDENT);
-            bulkPrintService.sendDocumentForPrint(respondentManualPaymentLetter, caseDetails);
+            bulkPrintService.sendDocumentForPrint(respondentManualPaymentLetter, caseDetails, authToken);
         }
     }
 
