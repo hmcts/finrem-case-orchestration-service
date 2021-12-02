@@ -78,15 +78,15 @@ public class ConsentOrderApprovedDocumentService {
         return generatedApprovedConsentOrderNotificationLetter;
     }
 
-    public List<PensionCollectionData> stampPensionDocuments(List<PensionCollectionData> pensionList, String authToken) {
+    public List<PensionCollectionData> stampPensionDocuments(List<PensionCollectionData> pensionList, String authToken, String caseTypeId) {
         return pensionList.stream()
             .filter(pensionCollectionData -> pensionCollectionData.getTypedCaseDocument().getPensionDocument() != null)
-            .map(pensionCollectionData -> stampPensionDocuments(pensionCollectionData, authToken)).collect(toList());
+            .map(pensionCollectionData -> stampPensionDocuments(pensionCollectionData, authToken, caseTypeId)).collect(toList());
     }
 
-    private PensionCollectionData stampPensionDocuments(PensionCollectionData pensionDocument, String authToken) {
+    private PensionCollectionData stampPensionDocuments(PensionCollectionData pensionDocument, String authToken, String caseTypeId) {
         CaseDocument document = pensionDocument.getTypedCaseDocument().getPensionDocument();
-        CaseDocument stampedDocument = genericDocumentService.stampDocument(document, authToken);
+        CaseDocument stampedDocument = genericDocumentService.stampDocument(document, authToken, caseTypeId);
         PensionCollectionData stampedPensionData = documentHelper.deepCopy(pensionDocument, PensionCollectionData.class);
         stampedPensionData.getTypedCaseDocument().setPensionDocument(stampedDocument);
         return stampedPensionData;
@@ -95,7 +95,6 @@ public class ConsentOrderApprovedDocumentService {
     public List<BulkPrintDocument> prepareApplicantLetterPack(CaseDetails caseDetails, String authorisationToken) {
         log.info("Sending Approved Consent Order to applicant / solicitor for Bulk Print, case {}", caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
-
         List<BulkPrintDocument> bulkPrintDocuments = new ArrayList<>();
 
         if (caseDataService.isPaperApplication(caseData)) {
@@ -108,9 +107,9 @@ public class ConsentOrderApprovedDocumentService {
         return bulkPrintDocuments;
     }
 
-    public void stampAndPopulateContestedConsentApprovedOrderCollection(Map<String, Object> caseData, String authToken) {
-        CaseDocument stampedAndAnnexedDoc = stampAndAnnexContestedConsentOrder(caseData, authToken);
-        List<PensionCollectionData> pensionDocs = consentInContestedStampPensionDocuments(caseData, authToken);
+    public void stampAndPopulateContestedConsentApprovedOrderCollection(Map<String, Object> caseData, String authToken, String caseTypeId) {
+        CaseDocument stampedAndAnnexedDoc = stampAndAnnexContestedConsentOrder(caseData, authToken, caseTypeId);
+        List<PensionCollectionData> pensionDocs = consentInContestedStampPensionDocuments(caseData, authToken, caseTypeId);
         populateContestedConsentOrderCaseDetails(caseData, stampedAndAnnexedDoc, pensionDocs);
     }
 
@@ -125,10 +124,10 @@ public class ConsentOrderApprovedDocumentService {
         }
     }
 
-    private CaseDocument stampAndAnnexContestedConsentOrder(Map<String, Object> caseData, String authToken) {
+    private CaseDocument stampAndAnnexContestedConsentOrder(Map<String, Object> caseData, String authToken, String caseTypeId) {
         CaseDocument latestConsentOrder = getLatestConsentInContestedConsentOrder(caseData);
-        CaseDocument stampedDoc = genericDocumentService.stampDocument(latestConsentOrder, authToken);
-        CaseDocument stampedAndAnnexedDoc = genericDocumentService.annexStampDocument(stampedDoc, authToken);
+        CaseDocument stampedDoc = genericDocumentService.stampDocument(latestConsentOrder, authToken, caseTypeId);
+        CaseDocument stampedAndAnnexedDoc = genericDocumentService.annexStampDocument(stampedDoc, authToken, caseTypeId);
         log.info("Stamped Document and Annex doc = {}", stampedAndAnnexedDoc);
         return stampedAndAnnexedDoc;
     }
@@ -154,9 +153,10 @@ public class ConsentOrderApprovedDocumentService {
         return mapper.convertValue(caseData.get(CONSENT_ORDER), new TypeReference<>() {});
     }
 
-    private List<PensionCollectionData> consentInContestedStampPensionDocuments(Map<String, Object> caseData, String authToken) {
+    private List<PensionCollectionData> consentInContestedStampPensionDocuments(Map<String, Object> caseData, String authToken,
+                                                                                String caseTypeId) {
         List<PensionCollectionData> pensionDocs = getContestedConsentPensionDocuments(caseData);
-        return stampPensionDocuments(pensionDocs, authToken);
+        return stampPensionDocuments(pensionDocs, authToken, caseTypeId);
     }
 
     private List<PensionCollectionData> getContestedConsentPensionDocuments(Map<String, Object> caseData) {

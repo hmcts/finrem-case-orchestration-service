@@ -52,18 +52,18 @@ public class HelpWithFeesDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldGenerateHwfSuccessfulNotificationLetterForApplicant() {
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString(), anyString())).thenReturn(document());
 
         CaseDocument generatedHwfSuccessfulNotificationLetter = helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(
             caseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generatedHwfSuccessfulNotificationLetter);
-        verify(documentClientMock).generatePdf(any(), anyString());
+        verify(documentClientMock).generatePdf(any(), anyString(), anyString());
     }
 
     @Test
     public void shouldGenerateHwfSuccessfulNotificationLetterForApplicantSolicitor() {
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString(), anyString())).thenReturn(document());
 
         Map<String, Object> solicitorAddress = new HashMap<>();
         solicitorAddress.put("AddressLine1", "123 Applicant Solicitor Street");

@@ -21,9 +21,11 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.BINARY_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
@@ -45,14 +47,14 @@ public class HearingOrderServiceTest extends BaseServiceTest {
 
     @Test
     public void convertPdfDocument() {
-        when(genericDocumentService.stampDocument(any(), eq(AUTH_TOKEN))).thenReturn(caseDocument());
+        when(genericDocumentService.stampDocument(any(), eq(AUTH_TOKEN), anyString())).thenReturn(caseDocument());
 
         Map<String, Object> caseData = prepareCaseData(makeDraftDirectionOrderCollectionWithOneElement());
-        CaseDetails caseDetails = CaseDetails.builder().data(caseData).build();
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONSENTED).data(caseData).build();
 
         hearingOrderService.convertToPdfAndStampAndStoreLatestDraftHearingOrder(caseDetails, AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN));
+        verify(genericDocumentService).stampDocument(any(), eq(AUTH_TOKEN), eq(CASE_TYPE_ID_CONSENTED));
 
         CaseDocument latestDraftHearingOrder = (CaseDocument) caseData.get(LATEST_DRAFT_HEARING_ORDER);
         assertThat(latestDraftHearingOrder, is(notNullValue()));

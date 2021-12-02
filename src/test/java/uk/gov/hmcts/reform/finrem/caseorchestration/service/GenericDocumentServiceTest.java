@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.assertCaseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
@@ -27,7 +28,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.docume
 
 @ActiveProfiles("test-mock-feign-clients")
 public class GenericDocumentServiceTest extends BaseServiceTest {
-
     @Autowired private GenericDocumentService genericDocumentService;
     @Autowired private DocumentClient documentClientMock;
 
@@ -36,22 +36,22 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldStampDocument() {
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
+        when(documentClientMock.stampDocument(any(), anyString(), anyString())).thenReturn(document());
 
-        CaseDocument stampDocument = genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN);
+        CaseDocument stampDocument = genericDocumentService.stampDocument(caseDocument(), AUTH_TOKEN, CASE_TYPE_ID_CONTESTED);
 
         assertCaseDocument(stampDocument);
-        verify(documentClientMock, times(1)).stampDocument(any(), eq(AUTH_TOKEN));
+        verify(documentClientMock, times(1)).stampDocument(any(), eq(AUTH_TOKEN), eq(CASE_TYPE_ID_CONTESTED));
     }
 
     @Test
     public void shouldAnnexStampDocument() {
-        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
+        when(documentClientMock.annexStampDocument(any(), anyString(), anyString())).thenReturn(document());
 
-        CaseDocument stampDocument = genericDocumentService.annexStampDocument(caseDocument(), AUTH_TOKEN);
+        CaseDocument stampDocument = genericDocumentService.annexStampDocument(caseDocument(), AUTH_TOKEN, CASE_TYPE_ID_CONTESTED);
 
         assertCaseDocument(stampDocument);
-        verify(documentClientMock, times(1)).annexStampDocument(any(), eq(AUTH_TOKEN));
+        verify(documentClientMock, times(1)).annexStampDocument(any(), eq(AUTH_TOKEN), eq(CASE_TYPE_ID_CONTESTED));
     }
 
     @Test
@@ -59,12 +59,13 @@ public class GenericDocumentServiceTest extends BaseServiceTest {
         final String templateName = "template name";
         final String fileName = "file name";
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString(), anyString())).thenReturn(document());
 
         CaseDocument document = genericDocumentService.generateDocument(AUTH_TOKEN, defaultContestedCaseDetails(), templateName, fileName);
 
         assertCaseDocument(document);
-        verify(documentClientMock, times(1)).generatePdf(documentGenerationRequestCaptor.capture(), eq(AUTH_TOKEN));
+        verify(documentClientMock, times(1)).generatePdf(
+            documentGenerationRequestCaptor.capture(), eq(AUTH_TOKEN), eq(CASE_TYPE_ID_CONTESTED));
 
         assertThat(documentGenerationRequestCaptor.getValue().getTemplate(), is(templateName));
         assertThat(documentGenerationRequestCaptor.getValue().getFileName(), is(fileName));

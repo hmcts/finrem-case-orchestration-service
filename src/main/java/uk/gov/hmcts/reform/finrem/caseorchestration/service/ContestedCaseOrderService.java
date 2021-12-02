@@ -107,13 +107,13 @@ public class ContestedCaseOrderService {
             log.info("Received request to stampFinalOrder called with Case ID = {}, latestHearingOrder = {}", caseDetails.getId(),
                 latestHearingOrder);
 
-            stampAndAddToCollection(caseData, latestHearingOrder, authToken);
+            stampAndAddToCollection(caseData, latestHearingOrder, authToken, caseDetails.getCaseTypeId());
         }
     }
 
-    private void stampAndAddToCollection(Map<String, Object> caseData, CaseDocument latestHearingOrder, String authToken) {
+    private void stampAndAddToCollection(Map<String, Object> caseData, CaseDocument latestHearingOrder, String authToken, String caseTypeId) {
         if (!isEmpty(latestHearingOrder)) {
-            CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken);
+            CaseDocument stampedDocs = genericDocumentService.stampDocument(latestHearingOrder, authToken, caseTypeId);
             log.info("Stamped Documents = {}", stampedDocs);
 
             List<HearingOrderCollectionData> finalOrderCollection = Optional.ofNullable(documentHelper.getFinalOrderDocuments(caseData))

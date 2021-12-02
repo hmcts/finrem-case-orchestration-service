@@ -70,6 +70,7 @@ public class ConsentOrderNotApprovedDocumentService {
             caseDetailsWithTemplateData,
             documentConfiguration.getConsentOrderNotApprovedCoverLetterTemplate(),
             documentConfiguration.getConsentOrderNotApprovedCoverLetterFileName());
+
         return documentHelper.getCaseDocumentAsBulkPrintDocument(coverLetter);
     }
 

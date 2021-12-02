@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
@@ -71,13 +72,13 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     public void shouldGenerateAssignedToJudgeLetterForApplicant() {
         caseDetails = defaultConsentedCaseDetails();
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString(), anyString())).thenReturn(document());
 
         CaseDocument generateAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generateAssignedToJudgeNotificationLetter);
-        verify(documentClientMock).generatePdf(any(), anyString());
+        verify(documentClientMock).generatePdf(any(), anyString(), anyString());
     }
 
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
@@ -85,7 +86,7 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     public void shouldGenerateAssignedToJudgeLetterForApplicantSolicitor() {
         caseDetails = defaultConsentedCaseDetails();
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString(), anyString())).thenReturn(document());
 
         Map<String, Object> solicitorAddress = new HashMap<>();
         solicitorAddress.put("AddressLine1", "123 Applicant Solicitor Street");
@@ -113,13 +114,13 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     public void shouldGenerateApplicantConsentInContestedAssignedToJudgeNotificationLetter() {
         caseDetails = defaultContestedCaseDetails();
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString(), anyString())).thenReturn(document());
 
         CaseDocument generateAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generateAssignedToJudgeNotificationLetter);
-        verify(documentClientMock).generatePdf(documentGenerationRequestCaptor.capture(), eq(AUTH_TOKEN));
+        verify(documentClientMock).generatePdf(documentGenerationRequestCaptor.capture(), eq(AUTH_TOKEN), eq(CASE_TYPE_ID_CONTESTED));
 
         CaseDetails caseDetails = (CaseDetails) documentGenerationRequestCaptor.getValue().getValues().get("caseDetails");
 
@@ -144,7 +145,7 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     public void shouldGenerateApplicantConsentInContestedAssignedToJudgeNotificationLetterForApplicantSolicitor() {
         caseDetails = defaultContestedCaseDetails();
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString(), anyString())).thenReturn(document());
 
         Map<String, Object> solicitorAddress = new HashMap<>();
         solicitorAddress.put("AddressLine1", "123 Applicant Solicitor Street");
@@ -165,7 +166,7 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
             = assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN, APPLICANT);
 
         assertCaseDocument(generatedAssignedToJudgeNotificationLetter);
-        verify(documentClientMock).generatePdf(documentGenerationRequestCaptor.capture(), eq(AUTH_TOKEN));
+        verify(documentClientMock).generatePdf(documentGenerationRequestCaptor.capture(), eq(AUTH_TOKEN), eq(CASE_TYPE_ID_CONTESTED));
 
         CaseDetails caseDetails = (CaseDetails) documentGenerationRequestCaptor.getValue().getValues().get("caseDetails");
 
@@ -190,13 +191,13 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     public void shouldGenerateRespondentConsentInContestedAssignedToJudgeNotificationLetter() {
         caseDetails = defaultContestedCaseDetails();
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString(), anyString())).thenReturn(document());
 
         CaseDocument generateAssignedToJudgeNotificationLetter
             = assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN, RESPONDENT);
 
         assertCaseDocument(generateAssignedToJudgeNotificationLetter);
-        verify(documentClientMock).generatePdf(documentGenerationRequestCaptor.capture(), eq(AUTH_TOKEN));
+        verify(documentClientMock).generatePdf(documentGenerationRequestCaptor.capture(), eq(AUTH_TOKEN), eq(CASE_TYPE_ID_CONTESTED));
 
         CaseDetails caseDetails = (CaseDetails) documentGenerationRequestCaptor.getValue().getValues().get("caseDetails");
 
@@ -221,7 +222,7 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
     public void shouldGenerateRespondentConsentInContestedAssignedToJudgeNotificationLetterForApplicantSolicitor() {
         caseDetails = defaultContestedCaseDetails();
 
-        when(documentClientMock.generatePdf(any(), anyString())).thenReturn(document());
+        when(documentClientMock.generatePdf(any(), anyString(), anyString())).thenReturn(document());
 
         Map<String, Object> solicitorAddress = new HashMap<>();
         solicitorAddress.put("AddressLine1", "123 Respondent Solicitor Street");
@@ -242,7 +243,7 @@ public class AssignedToJudgeDocumentServiceTest extends BaseServiceTest {
             = assignedToJudgeDocumentService.generateConsentInContestedAssignedToJudgeNotificationLetter(caseDetails, AUTH_TOKEN, RESPONDENT);
 
         assertCaseDocument(generatedAssignedToJudgeNotificationLetter);
-        verify(documentClientMock).generatePdf(documentGenerationRequestCaptor.capture(), eq(AUTH_TOKEN));
+        verify(documentClientMock).generatePdf(documentGenerationRequestCaptor.capture(), eq(AUTH_TOKEN), eq(CASE_TYPE_ID_CONTESTED));
 
         CaseDetails caseDetails = (CaseDetails) documentGenerationRequestCaptor.getValue().getValues().get("caseDetails");
 

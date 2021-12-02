@@ -20,6 +20,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @FeignClient(name = "document-client", url = "${document.generator.service.api.baseurl}", primary = false)
 public interface DocumentClient {
+    String CASE_TYPE_ID = "caseTypeId";
 
     @PostMapping(
         path = "/version/1/generate-pdf",
@@ -27,7 +28,8 @@ public interface DocumentClient {
     )
     Document generatePdf(
         @RequestBody DocumentGenerationRequest generateDocumentRequest,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
+        @RequestHeader(CASE_TYPE_ID) String caseTypeId);
 
     @PostMapping(
         path = "/version/1/bulk-print",
@@ -54,7 +56,8 @@ public interface DocumentClient {
     )
     Document stampDocument(
         @RequestBody Document document,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
+        @RequestHeader(CASE_TYPE_ID) String caseTypeId);
 
     @PostMapping(
         path = "/version/1/annex-stamp-document",
@@ -62,7 +65,8 @@ public interface DocumentClient {
     )
     Document annexStampDocument(
         @RequestBody Document document,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken);
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
+        @RequestHeader(CASE_TYPE_ID) String caseTypeId);
 
     @PostMapping(
         path = "/version/1/convert-to-pdf",
@@ -70,5 +74,6 @@ public interface DocumentClient {
     )
     Document convertDocumentToPdf(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationToken,
-        @RequestBody Document document);
+        @RequestBody Document document,
+        @RequestHeader(CASE_TYPE_ID) String caseTypeId);
 }

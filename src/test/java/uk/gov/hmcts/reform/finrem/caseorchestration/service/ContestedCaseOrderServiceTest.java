@@ -31,12 +31,14 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
@@ -193,12 +195,12 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     @Test
     public void finalOrderSuccess() {
         mockDocumentHelperToReturnDefaultExpectedDocuments();
-        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
+        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(caseDocument());
 
-        CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).build();
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(new HashMap<>()).build();
         contestedCaseOrderService.stampFinalOrder(caseDetails, AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN);
+        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN, CASE_TYPE_ID_CONTESTED);
 
         List<HearingOrderCollectionData> expectedFinalOrderCollection =
             (List<HearingOrderCollectionData>) caseDetails.getData().get(FINAL_ORDER_COLLECTION);
@@ -220,13 +222,13 @@ public class ContestedCaseOrderServiceTest extends BaseServiceTest {
     public void finalOrderSuccessWithFinalOrder() {
         mockDocumentHelperToReturnDefaultExpectedDocuments();
         when(documentHelper.getFinalOrderDocuments(any())).thenReturn(new ArrayList<>(List.of(HearingOrderCollectionData.builder().build())));
-        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN))).thenReturn(caseDocument());
+        when(genericDocumentService.stampDocument(isA(CaseDocument.class), eq(AUTH_TOKEN), anyString())).thenReturn(caseDocument());
 
-        CaseDetails caseDetails = CaseDetails.builder().data(new HashMap<>()).build();
+        CaseDetails caseDetails = CaseDetails.builder().caseTypeId(CASE_TYPE_ID_CONTESTED).data(new HashMap<>()).build();
 
         contestedCaseOrderService.stampFinalOrder(caseDetails, AUTH_TOKEN);
 
-        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN);
+        verify(genericDocumentService).stampDocument(caseDocument(), AUTH_TOKEN, CASE_TYPE_ID_CONTESTED);
 
         List<HearingOrderCollectionData> expectedFinalOrderCollection =
             (List<HearingOrderCollectionData>) caseDetails.getData().get(FINAL_ORDER_COLLECTION);

@@ -36,6 +36,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -96,16 +97,16 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         defaultCoversheet.setBinaryUrl(DEFAULT_COVERSHEET_URL);
 
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentBulkPrintTemplate,
-            documentBulkPrintFileName), anyString())).thenReturn(defaultCoversheet);
+            documentBulkPrintFileName), anyString(), anyString())).thenReturn(defaultCoversheet);
 
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate,
-            documentApprovedConsentOrderFileName), anyString())).thenReturn(document());
+            documentApprovedConsentOrderFileName), anyString(), anyString())).thenReturn(document());
 
         Document consentOrderApprovedCoverLetter = document();
         consentOrderApprovedCoverLetter.setBinaryUrl(CONSENT_ORDER_APPROVED_COVER_LETTER_URL);
 
         when(documentClientMock.generatePdf(matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderNotificationTemplate,
-            documentApprovedConsentOrderNotificationFileName), anyString())).thenReturn(consentOrderApprovedCoverLetter);
+            documentApprovedConsentOrderNotificationFileName), anyString(), anyString())).thenReturn(consentOrderApprovedCoverLetter);
     }
 
     @Test
@@ -115,7 +116,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(caseDocument);
         verify(documentClientMock, atLeastOnce()).generatePdf(
             matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, documentApprovedConsentOrderFileName),
-            anyString());
+            anyString(), anyString());
     }
 
     @Test
@@ -127,7 +128,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(approvedOrders.get(approvedOrders.size() - 1).getValue().getOrderLetter());
         verify(documentClientMock, atLeastOnce()).generatePdf(
             matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, documentApprovedConsentOrderFileName),
-            anyString());
+            anyString(), anyString());
     }
 
     @Test
@@ -138,7 +139,7 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
         assertCaseDocument(caseDocument);
         verify(documentClientMock, atLeastOnce()).generatePdf(
             matchDocumentGenerationRequestTemplateAndFilename(documentApprovedConsentOrderTemplate, documentApprovedConsentOrderFileName),
-            anyString());
+            anyString(), anyString());
     }
 
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
@@ -178,29 +179,31 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
     @Test
     public void shouldStampPensionDocuments() {
         Mockito.reset(documentClientMock);
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
+        when(documentClientMock.stampDocument(any(), anyString(), anyString())).thenReturn(document());
 
         List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionDocumentData());
-        List<PensionCollectionData> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
+        List<PensionCollectionData> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(
+            pensionDocuments, AUTH_TOKEN, CASE_TYPE_ID_CONTESTED);
 
         stampPensionDocuments.forEach(data -> assertCaseDocument(data.getTypedCaseDocument().getPensionDocument()));
-        verify(documentClientMock, times(2)).stampDocument(any(), anyString());
+        verify(documentClientMock, times(2)).stampDocument(any(), anyString(), anyString());
     }
 
     @Test
     public void givenNullDocumentInPensionDocuments_whenStampingDocuments_thenTheNullValueIsIgnored() {
         Mockito.reset(documentClientMock);
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
+        when(documentClientMock.stampDocument(any(), anyString(), anyString())).thenReturn(document());
 
         PensionCollectionData pensionCollectionDataWithNullDocument = pensionDocumentData();
         pensionCollectionDataWithNullDocument.getTypedCaseDocument().setPensionDocument(null);
         List<PensionCollectionData> pensionDocuments = asList(pensionDocumentData(), pensionCollectionDataWithNullDocument);
 
-        List<PensionCollectionData> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(pensionDocuments, AUTH_TOKEN);
+        List<PensionCollectionData> stampPensionDocuments = consentOrderApprovedDocumentService.stampPensionDocuments(
+            pensionDocuments, AUTH_TOKEN, CASE_TYPE_ID_CONTESTED);
 
         assertThat(stampPensionDocuments, hasSize(1));
         stampPensionDocuments.forEach(data -> assertCaseDocument(data.getTypedCaseDocument().getPensionDocument()));
-        verify(documentClientMock, times(1)).stampDocument(any(), anyString());
+        verify(documentClientMock, times(1)).stampDocument(any(), anyString(), anyString());
     }
 
     @Test
@@ -235,17 +238,18 @@ public class ConsentOrderApprovedDocumentServiceTest extends BaseServiceTest {
 
     @Test
     public void stampsAndPopulatesCaseDataForContestedConsentOrder() {
-        when(documentClientMock.stampDocument(any(), anyString())).thenReturn(document());
-        when(documentClientMock.annexStampDocument(any(), anyString())).thenReturn(document());
+        when(documentClientMock.stampDocument(any(), anyString(), anyString())).thenReturn(document());
+        when(documentClientMock.annexStampDocument(any(), anyString(), anyString())).thenReturn(document());
 
         CaseDetails caseDetails = defaultConsentedCaseDetails();
+        String caseTypeId = caseDetails.getCaseTypeId();
         Map<String, Object> caseData = caseDetails.getData();
         caseData.put(CONSENT_ORDER, caseDocument());
 
-        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN);
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN, caseTypeId);
         assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(1));
 
-        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN);
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, AUTH_TOKEN, caseTypeId);
         assertThat(getDocumentList(caseData, CONTESTED_CONSENT_ORDER_COLLECTION), hasSize(2));
     }
 

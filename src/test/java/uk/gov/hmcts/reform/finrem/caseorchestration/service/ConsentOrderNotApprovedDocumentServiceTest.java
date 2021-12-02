@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
@@ -51,8 +52,11 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
     private static final String COVER_LETTER_URL = "cover_letter_url";
     private static final String GENERAL_ORDER_URL = "general_letter_url";
 
-    @Autowired private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
-    @Autowired private DocumentClient documentClientMock;
+    @Autowired
+    private ConsentOrderNotApprovedDocumentService consentOrderNotApprovedDocumentService;
+
+    @Autowired
+    private DocumentClient documentClientMock;
 
     private CaseDetails caseDetails;
 
@@ -61,7 +65,8 @@ public class ConsentOrderNotApprovedDocumentServiceTest extends BaseServiceTest 
         Document generatedDocument = document();
         generatedDocument.setBinaryUrl(COVER_LETTER_URL);
 
-        when(documentClientMock.generatePdf(any(DocumentGenerationRequest.class), eq(AUTH_TOKEN))).thenReturn(generatedDocument);
+        when(documentClientMock.generatePdf(any(DocumentGenerationRequest.class), eq(AUTH_TOKEN), anyString()))
+            .thenReturn(generatedDocument);
     }
 
     public void setupContestedCase() {

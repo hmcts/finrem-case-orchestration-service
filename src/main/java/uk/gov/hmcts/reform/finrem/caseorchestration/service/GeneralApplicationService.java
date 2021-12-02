@@ -46,7 +46,10 @@ public class GeneralApplicationService {
         caseData.put(GENERAL_APPLICATION_PRE_STATE, caseDetailsBefore.getState());
         caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE, LocalDate.now());
         CaseDocument applicationDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
-            documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)), authorisationToken);
+            documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)),
+            authorisationToken,
+            caseDetailsBefore.getCaseTypeId()
+        );
         caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST, applicationDocument);
         updateGeneralApplicationDocumentCollection(caseData, applicationDocument);
     }

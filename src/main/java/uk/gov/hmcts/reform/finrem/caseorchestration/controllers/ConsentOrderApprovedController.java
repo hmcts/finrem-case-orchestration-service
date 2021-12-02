@@ -108,7 +108,8 @@ public class ConsentOrderApprovedController implements BaseController {
         CaseDetails caseDetails = callback.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
 
-        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(caseData, authToken);
+        consentOrderApprovedDocumentService.stampAndPopulateContestedConsentApprovedOrderCollection(
+            caseData, authToken, caseDetails.getCaseTypeId());
         consentOrderApprovedDocumentService.generateAndPopulateConsentOrderLetter(caseDetails, authToken);
 
         return ResponseEntity.ok(
@@ -148,7 +149,7 @@ public class ConsentOrderApprovedController implements BaseController {
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
 
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
-        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken);
+        CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken, caseDetails.getCaseTypeId());
 
         ApprovedOrder.ApprovedOrderBuilder approvedOrderBuilder = ApprovedOrder.builder()
             .orderLetter(approvedConsentOrderLetter)
@@ -161,7 +162,7 @@ public class ConsentOrderApprovedController implements BaseController {
                 caseDetails.getId());
 
             List<PensionCollectionData> stampedPensionDocs = consentOrderApprovedDocumentService.stampPensionDocuments(
-                getPensionDocuments(caseData), authToken);
+                getPensionDocuments(caseData), authToken, caseDetails.getCaseTypeId());
             log.info("Generated StampedPensionDocs = {} for case {}", stampedPensionDocs, caseDetails.getId());
             approvedOrder.setPensionDocuments(stampedPensionDocs);
         }

@@ -28,7 +28,8 @@ public class GenericDocumentService {
         Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails);
         Document generatedPdf = documentClient.generatePdf(
             DocumentGenerationRequest.builder().template(template).fileName(fileName).values(caseDetailsMap).build(),
-            authorisationToken
+            authorisationToken,
+            caseDetails.getCaseTypeId()
         );
 
         return toCaseDocument(generatedPdf);
@@ -42,22 +43,22 @@ public class GenericDocumentService {
         documentClient.deleteDocument(documentUrl, authorisationToken);
     }
 
-    public CaseDocument annexStampDocument(CaseDocument document, String authorisationToken) {
-        Document stampedDocument = documentClient.annexStampDocument(toDocument(document), authorisationToken);
+    public CaseDocument annexStampDocument(CaseDocument document, String authorisationToken, String caseTypeId) {
+        Document stampedDocument = documentClient.annexStampDocument(toDocument(document), authorisationToken, caseTypeId);
         return toCaseDocument(stampedDocument);
     }
 
-    public CaseDocument convertDocumentIfNotPdfAlready(CaseDocument document, String authorisationToken) {
+    public CaseDocument convertDocumentIfNotPdfAlready(CaseDocument document, String authorisationToken, String caseTypeId) {
         return !Files.getFileExtension(document.getDocumentFilename()).equalsIgnoreCase("pdf")
-            ? convertDocumentToPdf(document, authorisationToken) : document;
+            ? convertDocumentToPdf(document, authorisationToken, caseTypeId) : document;
     }
 
-    public CaseDocument convertDocumentToPdf(CaseDocument document, String authorisationToken) {
-        return toCaseDocument(documentClient.convertDocumentToPdf(authorisationToken, toDocument(document)));
+    public CaseDocument convertDocumentToPdf(CaseDocument document, String authorisationToken, String caseTypeId) {
+        return toCaseDocument(documentClient.convertDocumentToPdf(authorisationToken, toDocument(document), caseTypeId));
     }
 
-    public CaseDocument stampDocument(CaseDocument document, String authorisationToken) {
-        Document stampedDocument = documentClient.stampDocument(toDocument(document), authorisationToken);
+    public CaseDocument stampDocument(CaseDocument document, String authorisationToken, String caseTypeId) {
+        Document stampedDocument = documentClient.stampDocument(toDocument(document), authorisationToken, caseTypeId);
         return toCaseDocument(stampedDocument);
     }
 

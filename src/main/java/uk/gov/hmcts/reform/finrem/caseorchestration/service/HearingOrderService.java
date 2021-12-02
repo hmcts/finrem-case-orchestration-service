@@ -46,8 +46,10 @@ public class HearingOrderService {
         if (judgeApprovedHearingOrder.isPresent()) {
             CaseDocument latestDraftDirectionOrderDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
                 judgeApprovedHearingOrder.get().getUploadDraftDocument(),
-                authorisationToken);
-            CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(latestDraftDirectionOrderDocument, authorisationToken);
+                authorisationToken,
+                caseDetails.getCaseTypeId());
+            CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(
+                latestDraftDirectionOrderDocument, authorisationToken, caseDetails.getCaseTypeId());
             updateCaseDataForLatestDraftHearingOrder(caseData, stampedHearingOrder);
             updateCaseDataForLatestHearingOrderCollection(caseData, stampedHearingOrder);
             appendDocumentToHearingOrderCollection(caseDetails, stampedHearingOrder);
