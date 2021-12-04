@@ -46,7 +46,9 @@ public class PaperNotificationService {
         if (shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
             UUID respondentLetterId = bulkPrintService.sendDocumentForPrint(
                 helpWithFeesDocumentService.generateHwfSuccessfulNotificationLetter(caseDetails, authToken, RESPONDENT),
-                caseDetails, authToken);
+                caseDetails,
+                authToken
+            );
             log.info("Respondent notification letter sent to Bulk Print: {} for Case ID: {}", respondentLetterId, caseDetails.getId());
         }
     }
@@ -69,7 +71,9 @@ public class PaperNotificationService {
         if (shouldPrintNotificationForRespondentSolicitor(caseDetails)) {
             UUID respondentLetterId = bulkPrintService.sendDocumentForPrint(
                 assignedToJudgeDocumentService.generateAssignedToJudgeNotificationLetter(caseDetails, authToken, RESPONDENT),
-                caseDetails, authToken);
+                caseDetails,
+                authToken
+            );
             log.info("Respondent notification letter sent to Bulk Print: {} for Case ID: {}", respondentLetterId, caseDetails.getId());
         }
     }

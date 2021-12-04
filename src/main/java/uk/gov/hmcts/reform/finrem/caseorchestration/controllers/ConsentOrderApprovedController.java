@@ -71,8 +71,8 @@ public class ConsentOrderApprovedController implements BaseController {
     })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentOrderApproved(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
-
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback
+    ) {
         validateCaseData(callback);
         CaseDetails caseDetails = callback.getCaseDetails();
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseDetails.getData());
@@ -103,7 +103,8 @@ public class ConsentOrderApprovedController implements BaseController {
     })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedConsentOrderApproved(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback
+    ) {
         validateCaseData(callback);
         CaseDetails caseDetails = callback.getCaseDetails();
         Map<String, Object> caseData = caseDetails.getData();
@@ -132,7 +133,8 @@ public class ConsentOrderApprovedController implements BaseController {
     })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> consentInContestedSendOrder(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback
+    ) {
         CaseDetails caseDetails = callback.getCaseDetails();
 
         consentOrderPrintService.sendConsentOrderToBulkPrint(caseDetails, authToken);
@@ -147,7 +149,6 @@ public class ConsentOrderApprovedController implements BaseController {
 
         Map<String, Object> caseData = caseDetails.getData();
         CaseDocument latestConsentOrder = getLatestConsentOrder(caseData);
-
         CaseDocument approvedConsentOrderLetter = consentOrderApprovedDocumentService.generateApprovedConsentOrderLetter(caseDetails, authToken);
         CaseDocument consentOrderAnnexStamped = genericDocumentService.annexStampDocument(latestConsentOrder, authToken, caseDetails.getCaseTypeId());
 
@@ -192,8 +193,7 @@ public class ConsentOrderApprovedController implements BaseController {
                     notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
                 }
 
-                if (featureToggleService.isRespondentJourneyEnabled()
-                    && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+                if (featureToggleService.isRespondentJourneyEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
                     log.info("case - {}: Sending email notification to Respondent Solicitor for 'Consent Order Available'", caseDetails.getId());
                     notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
                 }

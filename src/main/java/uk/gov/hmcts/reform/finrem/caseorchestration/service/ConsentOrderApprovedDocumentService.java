@@ -89,6 +89,7 @@ public class ConsentOrderApprovedDocumentService {
         CaseDocument stampedDocument = genericDocumentService.stampDocument(document, authToken, caseTypeId);
         PensionCollectionData stampedPensionData = documentHelper.deepCopy(pensionDocument, PensionCollectionData.class);
         stampedPensionData.getTypedCaseDocument().setPensionDocument(stampedDocument);
+
         return stampedPensionData;
     }
 
@@ -129,6 +130,7 @@ public class ConsentOrderApprovedDocumentService {
         CaseDocument stampedDoc = genericDocumentService.stampDocument(latestConsentOrder, authToken, caseTypeId);
         CaseDocument stampedAndAnnexedDoc = genericDocumentService.annexStampDocument(stampedDoc, authToken, caseTypeId);
         log.info("Stamped Document and Annex doc = {}", stampedAndAnnexedDoc);
+
         return stampedAndAnnexedDoc;
     }
 
