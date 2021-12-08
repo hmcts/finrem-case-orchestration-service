@@ -70,7 +70,8 @@ public class FunctionalTestUtils {
         return Headers.headers(
             new Header(AUTHORIZATION_HEADER, "Bearer "
                 + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)),
-            new Header("Content-Type", ContentType.JSON.toString()));
+            new Header("Content-Type", ContentType.JSON.toString())
+        );
     }
 
     public String getS2SToken(String callerMicroservice) {
@@ -80,7 +81,8 @@ public class FunctionalTestUtils {
     public Headers getHeader() {
         return Headers.headers(
             new Header(AUTHORIZATION_HEADER, "Bearer "
-                + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword)));
+                + idamUtils.generateUserTokenWithNoRoles(idamUserName, idamUserPassword))
+        );
     }
 
     public String downloadPdfAndParseToString(String documentUrl) {
