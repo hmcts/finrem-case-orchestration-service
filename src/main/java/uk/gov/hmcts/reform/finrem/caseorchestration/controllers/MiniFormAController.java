@@ -52,24 +52,24 @@ public class MiniFormAController implements BaseController {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
             response = AboutToStartOrSubmitCallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")})
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateMiniFormA(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
-        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
-
-        log.info("Received request to generate Consented Mini Form A for Case ID : {}", callback.getCaseDetails().getId());
-
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback
+    ) {
         CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("Received request to generate Consented Mini Form A for Case ID : {}", caseDetails.getId());
         Map<String, Object> caseData = caseDetails.getData();
 
         if (!caseDataService.isConsentedInContestedCase(caseDetails)) {
-            CaseDocument document = service.generateMiniFormA(authorisationToken, callback.getCaseDetails());
+            CaseDocument document = service.generateMiniFormA(authorisationToken, caseDetails);
             caseData.put(MINI_FORM_A, document);
 
-            log.info("Defaulting AssignedToJudge fields for Case ID: {}", callback.getCaseDetails().getId());
+            log.info("Defaulting AssignedToJudge fields for Case ID: {}", caseDetails.getId());
             populateAssignToJudgeFields(caseData);
         } else {
-            CaseDocument document = service.generateConsentedInContestedMiniFormA(callback.getCaseDetails(), authorisationToken);
+            CaseDocument document = service.generateConsentedInContestedMiniFormA(caseDetails, authorisationToken);
             caseData.put(MINI_FORM_A_CONSENTED_IN_CONTESTED, document);
         }
 
