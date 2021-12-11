@@ -122,7 +122,8 @@ def versions = [
         springfoxSwagger     : '2.9.2',
         sonarPitest          : '0.5',
         tomcat               : '9.0.50',
-        wiremock             : '2.27.2'
+        wiremock             : '2.27.2',
+        apacheLogging        : '2.15.0'
 ]
 
 dependencyManagement {
@@ -187,8 +188,8 @@ dependencies {
         exclude group: 'uk.gov.hmcts.reform', module: 'service-auth-provider-client'
     }
 
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: '2.13.3'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
 
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
