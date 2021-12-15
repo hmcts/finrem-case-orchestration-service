@@ -123,7 +123,7 @@ def versions = [
         sonarPitest          : '0.5',
         tomcat               : '9.0.50',
         wiremock             : '2.27.2',
-        apacheLogging        : '2.15.0'
+        apacheLogging        : '2.16.0'
 ]
 
 dependencyManagement {
