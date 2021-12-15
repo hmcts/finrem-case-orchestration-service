@@ -16,6 +16,7 @@ Unless you have opted for postal service, you will receive a notification via em
 # If you need help
 You can contact the court if you need help.
 ************************************************************
-Courts and Tribunals Service Centre
-PO Box 12746, Harlow, CM20 9QZ
-<br/>Email: ContactFinancialRemedy@justice.gov.uk
+%s <br>
+%s <br>
+Email: %s <br>
+Phone: %s
