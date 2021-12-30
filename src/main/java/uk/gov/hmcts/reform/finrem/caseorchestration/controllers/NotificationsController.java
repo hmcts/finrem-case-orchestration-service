@@ -304,8 +304,7 @@ public class NotificationsController implements BaseController {
             notificationService.sendConsentOrderAvailableEmailToApplicantSolicitor(caseDetails);
         }
 
-        if (featureToggleService.isRespondentJourneyEnabled()
-            && notificationService.shouldEmailRespondentSolicitor(caseData)) {
+        if (featureToggleService.isRespondentJourneyEnabled() && notificationService.shouldEmailRespondentSolicitor(caseData)) {
             log.info("Sending email notification to Respondent Solicitor for 'Consent Order Available'");
             notificationService.sendConsentOrderAvailableEmailToRespondentSolicitor(caseDetails);
         }
@@ -339,7 +338,8 @@ public class NotificationsController implements BaseController {
 
         // NOTE TO SELF, TEST BOTH PAPER AND DIGITAL JOURNEYS
         if (!shouldEmailRespondentSolicitor && caseDataService.isContestedApplication(caseDetails)) {
-            if (hearingDocumentService.alreadyHadFirstHearing(callbackRequest.getCaseDetailsBefore())) {
+            CaseDetails caseDetailsBefore = callbackRequest.getCaseDetailsBefore();
+            if (null != caseDetailsBefore && hearingDocumentService.alreadyHadFirstHearing(caseDetailsBefore)) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
                 additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
             } else {
