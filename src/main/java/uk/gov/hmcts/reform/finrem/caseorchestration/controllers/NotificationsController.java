@@ -331,17 +331,19 @@ public class NotificationsController implements BaseController {
             notificationService.sendPrepareForHearingEmailApplicant(caseDetails);
         }
 
-        if (featureToggleService.isRespondentJourneyEnabled() && notificationService.shouldEmailRespondentSolicitor(caseDetails.getData())) {
+        boolean shouldEmailRespondentSolicitor = notificationService.shouldEmailRespondentSolicitor(caseDetails.getData());
+        if (shouldEmailRespondentSolicitor) {
             log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         }
 
-        if (caseDataService.isContestedPaperApplication(caseDetails)) {
+        // NOTE TO SELF, TEST BOTH PAPER AND DIGITAL JOURNEYS
+        if (!shouldEmailRespondentSolicitor && caseDataService.isContestedApplication(caseDetails)) {
             if (hearingDocumentService.alreadyHadFirstHearing(callbackRequest.getCaseDetailsBefore())) {
-                log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
+                log.info("Sending Additional Hearing Document to bulk print for Contested Case ID: {}", caseDetails.getId());
                 additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
             } else {
-                log.info("Sending Forms A, C, G to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
+                log.info("Sending Forms A, C, G to bulk print for Contested Case ID: {}", caseDetails.getId());
                 hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
             }
         }
