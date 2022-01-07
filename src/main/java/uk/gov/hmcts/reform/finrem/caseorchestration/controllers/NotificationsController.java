@@ -335,7 +335,7 @@ public class NotificationsController implements BaseController {
             log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         }
-
+        // checking to make sure bulk-print will be triggered.
         if (caseDataService.isContestedPaperApplication(caseDetails)) {
             if (hearingDocumentService.alreadyHadFirstHearing(callbackRequest.getCaseDetailsBefore())) {
                 log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
