@@ -337,8 +337,8 @@ public class NotificationsController implements BaseController {
         }
 
         // checking to make sure bulk-print will be triggered.
-       log.info("/////// log message //////");
-       log.info("caseDetails: {}", caseDataService.isContestedPaperApplication(caseDetails));
+        log.info("/////// log message //////");
+        log.info("caseDetails: {}", caseDataService.isContestedPaperApplication(caseDetails));
 
 
         if (caseDataService.isContestedPaperApplication(caseDetails)) {
