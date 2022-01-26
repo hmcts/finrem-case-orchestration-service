@@ -359,7 +359,7 @@ public class NotificationsController implements BaseController {
             }
         } else {
 
-            if  (caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())){
+            if (caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())){
 
                 log.info(" the option yes is chosen for is the respondent represented");
                 //if(caseDetails.getData().get(RESPONDENT_EMAIL) != null) {
@@ -368,7 +368,7 @@ public class NotificationsController implements BaseController {
 
             } else {
 
-                if(caseDetails.getData().get(RESPONDENT_EMAIL) == null) {
+                if (caseDetails.getData().get(RESPONDENT_EMAIL) == null) {
                     //String respEmail = caseDetails.getData().get(RESPONDENT_EMAIL).toString();
                     log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
                     additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
