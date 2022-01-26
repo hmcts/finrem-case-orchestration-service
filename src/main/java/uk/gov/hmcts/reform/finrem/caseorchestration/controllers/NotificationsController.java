@@ -30,7 +30,10 @@ import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
 
 @RestController
 @Slf4j
@@ -337,8 +340,12 @@ public class NotificationsController implements BaseController {
         }
 
         // checking to make sure bulk-print will be triggered.
+        // checking the value of optional email for respondent
+        String respEmail = caseDetails.getData().get(RESPONDENT_EMAIL).toString();
         log.info("/////// log message //////");
         log.info("caseDetails: {}", caseDataService.isContestedPaperApplication(caseDetails));
+        log.info("caseDetails: {}", caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData()));
+        log.info("respondent email: {}" , respEmail);
         log.info("/////// log message //////");
 
 
@@ -350,6 +357,26 @@ public class NotificationsController implements BaseController {
                 log.info("Sending Forms A, C, G to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
                 hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
             }
+        } else {
+
+            if  (caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())){
+
+                log.info(" the option yes is chosen for is the respondent represented");
+                //if(caseDetails.getData().get(RESPONDENT_EMAIL) != null) {
+                    //String respEmail = caseDetails.getData().get(RESPONDENT_EMAIL).toString();
+                //}
+
+            } else {
+
+                if(caseDetails.getData().get(RESPONDENT_EMAIL) == null) {
+                    //String respEmail = caseDetails.getData().get(RESPONDENT_EMAIL).toString();
+                    log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
+                    additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
+                }
+
+            }
+
+
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
