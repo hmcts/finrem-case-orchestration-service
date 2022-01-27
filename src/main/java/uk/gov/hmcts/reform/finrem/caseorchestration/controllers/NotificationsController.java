@@ -342,11 +342,11 @@ public class NotificationsController implements BaseController {
         // checking to make sure bulk-print will be triggered.
         // checking the value of optional email for respondent
         String respEmail = caseDetails.getData().get(RESPONDENT_EMAIL).toString();
-        log.info("/////// log message //////");
+        log.info("/////// log messages //////");
         log.info("caseDetails: {}", caseDataService.isContestedPaperApplication(caseDetails));
         log.info("caseDetails: {}", caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData()));
         log.info("respondent email: {}" , respEmail);
-        log.info("/////// log message //////");
+        log.info("/////// log messages //////");
 
 
         if (caseDataService.isContestedPaperApplication(caseDetails)) {
