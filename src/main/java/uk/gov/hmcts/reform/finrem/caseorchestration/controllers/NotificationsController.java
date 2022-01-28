@@ -353,7 +353,7 @@ public class NotificationsController implements BaseController {
             }
         } else {
 
-            if(caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())){
+            if (caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
                 log.info("option yes is chosen for respondent represented");
             }
 
