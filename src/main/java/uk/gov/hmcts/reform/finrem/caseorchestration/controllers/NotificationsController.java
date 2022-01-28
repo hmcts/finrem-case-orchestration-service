@@ -30,7 +30,10 @@ import java.util.Objects;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
 
 @RestController
 @Slf4j
@@ -335,11 +338,11 @@ public class NotificationsController implements BaseController {
             log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         }
-
-        // checking to make sure bulk-print will be triggered
+        String respEmail = caseDetails.getData().get(RESPONDENT_EMAIL).toString();
         log.info("/////// log messages //////");
         log.info("caseDetails: {}", caseDataService.isContestedPaperApplication(caseDetails));
         log.info("caseDetails: {}", caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData()));
+        log.info("respondent email", respEmail);
         log.info("/////// log messages //////");
 
 
@@ -355,6 +358,13 @@ public class NotificationsController implements BaseController {
 
             if (caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
                 log.info("option yes is chosen for respondent represented");
+            } else {
+
+                if (caseDetails.getData().get(RESPONDENT_EMAIL) == null) {
+                    log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
+                    //additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
+                }
+
             }
 
 
