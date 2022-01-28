@@ -355,22 +355,6 @@ public class NotificationsController implements BaseController {
                 log.info("Sending Forms A, C, G to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
                 hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
             }
-        } else {
-
-            if (caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
-
-                log.info("the option yes is chosen for is the respondent represented");
-
-            } else {
-
-                if (caseDetails.getData().get(RESPONDENT_EMAIL) == null) {
-                    log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
-                    //additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
-                }
-
-            }
-
-
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
