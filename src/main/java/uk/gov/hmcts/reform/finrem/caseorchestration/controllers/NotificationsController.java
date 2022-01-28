@@ -339,6 +339,7 @@ public class NotificationsController implements BaseController {
         // checking to make sure bulk-print will be triggered
         log.info("/////// log messages //////");
         log.info("caseDetails: {}", caseDataService.isContestedPaperApplication(caseDetails));
+        log.info("caseDetails: {}", caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData()));
         log.info("/////// log messages //////");
 
 
@@ -350,6 +351,14 @@ public class NotificationsController implements BaseController {
                 log.info("Sending Forms A, C, G to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
                 hearingDocumentService.sendFormCAndGForBulkPrint(caseDetails, authorisationToken);
             }
+        } else {
+
+            if(caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())){
+                log.info("option yes is chosen for respondent represented");
+            }
+
+
+
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
