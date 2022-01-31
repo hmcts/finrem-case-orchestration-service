@@ -340,8 +340,8 @@ public class NotificationsController implements BaseController {
         String respEmail = caseDetails.getData().get(RESPONDENT_EMAIL).toString();
         log.info("/////// log messages //////");
         log.info("caseDetails: {}", caseDataService.isContestedPaperApplication(caseDetails));
-        log.info("caseDetails: {}", caseDataService.isRespondentRepresentedByASolicitor((Map<String, Object>) caseDetails.getData().get(YES_VALUE)));
-        log.info("respondent email", respEmail);
+        log.info("caseDetails: {}", caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData()));
+        log.info("respondent email: {}", respEmail);
         log.info("/////// log messages //////");
 
 
@@ -355,7 +355,7 @@ public class NotificationsController implements BaseController {
             }
         } else {
 
-            if (!caseDataService.isRespondentRepresentedByASolicitor((Map<String, Object>) caseDetails.getData().get(YES_VALUE))) {
+            if (!caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
                 log.info("option yes is chosen for respondent represented");
 
                 if (caseDetails.getData().get(RESPONDENT_EMAIL) == null) {
