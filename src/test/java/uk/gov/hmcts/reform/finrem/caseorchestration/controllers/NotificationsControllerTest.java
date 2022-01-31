@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -37,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_EMAIL;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
@@ -235,13 +237,39 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, never()).sendPrepareForHearingEmailRespondent(any());
     }
 
+
     @Test
-    public void testForSonar() {
+    public void testToCheckIfPaperApplicationFalse() {
 
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(false);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
         notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
         verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(any(), any());
+
+    }
+
+
+    @Test
+    public void testToCheckIfPaperApplictionFalserepresentedTrue() {
+
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
+        verifyNoInteractions(additionalHearingDocumentService);
+
+    }
+
+    @Test
+    public void sonarTest2() {
+
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
+        CallbackRequest request = buildCallbackRequest();
+        request.getCaseDetails().getData().put(RESPONDENT_EMAIL, "email");
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, request);
+        verifyNoInteractions(additionalHearingDocumentService);
+
+
 
     }
 

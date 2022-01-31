@@ -341,11 +341,7 @@ public class NotificationsController implements BaseController {
             respEmail = caseDetails.getData().get(RESPONDENT_EMAIL).toString();
 
         }
-        log.info("/////// log messages //////");
-        log.info("caseDetails: {}", caseDataService.isContestedPaperApplication(caseDetails));
-        log.info("caseDetails: {}", caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData()));
         log.info("respondent email: {}", respEmail);
-        log.info("/////// log messages //////");
 
 
         if (caseDataService.isContestedPaperApplication(caseDetails)) {
