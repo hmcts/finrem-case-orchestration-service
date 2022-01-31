@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import org.junit.Assert;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
