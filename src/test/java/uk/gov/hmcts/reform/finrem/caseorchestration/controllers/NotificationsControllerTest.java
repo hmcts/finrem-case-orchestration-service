@@ -236,6 +236,16 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testForSonar(){
+
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
+        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(any(), any());
+
+    }
+
+    @Test
     public void givenHadPreviousHearing_whenNotifyHearingInvoked_thenPrintAdditionalHearingDocuments() {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(true);
         when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);

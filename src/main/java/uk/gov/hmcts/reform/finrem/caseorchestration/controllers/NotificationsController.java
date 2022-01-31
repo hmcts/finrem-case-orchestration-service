@@ -363,7 +363,7 @@ public class NotificationsController implements BaseController {
 
                 if (caseDetails.getData().get(RESPONDENT_EMAIL) == null) {
                     log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
-                    //additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
+                    additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
                 }
             }
 
