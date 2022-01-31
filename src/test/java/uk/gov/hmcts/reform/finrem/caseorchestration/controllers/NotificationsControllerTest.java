@@ -236,7 +236,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void testForSonar(){
+    public void testForSonar() {
 
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(false);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
