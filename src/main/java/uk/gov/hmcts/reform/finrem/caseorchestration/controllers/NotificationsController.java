@@ -336,7 +336,11 @@ public class NotificationsController implements BaseController {
             log.info("Sending email notification to Respondent Solicitor for 'Prepare for Hearing'");
             notificationService.sendPrepareForHearingEmailRespondent(caseDetails);
         }
-        String respEmail = caseDetails.getData().get(RESPONDENT_EMAIL).toString();
+        String respEmail = "";
+        if (caseDetails.getData().get(RESPONDENT_EMAIL) != null) {
+            respEmail = caseDetails.getData().get(RESPONDENT_EMAIL).toString();
+
+        }
         log.info("/////// log messages //////");
         log.info("caseDetails: {}", caseDataService.isContestedPaperApplication(caseDetails));
         log.info("caseDetails: {}", caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData()));
