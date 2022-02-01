@@ -355,7 +355,7 @@ public class NotificationsController implements BaseController {
         } else {
 
             if (!caseDataService.isRespondentRepresentedByASolicitor(caseDetails.getData())) {
-                log.info("option yes is chosen for respondent represented");
+                log.info("option no is chosen for is respondent represented");
 
                 if (caseDetails.getData().get(RESPONDENT_EMAIL) == null) {
                     log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());

@@ -260,7 +260,7 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void sonarTest2() {
+    public void testToCheckIfRespondentEmailIsAvailable() {
 
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(false);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
