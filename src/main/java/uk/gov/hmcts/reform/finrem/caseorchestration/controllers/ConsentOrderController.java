@@ -74,8 +74,8 @@ public class ConsentOrderController implements BaseController {
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
-        String warning = "Please note, this process should only be used to lodge a consent order in full and final " +
-            "settlement of your contested financial remedy application. For other applications please use the general application event.";
+        String warning = "Please note, this process should only be used to lodge a consent order in full and final "
+            + "settlement of your contested financial remedy application. For other applications please use the general application event.";
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseData)
