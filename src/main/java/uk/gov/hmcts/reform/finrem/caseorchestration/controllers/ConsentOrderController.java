@@ -34,6 +34,7 @@ public class ConsentOrderController implements BaseController {
 
     private final ConsentOrderService consentOrderService;
     private final IdamService idamService;
+    private final String WARNING = "Please note, this process should only be used to lodge a consent order in full and final settlement of your contested financial remedy application. For other applications please use the general application event.";
 
     @PostMapping(path = "/update-latest-consent-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "CCD Callback to update the latest Consent Order details")
@@ -70,16 +71,14 @@ public class ConsentOrderController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        log.info("Received request to create Consent Order with Case ID : {}", callbackRequest.getCaseDetails().getId());
+        log.info("Received request to create Consent Order with Case ID : {} , issuing warning", callbackRequest.getCaseDetails().getId());
         validateCaseData(callbackRequest);
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
-
-        String warning = "Please note, this process should only be used to lodge a consent order in full and final settlement of your contested financial remedy application. For other applications please use the general application event.";
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseData)
-                .warnings(List.of(warning))
+                .warnings(List.of(WARNING))
                 .build()
         );
     }
