@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -59,7 +60,7 @@ public class ConsentOrderController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(path = "/issue-warning", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/issue-warning", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Callback to deliver warning at start of consent order submission")
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
@@ -67,18 +68,15 @@ public class ConsentOrderController implements BaseController {
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> issueWarningWhenStartConsentOrder(
-        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
+        @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to create Consent Order with Case ID : {} , issuing warning", callbackRequest.getCaseDetails().getId());
-        validateCaseData(callbackRequest);
-        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
 
-        String warning = "Please note, this process should only be used to lodge a consent order in full and final "
+        final String warning = "Please note, this process should only be used to lodge a consent order in full and final "
             + "settlement of your contested financial remedy application. For other applications please use the general application event.";
+
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseData)
+                .data(callbackRequest.getCaseDetails().getData())
                 .warnings(List.of(warning))
                 .build()
         );
