@@ -30,6 +30,7 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
     private static final String UPDATE_LATEST_CONSENT_ORDER_JSON = "/case-orchestration/update-latest-consent-order";
     private static final String AMEND_CONSENT_ORDER_BY_SOL_JSON
         = "/fixtures/latestConsentedConsentOrder/amend-consent-order-by-solicitor.json";
+    private static final String ISSUE_WARNING = "/case-orchestration/issue-warning";
 
     @MockBean
     private ConsentOrderService consentOrderService;
@@ -75,6 +76,16 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.latestConsentOrder").exists())
             .andExpect(jsonPath("$.data.applicantRepresented").value("Yes"))
             .andExpect(jsonPath("$.warnings").doesNotExist());
+    }
+
+    @Test
+    public void shouldReturnWarningWhenCalled() throws Exception {
+        mvc.perform(post(ISSUE_WARNING)
+            .content(requestContent.toString())
+            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+            .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.warnings").exists());
     }
 
     @Test
