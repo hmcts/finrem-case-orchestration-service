@@ -71,7 +71,8 @@ public class ConsentOrderController implements BaseController {
         log.info("Received request to create Consent Order with Case ID : {} , issuing warning", callbackRequest.getCaseDetails().getId());
 
         final String warning = "Please note, this process should only be used to lodge a consent order in full and final "
-            + "settlement of your contested financial remedy application. For other applications please use the general application event.";
+            + "settlement of your contested financial remedy application. For other applications please use the general application event."
+            + "If you wish  to proceed please click ignore warning and go, this will allow you to lodge your consent application.";
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()
