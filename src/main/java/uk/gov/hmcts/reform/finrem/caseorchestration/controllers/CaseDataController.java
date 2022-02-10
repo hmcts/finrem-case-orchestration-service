@@ -34,7 +34,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ORGANISATION_ID;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_REF;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
 @RestController
 @RequiredArgsConstructor
@@ -109,7 +111,7 @@ public class CaseDataController implements BaseController {
         @RequestBody final CallbackRequest callbackRequest) {
         log.info("Setting default values for contested paper case journey.");
         validateCaseData(callbackRequest);
-        setOrganisationPolicy(callbackRequest.getCaseDetails());
+        setOrganisationPolicyForNewPaperCase(callbackRequest.getCaseDetails());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(callbackRequest.getCaseDetails().getData()).build());
     }
 
@@ -144,17 +146,33 @@ public class CaseDataController implements BaseController {
 
     private void setOrganisationPolicy(CaseDetails caseDetails) {
         if  (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails)) {
-            Map<String, Object> appPolicy = new HashMap<>();
-            appPolicy.put(ORGANISATION_POLICY_ROLE, APP_SOLICITOR_POLICY);
-            appPolicy.put(ORGANISATION_POLICY_REF, null);
-            Map<String, Object> org = new HashMap<>();
-            org.put(ORGANISATION_POLICY_ORGANISATION_ID, null);
-            appPolicy.put(ORGANISATION_POLICY_ORGANISATION, org);
+            Map<String, Object> appSolPolicy = buildOrganisationPolicy(APP_SOLICITOR_POLICY);
+            caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appSolPolicy);
 
-            caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appPolicy);
-
-            log.info("App policy added to case: {}, case ID {}", appPolicy, caseDetails.getId());
+            log.info("App Sol policy added to case: {}", appSolPolicy);
         }
+    }
+
+    private void setOrganisationPolicyForNewPaperCase(CaseDetails caseDetails) {
+        if  (caseDataService.isContestedApplication(caseDetails) || caseDataService.isConsentedApplication(caseDetails)) {
+            setOrganisationPolicy(caseDetails);
+
+            Map<String, Object> appRespPolicy = buildOrganisationPolicy(RESP_SOLICITOR_POLICY);
+            caseDetails.getData().put(ORGANISATION_POLICY_RESPONDENT, appRespPolicy);
+
+            log.info("App Resp policy added to case: {}", appRespPolicy);
+        }
+    }
+
+    private Map<String, Object> buildOrganisationPolicy(String caseAssignedRole) {
+        Map<String, Object> appPolicy = new HashMap<>();
+        appPolicy.put(ORGANISATION_POLICY_ROLE, caseAssignedRole);
+        appPolicy.put(ORGANISATION_POLICY_REF, null);
+        Map<String, Object> org = new HashMap<>();
+        org.put(ORGANISATION_POLICY_ORGANISATION_ID, null);
+        appPolicy.put(ORGANISATION_POLICY_ORGANISATION, org);
+
+        return appPolicy;
     }
 
     private void setApplicantSolicitorOrganisationDetails(CaseDetails caseDetails, String authToken) {
