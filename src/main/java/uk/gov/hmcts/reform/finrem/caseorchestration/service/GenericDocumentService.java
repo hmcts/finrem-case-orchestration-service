@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.google.common.io.Files;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -47,6 +48,12 @@ public class GenericDocumentService {
     public CaseDocument annexStampDocument(CaseDocument document, String authorisationToken) {
         Document stampedDocument = documentClient.annexStampDocument(toDocument(document), authorisationToken);
         return toCaseDocument(stampedDocument);
+    }
+
+    public CaseDocument convertDocumentIfNotPdfAlready(CaseDocument document, String authorisationToken) {
+        return !Files.getFileExtension(document.getDocumentFilename()).equalsIgnoreCase("pdf")
+            ? convertDocumentToPdf(document, authorisationToken)
+            : document;
     }
 
     public CaseDocument convertDocumentToPdf(CaseDocument document, String authorisationToken) {
