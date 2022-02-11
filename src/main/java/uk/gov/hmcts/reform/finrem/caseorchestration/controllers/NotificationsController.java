@@ -358,8 +358,6 @@ public class NotificationsController implements BaseController {
                 log.info("option no is chosen for is respondent represented");
 
                 if (caseDetails.getData().get(RESPONDENT_EMAIL) == null) {
-//                    log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());
-//                    additionalHearingDocumentService.sendAdditionalHearingDocuments(authorisationToken, caseDetails);
 
                     if (hearingDocumentService.alreadyHadFirstHearing(callbackRequest.getCaseDetailsBefore())) {
                         log.info("Sending Additional Hearing Document to bulk print for Contested Paper Case ID: {}", caseDetails.getId());

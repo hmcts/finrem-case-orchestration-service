@@ -244,8 +244,6 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(false);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
         notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
-        //verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(any(), any());
-        //verify(hearingDocumentService).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
     }
 
     @Test
