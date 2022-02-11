@@ -45,14 +45,13 @@ public class GeneralApplicationService {
     public void updateCaseDataSubmit(Map<String, Object> caseData, CaseDetails caseDetailsBefore, String authorisationToken) {
         caseData.put(GENERAL_APPLICATION_PRE_STATE, caseDetailsBefore.getState());
         caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE, LocalDate.now());
-        caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST, genericDocumentService.convertDocumentIfNotPdfAlready(
-            documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)), authorisationToken));
-        updateGeneralApplicationDocumentCollection(caseData, authorisationToken);
-    }
-
-    private void updateGeneralApplicationDocumentCollection(Map<String, Object> caseData, String authorisationToken) {
         CaseDocument applicationDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
             documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)), authorisationToken);
+        caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST, applicationDocument);
+        updateGeneralApplicationDocumentCollection(caseData, applicationDocument);
+    }
+
+    private void updateGeneralApplicationDocumentCollection(Map<String, Object> caseData, CaseDocument applicationDocument) {
         GeneralApplication generalApplication = GeneralApplication.builder().generalApplicationDocument(applicationDocument).build();
 
         List<GeneralApplicationData> generalApplicationList = Optional.ofNullable(caseData.get(GENERAL_APPLICATION_DOCUMENT_COLLECTION))
