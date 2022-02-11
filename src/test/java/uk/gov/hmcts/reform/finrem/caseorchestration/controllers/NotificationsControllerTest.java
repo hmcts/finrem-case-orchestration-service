@@ -244,7 +244,28 @@ public class NotificationsControllerTest extends BaseControllerTest {
         when(caseDataService.isContestedPaperApplication(any())).thenReturn(false);
         when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
         notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
-        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(any(), any());
+        //verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(any(), any());
+        //verify(hearingDocumentService).sendFormCAndGForBulkPrint(any(), eq(AUTH_TOKEN));
+    }
+
+    @Test
+    public void testToCheckIfPaperApplicationFalseAndAlreadyHadFirstHearing() {
+
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(false);
+        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(true);
+
+        notificationsController.sendPrepareForHearingEmail(AUTH_TOKEN, buildCallbackRequest());
+
+        verify(additionalHearingDocumentService).sendAdditionalHearingDocuments(eq(AUTH_TOKEN), any());
+    }
+
+    @Test
+    public void testToCheckIfPaperApplicationFalseAndAlreadyHadFirstHearingFalse() {
+
+        when(caseDataService.isContestedPaperApplication(any())).thenReturn(false);
+        when(hearingDocumentService.alreadyHadFirstHearing(any())).thenReturn(false);
+        verifyNoInteractions(additionalHearingDocumentService);
+
 
     }
 
