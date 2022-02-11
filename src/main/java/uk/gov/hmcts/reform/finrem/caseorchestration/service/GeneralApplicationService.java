@@ -45,7 +45,8 @@ public class GeneralApplicationService {
     public void updateCaseDataSubmit(Map<String, Object> caseData, CaseDetails caseDetailsBefore, String authorisationToken) {
         caseData.put(GENERAL_APPLICATION_PRE_STATE, caseDetailsBefore.getState());
         caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE, LocalDate.now());
-        caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST, documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)));
+        caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST, genericDocumentService.convertDocumentIfNotPdfAlready(
+            documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)), authorisationToken));
         updateGeneralApplicationDocumentCollection(caseData, authorisationToken);
     }
 
@@ -62,14 +63,14 @@ public class GeneralApplicationService {
             GeneralApplicationData.builder()
                 .id(UUID.randomUUID().toString())
                 .generalApplication(generalApplication)
-                .build());
+                .build()
+        );
 
         caseData.put(GENERAL_APPLICATION_DOCUMENT_COLLECTION, generalApplicationList);
     }
 
     private List<GeneralApplicationData> convertToGeneralApplicationDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<GeneralApplicationData>>() {
-        });
+        return objectMapper.convertValue(object, new TypeReference<List<GeneralApplicationData>>() {});
     }
 
     public void updateCaseDataStart(Map<String, Object> caseData, String authorisationToken) {
@@ -79,8 +80,8 @@ public class GeneralApplicationService {
             GENERAL_APPLICATION_SPECIAL_MEASURES,
             GENERAL_APPLICATION_DOCUMENT,
             GENERAL_APPLICATION_DRAFT_ORDER,
-            GENERAL_APPLICATION_DIRECTIONS_DOCUMENT)
-            .forEach(ccdFieldName -> caseData.remove(ccdFieldName));
+            GENERAL_APPLICATION_DIRECTIONS_DOCUMENT
+        ).forEach(ccdFieldName -> caseData.remove(ccdFieldName));
         caseData.put(GENERAL_APPLICATION_CREATED_BY, idamService.getIdamFullName(authorisationToken));
     }
 }

@@ -27,12 +27,9 @@ public class GenericDocumentService {
 
         Map<String, Object> caseDetailsMap = Collections.singletonMap(DOCUMENT_CASE_DETAILS_JSON_KEY, caseDetails);
         Document generatedPdf = documentClient.generatePdf(
-            DocumentGenerationRequest.builder()
-                .template(template)
-                .fileName(fileName)
-                .values(caseDetailsMap)
-                .build(),
-            authorisationToken);
+            DocumentGenerationRequest.builder().template(template).fileName(fileName).values(caseDetailsMap).build(),
+            authorisationToken
+        );
 
         return toCaseDocument(generatedPdf);
     }
@@ -52,13 +49,11 @@ public class GenericDocumentService {
 
     public CaseDocument convertDocumentIfNotPdfAlready(CaseDocument document, String authorisationToken) {
         return !Files.getFileExtension(document.getDocumentFilename()).equalsIgnoreCase("pdf")
-            ? convertDocumentToPdf(document, authorisationToken)
-            : document;
+            ? convertDocumentToPdf(document, authorisationToken) : document;
     }
 
     public CaseDocument convertDocumentToPdf(CaseDocument document, String authorisationToken) {
         return toCaseDocument(documentClient.convertDocumentToPdf(authorisationToken, toDocument(document)));
-
     }
 
     public CaseDocument stampDocument(CaseDocument document, String authorisationToken) {
