@@ -131,11 +131,9 @@ public class CaseDataController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(path = "/default-values",
-        consumes = MediaType.APPLICATION_JSON_VALUE,
+    @PostMapping(path = "/default-values", consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Default application state")
-
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> defaultValue(
         @RequestBody final CallbackRequest callbackRequest) {
 
