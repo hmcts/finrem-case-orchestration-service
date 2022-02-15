@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.IS_ADMIN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_APPLICANT;
@@ -127,6 +128,17 @@ public class CaseDataController implements BaseController {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseDataService.moveCollection(caseData, source, destination);
 
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
+    @PostMapping(path = "/default-values", consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Default application state")
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> defaultValue(
+        @RequestBody final CallbackRequest callbackRequest) {
+
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        caseData.putIfAbsent(CIVIL_PARTNERSHIP, NO_VALUE);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
