@@ -7,5 +7,5 @@ maintainers:
   - name: HMCTS Financial Remedy Team
 dependencies:
   - name: java
-    version: ~3.6.0
+    version: 3.7.0
     repository: '@hmctspublic'
