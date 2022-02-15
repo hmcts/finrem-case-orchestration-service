@@ -163,7 +163,7 @@ public class CaseDataController implements BaseController {
             Map<String, Object> appSolPolicy = buildOrganisationPolicy(APP_SOLICITOR_POLICY);
             caseDetails.getData().put(ORGANISATION_POLICY_APPLICANT, appSolPolicy);
 
-            log.info("App Sol policy added to case: {}, case ID {}", appSolPolicy, caseDetails.getId());
+            log.info("App Sol policy added to case: {}", appSolPolicy);
         }
     }
 
@@ -174,7 +174,7 @@ public class CaseDataController implements BaseController {
             Map<String, Object> appRespPolicy = buildOrganisationPolicy(RESP_SOLICITOR_POLICY);
             caseDetails.getData().put(ORGANISATION_POLICY_RESPONDENT, appRespPolicy);
 
-            log.info("App Resp policy added to case: {}, case ID {}", appRespPolicy, caseDetails.getId());
+            log.info("App Resp policy added to case: {}", appRespPolicy);
         }
     }
 
