@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -93,7 +94,8 @@ public class HearingDocumentService {
     public void sendFormCAndGForBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData());
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
-        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
+        UUID uuid = bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
+        log.info("Bulk print Letter UUid : ", uuid);
     }
 
     /**

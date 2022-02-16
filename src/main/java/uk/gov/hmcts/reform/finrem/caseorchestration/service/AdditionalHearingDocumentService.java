@@ -195,6 +195,5 @@ public class AdditionalHearingDocumentService {
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, document);
         UUID uuid = bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, document);
         log.info("Bulk print Letter UUid : ", uuid);
-        System.out.println("bulk print" + uuid);
     }
 }
