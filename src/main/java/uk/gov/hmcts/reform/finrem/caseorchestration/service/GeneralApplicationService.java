@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.DocumentHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplication;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.GeneralApplicationData;
 
@@ -39,17 +40,19 @@ public class GeneralApplicationService {
     private final DocumentHelper documentHelper;
     private final ObjectMapper objectMapper;
     private final IdamService idamService;
+    private final GenericDocumentService genericDocumentService;
 
-    public void updateCaseDataSubmit(Map<String, Object> caseData, CaseDetails caseDetailsBefore) {
+    public void updateCaseDataSubmit(Map<String, Object> caseData, CaseDetails caseDetailsBefore, String authorisationToken) {
         caseData.put(GENERAL_APPLICATION_PRE_STATE, caseDetailsBefore.getState());
         caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST_DATE, LocalDate.now());
-        caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST, documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)));
-        updateGeneralApplicationDocumentCollection(caseData);
+        CaseDocument applicationDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
+            documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT)), authorisationToken);
+        caseData.put(GENERAL_APPLICATION_DOCUMENT_LATEST, applicationDocument);
+        updateGeneralApplicationDocumentCollection(caseData, applicationDocument);
     }
 
-    private void updateGeneralApplicationDocumentCollection(Map<String, Object> caseData) {
-        GeneralApplication generalApplication = GeneralApplication.builder().generalApplicationDocument(
-            documentHelper.convertToCaseDocument(caseData.get(GENERAL_APPLICATION_DOCUMENT))).build();
+    private void updateGeneralApplicationDocumentCollection(Map<String, Object> caseData, CaseDocument applicationDocument) {
+        GeneralApplication generalApplication = GeneralApplication.builder().generalApplicationDocument(applicationDocument).build();
 
         List<GeneralApplicationData> generalApplicationList = Optional.ofNullable(caseData.get(GENERAL_APPLICATION_DOCUMENT_COLLECTION))
             .map(this::convertToGeneralApplicationDataList)
@@ -59,14 +62,14 @@ public class GeneralApplicationService {
             GeneralApplicationData.builder()
                 .id(UUID.randomUUID().toString())
                 .generalApplication(generalApplication)
-                .build());
+                .build()
+        );
 
         caseData.put(GENERAL_APPLICATION_DOCUMENT_COLLECTION, generalApplicationList);
     }
 
     private List<GeneralApplicationData> convertToGeneralApplicationDataList(Object object) {
-        return objectMapper.convertValue(object, new TypeReference<List<GeneralApplicationData>>() {
-        });
+        return objectMapper.convertValue(object, new TypeReference<List<GeneralApplicationData>>() {});
     }
 
     public void updateCaseDataStart(Map<String, Object> caseData, String authorisationToken) {
@@ -76,8 +79,8 @@ public class GeneralApplicationService {
             GENERAL_APPLICATION_SPECIAL_MEASURES,
             GENERAL_APPLICATION_DOCUMENT,
             GENERAL_APPLICATION_DRAFT_ORDER,
-            GENERAL_APPLICATION_DIRECTIONS_DOCUMENT)
-            .forEach(ccdFieldName -> caseData.remove(ccdFieldName));
+            GENERAL_APPLICATION_DIRECTIONS_DOCUMENT
+        ).forEach(ccdFieldName -> caseData.remove(ccdFieldName));
         caseData.put(GENERAL_APPLICATION_CREATED_BY, idamService.getIdamFullName(authorisationToken));
     }
 }
