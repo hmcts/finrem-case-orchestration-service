@@ -94,8 +94,7 @@ public class HearingDocumentService {
     public void sendFormCAndGForBulkPrint(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData());
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
-        UUID uuid = bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
-        log.info("Bulk print Letter UUid : ", uuid);
+        bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
     }
 
     /**
