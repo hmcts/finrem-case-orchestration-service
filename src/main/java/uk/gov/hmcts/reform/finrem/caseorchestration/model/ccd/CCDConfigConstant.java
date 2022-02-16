@@ -475,4 +475,7 @@ public class CCDConfigConstant {
     public static final String TRANSFER_COURTS_NAME = "transferLocalCourtName";
     public static final String TRANSFER_COURTS_EMAIL = "transferLocalCourtEmail";
     public static final String TRANSFER_COURTS_INSTRUCTIONS = "transferLocalCourtInstructions";
+
+    //NFD
+    public static final String CIVIL_PARTNERSHIP = "civilPartnership";
 }
