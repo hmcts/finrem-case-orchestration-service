@@ -40,10 +40,10 @@ public class DocumentValidationController implements BaseController {
     @PostMapping(path = "/field/{field}/file-upload-check", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Checks the file type and returns error.")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Callback was processed successfully.",
-            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 200, message = "Callback was processed successfully.", response = AboutToStartOrSubmitCallbackResponse.class),
         @ApiResponse(code = 400, message = "Bad Request"),
-        @ApiResponse(code = 500, message = "Internal Server Error")})
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> checkUploadedFileType(
         @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
         @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest,

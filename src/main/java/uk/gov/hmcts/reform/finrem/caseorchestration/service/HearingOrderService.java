@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Files;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -45,7 +44,7 @@ public class HearingOrderService {
         Optional<DraftDirectionOrder> judgeApprovedHearingOrder = getJudgeApprovedHearingOrder(caseDetails);
 
         if (judgeApprovedHearingOrder.isPresent()) {
-            CaseDocument latestDraftDirectionOrderDocument = convertDocumentToPdfIfRequired(
+            CaseDocument latestDraftDirectionOrderDocument = genericDocumentService.convertDocumentIfNotPdfAlready(
                 judgeApprovedHearingOrder.get().getUploadDraftDocument(),
                 authorisationToken);
             CaseDocument stampedHearingOrder = genericDocumentService.stampDocument(latestDraftDirectionOrderDocument, authorisationToken);
@@ -118,12 +117,6 @@ public class HearingOrderService {
         directionOrders.add(CollectionElement.<DirectionOrder>builder().value(newDirectionOrder).build());
 
         caseData.put(HEARING_ORDER_COLLECTION, directionOrders);
-    }
-
-    private CaseDocument convertDocumentToPdfIfRequired(CaseDocument document, String authorisationToken) {
-        return !Files.getFileExtension(document.getDocumentFilename()).equalsIgnoreCase("pdf")
-            ? genericDocumentService.convertDocumentToPdf(document, authorisationToken)
-            : document;
     }
 
     private void updateCaseDataForLatestDraftHearingOrder(Map<String, Object> caseData, CaseDocument stampedHearingOrder) {
