@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
@@ -34,6 +35,7 @@ public class ConsentOrderController implements BaseController {
 
     private final ConsentOrderService consentOrderService;
     private final IdamService idamService;
+    private final String DISABLE_WARNINGS = "disableWarnings";
 
     @PostMapping(path = "/update-latest-consent-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "CCD Callback to update the latest Consent Order details")
@@ -67,8 +69,17 @@ public class ConsentOrderController implements BaseController {
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> issueWarningWhenStartConsentOrder(
+        @RequestHeader(value = DISABLE_WARNINGS, required = false) String disableWarnings,
         @RequestBody CallbackRequest callbackRequest) {
         log.info("Received request to create Consent Order with Case ID : {} , issuing warning", callbackRequest.getCaseDetails().getId());
+
+        if (Optional.ofNullable(disableWarnings).isPresent() && disableWarnings.equals("true")) {
+            return ResponseEntity.ok(
+                AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(callbackRequest.getCaseDetails().getData())
+                    .build()
+            );
+        }
 
         final String warning = "Please note, this process should only be used to lodge a consent order in full and final "
             + "settlement of your contested financial remedy application. For other applications please use the general application event. "
