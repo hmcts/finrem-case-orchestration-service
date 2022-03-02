@@ -31,6 +31,8 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
     private static final String AMEND_CONSENT_ORDER_BY_SOL_JSON
         = "/fixtures/latestConsentedConsentOrder/amend-consent-order-by-solicitor.json";
     private static final String ISSUE_WARNING = "/case-orchestration/issue-warning";
+    private static final String DISABLE_WARNINGS = "disableWarnings";
+    private static final String TRUE_VALUE = "true";
 
     @MockBean
     private ConsentOrderService consentOrderService;
@@ -86,6 +88,17 @@ public class ConsentOrderControllerTest extends BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.warnings").exists());
+    }
+
+    @Test
+    public void shouldReturnNoWarningWhenDisableHeadingPresent() throws Exception {
+        mvc.perform(post(ISSUE_WARNING)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .header(DISABLE_WARNINGS, TRUE_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.warnings").doesNotExist());
     }
 
     @Test
