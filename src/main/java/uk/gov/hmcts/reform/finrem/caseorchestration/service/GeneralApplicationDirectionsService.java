@@ -124,7 +124,6 @@ public class GeneralApplicationDirectionsService {
     private List<BulkPrintDocument> prepareDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
         List<BulkPrintDocument> documents = new ArrayList<>();
-
         CaseDocument directionsDocument = caseData.get(GENERAL_APPLICATION_DIRECTIONS_HEARING_REQUIRED).equals(YES_VALUE)
             ? prepareHearingRequiredNoticeDocument(caseDetails, authorisationToken)
             : prepareGeneralApplicationDirectionsOrderDocument(caseDetails, authorisationToken);

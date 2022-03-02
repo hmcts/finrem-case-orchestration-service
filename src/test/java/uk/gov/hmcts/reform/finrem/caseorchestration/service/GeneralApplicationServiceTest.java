@@ -50,8 +50,9 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
     public void updateCaseDataSubmit() {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/general-application.json", objectMapper);
         CaseDetails caseDetailsBefore = caseDetailsBeforeFromResource("/fixtures/general-application.json", objectMapper);
+        String authToken = "token";
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, authToken);
 
         List<GeneralApplicationData> generalApplicationDataList =
             (List<GeneralApplicationData>) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_COLLECTION);
@@ -68,8 +69,9 @@ public class GeneralApplicationServiceTest extends BaseServiceTest {
     public void updateCaseDataSubmit_multiple() {
         CaseDetails caseDetails = caseDetailsFromResource("/fixtures/general-application-multiple.json", objectMapper);
         CaseDetails caseDetailsBefore = caseDetailsBeforeFromResource("/fixtures/general-application-multiple.json", objectMapper);
+        String authToken = "token";
 
-        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore);
+        generalApplicationService.updateCaseDataSubmit(caseDetails.getData(), caseDetailsBefore, authToken);
 
         List<GeneralApplicationData> generalApplicationDataList =
             (List<GeneralApplicationData>) caseDetails.getData().get(GENERAL_APPLICATION_DOCUMENT_COLLECTION);
