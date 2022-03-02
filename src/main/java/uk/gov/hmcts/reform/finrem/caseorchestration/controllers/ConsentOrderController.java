@@ -35,7 +35,7 @@ public class ConsentOrderController implements BaseController {
 
     private final ConsentOrderService consentOrderService;
     private final IdamService idamService;
-    private final String DISABLE_WARNINGS = "disableWarnings";
+    private static final String DISABLE_WARNINGS = "disableWarnings";
 
     @PostMapping(path = "/update-latest-consent-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "CCD Callback to update the latest Consent Order details")
