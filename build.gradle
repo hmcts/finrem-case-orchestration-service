@@ -105,6 +105,7 @@ def versions = [
         commonsIo            : '2.7',
         commonsLang3         : '3.11',
         gradlePitest         : '1.5.1',
+        jackson              : '2.13.2',
         jsonAssert           : '1.2.3',
         junit                : '4.13.1',
         lombok               : '1.18.12',
@@ -207,6 +208,9 @@ dependencies {
 
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
+
+    implementation group: 'com.fasterxml.jackson.core', name:'jackson-databind', version: versions.jackson
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jackson
 
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
