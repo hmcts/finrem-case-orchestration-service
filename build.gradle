@@ -239,6 +239,8 @@ dependencies {
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
     functionalImplementation group: 'org.pdfbox', name: 'com.springsource.org.pdfbox', version: '0.7.3'
+    functionalImplementation group: 'com.fasterxml.jackson.core', name:'jackson-databind', version: versions.jackson
+    functionalImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jackson
     functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalImplementation group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
     functionalImplementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
