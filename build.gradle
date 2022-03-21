@@ -180,6 +180,11 @@ dependencyManagement {
             entry 'logback-classic'
             entry 'logback-core'
         }
+
+        dependencySet(group: 'com.fasterxml.jackson.core', version: versions.jackson) {
+            entry 'jackson-core',
+            entry 'jackson-databind'
+        }
     }
 }
 
@@ -219,6 +224,8 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+    testImplementation group: 'com.fasterxml.jackson.core', name:'jackson-databind', version: versions.jackson
+    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jackson
 
     testSmokeImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
     testSmokeImplementation sourceSets.main.runtimeClasspath
