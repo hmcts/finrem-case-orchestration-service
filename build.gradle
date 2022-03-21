@@ -184,6 +184,7 @@ dependencyManagement {
         dependencySet(group: 'com.fasterxml.jackson.core', version: versions.jackson) {
             entry 'jackson-core'
             entry 'jackson-databind'
+            entry 'jackson-annotations'
         }
     }
 }
@@ -213,8 +214,6 @@ dependencies {
 
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: versions.apacheLogging
     implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: versions.apacheLogging
-
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jackson
 
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-devtools'
     runtimeOnly group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
