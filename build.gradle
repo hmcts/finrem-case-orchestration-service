@@ -105,6 +105,7 @@ def versions = [
         commonsIo            : '2.7',
         commonsLang3         : '3.11',
         gradlePitest         : '1.5.1',
+        jackson              : '2.13.2',
         jsonAssert           : '1.2.3',
         junit                : '4.13.1',
         lombok               : '1.18.12',
@@ -179,6 +180,12 @@ dependencyManagement {
             entry 'logback-classic'
             entry 'logback-core'
         }
+
+        dependencySet(group: 'com.fasterxml.jackson.core', version: versions.jackson) {
+            entry 'jackson-core'
+            entry 'jackson-databind'
+            entry 'jackson-annotations'
+        }
     }
 }
 
@@ -215,6 +222,8 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+    testImplementation group: 'com.fasterxml.jackson.core', name:'jackson-databind', version: versions.jackson
+    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jackson
 
     testSmokeImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured
     testSmokeImplementation sourceSets.main.runtimeClasspath
@@ -235,6 +244,8 @@ dependencies {
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
     functionalImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
     functionalImplementation group: 'org.pdfbox', name: 'com.springsource.org.pdfbox', version: '0.7.3'
+    functionalImplementation group: 'com.fasterxml.jackson.core', name:'jackson-databind', version: versions.jackson
+    functionalImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jackson
     functionalImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     functionalImplementation group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
     functionalImplementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
