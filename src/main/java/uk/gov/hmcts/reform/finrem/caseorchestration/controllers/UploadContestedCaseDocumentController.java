@@ -48,6 +48,7 @@ public class UploadContestedCaseDocumentController implements BaseController {
         log.info("Received request to upload Contested case documents for Case ID: {}", caseDetails.getId());
 
         caseData = service.filterDocumentsToRelevantParty(caseData);
+        log.info("Successfully filtered documents to relevant party for Case ID: {}", caseDetails.getId());
 
         return ResponseEntity.ok(
             AboutToStartOrSubmitCallbackResponse.builder()

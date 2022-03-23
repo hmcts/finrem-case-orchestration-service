@@ -403,5 +403,7 @@
   "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/submit-general-application-directions_POST":"ignore",
   "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/consented/set-defaults_POST": "ignore",
   "100000_A Server Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested/set-frc-details_POST": "ignore",
-  "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested/set-frc-details_POST": "ignore"
+  "100000_A Client Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/contested/set-frc-details_POST": "ignore",
+  "100000_A Server Error response code was returned by the server_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/submit-general-application_POST":"ignore",
+  "10021_X-Content-Type-Options Header Missing_http://finrem-cos-aat.service.core-compute-aat.internal/case-orchestration/default-values_POST":"ignore"
 }
