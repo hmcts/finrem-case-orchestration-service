@@ -1,21 +1,28 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.ChangeOfRepresentativesParseException;
+import uk.gov.hmcts.reform.finrem.caseorchestration.error.CourtDetailsParseException;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentatives;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_FIRST_MIDDLE_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_LAST_NAME;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_FIRST_MIDDLE_NAME;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_OF_REPRESENTATIVES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_IS_SOL_DIGITAL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_NEW_SOL_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_NEW_SOL_NAME;
@@ -33,20 +40,27 @@ public class NoticeOfChangeService {
 
     CaseDataService caseDataService;
     IdamService idamService;
+    ObjectMapper objectMapper;
 
-    public Map<String, Object> updateRepresentation(CaseDetails caseDetails) {
+    public Map<String, Object> updateRepresentation(CaseDetails caseDetails, String authorizationToken) {
         Map<String,Object> caseData = caseDetails.getData();
 
-        ChangedRepresentative changedRepresentative = caseData.get(NOC_IS_SOL_DIGITAL).equals("Yes")
-            ? generateChangedRepresentativeSolicitorIsDigital(caseDetails)
-            : generateChangedRepresentativeSolicitorIsNotDigital(caseDetails);
+        ChangedRepresentative changedRepresentative = generateChangedRepresentative(caseDetails);
+        ChangeOfRepresentation changeOfRepresentation = generateChangeOfRepresentation(caseDetails, authorizationToken);
+
+
+        if (caseData.get(NOC_IS_SOL_DIGITAL).equals("Yes")) {
+            //need to create a mirror org policy that doesn't require id, else
+            return null;
+        }
 
         if (caseDetails.getData().get(NOC_PARTY).equals(APPLICANT)) {
-            party = APPLICANT;
-
+            return null;
         } else if (caseDetails.getData().get(NOC_PARTY).equals(RESPONDENT)) {
-            party = RESPONDENT;
+            return null;
         }
+
+        return caseData;
     }
 
     private void generateChangeOfRepresentatives(CaseDetails caseDetails) {
@@ -56,7 +70,7 @@ public class NoticeOfChangeService {
 
     }
 
-    private ChangedRepresentative generateChangedRepresentativeSolicitorIsDigital(CaseDetails caseDetails) {
+    private ChangedRepresentative generateChangedRepresentative(CaseDetails caseDetails) {
 
         Map<String, Object> caseData = caseDetails.getData();
         Organisation representativeOrg = (Organisation) caseData.get(NOC_NEW_SOL_ORG);
@@ -70,7 +84,7 @@ public class NoticeOfChangeService {
             .build();
     }
 
-    private ChangeOfRepresentation generateChangeOfRepresentation(CaseDetails caseDetails) {
+    private ChangeOfRepresentation generateChangeOfRepresentation(CaseDetails caseDetails, String authorizationToken) {
         Map<String, Object> caseData = caseDetails.getData();
         boolean isApplicant = caseData.get(NOC_PARTY).equals(APPLICANT);
         String party = isApplicant ? APPLICANT : RESPONDENT;
@@ -80,21 +94,39 @@ public class NoticeOfChangeService {
             .party(party)
             .clientName(clientName)
             .date(LocalDate.now())
-            .by()
+            .by(idamService.getIdamFullName(authorizationToken))
             .via(NOTICE_OF_CHANGE)
             .build();
     }
 
-    private ChangeOfRepresentatives updateChangeOfRepresentatives() {
-
-    }
-
     private ChangedRepresentative generateChangedRepresentativeSolicitorIsNotDigital(CaseDetails caseDetails) {
-
+        return null;
     }
 
     private Map<String, Object> updateCurrentSolicitorFields(CaseDetails caseDetails) {
+        return null;
+    }
 
+    private ChangeOfRepresentatives updateChangeOfRepresentatives(CaseDetails caseDetails, ChangeOfRepresentation latestRepresentationChange) throws JsonProcessingException {
+        Map<String, Object> caseData = caseDetails.getData();
+
+        if (Optional.ofNullable(caseData.get(CHANGE_OF_REPRESENTATIVES)).isEmpty()) {
+            return ChangeOfRepresentatives.builder()
+                .changeOfRepresentation(List.of(latestRepresentationChange))
+                .build();
+        } else {
+            ChangeOfRepresentatives changeOfRepresentatives = objectMapper.readValue(getChangeOfRepresentativesString(), ChangeOfRepresentatives.class);
+            changeOfRepresentatives.addChangeOfRepresentation(latestRepresentationChange);
+            return changeOfRepresentatives;
+        }
+    }
+
+    private String getChangeOfRepresentativesString() {
+        try (InputStream inputStream = NoticeOfChangeService.class.getResourceAsStream(CHANGE_OF_REPRESENTATIVES)) {
+            return IOUtils.toString(inputStream, UTF_8);
+        } catch (IOException e) {
+            throw new ChangeOfRepresentativesParseException();
+        }
     }
 
 }
