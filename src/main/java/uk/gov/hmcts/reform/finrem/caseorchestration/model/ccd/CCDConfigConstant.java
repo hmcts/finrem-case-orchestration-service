@@ -478,4 +478,16 @@ public class CCDConfigConstant {
 
     //NFD
     public static final String CIVIL_PARTNERSHIP = "civilPartnership";
+
+    //NoC
+    public static final String NOC_PARTY = "nocParty";
+    public static final String NOC_IS_SOL_DIGITAL = "nocIsSolicitorDigital";
+    public static final String NOC_NEW_SOL_ORG = "nocNewSolicitorOrganisation";
+    public static final String NOC_NEW_SOL_NAME = "nocNewSolicitorName";
+    public static final String NOC_NEW_SOL_LASTNAME = "nocNewSolicitorLName";
+    public static final String NOC_NEW_SOL_PHONE = "nocNewSolicitorPhoneNumber";
+    public static final String NOC_NEW_SOL_EMAIL = "nocNewSolicitorEmail";
+    public static final String NOC_NEW_SOL_FIRM_NAME = "nocNewSolicitorFirm";
+    public static final String NOC_NEW_SOL_FIRM_ADDRESS = "nocNewSolicitorFirmAddress";
+    public static final String NOC_NEW_SOL_ORGANISATION = "nocNewSolicitorOrganisation";
 }
