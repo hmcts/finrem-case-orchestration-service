@@ -491,4 +491,5 @@ public class CCDConfigConstant {
     public static final String NOC_NEW_SOL_FIRM_ADDRESS = "nocNewSolicitorFirmAddress";
     public static final String NOC_NEW_SOL_ORGANISATION = "nocNewSolicitorOrganisation";
     public static final String CHANGE_OF_REPRESENTATIVES = "changeOfRepresentatives";
+    public static final String CA_UPDATE_ADD_REPRESENTATION = "FR_noticeOfChangeCourtAdmin";
 }
