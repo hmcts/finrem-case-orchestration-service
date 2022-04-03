@@ -19,6 +19,6 @@ public class ChangedRepresentative {
     @JsonProperty("email")
     private String email;
 
-    @JsonProperty("organisation")
+    @JsonProperty("Organisation")
     private Organisation organisation;
 }
