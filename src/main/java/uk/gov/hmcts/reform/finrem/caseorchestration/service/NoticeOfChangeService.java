@@ -20,8 +20,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_OF_REPRESENTATIVES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
@@ -78,7 +82,24 @@ public class NoticeOfChangeService {
 
         ChangedRepresentative changedRepresentative = generateChangedRepresentative(caseDetails);
 
-        caseData.put(isApplicant ? PREVIOUS_APP_POLICY : PREVIOUS_RESP_POLICY , changedRepresentative);
+        caseData.put(isApplicant ? PREVIOUS_APP_POLICY : PREVIOUS_RESP_POLICY, changedRepresentative);
+
+        if (caseData.get(NATURE_OF_CHANGE).equals(REMOVED_VALUE)) {
+            caseData = setIsRepresentedFieldToNo(caseDetails);
+        }
+
+        return caseData;
+    }
+
+    private Map<String, Object> setIsRepresentedFieldToNo(CaseDetails caseDetails) {
+
+        Map<String, Object> caseData = caseDetails.getData();
+        boolean isApplicant = ((String) caseData.get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+        String respRepresented = caseDataService.isConsentedApplication(caseDetails)
+            ? CONSENTED_RESPONDENT_REPRESENTED
+            : CONTESTED_RESPONDENT_REPRESENTED;
+
+        caseData.put(isApplicant ? APPLICANT_REPRESENTED : respRepresented, NO_VALUE);
 
         return caseData;
     }
@@ -135,7 +156,8 @@ public class NoticeOfChangeService {
         }
 
         if (caseData.get(NATURE_OF_CHANGE).equals(REPLACING_VALUE)) {
-            return objectMapper.convertValue(isApplicant ? caseData.get(PREVIOUS_APP_POLICY) : caseData.get(PREVIOUS_RESP_POLICY), ChangedRepresentative.class);
+            return objectMapper.convertValue(isApplicant ? caseData.get(PREVIOUS_APP_POLICY)
+                : caseData.get(PREVIOUS_RESP_POLICY), ChangedRepresentative.class);
         }
 
         return null;

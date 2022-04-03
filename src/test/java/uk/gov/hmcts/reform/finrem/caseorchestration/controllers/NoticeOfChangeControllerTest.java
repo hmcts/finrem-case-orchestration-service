@@ -45,6 +45,7 @@ public class NoticeOfChangeControllerTest extends BaseControllerTest {
     protected String updateEndpoint() {
         return "/case-orchestration/representation-change";
     }
+
     protected String savePreviousEndpoint() {
         return "/case-orchestration/save-previous-org";
     }
@@ -59,7 +60,8 @@ public class NoticeOfChangeControllerTest extends BaseControllerTest {
 
     private void doRequestSetUpContested() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
-        requestContent = objectMapper.readTree(new File(getClass().getResource("/fixtures/noticeOfChange/change-of-representatives-before.json").toURI()));
+        requestContent = objectMapper
+            .readTree(new File(getClass().getResource(PATH + "change-of-representatives-before.json").toURI()));
     }
 
     private void setUpCaseDetails(String fileName) throws Exception {

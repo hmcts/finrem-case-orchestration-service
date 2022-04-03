@@ -82,7 +82,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
 
             Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(), authTokenGenerator.generate());
-            ChangeOfRepresentation actualChange = convertToChangeOfRepresentatives(caseData.get(CHANGE_OF_REPRESENTATIVES)).getChangeOfRepresentation().get(0);
+            ChangeOfRepresentation actualChange = convertToChangeOfRepresentatives(caseData.get(CHANGE_OF_REPRESENTATIVES))
+                .getChangeOfRepresentation().get(0);
             ChangeOfRepresentation expectedChange = convertToChangeOfRepresentatives(callbackRequest.getCaseDetails()
                 .getData().get(CHANGE_OF_REPRESENTATIVES)).getChangeOfRepresentation().get(0);
 
@@ -125,8 +126,10 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + "consented-change-of-reps-before.json")) {
             CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
 
-            Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(), authTokenGenerator.generate());
-            ChangeOfRepresentation actualChange = convertToChangeOfRepresentatives(caseData.get(CHANGE_OF_REPRESENTATIVES)).getChangeOfRepresentation().get(0);
+            Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
+                authTokenGenerator.generate());
+            ChangeOfRepresentation actualChange = convertToChangeOfRepresentatives(caseData.get(CHANGE_OF_REPRESENTATIVES))
+                .getChangeOfRepresentation().get(0);
             ChangeOfRepresentation expectedChange = convertToChangeOfRepresentatives(callbackRequest.getCaseDetails()
                 .getData().get(CHANGE_OF_REPRESENTATIVES)).getChangeOfRepresentation().get(0);
 

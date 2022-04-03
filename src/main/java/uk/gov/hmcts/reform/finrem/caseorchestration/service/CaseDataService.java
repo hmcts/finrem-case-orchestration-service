@@ -211,11 +211,13 @@ public class CaseDataService {
 
     public String getApplicantSolicitorName(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        return isConsentedApplication(caseDetails) ? (String) caseData.get(CONSENTED_SOLICITOR_NAME) : (String) caseData.get(CONTESTED_SOLICITOR_NAME);
+        return isConsentedApplication(caseDetails) ? (String) caseData.get(CONSENTED_SOLICITOR_NAME)
+            : (String) caseData.get(CONTESTED_SOLICITOR_NAME);
     }
 
     public String getApplicantSolicitorEmail(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        return isConsentedApplication(caseDetails) ? (String) caseData.get(SOLICITOR_EMAIL) : (String) caseData.get(CONTESTED_SOLICITOR_EMAIL);
+        return isConsentedApplication(caseDetails) ? (String) caseData.get(SOLICITOR_EMAIL)
+            : (String) caseData.get(CONTESTED_SOLICITOR_EMAIL);
     }
 }
