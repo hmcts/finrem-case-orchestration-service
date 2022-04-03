@@ -117,6 +117,50 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void inConsented_shouldUpdateChangeOfRepresentatives_whenChangeCurrentlyUnpopulated() throws Exception {
+        setUpCaseDetails("consented-change-of-reps.json");
+
+        setUpHelper();
+
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + "consented-change-of-reps-before.json")) {
+            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+
+            Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(), authTokenGenerator.generate());
+            ChangeOfRepresentation actualChange = convertToChangeOfRepresentatives(caseData.get(CHANGE_OF_REPRESENTATIVES)).getChangeOfRepresentation().get(0);
+            ChangeOfRepresentation expectedChange = convertToChangeOfRepresentatives(callbackRequest.getCaseDetails()
+                .getData().get(CHANGE_OF_REPRESENTATIVES)).getChangeOfRepresentation().get(0);
+
+            assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
+            assertThat(actualChange.getParty()).isEqualTo(expectedChange.getParty());
+            assertThat(actualChange.getAdded()).isEqualTo(expectedChange.getAdded());
+            assertThat(actualChange.getBy()).isEqualTo(expectedChange.getBy());
+        }
+    }
+
+    @Test
+    public void inConsented_shouldUpdateChangeOfRepresentatives_whenChangeCurrentlyPopulated() throws Exception  {
+        setUpCaseDetails("consented-change-of-reps.json");
+        setUpHelper();
+
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + "consented-change-of-reps.json")) {
+            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+
+            Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(), authTokenGenerator.generate());
+            ChangeOfRepresentatives actual = convertToChangeOfRepresentatives(caseData.get(CHANGE_OF_REPRESENTATIVES));
+
+            ChangeOfRepresentation actualChange = actual.getChangeOfRepresentation().get(1);
+            ChangeOfRepresentation expectedChange = convertToChangeOfRepresentatives(callbackRequest.getCaseDetails()
+                .getData().get(CHANGE_OF_REPRESENTATIVES)).getChangeOfRepresentation().get(0);
+
+            assertThat(actual.getChangeOfRepresentation()).hasSize(2);
+            assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
+            assertThat(actualChange.getParty()).isEqualTo(expectedChange.getParty());
+            assertThat(actualChange.getAdded()).isEqualTo(expectedChange.getAdded());
+            assertThat(actualChange.getBy()).isEqualTo(expectedChange.getBy());
+        }
+    }
+
+    @Test
     public void whenSavePreviousOrganisation_thenShouldReturnCaseDataWithPreviousOrganisationField() throws Exception {
         setUpCaseDetails("change-of-representatives.json");
         setUpHelper();
@@ -135,6 +179,35 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     public void whenSavePreviousOrganisation_thenShouldReturnCaseDataWithRespondentPreviousOrganisationField() throws Exception {
         setUpHelper();
         setUpCaseDetails("change-of-representatives-respondent.json");
+        Map<String, Object> caseData = noticeOfChangeService.savePreviousOrganisation(callbackRequest.getCaseDetails());
+
+        OrganisationPolicy expectedPolicy = mapper.convertValue(caseData.get(RESPONDENT_ORGANISATION_POLICY), OrganisationPolicy.class);
+
+        ChangedRepresentative actualPolicy = mapper.convertValue(caseData.get("RespondentPreviousRepresentative"), ChangedRepresentative.class);
+
+        assertThat(actualPolicy.getOrganisation().getOrganisationID()).isEqualTo(expectedPolicy.getOrganisation().getOrganisationID());
+        assertThat(actualPolicy.getOrganisation().getOrganisationName()).isEqualTo(expectedPolicy.getOrganisation().getOrganisationName());
+    }
+
+    @Test
+    public void inConsented_whenSavePreviousOrganisation_thenShouldReturnCaseDataWithPreviousOrganisationField() throws Exception {
+        setUpCaseDetails("consented-change-of-reps.json");
+        setUpHelper();
+
+        Map<String, Object> caseData = noticeOfChangeService.savePreviousOrganisation(callbackRequest.getCaseDetails());
+
+        OrganisationPolicy expectedPolicy = mapper.convertValue(caseData.get(APPLICANT_ORGANISATION_POLICY), OrganisationPolicy.class);
+
+        ChangedRepresentative actualPolicy = mapper.convertValue(caseData.get("ApplicantPreviousRepresentative"), ChangedRepresentative.class);
+
+        assertThat(actualPolicy.getOrganisation().getOrganisationID()).isEqualTo(expectedPolicy.getOrganisation().getOrganisationID());
+        assertThat(actualPolicy.getOrganisation().getOrganisationName()).isEqualTo(expectedPolicy.getOrganisation().getOrganisationName());
+    }
+
+    @Test
+    public void inConsented_whenSavePreviousOrganisation_thenShouldReturnCaseDataWithRespondentPreviousOrganisationField() throws Exception {
+        setUpHelper();
+        setUpCaseDetails("consented-change-of-reps-respondent.json");
         Map<String, Object> caseData = noticeOfChangeService.savePreviousOrganisation(callbackRequest.getCaseDetails());
 
         OrganisationPolicy expectedPolicy = mapper.convertValue(caseData.get(RESPONDENT_ORGANISATION_POLICY), OrganisationPolicy.class);
