@@ -537,6 +537,46 @@ public class  CaseDataServiceTest extends BaseServiceTest {
         assertThat(caseDataService.isRespondentAddressConfidential(data), is(false));
     }
 
+    @Test
+    public void getApplicantSolicitorNameContested() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+            "/fixtures/noticeOfChange/change-of-representatives.json"), CallbackRequest.class)
+            .getCaseDetails();
+
+        String appSolicitorName = caseDataService.getApplicantSolicitorName(caseDetails);
+        assertThat(appSolicitorName, is("Sir Solicitor"));
+    }
+
+    @Test
+    public void getApplicantSolicitorNameConsented() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+                "/fixtures/noticeOfChange/consented-change-of-reps.json"), CallbackRequest.class)
+            .getCaseDetails();
+
+        String appSolicitorName = caseDataService.getApplicantSolicitorName(caseDetails);
+        assertThat(appSolicitorName, is("Sir Solicitor"));
+    }
+
+    @Test
+    public void getApplicantSolicitorEmailContested() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+                "/fixtures/noticeOfChange/change-of-representatives.json"), CallbackRequest.class)
+            .getCaseDetails();
+
+        String appSolicitorEmail = caseDataService.getApplicantSolicitorEmail(caseDetails);
+        assertThat(appSolicitorEmail, is("sirsolicitor1@gmail.com"));
+    }
+
+    @Test
+    public void getApplicantSolicitorEmailConsented() throws IOException {
+        CaseDetails caseDetails = mapper.readValue(getClass().getResourceAsStream(
+                "/fixtures/noticeOfChange/consented-change-of-reps.json"), CallbackRequest.class)
+            .getCaseDetails();
+
+        String appSolicitorEmail = caseDataService.getApplicantSolicitorEmail(caseDetails);
+        assertThat(appSolicitorEmail, is("sirsolicitor1@gmail.com"));
+    }
+
     private static RespondToOrderData getRespondToOrderData(String s) {
         RespondToOrderData data = new RespondToOrderData();
         RespondToOrder respondToOrder = new RespondToOrder();
