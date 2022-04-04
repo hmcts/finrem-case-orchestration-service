@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
 @Data
@@ -16,19 +18,25 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class ChangeOrganisationRequest {
-    @JsonProperty("Reason")
+    @JsonProperty("NotesReason")
     private String reason;
 
     @JsonProperty("CaseRoleId")
     private String caseRoleId;
 
     @JsonProperty("RequestTimestamp")
-    private String requestTimestamp;
+    private LocalDateTime requestTimestamp;
+
+    @JsonProperty("ApprovalRejectionTimeStamp")
+    private LocalDateTime approvalRejectionTimestamp;
 
     @JsonProperty("OrganisationToAdd")
     private Organisation organisationToAdd;
 
     @JsonProperty("OrganisationToRemove")
     private Organisation organisationToRemove;
+
+    @JsonProperty("ApprovalStatus")
+    private int approvalStatus;
 
 }
