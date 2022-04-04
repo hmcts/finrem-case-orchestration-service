@@ -183,6 +183,16 @@ public class NoticeOfChangeService {
         return null;
     }
 
+    private Organisation getRemovedOrganisation(Map<String, Object> caseData, ChangedRepresentative changedRepresentative) {
+        ChangedRepresentative removed = getRemovedRepresentative(caseData, changedRepresentative);
+
+        if (Optional.ofNullable(removed).isPresent()) {
+            return removed.getOrganisation();
+        }
+
+        return null;
+    }
+
     private ChangeOrganisationRequest generateChangeOrganisationRequest(CaseDetails caseDetails,
                                                                         ChangedRepresentative changedRepresentative) {
         Map<String, Object> caseData = caseDetails.getData();
@@ -196,9 +206,7 @@ public class NoticeOfChangeService {
             .approvalRejectionTimestamp(LocalDateTime.now())
             .approvalStatus(APPROVED_STATUS)
             .organisationToAdd(!isRemoved ? changedRepresentative.getOrganisation() : null)
-            .organisationToRemove(Optional.ofNullable(getRemovedRepresentative(caseData, changedRepresentative)).isPresent()
-                ? Objects.requireNonNull(getRemovedRepresentative(caseData, changedRepresentative)).getOrganisation()
-                : null)
+            .organisationToRemove(getRemovedOrganisation(caseData, changedRepresentative))
             .build();
     }
 
