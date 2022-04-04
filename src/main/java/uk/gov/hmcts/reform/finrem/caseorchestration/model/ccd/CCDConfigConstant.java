@@ -461,6 +461,15 @@ public class CCDConfigConstant {
     public static final String HEARING_ADDITIONAL_INFO = "additionalInformationAboutHearing";
     public static final String DIRECTION_DETAILS_COLLECTION_CT = "directionDetailsCollection";
 
+    //scheduled interim hearings
+    public static final String ADDITIONAL_INTERIM_HEARING_DOCUMENT_COLLECTION = "additionalHearingDocuments";
+    public static final String INTERIM_HEARING_TYPE = "interimHearingType";
+    public static final String INTERIM_TIME_ESTIMATE = "interimTimeEstimate";
+    public static final String INTERIM_HEARING_DATE = "interimHearingDate";
+    public static final String INTERIM_HEARING_TIME = "interimHearingTime";
+    public static final String INTERIM_HEARING_ADDITIONAL_INFO = "interimAdditionalInformationAboutHearing";
+    public static final String INTERIM_DIRECTION_DETAILS_COLLECTION_CT = "directionDetailsCollection";
+
     //draft hearing order
     public static final String LATEST_DRAFT_HEARING_ORDER  = "latestDraftHearingOrder";
     public static final String DRAFT_DIRECTION_ORDER_COLLECTION  = "draftDirectionOrderCollection";

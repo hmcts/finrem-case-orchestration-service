@@ -13,6 +13,8 @@ import java.util.stream.Stream;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FAST_TRACK_DECISION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DATE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_TIME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ISSUE_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFunctions.isFastTrackApplication;
 
@@ -59,4 +61,36 @@ public class ValidateHearingService {
                                                              final LocalDate date) {
         return !(date.isBefore(min) || date.isAfter(max));
     }
+
+    public List<String> validateInterimHearingErrors(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        String issueDate = Objects.toString(caseData.get(ISSUE_DATE), "");
+        String hearingDate = Objects.toString(caseData.get(INTERIM_HEARING_DATE), "");
+        String fastTrackDecision = Objects.toString(caseData.get(FAST_TRACK_DECISION), "");
+
+        return Stream.of(issueDate, hearingDate, fastTrackDecision).anyMatch(StringUtils::isBlank)
+            ? ImmutableList.of(REQUIRED_FIELD_EMPTY_ERROR) : ImmutableList.of();
+    }
+
+    public List<String> validateInterimHearingWarnings(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        String issueDate = Objects.toString(caseData.get(ISSUE_DATE), "");
+        String hearingDate = Objects.toString(caseData.get(INTERIM_HEARING_TIME), "");
+
+        LocalDate issueLocalDate = LocalDate.parse(issueDate);
+        LocalDate hearingLocalDate = LocalDate.parse(hearingDate);
+
+        boolean fastTrackApplication = isFastTrackApplication.apply(caseData);
+        if (fastTrackApplication) {
+            if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(6), issueLocalDate.plusWeeks(10),
+                hearingLocalDate)) {
+                return ImmutableList.of(DATE_BETWEEN_6_AND_10_WEEKS);
+            }
+        } else if (!isDateInBetweenIncludingEndPoints(issueLocalDate.plusWeeks(12), issueLocalDate.plusWeeks(16),
+            hearingLocalDate)) {
+            return ImmutableList.of(DATE_BETWEEN_12_AND_16_WEEKS);
+        }
+        return ImmutableList.of();
+    }
+
 }

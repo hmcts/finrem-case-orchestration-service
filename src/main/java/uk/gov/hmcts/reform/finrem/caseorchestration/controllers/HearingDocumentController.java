@@ -107,4 +107,40 @@ public class HearingDocumentController implements BaseController {
             .errors(errors)
             .build());
     }
+
+    @PostMapping(path = "/documents/interim-hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Handles Form C and G generation. Serves as a callback from CCD")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> generateInterimHearingDocument(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callbackRequest) throws IOException {
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        log.info("Received request for validating a hearing for Case ID: {}", caseDetails.getId());
+
+        validateCaseData(callbackRequest);
+
+        List<String> errors = validateHearingService.validateInterimHearingErrors(caseDetails);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errors)
+                .build());
+        }
+
+        if (hearingDocumentService.alreadyHadFirstHearing(caseDetails)) {
+            if (caseDataService.isContestedPaperApplication(caseDetails)) {
+                additionalHearingDocumentService.createAdditionalHearingDocuments(authorisationToken, caseDetails);
+            }
+        } else {
+            caseDetails.getData().putAll(hearingDocumentService.generateHearingDocuments(authorisationToken, caseDetails));
+        }
+
+        List<String> warnings = validateHearingService.validateInterimHearingWarnings(caseDetails);
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).warnings(warnings).build());
+    }
+
 }
