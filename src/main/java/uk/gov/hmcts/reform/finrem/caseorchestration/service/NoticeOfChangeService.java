@@ -89,8 +89,8 @@ public class NoticeOfChangeService {
             caseData.put(isApplicant ? PREVIOUS_APP_POLICY : PREVIOUS_RESP_POLICY, changedRepresentative);
 
             if (caseData.get(NATURE_OF_CHANGE).equals(REMOVED_VALUE)) {
-                log.info("Nature of representation change is removing, setting " +
-                    "isRepresented to No for party for caseID {}", caseDetails.getId());
+                log.info("Nature of representation change is removing, setting "
+                    + "isRepresented to No for party for caseID {}", caseDetails.getId());
                 caseData = setIsRepresentedFieldToNo(caseDetails);
             }
         }
