@@ -54,13 +54,11 @@ public class NoticeOfChangeService {
     private CaseDataService caseDataService;
     private IdamService idamService;
     private ObjectMapper objectMapper;
-    private AssignCaseAccessService assignCaseAccessService;
 
     @Autowired
     public NoticeOfChangeService(CaseDataService caseDataService, IdamService idamService, AssignCaseAccessService assignCaseAccessService) {
         this.caseDataService = caseDataService;
         this.idamService = idamService;
-        this.assignCaseAccessService = assignCaseAccessService;
         this.objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
