@@ -79,13 +79,17 @@ public class NoticeOfChangeService {
 
         Map<String, Object> caseData = caseDetails.getData();
         boolean isApplicant = ((String) caseData.get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
+        boolean hasSolicitor = isApplicant ? caseDataService.isApplicantRepresentedByASolicitor(caseData)
+            : caseDataService.isRespondentRepresentedByASolicitor(caseData);
 
-        ChangedRepresentative changedRepresentative = generateChangedRepresentative(caseDetails);
+        if (hasSolicitor) {
+            ChangedRepresentative changedRepresentative = generateChangedRepresentative(caseDetails);
 
-        caseData.put(isApplicant ? PREVIOUS_APP_POLICY : PREVIOUS_RESP_POLICY, changedRepresentative);
+            caseData.put(isApplicant ? PREVIOUS_APP_POLICY : PREVIOUS_RESP_POLICY, changedRepresentative);
 
-        if (caseData.get(NATURE_OF_CHANGE).equals(REMOVED_VALUE)) {
-            caseData = setIsRepresentedFieldToNo(caseDetails);
+            if (caseData.get(NATURE_OF_CHANGE).equals(REMOVED_VALUE)) {
+                caseData = setIsRepresentedFieldToNo(caseDetails);
+            }
         }
 
         return caseData;
