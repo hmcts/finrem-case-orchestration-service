@@ -83,11 +83,14 @@ public class NoticeOfChangeService {
             : caseDataService.isRespondentRepresentedByASolicitor(caseData);
 
         if (hasSolicitor) {
+            log.info("Party concerned has solicitor, moving to previous organisation field for caseID {}", caseDetails.getId());
             ChangedRepresentative changedRepresentative = generateChangedRepresentative(caseDetails);
 
             caseData.put(isApplicant ? PREVIOUS_APP_POLICY : PREVIOUS_RESP_POLICY, changedRepresentative);
 
             if (caseData.get(NATURE_OF_CHANGE).equals(REMOVED_VALUE)) {
+                log.info("Nature of representation change is removing, setting " +
+                    "isRepresented to No for party for caseID {}", caseDetails.getId());
                 caseData = setIsRepresentedFieldToNo(caseDetails);
             }
         }
@@ -113,6 +116,7 @@ public class NoticeOfChangeService {
         Map<String, Object> caseData = caseDetails.getData();
         boolean isApplicant = ((String) caseData.get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
 
+        log.info("Generating changed representative for caseID{}", caseDetails.getId());
         OrganisationPolicy representativeOrgPolicy = getOrganisationPolicy(caseData, isApplicant);
 
         Organisation representativeOrg = representativeOrgPolicy.getOrganisation();
@@ -141,6 +145,7 @@ public class NoticeOfChangeService {
         String clientName = isApplicant ? caseDataService.buildFullApplicantName(caseDetails) : caseDataService.buildFullRespondentName(caseDetails);
         boolean isRemoved = caseData.get(NATURE_OF_CHANGE).equals(REMOVED_VALUE);
 
+        log.info("Generating change of representation for caseID {}", caseDetails.getId());
         return ChangeOfRepresentation.builder()
                 .party(party)
                 .clientName(clientName)
@@ -169,6 +174,8 @@ public class NoticeOfChangeService {
 
     private ChangeOfRepresentatives updateChangeOfRepresentatives(CaseDetails caseDetails, ChangeOfRepresentation latestRepresentationChange) {
         Map<String, Object> caseData = caseDetails.getData();
+
+        log.info("Updating Change of Representatives field for caseID {}", caseDetails.getId());
 
         if (Optional.ofNullable(caseData.get(CHANGE_OF_REPRESENTATIVES)).isEmpty()) {
             return ChangeOfRepresentatives.builder()

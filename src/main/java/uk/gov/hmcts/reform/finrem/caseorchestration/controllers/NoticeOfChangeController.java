@@ -66,6 +66,7 @@ public class NoticeOfChangeController implements BaseController {
         @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
         @RequestBody CallbackRequest ccdRequest) {
 
+        log.info("Received callback request to save previous org policy on case {}, ", ccdRequest.getCaseDetails().getId());
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         validateCaseData(ccdRequest);
         Map<String, Object> caseData = noticeOfChangeService.savePreviousOrganisation(caseDetails);
