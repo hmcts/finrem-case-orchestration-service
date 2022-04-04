@@ -69,7 +69,9 @@ public class NoticeOfChangeService {
             changedRepresentative);
 
         ChangeOfRepresentatives changeOfRepresentatives = updateChangeOfRepresentatives(caseDetails, changeOfRepresentation);
-
+        log.info("added changeOfRepresentatives to case with caseID {} for party {} by {}", caseDetails.getId(),
+            changeOfRepresentatives.getChangeOfRepresentation().get(0).getParty(),
+            changeOfRepresentatives.getChangeOfRepresentation().get(0).getBy());
         caseData.put(CHANGE_OF_REPRESENTATIVES, changeOfRepresentatives);
 
         return caseData;
