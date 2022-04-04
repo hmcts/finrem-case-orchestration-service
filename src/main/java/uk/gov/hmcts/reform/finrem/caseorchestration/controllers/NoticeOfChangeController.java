@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService;
 
 import java.util.Map;
@@ -29,6 +30,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class NoticeOfChangeController implements BaseController {
 
     private final NoticeOfChangeService noticeOfChangeService;
+    private final AssignCaseAccessService assignCaseAccessService;
     private static final String INCLUDES_REPRESENTATION_CHANGE = "updateIncludesRepresentativeChange";
 
     @PostMapping(path = "/representation-change", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -51,7 +53,7 @@ public class NoticeOfChangeController implements BaseController {
             caseData = noticeOfChangeService.updateRepresentation(caseDetails, authToken);
             //do some stuff
             caseDetails.setData(caseData);
-            return ResponseEntity.ok(noticeOfChangeService.assignCaseAccess(caseDetails, authToken));
+            return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());

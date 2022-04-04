@@ -87,11 +87,6 @@ public class NoticeOfChangeService {
         return caseData;
     }
 
-    public AboutToStartOrSubmitCallbackResponse assignCaseAccess(CaseDetails caseDetails, String authToken) {
-        log.info("Updating case access via caseAccessService for caseID {}", caseDetails.getId());
-        return assignCaseAccessService.applyDecision(authToken, caseDetails);
-    }
-
     public Map<String, Object> savePreviousOrganisation(CaseDetails caseDetails) {
 
         Map<String, Object> caseData = caseDetails.getData();

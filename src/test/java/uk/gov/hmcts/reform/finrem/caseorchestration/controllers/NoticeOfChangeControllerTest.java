@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService;
 
 import java.io.File;
@@ -42,6 +43,7 @@ public class NoticeOfChangeControllerTest extends BaseControllerTest {
     protected CaseDetails caseDetails;
 
     @MockBean protected NoticeOfChangeService noticeOfChangeService;
+    @MockBean protected AssignCaseAccessService assignCaseAccessService;
 
     protected String updateEndpoint() {
         return "/case-orchestration/representation-change";
@@ -60,7 +62,7 @@ public class NoticeOfChangeControllerTest extends BaseControllerTest {
     }
 
     protected OngoingStubbing<AboutToStartOrSubmitCallbackResponse> whenServiceAssignsCaseAccess() {
-        return when(noticeOfChangeService.assignCaseAccess(isA(CaseDetails.class), isA(String.class)));
+        return when(assignCaseAccessService.applyDecision(isA(String.class), isA(CaseDetails.class)));
     }
 
     private void doRequestSetUpContested() throws IOException, URISyntaxException {
