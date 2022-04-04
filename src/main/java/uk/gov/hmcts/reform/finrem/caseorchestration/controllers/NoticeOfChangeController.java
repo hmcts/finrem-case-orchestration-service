@@ -50,6 +50,8 @@ public class NoticeOfChangeController implements BaseController {
             log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
             caseData = noticeOfChangeService.updateRepresentation(caseDetails, authToken);
             //do some stuff
+            caseDetails.setData(caseData);
+            return ResponseEntity.ok(noticeOfChangeService.assignCaseAccess(caseDetails, authToken));
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());

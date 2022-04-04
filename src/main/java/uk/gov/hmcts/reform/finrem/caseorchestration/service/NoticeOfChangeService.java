@@ -8,14 +8,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentatives;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,13 +26,16 @@ import java.util.Optional;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_OF_REPRESENTATIVES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
 @Service
 @RequiredArgsConstructor
@@ -44,15 +50,18 @@ public class NoticeOfChangeService {
     private static final String REPLACING_VALUE = "replacing";
     private static final String PREVIOUS_APP_POLICY = "ApplicantPreviousRepresentative";
     private static final String PREVIOUS_RESP_POLICY = "RespondentPreviousRepresentative";
+    private static final int APPROVED_STATUS = 1;
 
     private CaseDataService caseDataService;
     private IdamService idamService;
     private ObjectMapper objectMapper;
+    private AssignCaseAccessService assignCaseAccessService;
 
     @Autowired
-    public NoticeOfChangeService(CaseDataService caseDataService, IdamService idamService) {
+    public NoticeOfChangeService(CaseDataService caseDataService, IdamService idamService, AssignCaseAccessService assignCaseAccessService) {
         this.caseDataService = caseDataService;
         this.idamService = idamService;
+        this.assignCaseAccessService = assignCaseAccessService;
         this.objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -73,8 +82,14 @@ public class NoticeOfChangeService {
             changeOfRepresentatives.getChangeOfRepresentation().get(0).getParty(),
             changeOfRepresentatives.getChangeOfRepresentation().get(0).getBy());
         caseData.put(CHANGE_OF_REPRESENTATIVES, changeOfRepresentatives);
+        caseData.put(CHANGE_ORGANISATION_REQUEST, generateChangeOrganisationRequest(caseDetails, changedRepresentative));
 
         return caseData;
+    }
+
+    public AboutToStartOrSubmitCallbackResponse assignCaseAccess(CaseDetails caseDetails, String authToken) {
+        log.info("Updating case access via caseAccessService for caseID {}", caseDetails.getId());
+        return assignCaseAccessService.applyDecision(authToken, caseDetails);
     }
 
     public Map<String, Object> savePreviousOrganisation(CaseDetails caseDetails) {
@@ -144,7 +159,8 @@ public class NoticeOfChangeService {
         Map<String, Object> caseData = caseDetails.getData();
         boolean isApplicant = caseData.get(NOC_PARTY).equals(APPLICANT);
         String party = isApplicant ? APPLICANT : RESPONDENT;
-        String clientName = isApplicant ? caseDataService.buildFullApplicantName(caseDetails) : caseDataService.buildFullRespondentName(caseDetails);
+        String clientName = isApplicant ? caseDataService.buildFullApplicantName(caseDetails)
+            : caseDataService.buildFullRespondentName(caseDetails);
         boolean isRemoved = caseData.get(NATURE_OF_CHANGE).equals(REMOVED_VALUE);
 
         log.info("Generating change of representation for caseID {}", caseDetails.getId());
@@ -174,7 +190,27 @@ public class NoticeOfChangeService {
         return null;
     }
 
-    private ChangeOfRepresentatives updateChangeOfRepresentatives(CaseDetails caseDetails, ChangeOfRepresentation latestRepresentationChange) {
+    private ChangeOrganisationRequest generateChangeOrganisationRequest(CaseDetails caseDetails,
+                                                                        ChangedRepresentative changedRepresentative) {
+        Map<String, Object> caseData = caseDetails.getData();
+        boolean isApplicant = caseData.get(NOC_PARTY).equals(APPLICANT);
+        boolean isRemoved = caseData.get(NATURE_OF_CHANGE).equals(REMOVED_VALUE);
+
+        log.info("Generating Change Organisation Request for case with CaseID {}", caseDetails.getId());
+        return ChangeOrganisationRequest.builder()
+            .caseRoleId(isApplicant ? APP_SOLICITOR_POLICY : RESP_SOLICITOR_POLICY)
+            .requestTimestamp(LocalDateTime.now())
+            .approvalRejectionTimestamp(LocalDateTime.now())
+            .approvalStatus(APPROVED_STATUS)
+            .organisationToAdd(!isRemoved ? changedRepresentative.getOrganisation() : null)
+            .organisationToRemove(Optional.ofNullable(getRemovedRepresentative(caseData, changedRepresentative)).isPresent()
+                ? getRemovedRepresentative(caseData, changedRepresentative).getOrganisation()
+                : null)
+            .build();
+    }
+
+    private ChangeOfRepresentatives updateChangeOfRepresentatives(CaseDetails caseDetails,
+                                                                  ChangeOfRepresentation latestRepresentationChange) {
         Map<String, Object> caseData = caseDetails.getData();
 
         log.info("Updating Change of Representatives field for caseID {}", caseDetails.getId());
