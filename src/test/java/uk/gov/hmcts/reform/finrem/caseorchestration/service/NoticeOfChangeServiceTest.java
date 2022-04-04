@@ -228,6 +228,8 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         when(mockCaseDataService.getApplicantSolicitorEmail(any())).thenReturn("sirsolicitor1@gmail.com");
         when(mockCaseDataService.buildFullApplicantName(any())).thenReturn("John Smith");
         when(mockCaseDataService.buildFullRespondentName(any())).thenReturn("Jane Smith");
+        when(mockCaseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(mockCaseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
     }
 
     private ChangeOfRepresentatives convertToChangeOfRepresentatives(Object object) {
