@@ -9,6 +9,7 @@ import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService;
@@ -58,6 +59,10 @@ public class NoticeOfChangeControllerTest extends BaseControllerTest {
         return when(noticeOfChangeService.savePreviousOrganisation(isA(CaseDetails.class)));
     }
 
+    protected OngoingStubbing<AboutToStartOrSubmitCallbackResponse> whenServiceAssignsCaseAccess() {
+        return when(noticeOfChangeService.assignCaseAccess(isA(CaseDetails.class), isA(String.class)));
+    }
+
     private void doRequestSetUpContested() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
         requestContent = objectMapper
@@ -79,6 +84,9 @@ public class NoticeOfChangeControllerTest extends BaseControllerTest {
         doRequestSetUpContested();
         setUpCaseDetails("change-of-representatives.json");
         whenServiceUpdatesRepresentation().thenReturn(caseDetails.getData());
+        whenServiceAssignsCaseAccess().thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDetails.getData())
+            .build());
 
         mvc.perform(post(updateEndpoint())
             .content(requestContent.toString())
