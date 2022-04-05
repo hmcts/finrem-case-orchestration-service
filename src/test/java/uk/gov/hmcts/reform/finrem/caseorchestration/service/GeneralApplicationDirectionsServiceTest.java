@@ -218,6 +218,16 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     public void givenInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
         caseDetails = caseDetailsFromResource("/fixtures/contested-interim-hearing.json", objectMapper);
         generalApplicationDirectionsService.submitInterimHearing(caseDetails, AUTH_TOKEN);
+
+        verify(genericDocumentService, times(1)).generateDocument(
+            eq(AUTH_TOKEN),
+            documentGenerationRequestCaseDetailsCaptor.capture(),
+            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate()),
+            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName()));
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN),
+            printDocumentsRequestDocumentListCaptor.capture());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
+
         assertCaseDataHasInterimDocument();
     }
 

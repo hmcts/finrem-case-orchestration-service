@@ -353,14 +353,6 @@ public class NotificationService {
         return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
     }
 
-    public boolean isApplicantRepresentedByASolicitor(Map<String, Object> caseData) {
-        return caseDataService.isApplicantRepresentedByASolicitor(caseData);
-    }
-
-    public boolean isRespondentRepresentedByASolicitor(Map<String, Object> caseData) {
-        return caseDataService.isRespondentRepresentedByASolicitor(caseData);
-    }
-
     private URI buildUri(String endPoint) {
         return fromHttpUrl(notificationServiceConfiguration.getUrl()
             + notificationServiceConfiguration.getApi()

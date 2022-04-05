@@ -133,9 +133,7 @@ public class GeneralApplicationDirectionsService {
     public void submitInterimHearing(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> documents = prepareInterimHearingDocumentsToPrint(caseDetails, authorisationToken);
         Map<String, Object> caseData = caseDetails.getData();
-        if (isPaperApplication(caseData)) {
-            printInterimDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
-        }
+        printInterimDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
     }
 
     private void printInterimDocumentPackAndSendToApplicantAndRespondent(CaseDetails caseDetails, String authorisationToken,
