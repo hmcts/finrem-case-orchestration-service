@@ -56,7 +56,7 @@ public class NoticeOfChangeService {
     private ObjectMapper objectMapper;
 
     @Autowired
-    public NoticeOfChangeService(CaseDataService caseDataService, IdamService idamService, AssignCaseAccessService assignCaseAccessService) {
+    public NoticeOfChangeService(CaseDataService caseDataService, IdamService idamService) {
         this.caseDataService = caseDataService;
         this.idamService = idamService;
         this.objectMapper = new ObjectMapper()
@@ -162,7 +162,7 @@ public class NoticeOfChangeService {
                 .date(LocalDate.now())
                 .by(idamService.getIdamFullName(authorizationToken))
                 .via(NOTICE_OF_CHANGE)
-                .added(!isRemoved ? changedRepresentative : null)
+                .added(isRemoved ? null : changedRepresentative)
                 .removed(getRemovedRepresentative(caseData, changedRepresentative))
                 .build();
     }

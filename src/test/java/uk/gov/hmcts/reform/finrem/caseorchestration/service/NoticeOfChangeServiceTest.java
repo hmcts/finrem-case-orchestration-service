@@ -164,6 +164,54 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
     }
 
     @Test
+    public void shouldUpdateChangeOfRepresentatives_whenNatureIsRemoving() throws Exception {
+        setUpCaseDetails("change-of-reps-removing.json");
+
+        setUpHelper();
+
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + "change-of-reps-removing-before.json")) {
+            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+
+            Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(), authTokenGenerator.generate());
+            ChangeOfRepresentatives actual = convertToChangeOfRepresentatives(caseData.get(CHANGE_OF_REPRESENTATIVES));
+
+            ChangeOfRepresentation actualChange = actual.getChangeOfRepresentation().get(0);
+            ChangeOfRepresentation expectedChange = convertToChangeOfRepresentatives(callbackRequest.getCaseDetails()
+                .getData().get(CHANGE_OF_REPRESENTATIVES)).getChangeOfRepresentation().get(0);
+
+            assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
+            assertThat(actualChange.getParty()).isEqualTo(expectedChange.getParty());
+            assertThat(actualChange.getRemoved()).isEqualTo(expectedChange.getRemoved());
+            assertThat(actualChange.getBy()).isEqualTo(expectedChange.getBy());
+        }
+    }
+
+    @Test
+    public void shouldUpdateChangeOfRepresentatives_whenNatureIsReplacing() throws Exception {
+        setUpCaseDetails("change-of-reps-replacing.json");
+
+        setUpHelper();
+        when(mockCaseDataService.getApplicantSolicitorName(any())).thenReturn("TestAppSolName");
+        when(mockCaseDataService.getApplicantSolicitorEmail(any())).thenReturn("testappsol123@gmail.com");
+
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + "change-of-reps-replacing-before.json")) {
+            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+
+            Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(), authTokenGenerator.generate());
+            ChangeOfRepresentation actualChange = convertToChangeOfRepresentatives(caseData.get(CHANGE_OF_REPRESENTATIVES))
+                .getChangeOfRepresentation().get(0);
+            ChangeOfRepresentation expected = convertToChangeOfRepresentatives(callbackRequest.getCaseDetails()
+                .getData().get(CHANGE_OF_REPRESENTATIVES)).getChangeOfRepresentation().get(0);
+
+            assertThat(actualChange.getClientName()).isEqualTo(expected.getClientName());
+            assertThat(actualChange.getParty()).isEqualTo(expected.getParty());
+            assertThat(actualChange.getAdded()).isEqualTo(expected.getAdded()); //added = old sol
+            assertThat(actualChange.getRemoved()).isEqualTo(expected.getRemoved());
+            assertThat(actualChange.getBy()).isEqualTo(expected.getBy());
+        }
+    }
+
+    @Test
     public void whenSavePreviousOrganisation_thenShouldReturnCaseDataWithPreviousOrganisationField() throws Exception {
         setUpCaseDetails("change-of-representatives.json");
         setUpHelper();
