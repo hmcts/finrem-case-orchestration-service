@@ -42,7 +42,9 @@ public class AssignCaseAccessService {
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(String authToken, CaseDetails caseDetails) {
         log.info("Updating case access via assignCaseAccessService for caseID {}", caseDetails.getId());
-        return caseAssignmentApi.applyDecision(idamService.getIdamUserId(authToken), authTokenGenerator.generate(),
+        log.info("Sending authToken to ManageCaseAssignment Service: {}", authToken);
+        log.info("Sending payload to ManageCaseAssignment Service: {}", caseDetails);
+        return caseAssignmentApi.applyDecision(authToken, authTokenGenerator.generate(),
             DecisionRequest.decisionRequest(caseDetails));
     }
 }
