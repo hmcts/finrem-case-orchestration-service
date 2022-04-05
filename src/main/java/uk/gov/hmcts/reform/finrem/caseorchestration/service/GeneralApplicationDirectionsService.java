@@ -132,7 +132,6 @@ public class GeneralApplicationDirectionsService {
 
     public void submitInterimHearing(CaseDetails caseDetails, String authorisationToken) {
         List<BulkPrintDocument> documents = prepareInterimHearingDocumentsToPrint(caseDetails, authorisationToken);
-        Map<String, Object> caseData = caseDetails.getData();
         printInterimDocumentPackAndSendToApplicantAndRespondent(caseDetails, authorisationToken, documents);
     }
 
@@ -273,14 +272,8 @@ public class GeneralApplicationDirectionsService {
     }
 
     private boolean isApplicantSolicitorAgreeToReceiveEmails(CaseDetails caseDetails) {
-        boolean isContestedApplication = isContestedApplication(caseDetails);
         Map<String, Object> caseData = caseDetails.getData();
-        return (isContestedApplication && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED))))
-            || (!isContestedApplication && YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED))));
-    }
-
-    private boolean isContestedApplication(CaseDetails caseDetails) {
-        return CASE_TYPE_ID_CONTESTED.equalsIgnoreCase(nullToEmpty(caseDetails.getCaseTypeId()));
+        return YES_VALUE.equalsIgnoreCase(nullToEmpty(caseData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED)));
     }
 
     private boolean isRespondentSolicitorAgreeToReceiveEmails(Map<String, Object> caseData) {

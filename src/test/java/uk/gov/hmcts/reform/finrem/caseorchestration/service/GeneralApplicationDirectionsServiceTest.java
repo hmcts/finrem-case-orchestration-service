@@ -215,7 +215,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
+    public void givenPaperApplicationInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
         caseDetails = caseDetailsFromResource("/fixtures/contested-interim-hearing.json", objectMapper);
         generalApplicationDirectionsService.submitInterimHearing(caseDetails, AUTH_TOKEN);
 
@@ -227,6 +227,61 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
+
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        assertThat(data, allOf(
+            hasEntry("courtDetails", ImmutableMap.of(
+                "courtName", "Kingston-Upon-Thames County Court And Family Court",
+                "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
+                "phoneNumber", "0208 972 8700",
+                "email", "enquiries.kingston.countycourt@justice.gov.uk")),
+            Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
+            Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
+            Matchers.<String, Object>hasEntry("applicantRepresented", "No"),
+            Matchers.<String, Object>hasEntry("respondentRepresented", "No"),
+            Matchers.<String, Object>hasEntry("cfcCourtList", "FR_s_CFCList_4"),
+            Matchers.<String, Object>hasEntry("interimHearingDate", "2020-06-01"),
+            Matchers.<String, Object>hasEntry("interimHearingTime", "2:00 pm"),
+            Matchers.<String, Object>hasEntry("interimHearingTimeEstimate", "30 minutes"),
+            Matchers.<String, Object>hasEntry("interimAdditionalInformationAboutHearing", "refreshments will be provided"),
+            hasKey("letterDate")));
+
+        assertCaseDataHasInterimDocument();
+    }
+
+    @Test
+    public void givenApplicationIsNotPaperInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
+        caseDetails = caseDetailsFromResource("/fixtures/contested-interim-hearing-nopaper.json", objectMapper);
+        generalApplicationDirectionsService.submitInterimHearing(caseDetails, AUTH_TOKEN);
+
+        verify(genericDocumentService, times(1)).generateDocument(
+            eq(AUTH_TOKEN),
+            documentGenerationRequestCaseDetailsCaptor.capture(),
+            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate()),
+            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName()));
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN),
+            printDocumentsRequestDocumentListCaptor.capture());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
+
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        assertThat(data, allOf(
+            hasEntry("courtDetails", ImmutableMap.of(
+                "courtName", "Kingston-Upon-Thames County Court And Family Court",
+                "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
+                "phoneNumber", "0208 972 8700",
+                "email", "enquiries.kingston.countycourt@justice.gov.uk")),
+            Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
+            Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
+            Matchers.<String, Object>hasEntry("applicantRepresented", "No"),
+            Matchers.<String, Object>hasEntry("respondentRepresented", "No"),
+            Matchers.<String, Object>hasEntry("cfcCourtList", "FR_s_CFCList_4"),
+            Matchers.<String, Object>hasEntry("interimHearingDate", "2020-06-01"),
+            Matchers.<String, Object>hasEntry("interimHearingTime", "2:00 pm"),
+            Matchers.<String, Object>hasEntry("interimHearingTimeEstimate", "30 minutes"),
+            Matchers.<String, Object>hasEntry("interimAdditionalInformationAboutHearing", "refreshments will be provided"),
+            Matchers.<String, Object>hasEntry("applicantSolicitorConsentForEmails", "No"),
+            Matchers.<String, Object>hasEntry("RespSolNotificationsEmailConsent", "No"),
+            hasKey("letterDate")));
 
         assertCaseDataHasInterimDocument();
     }
