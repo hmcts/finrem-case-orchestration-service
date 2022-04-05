@@ -74,10 +74,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_THAMESVALLEY_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
 
 public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
     private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
+    private static final String INTERIM_HEARING_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
 
     @Autowired
     private GeneralApplicationDirectionsService generalApplicationDirectionsService;
@@ -212,6 +214,20 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         assertDocumentPrintRequestContainsExpectedDocuments();
     }
 
+    @Test
+    public void givenInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
+        caseDetails = caseDetailsFromResource("/fixtures/contested-interim-hearing.json", objectMapper);
+        generalApplicationDirectionsService.submitInterimHearing(caseDetails, AUTH_TOKEN);
+        assertCaseDataHasInterimDocument();
+    }
+
+    private void assertCaseDataHasInterimDocument() {
+        assertThat(caseDetails.getData(), hasKey(INTERIM_HEARING_DOCUMENT));
+        assertThat(((CaseDocument) caseDetails.getData().get(INTERIM_HEARING_DOCUMENT)).getDocumentBinaryUrl(),
+            is(INTERIM_HEARING_DOCUMENT_BIN_URL));
+    }
+
+
     private void assertCaseDataHasGeneralApplicationDirectionsDocument() {
         assertThat(caseDetails.getData(), hasKey(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
         assertThat(((CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT)).getDocumentBinaryUrl(),
@@ -225,6 +241,17 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL,
             "http://dm-store/hijbb-general-application-latest-document/binary",
             "http://dm-store/hijbb-general-application-draft-order/binary")
+            .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).build())
+            .toArray()));
+    }
+
+    private void assertDocumentPrintRequestContainsExpectedInterimDocuments() {
+        List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
+        System.out.println(documentsToPrint);
+        assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
+                INTERIM_HEARING_DOCUMENT_BIN_URL,
+                "http://dm-store/hijbb-general-application-latest-document/binary",
+                "http://dm-store/hijbb-general-application-draft-order/binary")
             .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).build())
             .toArray()));
     }

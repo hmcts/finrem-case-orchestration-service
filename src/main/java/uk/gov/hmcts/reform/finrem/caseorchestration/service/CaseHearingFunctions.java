@@ -55,6 +55,14 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_LONDON_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_MIDLANDS_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_NORTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_NORTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_REGION;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_SOUTHEAST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_SOUTHWEST_FRC_LIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_WALES_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.KENTFRC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LANCASHIRE;
@@ -141,6 +149,13 @@ public final class CaseHearingFunctions {
             GENERAL_APPLICATION_DIRECTIONS_MIDLANDS_FRC, GENERAL_APPLICATION_DIRECTIONS_LONDON_FRC, GENERAL_APPLICATION_DIRECTIONS_NORTHWEST_FRC,
             GENERAL_APPLICATION_DIRECTIONS_NORTHEAST_FRC, GENERAL_APPLICATION_DIRECTIONS_SOUTHWEST_FRC, GENERAL_APPLICATION_DIRECTIONS_SOUTHEAST_FRC,
             GENERAL_APPLICATION_DIRECTIONS_WALES_FRC);
+    }
+
+    static String getSelectedCourtIH(Map<String, Object> mapOfCaseData) {
+        return getSelectedCourt(mapOfCaseData, INTERIM_REGION,
+            INTERIM_MIDLANDS_FRC_LIST, INTERIM_LONDON_FRC_LIST, INTERIM_NORTHWEST_FRC_LIST,
+            INTERIM_NORTHEAST_FRC_LIST, INTERIM_SOUTHWEST_FRC_LIST, INTERIM_SOUTHEAST_FRC_LIST,
+            INTERIM_WALES_FRC_LIST);
     }
 
     static String getSelectedCourtComplexType(Map<String, Object> mapOfCaseData) {
@@ -270,6 +285,22 @@ public final class CaseHearingFunctions {
         }
     }
 
+    public static Map<String, Object> buildInterimFrcCourtDetails(Map<String, Object> data) {
+        try {
+            Map<String, Object> courtDetailsMap = new ObjectMapper().readValue(getCourtDetailsString(), HashMap.class);
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(data.get(getSelectedInterimCourt(data)));
+
+            return new ObjectMapper().convertValue(FrcCourtDetails.builder()
+                .courtName((String) courtDetails.get(COURT_DETAILS_NAME_KEY))
+                .courtAddress((String) courtDetails.get(COURT_DETAILS_ADDRESS_KEY))
+                .phoneNumber((String) courtDetails.get(COURT_DETAILS_PHONE_KEY))
+                .email((String) courtDetails.get(COURT_DETAILS_EMAIL_KEY))
+                .build(), Map.class);
+        } catch (IOException | NullPointerException e) {
+            return null;
+        }
+    }
+
     public static Map<String, Object> buildConsentedFrcCourtDetails() {
         return new ObjectMapper().convertValue(FrcCourtDetails.builder()
                 .courtName(OrchestrationConstants.CTSC_COURT_NAME)
@@ -289,5 +320,10 @@ public final class CaseHearingFunctions {
 
     static String getFrcCourtDetailsAsOneLineAddressString(Map<String, Object> courtDetailsMap) {
         return StringUtils.joinWith(", ", courtDetailsMap.get(COURT_DETAILS_NAME_KEY), courtDetailsMap.get(COURT_DETAILS_ADDRESS_KEY));
+    }
+
+    static String getSelectedInterimCourt(Map<String, Object> mapOfCaseData) {
+        return getSelectedCourt(mapOfCaseData, INTERIM_REGION, INTERIM_MIDLANDS_FRC_LIST, INTERIM_LONDON_FRC_LIST, INTERIM_NORTHWEST_FRC_LIST,
+            INTERIM_NORTHEAST_FRC_LIST, INTERIM_SOUTHWEST_FRC_LIST, INTERIM_SOUTHEAST_FRC_LIST, INTERIM_WALES_FRC_LIST);
     }
 }

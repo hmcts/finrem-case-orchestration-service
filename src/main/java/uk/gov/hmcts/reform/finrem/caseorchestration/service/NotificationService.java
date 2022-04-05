@@ -301,6 +301,19 @@ public class NotificationService {
         sendConsentOrderNotApprovedSentEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(caseDetails));
     }
 
+    public void sendInterimNotificationEmailToApplicantSolicitor(CaseDetails caseDetails) {
+        sendInterimNotificationEmail(notificationRequestMapper.createNotificationRequestForAppSolicitor(caseDetails));
+    }
+
+    public void sendInterimNotificationEmailToRespondentSolicitor(CaseDetails caseDetails) {
+        sendInterimNotificationEmail(notificationRequestMapper.createNotificationRequestForRespSolicitor(caseDetails));
+    }
+
+    private void sendInterimNotificationEmail(NotificationRequest notificationRequest) {
+        URI uri = buildUri(notificationServiceConfiguration.getPrepareForInterimHearing());
+        sendNotificationEmail(notificationRequest, uri);
+    }
+
     private void sendConsentOrderNotApprovedSentEmail(NotificationRequest notificationRequest) {
         URI uri = buildUri(notificationServiceConfiguration.getConsentOrderNotApprovedSent());
         sendNotificationEmail(notificationRequest, uri);
@@ -322,7 +335,7 @@ public class NotificationService {
         try {
             restTemplate.exchange(uri, HttpMethod.POST, request, String.class);
         } catch (Exception ex) {
-            log.error(String.format("Failed to send email for case ID: %s for solicitor email: %s due to exception: %s",
+            log.error(String.format("Failed to send email for case ID: %s for email: %s due to exception: %s",
                 notificationRequest.getCaseReferenceNumber(),
                 notificationRequest.getNotificationEmail(),
                 ex.getMessage()));
@@ -338,6 +351,14 @@ public class NotificationService {
 
     public boolean shouldEmailApplicantSolicitor(CaseDetails caseDetails) {
         return caseDataService.isApplicantSolicitorAgreeToReceiveEmails(caseDetails);
+    }
+
+    public boolean isApplicantRepresentedByASolicitor(Map<String, Object> caseData) {
+        return caseDataService.isApplicantRepresentedByASolicitor(caseData);
+    }
+
+    public boolean isRespondentRepresentedByASolicitor(Map<String, Object> caseData) {
+        return caseDataService.isRespondentRepresentedByASolicitor(caseData);
     }
 
     private URI buildUri(String endPoint) {

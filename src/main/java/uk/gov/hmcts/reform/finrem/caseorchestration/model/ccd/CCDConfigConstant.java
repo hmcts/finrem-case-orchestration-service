@@ -42,7 +42,6 @@ public class CCDConfigConstant {
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";
     public static final String APPLICANT_REPRESENTED_PAPER = "applicantRepresentedPaper";
     public static final String CONSENTED_SOLICITOR_DX_NUMBER = "solicitorDXnumber";
-    public static final String CONTESTED_SOLICITOR_DX_NUMBER = "applicantSolicitorDXnumber";
     public static final String APPLICANT_SHARE_DOCUMENTS = "applicantShareDocs";
 
     //Respondent Solicitor Related
@@ -60,6 +59,7 @@ public class CCDConfigConstant {
 
     //Court related
     public static final String REGION = "regionList";
+    public static final String INTERIM_REGION = "interimRegionList";
     public static final String REGION_CT = "region";
 
     //FRC List Names
@@ -478,4 +478,17 @@ public class CCDConfigConstant {
 
     //NFD
     public static final String CIVIL_PARTNERSHIP = "civilPartnership";
+
+    //Interim FRC List Names
+    public static final String INTERIM_HEARING_PREFIX = "interimHearing_";
+    public static final String INTERIM_LONDON_FRC_LIST = "interimLondonFRCList";
+    public static final String INTERIM_MIDLANDS_FRC_LIST = "interimMidlandsFRCList";
+    public static final String INTERIM_NORTHEAST_FRC_LIST = "interimNorthEastFRCList";
+    public static final String INTERIM_NORTHWEST_FRC_LIST = "interimNorthWestFRCList";
+    public static final String INTERIM_SOUTHEAST_FRC_LIST = "interimSouthEastFRCList";
+    public static final String INTERIM_SOUTHWEST_FRC_LIST = "interimSouthWestFRCList";
+    public static final String INTERIM_WALES_FRC_LIST = "interimWalesFRCList";
+
+    //Interim Documents
+    public static final String INTERIM_HEARING_DOCUMENT = "interimHearingDirectionsDocument";
 }
