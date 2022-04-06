@@ -55,6 +55,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HEARING_DATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.HSYORKSHIRE_COURTLIST;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_COURT_PREFIX;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_LONDON_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_MIDLANDS_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_NORTHEAST_FRC_LIST;
@@ -152,7 +153,7 @@ public final class CaseHearingFunctions {
     }
 
     static String getSelectedCourtIH(Map<String, Object> mapOfCaseData) {
-        return getSelectedCourt(mapOfCaseData, INTERIM_REGION,
+        return INTERIM_HEARING_COURT_PREFIX+getSelectedCourt(mapOfCaseData, INTERIM_REGION,
             INTERIM_MIDLANDS_FRC_LIST, INTERIM_LONDON_FRC_LIST, INTERIM_NORTHWEST_FRC_LIST,
             INTERIM_NORTHEAST_FRC_LIST, INTERIM_SOUTHWEST_FRC_LIST, INTERIM_SOUTHEAST_FRC_LIST,
             INTERIM_WALES_FRC_LIST);

@@ -163,7 +163,7 @@ public class GeneralApplicationDirectionsService {
         caseData.put("courtDetails", buildInterimFrcCourtDetails(caseData));
         caseData.put("applicantName", documentHelper.getApplicantFullName(caseDetailsCopy));
         caseData.put("respondentName", documentHelper.getRespondentFullNameContested(caseDetailsCopy));
-        addIntrimHearingVenueDetails(caseDetailsCopy);
+        addInterimHearingVenueDetails(caseDetailsCopy);
         caseData.put("letterDate", String.valueOf(LocalDate.now()));
 
         return genericDocumentService.generateDocument(authorisationToken, caseDetailsCopy,
@@ -171,7 +171,7 @@ public class GeneralApplicationDirectionsService {
             documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName());
     }
 
-    private void addIntrimHearingVenueDetails(CaseDetails caseDetails) {
+    private void addInterimHearingVenueDetails(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
         try {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
