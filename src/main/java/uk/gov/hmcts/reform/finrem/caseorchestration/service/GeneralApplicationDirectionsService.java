@@ -178,7 +178,7 @@ public class GeneralApplicationDirectionsService {
             log.info("Interim hearing courtDetailsMap :{}", courtDetailsMap);
             String selectedCourtIH = getSelectedCourtIH(caseData);
             log.info("Interim hearing selectedCourtIH :{}", selectedCourtIH);
-            String courtDetailsObj = (String) courtDetailsMap.get(caseData.get(selectedCourtIH));
+            String courtDetailsObj = (String) caseData.get(selectedCourtIH);
             log.info("Interim hearing courtDetailsObj :{}", courtDetailsObj);
             Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(courtDetailsObj);
             caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
