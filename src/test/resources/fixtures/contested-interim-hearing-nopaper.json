@@ -128,15 +128,13 @@
           }
         }
       ],
-      "interimRegionList": "london",
-      "interimLondonFRCList": "cfc",
-      "cfcCourtList": "FR_s_CFCList_4",
+      "interim_regionList": "london",
+      "interim_londonFRCList": "cfc",
+      "interim_cfcCourtList": "FR_s_CFCList_4",
       "generalApplicationDirectionsHearingRequired": "Yes",
       "interimHearingDate": "2020-06-01",
       "interimHearingTime": "2:00 pm",
       "interimHearingTimeEstimate": "30 minutes",
-      "interimRegionList": "london",
-      "interimLondonFRCList": "cfc",
       "generalApplicationDirections_cfcCourtList": "FR_s_CFCList_2",
       "interimAdditionalInformationAboutHearing": "refreshments will be provided",
       "generalApplicationDirectionsRecitals": "phantom of the opera",

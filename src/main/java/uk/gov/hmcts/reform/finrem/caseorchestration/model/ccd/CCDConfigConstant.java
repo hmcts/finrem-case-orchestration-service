@@ -59,7 +59,7 @@ public class CCDConfigConstant {
 
     //Court related
     public static final String REGION = "regionList";
-    public static final String INTERIM_REGION = "interimRegionList";
+    public static final String INTERIM_REGION = "interim_regionList";
     public static final String REGION_CT = "region";
 
     //FRC List Names
@@ -343,7 +343,6 @@ public class CCDConfigConstant {
     public static final String GENERAL_APPLICATION_DIRECTIONS_JUDGE_NAME = "generalApplicationDirectionsJudgeName";
     public static final String GENERAL_APPLICATION_DIRECTIONS_JUDGE_TYPE = "generalApplicationDirectionsJudgeType";
     public static final String GENERAL_APPLICATION_DIRECTIONS_PREFIX = "generalApplicationDirections_";
-    public static final String INTERIM_HEARING_COURT_PREFIX = "interim";
     public static final String GENERAL_APPLICATION_DIRECTIONS_RECITALS = "generalApplicationDirectionsRecitals";
     public static final String GENERAL_APPLICATION_DIRECTIONS_TEXT_FROM_JUDGE = "generalApplicationDirectionsTextFromJudge";
 
@@ -481,14 +480,14 @@ public class CCDConfigConstant {
     public static final String CIVIL_PARTNERSHIP = "civilPartnership";
 
     //Interim FRC List Names
-    public static final String INTERIM_HEARING_PREFIX = "interimHearing_";
-    public static final String INTERIM_LONDON_FRC_LIST = "interimLondonFRCList";
-    public static final String INTERIM_MIDLANDS_FRC_LIST = "interimMidlandsFRCList";
-    public static final String INTERIM_NORTHEAST_FRC_LIST = "interimNorthEastFRCList";
-    public static final String INTERIM_NORTHWEST_FRC_LIST = "interimNorthWestFRCList";
-    public static final String INTERIM_SOUTHEAST_FRC_LIST = "interimSouthEastFRCList";
-    public static final String INTERIM_SOUTHWEST_FRC_LIST = "interimSouthWestFRCList";
-    public static final String INTERIM_WALES_FRC_LIST = "interimWalesFRCList";
+    public static final String INTERIM_HEARING_PREFIX = "interim_";
+    public static final String INTERIM_LONDON_FRC_LIST = "interim_londonFRCList";
+    public static final String INTERIM_MIDLANDS_FRC_LIST = "interim_midlandsFRCList";
+    public static final String INTERIM_NORTHEAST_FRC_LIST = "interim_northEastFRCList";
+    public static final String INTERIM_NORTHWEST_FRC_LIST = "interim_northWestFRCList";
+    public static final String INTERIM_SOUTHEAST_FRC_LIST = "interim_southEastFRCList";
+    public static final String INTERIM_SOUTHWEST_FRC_LIST = "interim_sSouthWestFRCList";
+    public static final String INTERIM_WALES_FRC_LIST = "interim_walesFRCList";
 
     //Interim Documents
     public static final String INTERIM_HEARING_DOCUMENT = "interimHearingDirectionsDocument";
