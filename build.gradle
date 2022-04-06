@@ -222,7 +222,7 @@ dependencies {
     testImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: versions.wiremock
     testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
-    testImplementation group: 'com.fasterxml.jackson.core', name:'jackson-databind', version: versions.jackson
+    implementation group: 'com.fasterxml.jackson.core', name:'jackson-databind', version: '2.13.2.2'
     testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: versions.jackson
 
     testSmokeImplementation group: 'io.rest-assured', name: 'rest-assured', version: versions.restAssured

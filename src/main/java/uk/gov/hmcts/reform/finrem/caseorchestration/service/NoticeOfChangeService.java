@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresenta
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentatives;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 
@@ -198,14 +200,31 @@ public class NoticeOfChangeService {
         boolean isApplicant = caseData.get(NOC_PARTY).equals(APPLICANT);
         boolean isRemoved = caseData.get(NATURE_OF_CHANGE).equals(REMOVED_VALUE);
 
+        DynamicList role = generateCaseRoleIdDynamicListElementAsList(isApplicant ? APP_SOLICITOR_POLICY
+            : RESP_SOLICITOR_POLICY);
+
         log.info("Generating Change Organisation Request for case with CaseID {}", caseDetails.getId());
         return ChangeOrganisationRequest.builder()
-            .caseRoleId(isApplicant ? APP_SOLICITOR_POLICY : RESP_SOLICITOR_POLICY)
+            .caseRoleId(role)
             .requestTimestamp(LocalDateTime.now())
             .approvalRejectionTimestamp(LocalDateTime.now())
             .approvalStatus(APPROVED_STATUS)
             .organisationToAdd(!isRemoved ? changedRepresentative.getOrganisation() : null)
             .organisationToRemove(getRemovedOrganisation(caseData, changedRepresentative))
+            .build();
+    }
+
+    // Manage case assignment's ugly API only accepts CaseRoleId as the selected element of a dynamic list
+    // and not just as a simple string, so we have to do this ugly cast to get the API to process our COR
+    private DynamicList generateCaseRoleIdDynamicListElementAsList(String role) {
+        final DynamicListElement roleItem = DynamicListElement.builder()
+            .code(role)
+            .label(role)
+            .build();
+
+        return DynamicList.builder()
+            .value(roleItem)
+            .listItems(List.of(roleItem))
             .build();
     }
 
