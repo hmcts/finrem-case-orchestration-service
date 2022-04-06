@@ -53,7 +53,9 @@ public class NoticeOfChangeController implements BaseController {
             caseData = noticeOfChangeService.updateRepresentation(caseDetails, authToken);
             //do some stuff
             caseDetails.setData(caseData);
-            return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));
+            AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(authToken, caseDetails);
+            log.info("Response from Manage case service for caseID {}: {}", caseDetails.getId(), response);
+            return ResponseEntity.ok(response);
         }
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
