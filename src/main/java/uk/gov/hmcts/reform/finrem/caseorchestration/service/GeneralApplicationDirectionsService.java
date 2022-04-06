@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -79,6 +80,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseHearingFu
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GeneralApplicationDirectionsService {
 
     private final BulkPrintService bulkPrintService;
@@ -173,7 +175,12 @@ public class GeneralApplicationDirectionsService {
         Map<String, Object> caseData = caseDetails.getData();
         try {
             Map<String, Object> courtDetailsMap = objectMapper.readValue(getCourtDetailsString(), HashMap.class);
-            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(caseData.get(getSelectedCourtIH(caseData)));
+            log.info("Interim hearing courtDetailsMap :{}", courtDetailsMap);
+            String selectedCourtIH = getSelectedCourtIH(caseData);
+            log.info("Interim hearing selectedCourtIH :{}", selectedCourtIH);
+            String courtDetailsObj = (String) courtDetailsMap.get(caseData.get(selectedCourtIH));
+            log.info("Interim hearing courtDetailsObj :{}", courtDetailsObj);
+            Map<String, Object> courtDetails = (Map<String, Object>) courtDetailsMap.get(courtDetailsObj);
             caseData.put("hearingVenue", getFrcCourtDetailsAsOneLineAddressString(courtDetails));
         } catch (IOException exception) {
             throw new IllegalStateException(exception);
