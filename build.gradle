@@ -334,7 +334,10 @@ def sonarExclusions = ['**/uk/gov/hmcts/reform/finrem/caseorchestration/config/*
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/model/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/error/**',
                        '**/uk/gov/hmcts/reform/finrem/caseorchestration/ccd/datamigration/model/**',
-                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication']
+                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/CaseOrchestrationApplication',
+                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/utils/aac/**',
+                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/client/**',
+                       '**/uk/gov/hmcts/reform/finrem/caseorchestration/config/AacApproverOAuth2Configuration']
 
 sonarqube {
     properties {
