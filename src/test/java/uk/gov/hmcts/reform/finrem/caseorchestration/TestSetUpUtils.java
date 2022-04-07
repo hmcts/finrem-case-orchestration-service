@@ -73,7 +73,7 @@ public class TestSetUpUtils {
     public static FeignException feignError() {
         Response response = Response.builder().status(INTERNAL_SERVER_ERROR)
             .headers(ImmutableMap.of())
-            .request(Request.create(Request.HttpMethod.GET, "", ImmutableMap.of(), Request.Body.empty()))
+            .request(Request.create(Request.HttpMethod.GET, "", ImmutableMap.of(), Request.Body.empty(), null))
             .build();
         return FeignException.errorStatus("test", response);
     }

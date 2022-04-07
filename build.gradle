@@ -212,7 +212,7 @@ dependencies {
     implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-spring', version: versions.reformLogging
     implementation group: 'com.github.hmcts', name: 'properties-volume-spring-boot-starter', version: '0.0.4'
     implementation group: 'com.github.hmcts', name:'service-auth-provider-java-client', version: versions.serviceTokenGenerator
-    implementation 'com.github.hmcts:idam-java-client:2.0.1'
+    implementation 'com.github.hmcts:idam-java-client:v1.5.5'
 
     implementation group: 'com.github.hmcts', name: 'bsp-common-lib', version: versions.bspCommonLib
 

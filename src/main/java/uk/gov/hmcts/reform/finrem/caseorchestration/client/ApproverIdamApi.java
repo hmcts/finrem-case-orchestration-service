@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +15,7 @@ import uk.gov.hmcts.reform.idam.client.models.ExchangeCodeRequest;
 import uk.gov.hmcts.reform.idam.client.models.TokenExchangeResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
-@FeignClient(name = "approver-idam-api", url = "${idam.url}", configuration = CoreFeignConfiguration.class)
+@FeignClient(name = "approver-idam-api", url = "${idam.api.url}", configuration = CoreFeignConfiguration.class)
 public interface ApproverIdamApi {
     @GetMapping("/details")
     UserDetails retrieveUserDetails(
