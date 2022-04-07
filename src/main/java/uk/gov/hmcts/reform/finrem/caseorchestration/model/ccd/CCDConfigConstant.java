@@ -491,4 +491,6 @@ public class CCDConfigConstant {
 
     //Interim Documents
     public static final String INTERIM_HEARING_DOCUMENT = "interimHearingDirectionsDocument";
+    public static final String INTERIM_HEARING_UPLOADED_DOCUMENT = "interimUploadAdditionalDocument";
+
 }

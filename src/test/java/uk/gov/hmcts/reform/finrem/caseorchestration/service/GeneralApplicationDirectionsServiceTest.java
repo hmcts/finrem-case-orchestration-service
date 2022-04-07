@@ -35,6 +35,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION;
@@ -217,6 +220,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     @Test
     public void givenPaperApplicationInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
         caseDetails = caseDetailsFromResource("/fixtures/contested-interim-hearing.json", objectMapper);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument(INTE_DOC_URL, INTE_FILE_NAME,
+            INTE_BINARY_URL));
         generalApplicationDirectionsService.submitInterimHearing(caseDetails, AUTH_TOKEN);
 
         verify(genericDocumentService, times(1)).generateDocument(
@@ -227,6 +232,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
+        verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN));
 
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
         assertThat(data, allOf(
@@ -252,6 +258,8 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
     @Test
     public void givenApplicationIsNotPaperInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
         caseDetails = caseDetailsFromResource("/fixtures/contested-interim-hearing-nopaper.json", objectMapper);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument(INTE_DOC_URL, INTE_FILE_NAME,
+            INTE_BINARY_URL));
         generalApplicationDirectionsService.submitInterimHearing(caseDetails, AUTH_TOKEN);
 
         verify(genericDocumentService, times(1)).generateDocument(
@@ -262,6 +270,7 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN),
             printDocumentsRequestDocumentListCaptor.capture());
         verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
+        verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN));
 
         Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
         assertThat(data, allOf(

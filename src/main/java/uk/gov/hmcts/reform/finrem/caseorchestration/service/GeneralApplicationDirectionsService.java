@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static java.util.Objects.isNull;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
@@ -67,6 +68,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DRAFT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_PRE_STATE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_UPLOADED_DOCUMENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.STATE;
@@ -149,9 +151,18 @@ public class GeneralApplicationDirectionsService {
     private List<BulkPrintDocument> prepareInterimHearingDocumentsToPrint(CaseDetails caseDetails, String authorisationToken) {
         Map<String, Object> caseData = caseDetails.getData();
         List<BulkPrintDocument> documents = new ArrayList<>();
-        CaseDocument directionsDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails, authorisationToken);
-        documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(directionsDocument));
-        caseData.put(INTERIM_HEARING_DOCUMENT, directionsDocument);
+        CaseDocument interimDocument = prepareInterimHearingRequiredNoticeDocument(caseDetails, authorisationToken);
+        documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(interimDocument));
+
+        if (!isNull(caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT))) {
+            log.warn("Additional uploaded interim document found for printing for case");
+            CaseDocument caseDocument = documentHelper.convertToCaseDocument(caseData.get(INTERIM_HEARING_UPLOADED_DOCUMENT));
+            CaseDocument additionalUploadedDocuments = genericDocumentService.convertDocumentIfNotPdfAlready(caseDocument, authorisationToken);
+            documents.add(documentHelper.getCaseDocumentAsBulkPrintDocument(additionalUploadedDocuments));
+            caseData.put(INTERIM_HEARING_UPLOADED_DOCUMENT, additionalUploadedDocuments);
+        }
+
+        caseData.put(INTERIM_HEARING_DOCUMENT, interimDocument);
         return documents;
     }
 

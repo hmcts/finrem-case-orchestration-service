@@ -153,6 +153,11 @@
         "document_url": "http://dm-store/lhjbyuivu87y989hijbb",
         "document_filename": "app_docs.pdf",
         "document_binary_url": "http://dm-store/lhjbyuivu87y989hijbb/binary"
+      },
+      "interimUploadAdditionalDocument": {
+        "document_url": "http://dm-store/documents/e9ca7c4a-1f75-4b46-b0dc-744abc2dc0d3",
+        "document_filename": "dummy1.pdf",
+        "document_binary_url": "http://dm-store/documents/e9ca7c4a-1f75-4b46-b0dc-744abc2dc0d3/binary"
       }
     }
   }
