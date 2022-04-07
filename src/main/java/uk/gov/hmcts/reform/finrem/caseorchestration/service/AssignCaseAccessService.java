@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.DecisionRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.utils.aac.SwitchUserContextService;
 
 @Service
 @Slf4j
@@ -23,6 +24,7 @@ public class AssignCaseAccessService {
     private final RestService restService;
     private final CaseAssignmentApi caseAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final SwitchUserContextService switchUserContextService;
 
     private final FeatureToggleService featureToggleService;
 
@@ -44,6 +46,7 @@ public class AssignCaseAccessService {
         log.info("Updating case access via assignCaseAccessService for caseID {}", caseDetails.getId());
         log.info("Sending authToken to ManageCaseAssignment Service: {}", authToken);
         log.info("Sending payload to ManageCaseAssignment Service: {}", caseDetails);
+        authToken = switchUserContextService.getApproverAuthToken();
         return caseAssignmentApi.applyDecision(authToken, authTokenGenerator.generate(),
             DecisionRequest.decisionRequest(caseDetails));
     }

@@ -12,7 +12,10 @@ def secrets = [
                 secret("finrem-doc-s2s-auth-secret", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
                 secret("idam-secret" ,"OAUTH2_CLIENT_FINREM"),
                 secret("username-solicitor","USERNAME-SOLICITOR"),
-                secret("password-solicitor","PASSWORD-SOLICITOR")
+                secret("password-solicitor","PASSWORD-SOLICITOR"),
+                secret("aac-noc-approver-username", "NOC_APPROVER_USERNAME"),
+                secret("aac-noc-approver-password", "NOC_APPROVER_PASSWORD"),
+                secret("idam-xui-secret", "IDAM_XUI_SECRET")
         ]
 ]
 

@@ -8,6 +8,7 @@ java:
     IDAM_API_URL: "https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net"
     PRD_API_URL: "http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     IDAM_S2S_URL: "http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+    IDAM_API_XUI_REDIRECT_URL: "https://manage-case.{{ .Values.global.environment }}.platform.hmcts.net/oauth2/callback"
     DOCUMENT_GENERATOR_SERVICE_API_BASEURL: "http://finrem-dgcs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     FINREM_NOTIFICATION_SERVICE_BASE_URL: "http://finrem-ns-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     PAYMENT_SERVICE_API_BASEURL: "http://finrem-ps-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
@@ -20,3 +21,6 @@ java:
         - AppInsightsInstrumentationKey
         - finrem-case-orchestration-service-s2s-key
         - idam-secret
+        - idam-xui-secret
+        - aac-noc-approver-username
+        - aac-noc-approver-password
