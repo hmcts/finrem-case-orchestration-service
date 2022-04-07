@@ -486,7 +486,7 @@ public class CCDConfigConstant {
     public static final String INTERIM_NORTHEAST_FRC_LIST = "interim_northEastFRCList";
     public static final String INTERIM_NORTHWEST_FRC_LIST = "interim_northWestFRCList";
     public static final String INTERIM_SOUTHEAST_FRC_LIST = "interim_southEastFRCList";
-    public static final String INTERIM_SOUTHWEST_FRC_LIST = "interim_sSouthWestFRCList";
+    public static final String INTERIM_SOUTHWEST_FRC_LIST = "interim_southWestFRCList";
     public static final String INTERIM_WALES_FRC_LIST = "interim_walesFRCList";
 
     //Interim Documents
