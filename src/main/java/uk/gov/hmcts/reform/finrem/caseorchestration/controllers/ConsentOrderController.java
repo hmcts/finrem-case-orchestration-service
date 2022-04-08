@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.ConsentOrderService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService;
 
 import java.util.Map;
 
@@ -33,6 +34,7 @@ public class ConsentOrderController implements BaseController {
 
     private final ConsentOrderService consentOrderService;
     private final IdamService idamService;
+    private final NoticeOfChangeService noticeOfChangeService;
 
     @PostMapping(path = "/update-latest-consent-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "CCD Callback to update the latest Consent Order details")
@@ -51,6 +53,8 @@ public class ConsentOrderController implements BaseController {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
         caseData.put(LATEST_CONSENT_ORDER, caseDocument);
+
+        caseData = noticeOfChangeService.addOrganisationPoliciesIfPartiesNotRepresented(caseData);
 
         if (!idamService.isUserRoleAdmin(authToken)) {
             caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
