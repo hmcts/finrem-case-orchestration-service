@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,7 +35,6 @@ public class ConsentOrderController implements BaseController {
 
     private final ConsentOrderService consentOrderService;
     private final IdamService idamService;
-    private final NoticeOfChangeService noticeOfChangeService;
 
     @PostMapping(path = "/update-latest-consent-order", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "CCD Callback to update the latest Consent Order details")
@@ -53,8 +53,6 @@ public class ConsentOrderController implements BaseController {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         CaseDocument caseDocument = consentOrderService.getLatestConsentOrderData(callbackRequest);
         caseData.put(LATEST_CONSENT_ORDER, caseDocument);
-
-        caseData = noticeOfChangeService.addOrganisationPoliciesIfPartiesNotRepresented(caseData);
 
         if (!idamService.isUserRoleAdmin(authToken)) {
             caseData.put(APPLICANT_REPRESENTED, YES_VALUE);

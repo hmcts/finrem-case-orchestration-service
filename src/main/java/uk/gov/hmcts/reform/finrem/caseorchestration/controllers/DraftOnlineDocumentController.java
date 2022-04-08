@@ -37,7 +37,6 @@ public class DraftOnlineDocumentController {
 
     private final OnlineFormDocumentService service;
     private final IdamService idamService;
-    private final NoticeOfChangeService noticeOfChangeService;
 
     @PostMapping(path = "/documents/draft-contested-mini-form-a", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles draft Contested Mini Form A generation. Serves as a callback from CCD")
@@ -56,8 +55,6 @@ public class DraftOnlineDocumentController {
         Map<String, Object> caseData = callback.getCaseDetails().getData();
         CaseDocument document = service.generateDraftContestedMiniFormA(authorisationToken, callback.getCaseDetails());
         caseData.put(MINI_FORM_A, document);
-
-        caseData = noticeOfChangeService.addOrganisationPoliciesIfPartiesNotRepresented(caseData);
 
         if (!idamService.isUserRoleAdmin(authorisationToken)) {
             log.info("other users.");

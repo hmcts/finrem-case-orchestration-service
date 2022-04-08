@@ -109,24 +109,6 @@ public class NoticeOfChangeService {
         return caseData;
     }
 
-    public Map<String, Object> addOrganisationPoliciesIfPartiesNotRepresented(Map<String, Object> caseData) {
-
-        if (!caseDataService.isApplicantRepresentedByASolicitor(caseData)) {
-            OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
-                .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
-                .build();
-            caseData.put(APPLICANT_ORGANISATION_POLICY, applicantOrganisationPolicy);
-        }
-        if (!caseDataService.isRespondentRepresentedByASolicitor(caseData)) {
-            OrganisationPolicy respondentOrganisationPolicy = OrganisationPolicy.builder()
-                .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
-                .build();
-            caseData.put(RESPONDENT_ORGANISATION_POLICY, respondentOrganisationPolicy);
-        }
-
-        return caseData;
-    }
-
     private Map<String, Object> setIsRepresentedFieldToNo(CaseDetails caseDetails) {
 
         Map<String, Object> caseData = caseDetails.getData();
