@@ -46,7 +46,7 @@ public class AacApproverIdamClient {
         AuthenticateUserResponse authenticateUserResponse = approverIdamApi.authenticateUser(
             BASIC_AUTH_TYPE + " " + base64Authorisation,
             new AuthenticateUserRequest(AUTH_TYPE, clientId, redirectUri),
-            "openid%20profile%20roles%20prd-admin"
+            "openid%20profile%20roles%20manage-user+create-user+search-user"
         );
 
         log.info("Got authenticate UserResponse from IdamApi: {}", authenticateUserResponse);

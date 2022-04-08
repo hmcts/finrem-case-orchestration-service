@@ -24,8 +24,7 @@ public interface ApproverIdamApi {
 
     @PostMapping(
         value = "/oauth2/authorize",
-        consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE,
-        produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE
+        consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
     AuthenticateUserResponse authenticateUser(
         @RequestHeader(HttpHeaders.AUTHORIZATION) final String authorisation,
