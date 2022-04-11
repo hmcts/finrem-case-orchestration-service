@@ -142,8 +142,8 @@ public class CaseDataController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
-    @PostMapping(path= "/org-policies", consumes = MediaType.APPLICATION_JSON_VALUE,
-    produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/org-policies", consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Add empty org policies for both parties")
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setOrgPolicies(
         @RequestBody CallbackRequest callbackRequest

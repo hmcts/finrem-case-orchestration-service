@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetai
 import java.io.InputStream;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -317,7 +316,7 @@ public class CaseDataControllerTest extends BaseControllerTest {
     public void shouldSuccessfullySetOrgPolicies() throws Exception {
         setUpCaseDetails("no-org-policies.json");
         Map<String, Object> caseData = caseDetails.getData();
-        when(caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(isA(Map.class))).thenReturn(caseData);
+        when(caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(any())).thenReturn(caseData);
 
         loadRequestContentWith(PATH + "no-org-policies.json");
         mvc.perform(post("/case-orchestration/org-policies")
