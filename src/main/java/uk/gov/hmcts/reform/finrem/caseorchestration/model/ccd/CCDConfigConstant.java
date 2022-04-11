@@ -44,6 +44,7 @@ public class CCDConfigConstant {
     public static final String CONSENTED_SOLICITOR_DX_NUMBER = "solicitorDXnumber";
     public static final String CONTESTED_SOLICITOR_DX_NUMBER = "applicantSolicitorDXnumber";
     public static final String APPLICANT_SHARE_DOCUMENTS = "applicantShareDocs";
+    public static final String APPLICANT_ORGANISATION_POLICY = "ApplicantOrganisationPolicy";
 
     //Respondent Solicitor Related
     public static final String CONSENTED_RESPONDENT_REPRESENTED = "appRespondentRep";
@@ -57,6 +58,8 @@ public class CCDConfigConstant {
     public static final String RESP_SOLICITOR_DX_NUMBER = "rSolicitorDXnumber";
     public static final String RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT = "RespSolNotificationsEmailConsent";
     public static final String RESPONDENT_SHARE_DOCUMENTS = "respondentShareDocs";
+    public static final String RESPONDENT_ORGANISATION_POLICY = "RespondentOrganisationPolicy";
+
 
     //Court related
     public static final String REGION = "regionList";

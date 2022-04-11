@@ -142,6 +142,18 @@ public class CaseDataController implements BaseController {
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
+    @PostMapping(path = "/org-policies", consumes = MediaType.APPLICATION_JSON_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Add empty org policies for both parties")
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setOrgPolicies(
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
+        caseData = caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(caseData);
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
+    }
+
     private void setData(final String authToken, final Map<String, Object> caseData) {
         if (idamService.isUserRoleAdmin(authToken)) {
             caseData.put(IS_ADMIN, YES_VALUE);

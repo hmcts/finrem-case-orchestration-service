@@ -1,15 +1,22 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
+
+import java.io.InputStream;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,6 +41,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class CaseDataControllerTest extends BaseControllerTest {
 
     private static final String CONTESTED_HWF_JSON = "/fixtures/contested/hwf.json";
+    private static final String PATH = "/fixtures/noticeOfChange/";
     private static final String CONTESTED_VALIDATE_HEARING_SUCCESSFULLY_JSON = "/fixtures/contested/validate-hearing-successfully.json";
 
     @Autowired private CaseDataController caseDataController;
@@ -42,6 +50,17 @@ public class CaseDataControllerTest extends BaseControllerTest {
     @MockBean private IdamService idamService;
     @MockBean private FeatureToggleService featureToggleService;
     @MockBean private CaseDataService caseDataService;
+
+    protected CaseDetails caseDetails;
+
+    private void setUpCaseDetails(String fileName) throws Exception {
+        ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        try (InputStream resourceAsStream =
+                 getClass().getResourceAsStream(PATH + fileName)) {
+            caseDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
+        }
+    }
 
     @Test
     public void shouldSuccessfullyMoveCollection() throws Exception {
@@ -291,5 +310,19 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 .contentType(APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.civilPartnership", is(NO_VALUE)));
+    }
+
+    @Test
+    public void shouldSuccessfullySetOrgPolicies() throws Exception {
+        setUpCaseDetails("no-org-policies.json");
+        Map<String, Object> caseData = caseDetails.getData();
+        when(caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(any())).thenReturn(caseData);
+
+        loadRequestContentWith(PATH + "no-org-policies.json");
+        mvc.perform(post("/case-orchestration/org-policies")
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk());
     }
 }
