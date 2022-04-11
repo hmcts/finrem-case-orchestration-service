@@ -41,12 +41,14 @@ public class AacApproverIdamClient {
         String redirectUri = oauth2Configuration.getRedirectUri();
 
         log.info("In authenticate approver, Authorisation = {}", authorisation);
-        log.info("In authenticate apptover, clientId = {} : redirect-uri = {}", clientId, redirectUri);
+        log.info("In authenticate approver, clientId = {} : redirect-uri = {}", clientId, redirectUri);
 
+        final AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest(AUTH_TYPE, clientId, redirectUri);
+        log.info("Authenticate User Request: {}", authenticateUserRequest);
         AuthenticateUserResponse authenticateUserResponse = approverIdamApi.authenticateUser(
             BASIC_AUTH_TYPE + " " + base64Authorisation,
-            new AuthenticateUserRequest(AUTH_TYPE, clientId, redirectUri),
-            "openid%20profile%20roles%20manage-user+create-user+search-user"
+            authenticateUserRequest,
+            "openid%20profile%20roles%20manage-user"
         );
 
         log.info("Got authenticate UserResponse from IdamApi: {}", authenticateUserResponse);
