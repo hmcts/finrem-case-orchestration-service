@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
@@ -518,7 +519,42 @@ public class  CaseDataServiceTest extends BaseServiceTest {
         assertEquals(respOrgPolicy.getOrgPolicyCaseAssignedRole(), RESP_SOLICITOR_POLICY);
     }
 
+    @Test
+    public void shouldNotAddAppSolPolicy() throws IOException {
+        Map<String, Object> caseData = mapper.readValue(getClass().getResourceAsStream(
+                "/fixtures/noticeOfChange/no-org-policies.json"), CallbackRequest.class)
+            .getCaseDetails().getData();
 
+        caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
+        caseData = caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(caseData);
+        OrganisationPolicy applicantOrgPolicy = mapper.convertValue(caseData.get(APPLICANT_ORGANISATION_POLICY), OrganisationPolicy.class);
+        assertNull(applicantOrgPolicy);
+    }
+
+    @Test
+    public void shouldNotAddRespSolPolicyContested() throws IOException {
+        Map<String, Object> caseData = mapper.readValue(getClass().getResourceAsStream(
+                "/fixtures/noticeOfChange/no-org-policies.json"), CallbackRequest.class)
+            .getCaseDetails().getData();
+
+        caseData.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
+        caseData = caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(caseData);
+        OrganisationPolicy respOrgPolicy = mapper.convertValue(caseData.get(RESPONDENT_ORGANISATION_POLICY), OrganisationPolicy.class);
+        assertNull(respOrgPolicy);
+    }
+
+    @Test
+    public void shouldNotAddRespSolPolicyConsented() throws IOException {
+        Map<String, Object> caseData = mapper.readValue(getClass().getResourceAsStream(
+                "/fixtures/noticeOfChange/no-org-policies.json"), CallbackRequest.class)
+            .getCaseDetails().getData();
+
+        caseData.put("case_type_id", CASE_TYPE_ID_CONSENTED);
+        caseData.put(CONSENTED_RESPONDENT_REPRESENTED, YES_VALUE);
+        caseData = caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(caseData);
+        OrganisationPolicy respOrgPolicy = mapper.convertValue(caseData.get(RESPONDENT_ORGANISATION_POLICY), OrganisationPolicy.class);
+        assertNull(respOrgPolicy);
+    }
 
     @Test
     public void isApplicantAddressConfidentialTrueWhenApplicantAddressIsMarkedAsConfidential() {
