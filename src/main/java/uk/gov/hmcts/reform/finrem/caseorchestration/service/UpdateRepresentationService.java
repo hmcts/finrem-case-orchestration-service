@@ -123,11 +123,8 @@ public class UpdateRepresentationService {
 
     private Organisation getSolicitorOrganisation(CaseDetails caseDetails) {
         Map<String, Object> caseData = caseDetails.getData();
-        return isApplicant
-            ? objectMapper.convertValue(caseData.get(APPLICANT_ORGANISATION_POLICY),
-            OrganisationPolicy.class).getOrganisation()
-            : objectMapper.convertValue(caseData.get(RESPONDENT_ORGANISATION_POLICY),
-            OrganisationPolicy.class).getOrganisation();
+        return objectMapper.convertValue(caseData.get(isApplicant ? APPLICANT_ORGANISATION_POLICY
+            : RESPONDENT_ORGANISATION_POLICY), OrganisationPolicy.class).getOrganisation();
     }
 
     private String getRespondentRepresentedKey(CaseDetails caseDetails) {
