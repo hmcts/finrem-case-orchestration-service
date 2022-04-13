@@ -41,7 +41,7 @@ public class UpdateSolicitorDetailsService {
         }
     }
 
-    private Map<String, Object> convertOrganisationAddressToSolicitorAddress(OrganisationsResponse organisationData) {
+    public Map<String, Object> convertOrganisationAddressToSolicitorAddress(OrganisationsResponse organisationData) {
         return objectMapper.convertValue(Address.builder()
             .addressLine1(organisationData.getContactInformation().get(0).getAddressLine1())
             .addressLine2(organisationData.getContactInformation().get(0).getAddressLine2())
