@@ -203,6 +203,8 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign'
 
+    implementation 'com.github.hmcts:idam-java-client:2.0.1'
+
     implementation group: 'com.github.hmcts', name: 'ccd-client', version: versions.ccdClient
     implementation group: 'com.github.hmcts.java-logging', name: 'java-logging', version: versions.reformLogging
     implementation group: 'com.github.hmcts.java-logging', name: 'java-logging-appinsights', version: versions.reformLogging
