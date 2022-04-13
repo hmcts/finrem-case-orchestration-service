@@ -31,6 +31,6 @@ public class UpdateRepresentationService {
     }
 
     private Map<String, Object> generateCOR(CaseDetails caseDetails) {
-
+        return null;
     }
 }
