@@ -35,6 +35,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.DOC_URL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.FILE_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_BINARY_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_DOC_URL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.INTE_FILE_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDetailsFromResource;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.caseDocument;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_ADDITIONAL_INFORMATION;
@@ -74,10 +77,12 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_THAMESVALLEY_COURT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_FRC;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.GENERAL_APPLICATION_DIRECTIONS_WALES_OTHER_COURT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.INTERIM_HEARING_DOCUMENT;
 
 public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
 
     private static final String GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
+    private static final String INTERIM_HEARING_DOCUMENT_BIN_URL = "http://dm-store/1f3a-gads-doc/binary";
 
     @Autowired
     private GeneralApplicationDirectionsService generalApplicationDirectionsService;
@@ -212,6 +217,91 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
         assertDocumentPrintRequestContainsExpectedDocuments();
     }
 
+    @Test
+    public void givenPaperApplicationInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
+        caseDetails = caseDetailsFromResource("/fixtures/contested-interim-hearing.json", objectMapper);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument(INTE_DOC_URL, INTE_FILE_NAME,
+            INTE_BINARY_URL));
+        generalApplicationDirectionsService.submitInterimHearing(caseDetails, AUTH_TOKEN);
+
+        verify(genericDocumentService, times(1)).generateDocument(
+            eq(AUTH_TOKEN),
+            documentGenerationRequestCaseDetailsCaptor.capture(),
+            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate()),
+            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName()));
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN),
+            printDocumentsRequestDocumentListCaptor.capture());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
+        verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN));
+
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        assertThat(data, allOf(
+            hasEntry("courtDetails", ImmutableMap.of(
+                "courtName", "Kingston-Upon-Thames County Court And Family Court",
+                "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
+                "phoneNumber", "0208 972 8700",
+                "email", "enquiries.kingston.countycourt@justice.gov.uk")),
+            Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
+            Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
+            Matchers.<String, Object>hasEntry("applicantRepresented", "No"),
+            Matchers.<String, Object>hasEntry("respondentRepresented", "No"),
+            Matchers.<String, Object>hasEntry("interim_cfcCourtList", "FR_s_CFCList_4"),
+            Matchers.<String, Object>hasEntry("interimHearingDate", "2020-06-01"),
+            Matchers.<String, Object>hasEntry("interimHearingTime", "2:00 pm"),
+            Matchers.<String, Object>hasEntry("interimHearingTimeEstimate", "30 minutes"),
+            Matchers.<String, Object>hasEntry("interimAdditionalInformationAboutHearing", "refreshments will be provided"),
+            hasKey("letterDate")));
+
+        assertCaseDataHasInterimDocument();
+    }
+
+    @Test
+    public void givenApplicationIsNotPaperInterimHearingRequired_thenInterimHearingNoticeIsPrinted() {
+        caseDetails = caseDetailsFromResource("/fixtures/contested-interim-hearing-nopaper.json", objectMapper);
+        when(genericDocumentService.convertDocumentIfNotPdfAlready(any(), any())).thenReturn(caseDocument(INTE_DOC_URL, INTE_FILE_NAME,
+            INTE_BINARY_URL));
+        generalApplicationDirectionsService.submitInterimHearing(caseDetails, AUTH_TOKEN);
+
+        verify(genericDocumentService, times(1)).generateDocument(
+            eq(AUTH_TOKEN),
+            documentGenerationRequestCaseDetailsCaptor.capture(),
+            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeTemplate()),
+            eq(documentConfiguration.getGeneralApplicationInterimHearingNoticeFileName()));
+        verify(bulkPrintService, times(1)).printApplicantDocuments(any(), eq(AUTH_TOKEN),
+            printDocumentsRequestDocumentListCaptor.capture());
+        verify(bulkPrintService, times(1)).printRespondentDocuments(any(), eq(AUTH_TOKEN), any());
+        verify(genericDocumentService, times(1)).convertDocumentIfNotPdfAlready(any(), eq(AUTH_TOKEN));
+
+        Map<String, Object> data = documentGenerationRequestCaseDetailsCaptor.getValue().getData();
+        assertThat(data, allOf(
+            hasEntry("courtDetails", ImmutableMap.of(
+                "courtName", "Kingston-Upon-Thames County Court And Family Court",
+                "courtAddress", "Kingston upon Thames County Court, St James Road, Kingston-upon-Thames, KT1 2AD",
+                "phoneNumber", "0208 972 8700",
+                "email", "enquiries.kingston.countycourt@justice.gov.uk")),
+            Matchers.<String, Object>hasEntry("applicantName", "Poor Guy"),
+            Matchers.<String, Object>hasEntry("respondentName", "test Korivi"),
+            Matchers.<String, Object>hasEntry("applicantRepresented", "No"),
+            Matchers.<String, Object>hasEntry("respondentRepresented", "No"),
+            Matchers.<String, Object>hasEntry("interim_cfcCourtList", "FR_s_CFCList_4"),
+            Matchers.<String, Object>hasEntry("interimHearingDate", "2020-06-01"),
+            Matchers.<String, Object>hasEntry("interimHearingTime", "2:00 pm"),
+            Matchers.<String, Object>hasEntry("interimHearingTimeEstimate", "30 minutes"),
+            Matchers.<String, Object>hasEntry("interimAdditionalInformationAboutHearing", "refreshments will be provided"),
+            Matchers.<String, Object>hasEntry("applicantSolicitorConsentForEmails", "No"),
+            Matchers.<String, Object>hasEntry("RespSolNotificationsEmailConsent", "No"),
+            hasKey("letterDate")));
+
+        assertCaseDataHasInterimDocument();
+    }
+
+    private void assertCaseDataHasInterimDocument() {
+        assertThat(caseDetails.getData(), hasKey(INTERIM_HEARING_DOCUMENT));
+        assertThat(((CaseDocument) caseDetails.getData().get(INTERIM_HEARING_DOCUMENT)).getDocumentBinaryUrl(),
+            is(INTERIM_HEARING_DOCUMENT_BIN_URL));
+    }
+
+
     private void assertCaseDataHasGeneralApplicationDirectionsDocument() {
         assertThat(caseDetails.getData(), hasKey(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT));
         assertThat(((CaseDocument) caseDetails.getData().get(GENERAL_APPLICATION_DIRECTIONS_DOCUMENT)).getDocumentBinaryUrl(),
@@ -225,6 +315,17 @@ public class GeneralApplicationDirectionsServiceTest extends BaseServiceTest {
             GENERAL_APPLICATION_DIRECTIONS_DOCUMENT_BIN_URL,
             "http://dm-store/hijbb-general-application-latest-document/binary",
             "http://dm-store/hijbb-general-application-draft-order/binary")
+            .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).build())
+            .toArray()));
+    }
+
+    private void assertDocumentPrintRequestContainsExpectedInterimDocuments() {
+        List<BulkPrintDocument> documentsToPrint = printDocumentsRequestDocumentListCaptor.getValue();
+        System.out.println(documentsToPrint);
+        assertThat(documentsToPrint, containsInAnyOrder(Stream.of(
+                INTERIM_HEARING_DOCUMENT_BIN_URL,
+                "http://dm-store/hijbb-general-application-latest-document/binary",
+                "http://dm-store/hijbb-general-application-draft-order/binary")
             .map(binaryFileUrl -> BulkPrintDocument.builder().binaryFileUrl(binaryFileUrl).build())
             .toArray()));
     }

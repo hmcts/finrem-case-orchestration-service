@@ -16,6 +16,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
+
 public abstract class BaseControllerTest extends BaseTest {
 
     @Autowired protected WebApplicationContext applicationContext;
@@ -67,6 +70,14 @@ public abstract class BaseControllerTest extends BaseTest {
 
     protected CallbackRequest buildCallbackRequest() {
         Map<String, Object> caseData = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
+        return CallbackRequest.builder().caseDetails(caseDetails).build();
+    }
+
+    protected CallbackRequest buildCallbackInterimRequest() {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put(RESP_SOLICITOR_EMAIL, "abc@mailinator.com");
+        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, "YES");
         CaseDetails caseDetails = CaseDetails.builder().id(Long.valueOf(123)).data(caseData).build();
         return CallbackRequest.builder().caseDetails(caseDetails).build();
     }

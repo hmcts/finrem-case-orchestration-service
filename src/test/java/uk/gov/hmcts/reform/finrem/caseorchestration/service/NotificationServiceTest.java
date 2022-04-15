@@ -63,6 +63,7 @@ public class NotificationServiceTest extends BaseServiceTest {
     private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_REFER_TO_JUDGE = "http://localhost:8086/notify/contested/general-application-refer-to-judge";
     private static final String END_POINT_CONTESTED_GENERAL_APPLICATION_OUTCOME = "http://localhost:8086/notify/contested/general-application-outcome";
     private static final String END_POINT_CONTESTED_CONSENT_ORDER_NOT_APPROVED = "http://localhost:8086/notify/contested/consent-order-not-approved";
+    private static final String END_POINT_CONTESTED_INTERIM_HEARING = "http://localhost:8086/notify/contested/prepare-for-interim-hearing-sent";
     private static final String END_POINT_TRANSFER_TO_LOCAL_COURT = "http://localhost:8086/notify/transfer-to-local-court";
 
     private static final String ERROR_500_MESSAGE = "500 Internal Server Error";
@@ -949,5 +950,29 @@ public class NotificationServiceTest extends BaseServiceTest {
         } catch (Exception ex) {
             assertThat(ex.getMessage(), Is.is(ERROR_500_MESSAGE));
         }
+    }
+
+    @Test
+    public void sendInterimNotificationEmailToApplicantSolicitor() {
+        callbackRequest = getContestedCallbackRequest();
+
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_INTERIM_HEARING))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendInterimNotificationEmailToApplicantSolicitor(callbackRequest.getCaseDetails());
+
+        verify(notificationRequestMapper).createNotificationRequestForAppSolicitor(callbackRequest.getCaseDetails());
+    }
+
+    @Test
+    public void sendInterimNotificationEmailToRespondentSolicitor() {
+        callbackRequest = getContestedCallbackRequest();
+
+        mockServer.expect(MockRestRequestMatchers.requestTo(END_POINT_CONTESTED_INTERIM_HEARING))
+            .andExpect(MockRestRequestMatchers.method(HttpMethod.POST))
+            .andRespond(MockRestResponseCreators.withNoContent());
+        notificationService.sendInterimNotificationEmailToRespondentSolicitor(callbackRequest.getCaseDetails());
+
+        verify(notificationRequestMapper).createNotificationRequestForRespSolicitor(callbackRequest.getCaseDetails());
     }
 }
