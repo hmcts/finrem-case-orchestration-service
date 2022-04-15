@@ -1,0 +1,95 @@
+{
+  "token": "token_test",
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "DIVORCE",
+    "state": "applicationIssued",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "applicantFMName": "John",
+      "applicantLName": "Smith",
+      "applicantSolicitorName": "Test Applicant Solicitor",
+      "applicantSolicitorEmail": "appsolicitor1@yahoo.com",
+      "applicantSolicitorFirm": "FRApplicantSolicitorFirm2",
+      "nocParty": "applicant",
+      "natureOfRepresentationChange": "replacing",
+      "updateIncludesRepresentativeChange" : "Yes",
+      "ApplicantOrganisationPolicy": {
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRRespondentSolicitorFirm"
+        },
+        "OrgPolicyReference": "FRRespondent",
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "rSolicitorFirm": "FRRespondentSolicitorFirm",
+      "rSolicitorName": "Test respondent Solicitor",
+      "dateOfSepration": "2014-01-11",
+      "propertyAddress": "102",
+      "rSolicitorEmail": "padmaja.ramisetti@gmail.com",
+      "rSolicitorPhone": "07411201630",
+      "respondentEmail": "padmaja102.ramisetti@gmail.com",
+      "respondentLName": "Smith",
+      "respondentPhone": "7411201631",
+      "respondentFMName": "Jane",
+      "changeOrganisationRequestField": {
+        "Reason": null,
+        "CaseRoleId": {
+          "value": {
+            "code": "[APPSOLICITOR]",
+            "label": "[APPSOLICITOR]"
+          },
+          "list_items": [
+            {
+              "code": "[APPSOLICITOR]",
+              "label": "[APPSOLICITOR]"
+            }
+          ]
+        },
+        "NotesReason": null,
+        "ApprovalStatus": "1",
+        "RequestTimestamp": "2020-05-25T14:25:01.000",
+        "OrganisationToAdd": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRApplicantSolicitorFirm2"
+        },
+        "OrganisationToRemove": {
+          "OrganisationID": "A31PTVA",
+          "OrganisationName": "FRApplicantSolicitorFirm"
+        },
+        "ApprovalRejectionTimestamp": "2020-05-25T14:25:01.000"
+      },
+      "ChangeOfRepresentatives": {
+        "ChangeOfRepresentation": [
+          {
+            "party": "applicant",
+            "name": "John Smith",
+            "date": "2020-06-01",
+            "by": "Test Applicant Solicitor",
+            "via": "Notice of Change",
+            "added": {
+              "name": "Test Applicant Solicitor",
+              "email": "appsolicitor1@yahoo.com",
+              "Organisation": {
+                "OrganisationID": "A31PTVU",
+                "OrganisationName": "FRApplicantSolicitorFirm2"
+              }
+            },
+            "removed": {
+              "name": "Sir Solicitor",
+              "email": "sirsolicitor1@gmail.com",
+              "Organisation": {
+                "OrganisationID": "A31PTVA",
+                "OrganisationName": "FRApplicantSolicitorFirm"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

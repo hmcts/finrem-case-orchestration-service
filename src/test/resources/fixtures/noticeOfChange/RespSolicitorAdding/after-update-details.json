@@ -1,0 +1,82 @@
+{
+  "token": "token_test",
+  "event_id": "some_event_id",
+  "case_details": {
+    "id": "12345678",
+    "jurisdiction": "DIVORCE",
+    "state": "applicationIssued",
+    "case_type_id": "FinancialRemedyContested",
+    "case_data": {
+      "applicantFMName": "John",
+      "applicantLName": "Smith",
+      "applicantSolicitorName": "Sir Solicitor",
+      "applicantSolicitorEmail": "sirsolicitor1@gmail.com",
+      "applicantSolicitorFirm": "FRApplicantSolicitorFirm",
+      "nocParty": "respondent",
+      "natureOfRepresentationChange": "adding",
+      "updateIncludesRepresentativeChange" : "Yes",
+      "ApplicantOrganisationPolicy": {
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRRespondentSolicitorFirm"
+        },
+        "OrgPolicyReference": "FRRespondent",
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "rSolicitorFirm": "FRRespondentSolicitorFirm",
+      "rSolicitorName": "Test respondent Solicitor",
+      "dateOfSepration": "2014-01-11",
+      "propertyAddress": "102",
+      "rSolicitorEmail": "padmaja.ramisetti@gmail.com",
+      "respondentEmail": "padmaja102.ramisetti@gmail.com",
+      "respondentLName": "Smith",
+      "respondentPhone": "7411201631",
+      "respondentFMName": "Jane",
+      "changeOrganisationRequestField": {
+        "Reason": null,
+        "CaseRoleId": {
+          "value": {
+            "code": "[RESPSOLICITOR]",
+            "label": "[RESPSOLICITOR]"
+          },
+          "list_items": [
+            {
+              "code": "[RESPSOLICITOR]",
+              "label": "[RESPSOLICITOR]"
+            }
+          ]
+        },
+        "NotesReason": null,
+        "ApprovalStatus": "1",
+        "RequestTimestamp": "2020-05-25T14:25:01.000",
+        "OrganisationToAdd": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRApplicantSolicitorFirm"
+        },
+        "ApprovalRejectionTimestamp": "2020-05-25T14:25:01.000"
+      },
+      "ChangeOfRepresentatives": {
+        "ChangeOfRepresentation": [
+          {
+            "party": "respondent",
+            "name": "Jane Smith",
+            "date": "2020-06-01",
+            "by": "Test respondent Solicitor",
+            "via": "Notice of Change",
+            "added": {
+              "name": "Test respondent Solicitor",
+              "email": "padmaja.ramisetti@gmail.com",
+              "Organisation": {
+                "OrganisationID": "A31PTVU",
+                "OrganisationName": "FRRespondentSolicitorFirm"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

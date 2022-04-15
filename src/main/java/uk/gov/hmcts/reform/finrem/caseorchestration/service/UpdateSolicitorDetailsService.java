@@ -6,14 +6,30 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
 import java.util.Map;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_DX_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_DX_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 @Service
@@ -51,5 +67,52 @@ public class UpdateSolicitorDetailsService {
             .postTown(organisationData.getContactInformation().get(0).getTownCity())
             .postCode(organisationData.getContactInformation().get(0).getPostcode())
             .build(), Map.class);
+    }
+
+    public Map<String, Object> updateSolicitorContactDetails(ChangedRepresentative addedSolicitor,
+                                                             Map<String, Object> caseData,
+                                                             boolean isConsented,
+                                                             boolean isApplicant) {
+        if (isApplicant) {
+            caseData.put(isConsented ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME,
+                addedSolicitor.getName());
+            caseData.put(isConsented ? SOLICITOR_EMAIL : CONTESTED_SOLICITOR_EMAIL, addedSolicitor.getEmail());
+            caseData.put(isConsented ? CONSENTED_SOLICITOR_FIRM : CONTESTED_SOLICITOR_FIRM,
+                addedSolicitor.getOrganisation().getOrganisationName());
+        } else {
+            updateRespSolFields(caseData, addedSolicitor);
+        }
+
+
+        return removeSolicitorFields(caseData, isConsented, isApplicant);
+
+    }
+
+    private Map<String, Object> removeSolicitorFields(Map<String, Object> caseData,
+                                                      boolean isConsented,
+                                                      boolean isApplicant) {
+        if (isApplicant) {
+            caseData.remove(SOLICITOR_PHONE);
+            caseData.remove(isConsented ? CONSENTED_SOLICITOR_DX_NUMBER : CONTESTED_SOLICITOR_DX_NUMBER);
+            caseData.remove(isConsented ? APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED
+                : APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED);
+        } else {
+            removeRespSolFields(caseData);
+        }
+
+        return caseData;
+    }
+
+    private void updateRespSolFields(Map<String, Object> caseData,
+                                     ChangedRepresentative addedSolicitor) {
+        caseData.put(RESP_SOLICITOR_NAME, addedSolicitor.getName());
+        caseData.put(RESP_SOLICITOR_EMAIL, addedSolicitor.getEmail());
+        caseData.put(RESP_SOLICITOR_FIRM, addedSolicitor.getOrganisation().getOrganisationName());
+    }
+
+    private void removeRespSolFields(Map<String, Object> caseData) {
+        caseData.remove(RESP_SOLICITOR_PHONE);
+        caseData.remove(RESP_SOLICITOR_DX_NUMBER);
+        caseData.remove(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT);
     }
 }

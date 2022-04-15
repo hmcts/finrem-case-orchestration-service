@@ -7,22 +7,43 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_DX_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_DX_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_REFERENCE;
 
 public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
@@ -110,5 +131,101 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
         Assert.assertFalse(caseDetails.getData().containsKey(CONTESTED_SOLICITOR_ADDRESS));
         Assert.assertFalse(caseDetails.getData().containsKey(CONTESTED_SOLICITOR_FIRM));
         Assert.assertFalse(caseDetails.getData().containsKey(SOLICITOR_REFERENCE));
+    }
+
+    @Test
+    public void shouldSetNewApplicantSolicitorDetailsContested() {
+        ChangedRepresentative addedSolicitor = ChangedRepresentative.builder()
+            .name("Sir Solicitor")
+            .email("sirsolicitor1@gmail.com")
+            .organisation(Organisation.builder()
+                .organisationID("A31PTVA")
+                .organisationName("FRApplicantSolicitorFirm")
+                .build())
+            .build();
+
+        boolean IS_CONSENTED = false;
+        boolean IS_APPLICANT = true;
+        Map<String, Object> caseData = new HashMap<>();
+
+        caseData.put(SOLICITOR_PHONE, "123456789");
+        caseData.put(CONTESTED_SOLICITOR_DX_NUMBER, "DummyDX");
+        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
+
+        caseData = updateSolicitorDetailsService.updateSolicitorContactDetails(addedSolicitor,
+            caseData,
+            IS_CONSENTED,
+            IS_APPLICANT);
+
+        assertEquals(caseData.get(CONTESTED_SOLICITOR_NAME), "Sir Solicitor");
+        assertEquals(caseData.get(CONTESTED_SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");
+        assertEquals(caseData.get(CONTESTED_SOLICITOR_FIRM), "FRApplicantSolicitorFirm");
+        assertFalse(caseData.containsKey(SOLICITOR_PHONE));
+        assertFalse(caseData.containsKey(CONTESTED_SOLICITOR_DX_NUMBER));
+        assertFalse(caseData.containsKey(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
+    }
+
+    @Test
+    public void shouldSetNewApplicantSolicitorDetailsConsented() {
+        ChangedRepresentative addedSolicitor = ChangedRepresentative.builder()
+            .name("Sir Solicitor")
+            .email("sirsolicitor1@gmail.com")
+            .organisation(Organisation.builder()
+                .organisationID("A31PTVA")
+                .organisationName("FRApplicantSolicitorFirm")
+                .build())
+            .build();
+
+        boolean IS_CONSENTED = true;
+        boolean IS_APPLICANT = true;
+        Map<String, Object> caseData = new HashMap<>();
+
+        caseData.put(SOLICITOR_PHONE, "123456789");
+        caseData.put(CONSENTED_SOLICITOR_DX_NUMBER, "DummyDX");
+        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
+
+        caseData = updateSolicitorDetailsService.updateSolicitorContactDetails(addedSolicitor,
+            caseData,
+            IS_CONSENTED,
+            IS_APPLICANT);
+
+        assertEquals(caseData.get(CONSENTED_SOLICITOR_NAME), "Sir Solicitor");
+        assertEquals(caseData.get(SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");
+        assertEquals(caseData.get(CONSENTED_SOLICITOR_FIRM), "FRApplicantSolicitorFirm");
+        assertFalse(caseData.containsKey(SOLICITOR_PHONE));
+        assertFalse(caseData.containsKey(CONSENTED_SOLICITOR_DX_NUMBER));
+        assertFalse(caseData.containsKey(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED));
+    }
+
+    @Test
+    public void shouldSetNewRespondentSolicitorDetails() {
+        ChangedRepresentative addedSolicitor = ChangedRepresentative.builder()
+            .name("Sir Solicitor")
+            .email("sirsolicitor1@gmail.com")
+            .organisation(Organisation.builder()
+                .organisationID("A31PTVA")
+                .organisationName("FRRespondentSolicitorFirm")
+                .build())
+            .build();
+
+        boolean IS_CONSENTED = true;
+        boolean IS_APPLICANT = false;
+        Map<String, Object> caseData = new HashMap<>();
+
+        caseData.put(RESP_SOLICITOR_PHONE, "123456789");
+        caseData.put(RESP_SOLICITOR_DX_NUMBER, "DummyDX");
+        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
+
+        caseData = updateSolicitorDetailsService.updateSolicitorContactDetails(addedSolicitor,
+            caseData,
+            IS_CONSENTED,
+            IS_APPLICANT);
+
+        assertEquals(caseData.get(RESP_SOLICITOR_NAME), "Sir Solicitor");
+        assertEquals(caseData.get(RESP_SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");
+        assertEquals(caseData.get(RESP_SOLICITOR_FIRM), "FRRespondentSolicitorFirm");
+        assertFalse(caseData.containsKey(RESP_SOLICITOR_PHONE));
+        assertFalse(caseData.containsKey(CONSENTED_SOLICITOR_DX_NUMBER));
+        assertFalse(caseData.containsKey(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED));
     }
 }
