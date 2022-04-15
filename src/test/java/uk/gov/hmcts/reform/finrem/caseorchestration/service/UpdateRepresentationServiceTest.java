@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.Organisat
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
@@ -176,16 +175,17 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
         Map<String, Object> actualData = updateRepresentationService
             .updateRepresentationAsSolicitor(initialDetails, "bebe");
-        ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
-        ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
 
         assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), expectedCaseData.get(CONTESTED_SOLICITOR_NAME));
         assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), expectedCaseData.get(CONTESTED_SOLICITOR_EMAIL));
         assertNull(actualData.get(CONTESTED_SOLICITOR_DX_NUMBER));
         assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
         assertNull(actualData.get(SOLICITOR_PHONE));
+
+        ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
+            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
+        ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
+            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -223,16 +223,17 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
         Map<String, Object> actualData = updateRepresentationService
             .updateRepresentationAsSolicitor(initialDetails, "bebe");
-        ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
-        ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
 
         assertEquals(actualData.get(CONSENTED_SOLICITOR_NAME), expectedCaseData.get(CONSENTED_SOLICITOR_NAME));
         assertEquals(actualData.get(SOLICITOR_EMAIL), expectedCaseData.get(SOLICITOR_EMAIL));
         assertNull(actualData.get(CONSENTED_SOLICITOR_DX_NUMBER));
         assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED));
         assertNull(actualData.get(SOLICITOR_PHONE));
+
+        ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
+            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
+        ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
+            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -270,16 +271,17 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
         Map<String, Object> actualData = updateRepresentationService
             .updateRepresentationAsSolicitor(initialDetails, "bebe");
-        ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
-        ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
 
         assertEquals(actualData.get(RESP_SOLICITOR_NAME), expectedCaseData.get(RESP_SOLICITOR_NAME));
         assertEquals(actualData.get(RESP_SOLICITOR_EMAIL), expectedCaseData.get(RESP_SOLICITOR_EMAIL));
         assertNull(actualData.get(RESP_SOLICITOR_DX_NUMBER));
         assertNull(actualData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT));
         assertNull(actualData.get(RESP_SOLICITOR_PHONE));
+
+        ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
+            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
+        ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
+            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -335,16 +337,17 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
         Map<String, Object> actualData = updateRepresentationService
             .updateRepresentationAsSolicitor(initialDetails, "bebe");
-        ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
-        ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
 
         assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), "Test Applicant Solicitor");
         assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), "appsolicitor1@yahoo.com");
         assertNull(actualData.get(CONTESTED_SOLICITOR_DX_NUMBER));
         assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
         assertNull(actualData.get(SOLICITOR_PHONE));
+
+        ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
+            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
+        ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
+            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());

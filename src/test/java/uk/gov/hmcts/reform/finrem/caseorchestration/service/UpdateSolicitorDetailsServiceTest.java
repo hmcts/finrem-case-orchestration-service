@@ -135,6 +135,13 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldSetNewApplicantSolicitorDetailsContested() {
+
+        Map<String, Object> caseData = new HashMap<>();
+
+        caseData.put(SOLICITOR_PHONE, "123456789");
+        caseData.put(CONTESTED_SOLICITOR_DX_NUMBER, "DummyDX");
+        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
+
         ChangedRepresentative addedSolicitor = ChangedRepresentative.builder()
             .name("Sir Solicitor")
             .email("sirsolicitor1@gmail.com")
@@ -144,18 +151,13 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
                 .build())
             .build();
 
-        boolean IS_CONSENTED = false;
-        boolean IS_APPLICANT = true;
-        Map<String, Object> caseData = new HashMap<>();
-
-        caseData.put(SOLICITOR_PHONE, "123456789");
-        caseData.put(CONTESTED_SOLICITOR_DX_NUMBER, "DummyDX");
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
+        boolean isConsented = false;
+        boolean isApplicant = true;
 
         caseData = updateSolicitorDetailsService.updateSolicitorContactDetails(addedSolicitor,
             caseData,
-            IS_CONSENTED,
-            IS_APPLICANT);
+            isConsented,
+            isApplicant);
 
         assertEquals(caseData.get(CONTESTED_SOLICITOR_NAME), "Sir Solicitor");
         assertEquals(caseData.get(CONTESTED_SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");
@@ -167,6 +169,13 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldSetNewApplicantSolicitorDetailsConsented() {
+
+        Map<String, Object> caseData = new HashMap<>();
+
+        caseData.put(SOLICITOR_PHONE, "123456789");
+        caseData.put(CONSENTED_SOLICITOR_DX_NUMBER, "DummyDX");
+        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
+
         ChangedRepresentative addedSolicitor = ChangedRepresentative.builder()
             .name("Sir Solicitor")
             .email("sirsolicitor1@gmail.com")
@@ -176,18 +185,13 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
                 .build())
             .build();
 
-        boolean IS_CONSENTED = true;
-        boolean IS_APPLICANT = true;
-        Map<String, Object> caseData = new HashMap<>();
-
-        caseData.put(SOLICITOR_PHONE, "123456789");
-        caseData.put(CONSENTED_SOLICITOR_DX_NUMBER, "DummyDX");
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
+        boolean isConsented = true;
+        boolean isApplicant = true;
 
         caseData = updateSolicitorDetailsService.updateSolicitorContactDetails(addedSolicitor,
             caseData,
-            IS_CONSENTED,
-            IS_APPLICANT);
+            isConsented,
+            isApplicant);
 
         assertEquals(caseData.get(CONSENTED_SOLICITOR_NAME), "Sir Solicitor");
         assertEquals(caseData.get(SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");
@@ -199,6 +203,13 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldSetNewRespondentSolicitorDetails() {
+
+        Map<String, Object> caseData = new HashMap<>();
+
+        caseData.put(RESP_SOLICITOR_PHONE, "123456789");
+        caseData.put(RESP_SOLICITOR_DX_NUMBER, "DummyDX");
+        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
+
         ChangedRepresentative addedSolicitor = ChangedRepresentative.builder()
             .name("Sir Solicitor")
             .email("sirsolicitor1@gmail.com")
@@ -208,18 +219,13 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
                 .build())
             .build();
 
-        boolean IS_CONSENTED = true;
-        boolean IS_APPLICANT = false;
-        Map<String, Object> caseData = new HashMap<>();
-
-        caseData.put(RESP_SOLICITOR_PHONE, "123456789");
-        caseData.put(RESP_SOLICITOR_DX_NUMBER, "DummyDX");
-        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
+        boolean isConsented = true;
+        boolean isApplicant = false;
 
         caseData = updateSolicitorDetailsService.updateSolicitorContactDetails(addedSolicitor,
             caseData,
-            IS_CONSENTED,
-            IS_APPLICANT);
+            isConsented,
+            isApplicant);
 
         assertEquals(caseData.get(RESP_SOLICITOR_NAME), "Sir Solicitor");
         assertEquals(caseData.get(RESP_SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");

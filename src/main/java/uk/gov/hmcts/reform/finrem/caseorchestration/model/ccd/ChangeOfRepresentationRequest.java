@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd;
 
 import lombok.Builder;
-import lombok.Setter;
 import lombok.Value;
 
 
