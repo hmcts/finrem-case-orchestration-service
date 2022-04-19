@@ -81,8 +81,6 @@ public class UpdateRepresentationService {
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, authToken));
         Map<String, Object> caseData = updateChangeOfRepresentatives(caseDetails, addedSolicitor, removedSolicitor);
 
-        //Call ApplyNoCDecision here
-
         return caseData;
     }
 

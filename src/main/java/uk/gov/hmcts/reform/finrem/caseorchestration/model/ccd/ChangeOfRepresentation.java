@@ -17,24 +17,24 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChangeOfRepresentation {
-    @JsonProperty("party") // app/resp
+    @JsonProperty("party")
     String party;
 
-    @JsonProperty("name") // client name
+    @JsonProperty("name")
     String clientName;
 
-    @JsonProperty("date") // :)
+    @JsonProperty("date")
     LocalDate date;
 
-    @JsonProperty("by") // name of request initiator
+    @JsonProperty("by")
     String by;
 
-    @JsonProperty("via") // notice of change hardcoded
+    @JsonProperty("via")
     String via;
 
-    @JsonProperty("added") // added rep
+    @JsonProperty("added")
     ChangedRepresentative added;
 
-    @JsonProperty("removed") // removed rep
+    @JsonProperty("removed")
     ChangedRepresentative removed;
 }
