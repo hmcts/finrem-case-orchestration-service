@@ -85,4 +85,33 @@ public class GeneralApplicationDirectionsController implements BaseController {
             .data(caseDetails.getData())
             .build());
     }
+
+    @PostMapping(path = "/submit-for-interim-hearing", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "submit for interim hearing")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> submitInterimHearing(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authorisationToken,
+        @NotNull @RequestBody @ApiParam("CaseData") CallbackRequest callback) {
+
+        CaseDetails caseDetails = callback.getCaseDetails();
+        log.info("Received request to submit for interim hearing for Case ID: {}", caseDetails.getId());
+        validateCaseData(callback);
+
+        List<String> errors = new ArrayList<>();
+        try {
+            generalApplicationDirectionsService.submitInterimHearing(caseDetails, authorisationToken);
+        } catch (InvalidCaseDataException invalidCaseDataException) {
+            errors.add(invalidCaseDataException.getMessage());
+        }
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(caseDetails.getData())
+            .errors(errors)
+            .build());
+    }
 }

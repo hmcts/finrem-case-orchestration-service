@@ -42,7 +42,6 @@ public class CCDConfigConstant {
     public static final String APPLICANT_REPRESENTED = "applicantRepresented";
     public static final String APPLICANT_REPRESENTED_PAPER = "applicantRepresentedPaper";
     public static final String CONSENTED_SOLICITOR_DX_NUMBER = "solicitorDXnumber";
-    public static final String CONTESTED_SOLICITOR_DX_NUMBER = "applicantSolicitorDXnumber";
     public static final String APPLICANT_SHARE_DOCUMENTS = "applicantShareDocs";
     public static final String APPLICANT_ORGANISATION_POLICY = "ApplicantOrganisationPolicy";
 
@@ -63,6 +62,7 @@ public class CCDConfigConstant {
 
     //Court related
     public static final String REGION = "regionList";
+    public static final String INTERIM_REGION = "interim_regionList";
     public static final String REGION_CT = "region";
 
     //FRC List Names
@@ -482,6 +482,7 @@ public class CCDConfigConstant {
     //NFD
     public static final String CIVIL_PARTNERSHIP = "civilPartnership";
 
+
     //NoC
     public static final String NOC_PARTY = "nocParty";
     public static final String NOC_IS_SOL_DIGITAL = "nocIsSolicitorDigital";
@@ -496,4 +497,19 @@ public class CCDConfigConstant {
     public static final String CHANGE_OF_REPRESENTATIVES = "changeOfRepresentatives";
     public static final String CA_UPDATE_ADD_REPRESENTATION = "FR_noticeOfChangeCourtAdmin";
     public static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
+
+    //Interim FRC List Names
+    public static final String INTERIM_HEARING_PREFIX = "interim_";
+    public static final String INTERIM_LONDON_FRC_LIST = "interim_londonFRCList";
+    public static final String INTERIM_MIDLANDS_FRC_LIST = "interim_midlandsFRCList";
+    public static final String INTERIM_NORTHEAST_FRC_LIST = "interim_northEastFRCList";
+    public static final String INTERIM_NORTHWEST_FRC_LIST = "interim_northWestFRCList";
+    public static final String INTERIM_SOUTHEAST_FRC_LIST = "interim_southEastFRCList";
+    public static final String INTERIM_SOUTHWEST_FRC_LIST = "interim_southWestFRCList";
+    public static final String INTERIM_WALES_FRC_LIST = "interim_walesFRCList";
+
+    //Interim Documents
+    public static final String INTERIM_HEARING_DOCUMENT = "interimHearingDirectionsDocument";
+    public static final String INTERIM_HEARING_UPLOADED_DOCUMENT = "interimUploadAdditionalDocument";
+
 }
