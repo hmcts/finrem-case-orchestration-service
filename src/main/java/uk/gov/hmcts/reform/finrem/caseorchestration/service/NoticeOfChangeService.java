@@ -84,7 +84,7 @@ public class NoticeOfChangeService {
         ChangeOfRepresentatives change = changeOfRepresentationService.generateChangeOfRepresentatives(
             ChangeOfRepresentationRequest.builder()
                 .by(idamService.getIdamFullName(authToken))
-                .party(isApplicant ? "applicant" : "respondent")
+                .party(isApplicant ? APPLICANT : "respondent")
                 .clientName(isApplicant ? caseDataService.buildFullApplicantName(caseDetails)
                     : caseDataService.buildFullRespondentName(caseDetails))
                 .current(objectMapper.convertValue(caseData.get(CHANGE_OF_REPS), ChangeOfRepresentatives.class))

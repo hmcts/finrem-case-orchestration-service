@@ -207,6 +207,36 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         }
     }
 
+    @Test
+    public void shouldUpdateChangeOfRepresentativesRespondent() throws Exception {
+        setUpCaseDetails("change-of-representatives-respondent.json");
+        when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
+        when(mockCaseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        when(mockCaseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(mockCaseDataService.buildFullRespondentName(any())).thenReturn("Jane Smith");
+
+        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH
+            + "change-of-representatives-respondent-before.json")) {
+            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
+            InputStream is = getClass().getResourceAsStream(PATH
+                + "change-of-representatives-respondent-original.json");
+            CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
+
+            Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
+                authTokenGenerator.generate(),
+                originalDetails);
+            ChangeOfRepresentation actualChange = convertToChangeOfRepresentatives(caseData.get(CHANGE_OF_REPRESENTATIVES))
+                .getChangeOfRepresentation().get(0);
+            ChangeOfRepresentation expected = convertToChangeOfRepresentatives(callbackRequest.getCaseDetails()
+                .getData().get(CHANGE_OF_REPRESENTATIVES)).getChangeOfRepresentation().get(0);
+
+            assertThat(actualChange.getClientName()).isEqualTo(expected.getClientName());
+            assertThat(actualChange.getParty()).isEqualTo(expected.getParty());
+            assertThat(actualChange.getAdded()).isEqualTo(expected.getAdded());
+            assertThat(actualChange.getBy()).isEqualTo(expected.getBy());
+        }
+    }
+
     private void setUpHelper() {
 
         when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
