@@ -14,9 +14,11 @@ java:
     EVIDENCE_MANAGEMENT_SERVICE_BASEURL: "http://finrem-emca-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     ACA_SERVICE_API_BASEURL: "http://aac-manage-case-assignment-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     CCD_DATA_STORE_API_BASEURL: "http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+    IDAM_REDIRECT_URL: "https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net"
   keyVaults:
     finrem:
       secrets:
         - AppInsightsInstrumentationKey
         - finrem-case-orchestration-service-s2s-key
         - idam-secret
+        - idam-client-secret
