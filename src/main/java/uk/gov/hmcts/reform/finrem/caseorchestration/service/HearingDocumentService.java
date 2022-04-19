@@ -91,7 +91,8 @@ public class HearingDocumentService {
     }
 
     public void sendFormCAndGForBulkPrint(CaseDetails caseDetails, String authorisationToken) {
-        List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData());
+        Long caseId = caseDetails.getId();
+        List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData(), caseId.toString());
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
     }
@@ -107,7 +108,7 @@ public class HearingDocumentService {
         return caseDetails.getData().containsKey(FORM_C);
     }
 
-    private List<BulkPrintDocument> getHearingCaseDocuments(Map<String, Object> caseData) {
+    private List<BulkPrintDocument> getHearingCaseDocuments(Map<String, Object> caseData, String caseId) {
         List<BulkPrintDocument> caseDocuments = new ArrayList<>();
 
         // Render Case Data with @JSONProperty names
@@ -117,12 +118,13 @@ public class HearingDocumentService {
             return caseDocuments;
         }
 
-        log.info("Fetching Contested Paper Case bulk print document from Case Data: {}", caseData);
+        log.info("Fetching Contested Paper Case bulk print document for %s from Case Data: {}", caseId, caseData);
 
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, FORM_C).ifPresent(caseDocuments::add);
         documentHelper.getDocumentLinkAsBulkPrintDocument(caseData, FORM_G).ifPresent(caseDocuments::add);
 
         List<CaseDocument> formACaseDocuments = documentHelper.getFormADocumentsData(caseData);
+        log.info("Form A Case Documents for %s: {}", caseId, formACaseDocuments);
         caseDocuments.addAll(formACaseDocuments.stream().map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList()));
 
         log.info("Sending Contested Paper Case bulk print documents: {}", caseDocuments);
