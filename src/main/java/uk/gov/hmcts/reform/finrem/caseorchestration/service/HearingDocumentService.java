@@ -91,8 +91,8 @@ public class HearingDocumentService {
     }
 
     public void sendFormCAndGForBulkPrint(CaseDetails caseDetails, String authorisationToken) {
-        Long caseId = caseDetails.getId();
-        List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData(), caseId.toString());
+        String caseId = caseDetails.getId().toString().equals(null) ? "noId": caseDetails.getId().toString();
+        List<BulkPrintDocument> caseDocuments = getHearingCaseDocuments(caseDetails.getData(), caseId);
         bulkPrintService.printApplicantDocuments(caseDetails, authorisationToken, caseDocuments);
         bulkPrintService.printRespondentDocuments(caseDetails, authorisationToken, caseDocuments);
     }
