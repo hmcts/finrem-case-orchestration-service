@@ -8,11 +8,11 @@
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
+      "applicantRepresented": "Yes",
       "solicitorName": "Sir Solicitor",
-      "applicantRepresented": "No",
       "solicitorEmail": "sirsolicitor1@gmail.com",
       "nocParty": "applicant",
-      "natureOfRepresentationChange": "adding",
+      "natureOfRepresentationChange": "removing",
       "updateIncludesRepresentativeChange" : "Yes",
       "ApplicantOrganisationPolicy": {
         "Organisation": {
@@ -35,10 +35,10 @@
       "dateOfSeparation": "2014-01-11",
       "propertyAddress": "102",
       "rSolicitorEmail": "padmaja.ramisetti@gmail.com",
+      "respondentRepresented": "Yes",
       "rSolicitorPhone": "07411201630",
       "respondentEmail": "padmaja102.ramisetti@gmail.com",
       "appRespondentLName": "Smith",
-      "appRespondentRep": "Yes",
       "respondentPhone": "7411201631",
       "appRespondentFMName": "Jane"
     }

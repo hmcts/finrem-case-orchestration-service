@@ -23,6 +23,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -49,16 +50,8 @@ public class NoticeOfChangeControllerTest extends BaseControllerTest {
         return "/case-orchestration/representation-change";
     }
 
-    protected String savePreviousEndpoint() {
-        return "/case-orchestration/save-previous-org";
-    }
-
     protected OngoingStubbing<Map<String, Object>> whenServiceUpdatesRepresentation() {
-        return when(noticeOfChangeService.updateRepresentation(isA(CaseDetails.class), eq(AUTH_TOKEN)));
-    }
-
-    protected OngoingStubbing<Map<String, Object>> whenServiceSavesPreviousRepresentation() {
-        return when(noticeOfChangeService.savePreviousOrganisation(isA(CaseDetails.class)));
+        return when(noticeOfChangeService.updateRepresentation(isA(CaseDetails.class), eq(AUTH_TOKEN), any()));
     }
 
     protected OngoingStubbing<AboutToStartOrSubmitCallbackResponse> whenServiceAssignsCaseAccess() {
@@ -95,10 +88,10 @@ public class NoticeOfChangeControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
             .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.changeOfRepresentatives.ChangeOfRepresentation[0].party", is("applicant")))
-            .andExpect(jsonPath("$.data.changeOfRepresentatives.ChangeOfRepresentation[0].name", is("John Smith")))
-            .andExpect(jsonPath("$.data.changeOfRepresentatives.ChangeOfRepresentation[0].by", is("Claire Mumford")))
-            .andExpect(jsonPath("$.data.changeOfRepresentatives.ChangeOfRepresentation[0].added.name", is("Sir Solicitor")))
+            .andExpect(jsonPath("$.data.ChangeOfRepresentatives.ChangeOfRepresentation[0].party", is("applicant")))
+            .andExpect(jsonPath("$.data.ChangeOfRepresentatives.ChangeOfRepresentation[0].name", is("John Smith")))
+            .andExpect(jsonPath("$.data.ChangeOfRepresentatives.ChangeOfRepresentation[0].by", is("Claire Mumford")))
+            .andExpect(jsonPath("$.data.ChangeOfRepresentatives.ChangeOfRepresentation[0].added.name", is("Sir Solicitor")))
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
             .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
@@ -119,48 +112,6 @@ public class NoticeOfChangeControllerTest extends BaseControllerTest {
         whenServiceUpdatesRepresentation().thenThrow(feignError());
 
         mvc.perform(post(updateEndpoint())
-                .content(requestContent.toString())
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isInternalServerError());
-    }
-
-    @Test
-    public void savePreviousRepresentation() throws Exception {
-        doRequestSetUpContested();
-        setUpCaseDetails("applicant-previous-organisation.json");
-
-        whenServiceSavesPreviousRepresentation().thenReturn(caseDetails.getData());
-
-        mvc.perform(post(savePreviousEndpoint())
-            .content(requestContent.toString())
-            .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-            .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.ApplicantPreviousRepresentative.name", is("Sir Solicitor")))
-            .andExpect(jsonPath("$.data.ApplicantPreviousRepresentative.email", is("sirsolicitor1@gmail.com")))
-            .andExpect(jsonPath("$.data.ApplicantPreviousRepresentative.Organisation.OrganisationID", is("A31PTVA")))
-            .andExpect(jsonPath("$.data.ApplicantPreviousRepresentative.Organisation.OrganisationName", is("FRApplicantSolicitorFirm")))
-            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
-            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
-    }
-
-    @Test
-    public void savePreviousRepresentationError400() throws Exception {
-        doRequestSetUpContested();
-        mvc.perform(post(savePreviousEndpoint())
-                .content("kwuilebge")
-                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    public void savePreviousRepresentationHttpError500() throws Exception {
-        doRequestSetUpContested();
-        whenServiceSavesPreviousRepresentation().thenThrow(feignError());
-
-        mvc.perform(post(savePreviousEndpoint())
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))

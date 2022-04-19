@@ -38,8 +38,9 @@
       "respondentEmail": "padmaja102.ramisetti@gmail.com",
       "appRespondentLName": "Smith",
       "respondentPhone": "7411201631",
+      "appRespondentRep": "Yes",
       "appRespondentFMName": "Jane",
-      "changeOfRepresentatives": {
+      "ChangeOfRepresentatives": {
         "ChangeOfRepresentation": [
           {
             "party": "applicant",

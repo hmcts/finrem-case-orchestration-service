@@ -8,6 +8,7 @@
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
+      "applicantRepresented": "Yes",
       "applicantSolicitorName": "Sir Solicitor",
       "applicantSolicitorEmail": "sirsolicitor1@gmail.com",
       "nocParty": "applicant",
@@ -35,6 +36,7 @@
       "rSolicitorEmail": "padmaja.ramisetti@gmail.com",
       "rSolicitorPhone": "07411201630",
       "respondentEmail": "padmaja102.ramisetti@gmail.com",
+      "respondentRepresented": "Yes",
       "respondentLName": "Smith",
       "respondentPhone": "7411201631",
       "respondentFMName": "Jane",

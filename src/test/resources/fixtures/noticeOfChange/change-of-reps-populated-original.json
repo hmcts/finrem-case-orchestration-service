@@ -4,22 +4,15 @@
   "case_details": {
     "jurisdiction": "DIVORCE",
     "state": "applicationIssued",
-    "case_type_id": "FinancialRemedyMVP2",
+    "case_type_id": "ContestedFinancialRemedy",
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
-      "solicitorName": "Sir Solicitor",
       "applicantRepresented": "No",
-      "solicitorEmail": "sirsolicitor1@gmail.com",
       "nocParty": "applicant",
       "natureOfRepresentationChange": "adding",
       "updateIncludesRepresentativeChange" : "Yes",
       "ApplicantOrganisationPolicy": {
-        "Organisation": {
-          "OrganisationID": "A31PTVA",
-          "OrganisationName": "FRApplicantSolicitorFirm"
-        },
-        "OrgPolicyReference": "FRApplicant",
         "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
       },
       "RespondentOrganisationPolicy": {
@@ -32,15 +25,34 @@
       },
       "rSolicitorFirm": "FRRespondentSolicitorFirm",
       "rSolicitorName": "Test respondent Solicitor",
-      "dateOfSeparation": "2014-01-11",
+      "dateOfSepration": "2014-01-11",
       "propertyAddress": "102",
       "rSolicitorEmail": "padmaja.ramisetti@gmail.com",
       "rSolicitorPhone": "07411201630",
       "respondentEmail": "padmaja102.ramisetti@gmail.com",
-      "appRespondentLName": "Smith",
-      "appRespondentRep": "Yes",
+      "respondentLName": "Smith",
+      "respondentRepresented": "Yes",
       "respondentPhone": "7411201631",
-      "appRespondentFMName": "Jane"
+      "respondentFMName": "Jane",
+      "ChangeOfRepresentatives": {
+        "ChangeOfRepresentation": [
+          {
+            "party": "applicant",
+            "name": "John Smith",
+            "date": "2020-06-01",
+            "by": "Claire Mumford",
+            "via": "Notice of Change",
+            "added": {
+              "name": "Sir Solicitor",
+              "email": "sirsolicitor1@gmail.com",
+              "Organisation": {
+                "OrganisationID": "A31PTVA",
+                "OrganisationName": "FRApplicantSolicitorFirm"
+              }
+            }
+          }
+        ]
+      }
     }
   }
 }

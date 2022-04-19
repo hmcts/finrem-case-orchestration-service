@@ -11,6 +11,7 @@
       "applicantSolicitorName": "Sir Solicitor",
       "applicantSolicitorEmail": "sirsolicitor1@gmail.com",
       "nocParty": "applicant",
+      "applicantRepresented": "No",
       "natureOfRepresentationChange": "removing",
       "updateIncludesRepresentativeChange" : "Yes",
       "ApplicantOrganisationPolicy": {
@@ -38,8 +39,9 @@
       "respondentEmail": "padmaja102.ramisetti@gmail.com",
       "respondentLName": "Smith",
       "respondentPhone": "7411201631",
+      "respondentRepresented": "Yes",
       "respondentFMName": "Jane",
-      "changeOfRepresentatives": {
+      "ChangeOfRepresentatives": {
         "ChangeOfRepresentation": [
           {
             "party": "applicant",

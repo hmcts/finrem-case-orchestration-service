@@ -8,18 +8,11 @@
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
-      "solicitorName": "Sir Solicitor",
-      "applicantRepresented": "No",
-      "solicitorEmail": "sirsolicitor1@gmail.com",
+      "applicantRepresented": "Yes",
       "nocParty": "applicant",
       "natureOfRepresentationChange": "adding",
       "updateIncludesRepresentativeChange" : "Yes",
       "ApplicantOrganisationPolicy": {
-        "Organisation": {
-          "OrganisationID": "A31PTVA",
-          "OrganisationName": "FRApplicantSolicitorFirm"
-        },
-        "OrgPolicyReference": "FRApplicant",
         "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
       },
       "RespondentOrganisationPolicy": {
@@ -36,9 +29,9 @@
       "propertyAddress": "102",
       "rSolicitorEmail": "padmaja.ramisetti@gmail.com",
       "rSolicitorPhone": "07411201630",
+      "appRespondentRep": "Yes",
       "respondentEmail": "padmaja102.ramisetti@gmail.com",
       "appRespondentLName": "Smith",
-      "appRespondentRep": "Yes",
       "respondentPhone": "7411201631",
       "appRespondentFMName": "Jane"
     }

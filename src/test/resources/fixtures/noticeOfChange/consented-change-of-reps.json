@@ -9,6 +9,7 @@
       "applicantFMName": "John",
       "applicantLName": "Smith",
       "solicitorName": "Sir Solicitor",
+      "applicantRepresented": "No",
       "solicitorEmail": "sirsolicitor1@gmail.com",
       "nocParty": "applicant",
       "natureOfRepresentationChange": "adding",
@@ -37,9 +38,10 @@
       "rSolicitorPhone": "07411201630",
       "respondentEmail": "padmaja102.ramisetti@gmail.com",
       "appRespondentLName": "Smith",
+      "appRespondentRep": "Yes",
       "respondentPhone": "7411201631",
       "appRespondentFMName": "Jane",
-      "changeOfRepresentatives": {
+      "ChangeOfRepresentatives": {
         "ChangeOfRepresentation": [
           {
             "party": "applicant",

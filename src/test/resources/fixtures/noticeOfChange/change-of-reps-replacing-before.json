@@ -8,6 +8,7 @@
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
+      "applicantRepresented": "Yes",
       "applicantSolicitorName": "TestAppSolName",
       "applicantSolicitorEmail": "testappsol123@gmail.com",
       "nocParty": "applicant",
@@ -42,6 +43,7 @@
       "dateOfSeparation": "2014-01-11",
       "propertyAddress": "102",
       "rSolicitorEmail": "padmaja.ramisetti@gmail.com",
+      "respondentRepresented": "Yes",
       "rSolicitorPhone": "07411201630",
       "respondentEmail": "padmaja102.ramisetti@gmail.com",
       "respondentLName": "Smith",
