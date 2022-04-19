@@ -65,7 +65,6 @@ public class NoticeOfChangeService {
                                                     String authorizationToken,
                                                     CaseDetails originalCaseDetails) {
 
-        populateOrgPoliciesIfUnrepresented(caseDetails);
         Map<String,Object> caseData = caseDetails.getData();
         isApplicant = ((String) caseData.get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
 
@@ -169,24 +168,6 @@ public class NoticeOfChangeService {
             .value(roleItem)
             .listItems(List.of(roleItem))
             .build();
-    }
-
-    private void populateOrgPoliciesIfUnrepresented(CaseDetails caseDetails) {
-        Map<String, Object> caseData = caseDetails.getData();
-        if (!caseDataService.isApplicantRepresentedByASolicitor(caseData)) {
-            caseData.put(APPLICANT_ORGANISATION_POLICY, OrganisationPolicy.builder()
-                .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
-                .build());
-        }
-
-        if (!caseDataService.isRespondentRepresentedByASolicitor(caseData)) {
-            caseData.put(RESPONDENT_ORGANISATION_POLICY, OrganisationPolicy.builder()
-                .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
-                .build());
-        }
-
-        caseDetails.getData().putAll(caseData);
-
     }
 
 }
