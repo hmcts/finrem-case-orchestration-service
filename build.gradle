@@ -162,8 +162,8 @@ dependencyManagement {
         // prototype pollution vulnerability in handlebars
         dependency group: 'com.github.jknack', name: 'handlebars', version: '4.2.0'
 
-        //CVE-2021-22060
-        dependencySet(group: 'org.springframework', version: '5.2.20.RELEASE') {
+        //CVE-2016-1000027
+        dependencySet(group: 'org.springframework', version: '5.2.21.RELEASE') {
             entry 'spring-aop'
             entry 'spring-beans'
             entry 'spring-context'
