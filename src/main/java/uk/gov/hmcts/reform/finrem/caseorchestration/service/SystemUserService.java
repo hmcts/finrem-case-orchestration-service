@@ -18,7 +18,7 @@ public class SystemUserService {
     public String getSysUserToken() {
         log.info("Sending access token request to idam client for user {}:{}",
             userConfig.getUserName(), userConfig.getPassword());
-        return idamClient.authenticateUser(userConfig.getUserName(), userConfig.getPassword());
+        return idamClient.getAccessToken(userConfig.getUserName(), userConfig.getPassword());
     }
 
     public String getUserId(String userToken) {
