@@ -163,7 +163,7 @@ dependencyManagement {
         dependency group: 'com.github.jknack', name: 'handlebars', version: '4.2.0'
 
         //CVE-2016-1000027
-        dependencySet(group: 'org.springframework', version: '5.3.19.RELEASE') {
+        dependencySet(group: 'org.springframework', version: '5.3.18') {
             entry 'spring-aop'
             entry 'spring-beans'
             entry 'spring-context'
