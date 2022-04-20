@@ -22,8 +22,4 @@ public class SystemUserService {
         return idamClient.getAccessToken(userConfig.getUserName(), userConfig.getPassword());
     }
 
-//    public String getUserId(String userToken) {
-//        return idamClient.getUserInfo(userToken).getUid();
-//    }
-
 }
