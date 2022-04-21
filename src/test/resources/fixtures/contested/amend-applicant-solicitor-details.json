@@ -5,6 +5,7 @@
     "jurisdiction": "DIVORCE",
     "state": "applicationDrafted",
     "case_type_id": "FinancialRemedyContested",
+    "currentUserCaseRole": "[APPSOLICITOR]",
     "case_data": {
       "helpWithFeesQuestion": "Yes",
       "applicantFMName": "Poor",
