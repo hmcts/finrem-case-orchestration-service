@@ -80,10 +80,9 @@ public class UpdateRepresentationService {
             .orElse(null);
 
         log.info("About to start updating solicitor details in the case data for caseId: {}", caseDetails.getId());
-        caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, authToken));
-        Map<String, Object> caseData = updateChangeOfRepresentatives(caseDetails, addedSolicitor, removedSolicitor);
+        caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor));
 
-        return caseData;
+        return updateChangeOfRepresentatives(caseDetails, addedSolicitor, removedSolicitor);
     }
 
     private Map<String, Object> updateChangeOfRepresentatives(CaseDetails caseDetails,
@@ -110,8 +109,7 @@ public class UpdateRepresentationService {
     }
 
     private Map<String, Object> updateCaseDataWithNewSolDetails(CaseDetails caseDetails,
-                                                                ChangedRepresentative addedSolicitor,
-                                               String authToken) {
+                                                                ChangedRepresentative addedSolicitor) {
 
         Map<String, Object> caseData = caseDetails.getData();
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
@@ -120,8 +118,8 @@ public class UpdateRepresentationService {
 
         //isRepresented Boolean
         caseData.put(isApplicant ? APPLICANT_REPRESENTED : getRespondentRepresentedKey(caseDetails), YES_VALUE);
-
-        OrganisationsResponse organisationsResponse = organisationService.retrieveOrganisationsData(authToken);
+        OrganisationsResponse organisationsResponse = organisationService
+            .findOrganisationByOrgId(addedSolicitor.getOrganisation().getOrganisationID());
 
         //address
         caseData.put(solicitorAddressField,

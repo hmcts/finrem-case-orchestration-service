@@ -87,7 +87,6 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     private Organisation respondentOrg;
     private AuditEvent testAuditEvent;
     private OrganisationsResponse orgResponse;
-    private OrganisationsResponse respOrgResponse;
 
     OrganisationContactInformation organisationContactInformation = OrganisationContactInformation.builder()
         .addressLine1(ADDRESS_LINE_1)
@@ -135,12 +134,6 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .name("FRApplicantSolicitorFirm")
             .organisationIdentifier("FRApplicantSolicitorFirm")
             .build();
-
-        respOrgResponse = OrganisationsResponse.builder()
-            .contactInformation(List.of(organisationContactInformation))
-            .name("FRRespondentSolicitorFirm")
-            .organisationIdentifier("FRRespondentSolicitorFirm")
-            .build();
     }
 
     private void setUpCaseDetails(String fileName) throws Exception {
@@ -156,7 +149,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     public void shouldAddChangeOfRepsAndUpdateAppSolDetailsContested() throws Exception {
         when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
         when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
-        when(organisationService.retrieveOrganisationsData(any())).thenReturn(orgResponse);
+        when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
         when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
             .thenReturn(prepareSolAddressData(orgResponse));
         when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
@@ -204,7 +197,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     public void shouldAddChangeOfRepsAndUpdateAppSolDetailsConsented() throws Exception {
         when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
         when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
-        when(organisationService.retrieveOrganisationsData(any())).thenReturn(orgResponse);
+        when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
         when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
             .thenReturn(prepareSolAddressData(orgResponse));
         when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
@@ -252,7 +245,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     public void shouldUpdateRespSolDetails() throws Exception {
         when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
         when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
-        when(organisationService.retrieveOrganisationsData(any())).thenReturn(orgResponse);
+        when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
         when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
             .thenReturn(prepareSolAddressData(orgResponse));
         when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
@@ -318,7 +311,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
         when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
         when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(replacingSolicitor);
-        when(organisationService.retrieveOrganisationsData(any())).thenReturn(secondOrgResponse);
+        when(organisationService.findOrganisationByOrgId(any())).thenReturn(secondOrgResponse);
         when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(secondOrgResponse))
             .thenReturn(prepareSolAddressData(secondOrgResponse));
         when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
