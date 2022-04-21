@@ -11,6 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresenta
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.UUID;
+
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 @Slf4j
 @Service
@@ -30,7 +33,7 @@ public class ChangeOfRepresentationService {
                     .orElse(new ArrayList<>())).build())
             .orElse(ChangeOfRepresentatives.builder().changeOfRepresentation(new ArrayList<>()).build());
 
-        change.addChangeOfRepresentation(
+        change.addChangeOfRepresentation(element(UUID.randomUUID(),
             ChangeOfRepresentation.builder()
                 .party(changeOfRepresentationRequest.getParty())
                 .clientName(changeOfRepresentationRequest.getClientName())
@@ -40,7 +43,7 @@ public class ChangeOfRepresentationService {
                 .added(changeOfRepresentationRequest.getAddedRepresentative())
                 .removed(changeOfRepresentationRequest.getRemovedRepresentative())
                 .build()
-        );
+        ));
         log.info("Updated change of representatives: {}", change);
         return change;
     }

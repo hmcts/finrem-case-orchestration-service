@@ -59,17 +59,20 @@
       "ChangeOfRepresentatives":
       [
           {
-            "party": "applicant",
-            "name": "John Smith",
-            "date": "2020-06-01",
-            "by": "Sir Solicitor",
-            "via": "Notice of Change",
-            "added": {
-              "name": "Sir Solicitor",
-              "email": "sirsolicitor1@gmail.com",
-              "Organisation": {
-                "OrganisationID": "A31PTVA",
-                "OrganisationName": "FRApplicantSolicitorFirm"
+            "id": "60dbe6bc-c1a7-11ec-9d64-0242ac120002",
+            "value": {
+              "party": "applicant",
+              "name": "John Smith",
+              "date": "2020-06-01",
+              "by": "Sir Solicitor",
+              "via": "Notice of Change",
+              "added": {
+                "name": "Sir Solicitor",
+                "email": "sirsolicitor1@gmail.com",
+                "Organisation": {
+                  "OrganisationID": "A31PTVA",
+                  "OrganisationName": "FRApplicantSolicitorFirm"
+                }
               }
             }
           }

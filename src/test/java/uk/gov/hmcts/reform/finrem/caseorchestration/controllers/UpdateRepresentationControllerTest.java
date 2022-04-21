@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -75,7 +74,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
         }
     }
 
-    protected OngoingStubbing<Map<String, Object>> whenServiceUpdatesRepresentationValid() throws JsonProcessingException {
+    protected OngoingStubbing<Map<String, Object>> whenServiceUpdatesRepresentationValid() {
         return when(updateRepresentationService.updateRepresentationAsSolicitor(any(), eq(VALID_AUTH_TOKEN)));
     }
 
@@ -111,7 +110,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
             .header(AUTHORIZATION_HEADER, VALID_AUTH_TOKEN)
             .content(requestContent.toString()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.ChangeOfRepresentatives[0].by",
+            .andExpect(jsonPath("$.data.ChangeOfRepresentatives[0].value.by",
                 is("Test Applicant Solicitor")))
             .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.Organisation.OrganisationName",
                 is("FRApplicantSolicitorFirm2")))

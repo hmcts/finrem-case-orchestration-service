@@ -11,11 +11,13 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 public class ChangeOfRepresentationServiceTest extends BaseServiceTest {
 
@@ -43,32 +45,34 @@ public class ChangeOfRepresentationServiceTest extends BaseServiceTest {
         ChangeOfRepresentatives change = changeOfRepresentationService.generateChangeOfRepresentatives(request);
 
         assertThat(change.getChangeOfRepresentation()).hasSize(1);
-        assertEquals(change.getChangeOfRepresentation().get(0).getAdded(), request.getAddedRepresentative());
-        assertEquals(change.getChangeOfRepresentation().get(0).getParty(), request.getParty());
-        assertEquals(change.getChangeOfRepresentation().get(0).getClientName(), request.getClientName());
-        assertEquals(change.getChangeOfRepresentation().get(0).getBy(), request.getAddedRepresentative().getName());
-        assertNull(change.getChangeOfRepresentation().get(0).getRemoved());
+        assertEquals(change.getChangeOfRepresentation().get(0).getValue().getAdded(), request.getAddedRepresentative());
+        assertEquals(change.getChangeOfRepresentation().get(0).getValue().getParty(), request.getParty());
+        assertEquals(change.getChangeOfRepresentation().get(0).getValue().getClientName(), request.getClientName());
+        assertEquals(change.getChangeOfRepresentation().get(0).getValue().getBy(),
+            request.getAddedRepresentative().getName());
+        assertNull(change.getChangeOfRepresentation().get(0).getValue().getRemoved());
     }
 
     @Test
     public void shouldGenerateChangeOfRepresentativesWithMultipleElements() {
         ChangeOfRepresentatives current = ChangeOfRepresentatives.builder()
-            .changeOfRepresentation(new ArrayList<>(Arrays.asList(
-            ChangeOfRepresentation.builder()
-                .party("applicant")
-                .clientName("John Smith")
-                .by("Sir Solicitor")
-                .via("Notice of Change")
-                .date(LocalDate.now())
-                .added(ChangedRepresentative.builder()
-                    .name("Sir Solicitor")
-                    .email("sirsolicitor1@gmail.com")
-                    .organisation(Organisation.builder()
-                        .organisationID("A31PTVA")
-                        .organisationName("FRApplicantSolicitorFirm")
-                        .build()).build())
-                .removed(null)
-                .build()))).build();
+            .changeOfRepresentation(new ArrayList<>(List.of(element(
+                UUID.randomUUID(),
+                ChangeOfRepresentation.builder()
+                    .party("applicant")
+                    .clientName("John Smith")
+                    .by("Sir Solicitor")
+                    .via("Notice of Change")
+                    .date(LocalDate.now())
+                    .added(ChangedRepresentative.builder()
+                        .name("Sir Solicitor")
+                        .email("sirsolicitor1@gmail.com")
+                        .organisation(Organisation.builder()
+                            .organisationID("A31PTVA")
+                            .organisationName("FRApplicantSolicitorFirm")
+                            .build()).build())
+                    .removed(null)
+                    .build())))).build();
 
         request = ChangeOfRepresentationRequest.builder()
             .current(current)
@@ -115,8 +119,9 @@ public class ChangeOfRepresentationServiceTest extends BaseServiceTest {
 
         ChangeOfRepresentatives change = changeOfRepresentationService.generateChangeOfRepresentatives(request);
         assertThat(change.getChangeOfRepresentation()).hasSize(1);
-        assertEquals(change.getChangeOfRepresentation().get(0).getAdded(), request.getAddedRepresentative());
-        assertEquals(change.getChangeOfRepresentation().get(0).getRemoved(), request.getRemovedRepresentative());
+        assertEquals(change.getChangeOfRepresentation().get(0).getValue().getAdded(), request.getAddedRepresentative());
+        assertEquals(change.getChangeOfRepresentation().get(0).getValue().getRemoved(),
+            request.getRemovedRepresentative());
     }
 
 }

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentatives;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
@@ -22,6 +24,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -46,6 +49,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_PHONE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_PHONE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
@@ -174,10 +178,12 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
         assertNull(actualData.get(SOLICITOR_PHONE));
 
-        ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentation[].class)[0];
-        ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentation[].class)[0];
+        List<Element<ChangeOfRepresentation>> actualChangeOfReps = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
+            new TypeReference<>() {});
+        ChangeOfRepresentation actualChangeOfRep = actualChangeOfReps.get(0).getValue();
+        List<Element<ChangeOfRepresentation>> expectedChange = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
+            new TypeReference<>() {});
+        ChangeOfRepresentation expectedChangeOfRep = expectedChange.get(0).getValue();
 
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
@@ -223,10 +229,12 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED));
         assertNull(actualData.get(SOLICITOR_PHONE));
 
-        ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentation[].class)[0];
-        ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentation[].class)[0];
+        List<Element<ChangeOfRepresentation>> actualChangeOfReps = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
+            new TypeReference<>() {});
+        ChangeOfRepresentation actualChangeOfRep = actualChangeOfReps.get(0).getValue();
+        List<Element<ChangeOfRepresentation>> expectedChange = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
+            new TypeReference<>() {});
+        ChangeOfRepresentation expectedChangeOfRep = expectedChange.get(0).getValue();
 
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
@@ -272,10 +280,12 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT));
         assertNull(actualData.get(RESP_SOLICITOR_PHONE));
 
-        ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentation[].class)[0];
-        ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentation[].class)[0];
+        List<Element<ChangeOfRepresentation>> actualChangeOfReps = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
+            new TypeReference<>() {});
+        ChangeOfRepresentation actualChangeOfRep = actualChangeOfReps.get(0).getValue();
+        List<Element<ChangeOfRepresentation>> expectedChange = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
+            new TypeReference<>() {});
+        ChangeOfRepresentation expectedChangeOfRep = expectedChange.get(0).getValue();
 
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
@@ -339,10 +349,12 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
         assertNull(actualData.get(SOLICITOR_PHONE));
 
-        ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentation[].class)[0];
-        ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentation[].class)[0];
+        List<Element<ChangeOfRepresentation>> actualChangeOfReps = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
+            new TypeReference<>() {});
+        ChangeOfRepresentation actualChangeOfRep = actualChangeOfReps.get(0).getValue();
+        List<Element<ChangeOfRepresentation>> expectedChange = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
+            new TypeReference<>() {});
+        ChangeOfRepresentation expectedChangeOfRep = expectedChange.get(0).getValue();
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -385,7 +397,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .organisation(applicantOrg)
             .build();
         return ChangeOfRepresentatives.builder().changeOfRepresentation(
-            List.of(
+            List.of(element(UUID.randomUUID(),
                 ChangeOfRepresentation.builder()
                     .party("applicant")
                     .clientName("John Smith")
@@ -394,9 +406,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
                     .removed(null)
                     .by(testAppSolicitor.getFullName())
                     .via(NOTICE_OF_CHANGE)
-                    .build()
-            )
-        ).build();
+                    .build()))).build();
     }
 
     private ChangeOfRepresentatives getChangeOfRepsRespondent() {
@@ -407,18 +417,16 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .build();
 
         return ChangeOfRepresentatives.builder().changeOfRepresentation(
-            List.of(
+            List.of(element(UUID.randomUUID(),
                 ChangeOfRepresentation.builder()
-                    .party("respondent")
-                    .clientName("Jane Smith")
-                    .date(LocalDate.of(2020, 6, 1))
-                    .added(added)
-                    .removed(null)
-                    .by(testRespSolicitor.getFullName())
-                    .via(NOTICE_OF_CHANGE)
-                    .build()
-            )
-        ).build();
+                .party("respondent")
+                .clientName("Jane Smith")
+                .date(LocalDate.of(2020, 6, 1))
+                .added(added)
+                .removed(null)
+                .by(testRespSolicitor.getFullName())
+                .via(NOTICE_OF_CHANGE)
+                .build()))).build();
     }
 
     private ChangeOfRepresentatives getChangeOfRepsReplacingApplicant(UserDetails testAppSolicitorReplacing, Organisation appOrg) {
@@ -435,7 +443,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .build();
 
         return ChangeOfRepresentatives.builder().changeOfRepresentation(
-            List.of(
+            List.of(element(UUID.randomUUID(),
                 ChangeOfRepresentation.builder()
                     .party("applicant")
                     .clientName("John Smith")
@@ -444,9 +452,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
                     .removed(removed)
                     .by(testAppSolicitorReplacing.getFullName())
                     .via(NOTICE_OF_CHANGE)
-                    .build()
-            )
-        ).build();
+                    .build()))).build();
     }
 
 

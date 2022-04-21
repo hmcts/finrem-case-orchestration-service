@@ -58,7 +58,9 @@
       },
       "ChangeOfRepresentatives":
       [
-          {
+        {
+          "id": "so60dbe6bc-c1a7-11ec-9d64-0242ac120002meId",
+          "value": {
             "party": "applicant",
             "name": "John Smith",
             "date": "2020-06-01",
@@ -73,6 +75,7 @@
               }
             }
           }
+        }
       ]
     }
   }
