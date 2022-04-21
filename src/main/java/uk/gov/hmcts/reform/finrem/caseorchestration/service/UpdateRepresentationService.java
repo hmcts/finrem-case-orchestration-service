@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,7 @@ public class UpdateRepresentationService {
     private boolean isApplicant;
 
     public Map<String, Object> updateRepresentationAsSolicitor(CaseDetails caseDetails,
-                                                               String authToken) {
+                                                               String authToken)  {
 
         log.info("Updating representation for case ID {}", caseDetails.getId());
 
@@ -90,6 +91,10 @@ public class UpdateRepresentationService {
                                                               ChangedRepresentative removedSolicitor) {
 
         Map<String, Object> caseData = caseDetails.getData();
+        ChangeOfRepresentatives current = ChangeOfRepresentatives.builder()
+            .changeOfRepresentation(objectMapper.convertValue(caseData.get(CHANGE_OF_REPS),
+                new TypeReference<>() {}))
+            .build();
 
         ChangeOfRepresentatives change = changeOfRepresentationService.generateChangeOfRepresentatives(
             ChangeOfRepresentationRequest.builder()
@@ -97,13 +102,13 @@ public class UpdateRepresentationService {
                 .party(isApplicant ? "applicant" : "respondent")
                 .clientName(isApplicant ? caseDataService.buildFullApplicantName(caseDetails)
                     : caseDataService.buildFullRespondentName(caseDetails))
-                .current(objectMapper.convertValue(caseData.get(CHANGE_OF_REPS), ChangeOfRepresentatives.class))
+                .current(current)
                 .addedRepresentative(addedSolicitor)
                 .removedRepresentative(removedSolicitor)
                 .build()
         );
 
-        caseData.put(CHANGE_OF_REPS, change);
+        caseData.put(CHANGE_OF_REPS, change.getChangeOfRepresentation());
 
         return caseData;
     }

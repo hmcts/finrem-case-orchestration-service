@@ -67,8 +67,8 @@
         },
         "ApprovalRejectionTimestamp": "2020-05-25T14:25:01.000"
       },
-      "ChangeOfRepresentatives": {
-        "ChangeOfRepresentation": [
+      "ChangeOfRepresentatives":
+      [
           {
             "party": "applicant",
             "name": "John Smith",
@@ -92,8 +92,7 @@
               }
             }
           }
-        ]
-      }
+      ]
     }
   }
 }

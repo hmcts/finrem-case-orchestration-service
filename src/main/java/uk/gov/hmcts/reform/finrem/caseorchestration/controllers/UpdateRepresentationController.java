@@ -39,7 +39,7 @@ public class UpdateRepresentationController implements BaseController {
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Internal Server Error")})
     public ResponseEntity<AboutToStartOrSubmitCallbackResponse> updateRepresentation(
-        @RequestHeader(value = AUTHORIZATION_HEADER, required = false) String authToken,
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
         @RequestBody CallbackRequest ccdRequest) {
 
         CaseDetails caseDetails = ccdRequest.getCaseDetails();

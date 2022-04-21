@@ -175,9 +175,10 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(SOLICITOR_PHONE));
 
         ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
+            ChangeOfRepresentation[].class)[0];
         ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
+            ChangeOfRepresentation[].class)[0];
+
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -223,9 +224,10 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(SOLICITOR_PHONE));
 
         ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
+            ChangeOfRepresentation[].class)[0];
         ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
+            ChangeOfRepresentation[].class)[0];
+
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -271,9 +273,10 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(RESP_SOLICITOR_PHONE));
 
         ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
+            ChangeOfRepresentation[].class)[0];
         ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
+            ChangeOfRepresentation[].class)[0];
+
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -337,9 +340,9 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(SOLICITOR_PHONE));
 
         ChangeOfRepresentation actualChangeOfRep = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
+            ChangeOfRepresentation[].class)[0];
         ChangeOfRepresentation expectedChangeOfRep = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            ChangeOfRepresentatives.class).getChangeOfRepresentation().get(0);
+            ChangeOfRepresentation[].class)[0];
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
