@@ -23,11 +23,12 @@ public class ChangeOfRepresentationService {
                                                                        changeOfRepresentationRequest) {
 
         log.info("Updating change of representatives for case.");
-        ChangeOfRepresentatives change = Optional.ofNullable(changeOfRepresentationRequest.getCurrent())
-            .orElse(ChangeOfRepresentatives.builder()
-                .changeOfRepresentation(new ArrayList<>())
-                .build()
-            );
+
+        ChangeOfRepresentatives change = Optional.ofNullable(changeOfRepresentationRequest.getCurrent()).map(
+            current -> ChangeOfRepresentatives.builder()
+                .changeOfRepresentation(Optional.ofNullable(current.getChangeOfRepresentation())
+                    .orElse(new ArrayList<>())).build())
+            .orElse(ChangeOfRepresentatives.builder().changeOfRepresentation(new ArrayList<>()).build());
 
         change.addChangeOfRepresentation(
             ChangeOfRepresentation.builder()

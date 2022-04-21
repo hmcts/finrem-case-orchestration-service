@@ -18,7 +18,7 @@ import java.util.List;
 @EqualsAndHashCode
 public class ChangeOfRepresentatives {
     @JsonProperty("ChangeOfRepresentation")
-    List<ChangeOfRepresentation> changeOfRepresentation;
+    private List<ChangeOfRepresentation> changeOfRepresentation;
 
     public void addChangeOfRepresentation(ChangeOfRepresentation toAdd) {
         changeOfRepresentation.add(toAdd);
