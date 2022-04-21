@@ -6,13 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.IdamAuthApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentatives;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.util.Map;
@@ -39,7 +39,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class UpdateRepresentationService {
 
     private final AuditEventService auditEventService;
-    private final IdamClient idamClient;
+    private final IdamAuthApi idamClient;
     private final ObjectMapper objectMapper;
     private final CaseDataService caseDataService;
     private final PrdOrganisationService organisationService;
@@ -55,9 +55,12 @@ public class UpdateRepresentationService {
     public Map<String, Object> updateRepresentationAsSolicitor(CaseDetails caseDetails,
                                                                String authToken) {
 
+        log.info("Updating representation for case ID {}", caseDetails.getId());
+
         AuditEvent auditEvent = auditEventService.getLatestAuditEventByName(caseDetails.getId().toString(), NOC_EVENT)
             .orElseThrow(() -> new IllegalStateException(String.format("Could not find %s event in audit", NOC_EVENT)));
 
+        log.info("Retrieving invoker's details from idam with token: {} and id: {}", authToken, auditEvent.getUserId());
         UserDetails solicitorToAdd = idamClient.getUserByUserId(authToken, auditEvent.getUserId());
         ChangeOrganisationRequest change = getChangeOrganisationRequest(caseDetails);
         isApplicant = change.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
@@ -77,7 +80,7 @@ public class UpdateRepresentationService {
             .organisation(org).build())
             .orElse(null);
 
-        //Update Solicitor's contact details in the data
+        log.info("About to start updating solicitor details in the case data for caseId: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor, authToken));
         Map<String, Object> caseData = updateChangeOfRepresentatives(caseDetails, addedSolicitor, removedSolicitor);
 

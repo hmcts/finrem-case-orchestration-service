@@ -22,6 +22,7 @@ public class ChangeOfRepresentationService {
     public ChangeOfRepresentatives generateChangeOfRepresentatives(ChangeOfRepresentationRequest
                                                                        changeOfRepresentationRequest) {
 
+        log.info("Updating change of representatives for case.");
         ChangeOfRepresentatives change = Optional.ofNullable(changeOfRepresentationRequest.getCurrent())
             .orElse(ChangeOfRepresentatives.builder()
                 .changeOfRepresentation(new ArrayList<>())
@@ -39,7 +40,7 @@ public class ChangeOfRepresentationService {
                 .removed(changeOfRepresentationRequest.getRemovedRepresentative())
                 .build()
         );
-
+        log.info("Updated change of representatives: {}", change);
         return change;
     }
 

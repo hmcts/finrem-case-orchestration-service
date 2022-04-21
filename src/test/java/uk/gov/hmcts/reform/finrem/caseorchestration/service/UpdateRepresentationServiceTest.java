@@ -7,6 +7,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.IdamAuthApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Address;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentatives;
@@ -15,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationContactInformation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 import java.io.InputStream;
@@ -70,7 +70,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     private AuditEventService auditEventService;
 
     @MockBean
-    private IdamClient idamClient;
+    private IdamAuthApi idamClient;
 
     @MockBean
     private CaseDataService caseDataService;
