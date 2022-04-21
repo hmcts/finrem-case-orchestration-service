@@ -131,4 +131,9 @@
         <packageUrl regex="true">^pkg:maven/org\.springframework\.security/spring\-security\-rsa@.*$</packageUrl>
         <cve>CVE-2022-31569</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[file name: spring-core-5.2.20.RELEASE.jar]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring\-core@.*$</packageUrl>
+        <vulnerabilityName>CVE-2016-1000027</vulnerabilityName>
+    </suppress>
 </suppressions>
