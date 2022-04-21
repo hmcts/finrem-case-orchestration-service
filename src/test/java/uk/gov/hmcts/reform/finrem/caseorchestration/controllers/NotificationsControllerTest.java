@@ -30,6 +30,7 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -37,6 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.FINAL_ORDER_COLLECTION;
+
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(NotificationsController.class)
@@ -882,6 +884,58 @@ public class NotificationsControllerTest extends BaseControllerTest {
 
         verify(notificationService).sendTransferToLocalCourtEmail(any());
         verify(transferCourtService).storeTransferToCourtEmail(any());
+    }
+
+    @Test
+    public void shouldSendInterimHearingWhenAgreed() {
+        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
+
+        verify(notificationService, times(1)).sendInterimNotificationEmailToApplicantSolicitor(any());
+        verify(notificationService, times(1)).sendInterimNotificationEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void shouldNotSendInterimHearingWhenNotAgreed() {
+        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
+        notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
+
+        verify(notificationService, never()).sendInterimNotificationEmailToApplicantSolicitor(any());
+        verify(notificationService, never()).sendInterimNotificationEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void shouldSendInterimHearingNotificationWhenApplicantAgreedButRespondentNotAgreed() {
+        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(true);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(false);
+
+        notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
+
+        verify(notificationService, times(1)).sendInterimNotificationEmailToApplicantSolicitor(any());
+        verify(notificationService, never()).sendInterimNotificationEmailToRespondentSolicitor(any());
+    }
+
+    @Test
+    public void shouldSendInterimHearingNotificationWhenApplicantNotAgreedButRespondentAgreed() {
+        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isContestedApplication(any())).thenReturn(true);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+        when(notificationService.shouldEmailRespondentSolicitor(any())).thenReturn(true);
+
+        notificationsController.sendInterimHearingNotification(buildCallbackInterimRequest());
+
+        verify(notificationService, never()).sendInterimNotificationEmailToApplicantSolicitor(any());
+        verify(notificationService, times(1)).sendInterimNotificationEmailToRespondentSolicitor(any());
     }
 
     private CallbackRequest createCallbackRequestWithFinalOrder() {
