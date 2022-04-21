@@ -127,7 +127,7 @@ public class HearingDocumentService {
         log.info("Form A Case Documents for {}: {}", caseId, formACaseDocuments);
         caseDocuments.addAll(formACaseDocuments.stream().map(documentHelper::getCaseDocumentAsBulkPrintDocument).collect(Collectors.toList()));
 
-        log.info("Sending Contested Paper Case bulk print documents: {}", caseDocuments);
+        log.info("Sending Contested Paper Case bulk print documents for {}: {}", caseId, caseDocuments);
 
         return caseDocuments;
     }
