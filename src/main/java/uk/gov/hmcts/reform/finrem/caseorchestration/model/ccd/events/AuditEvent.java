@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.jackson.Jacksonized;
 
 import java.time.LocalDateTime;
 
 @Data
 @Builder(toBuilder = true)
+@Jacksonized
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AuditEvent {
 

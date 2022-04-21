@@ -108,7 +108,7 @@ def versions = [
         jackson              : '2.13.2',
         jsonAssert           : '1.2.3',
         junit                : '4.13.1',
-        lombok               : '1.18.12',
+        lombok               : '1.18.20',
         mockito              : '3.4.4',
         nimbus               : '5.1',
         pact_version         : '4.1.11',
