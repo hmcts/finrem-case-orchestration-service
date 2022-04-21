@@ -2,8 +2,12 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
 import java.time.LocalDateTime;
@@ -12,20 +16,23 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 @Jacksonized
 @JsonIgnoreProperties(ignoreUnknown = true)
+@NoArgsConstructor
+@AllArgsConstructor
 public class AuditEvent {
 
     @JsonProperty("id")
-    private final String id;
+    private String id;
 
     @JsonProperty("user_id")
-    private final String userId;
+    private String userId;
 
     @JsonProperty("user_first_name")
-    private final String userFirstName;
+    private String userFirstName;
 
     @JsonProperty("user_last_name")
-    private final String userLastName;
+    private String userLastName;
 
     @JsonProperty("created_date")
-    private final LocalDateTime createdDate;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    private LocalDateTime createdDate;
 }
