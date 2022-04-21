@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TO
 public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
 
     private static final String CASE_ORCHESTRATION_UPDATE_CASE = "/case-orchestration/update-case";
+    private static final String CASE_ORCHESTRATION_UPDATE_CASE_SOLICITOR = "/case-orchestration/update-case-solicitor";
     private static final String FEE_LOOKUP_JSON = "/fixtures/fee-lookup.json";
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -195,6 +196,44 @@ public class UpdateConsentedCaseControllerTest extends BaseControllerTest {
             .andExpect(jsonPath("$.data.rSolicitorDXnumber").doesNotExist())
             .andExpect(jsonPath("$.data.rSolicitorEmail").doesNotExist())
             .andExpect(jsonPath("$.data.rSolicitorPhone").doesNotExist());
+    }
+
+    @Test
+    public void shouldDeleteRespondentSolicitorContactDetails() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/updatecase/remove-respondent-solicitor-details.json").toURI()));
+        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE_SOLICITOR)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.rSolicitorFirm").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorName").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorReference").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorAddress").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorEmail").doesNotExist())
+            .andExpect(jsonPath("$.data.rSolicitorPhone").doesNotExist())
+            .andExpect(jsonPath("$.data.RespSolNotificationsEmailConsent").doesNotExist());
+    }
+
+    @Test
+    public void shouldDeleteApplicantSolicitorContactDetails() throws Exception {
+        requestContent = objectMapper.readTree(new File(getClass()
+            .getResource("/fixtures/applicant-solicitor-to-draft-order-with-email-consent.json").toURI()));
+        mvc.perform(post(CASE_ORCHESTRATION_UPDATE_CASE_SOLICITOR)
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$.data.solicitorFirm").doesNotExist())
+            .andExpect(jsonPath("$.data.solicitorName").doesNotExist())
+            .andExpect(jsonPath("$.data.solicitorReference").doesNotExist())
+            .andExpect(jsonPath("$.data.solicitorAddress").doesNotExist())
+            .andExpect(jsonPath("$.data.solicitorEmail").doesNotExist())
+            .andExpect(jsonPath("$.data.solicitorPhone").doesNotExist())
+            .andExpect(jsonPath("$.data.solicitorAgreeToReceiveEmails").doesNotExist());
     }
 
     @Test
