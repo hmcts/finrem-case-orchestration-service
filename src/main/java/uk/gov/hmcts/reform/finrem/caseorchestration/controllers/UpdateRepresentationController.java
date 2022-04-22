@@ -50,6 +50,8 @@ public class UpdateRepresentationController implements BaseController {
 
         caseDetails.getData().putAll(updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken));
         log.info("Case details for caseID {} == {}", caseDetails.getId(), caseDetails.getData());
-        return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));
+        AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(authToken, caseDetails);
+        log.info("Case details after decision applied: {}", response);
+        return ResponseEntity.ok(response);
     }
 }
