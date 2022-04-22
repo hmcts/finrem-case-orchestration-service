@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationService;
 
@@ -59,7 +60,7 @@ public class UpdateRepresentationController implements BaseController {
         caseData.put("ChangeOfRepresentatives", response.getData().get("ChangeOfRepresentatives"));
         caseData.put("ApplicantOrganisationPolicy", response.getData().get("ApplicantOrganisationPolicy"));
         caseData.put("RespondentOrganisationPolicy", response.getData().get("RespondentOrganisationPolicy"));
-        caseData.put("changeOrganisationRequestField", ChangeOfRepresentationRequest.builder().build());
+        caseData.put("changeOrganisationRequestField", ChangeOrganisationRequest.builder().build());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }
