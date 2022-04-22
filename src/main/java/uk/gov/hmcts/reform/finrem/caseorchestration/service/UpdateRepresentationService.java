@@ -99,7 +99,7 @@ public class UpdateRepresentationService {
         ChangeOfRepresentatives change = changeOfRepresentationService.generateChangeOfRepresentatives(
             ChangeOfRepresentationRequest.builder()
                 .by(addedSolicitor.getName())
-                .party(isApplicant ? "applicant" : "respondent")
+                .party(isApplicant ? "Applicant" : "Respondent")
                 .clientName(isApplicant ? caseDataService.buildFullApplicantName(caseDetails)
                     : caseDataService.buildFullRespondentName(caseDetails))
                 .current(current)
