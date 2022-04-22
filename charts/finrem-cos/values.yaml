@@ -15,6 +15,11 @@ java:
     EVIDENCE_MANAGEMENT_SERVICE_BASEURL: "http://finrem-emca-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     ACA_SERVICE_API_BASEURL: "http://aac-manage-case-assignment-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
     CCD_DATA_STORE_API_BASEURL: "http://ccd-data-store-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal"
+  autoscaling:
+    enabled: true
+    maxReplicas: 4
+    minReplicas: 2
+    targetCPUUtilizationPercentage: 80 # Default is 80% target CPU utilization
   keyVaults:
     finrem:
       secrets:
