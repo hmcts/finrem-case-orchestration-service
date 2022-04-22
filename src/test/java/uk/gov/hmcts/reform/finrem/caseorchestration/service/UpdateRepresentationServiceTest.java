@@ -429,7 +429,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
                 .build()))).build();
     }
 
-    private ChangeOfRepresentatives getChangeOfRepsReplacingApplicant(UserDetails testAppSolicitorReplacing, Organisation appOrg) {
+    private ChangeOfRepresentatives getChangeOfRepsReplacingApplicant(UserDetails testAppSolicitorReplacing,
+                                                                      Organisation appOrg) {
         ChangedRepresentative added = ChangedRepresentative.builder()
             .name(testAppSolicitorReplacing.getFullName())
             .email(testAppSolicitorReplacing.getEmail())

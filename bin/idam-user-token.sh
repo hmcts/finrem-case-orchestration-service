@@ -1,11 +1,11 @@
 #!/bin/sh
 
-IMPORTER_USERNAME=${1:-fr_system_user@sharklasers.com}
-IMPORTER_PASSWORD=${2:-I87ef91zA!}
-IDAM_URI="https://idam-api.aat.platform.hmcts.net"
-REDIRECT_URI="https://finrem-frontend-aat.service.core-compute-aat.internal/oauth2/callback"
-CLIENT_ID="finrem"
-CLIENT_SECRET="2QFX-7GOV-GVYN-A5CA"
+IMPORTER_USERNAME=${1:-ccd.docker.default@hmcts.net}
+IMPORTER_PASSWORD=${2:-Pa55word11}
+IDAM_URI="http://localhost:5000"
+REDIRECT_URI="http://localhost:3451/oauth2redirect"
+CLIENT_ID="ccd_gateway"
+CLIENT_SECRET="ccd_gateway_secret"
 
 code=$(curl ${CURL_OPTS} -u "${IMPORTER_USERNAME}:${IMPORTER_PASSWORD}" -XPOST "${IDAM_URI}/oauth2/authorize?redirect_uri=${REDIRECT_URI}&response_type=code&client_id=${CLIENT_ID}" -d "" | jq -r .code)
 
