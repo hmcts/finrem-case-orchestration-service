@@ -46,7 +46,6 @@ public class ChangeOfRepresentationService {
                 .build()
         ));
         log.info("Updated change of representatives: {}", change);
-        change.getChangeOfRepresentation().sort(Comparator.comparing(e -> e.getValue().getDate()));
 
         return change;
     }
