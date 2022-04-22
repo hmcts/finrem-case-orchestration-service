@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRo
 
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.SERVICE_AUTHORISATION_HEADER;
 
 @FeignClient(name = "data-store-api", url = "${ccd.data-store.api.baseurl}")
 @Configuration
@@ -18,5 +19,6 @@ public interface DataStoreClient {
         @GetMapping(
             path = "/case-users",
             headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE)
-        CaseAssignedUserRolesResource getCaseAssignedUserRoles(@PathVariable("case_ids") Long caseID, @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken);
+        CaseAssignedUserRolesResource getCaseAssignedUserRoles(@PathVariable("case_ids") Long caseID, @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken,
+                                                               @RequestHeader(SERVICE_AUTHORISATION_HEADER) String serviceAuthorization);
 }

@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRole;
@@ -28,6 +29,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @RunWith(MockitoJUnitRunner.class)
 public class CaseAssignedRoleServiceTest {
 
+    private static final String SERVICE_AUTH_TOKEN = "serviceAuthToken";
     private CaseAssignedRoleService caseAssignedRoleService;
     private static final String OTHER_ROLES = "otherRoles";
 
@@ -49,11 +51,15 @@ public class CaseAssignedRoleServiceTest {
     @Mock
     private CaseAssignedUserRole caseAssignedUserRole;
 
+    @Mock
+    private  AuthTokenGenerator authTokenGenerator;
+
+
     @Before
     public void setUp() {
         Map<String, Object> case_data = new HashMap<>();
         caseDetails = CaseDetails.builder().id(1234L).data(case_data).build();
-        caseAssignedRoleService = new CaseAssignedRoleService(dataStoreClient, caseDataService);
+        caseAssignedRoleService = new CaseAssignedRoleService(dataStoreClient, caseDataService, authTokenGenerator);
     }
 
     @Test
@@ -100,7 +106,8 @@ public class CaseAssignedRoleServiceTest {
     }
 
     private void mockMethodCalls(String role, boolean isConsentedApplication ) {
-        when(dataStoreClient.getCaseAssignedUserRoles(caseDetails.getId(), AUTH_TOKEN)).thenReturn(caseAssignedUserRolesResource);
+        when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
+        when(dataStoreClient.getCaseAssignedUserRoles(caseDetails.getId(), AUTH_TOKEN, SERVICE_AUTH_TOKEN) ).thenReturn(caseAssignedUserRolesResource);
         when(caseAssignedUserRolesResource.getCaseAssignedUserRoles()).thenReturn(userRoles);
         when(userRoles.get(0)).thenReturn(caseAssignedUserRole);
         when(caseAssignedUserRole.getCaseRole()).thenReturn(role);

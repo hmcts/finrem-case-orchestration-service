@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.finrem.caseorchestration.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.DataStoreClient;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignedUserRolesResource;
@@ -24,11 +25,12 @@ public class CaseAssignedRoleService {
 
     private final DataStoreClient dataStoreClient;
     private final CaseDataService caseDataService;
+    private final AuthTokenGenerator authTokenGenerator;
 
     public Map<String, Object> setCaseAssignedUserRole(CaseDetails caseDetails,
                                                        String authToken) {
 
-        CaseAssignedUserRolesResource resource = dataStoreClient.getCaseAssignedUserRoles(caseDetails.getId(), authToken);
+        CaseAssignedUserRolesResource resource = dataStoreClient.getCaseAssignedUserRoles(caseDetails.getId(), authToken, authTokenGenerator.generate());
         String caseRole = resource.getCaseAssignedUserRoles().get(0).getCaseRole();
 
         boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
