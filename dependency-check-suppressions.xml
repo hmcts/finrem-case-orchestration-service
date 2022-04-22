@@ -39,9 +39,7 @@
         <cve>CVE-2020-36518</cve>
     </suppress>
     <suppress>
-        <notes><![CDATA[
-   file name: spring-core-5.2.20.RELEASE.jar
-   ]]></notes>
+        <notes><![CDATA[file name: spring-core-5.2.20.RELEASE.jar]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.springframework/spring\-core@.*$</packageUrl>
         <vulnerabilityName>CVE-2016-1000027</vulnerabilityName>
     </suppress>
