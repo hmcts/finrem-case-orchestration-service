@@ -112,8 +112,8 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.data.ChangeOfRepresentatives[0].value.by",
                 is("Test Applicant Solicitor")))
-            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.Organisation.OrganisationName",
-                is("FRApplicantSolicitorFirm2")))
+            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy.Organisation.OrganisationID",
+                is("A31PTVU")))
             .andExpect(jsonPath("$.data.applicantSolicitorName", is("Test Applicant Solicitor")))
             .andExpect(jsonPath("$.data.applicantSolicitorEmail", is("appsolicitor1@yahoo.com")))
             .andExpect(jsonPath("$.errors", is(emptyOrNullString())))

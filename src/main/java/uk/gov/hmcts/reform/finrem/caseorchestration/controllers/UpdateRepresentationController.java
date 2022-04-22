@@ -15,8 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationService;
+
+import java.util.Map;
 
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
@@ -52,7 +55,11 @@ public class UpdateRepresentationController implements BaseController {
         log.info("Case details for caseID {} == {}", caseDetails.getId(), caseDetails.getData());
         AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(authToken, caseDetails);
         log.info("Case details after decision applied: {}", response);
-        caseDetails.getData().put("ChangeOfRepresentatives", response.getData().get("ChangeOfRepresentatives"));
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+        Map<String, Object> caseData = caseDetails.getData();
+        caseData.put("ChangeOfRepresentatives", response.getData().get("ChangeOfRepresentatives"));
+        caseData.put("ApplicantOrganisationPolicy", response.getData().get("ApplicantOrganisationPolicy"));
+        caseData.put("RespondentOrganisationPolicy", response.getData().get("RespondentOrganisationPolicy"));
+        caseData.put("changeOrganisationRequestField", ChangeOfRepresentationRequest.builder().build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 }
