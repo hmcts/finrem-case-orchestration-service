@@ -52,6 +52,7 @@ public class UpdateRepresentationController implements BaseController {
         log.info("Case details for caseID {} == {}", caseDetails.getId(), caseDetails.getData());
         AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(authToken, caseDetails);
         log.info("Case details after decision applied: {}", response);
-        return ResponseEntity.ok(response);
+        caseDetails.getData().put("ChangeOfRepresentatives", response.getData().get("ChangeOfRepresentatives"));
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
 }
