@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresenta
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -45,6 +46,8 @@ public class ChangeOfRepresentationService {
                 .build()
         ));
         log.info("Updated change of representatives: {}", change);
+
+        change.getChangeOfRepresentation().sort(Comparator.comparing(element -> element.getValue().getDate()));
 
         return change;
     }
