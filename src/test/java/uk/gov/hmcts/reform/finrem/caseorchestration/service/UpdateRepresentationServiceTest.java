@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -92,6 +94,9 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     private AuditEvent testAuditEvent;
     private OrganisationsResponse orgResponse;
 
+    private final Function<Map<String, Object>, List<Element<ChangeOfRepresentation>>> getFirstChangeElement =
+        this::convertToChangeOfRepresentation;
+
     OrganisationContactInformation organisationContactInformation = OrganisationContactInformation.builder()
         .addressLine1(ADDRESS_LINE_1)
         .addressLine2(ADDRESS_LINE_2)
@@ -151,23 +156,12 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldAddChangeOfRepsAndUpdateAppSolDetailsContested() throws Exception {
-        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
-        when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
-        when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
-        when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
-            .thenReturn(prepareSolAddressData(orgResponse));
-        when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
-            .thenReturn(getChangeOfRepsAppContested());
-        when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
-            .thenReturn(getUpdatedContactData("contestedAppSolicitorAdding"));
-
-
+        setUpDefaultMockContext();
         setUpCaseDetails("contestedAppSolicitorAdding/after-update-details.json");
-        try (InputStream resourceAsStream = getClass()
-                     .getResourceAsStream(PATH + "contestedAppSolicitorAdding/change-of-representatives-before.json")) {
-            initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
-                .getCaseDetails();
-        }
+
+        InputStream resourceAsStream = getClass().getResourceAsStream(PATH
+            + "contestedAppSolicitorAdding/change-of-representatives-before.json");
+        initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
             .updateRepresentationAsSolicitor(initialDetails, "bebe");
@@ -178,13 +172,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
         assertNull(actualData.get(SOLICITOR_PHONE));
 
-        List<Element<ChangeOfRepresentation>> actualChangeOfReps = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            new TypeReference<>() {});
-        ChangeOfRepresentation actualChangeOfRep = actualChangeOfReps.get(0).getValue();
-        List<Element<ChangeOfRepresentation>> expectedChange = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            new TypeReference<>() {});
-        ChangeOfRepresentation expectedChangeOfRep = expectedChange.get(0).getValue();
-
+        ChangeOfRepresentation actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
+        ChangeOfRepresentation expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -202,17 +191,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldAddChangeOfRepsAndUpdateAppSolDetailsConsented() throws Exception {
-        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
-        when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
-        when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
-        when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
-            .thenReturn(prepareSolAddressData(orgResponse));
-        when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
-            .thenReturn(getChangeOfRepsAppContested());
-        when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
-            .thenReturn(getUpdatedContactData("consentedAppSolicitorAdding"));
-        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
-
+        String fixture = "consentedAppSolicitorAdding";
+        setUpMockContext(testAppSolicitor, orgResponse, this::getChangeOfRepsAppContested, fixture, true);
         setUpCaseDetails("consentedAppSolicitorAdding/after-update-details.json");
         try (InputStream resourceAsStream = getClass()
             .getResourceAsStream(PATH + "consentedAppSolicitorAdding/change-of-representatives-before.json")) {
@@ -229,13 +209,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED));
         assertNull(actualData.get(SOLICITOR_PHONE));
 
-        List<Element<ChangeOfRepresentation>> actualChangeOfReps = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            new TypeReference<>() {});
-        ChangeOfRepresentation actualChangeOfRep = actualChangeOfReps.get(0).getValue();
-        List<Element<ChangeOfRepresentation>> expectedChange = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            new TypeReference<>() {});
-        ChangeOfRepresentation expectedChangeOfRep = expectedChange.get(0).getValue();
-
+        ChangeOfRepresentation actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
+        ChangeOfRepresentation expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -253,23 +228,12 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldUpdateRespSolDetails() throws Exception {
-        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
-        when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
-        when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
-        when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
-            .thenReturn(prepareSolAddressData(orgResponse));
-        when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
-            .thenReturn(getChangeOfRepsRespondent());
-        when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
-            .thenReturn(getUpdatedContactData("RespSolicitorAdding"));
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-
+        String fixture = "RespSolicitorAdding";
+        setUpMockContext(testRespSolicitor, orgResponse, this::getChangeOfRepsRespondent, fixture, false);
         setUpCaseDetails("RespSolicitorAdding/after-update-details.json");
-        try (InputStream resourceAsStream = getClass()
-            .getResourceAsStream(PATH + "RespSolicitorAdding/change-of-representatives-before.json")) {
-            initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
-                .getCaseDetails();
-        }
+        InputStream resourceAsStream = getClass()
+           .getResourceAsStream(PATH + "RespSolicitorAdding/change-of-representatives-before.json");
+        initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
             .updateRepresentationAsSolicitor(initialDetails, "bebe");
@@ -280,13 +244,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT));
         assertNull(actualData.get(RESP_SOLICITOR_PHONE));
 
-        List<Element<ChangeOfRepresentation>> actualChangeOfReps = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            new TypeReference<>() {});
-        ChangeOfRepresentation actualChangeOfRep = actualChangeOfReps.get(0).getValue();
-        List<Element<ChangeOfRepresentation>> expectedChange = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            new TypeReference<>() {});
-        ChangeOfRepresentation expectedChangeOfRep = expectedChange.get(0).getValue();
-
+        ChangeOfRepresentation actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
+        ChangeOfRepresentation expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -305,43 +264,25 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldUpdateContactDetailsAppSolReplacing() throws Exception {
-        UserDetails replacingSolicitor = UserDetails.builder()
-            .forename("Test Applicant")
-            .surname("Solicitor")
-            .email("appsolicitor1@yahoo.com")
-            .build();
+        UserDetails replacingSolicitor = UserDetails.builder().forename("Test Applicant").surname("Solicitor")
+            .email("appsolicitor1@yahoo.com").build();
 
-        Organisation secondAppOrg = Organisation.builder()
-            .organisationName("FRApplicantSolicitorFirm2")
-            .organisationID("A31PTVU")
-            .build();
+        Organisation secondAppOrg = Organisation.builder().organisationName("FRApplicantSolicitorFirm2")
+            .organisationID("A31PTVU").build();
 
         OrganisationsResponse secondOrgResponse = OrganisationsResponse.builder()
-            .contactInformation(List.of(organisationContactInformation))
-            .name("FRApplicantSolicitorFirm2")
-            .organisationIdentifier("FRApplicantSolicitorFirm2")
-            .build();
+            .contactInformation(List.of(organisationContactInformation)).name("FRApplicantSolicitorFirm2")
+            .organisationIdentifier("FRApplicantSolicitorFirm2").build();
 
-        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
-        when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(replacingSolicitor);
-        when(organisationService.findOrganisationByOrgId(any())).thenReturn(secondOrgResponse);
-        when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(secondOrgResponse))
-            .thenReturn(prepareSolAddressData(secondOrgResponse));
-        when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
-            .thenReturn(getChangeOfRepsReplacingApplicant(replacingSolicitor, secondAppOrg));
-        when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
-            .thenReturn(getUpdatedContactData("AppSolReplacing"));
-        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
-
+        setUpMockContextReplacing(replacingSolicitor, secondOrgResponse, secondAppOrg);
         setUpCaseDetails("AppSolReplacing/after-update-details.json");
-        try (InputStream resourceAsStream = getClass()
-            .getResourceAsStream(PATH + "AppSolReplacing/change-of-representatives-before.json")) {
-            initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class)
-                .getCaseDetails();
-        }
+
+        InputStream resourceAsStream = getClass().getResourceAsStream(PATH
+            + "AppSolReplacing/change-of-representatives-before.json");
+        initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe");
+            .updateRepresentationAsSolicitor(initialDetails, "someAuthToken");
 
         assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), "Test Applicant Solicitor");
         assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), "appsolicitor1@yahoo.com");
@@ -349,12 +290,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertNull(actualData.get(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
         assertNull(actualData.get(SOLICITOR_PHONE));
 
-        List<Element<ChangeOfRepresentation>> actualChangeOfReps = mapper.convertValue(actualData.get(CHANGE_OF_REPS),
-            new TypeReference<>() {});
-        ChangeOfRepresentation actualChangeOfRep = actualChangeOfReps.get(0).getValue();
-        List<Element<ChangeOfRepresentation>> expectedChange = mapper.convertValue(expectedCaseData.get(CHANGE_OF_REPS),
-            new TypeReference<>() {});
-        ChangeOfRepresentation expectedChangeOfRep = expectedChange.get(0).getValue();
+        ChangeOfRepresentation actualChangeOfRep = getFirstChangeElement.apply(actualData).get(0).getValue();
+        ChangeOfRepresentation expectedChangeOfRep = getFirstChangeElement.apply(expectedCaseData).get(0).getValue();
 
         assertEquals(actualChangeOfRep.getParty(), expectedChangeOfRep.getParty());
         assertEquals(actualChangeOfRep.getClientName(), expectedChangeOfRep.getClientName());
@@ -370,8 +307,55 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         assertEquals(solicitorAddress.getPostCode(), POSTCODE);
     }
 
+    private List<Element<ChangeOfRepresentation>> convertToChangeOfRepresentation(Map<String, Object> data) {
+        return mapper.convertValue(data.get(CHANGE_OF_REPS),
+            new TypeReference<>() {});
+    }
+
+    private void setUpDefaultMockContext() throws Exception {
+        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
+        when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
+        when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
+        when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
+            .thenReturn(prepareSolAddressData(orgResponse));
+        when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
+            .thenReturn(getChangeOfRepsAppContested());
+        when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
+            .thenReturn(getUpdatedContactData("contestedAppSolicitorAdding"));
+    }
+
+    private void setUpMockContext(UserDetails solicitor,
+                                  OrganisationsResponse orgResponse,
+                                  Supplier<ChangeOfRepresentatives> supplier,
+                                  String fixture,
+                                  boolean isConsented) throws Exception {
+        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
+        when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(solicitor);
+        when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
+        when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
+            .thenReturn(prepareSolAddressData(orgResponse));
+        when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
+            .thenReturn(supplier.get());
+        when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
+            .thenReturn(getUpdatedContactData(fixture));
+        when(caseDataService.isConsentedApplication(any())).thenReturn(isConsented);
+    }
+    private void setUpMockContextReplacing(UserDetails newSolicitor,
+                                           OrganisationsResponse orgResponse,
+                                           Organisation newSolicitorOrg) throws Exception {
+        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
+        when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(newSolicitor);
+        when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
+        when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
+            .thenReturn(prepareSolAddressData(orgResponse));
+        when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
+            .thenReturn(getChangeOfRepsReplacingApplicant(newSolicitor, newSolicitorOrg));
+        when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
+            .thenReturn(getUpdatedContactData("AppSolReplacing"));
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+    }
+
     private Map<String, Object> prepareSolAddressData(OrganisationsResponse organisationData) {
-        System.out.println(organisationData);
         return mapper.convertValue(Address.builder()
             .addressLine1(organisationData.getContactInformation().get(0).getAddressLine1())
             .addressLine2(organisationData.getContactInformation().get(0).getAddressLine2())
@@ -455,6 +439,5 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
                     .via(NOTICE_OF_CHANGE)
                     .build()))).build();
     }
-
 
 }
