@@ -497,4 +497,8 @@ public class CCDConfigConstant {
     public static final String INTERIM_HEARING_DOCUMENT = "interimHearingDirectionsDocument";
     public static final String INTERIM_HEARING_UPLOADED_DOCUMENT = "interimUploadAdditionalDocument";
 
+    //NoC
+    public static final String NOC_PARTY = "nocParty";
+    public static final String CHANGE_ORGANISATION_REQUEST = "changeOrganisationRequestField";
+
 }
