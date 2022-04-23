@@ -160,13 +160,14 @@ public class CaseDataController implements BaseController {
             .requestTimestamp(null)
             .approvalRejectionTimestamp(null)
             .caseRoleId(null)
-            .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED.getValue())
+            .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
             .organisationToAdd(null)
             .organisationToRemove(null)
             .reason(null)
             .build();
         caseData.put(CHANGE_REQUEST_FIELD, defaultChangeRequest);
         addOrganisationPoliciesIfPartiesNotRepresented(caseData);
+        System.out.println(caseData);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 

@@ -40,6 +40,6 @@ public class ChangeOrganisationRequest {
     private Organisation organisationToRemove;
 
     @JsonProperty("ApprovalStatus")
-    private int approvalStatus;
+    private ChangeOrganisationApprovalStatus approvalStatus;
 
 }
