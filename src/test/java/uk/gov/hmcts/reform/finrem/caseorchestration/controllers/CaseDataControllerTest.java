@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateSolicitorDetailsService;
 
 import java.io.InputStream;
-import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -315,11 +314,10 @@ public class CaseDataControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldSuccessfullySetOrgPolicies() throws Exception {
-        setUpCaseDetails("no-org-policies.json");
-        Map<String, Object> caseData = caseDetails.getData();
-        when(caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(any())).thenReturn(caseData);
 
         loadRequestContentWith(PATH + "no-org-policies.json");
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(false);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(false);
         mvc.perform(post("/case-orchestration/org-policies")
                 .content(requestContent.toString())
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
@@ -329,6 +327,21 @@ public class CaseDataControllerTest extends BaseControllerTest {
                 is(APP_SOLICITOR_POLICY)))
             .andExpect(jsonPath("$.data.RespondentOrganisationPolicy.OrgPolicyCaseAssignedRole",
                 is(RESP_SOLICITOR_POLICY)))
+            .andExpect(jsonPath("$.data.changeOrganisationRequestField").exists());
+    }
+
+    @Test
+    public void shouldNotSetOrgPolicies() throws Exception {
+        loadRequestContentWith(PATH + "no-orgs-is-represented.json");
+        when(caseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
+        when(caseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
+        mvc.perform(post("/case-orchestration/org-policies")
+                .content(requestContent.toString())
+                .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
+                .contentType(APPLICATION_JSON_VALUE))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.ApplicantOrganisationPolicy").doesNotExist())
+            .andExpect(jsonPath("$.data.RespondentOrganisationPolicy").doesNotExist())
             .andExpect(jsonPath("$.data.changeOrganisationRequestField").exists());
     }
 }

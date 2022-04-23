@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseDocument;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrder;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.RespondToOrderData;
 
@@ -25,9 +24,7 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.CASE_TYPE_ID_CONTESTED;
@@ -35,12 +32,10 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.AMENDED_CONSENT_ORDER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_CONFIDENTIAL_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CFC_COURTLIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENT_ORDER_FRC_ADDRESS;
@@ -54,9 +49,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.LONDON_FRC_LIST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.REGION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_CONFIDENTIAL_ADDRESS;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_SOLICITOR;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_RESPONSIBLE_FOR_DRAFTING_ORDER;
 
 public class  CaseDataServiceTest extends BaseServiceTest {
@@ -495,65 +488,6 @@ public class  CaseDataServiceTest extends BaseServiceTest {
             "/fixtures/empty-casedata.json"), CallbackRequest.class).getCaseDetails();
 
         assertThat(caseDataService.isContestedPaperApplication(caseDetails), is(false));
-    }
-
-    @Test
-    public void shouldAddAppSolPolicy() throws IOException {
-        Map<String, Object> caseData = mapper.readValue(getClass().getResourceAsStream(
-                "/fixtures/noticeOfChange/no-org-policies.json"), CallbackRequest.class)
-            .getCaseDetails().getData();
-
-        caseData = caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(caseData);
-        OrganisationPolicy applicantOrgPolicy = mapper.convertValue(caseData.get(APPLICANT_ORGANISATION_POLICY), OrganisationPolicy.class);
-        assertEquals(applicantOrgPolicy.getOrgPolicyCaseAssignedRole(), APP_SOLICITOR_POLICY);
-    }
-
-    @Test
-    public void shouldAddRespSolPolicy() throws IOException {
-        Map<String, Object> caseData = mapper.readValue(getClass().getResourceAsStream(
-                "/fixtures/noticeOfChange/no-org-policies.json"), CallbackRequest.class)
-            .getCaseDetails().getData();
-
-        caseData = caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(caseData);
-        OrganisationPolicy respOrgPolicy = mapper.convertValue(caseData.get(RESPONDENT_ORGANISATION_POLICY), OrganisationPolicy.class);
-        assertEquals(respOrgPolicy.getOrgPolicyCaseAssignedRole(), RESP_SOLICITOR_POLICY);
-    }
-
-    @Test
-    public void shouldNotAddAppSolPolicy() throws IOException {
-        Map<String, Object> caseData = mapper.readValue(getClass().getResourceAsStream(
-                "/fixtures/noticeOfChange/no-org-policies.json"), CallbackRequest.class)
-            .getCaseDetails().getData();
-
-        caseData.put(APPLICANT_REPRESENTED, YES_VALUE);
-        caseData = caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(caseData);
-        OrganisationPolicy applicantOrgPolicy = mapper.convertValue(caseData.get(APPLICANT_ORGANISATION_POLICY), OrganisationPolicy.class);
-        assertNull(applicantOrgPolicy);
-    }
-
-    @Test
-    public void shouldNotAddRespSolPolicyContested() throws IOException {
-        Map<String, Object> caseData = mapper.readValue(getClass().getResourceAsStream(
-                "/fixtures/noticeOfChange/no-org-policies.json"), CallbackRequest.class)
-            .getCaseDetails().getData();
-
-        caseData.put(CONTESTED_RESPONDENT_REPRESENTED, YES_VALUE);
-        caseData = caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(caseData);
-        OrganisationPolicy respOrgPolicy = mapper.convertValue(caseData.get(RESPONDENT_ORGANISATION_POLICY), OrganisationPolicy.class);
-        assertNull(respOrgPolicy);
-    }
-
-    @Test
-    public void shouldNotAddRespSolPolicyConsented() throws IOException {
-        Map<String, Object> caseData = mapper.readValue(getClass().getResourceAsStream(
-                "/fixtures/noticeOfChange/no-org-policies.json"), CallbackRequest.class)
-            .getCaseDetails().getData();
-
-        caseData.put("case_type_id", CASE_TYPE_ID_CONSENTED);
-        caseData.put(CONSENTED_RESPONDENT_REPRESENTED, YES_VALUE);
-        caseData = caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(caseData);
-        OrganisationPolicy respOrgPolicy = mapper.convertValue(caseData.get(RESPONDENT_ORGANISATION_POLICY), OrganisationPolicy.class);
-        assertNull(respOrgPolicy);
     }
 
     @Test
