@@ -4,18 +4,18 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum ChangeOrganisationApprovalStatus {
 
-    PENDING("0"),
-    APPROVED("1"),
-    REJECTED("2");
+    PENDING(0),
+    APPROVED(1),
+    REJECTED(2);
 
-    String value;
+    int value;
 
-    ChangeOrganisationApprovalStatus(String value) {
+    ChangeOrganisationApprovalStatus(int value) {
         this.value = value;
     }
 
     @JsonValue
-    public String getValue() {
+    public int getValue() {
         return value;
     }
 }

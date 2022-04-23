@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.FeatureToggleService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.IdamService;
@@ -27,7 +28,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.PAPER_APPLICATION;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CIVIL_PARTNERSHIP;
@@ -39,7 +39,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_REF;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_RESPONDENT;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.ORGANISATION_POLICY_ROLE;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
 
 @RestController
@@ -48,6 +47,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 @Slf4j
 public class CaseDataController implements BaseController {
 
+    private static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
     private final UpdateSolicitorDetailsService solicitorService;
     private final IdamService idamService;
     private final CaseDataService caseDataService;
@@ -153,19 +153,21 @@ public class CaseDataController implements BaseController {
     ) {
         Map<String, Object> caseData = callbackRequest.getCaseDetails().getData();
         caseData = caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(caseData);
-
+        ChangeOrganisationRequest defaultChangeRequest = ChangeOrganisationRequest
+            .builder()
+            .requestTimestamp(null)
+            .approvalRejectionTimestamp(null)
+            .caseRoleId(null)
+            .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED.getValue())
+            .organisationToAdd(null)
+            .organisationToRemove(null)
+            .reason(null)
+            .build();
+        caseData.put(CHANGE_REQUEST_FIELD, defaultChangeRequest);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
     private void setData(final String authToken, final Map<String, Object> caseData) {
-        OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
-            .orgPolicyCaseAssignedRole(APP_SOLICITOR_POLICY)
-            .build();
-        caseData.put(APPLICANT_ORGANISATION_POLICY, applicantOrganisationPolicy);
-        OrganisationPolicy respondentOrganisationPolicy = OrganisationPolicy.builder()
-            .orgPolicyCaseAssignedRole(RESP_SOLICITOR_POLICY)
-            .build();
-        caseData.put(RESPONDENT_ORGANISATION_POLICY, respondentOrganisationPolicy);
         if (idamService.isUserRoleAdmin(authToken)) {
             caseData.put(IS_ADMIN, YES_VALUE);
         } else {
