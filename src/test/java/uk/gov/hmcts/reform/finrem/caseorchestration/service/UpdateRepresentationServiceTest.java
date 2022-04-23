@@ -232,7 +232,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         setUpMockContext(testRespSolicitor, orgResponse, this::getChangeOfRepsRespondent, fixture, false);
         setUpCaseDetails("RespSolicitorAdding/after-update-details.json");
         InputStream resourceAsStream = getClass()
-           .getResourceAsStream(PATH + "RespSolicitorAdding/change-of-representatives-before.json");
+            .getResourceAsStream(PATH + "RespSolicitorAdding/change-of-representatives-before.json");
         initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
@@ -340,6 +340,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .thenReturn(getUpdatedContactData(fixture));
         when(caseDataService.isConsentedApplication(any())).thenReturn(isConsented);
     }
+
     private void setUpMockContextReplacing(UserDetails newSolicitor,
                                            OrganisationsResponse orgResponse,
                                            Organisation newSolicitorOrg) throws Exception {
