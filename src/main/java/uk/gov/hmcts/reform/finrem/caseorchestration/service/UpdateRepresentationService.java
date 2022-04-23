@@ -60,8 +60,6 @@ public class UpdateRepresentationService {
         AuditEvent auditEvent = auditEventService.getLatestAuditEventByName(caseDetails.getId().toString(), NOC_EVENT)
             .orElseThrow(() -> new IllegalStateException(String.format("Could not find %s event in audit", NOC_EVENT)));
 
-        caseDetails.getData()
-            .putAll(caseDataService.addOrganisationPoliciesIfPartiesNotRepresented(caseDetails.getData()));
         UserDetails solicitorToAdd = idamClient.getUserByUserId(authToken, auditEvent.getUserId());
         ChangeOrganisationRequest change = getChangeOrganisationRequest(caseDetails);
         isApplicant = change.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
