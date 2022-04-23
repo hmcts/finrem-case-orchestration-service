@@ -28,12 +28,16 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_ORGANISATION_REQUEST;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_RESPONDENT_REPRESENTED;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.NOC_PARTY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.SOLICITOR_EMAIL;
 
 @Service
 @RequiredArgsConstructor
@@ -125,10 +129,10 @@ public class NoticeOfChangeService {
         if (caseData.get(representedKey).equals(YES_VALUE)) {
             return ChangedRepresentative.builder()
                 .name(isApplicant
-                    ? caseDataService.getApplicantSolicitorName(caseDetails)
+                    ? getApplicantSolicitorName(caseDetails)
                     : (String) caseData.get(RESP_SOLICITOR_NAME))
                 .email(isApplicant
-                    ? caseDataService.getApplicantSolicitorEmail(caseDetails)
+                    ? getApplicantSolicitorEmail(caseDetails)
                     : (String) caseData.get(RESP_SOLICITOR_EMAIL))
                 .organisation(getOrganisationPolicy(caseData).getOrganisation())
                 .build();
@@ -141,10 +145,10 @@ public class NoticeOfChangeService {
         return Optional.ofNullable(getOrganisationPolicy(caseData).getOrganisation())
             .map(org -> ChangedRepresentative.builder()
                 .name(isApplicant
-                    ? caseDataService.getApplicantSolicitorName(caseDetails)
+                    ? getApplicantSolicitorName(caseDetails)
                     : (String) caseData.get(RESP_SOLICITOR_NAME))
                 .email(isApplicant
-                    ? caseDataService.getApplicantSolicitorEmail(caseDetails)
+                    ? getApplicantSolicitorEmail(caseDetails)
                     : (String) caseData.get(RESP_SOLICITOR_EMAIL))
                 .organisation(org)
                 .build()).orElse(null);
@@ -174,6 +178,18 @@ public class NoticeOfChangeService {
             .value(roleItem)
             .listItems(List.of(roleItem))
             .build();
+    }
+
+    private String getApplicantSolicitorName(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        return caseDataService.isConsentedApplication(caseDetails)
+            ? (String) caseData.get(CONSENTED_SOLICITOR_NAME) : (String) caseData.get(CONTESTED_SOLICITOR_NAME);
+    }
+
+    private String getApplicantSolicitorEmail(CaseDetails caseDetails) {
+        Map<String, Object> caseData = caseDetails.getData();
+        return caseDataService.isConsentedApplication(caseDetails)
+            ? (String) caseData.get(SOLICITOR_EMAIL) : (String) caseData.get(CONTESTED_SOLICITOR_EMAIL);
     }
 
 }
