@@ -160,7 +160,7 @@ public class CaseDataController implements BaseController {
             .requestTimestamp(null)
             .approvalRejectionTimestamp(null)
             .caseRoleId(null)
-            .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
+            .approvalStatus(null)
             .organisationToAdd(null)
             .organisationToRemove(null)
             .reason(null)
