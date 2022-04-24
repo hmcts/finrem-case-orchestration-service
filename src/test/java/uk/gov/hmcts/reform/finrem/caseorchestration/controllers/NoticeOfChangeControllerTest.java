@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +38,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestSetUpUtils.feignE
 @WebMvcTest(NoticeOfChangeController.class)
 public class NoticeOfChangeControllerTest extends BaseControllerTest {
 
-    private static final String PATH = "/fixtures/noticeOfChange/";
+    private static final String PATH = "/fixtures/noticeOfChange/caseworkerNoc/";
 
     protected JsonNode requestContent;
     protected CallbackRequest callbackRequest;
@@ -45,6 +46,7 @@ public class NoticeOfChangeControllerTest extends BaseControllerTest {
 
     @MockBean protected NoticeOfChangeService noticeOfChangeService;
     @MockBean protected AssignCaseAccessService assignCaseAccessService;
+    @MockBean protected SystemUserService systemUserService;
 
     protected String updateEndpoint() {
         return "/case-orchestration/representation-change";
@@ -56,6 +58,10 @@ public class NoticeOfChangeControllerTest extends BaseControllerTest {
 
     protected OngoingStubbing<AboutToStartOrSubmitCallbackResponse> whenServiceAssignsCaseAccess() {
         return when(assignCaseAccessService.applyDecision(isA(String.class), isA(CaseDetails.class)));
+    }
+
+    protected OngoingStubbing<String> whenServiceGetsSysUserToken() {
+        return when(systemUserService.getSysUserToken());
     }
 
     private void doRequestSetUpContested() throws IOException, URISyntaxException {
@@ -82,6 +88,7 @@ public class NoticeOfChangeControllerTest extends BaseControllerTest {
         whenServiceAssignsCaseAccess().thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDetails.getData())
             .build());
+        whenServiceGetsSysUserToken().thenReturn(AUTH_TOKEN);
 
         mvc.perform(post(updateEndpoint())
                 .content(requestContent.toString())

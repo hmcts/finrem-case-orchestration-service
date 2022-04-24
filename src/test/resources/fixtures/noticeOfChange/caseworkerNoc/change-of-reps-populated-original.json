@@ -1,0 +1,58 @@
+{
+  "token": "token_test",
+  "event_id": "some_event_id",
+  "case_details": {
+    "jurisdiction": "DIVORCE",
+    "state": "applicationIssued",
+    "case_type_id": "ContestedFinancialRemedy",
+    "case_data": {
+      "applicantFMName": "John",
+      "applicantLName": "Smith",
+      "applicantRepresented": "No",
+      "nocParty": "applicant",
+      "natureOfRepresentationChange": "adding",
+      "updateIncludesRepresentativeChange" : "Yes",
+      "ApplicantOrganisationPolicy": {
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRRespondentSolicitorFirm"
+        },
+        "OrgPolicyReference": "FRRespondent",
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "rSolicitorFirm": "FRRespondentSolicitorFirm",
+      "rSolicitorName": "Test respondent Solicitor",
+      "dateOfSepration": "2014-01-11",
+      "propertyAddress": "102",
+      "rSolicitorEmail": "padmaja.ramisetti@gmail.com",
+      "rSolicitorPhone": "07411201630",
+      "respondentEmail": "padmaja102.ramisetti@gmail.com",
+      "respondentLName": "Smith",
+      "respondentRepresented": "Yes",
+      "respondentPhone": "7411201631",
+      "respondentFMName": "Jane",
+      "ChangeOfRepresentatives": {
+        "ChangeOfRepresentation": [
+          {
+            "party": "applicant",
+            "name": "John Smith",
+            "date": "2020-06-01",
+            "by": "Claire Mumford",
+            "via": "Notice of Change",
+            "added": {
+              "name": "Sir Solicitor",
+              "email": "sirsolicitor1@gmail.com",
+              "Organisation": {
+                "OrganisationID": "A31PTVA",
+                "OrganisationName": "FRApplicantSolicitorFirm"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

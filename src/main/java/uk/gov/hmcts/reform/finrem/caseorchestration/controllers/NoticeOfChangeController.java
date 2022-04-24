@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.NoticeOfChangeService;
+import uk.gov.hmcts.reform.finrem.caseorchestration.service.SystemUserService;
 
 import java.util.Map;
 
@@ -31,6 +32,7 @@ public class NoticeOfChangeController implements BaseController {
 
     private final NoticeOfChangeService noticeOfChangeService;
     private final AssignCaseAccessService assignCaseAccessService;
+    private final SystemUserService systemUserService;
     private static final String INCLUDES_REPRESENTATION_CHANGE = "updateIncludesRepresentativeChange";
 
     @PostMapping(path = "/representation-change", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -52,9 +54,12 @@ public class NoticeOfChangeController implements BaseController {
         if (caseDetails.getData().get(INCLUDES_REPRESENTATION_CHANGE).equals(YES_VALUE)) {
             log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
             caseData = noticeOfChangeService.updateRepresentation(caseDetails, authToken, originalCaseDetails);
-            //do some stuff
-            caseDetails.setData(caseData);
-            AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(authToken, caseDetails);
+            caseDetails.getData().putAll(caseData);
+
+            AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(
+                systemUserService.getSysUserToken(),
+                caseDetails);
+
             log.info("Response from Manage case service for caseID {}: {}", caseDetails.getId(), response);
             return ResponseEntity.ok(response);
         }

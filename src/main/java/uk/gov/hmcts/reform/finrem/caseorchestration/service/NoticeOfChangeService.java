@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentatives;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
@@ -46,7 +47,6 @@ public class NoticeOfChangeService {
 
     private static final String APPLICANT = "applicant";
     private static final String CHANGE_OF_REPS = "ChangeOfRepresentatives";
-    private static final int APPROVED_STATUS = 1;
 
     private final CaseDataService caseDataService;
     private final IdamService idamService;
@@ -102,7 +102,7 @@ public class NoticeOfChangeService {
                 .build()
         );
 
-        caseData.put(CHANGE_OF_REPS, change);
+        caseData.put(CHANGE_OF_REPS, change.getChangeOfRepresentation());
         return caseData;
     }
 
@@ -117,7 +117,7 @@ public class NoticeOfChangeService {
             .caseRoleId(role)
             .requestTimestamp(LocalDateTime.now())
             .approvalRejectionTimestamp(LocalDateTime.now())
-            .approvalStatus(APPROVED_STATUS)
+            .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
             .organisationToAdd(getOrganisationPolicy(caseDetails.getData()).getOrganisation())
             .organisationToRemove(getOrganisationPolicy(originalDetails.getData()).getOrganisation())
             .build();

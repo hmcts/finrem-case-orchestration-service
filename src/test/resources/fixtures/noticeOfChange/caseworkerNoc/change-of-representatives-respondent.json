@@ -1,0 +1,66 @@
+{
+  "token": "token_test",
+  "event_id": "some_event_id",
+  "case_details": {
+    "jurisdiction": "DIVORCE",
+    "state": "applicationIssued",
+    "case_type_id": "ContestedFinancialRemedy",
+    "case_data": {
+      "applicantFMName": "John",
+      "applicantLName": "Smith",
+      "applicantSolicitorName": "Sir Solicitor",
+      "applicantSolicitorEmail": "sirsolicitor1@gmail.com",
+      "nocParty": "respondent",
+      "natureOfRepresentationChange": "adding",
+      "updateIncludesRepresentativeChange": "Yes",
+      "ApplicantOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVA",
+          "OrganisationName": "FRApplicantSolicitorFirm"
+        },
+        "OrgPolicyReference": "FRApplicant",
+        "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
+      },
+      "RespondentOrganisationPolicy": {
+        "Organisation": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRRespondentSolicitorFirm"
+        },
+        "OrgPolicyReference": "FRRespondent",
+        "OrgPolicyCaseAssignedRole": "[RESPSOLICITOR]"
+      },
+      "rSolicitorFirm": "FRRespondentSolicitorFirm",
+      "rSolicitorName": "Test respondent Solicitor",
+      "dateOfSepration": "2014-01-11",
+      "propertyAddress": "102",
+      "rSolicitorEmail": "padmaja.ramisetti@gmail.com",
+      "rSolicitorPhone": "07411201630",
+      "respondentEmail": "padmaja102.ramisetti@gmail.com",
+      "respondentLName": "Smith",
+      "respondentPhone": "7411201631",
+      "respondentRepresented": "Yes",
+      "respondentFMName": "Jane",
+      "ChangeOfRepresentatives": [
+        {
+          "id": "",
+          "value": {
+            "party": "respondent",
+            "name": "Jane Smith",
+            "date": "2020-06-01",
+            "by": "Claire Mumford",
+            "via": "Notice of Change",
+            "added": {
+              "name": "Test respondent Solicitor",
+              "email": "padmaja.ramisetti@gmail.com",
+              "Organisation": {
+                "OrganisationID": "A31PTVU",
+                "OrganisationName": "FRRespondentSolicitorFirm"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+  }
+}
