@@ -52,4 +52,27 @@ public class UpdateRepresentationController implements BaseController {
         log.info("Case details for caseID {} == {}", caseDetails.getId(), caseDetails.getData());
         return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));
     }
+
+    @PostMapping(path = "/remove-representation", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Applies Notice of Change Decision when initiated by solicitor and saves new sol's details to case")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> removeRepresentation(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+        @RequestBody CallbackRequest ccdRequest) {
+
+        CaseDetails caseDetails = ccdRequest.getCaseDetails();
+        log.info("Received request to apply Notice of Change Decision and update representation for case {}",
+            caseDetails.getId());
+
+        validateCaseData(ccdRequest);
+
+        caseDetails.getData().putAll(updateRepresentationService
+            .removeRepresentationAsCaseworker(caseDetails, authToken));
+        log.info("Case details for caseID {} == {}", caseDetails.getId(), caseDetails.getData());
+        return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));
+    }
 }

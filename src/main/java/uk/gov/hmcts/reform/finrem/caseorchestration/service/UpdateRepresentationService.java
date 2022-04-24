@@ -9,16 +9,24 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentatives;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationApprovalStatus;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvent;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.organisation.OrganisationsResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.NO_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_RESPONDENT_REPRESENTED;
@@ -28,6 +36,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESPONDENT_ORGANISATION_POLICY;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_NAME;
@@ -49,6 +58,7 @@ public class UpdateRepresentationService {
     private static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
     private static final String NOC_EVENT = "nocRequest";
     private static final String CHANGE_OF_REPS = "ChangeOfRepresentatives";
+    private static final String NOC_PARTY = "nocParty";
 
     private boolean isApplicant;
 
@@ -82,12 +92,50 @@ public class UpdateRepresentationService {
         log.info("About to start updating solicitor details in the case data for caseId: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor));
 
-        return updateChangeOfRepresentatives(caseDetails, addedSolicitor, removedSolicitor);
+        return updateChangeOfRepresentatives(caseDetails, addedSolicitor, removedSolicitor, addedSolicitor.getName());
+    }
+
+    public Map<String, Object> removeRepresentationAsCaseworker(CaseDetails caseDetails,
+                                                                String authToken) {
+        isApplicant = ((String)caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase("applicant");
+        OrganisationPolicy policy = objectMapper.convertValue(caseDetails.getData().get(isApplicant
+            ? APPLICANT_ORGANISATION_POLICY
+            : RESPONDENT_ORGANISATION_POLICY), OrganisationPolicy.class);
+
+        ChangedRepresentative removedSolicitor = Optional.ofNullable(policy.getOrganisation())
+            .map(org -> ChangedRepresentative.builder()
+                .name(isApplicant ? getApplicantSolicitorName(caseDetails)
+                    : (String) caseDetails.getData().get(RESP_SOLICITOR_NAME))
+                .email(isApplicant ? getApplicantSolicitorEmail(caseDetails)
+                    : (String) caseDetails.getData().get(RESP_SOLICITOR_EMAIL))
+                .organisation(org).build())
+            .orElseThrow(IllegalStateException::new);
+
+        caseDetails.getData().put(isApplicant ? APPLICANT_REPRESENTED
+            : getRespondentRepresentedKey(caseDetails), NO_VALUE);
+        caseDetails.getData().put(CHANGE_REQUEST_FIELD, generateChangeOrganisationRequest(policy));
+        String invokerName = idamClient.getUserFullName(authToken);
+
+        return updateChangeOfRepresentatives(caseDetails, null, removedSolicitor, invokerName);
+    }
+
+    private ChangeOrganisationRequest generateChangeOrganisationRequest(OrganisationPolicy organisationPolicy) {
+
+        return ChangeOrganisationRequest.builder()
+            .organisationToAdd(null)
+            .organisationToRemove(organisationPolicy.getOrganisation())
+            .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
+            .caseRoleId(generateCaseRoleIdDynamicListElementAsList(organisationPolicy.getOrgPolicyCaseAssignedRole()))
+            .requestTimestamp(LocalDateTime.now())
+            .approvalRejectionTimestamp(LocalDateTime.now())
+            .reason(null)
+            .build();
     }
 
     private Map<String, Object> updateChangeOfRepresentatives(CaseDetails caseDetails,
                                                               ChangedRepresentative addedSolicitor,
-                                                              ChangedRepresentative removedSolicitor) {
+                                                              ChangedRepresentative removedSolicitor,
+                                                              String invokerName) {
 
         Map<String, Object> caseData = caseDetails.getData();
         ChangeOfRepresentatives current = ChangeOfRepresentatives.builder()
@@ -97,7 +145,7 @@ public class UpdateRepresentationService {
 
         ChangeOfRepresentatives change = changeOfRepresentationService.generateChangeOfRepresentatives(
             ChangeOfRepresentationRequest.builder()
-                .by(addedSolicitor.getName())
+                .by(invokerName)
                 .party(isApplicant ? "Applicant" : "Respondent")
                 .clientName(isApplicant ? caseDataService.buildFullApplicantName(caseDetails)
                     : caseDataService.buildFullRespondentName(caseDetails))
@@ -155,5 +203,19 @@ public class UpdateRepresentationService {
     private String getRespondentRepresentedKey(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
             ? CONSENTED_RESPONDENT_REPRESENTED : CONTESTED_RESPONDENT_REPRESENTED;
+    }
+
+    // Manage case assignment's API only accepts CaseRoleId as the selected element of a dynamic list
+    // and not just as a simple string, so we have to do this ugly cast to get the API to process our COR
+    private DynamicList generateCaseRoleIdDynamicListElementAsList(String role) {
+        final DynamicListElement roleItem = DynamicListElement.builder()
+            .code(role)
+            .label(role)
+            .build();
+
+        return DynamicList.builder()
+            .value(roleItem)
+            .listItems(List.of(roleItem))
+            .build();
     }
 }

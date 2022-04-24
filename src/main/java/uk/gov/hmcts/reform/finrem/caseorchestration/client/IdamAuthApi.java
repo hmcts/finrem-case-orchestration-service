@@ -26,4 +26,9 @@ public interface IdamAuthApi {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @PathVariable("userId") String userId
     );
+
+    @GetMapping("/details")
+    UserDetails retrieveUserDetails(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation
+    );
 }

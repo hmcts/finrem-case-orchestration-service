@@ -22,6 +22,10 @@ public class IdamAuthService {
         return BEARER_AUTH_TYPE + " " + idamAuthApi.generateOpenIdToken(buildTokenRequest(username, password)).accessToken;
     }
 
+    public String getUserFullName(String authorisation) {
+        return idamAuthApi.retrieveUserDetails(authorisation).getFullName();
+    }
+
     public UserDetails getUserByUserId(String authorisation, String userId) {
         return idamAuthApi.getUserByUserId(authorisation, userId);
     }
