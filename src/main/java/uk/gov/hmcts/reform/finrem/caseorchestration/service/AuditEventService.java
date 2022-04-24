@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.events.AuditEvents
 
 import java.util.Comparator;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 @Service
 @Slf4j
@@ -20,7 +21,13 @@ public class AuditEventService {
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
 
-    public Optional<AuditEvent> getLatestAuditEventByName(String caseId, String eventName) {
+    private static final String NOC_EVENT = "nocRequest";
+    private static final String REMOVE_REPRESENTATION_EVENT = "removeRepresentationRequest";
+
+    private final Predicate<AuditEvent> isNocEvent = event -> NOC_EVENT.equals(event.getId())
+        || REMOVE_REPRESENTATION_EVENT.equals(event.getId());
+
+    public Optional<AuditEvent> getLatestNocAuditEventByName(String caseId) {
         String userToken = systemUserService.getSysUserToken();
 
         String authToken = authTokenGenerator.generate();
@@ -30,7 +37,7 @@ public class AuditEventService {
             = caseDataApi.getAuditEvents(userToken, authToken, false, caseId);
 
         return auditEventsResponse.getAuditEvents().stream()
-            .filter(auditEvent -> eventName.equals(auditEvent.getId()))
+            .filter(isNocEvent)
             .max(Comparator.comparing(AuditEvent::getCreatedDate));
     }
 }

@@ -62,7 +62,7 @@ public class AuditEventServiceTest extends BaseServiceTest {
             .thenReturn(generateAuditEventsResponse());
 
         Optional<AuditEvent> actualAuditEvent
-            = auditEventService.getLatestAuditEventByName(CASE_ID, NOC_EVENT);
+            = auditEventService.getLatestNocAuditEventByName(CASE_ID);
 
         assertTrue(actualAuditEvent.isPresent());
 
@@ -83,7 +83,7 @@ public class AuditEventServiceTest extends BaseServiceTest {
         when(auditEventsResponse.getAuditEvents()).thenReturn(auditEventList);
 
         Optional<AuditEvent> actualAuditEvent
-            = auditEventService.getLatestAuditEventByName(CASE_ID, NOC_EVENT);
+            = auditEventService.getLatestNocAuditEventByName(CASE_ID);
 
         assertThat(actualAuditEvent).isPresent().contains(expectedAuditEvent);
     }
@@ -97,7 +97,7 @@ public class AuditEventServiceTest extends BaseServiceTest {
         when(auditEventsResponse.getAuditEvents()).thenReturn(auditEventList);
 
         Optional<AuditEvent> actualAuditEvent
-            = auditEventService.getLatestAuditEventByName(CASE_ID, "nocRequest");
+            = auditEventService.getLatestNocAuditEventByName(CASE_ID);
 
         assertThat(actualAuditEvent).isEmpty();
     }

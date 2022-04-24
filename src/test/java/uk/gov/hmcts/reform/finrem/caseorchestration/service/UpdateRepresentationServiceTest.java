@@ -56,6 +56,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.ele
 public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
     private static final String PATH = "/fixtures/noticeOfChange/";
+
     private static final String NOC_EVENT = "nocRequest";
 
     public static final String ADDRESS_LINE_1 = "addressLine1";
@@ -116,12 +117,14 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .forename("Sir")
             .surname("Solicitor")
             .email("sirsolicitor1@gmail.com")
+            .roles(List.of("caseworker-divorce-financialremedy-solicitor"))
             .build();
 
         testRespSolicitor = UserDetails.builder()
             .forename("Test respondent")
             .surname("Solicitor")
             .email("padmaja.ramisetti@gmail.com")
+            .roles(List.of("caseworker-divorce-financialremedy-solicitor"))
             .build();
 
         applicantOrg = Organisation.builder()
@@ -136,6 +139,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
         testAuditEvent = AuditEvent.builder()
             .userId("randomID")
+            .id(NOC_EVENT)
             .build();
 
         orgResponse = OrganisationsResponse.builder()
@@ -265,7 +269,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     @Test
     public void shouldUpdateContactDetailsAppSolReplacing() throws Exception {
         UserDetails replacingSolicitor = UserDetails.builder().forename("Test Applicant").surname("Solicitor")
-            .email("appsolicitor1@yahoo.com").build();
+            .email("appsolicitor1@yahoo.com")
+            .roles(List.of("caseworker-divorce-financialremedy-solicitor")).build();
 
         Organisation secondAppOrg = Organisation.builder().organisationName("FRApplicantSolicitorFirm2")
             .organisationID("A31PTVU").build();
@@ -313,7 +318,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     private void setUpDefaultMockContext() throws Exception {
-        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
+        when(auditEventService.getLatestNocAuditEventByName(any())).thenReturn(Optional.of(testAuditEvent));
         when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(testAppSolicitor);
         when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
         when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
@@ -329,7 +334,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
                                   Supplier<ChangeOfRepresentatives> supplier,
                                   String fixture,
                                   boolean isConsented) throws Exception {
-        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
+        when(auditEventService.getLatestNocAuditEventByName(any())).thenReturn(Optional.of(testAuditEvent));
         when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(solicitor);
         when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
         when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
@@ -344,7 +349,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     private void setUpMockContextReplacing(UserDetails newSolicitor,
                                            OrganisationsResponse orgResponse,
                                            Organisation newSolicitorOrg) throws Exception {
-        when(auditEventService.getLatestAuditEventByName(any(), eq(NOC_EVENT))).thenReturn(Optional.of(testAuditEvent));
+        when(auditEventService.getLatestNocAuditEventByName(any())).thenReturn(Optional.of(testAuditEvent));
         when(idamClient.getUserByUserId(any(), eq(testAuditEvent.getUserId()))).thenReturn(newSolicitor);
         when(organisationService.findOrganisationByOrgId(any())).thenReturn(orgResponse);
         when(updateSolicitorDetailsService.convertOrganisationAddressToSolicitorAddress(orgResponse))
