@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.DecisionRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AboutToStartNocCallbackResponse;
 
 @Service
 @Slf4j
@@ -48,7 +49,7 @@ public class AssignCaseAccessService {
             DecisionRequest.decisionRequest(caseDetails));
     }
 
-    public AboutToStartOrSubmitCallbackResponse prepareNoC(String authToken, CallbackRequest request) {
+    public AboutToStartNocCallbackResponse prepareNoC(String authToken, CallbackRequest request) {
         return caseAssignmentApi.prepareNoC(authToken, authTokenGenerator.generate(), request);
     }
 }

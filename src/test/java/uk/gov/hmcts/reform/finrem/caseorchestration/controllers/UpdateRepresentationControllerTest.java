@@ -11,6 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AboutToStartNocCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationService;
 
@@ -86,7 +87,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
         return when(assignCaseAccessService.applyDecision(eq(VALID_AUTH_TOKEN), any()));
     }
 
-    protected OngoingStubbing<AboutToStartOrSubmitCallbackResponse> whenServicePreparesNoC() {
+    protected OngoingStubbing<AboutToStartNocCallbackResponse> whenServicePreparesNoC() {
         return when(assignCaseAccessService.prepareNoC(eq(VALID_AUTH_TOKEN), any()));
     }
 
@@ -153,7 +154,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
     @Test
     public void aboutToStartShouldInitialiseChangeOrgRequest() throws Exception {
         doRequestSetUp();
-        whenServicePreparesNoC().thenReturn(AboutToStartOrSubmitCallbackResponse
+        whenServicePreparesNoC().thenReturn(AboutToStartNocCallbackResponse
             .builder()
             .data(getUpdatedRepresentationData(jsonFixture()))
             .build());

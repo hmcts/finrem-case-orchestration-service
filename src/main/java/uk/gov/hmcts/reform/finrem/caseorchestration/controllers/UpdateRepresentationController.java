@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AboutToStartNocCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationService;
@@ -76,6 +77,7 @@ public class UpdateRepresentationController implements BaseController {
                 .caseRoleId(null)
                 .build());
 
-        return ResponseEntity.ok(assignCaseAccessService.prepareNoC(authToken, ccdRequest));
+        AboutToStartNocCallbackResponse response = assignCaseAccessService.prepareNoC(authToken, ccdRequest);
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(response.getData()).build());
     }
 }
