@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseBody;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.DecisionRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.PrepareNocRequest;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATION;
@@ -28,4 +29,14 @@ public interface CaseAssignmentApi {
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization,
         @RequestBody DecisionRequest decisionRequest);
+
+    @PostMapping(
+        value = "noc/noc-prepare",
+        consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    AboutToStartOrSubmitCallbackResponse prepareNoC(
+        @RequestHeader(AUTHORIZATION) String authorisation,
+        @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization,
+        @RequestBody PrepareNocRequest prepareNocRequest);
+
 }

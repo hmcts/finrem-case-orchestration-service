@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationService;
 
@@ -24,6 +25,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @RequestMapping(value = "/case-orchestration")
 @Slf4j
 public class UpdateRepresentationController implements BaseController {
+
+    private static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
 
     @Autowired
     private UpdateRepresentationService updateRepresentationService;
@@ -50,6 +53,30 @@ public class UpdateRepresentationController implements BaseController {
 
         caseDetails.getData().putAll(updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken));
         log.info("Case details for caseID {} == {}", caseDetails.getId(), caseDetails.getData());
-        return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));
+        AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(authToken, caseDetails);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(path = "/noc/about-to-start", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Initialises changeOrganisationRequest to null values for remove representation event")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Callback was processed successfully or in case of an error message is attached to the case",
+            response = AboutToStartOrSubmitCallbackResponse.class),
+        @ApiResponse(code = 400, message = "Bad Request"),
+        @ApiResponse(code = 500, message = "Internal Server Error")})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> setUpChangeOrgRequest(
+        @RequestHeader(value = AUTHORIZATION_HEADER) String authToken,
+        @RequestBody CallbackRequest ccdRequest) {
+        ccdRequest.getCaseDetails().getData().put(CHANGE_REQUEST_FIELD,
+            ChangeOrganisationRequest.builder()
+                .organisationToAdd(null)
+                .organisationToRemove(null)
+                .approvalRejectionTimestamp(null)
+                .approvalStatus(null)
+                .caseRoleId(null)
+                .build());
+
+        return ResponseEntity.ok(assignCaseAccessService.prepareNoC(authToken,
+            ccdRequest.getCaseDetails().getData()));
     }
 }

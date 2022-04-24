@@ -51,6 +51,10 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
         return "/case-orchestration/apply-noc-decision";
     }
 
+    protected String aboutToStartEndpoint() {
+        return "/case-orchestration/noc/about-to-start";
+    }
+
     String beforeFixture() {
         return PATH + "AppSolReplacing/change-of-representatives-before.json";
     }
@@ -80,6 +84,10 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
 
     protected OngoingStubbing<AboutToStartOrSubmitCallbackResponse> whenServiceAssignsCaseAccessValid() {
         return when(assignCaseAccessService.applyDecision(eq(VALID_AUTH_TOKEN), any()));
+    }
+
+    protected OngoingStubbing<AboutToStartOrSubmitCallbackResponse> whenServicePreparesNoC() {
+        return when(assignCaseAccessService.prepareNoC(eq(VALID_AUTH_TOKEN), any()));
     }
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
@@ -140,5 +148,25 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void aboutToStartShouldInitialiseChangeOrgRequest() throws Exception {
+        doRequestSetUp();
+        whenServicePreparesNoC().thenReturn(AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(getUpdatedRepresentationData(jsonFixture()))
+            .build());
+
+
+        mvc.perform(post(aboutToStartEndpoint())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(AUTHORIZATION_HEADER, VALID_AUTH_TOKEN)
+                .content(requestContent.toString()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.changeOrganisationRequestField.CaseRoleId.value.code",
+                is("[APPSOLICITOR]")))
+            .andExpect(jsonPath("$.errors", is(emptyOrNullString())))
+            .andExpect(jsonPath("$.warnings", is(emptyOrNullString())));
     }
 }

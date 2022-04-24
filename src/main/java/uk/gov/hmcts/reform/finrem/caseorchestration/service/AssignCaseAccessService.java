@@ -11,6 +11,9 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServi
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.DecisionRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.PrepareNocRequest;
+
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -45,5 +48,10 @@ public class AssignCaseAccessService {
         log.info("Sending payload to ManageCaseAssignment Service: {}", caseDetails);
         return caseAssignmentApi.applyDecision(authToken, authTokenGenerator.generate(),
             DecisionRequest.decisionRequest(caseDetails));
+    }
+
+    public AboutToStartOrSubmitCallbackResponse prepareNoC(String authToken, Map<String, Object> caseData) {
+        return caseAssignmentApi.prepareNoC(authToken, authTokenGenerator.generate(),
+            PrepareNocRequest.prepareNocRequest(caseData));
     }
 }
