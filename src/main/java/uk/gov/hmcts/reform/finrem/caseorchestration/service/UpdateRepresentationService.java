@@ -98,9 +98,9 @@ public class UpdateRepresentationService {
     public Map<String, Object> removeRepresentationAsCaseworker(CaseDetails caseDetails,
                                                                 String authToken) {
         isApplicant = ((String)caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase("applicant");
+
         OrganisationPolicy policy = objectMapper.convertValue(caseDetails.getData().get(isApplicant
-            ? APPLICANT_ORGANISATION_POLICY
-            : RESPONDENT_ORGANISATION_POLICY), OrganisationPolicy.class);
+            ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY), OrganisationPolicy.class);
 
         ChangedRepresentative removedSolicitor = Optional.ofNullable(policy.getOrganisation())
             .map(org -> ChangedRepresentative.builder()
