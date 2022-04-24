@@ -64,12 +64,17 @@ public class NoticeOfChangeService {
     public Map<String, Object> updateRepresentation(CaseDetails caseDetails,
                                                     String authorizationToken,
                                                     CaseDetails originalCaseDetails) {
-
+        log.info("CaseDetails for caseID{}:{}", caseDetails.getId(), caseDetails);
+        log.info("Original CaseDetails for caseID{}:{}", caseDetails.getId(), caseDetails);
         Map<String,Object> caseData = caseDetails.getData();
         isApplicant = ((String) caseData.get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
 
         caseData = updateChangeOfRepresentatives(caseDetails, authorizationToken, originalCaseDetails);
         log.info("added changeOfRepresentatives to case with caseID {}", caseDetails.getId());
+        ChangeOrganisationRequest changeOrganisationRequest = generateChangeOrganisationRequest(caseDetails,
+            originalCaseDetails);
+        log.info("Generated Change Organisation Request for caseID {} == {}", caseDetails.getId(),
+            changeOrganisationRequest);
         caseData.put(CHANGE_ORGANISATION_REQUEST, generateChangeOrganisationRequest(caseDetails, originalCaseDetails));
 
         return caseData;
