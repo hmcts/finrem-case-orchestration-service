@@ -69,6 +69,10 @@ public class NoticeOfChangeService {
     public Map<String, Object> updateRepresentation(CaseDetails caseDetails,
                                                     String authorizationToken,
                                                     CaseDetails originalCaseDetails) {
+        log.info("CaseDetails for caseID{}:{}", caseDetails.getId(), caseDetails);
+        log.info("Original CaseDetails for caseID{}:{}", caseDetails.getId(), caseDetails);
+        log.info("Applicant Org policy before: {}", originalCaseDetails.getData().get(APPLICANT_ORGANISATION_POLICY));
+        log.info("Applicant Org policy after: {}", caseDetails.getData().get(APPLICANT_ORGANISATION_POLICY));
 
         Map<String,Object> caseData = caseDetails.getData();
         isApplicant = ((String) caseData.get(NOC_PARTY)).equalsIgnoreCase(APPLICANT);
