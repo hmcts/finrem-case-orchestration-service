@@ -78,6 +78,10 @@ public class UpdateRepresentationController implements BaseController {
                 .build());
 
         AboutToStartNocCallbackResponse response = assignCaseAccessService.prepareNoC(authToken, ccdRequest);
-        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(response.getData()).build());
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
+            .data(response.getData())
+            .errors(response.getErrors())
+            .warnings(response.getWarnings())
+            .build());
     }
 }
