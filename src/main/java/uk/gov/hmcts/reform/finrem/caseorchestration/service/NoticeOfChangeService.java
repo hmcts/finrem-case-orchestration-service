@@ -80,6 +80,7 @@ public class NoticeOfChangeService {
         caseData = updateChangeOfRepresentatives(caseDetails, authorizationToken, originalCaseDetails);
         log.info("added changeOfRepresentatives to case with caseID {}", caseDetails.getId());
         caseData.put(CHANGE_ORGANISATION_REQUEST, generateChangeOrganisationRequest(caseDetails, originalCaseDetails));
+        caseData.put(APPLICANT_ORGANISATION_POLICY, originalCaseDetails.getData().get(APPLICANT_ORGANISATION_POLICY));
 
         return caseData;
     }
