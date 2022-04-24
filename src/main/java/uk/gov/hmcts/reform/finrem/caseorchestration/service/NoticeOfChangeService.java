@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOrganisation
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentative;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicList;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.DynamicListElement;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 
 import java.time.LocalDateTime;
@@ -116,15 +117,18 @@ public class NoticeOfChangeService {
 
         DynamicList role = generateCaseRoleIdDynamicListElementAsList(isApplicant ? APP_SOLICITOR_POLICY
             : RESP_SOLICITOR_POLICY);
-
+        Organisation organisationToAdd = Optional.ofNullable(getOrganisationPolicy(caseDetails.getData()))
+            .map(OrganisationPolicy::getOrganisation).orElse(null);
+        Organisation organisationToRemove = Optional.ofNullable(getOrganisationPolicy(originalDetails.getData()))
+            .map(OrganisationPolicy::getOrganisation).orElse(null);
         log.info("Generating Change Organisation Request for case with CaseID {}", caseDetails.getId());
         return ChangeOrganisationRequest.builder()
             .caseRoleId(role)
             .requestTimestamp(LocalDateTime.now())
             .approvalRejectionTimestamp(LocalDateTime.now())
             .approvalStatus(ChangeOrganisationApprovalStatus.APPROVED)
-            .organisationToAdd(getOrganisationPolicy(caseDetails.getData()).getOrganisation())
-            .organisationToRemove(getOrganisationPolicy(originalDetails.getData()).getOrganisation())
+            .organisationToAdd(organisationToAdd)
+            .organisationToRemove(organisationToRemove)
             .build();
     }
 
