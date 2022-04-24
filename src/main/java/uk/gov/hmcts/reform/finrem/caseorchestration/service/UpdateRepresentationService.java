@@ -51,7 +51,6 @@ public class UpdateRepresentationService {
     private static final String NOC_EVENT = "nocRequest";
     private static final String REMOVE_REPRESENTATION_EVENT = "removeRepresentationRequest";
     private static final String CHANGE_OF_REPS = "ChangeOfRepresentatives";
-    private static final String COURT_ADMIN = "caseworker-divorce-financial-remedy-courtadmin";
 
     private boolean isApplicant;
 
@@ -65,8 +64,7 @@ public class UpdateRepresentationService {
                 NOC_EVENT, REMOVE_REPRESENTATION_EVENT)));
 
         UserDetails invoker = idamClient.getUserByUserId(authToken, auditEvent.getUserId());
-        UserDetails solicitorToAdd = !invoker.getRoles().contains(COURT_ADMIN)
-            && auditEvent.getId().equals(NOC_EVENT) ? invoker : null;
+        UserDetails solicitorToAdd = auditEvent.getId().equals(NOC_EVENT) ? invoker : null;
         ChangeOrganisationRequest change = getChangeOrganisationRequest(caseDetails);
         isApplicant = change.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
 
