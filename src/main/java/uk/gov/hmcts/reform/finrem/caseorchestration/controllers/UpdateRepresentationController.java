@@ -76,7 +76,6 @@ public class UpdateRepresentationController implements BaseController {
                 .caseRoleId(null)
                 .build());
 
-        return ResponseEntity.ok(assignCaseAccessService.prepareNoC(authToken,
-            ccdRequest.getCaseDetails().getData()));
+        return ResponseEntity.ok(assignCaseAccessService.prepareNoC(authToken, ccdRequest));
     }
 }

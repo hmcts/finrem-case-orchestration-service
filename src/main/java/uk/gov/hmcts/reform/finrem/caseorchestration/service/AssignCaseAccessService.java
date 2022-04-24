@@ -5,15 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.CaseAssignmentApi;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.DecisionRequest;
-import uk.gov.hmcts.reform.finrem.caseorchestration.model.PrepareNocRequest;
-
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -50,8 +48,7 @@ public class AssignCaseAccessService {
             DecisionRequest.decisionRequest(caseDetails));
     }
 
-    public AboutToStartOrSubmitCallbackResponse prepareNoC(String authToken, Map<String, Object> caseData) {
-        return caseAssignmentApi.prepareNoC(authToken, authTokenGenerator.generate(),
-            PrepareNocRequest.prepareNocRequest(caseData));
+    public AboutToStartOrSubmitCallbackResponse prepareNoC(String authToken, CallbackRequest request) {
+        return caseAssignmentApi.prepareNoC(authToken, authTokenGenerator.generate(), request);
     }
 }
