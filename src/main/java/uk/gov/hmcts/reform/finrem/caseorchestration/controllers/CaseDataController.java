@@ -166,7 +166,6 @@ public class CaseDataController implements BaseController {
             .build();
         caseData.put(CHANGE_REQUEST_FIELD, defaultChangeRequest);
         addOrganisationPoliciesIfPartiesNotRepresented(caseData);
-        System.out.println(caseData);
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseData).build());
     }
 
