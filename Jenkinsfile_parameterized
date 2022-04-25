@@ -18,7 +18,9 @@ def secrets = [
                 secret("finrem-doc-s2s-auth-secret", "AUTH_PROVIDER_SERVICE_CLIENT_KEY"),
                 secret("username-solicitor","USERNAME-SOLICITOR"),
                 secret("password-solicitor","PASSWORD-SOLICITOR"),
-                secret("idam-secret" ,"OAUTH2_CLIENT_FINREM")
+                secret("idam-secret" ,"OAUTH2_CLIENT_FINREM"),
+                secret("finrem-system-update-username", "FINREM_SYSTEMUPDATE_USERNAME"),
+                secret("finrem-system-update-password", "FINREM_SYSTEMUPDATE_PASSWORD")
         ]
 ]
 
