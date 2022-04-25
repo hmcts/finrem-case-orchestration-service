@@ -106,7 +106,7 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
     public void shouldSuccessfullySetApplicantSolicitorOrganisationDetailsConsented() {
         CaseDetails caseDetails = buildCaseDetails();
 
-        when(caseDataService.isContestedApplication(caseDetails)).thenReturn(true);
+        when(caseDataService.isContestedApplication(caseDetails)).thenReturn(false);
 
         updateSolicitorDetailsService.setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, caseDetails);
 
