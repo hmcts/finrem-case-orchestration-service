@@ -77,7 +77,9 @@ public class UpdateRepresentationController implements BaseController {
                 .caseRoleId(null)
                 .build());
 
+        log.info("About to start remove representation event for caseId{}", ccdRequest.getCaseDetails().getId());
         AboutToStartNocCallbackResponse response = assignCaseAccessService.prepareNoC(authToken, ccdRequest);
+        log.info("Response from MCA for caseId {}: {}", ccdRequest.getCaseDetails().getId(), response.getData());
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder()
             .data(response.getData())
             .errors(response.getErrors())
