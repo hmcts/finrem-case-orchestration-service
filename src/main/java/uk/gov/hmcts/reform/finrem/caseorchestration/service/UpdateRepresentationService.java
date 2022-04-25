@@ -98,8 +98,7 @@ public class UpdateRepresentationService {
             return;
         }
 
-        caseDetails.getData().put(isApplicant ? APPLICANT_REPRESENTED
-            : getRespondentRepresentedKey(caseDetails), NO_VALUE);
+        updateLitigantDetails(caseDetails);
     }
 
     private Map<String, Object> updateChangeOfRepresentatives(CaseDetails caseDetails,
