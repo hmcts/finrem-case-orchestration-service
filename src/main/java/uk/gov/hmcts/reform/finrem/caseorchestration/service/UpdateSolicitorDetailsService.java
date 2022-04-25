@@ -22,6 +22,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_FIRM;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_ADDRESS;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_DX_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.RESP_SOLICITOR_FIRM;
@@ -86,6 +87,28 @@ public class UpdateSolicitorDetailsService {
 
         return removeSolicitorFields(caseData, isConsented, isApplicant);
 
+    }
+
+    public void removeAppSolicitorContactDetails(CaseDetails caseDetails) {
+        boolean isConsented = caseDataService.isConsentedApplication(caseDetails);
+        caseDetails.getData().remove(isConsented ? CONSENTED_SOLICITOR_NAME : CONTESTED_SOLICITOR_NAME);
+        caseDetails.getData().remove(isConsented ? CONSENTED_SOLICITOR_FIRM : CONTESTED_SOLICITOR_FIRM);
+        caseDetails.getData().remove(isConsented ? CONSENTED_SOLICITOR_ADDRESS : CONTESTED_SOLICITOR_ADDRESS);
+        caseDetails.getData().remove(SOLICITOR_PHONE);
+        caseDetails.getData().remove(isConsented ? SOLICITOR_EMAIL : CONTESTED_SOLICITOR_EMAIL);
+        caseDetails.getData().remove(isConsented ? CONSENTED_SOLICITOR_DX_NUMBER : CONTESTED_SOLICITOR_DX_NUMBER);
+        caseDetails.getData().remove(isConsented ? APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED
+            : APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED);
+    }
+
+    public void removeRespSolicitorContactDetails(CaseDetails caseDetails) {
+        caseDetails.getData().remove(RESP_SOLICITOR_NAME);
+        caseDetails.getData().remove(RESP_SOLICITOR_FIRM);
+        caseDetails.getData().remove(RESP_SOLICITOR_ADDRESS);
+        caseDetails.getData().remove(RESP_SOLICITOR_PHONE);
+        caseDetails.getData().remove(RESP_SOLICITOR_EMAIL);
+        caseDetails.getData().remove(RESP_SOLICITOR_DX_NUMBER);
+        caseDetails.getData().remove(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT);
     }
 
     private Map<String, Object> removeSolicitorFields(Map<String, Object> caseData,
