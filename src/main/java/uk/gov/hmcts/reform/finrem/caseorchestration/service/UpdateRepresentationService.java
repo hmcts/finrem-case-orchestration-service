@@ -49,7 +49,7 @@ public class UpdateRepresentationService {
 
     private static final String CHANGE_REQUEST_FIELD = "changeOrganisationRequestField";
     private static final String NOC_EVENT = "nocRequest";
-    private static final String REMOVE_REPRESENTATION_EVENT = "removeRepresentationRequest";
+    private static final String REMOVE_REPRESENTATION_EVENT = "removeRepresentation";
     private static final String CHANGE_OF_REPS = "ChangeOfRepresentatives";
 
     private boolean isApplicant;
@@ -98,7 +98,8 @@ public class UpdateRepresentationService {
             return;
         }
 
-        updateLitigantDetails(caseDetails);
+        caseDetails.getData().put(isApplicant ? APPLICANT_REPRESENTED
+            : getRespondentRepresentedKey(caseDetails), NO_VALUE);
     }
 
     private Map<String, Object> updateChangeOfRepresentatives(CaseDetails caseDetails,

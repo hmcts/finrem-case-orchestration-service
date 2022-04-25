@@ -22,7 +22,7 @@ public class AuditEventService {
     private final SystemUserService systemUserService;
 
     private static final String NOC_EVENT = "nocRequest";
-    private static final String REMOVE_REPRESENTATION_EVENT = "removeRepresentationRequest";
+    private static final String REMOVE_REPRESENTATION_EVENT = "removeRepresentation";
 
     private final Predicate<AuditEvent> isNocEvent = event -> NOC_EVENT.equals(event.getId())
         || REMOVE_REPRESENTATION_EVENT.equals(event.getId());
