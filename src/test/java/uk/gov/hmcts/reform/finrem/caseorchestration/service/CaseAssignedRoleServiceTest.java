@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.YES_VALUE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.AUTH_TOKEN;
@@ -57,8 +57,8 @@ public class CaseAssignedRoleServiceTest {
 
     @Before
     public void setUp() {
-        Map<String, Object> case_data = new HashMap<>();
-        caseDetails = CaseDetails.builder().id(1234L).data(case_data).build();
+        Map<String, Object> caseData = new HashMap<>();
+        caseDetails = CaseDetails.builder().id(1234L).data(caseData).build();
         caseAssignedRoleService = new CaseAssignedRoleService(dataStoreClient, caseDataService, authTokenGenerator);
     }
 
@@ -105,9 +105,9 @@ public class CaseAssignedRoleServiceTest {
         assertEquals(OTHER_ROLES, returnedValue.get(CASE_ROLE));
     }
 
-    private void mockMethodCalls(String role, boolean isConsentedApplication ) {
+    private void mockMethodCalls(String role, boolean isConsentedApplication) {
         when(authTokenGenerator.generate()).thenReturn(SERVICE_AUTH_TOKEN);
-        when(dataStoreClient.getCaseAssignedUserRoles(caseDetails.getId(), AUTH_TOKEN, SERVICE_AUTH_TOKEN) ).thenReturn(caseAssignedUserRolesResource);
+        when(dataStoreClient.getCaseAssignedUserRoles(caseDetails.getId(), AUTH_TOKEN, SERVICE_AUTH_TOKEN)).thenReturn(caseAssignedUserRolesResource);
         when(caseAssignedUserRolesResource.getCaseAssignedUserRoles()).thenReturn(userRoles);
         when(userRoles.get(0)).thenReturn(caseAssignedUserRole);
         when(caseAssignedUserRole.getCaseRole()).thenReturn(role);

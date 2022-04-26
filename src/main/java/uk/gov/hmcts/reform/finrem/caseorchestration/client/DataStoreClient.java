@@ -15,10 +15,9 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 @FeignClient(name = "data-store-api", url = "${ccd.data-store.api.baseurl}")
 @Configuration
 public interface DataStoreClient {
-
-        @GetMapping(
-            path = "/case-users",
-            headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE)
-        CaseAssignedUserRolesResource getCaseAssignedUserRoles(@PathVariable("case_ids") Long caseID, @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken,
-                                                               @RequestHeader(SERVICE_AUTHORISATION_HEADER) String serviceAuthorization);
+    @GetMapping(
+        path = "/case-users",
+        headers = CONTENT_TYPE + "=" + APPLICATION_JSON_VALUE)
+    CaseAssignedUserRolesResource getCaseAssignedUserRoles(@PathVariable("case_ids") Long caseID, @RequestHeader(HttpHeaders.AUTHORIZATION)
+        String authToken, @RequestHeader(SERVICE_AUTHORISATION_HEADER) String serviceAuthorization);
 }

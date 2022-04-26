@@ -118,9 +118,9 @@ public class UpdateContestedCaseController implements BaseController {
         validateCaseData(ccdRequest);
         Map<String, Object> caseData = caseDetails.getData();
 
-        if(caseData.get(CASE_ROLE).equals(APP_SOLICITOR_POLICY)) {
+        if (caseData.get(CASE_ROLE).equals(APP_SOLICITOR_POLICY)) {
             removeApplicantSolicitorAddress(caseData);
-        } else if(caseData.get(CASE_ROLE).equals(RESP_SOLICITOR_POLICY)) {
+        } else if (caseData.get(CASE_ROLE).equals(RESP_SOLICITOR_POLICY)) {
             removeRespondentSolicitorAddress(caseData);
         }
 
@@ -336,6 +336,7 @@ public class UpdateContestedCaseController implements BaseController {
         caseData.put(CONTESTED_SOLICITOR_EMAIL, null);
         caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, null);
     }
+
     private void updateContestedRespondentDetails(Map<String, Object> caseData) {
         if (equalsTo((String) caseData.get(CONTESTED_RESPONDENT_REPRESENTED), NO_VALUE)) {
             removeRespondentSolicitorAddress(caseData);

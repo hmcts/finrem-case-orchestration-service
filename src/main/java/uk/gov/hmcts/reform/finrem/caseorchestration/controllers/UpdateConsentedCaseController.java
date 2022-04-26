@@ -107,9 +107,9 @@ public class UpdateConsentedCaseController implements BaseController {
         validateCaseData(ccdRequest);
         Map<String, Object> caseData = caseDetails.getData();
 
-        if(caseData.get(CASE_ROLE).equals(APP_SOLICITOR_POLICY)) {
+        if (caseData.get(CASE_ROLE).equals(APP_SOLICITOR_POLICY)) {
             removeApplicantSolicitorAddress(caseData);
-        } else if(caseData.get(CASE_ROLE).equals(RESP_SOLICITOR_POLICY)) {
+        } else if (caseData.get(CASE_ROLE).equals(RESP_SOLICITOR_POLICY)) {
             removeRespondentSolicitorAddress(caseData);
         }
 
