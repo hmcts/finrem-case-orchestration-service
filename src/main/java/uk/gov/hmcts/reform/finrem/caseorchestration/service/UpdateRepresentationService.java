@@ -67,7 +67,8 @@ public class UpdateRepresentationService {
         log.info("About to start updating solicitor details in the case data for caseId: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor));
 
-        return updateChangeOfRepresentatives(caseDetails, addedSolicitor, removedSolicitor);
+        Map<String, Object> updatedCaseData = updateChangeOfRepresentatives(caseDetails, addedSolicitor, removedSolicitor);
+        return updatedCaseData;
     }
 
     private UserDetails getInvokerDetails(String authToken, CaseDetails caseDetails) {
@@ -113,7 +114,8 @@ public class UpdateRepresentationService {
         Map<String, Object> updatedCaseData = updateSolicitorDetailsService.updateSolicitorContactDetails(addedSolicitor,
              caseData, isConsented, isApplicant);
 
-        return updateSolicitorDetailsService.removeSolicitorFields(updatedCaseData, isConsented, isApplicant);
+        updatedCaseData = updateSolicitorDetailsService.removeSolicitorFields(updatedCaseData, isConsented, isApplicant);
+        return updatedCaseData;
     }
 
     private ChangeOrganisationRequest getChangeOrganisationRequest(CaseDetails caseDetails) {
