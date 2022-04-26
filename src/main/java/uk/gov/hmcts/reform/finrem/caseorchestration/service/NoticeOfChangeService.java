@@ -205,7 +205,7 @@ public class NoticeOfChangeService {
             .getChangeOfRepresentation()
             .stream()
             .max(Comparator.comparing(element -> element.getValue().getDate()));
-        System.out.println(changeOfRepresentationElement);
+
         if (changeOfRepresentationElement.isPresent()) {
             ChangeOfRepresentation changeOfRepresentation = changeOfRepresentationElement.get().getValue();
             if (Optional.ofNullable(changeOfRepresentation.getAdded()).isPresent()
