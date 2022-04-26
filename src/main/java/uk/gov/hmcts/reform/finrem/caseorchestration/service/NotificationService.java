@@ -367,9 +367,14 @@ public class NotificationService {
         return headers;
     }
 
-    public void sendConsentNoticeOfChangeEmail(CaseDetails caseDetails) {
+    public void sendNoticeOfChangeEmail(CaseDetails caseDetails) {
+        sendNotificationEmail(notificationRequestMapper.
+                createNotificationRequestForNoticeOfChange(caseDetails), getNoticeOfChangeUri(caseDetails));
     }
 
-    public void sendContestedNoticeOfChangeEmail(CaseDetails caseDetails) {
+    private URI getNoticeOfChangeUri(CaseDetails caseDetails) {
+        return buildUri(caseDataService.isConsentedApplication(caseDetails) ?
+            notificationServiceConfiguration.getConsentedNoticeOfChange() :
+            notificationServiceConfiguration.getContestNoticeOfChange());
     }
 }

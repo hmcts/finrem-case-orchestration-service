@@ -621,11 +621,7 @@ public class NotificationsController implements BaseController {
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
-        if (caseDataService.isConsentedApplication(caseDetails)) {
-            notificationService.sendConsentNoticeOfChangeEmail(caseDetails);
-        } else {
-            notificationService.sendContestedNoticeOfChangeEmail(caseDetails);
-        }
+        notificationService.sendNoticeOfChangeEmail(caseDetails);
 
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }

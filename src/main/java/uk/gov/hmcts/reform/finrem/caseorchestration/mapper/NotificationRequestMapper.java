@@ -44,6 +44,12 @@ public class NotificationRequestMapper {
             : buildNotificationRequest(caseDetails, RESP_SOLICITOR_REFERENCE, RESP_SOLICITOR_NAME, RESP_SOLICITOR_EMAIL, CONTESTED);
     }
 
+    public NotificationRequest createNotificationRequestForNoticeOfChange(CaseDetails caseDetails) {
+
+
+        return null;
+    }
+
     private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,
                                                          String solicitorReference,
                                                          String solicitorName,
