@@ -938,6 +938,28 @@ public class NotificationsControllerTest extends BaseControllerTest {
         verify(notificationService, times(1)).sendInterimNotificationEmailToRespondentSolicitor(any());
     }
 
+    @Test
+    public void shouldSendConsentNoticeOfChangeEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(true);
+        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendNoticeOfChangeEmailAndLetter(buildCallbackRequest());
+
+        verify(notificationService, times(1)).sendConsentNoticeOfChangeEmail(any());
+    }
+
+    @Test
+    public void shouldSendContestedNoticeOfChangeEmail() {
+        when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(caseDataService.isPaperApplication(any())).thenReturn(false);
+        when(caseDataService.isApplicantSolicitorAgreeToReceiveEmails(any())).thenReturn(false);
+
+        notificationsController.sendNoticeOfChangeEmailAndLetter(buildCallbackRequest());
+
+        verify(notificationService, times(1)).sendContestedNoticeOfChangeEmail(any());
+    }
+
     private CallbackRequest createCallbackRequestWithFinalOrder() {
         CallbackRequest callbackRequest = buildCallbackRequest();
 

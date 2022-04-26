@@ -366,4 +366,10 @@ public class NotificationService {
         headers.add("Content-Type", "application/json");
         return headers;
     }
+
+    public void sendConsentNoticeOfChangeEmail(CaseDetails caseDetails) {
+    }
+
+    public void sendContestedNoticeOfChangeEmail(CaseDetails caseDetails) {
+    }
 }

@@ -607,4 +607,26 @@ public class NotificationsController implements BaseController {
         }
         return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
     }
+
+    @PostMapping(value = "/notice-of-change", consumes = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Send a notice of change to the Solicitor email and a letter to the organization.")
+    @ApiResponses(value = {
+        @ApiResponse(code = 204, message = "Notice of change e-mail and letter sent successfully",
+            response = AboutToStartOrSubmitCallbackResponse.class)})
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeEmailAndLetter(
+        @RequestBody CallbackRequest callbackRequest) {
+
+        log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
+        validateCaseData(callbackRequest);
+
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+
+        if (caseDataService.isConsentedApplication(caseDetails)) {
+            notificationService.sendConsentNoticeOfChangeEmail(caseDetails);
+        } else {
+            notificationService.sendContestedNoticeOfChangeEmail(caseDetails);
+        }
+
+        return ResponseEntity.ok(AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build());
+    }
 }
