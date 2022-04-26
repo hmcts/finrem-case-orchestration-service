@@ -34,7 +34,7 @@ public class ChangeOfRepresentationService {
             current -> buildNewChangeOfRepresentatives(current.getChangeOfRepresentation()))
             .orElse(ChangeOfRepresentatives.builder().changeOfRepresentation(new ArrayList<>()).build());
 
-        change.addChangeOfRepresentation(element(UUID.randomUUID(),
+        change.getChangeOfRepresentation().add(element(UUID.randomUUID(),
             ChangeOfRepresentation.builder()
                 .party(changeOfRepresentationRequest.getParty())
                 .clientName(changeOfRepresentationRequest.getClientName())
