@@ -20,7 +20,4 @@ public class ChangeOfRepresentatives {
     @JsonProperty("ChangeOfRepresentation")
     private List<Element<ChangeOfRepresentation>> changeOfRepresentation;
 
-    public void addChangeOfRepresentation(Element<ChangeOfRepresentation> toAdd) {
-        changeOfRepresentation.add(toAdd);
-    }
 }
