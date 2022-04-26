@@ -214,16 +214,16 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
         assertEquals(caseData.get(RESP_SOLICITOR_FIRM), "FRRespondentSolicitorFirm");
 
     }
+
     @Test
     public void shouldRemoveConsentedAppSolicitorDetails() {
-        boolean consentedCase = true;
-        boolean isApplicant = true;
-
         Map<String, Object> caseData = new HashMap<>();
 
         caseData.put(SOLICITOR_PHONE, "123456789");
         caseData.put(CONSENTED_SOLICITOR_DX_NUMBER, "DummyDX");
         caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
+        boolean consentedCase = true;
+        boolean isApplicant = true;
 
         updateSolicitorDetailsService.removeSolicitorFields(caseData, consentedCase, isApplicant);
 
@@ -252,15 +252,13 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
 
     @Test
     public void shouldRemoveRespSolicitorDetails() {
-
-        boolean consentedCase = true;
-        boolean isApplicant = false;
-
         Map<String, Object> caseData = new HashMap<>();
 
         caseData.put(RESP_SOLICITOR_PHONE, "123456789");
         caseData.put(RESP_SOLICITOR_DX_NUMBER, "DummyDX");
         caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
+        boolean consentedCase = true;
+        boolean isApplicant = false;
 
         updateSolicitorDetailsService.removeSolicitorFields(caseData, consentedCase, isApplicant);
 
