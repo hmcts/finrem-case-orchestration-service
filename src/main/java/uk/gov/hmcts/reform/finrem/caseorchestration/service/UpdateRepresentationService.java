@@ -57,12 +57,12 @@ public class UpdateRepresentationService {
 
         log.info("Updating representation for case ID {}", caseDetails.getId());
 
-        UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
-        ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
+        final UserDetails solicitorToAdd = getInvokerDetails(authToken, caseDetails);
+        final ChangeOrganisationRequest changeRequest = getChangeOrganisationRequest(caseDetails);
         isApplicant = changeRequest.getCaseRoleId().getValueCode().equals(APP_SOLICITOR_POLICY);
 
-        ChangedRepresentative addedSolicitor = getAddedSolicitor(solicitorToAdd, changeRequest);
-        ChangedRepresentative removedSolicitor = getRemovedSolicitor(caseDetails, changeRequest);
+        final ChangedRepresentative addedSolicitor = getAddedSolicitor(solicitorToAdd, changeRequest);
+        final ChangedRepresentative removedSolicitor = getRemovedSolicitor(caseDetails, changeRequest);
 
         log.info("About to start updating solicitor details in the case data for caseId: {}", caseDetails.getId());
         caseDetails.getData().putAll(updateCaseDataWithNewSolDetails(caseDetails, addedSolicitor));
@@ -82,22 +82,13 @@ public class UpdateRepresentationService {
                                                               ChangedRepresentative removedSolicitor) {
 
         Map<String, Object> caseData = caseDetails.getData();
-        ChangeOfRepresentatives current = ChangeOfRepresentatives.builder()
-            .changeOfRepresentation(objectMapper.convertValue(caseData.get(CHANGE_OF_REPRESENTATIVES),
-                new TypeReference<>() {}))
-            .build();
+        ChangeOfRepresentatives current = getCurrentChangeOfRepresentatives(caseData);
 
-        ChangeOfRepresentatives change = changeOfRepresentationService.generateChangeOfRepresentatives(
-            ChangeOfRepresentationRequest.builder()
-                .by(addedSolicitor.getName())
-                .party(isApplicant ? "Applicant" : "Respondent")
-                .clientName(isApplicant ? caseDataService.buildFullApplicantName(caseDetails)
-                    : caseDataService.buildFullRespondentName(caseDetails))
-                .current(current)
-                .addedRepresentative(addedSolicitor)
-                .removedRepresentative(removedSolicitor)
-                .build()
-        );
+        ChangeOfRepresentatives change = changeOfRepresentationService
+            .generateChangeOfRepresentatives(buildChangeOfRepresentationRequest(caseDetails,
+                addedSolicitor,
+                removedSolicitor,
+                current));
 
         caseData.put(CHANGE_OF_REPRESENTATIVES, change.getChangeOfRepresentation());
 
@@ -165,5 +156,26 @@ public class UpdateRepresentationService {
                     : (String) caseDetails.getData().get(RESP_SOLICITOR_EMAIL))
                 .organisation(org).build())
             .orElse(null);
+    }
+
+    private ChangeOfRepresentatives getCurrentChangeOfRepresentatives(Map<String, Object> caseData) {
+        return ChangeOfRepresentatives.builder()
+            .changeOfRepresentation(objectMapper.convertValue(caseData.get(CHANGE_OF_REPRESENTATIVES),
+                new TypeReference<>() {})).build();
+    }
+
+    private ChangeOfRepresentationRequest buildChangeOfRepresentationRequest(CaseDetails caseDetails,
+                                                                             ChangedRepresentative addedSolicitor,
+                                                                             ChangedRepresentative removedSolicitor,
+                                                                             ChangeOfRepresentatives current) {
+        return ChangeOfRepresentationRequest.builder()
+            .by(addedSolicitor.getName())
+            .party(isApplicant ? "Applicant" : "Respondent")
+            .clientName(isApplicant ? caseDataService.buildFullApplicantName(caseDetails)
+                : caseDataService.buildFullRespondentName(caseDetails))
+            .current(current)
+            .addedRepresentative(addedSolicitor)
+            .removedRepresentative(removedSolicitor)
+            .build();
     }
 }
