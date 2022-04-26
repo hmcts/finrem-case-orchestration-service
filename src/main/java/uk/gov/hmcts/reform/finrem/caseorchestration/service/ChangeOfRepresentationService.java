@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentatives;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,9 +31,7 @@ public class ChangeOfRepresentationService {
         log.info("Updating change of representatives for case.");
 
         ChangeOfRepresentatives change = Optional.ofNullable(changeOfRepresentationRequest.getCurrent()).map(
-            current -> ChangeOfRepresentatives.builder()
-                .changeOfRepresentation(Optional.ofNullable(current.getChangeOfRepresentation())
-                    .orElse(new ArrayList<>())).build())
+            current -> buildNewChangeOfRepresentatives(current.getChangeOfRepresentation()))
             .orElse(ChangeOfRepresentatives.builder().changeOfRepresentation(new ArrayList<>()).build());
 
         change.addChangeOfRepresentation(element(UUID.randomUUID(),
@@ -50,6 +50,12 @@ public class ChangeOfRepresentationService {
         change.getChangeOfRepresentation().sort(Comparator.comparing(element -> element.getValue().getDate()));
 
         return change;
+    }
+
+    private ChangeOfRepresentatives buildNewChangeOfRepresentatives(List<Element<ChangeOfRepresentation>> currentChangeList) {
+        return  ChangeOfRepresentatives.builder()
+            .changeOfRepresentation(Optional.ofNullable(currentChangeList).orElse(new ArrayList<>()))
+            .build();
     }
 
 }

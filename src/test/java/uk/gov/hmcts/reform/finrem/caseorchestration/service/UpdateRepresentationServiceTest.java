@@ -67,7 +67,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     public static final String POSTCODE = "postCode";
 
     private static final String NOTICE_OF_CHANGE = "Notice of Change";
-    private static final String CHANGE_OF_REPS = "ChangeOfRepresentatives";
+    private static final String CHANGE_OF_REPRESENTATIVES = "ChangeOfRepresentatives";
 
     @Autowired private UpdateRepresentationService updateRepresentationService;
 
@@ -155,7 +155,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldAddChangeOfRepsAndUpdateAppSolDetailsContested() throws Exception {
+    public void givenContestedCaseAndEmptyChangeOfReps_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
         setUpDefaultMockContext();
         setUpCaseDetails("contestedAppSolicitorAdding/after-update-details.json");
 
@@ -190,7 +190,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldAddChangeOfRepsAndUpdateAppSolDetailsConsented() throws Exception {
+    public void givenConsentedCaseAndEmptyChangeOfReps_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
         String fixture = "consentedAppSolicitorAdding";
         setUpMockContext(testAppSolicitor, orgResponse, this::getChangeOfRepsAppContested, fixture, true);
         setUpCaseDetails("consentedAppSolicitorAdding/after-update-details.json");
@@ -227,7 +227,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateRespSolDetails() throws Exception {
+    public void givenEmptyChangeOfRepsAndRespSolicitor_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
         String fixture = "RespSolicitorAdding";
         setUpMockContext(testRespSolicitor, orgResponse, this::getChangeOfRepsRespondent, fixture, false);
         setUpCaseDetails("RespSolicitorAdding/after-update-details.json");
@@ -263,7 +263,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldUpdateContactDetailsAppSolReplacing() throws Exception {
+    public void givenPopulatedChangeOfReps_WhenUpdateRepresentation_thenReturnCorrectCaseData() throws Exception {
         UserDetails replacingSolicitor = UserDetails.builder().forename("Test Applicant").surname("Solicitor")
             .email("appsolicitor1@yahoo.com").build();
 
@@ -308,7 +308,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
     }
 
     private List<Element<ChangeOfRepresentation>> convertToChangeOfRepresentation(Map<String, Object> data) {
-        return mapper.convertValue(data.get(CHANGE_OF_REPS),
+        return mapper.convertValue(data.get(CHANGE_OF_REPRESENTATIVES),
             new TypeReference<>() {});
     }
 
@@ -321,6 +321,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
             .thenReturn(getChangeOfRepsAppContested());
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
+            .thenReturn(getUpdatedContactData("contestedAppSolicitorAdding"));
+        when(updateSolicitorDetailsService.removeSolicitorFields(any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData("contestedAppSolicitorAdding"));
     }
 
@@ -338,6 +340,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .thenReturn(supplier.get());
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData(fixture));
+        when(updateSolicitorDetailsService.removeSolicitorFields(any(), anyBoolean(), anyBoolean()))
+            .thenReturn(getUpdatedContactData(fixture));
         when(caseDataService.isConsentedApplication(any())).thenReturn(isConsented);
     }
 
@@ -352,6 +356,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
             .thenReturn(getChangeOfRepsReplacingApplicant(newSolicitor, newSolicitorOrg));
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
+            .thenReturn(getUpdatedContactData("AppSolReplacing"));
+        when(updateSolicitorDetailsService.removeSolicitorFields(any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData("AppSolReplacing"));
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
     }

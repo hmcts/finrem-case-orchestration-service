@@ -84,11 +84,10 @@ public class UpdateSolicitorDetailsService {
         }
 
 
-        return removeSolicitorFields(caseData, isConsented, isApplicant);
-
+        return caseData;
     }
 
-    private Map<String, Object> removeSolicitorFields(Map<String, Object> caseData,
+    public Map<String, Object> removeSolicitorFields(Map<String, Object> caseData,
                                                       boolean isConsented,
                                                       boolean isApplicant) {
         if (isApplicant) {
