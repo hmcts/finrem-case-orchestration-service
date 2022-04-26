@@ -232,12 +232,12 @@ public class UpdateRepresentationService {
             .map(user -> assignCaseAccessService.revokeUserAccess(
                 CaseAssignmentUserRolesRequest.builder()
                     .caseAssignmentUserRolesWithOrganisation(
-                        buildCaseAssignmentRolesMap(caseDetails, changeRequest, user))
+                        buildCaseAssignmentRolesList(caseDetails, changeRequest, user))
                     .build()))
             .orElseThrow(() -> new IllegalStateException("Null response from ccd"));
     }
 
-    private List<CaseAssignmentUserRoleWithOrganisation> buildCaseAssignmentRolesMap(CaseDetails caseDetails,
+    private List<CaseAssignmentUserRoleWithOrganisation> buildCaseAssignmentRolesList(CaseDetails caseDetails,
                                                                                ChangeOrganisationRequest changeRequest,
                                                                                CaseAssignmentUserRole user) {
         return List.of(CaseAssignmentUserRoleWithOrganisation.builder()
