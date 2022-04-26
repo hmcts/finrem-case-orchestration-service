@@ -171,7 +171,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe").getData();
+            .updateRepresentation(initialDetails, "bebe");
 
         assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), expectedCaseData.get(CONTESTED_SOLICITOR_NAME));
         assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), expectedCaseData.get(CONTESTED_SOLICITOR_EMAIL));
@@ -208,7 +208,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         }
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe").getData();
+            .updateRepresentation(initialDetails, "bebe");
 
         assertEquals(actualData.get(CONSENTED_SOLICITOR_NAME), expectedCaseData.get(CONSENTED_SOLICITOR_NAME));
         assertEquals(actualData.get(SOLICITOR_EMAIL), expectedCaseData.get(SOLICITOR_EMAIL));
@@ -243,7 +243,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe").getData();
+            .updateRepresentation(initialDetails, "bebe");
 
         assertEquals(actualData.get(RESP_SOLICITOR_NAME), expectedCaseData.get(RESP_SOLICITOR_NAME));
         assertEquals(actualData.get(RESP_SOLICITOR_EMAIL), expectedCaseData.get(RESP_SOLICITOR_EMAIL));
@@ -290,7 +290,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "someAuthToken").getData();
+            .updateRepresentation(initialDetails, "someAuthToken");
 
         assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), "Test Applicant Solicitor");
         assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), "appsolicitor1@yahoo.com");
@@ -330,6 +330,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .thenReturn(getChangeOfRepsAppContested());
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData("contestedAppSolicitorAdding"));
+        when(updateSolicitorDetailsService.removeSolicitorFields(any(), anyBoolean(), anyBoolean()))
+            .thenReturn(getUpdatedContactData("contestedAppSolicitorAdding"));
         when(assignCaseAccessService.applyDecision(any(), any())).thenReturn(AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(expectedCaseData)
@@ -350,6 +352,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .thenReturn(supplier.get());
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData(fixture));
+        when(updateSolicitorDetailsService.removeSolicitorFields(any(), anyBoolean(), anyBoolean()))
+            .thenReturn(getUpdatedContactData(fixture));
         when(caseDataService.isConsentedApplication(any())).thenReturn(isConsented);
         when(assignCaseAccessService.applyDecision(any(), any())).thenReturn(AboutToStartOrSubmitCallbackResponse
             .builder()
@@ -368,6 +372,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         when(changeOfRepresentationService.generateChangeOfRepresentatives(any()))
             .thenReturn(getChangeOfRepsReplacingApplicant(newSolicitor, newSolicitorOrg));
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
+            .thenReturn(getUpdatedContactData("AppSolReplacing"));
+        when(updateSolicitorDetailsService.removeSolicitorFields(any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData("AppSolReplacing"));
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
         when(assignCaseAccessService.applyDecision(any(), any())).thenReturn(AboutToStartOrSubmitCallbackResponse

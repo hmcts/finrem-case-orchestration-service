@@ -85,8 +85,7 @@ public class UpdateSolicitorDetailsService {
         }
 
 
-        return removeSolicitorFields(caseData, isConsented, isApplicant);
-
+        return caseData;
     }
 
     public void removeAppSolicitorContactDetails(CaseDetails caseDetails) {
@@ -111,7 +110,7 @@ public class UpdateSolicitorDetailsService {
         caseDetails.getData().remove(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT);
     }
 
-    private Map<String, Object> removeSolicitorFields(Map<String, Object> caseData,
+    public Map<String, Object> removeSolicitorFields(Map<String, Object> caseData,
                                                       boolean isConsented,
                                                       boolean isApplicant) {
         if (isApplicant) {
