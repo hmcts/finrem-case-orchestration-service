@@ -939,9 +939,9 @@ public class NotificationsControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void givenNoticeOfChangeNotificationThenSendNoticeOfChangeServiceCalled() {
+    public void givenNoticeOfChangeWhenSendNoticeOfChangeNotificationsThenSendNoticeOfChangeServiceCalled() {
 
-        notificationsController.sendNoticeOfChangeEmailAndLetter(buildCallbackRequest());
+        notificationsController.sendNoticeOfChangeNotifications(buildCallbackRequest());
 
         verify(notificationService, times(1)).sendNoticeOfChangeEmail(any());
     }

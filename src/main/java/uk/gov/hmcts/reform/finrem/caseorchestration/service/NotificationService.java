@@ -368,13 +368,14 @@ public class NotificationService {
     }
 
     public void sendNoticeOfChangeEmail(CaseDetails caseDetails) {
+        URI uri = getNoticeOfChangeUri(caseDetails);
         sendNotificationEmail(notificationRequestMapper.
-                createNotificationRequestForNoticeOfChange(caseDetails), getNoticeOfChangeUri(caseDetails));
+            getNotificationRequestForNoticeOfChange(caseDetails), uri);
     }
 
     private URI getNoticeOfChangeUri(CaseDetails caseDetails) {
         return buildUri(caseDataService.isConsentedApplication(caseDetails) ?
             notificationServiceConfiguration.getConsentedNoticeOfChange() :
-            notificationServiceConfiguration.getContestNoticeOfChange());
+            notificationServiceConfiguration.getContestedNoticeOfChange());
     }
 }

@@ -613,7 +613,7 @@ public class NotificationsController implements BaseController {
     @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Notice of change e-mail and letter sent successfully",
             response = AboutToStartOrSubmitCallbackResponse.class)})
-    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeEmailAndLetter(
+    public ResponseEntity<AboutToStartOrSubmitCallbackResponse> sendNoticeOfChangeNotifications(
         @RequestBody CallbackRequest callbackRequest) {
 
         log.info("Received request to send Notice of Change email and letter for Case ID: {}", callbackRequest.getCaseDetails().getId());
