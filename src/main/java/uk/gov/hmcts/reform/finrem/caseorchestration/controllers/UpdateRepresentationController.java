@@ -18,6 +18,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.AssignCaseAccessService;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.UpdateRepresentationService;
 
+import java.util.Map;
+
 import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstants.AUTHORIZATION_HEADER;
 
 @RestController
@@ -47,8 +49,8 @@ public class UpdateRepresentationController implements BaseController {
             caseDetails.getId());
 
         validateCaseData(ccdRequest);
-
-        caseDetails.getData().putAll(updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken));
+        Map<String, Object> caseData = updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken);
+        caseDetails.getData().putAll(caseData);
         log.info("Case details for caseID {} == {}", caseDetails.getId(), caseDetails.getData());
         return ResponseEntity.ok(assignCaseAccessService.applyDecision(authToken, caseDetails));
     }
