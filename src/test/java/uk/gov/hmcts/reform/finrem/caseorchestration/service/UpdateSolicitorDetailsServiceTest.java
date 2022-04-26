@@ -124,26 +124,9 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldNotSetApplicantSolicitorOrganisationDetails_orgRespNull() {
-        when(prdOrganisationService.retrieveOrganisationsData(eq(AUTH_TOKEN))).thenReturn(null);
-
-        CaseDetails caseDetails = buildCaseDetails();
-
-        updateSolicitorDetailsService.setApplicantSolicitorOrganisationDetails(AUTH_TOKEN, caseDetails);
-
-        Assert.assertFalse(caseDetails.getData().containsKey(CONTESTED_SOLICITOR_ADDRESS));
-        Assert.assertFalse(caseDetails.getData().containsKey(CONTESTED_SOLICITOR_FIRM));
-        Assert.assertFalse(caseDetails.getData().containsKey(SOLICITOR_REFERENCE));
-    }
-
-    @Test
     public void shouldSetNewApplicantSolicitorDetailsContested() {
 
         Map<String, Object> caseData = new HashMap<>();
-
-        caseData.put(SOLICITOR_PHONE, "123456789");
-        caseData.put(CONTESTED_SOLICITOR_DX_NUMBER, "DummyDX");
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
 
         ChangedRepresentative addedSolicitor = ChangedRepresentative.builder()
             .name("Sir Solicitor")
@@ -165,19 +148,12 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
         assertEquals(caseData.get(CONTESTED_SOLICITOR_NAME), "Sir Solicitor");
         assertEquals(caseData.get(CONTESTED_SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");
         assertEquals(caseData.get(CONTESTED_SOLICITOR_FIRM), "FRApplicantSolicitorFirm");
-        assertFalse(caseData.containsKey(SOLICITOR_PHONE));
-        assertFalse(caseData.containsKey(CONTESTED_SOLICITOR_DX_NUMBER));
-        assertFalse(caseData.containsKey(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
     }
 
     @Test
     public void shouldSetNewApplicantSolicitorDetailsConsented() {
 
         Map<String, Object> caseData = new HashMap<>();
-
-        caseData.put(SOLICITOR_PHONE, "123456789");
-        caseData.put(CONSENTED_SOLICITOR_DX_NUMBER, "DummyDX");
-        caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
 
         ChangedRepresentative addedSolicitor = ChangedRepresentative.builder()
             .name("Sir Solicitor")
@@ -199,19 +175,12 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
         assertEquals(caseData.get(CONSENTED_SOLICITOR_NAME), "Sir Solicitor");
         assertEquals(caseData.get(SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");
         assertEquals(caseData.get(CONSENTED_SOLICITOR_FIRM), "FRApplicantSolicitorFirm");
-        assertFalse(caseData.containsKey(SOLICITOR_PHONE));
-        assertFalse(caseData.containsKey(CONSENTED_SOLICITOR_DX_NUMBER));
-        assertFalse(caseData.containsKey(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED));
     }
 
     @Test
     public void shouldSetNewRespondentSolicitorDetails() {
 
         Map<String, Object> caseData = new HashMap<>();
-
-        caseData.put(RESP_SOLICITOR_PHONE, "123456789");
-        caseData.put(RESP_SOLICITOR_DX_NUMBER, "DummyDX");
-        caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
 
         ChangedRepresentative addedSolicitor = ChangedRepresentative.builder()
             .name("Sir Solicitor")
@@ -233,94 +202,58 @@ public class UpdateSolicitorDetailsServiceTest extends BaseServiceTest {
         assertEquals(caseData.get(RESP_SOLICITOR_NAME), "Sir Solicitor");
         assertEquals(caseData.get(RESP_SOLICITOR_EMAIL), "sirsolicitor1@gmail.com");
         assertEquals(caseData.get(RESP_SOLICITOR_FIRM), "FRRespondentSolicitorFirm");
-        assertFalse(caseData.containsKey(RESP_SOLICITOR_PHONE));
-        assertFalse(caseData.containsKey(CONSENTED_SOLICITOR_DX_NUMBER));
-        assertFalse(caseData.containsKey(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED));
+
     }
 
     @Test
-    public void shouldRemoveAppSolicitorDetailsConsented() {
+    public void shouldRemoveConsentedAppSolicitorDetails() {
         Map<String, Object> caseData = new HashMap<>();
 
-        caseData.put(CONSENTED_SOLICITOR_NAME, "Sir Solicitor");
-        caseData.put(CONSENTED_SOLICITOR_FIRM,"Firm");
-        caseData.put(CONSENTED_SOLICITOR_ADDRESS, "Address");
-        caseData.put(SOLICITOR_EMAIL, "email@aol.com");
         caseData.put(SOLICITOR_PHONE, "123456789");
         caseData.put(CONSENTED_SOLICITOR_DX_NUMBER, "DummyDX");
         caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED, YES_VALUE);
+        boolean consentedCase = true;
+        boolean isApplicant = true;
 
-        CaseDetails caseDetails = CaseDetails
-            .builder().data(caseData)
-            .caseTypeId(CASE_TYPE_ID_CONSENTED)
-            .build();
+        updateSolicitorDetailsService.removeSolicitorFields(caseData, consentedCase, isApplicant);
 
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(true);
-        updateSolicitorDetailsService.removeAppSolicitorContactDetails(caseDetails);
+        assertFalse(caseData.containsKey(SOLICITOR_PHONE));
+        assertFalse(caseData.containsKey(CONSENTED_SOLICITOR_DX_NUMBER));
+        assertFalse(caseData.containsKey(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED));
 
-        assertFalse(caseDetails.getData().containsKey(CONSENTED_SOLICITOR_NAME));
-        assertFalse(caseDetails.getData().containsKey(SOLICITOR_EMAIL));
-        assertFalse(caseDetails.getData().containsKey(CONSENTED_SOLICITOR_ADDRESS));
-        assertFalse(caseDetails.getData().containsKey(CONSENTED_SOLICITOR_FIRM));
-        assertFalse(caseDetails.getData().containsKey(SOLICITOR_PHONE));
-        assertFalse(caseDetails.getData().containsKey(CONSENTED_SOLICITOR_DX_NUMBER));
-        assertFalse(caseDetails.getData().containsKey(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED));
     }
 
     @Test
-    public void shouldRemoveAppSolicitorDetailsContested() {
+    public void shouldRemoveContestedAppSolicitorDetails() {
         Map<String, Object> caseData = new HashMap<>();
 
-        caseData.put(CONTESTED_SOLICITOR_NAME, "Sir Solicitor");
-        caseData.put(CONTESTED_SOLICITOR_FIRM,"Firm");
-        caseData.put(CONTESTED_SOLICITOR_ADDRESS, "Address");
-        caseData.put(SOLICITOR_EMAIL, "email@aol.com");
         caseData.put(SOLICITOR_PHONE, "123456789");
         caseData.put(CONTESTED_SOLICITOR_DX_NUMBER, "DummyDX");
         caseData.put(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED, YES_VALUE);
+        boolean consentedCase = false;
+        boolean isApplicant = true;
 
-        CaseDetails caseDetails = CaseDetails
-            .builder().data(caseData)
-            .caseTypeId(CASE_TYPE_ID_CONTESTED)
-            .build();
+        updateSolicitorDetailsService.removeSolicitorFields(caseData, consentedCase, isApplicant);
 
-        when(caseDataService.isConsentedApplication(caseDetails)).thenReturn(false);
-        updateSolicitorDetailsService.removeAppSolicitorContactDetails(caseDetails);
-
-        assertFalse(caseDetails.getData().containsKey(CONTESTED_SOLICITOR_NAME));
-        assertFalse(caseDetails.getData().containsKey(CONTESTED_SOLICITOR_EMAIL));
-        assertFalse(caseDetails.getData().containsKey(CONTESTED_SOLICITOR_ADDRESS));
-        assertFalse(caseDetails.getData().containsKey(CONTESTED_SOLICITOR_FIRM));
-        assertFalse(caseDetails.getData().containsKey(SOLICITOR_PHONE));
-        assertFalse(caseDetails.getData().containsKey(CONTESTED_SOLICITOR_DX_NUMBER));
-        assertFalse(caseDetails.getData().containsKey(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONTESTED));
+        assertFalse(caseData.containsKey(SOLICITOR_PHONE));
+        assertFalse(caseData.containsKey(CONSENTED_SOLICITOR_DX_NUMBER));
+        assertFalse(caseData.containsKey(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED));
     }
 
     @Test
     public void shouldRemoveRespSolicitorDetails() {
         Map<String, Object> caseData = new HashMap<>();
 
-        caseData.put(RESP_SOLICITOR_NAME, "Sir Solicitor");
-        caseData.put(RESP_SOLICITOR_FIRM,"Firm");
-        caseData.put(RESP_SOLICITOR_ADDRESS, "Address");
-        caseData.put(RESP_SOLICITOR_EMAIL, "email@aol.com");
         caseData.put(RESP_SOLICITOR_PHONE, "123456789");
         caseData.put(RESP_SOLICITOR_DX_NUMBER, "DummyDX");
         caseData.put(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT, YES_VALUE);
+        boolean consentedCase = true;
+        boolean isApplicant = false;
 
-        CaseDetails caseDetails = CaseDetails
-            .builder().data(caseData)
-            .caseTypeId(CASE_TYPE_ID_CONTESTED)
-            .build();
+        updateSolicitorDetailsService.removeSolicitorFields(caseData, consentedCase, isApplicant);
 
-        updateSolicitorDetailsService.removeRespSolicitorContactDetails(caseDetails);
-
-        assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_NAME));
-        assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_EMAIL));
-        assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_ADDRESS));
-        assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_FIRM));
-        assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_PHONE));
-        assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_DX_NUMBER));
-        assertFalse(caseDetails.getData().containsKey(RESP_SOLICITOR_NOTIFICATIONS_EMAIL_CONSENT));
+        assertFalse(caseData.containsKey(RESP_SOLICITOR_PHONE));
+        assertFalse(caseData.containsKey(CONSENTED_SOLICITOR_DX_NUMBER));
+        assertFalse(caseData.containsKey(APP_SOLICITOR_AGREE_TO_RECEIVE_EMAILS_CONSENTED));
     }
 }
