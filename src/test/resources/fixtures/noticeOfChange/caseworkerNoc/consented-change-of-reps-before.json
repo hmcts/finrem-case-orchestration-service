@@ -5,13 +5,14 @@
     "jurisdiction": "DIVORCE",
     "state": "applicationIssued",
     "case_type_id": "FinancialRemedyMVP2",
+    "id": "123456",
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
       "solicitorName": "Sir Solicitor",
       "applicantRepresented": "No",
       "solicitorEmail": "sirsolicitor1@gmail.com",
-      "nocParty": "applicant",
+      "nocParty": "Applicant",
       "natureOfRepresentationChange": "adding",
       "updateIncludesRepresentativeChange" : "Yes",
       "ApplicantOrganisationPolicy": {
@@ -40,7 +41,15 @@
       "appRespondentLName": "Smith",
       "appRespondentRep": "Yes",
       "respondentPhone": "7411201631",
-      "appRespondentFMName": "Jane"
+      "appRespondentFMName": "Jane",
+      "changeOrganisationRequestField": {
+        "OrganisationToAdd": {
+          "OrganisationID": "A31PTVA",
+          "OrganisationName": "FRApplicantSolicitorFirm"
+        },
+        "OrganisationToRemove": {
+        }
+      }
     }
   }
 }

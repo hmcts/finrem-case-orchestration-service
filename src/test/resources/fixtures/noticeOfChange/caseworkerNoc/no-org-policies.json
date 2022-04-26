@@ -5,6 +5,7 @@
     "jurisdiction": "DIVORCE",
     "state": "applicationIssued",
     "case_type_id": "ContestedFinancialRemedy",
+    "id": "123456",
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
@@ -21,7 +22,7 @@
           {
             "id": "",
             "value": {
-              "party": "applicant",
+              "party": "Applicant",
               "name": "John Smith",
               "date": "2020-06-01",
               "by": "Claire Mumford",

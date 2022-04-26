@@ -5,13 +5,14 @@
     "jurisdiction": "DIVORCE",
     "state": "applicationIssued",
     "case_type_id": "ContestedFinancialRemedy",
+    "id": "123456",
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
       "applicantRepresented": "Yes",
       "applicantSolicitorName": "Sir Solicitor",
       "applicantSolicitorEmail": "sirsolicitor1@gmail.com",
-      "nocParty": "applicant",
+      "nocParty": "Applicant",
       "natureOfRepresentationChange": "replacing",
       "updateIncludesRepresentativeChange" : "Yes",
       "ApplicantOrganisationPolicy": {

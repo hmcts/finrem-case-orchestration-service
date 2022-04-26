@@ -5,12 +5,13 @@
     "jurisdiction": "DIVORCE",
     "state": "applicationIssued",
     "case_type_id": "ContestedFinancialRemedy",
+    "id": "123456",
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
       "applicantSolicitorName": "Sir Solicitor",
       "applicantSolicitorEmail": "sirsolicitor1@gmail.com",
-      "nocParty": "applicant",
+      "nocParty": "Applicant",
       "applicantRepresented": "No",
       "natureOfRepresentationChange": "adding",
       "updateIncludesRepresentativeChange" : "Yes",
@@ -40,7 +41,15 @@
       "respondentRepresented": "Yes",
       "respondentLName": "Smith",
       "respondentPhone": "7411201631",
-      "respondentFMName": "Jane"
+      "respondentFMName": "Jane",
+      "changeOrganisationRequestField": {
+        "OrganisationToAdd": {
+          "OrganisationID": "A31PTVA",
+          "OrganisationName": "FRApplicantSolicitorFirm"
+        },
+        "OrganisationToRemove": {
+        }
+      }
     }
   }
 }

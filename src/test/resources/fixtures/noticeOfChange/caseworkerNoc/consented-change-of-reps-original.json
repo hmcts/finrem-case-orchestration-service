@@ -5,11 +5,12 @@
     "jurisdiction": "DIVORCE",
     "state": "applicationIssued",
     "case_type_id": "FinancialRemedyMVP2",
+    "id": "123456",
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
       "applicantRepresented": "Yes",
-      "nocParty": "applicant",
+      "nocParty": "Applicant",
       "natureOfRepresentationChange": "adding",
       "updateIncludesRepresentativeChange" : "Yes",
       "ApplicantOrganisationPolicy": {

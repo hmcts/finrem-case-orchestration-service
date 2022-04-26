@@ -5,12 +5,13 @@
     "jurisdiction": "DIVORCE",
     "state": "applicationIssued",
     "case_type_id": "FinancialRemedyMVP2",
+    "id": "123456",
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
       "solicitorName": "Sir Solicitor",
       "solicitorEmail": "sirsolicitor1@gmail.com",
-      "nocParty": "respondent",
+      "nocParty": "Respondent",
       "natureOfRepresentationChange": "adding",
       "updateIncludesRepresentativeChange": "Yes",
       "ApplicantOrganisationPolicy": {
@@ -44,7 +45,7 @@
         {
           "id": "60dbe6bc-c1a7-11ec-9d64-0242ac120002",
           "value": {
-            "party": "applicant",
+            "party": "Applicant",
             "name": "John Smith",
             "date": "2020-06-01",
             "by": "Claire Mumford",

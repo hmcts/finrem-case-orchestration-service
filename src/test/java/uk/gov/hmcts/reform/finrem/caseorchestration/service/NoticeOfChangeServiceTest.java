@@ -9,8 +9,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRole;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.OrganisationPolicy;
 
 import java.io.InputStream;
 import java.util.List;
@@ -20,23 +24,29 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APPLICANT_ORGANISATION_POLICY;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.APP_SOLICITOR_POLICY;
 
 public class NoticeOfChangeServiceTest extends BaseServiceTest {
-
     private static final String PATH = "/fixtures/noticeOfChange/caseworkerNoc/";
     private static final String CHANGE_OF_REPRESENTATIVES = "ChangeOfRepresentatives";
+    private static final String TEST_CASE_ID = "123456";
+    private static final String TEST_USER_ID = "testUserId";
 
-    @Autowired private NoticeOfChangeService noticeOfChangeService;
+    @Autowired
+    private NoticeOfChangeService noticeOfChangeService;
 
-    @MockBean private CaseDataService mockCaseDataService;
+    @MockBean
+    private CaseDataService mockCaseDataService;
 
     @MockBean private IdamService mockIdamService;
+
+    @MockBean private AssignCaseAccessService mockAssignCaseAccessService;
 
     private CallbackRequest callbackRequest;
 
     private final Function<Map<String, Object>, List<Element<ChangeOfRepresentation>>> getFirstChangeElement =
         this::convertToChangeOfRepresentation;
-
 
     @Before
     public void setUp() {
@@ -48,6 +58,11 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
                  getClass().getResourceAsStream(PATH + fileName)) {
             callbackRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
         }
+    }
+
+    private List<Element<ChangeOfRepresentation>> convertToChangeOfRepresentation(Map<String, Object> data) {
+        return mapper.convertValue(data.get(CHANGE_OF_REPRESENTATIVES),
+            new TypeReference<>() {});
     }
 
     @Test
@@ -63,7 +78,17 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             InputStream is = getClass().getResourceAsStream(PATH + "change-of-representatives-original-data.json");
             CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
 
-            Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
+            when(mockAssignCaseAccessService.getUsersWithAccess(APP_SOLICITOR_POLICY)).thenReturn(
+                CaseAssignmentUserRolesResource.builder()
+                    .caseAssignmentUserRoles(List.of(
+                        CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY)
+                            .caseDataId(TEST_CASE_ID)
+                            .userId(TEST_USER_ID)
+                            .caseRole(APP_SOLICITOR_POLICY)
+                            .build()))
+                    .build());
+
+            Map<String, Object> caseData = noticeOfChangeService.caseWorkerUpdatesRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(),
                 originalDetails);
 
@@ -75,6 +100,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             assertThat(actualChange.getParty()).isEqualTo(expectedChange.getParty());
             assertThat(actualChange.getAdded()).isEqualTo(expectedChange.getAdded());
             assertThat(actualChange.getBy()).isEqualTo(expectedChange.getBy());
+            OrganisationPolicy actualPolicy = getOrganisationPolicy(caseData, APPLICANT_ORGANISATION_POLICY);
+            assertThat(actualPolicy.getOrganisation().getOrganisationName()).isEqualTo("FRApplicantSolicitorFirm");
+            assertThat(actualPolicy.getOrganisation().getOrganisationID()).isEqualTo("A31PTVA");
         }
     }
 
@@ -87,7 +115,18 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
             InputStream is = getClass().getResourceAsStream(PATH + "change-of-reps-populated-original.json");
             CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
-            Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
+
+            when(mockAssignCaseAccessService.getUsersWithAccess(APP_SOLICITOR_POLICY)).thenReturn(
+                CaseAssignmentUserRolesResource.builder()
+                    .caseAssignmentUserRoles(List.of(
+                        CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY)
+                            .caseDataId(TEST_CASE_ID)
+                            .userId(TEST_USER_ID)
+                            .caseRole(APP_SOLICITOR_POLICY)
+                            .build()))
+                    .build());
+
+            Map<String, Object> caseData = noticeOfChangeService.caseWorkerUpdatesRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(),
                 originalDetails);
             List<Element<ChangeOfRepresentation>> actual = getFirstChangeElement.apply(caseData);
@@ -100,6 +139,10 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             assertThat(actualChange.getParty()).isEqualTo(expectedChange.getParty());
             assertThat(actualChange.getAdded()).isEqualTo(expectedChange.getAdded());
             assertThat(actualChange.getBy()).isEqualTo(expectedChange.getBy());
+
+            OrganisationPolicy actualPolicy = getOrganisationPolicy(caseData, APPLICANT_ORGANISATION_POLICY);
+            assertThat(actualPolicy.getOrganisation().getOrganisationName()).isEqualTo("FRApplicantSolicitorFirm");
+            assertThat(actualPolicy.getOrganisation().getOrganisationID()).isEqualTo("A31PTVA");
         }
     }
 
@@ -115,7 +158,16 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
             InputStream is = getClass().getResourceAsStream(PATH + "consented-change-of-reps-original.json");
             CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
-            Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
+            when(mockAssignCaseAccessService.getUsersWithAccess(APP_SOLICITOR_POLICY)).thenReturn(
+                CaseAssignmentUserRolesResource.builder()
+                    .caseAssignmentUserRoles(List.of(
+                        CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY)
+                            .caseDataId(TEST_CASE_ID)
+                            .userId(TEST_USER_ID)
+                            .caseRole(APP_SOLICITOR_POLICY)
+                            .build()))
+                    .build());
+            Map<String, Object> caseData = noticeOfChangeService.caseWorkerUpdatesRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(), originalDetails);
             ChangeOfRepresentation actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
             ChangeOfRepresentation expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
@@ -125,6 +177,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             assertThat(actualChange.getParty()).isEqualTo(expectedChange.getParty());
             assertThat(actualChange.getAdded()).isEqualTo(expectedChange.getAdded());
             assertThat(actualChange.getBy()).isEqualTo(expectedChange.getBy());
+            OrganisationPolicy actualPolicy = getOrganisationPolicy(caseData, APPLICANT_ORGANISATION_POLICY);
+            assertThat(actualPolicy.getOrganisation().getOrganisationName()).isEqualTo("FRApplicantSolicitorFirm");
+            assertThat(actualPolicy.getOrganisation().getOrganisationID()).isEqualTo("A31PTVA");
         }
     }
 
@@ -137,7 +192,18 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
             InputStream is = getClass().getResourceAsStream(PATH + "consented-change-of-reps-original.json");
             CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
-            Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
+
+            when(mockAssignCaseAccessService.getUsersWithAccess(APP_SOLICITOR_POLICY)).thenReturn(
+                CaseAssignmentUserRolesResource.builder()
+                    .caseAssignmentUserRoles(List.of(
+                        CaseAssignmentUserRole.builder().caseRole(APP_SOLICITOR_POLICY)
+                            .caseDataId(TEST_CASE_ID)
+                            .userId(TEST_USER_ID)
+                            .caseRole(APP_SOLICITOR_POLICY)
+                            .build()))
+                    .build());
+
+            Map<String, Object> caseData = noticeOfChangeService.caseWorkerUpdatesRepresentation(actualRequest.getCaseDetails(),
                 authTokenGenerator.generate(), originalDetails);
             List<Element<ChangeOfRepresentation>> actual = getFirstChangeElement.apply(caseData);
             ChangeOfRepresentation actualChange = actual.get(1).getValue();
@@ -149,94 +215,14 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
             assertThat(actualChange.getParty()).isEqualTo(expectedChange.getParty());
             assertThat(actualChange.getAdded()).isEqualTo(expectedChange.getAdded());
             assertThat(actualChange.getBy()).isEqualTo(expectedChange.getBy());
+            OrganisationPolicy actualPolicy = getOrganisationPolicy(caseData, APPLICANT_ORGANISATION_POLICY);
+            assertThat(actualPolicy.getOrganisation().getOrganisationName()).isEqualTo("FRApplicantSolicitorFirm");
+            assertThat(actualPolicy.getOrganisation().getOrganisationID()).isEqualTo("A31PTVA");
         }
     }
 
-    @Test
-    public void shouldUpdateChangeOfRepresentatives_whenNatureIsRemoving() throws Exception {
-        setUpCaseDetails("change-of-reps-removing.json");
-        setUpHelper();
-        when(mockCaseDataService.isConsentedApplication(any())).thenReturn(true);
-
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH + "change-of-reps-removing-before.json")) {
-            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
-
-            InputStream is = getClass().getResourceAsStream(PATH + "change-of-reps-removing-original.json");
-            CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
-            Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
-                authTokenGenerator.generate(),
-                originalDetails);
-            ChangeOfRepresentation actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
-            ChangeOfRepresentation expectedChange = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
-
-            assertThat(actualChange.getClientName()).isEqualTo(expectedChange.getClientName());
-            assertThat(actualChange.getParty()).isEqualTo(expectedChange.getParty());
-            assertThat(actualChange.getRemoved()).isEqualTo(expectedChange.getRemoved());
-            assertThat(actualChange.getBy()).isEqualTo(expectedChange.getBy());
-        }
-    }
-
-    @Test
-    public void shouldUpdateChangeOfRepresentatives_whenNatureIsReplacing() throws Exception {
-        setUpCaseDetails("change-of-reps-replacing.json");
-
-        setUpHelper();
-
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH
-            + "change-of-reps-replacing-before.json")) {
-            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
-            InputStream is = getClass().getResourceAsStream(PATH + "change-of-reps-replacing-original.json");
-            CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
-            Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
-                authTokenGenerator.generate(),
-                originalDetails);
-
-            ChangeOfRepresentation actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
-            ChangeOfRepresentation expected = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
-
-            assertThat(actualChange.getClientName()).isEqualTo(expected.getClientName());
-            assertThat(actualChange.getParty()).isEqualTo(expected.getParty());
-            assertThat(actualChange.getAdded()).isEqualTo(expected.getAdded()); //added = old sol
-            assertThat(actualChange.getRemoved().getOrganisation()).isEqualTo(expected.getRemoved().getOrganisation());
-            assertThat(actualChange.getBy()).isEqualTo(expected.getBy());
-        }
-    }
-
-    @Test
-    public void shouldUpdateChangeOfRepresentativesRespondent() throws Exception {
-        setUpCaseDetails("change-of-representatives-respondent.json");
-        when(mockIdamService.getIdamFullName(any())).thenReturn("Claire Mumford");
-        when(mockCaseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
-        when(mockCaseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
-        when(mockCaseDataService.buildFullRespondentName(any())).thenReturn("Jane Smith");
-
-        try (InputStream resourceAsStream = getClass().getResourceAsStream(PATH
-            + "change-of-representatives-respondent-before.json")) {
-            CallbackRequest actualRequest = mapper.readValue(resourceAsStream, CallbackRequest.class);
-            InputStream is = getClass().getResourceAsStream(PATH
-                + "change-of-representatives-respondent-original.json");
-            CaseDetails originalDetails = mapper.readValue(is, CallbackRequest.class).getCaseDetails();
-
-            Map<String, Object> caseData = noticeOfChangeService.updateRepresentation(actualRequest.getCaseDetails(),
-                authTokenGenerator.generate(),
-                originalDetails);
-            ChangeOfRepresentation actualChange = getFirstChangeElement.apply(caseData).get(0).getValue();
-            ChangeOfRepresentation expected = getFirstChangeElement.apply(callbackRequest.getCaseDetails()
-                .getData()).get(0).getValue();
-
-            assertThat(actualChange.getClientName()).isEqualTo(expected.getClientName());
-            assertThat(actualChange.getParty()).isEqualTo(expected.getParty());
-            assertThat(actualChange.getAdded()).isEqualTo(expected.getAdded());
-            assertThat(actualChange.getBy()).isEqualTo(expected.getBy());
-        }
-    }
-
-    private List<Element<ChangeOfRepresentation>> convertToChangeOfRepresentation(Map<String, Object> data) {
-        System.out.println(data);
-        return mapper.convertValue(data.get(CHANGE_OF_REPRESENTATIVES),
-            new TypeReference<>() {});
+    private OrganisationPolicy getOrganisationPolicy(Map<String, Object> caseData, String policy) {
+        return mapper.convertValue(caseData.get(policy), OrganisationPolicy.class);
     }
 
     private void setUpHelper() {
@@ -247,7 +233,9 @@ public class NoticeOfChangeServiceTest extends BaseServiceTest {
         when(mockCaseDataService.isApplicantRepresentedByASolicitor(any())).thenReturn(true);
         when(mockCaseDataService.isRespondentRepresentedByASolicitor(any())).thenReturn(true);
         when(mockCaseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(mockAssignCaseAccessService.revokeUserAccess(any())).thenReturn(CaseAssignmentUserRolesResponse
+            .builder()
+            .build());
+
     }
-
 }
-

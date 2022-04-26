@@ -5,13 +5,14 @@
     "jurisdiction": "DIVORCE",
     "state": "applicationIssued",
     "case_type_id": "ContestedFinancialRemedy",
+    "id": "123456",
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
       "applicantRepresented": "Yes",
       "applicantSolicitorName": "TestAppSolName",
       "applicantSolicitorEmail": "testappsol123@gmail.com",
-      "nocParty": "applicant",
+      "nocParty": "Applicant",
       "natureOfRepresentationChange": "replacing",
       "updateIncludesRepresentativeChange": "Yes",
       "ApplicantOrganisationPolicy": {
@@ -49,11 +50,19 @@
       "respondentPhone": "7411201631",
       "respondentRepresented": "Yes",
       "respondentFMName": "Jane",
+      "changeOrganisationRequestField": {
+        "OrganisationToAdd": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRApplicantNewSolFirm"
+        },
+        "OrganisationToRemove": {
+        }
+      },
       "ChangeOfRepresentatives": [
         {
           "id": "60dbe6bc-c1a7-11ec-9d64-0242ac120002",
           "value": {
-            "party": "applicant",
+            "party": "Applicant",
             "name": "John Smith",
             "date": "2020-06-01",
             "by": "Claire Mumford",

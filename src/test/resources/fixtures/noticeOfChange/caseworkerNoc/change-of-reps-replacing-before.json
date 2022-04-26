@@ -5,13 +5,14 @@
     "jurisdiction": "DIVORCE",
     "state": "applicationIssued",
     "case_type_id": "ContestedFinancialRemedy",
+    "id": "123456",
     "case_data": {
       "applicantFMName": "John",
       "applicantLName": "Smith",
       "applicantRepresented": "Yes",
       "applicantSolicitorName": "TestAppSolName",
       "applicantSolicitorEmail": "testappsol123@gmail.com",
-      "nocParty": "applicant",
+      "nocParty": "Applicant",
       "natureOfRepresentationChange": "replacing",
       "updateIncludesRepresentativeChange" : "Yes",
       "ApplicantOrganisationPolicy": {
@@ -48,7 +49,15 @@
       "respondentEmail": "padmaja102.ramisetti@gmail.com",
       "respondentLName": "Smith",
       "respondentPhone": "7411201631",
-      "respondentFMName": "Jane"
+      "respondentFMName": "Jane",
+      "changeOrganisationRequestField": {
+        "OrganisationToAdd": {
+          "OrganisationID": "A31PTVU",
+          "OrganisationName": "FRApplicantNewSolFirm"
+        },
+        "OrganisationToRemove": {
+        }
+      }
     }
   }
 }

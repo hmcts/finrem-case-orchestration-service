@@ -53,7 +53,8 @@ public class NoticeOfChangeControllerTest extends BaseControllerTest {
     }
 
     protected OngoingStubbing<Map<String, Object>> whenServiceUpdatesRepresentation() {
-        return when(noticeOfChangeService.updateRepresentation(isA(CaseDetails.class), eq(AUTH_TOKEN), any()));
+        return when(noticeOfChangeService.caseWorkerUpdatesRepresentation(isA(CaseDetails.class),
+            eq(AUTH_TOKEN), any()));
     }
 
     protected OngoingStubbing<AboutToStartOrSubmitCallbackResponse> whenServiceAssignsCaseAccess() {
@@ -95,7 +96,7 @@ public class NoticeOfChangeControllerTest extends BaseControllerTest {
                 .header(AUTHORIZATION_HEADER, AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.ChangeOfRepresentatives[0].value.party", is("applicant")))
+            .andExpect(jsonPath("$.data.ChangeOfRepresentatives[0].value.party", is("Applicant")))
             .andExpect(jsonPath("$.data.ChangeOfRepresentatives[0].value.name", is("John Smith")))
             .andExpect(jsonPath("$.data.ChangeOfRepresentatives[0].value.by", is("Claire Mumford")))
             .andExpect(jsonPath("$.data.ChangeOfRepresentatives[0].value.added.name", is("Sir Solicitor")))
