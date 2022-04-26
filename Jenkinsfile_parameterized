@@ -20,7 +20,8 @@ def secrets = [
                 secret("password-solicitor","PASSWORD-SOLICITOR"),
                 secret("idam-secret" ,"OAUTH2_CLIENT_FINREM"),
                 secret("finrem-system-update-username", "FINREM_SYSTEMUPDATE_USERNAME"),
-                secret("finrem-system-update-password", "FINREM_SYSTEMUPDATE_PASSWORD")
+                secret("finrem-system-update-password", "FINREM_SYSTEMUPDATE_PASSWORD"),
+                secret("finrem-idam-client-secret", "FINREM_IDAM_CLIENT_SECRET")
         ]
 ]
 
