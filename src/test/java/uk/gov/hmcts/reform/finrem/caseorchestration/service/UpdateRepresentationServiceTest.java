@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.BaseServiceTest;
@@ -88,6 +89,8 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
 
     @MockBean private ChangeOfRepresentationService changeOfRepresentationService;
 
+    @MockBean private AssignCaseAccessService assignCaseAccessService;
+
     private UserDetails testAppSolicitor;
     private UserDetails testRespSolicitor;
     private Organisation applicantOrg;
@@ -168,7 +171,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe");
+            .updateRepresentationAsSolicitor(initialDetails, "bebe").getData();
 
         assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), expectedCaseData.get(CONTESTED_SOLICITOR_NAME));
         assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), expectedCaseData.get(CONTESTED_SOLICITOR_EMAIL));
@@ -205,7 +208,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         }
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe");
+            .updateRepresentationAsSolicitor(initialDetails, "bebe").getData();
 
         assertEquals(actualData.get(CONSENTED_SOLICITOR_NAME), expectedCaseData.get(CONSENTED_SOLICITOR_NAME));
         assertEquals(actualData.get(SOLICITOR_EMAIL), expectedCaseData.get(SOLICITOR_EMAIL));
@@ -240,7 +243,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "bebe");
+            .updateRepresentationAsSolicitor(initialDetails, "bebe").getData();
 
         assertEquals(actualData.get(RESP_SOLICITOR_NAME), expectedCaseData.get(RESP_SOLICITOR_NAME));
         assertEquals(actualData.get(RESP_SOLICITOR_EMAIL), expectedCaseData.get(RESP_SOLICITOR_EMAIL));
@@ -287,7 +290,7 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         initialDetails = mapper.readValue(resourceAsStream, CallbackRequest.class).getCaseDetails();
 
         Map<String, Object> actualData = updateRepresentationService
-            .updateRepresentationAsSolicitor(initialDetails, "someAuthToken");
+            .updateRepresentationAsSolicitor(initialDetails, "someAuthToken").getData();
 
         assertEquals(actualData.get(CONTESTED_SOLICITOR_NAME), "Test Applicant Solicitor");
         assertEquals(actualData.get(CONTESTED_SOLICITOR_EMAIL), "appsolicitor1@yahoo.com");
@@ -327,6 +330,10 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
             .thenReturn(getChangeOfRepsAppContested());
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData("contestedAppSolicitorAdding"));
+        when(assignCaseAccessService.applyDecision(any(), any())).thenReturn(AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(expectedCaseData)
+            .build());
     }
 
     private void setUpMockContext(UserDetails solicitor,
@@ -344,6 +351,10 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData(fixture));
         when(caseDataService.isConsentedApplication(any())).thenReturn(isConsented);
+        when(assignCaseAccessService.applyDecision(any(), any())).thenReturn(AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(expectedCaseData)
+            .build());
     }
 
     private void setUpMockContextReplacing(UserDetails newSolicitor,
@@ -359,6 +370,10 @@ public class UpdateRepresentationServiceTest extends BaseServiceTest {
         when(updateSolicitorDetailsService.updateSolicitorContactDetails(any(), any(), anyBoolean(), anyBoolean()))
             .thenReturn(getUpdatedContactData("AppSolReplacing"));
         when(caseDataService.isConsentedApplication(any())).thenReturn(false);
+        when(assignCaseAccessService.applyDecision(any(), any())).thenReturn(AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(expectedCaseData)
+            .build());
     }
 
     private Map<String, Object> prepareSolAddressData(OrganisationsResponse organisationData) {

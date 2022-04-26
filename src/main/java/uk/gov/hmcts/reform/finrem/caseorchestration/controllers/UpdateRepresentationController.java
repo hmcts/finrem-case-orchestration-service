@@ -52,9 +52,9 @@ public class UpdateRepresentationController implements BaseController {
 
         validateCaseData(ccdRequest);
 
-        caseDetails.getData().putAll(updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken));
-        log.info("Case details for caseID {} == {}", caseDetails.getId(), caseDetails.getData());
-        AboutToStartOrSubmitCallbackResponse response = assignCaseAccessService.applyDecision(authToken, caseDetails);
+        AboutToStartOrSubmitCallbackResponse response =
+            updateRepresentationService.updateRepresentationAsSolicitor(caseDetails, authToken);
+        log.info("Case details for caseID {} == {}", caseDetails.getId(), response.getData());
         return ResponseEntity.ok(response);
     }
 

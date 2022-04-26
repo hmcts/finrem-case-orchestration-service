@@ -79,7 +79,7 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
         }
     }
 
-    protected OngoingStubbing<Map<String, Object>> whenServiceUpdatesRepresentationValid() {
+    protected OngoingStubbing<AboutToStartOrSubmitCallbackResponse> whenServiceUpdatesRepresentationValid() {
         return when(updateRepresentationService.updateRepresentationAsSolicitor(any(), eq(VALID_AUTH_TOKEN)));
     }
 
@@ -108,7 +108,10 @@ public class UpdateRepresentationControllerTest extends BaseControllerTest {
     public void shouldReturnOkResponseWithValidData() throws Exception {
         doRequestSetUp();
 
-        whenServiceUpdatesRepresentationValid().thenReturn(getUpdatedRepresentationData(beforeAppliedFixture()));
+        whenServiceUpdatesRepresentationValid().thenReturn(AboutToStartOrSubmitCallbackResponse
+            .builder()
+            .data(getUpdatedRepresentationData(beforeAppliedFixture()))
+            .build());
         whenServiceAssignsCaseAccessValid().thenReturn(AboutToStartOrSubmitCallbackResponse
             .builder()
             .data(getUpdatedRepresentationData(jsonFixture()))

@@ -8,11 +8,17 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.client.CaseAssignmentApi;
+import uk.gov.hmcts.reform.finrem.caseorchestration.client.CaseDataApiV2;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.AssignCaseAccessServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.AssignCaseAccessRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.AssignCaseAccessRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.DecisionRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.AboutToStartNocCallbackResponse;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesRequest;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResource;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CaseAssignmentUserRolesResponse;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -25,6 +31,8 @@ public class AssignCaseAccessService {
     private final RestService restService;
     private final CaseAssignmentApi caseAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final CaseDataApiV2 coreCaseDataApi;
+    private final SystemUserService systemUserService;
 
     private final FeatureToggleService featureToggleService;
 
@@ -49,7 +57,23 @@ public class AssignCaseAccessService {
             DecisionRequest.decisionRequest(caseDetails));
     }
 
+    public AboutToStartOrSubmitCallbackResponse applyDecision(CaseDetails caseDetails) {
+        return applyDecision(systemUserService.getSysUserToken(), caseDetails);
+    }
+
     public AboutToStartNocCallbackResponse prepareNoC(String authToken, CallbackRequest request) {
         return caseAssignmentApi.prepareNoC(authToken, authTokenGenerator.generate(), request);
+    }
+
+    public CaseAssignmentUserRolesResource getUsersWithAccess(String caseRoleId) {
+        String userToken = systemUserService.getSysUserToken();
+
+        return coreCaseDataApi.getUserRoles(userToken, authTokenGenerator.generate(), List.of(caseRoleId));
+    }
+
+    public CaseAssignmentUserRolesResponse revokeUserAccess(CaseAssignmentUserRolesRequest request) {
+        String userToken = systemUserService.getSysUserToken();
+
+        return coreCaseDataApi.removeCaseUserRoles(userToken, authTokenGenerator.generate(), request);
     }
 }
