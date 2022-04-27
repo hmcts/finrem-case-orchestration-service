@@ -14,7 +14,6 @@
       "natureOfRepresentationChange": "adding",
       "updateIncludesRepresentativeChange" : "Yes",
       "ApplicantOrganisationPolicy": {
-        "OrgPolicyReference": "FRApplicant",
         "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
       },
       "RespondentOrganisationPolicy": {
