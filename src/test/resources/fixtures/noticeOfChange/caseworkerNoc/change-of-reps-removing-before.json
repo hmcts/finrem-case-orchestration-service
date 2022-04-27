@@ -16,10 +16,6 @@
       "natureOfRepresentationChange": "removing",
       "updateIncludesRepresentativeChange" : "Yes",
       "ApplicantOrganisationPolicy": {
-        "Organisation": {
-          "OrganisationID": "A31PTVA",
-          "OrganisationName": "FRApplicantSolicitorFirm"
-        },
         "OrgPolicyReference": "FRApplicant",
         "OrgPolicyCaseAssignedRole": "[APPSOLICITOR]"
       },
