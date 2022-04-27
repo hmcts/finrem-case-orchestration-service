@@ -1,16 +1,23 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.helper.ContestedCourtHelper;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentation;
+import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangeOfRepresentatives;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
 import uk.gov.hmcts.reform.finrem.caseorchestration.service.CaseDataService;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
 
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_OF_REPRESENTATIVES;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONSENTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
@@ -28,6 +35,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigCo
 public class NotificationRequestMapper {
 
     private final CaseDataService caseDataService;
+    private final ObjectMapper objectMapper;
 
     private static final String CONSENTED = "consented";
     private static final String CONTESTED = "contested";
@@ -45,16 +53,47 @@ public class NotificationRequestMapper {
     }
 
     public NotificationRequest getNotificationRequestForNoticeOfChange(CaseDetails caseDetails) {
-//        String solicitorReference, solicitorName, solicitorEmail, caseType;
-//        if(caseDataService.isConsentedApplication(caseDetails)) {
-//            solicitorReference =
-//        }else{
-//
-//        }
-//
-//        return buildNotificationRequest(caseDetails, solicitorReference, solicitorName, solicitorEmail, caseType);
+        String solicitorReferenceKey, solicitorNameKey, solicitorEmailKey;
 
-        return new NotificationRequest();
+        if (isLastChangeOfRepresentationForRespondent(caseDetails)) {
+            solicitorReferenceKey = RESP_SOLICITOR_REFERENCE;
+            solicitorNameKey = RESP_SOLICITOR_NAME;
+            solicitorEmailKey = RESP_SOLICITOR_EMAIL;
+        } else {
+            solicitorReferenceKey = SOLICITOR_REFERENCE;
+            if (caseDataService.isConsentedApplication(caseDetails)) {
+                solicitorNameKey = CONSENTED_SOLICITOR_NAME;
+                solicitorEmailKey = SOLICITOR_EMAIL;
+            } else {
+                solicitorNameKey = CONTESTED_SOLICITOR_NAME;
+                solicitorEmailKey = CONTESTED_SOLICITOR_EMAIL;
+            }
+        }
+
+        return buildNotificationRequest(caseDetails, solicitorReferenceKey, solicitorNameKey, solicitorEmailKey, getCaseType(caseDetails));
+    }
+
+    private boolean isLastChangeOfRepresentationForRespondent(CaseDetails caseDetails) {
+        return getLastChangeOfRepresentation(caseDetails).getParty().equals("Respondent");
+    }
+
+    private ChangeOfRepresentation getLastChangeOfRepresentation(CaseDetails caseDetails) {
+        ChangeOfRepresentatives changeOfRepresentativesHistory = objectMapper
+            .convertValue(caseDetails.getData().get(CHANGE_OF_REPRESENTATIVES), new TypeReference<>() {});
+        ChangeOfRepresentation lastChangeOfRepresentation = Collections
+            .max(changeOfRepresentativesHistory.getChangeOfRepresentation(), Comparator.comparing(c -> c.getValue().getDate()))
+            .getValue();
+        return lastChangeOfRepresentation;
+    }
+
+    private String getCaseType(CaseDetails caseDetails) {
+        String caseType;
+        if (caseDataService.isConsentedApplication(caseDetails)) {
+            caseType = CONSENTED;
+        } else {
+            caseType = CONTESTED;
+        }
+        return caseType;
     }
 
     private NotificationRequest buildNotificationRequest(CaseDetails caseDetails,

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -27,6 +28,8 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_OF_REPRESENTATIVES;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
+import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 public class NotificationRequestMapperTest extends BaseServiceTest {
@@ -94,22 +97,67 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenApplicantNoticeOfChangeOnContestedCaseWhenGetNotificationRequestForNoticeOfChangeCalledThenReturnNotificationRequestToAddedSolicitorOnLatestChangeOfRepresentation() {
+    public void givenApplicantSolicitorNoticeOfChangeOnContestedCaseWhenGetNotificationRequestForNoticeOfChangeCalledThenReturnNotificationRequestToAddedSolicitorOnLatestChangeOfRepresentation() {
         CallbackRequest callbackRequest = getContestedCallbackRequest();
-        callbackRequest.getCaseDetails().getData().put(CHANGE_OF_REPRESENTATIVES, getChangeOfRepresentationApplicantSolicitor());
+        callbackRequest.getCaseDetails().getData().put(CHANGE_OF_REPRESENTATIVES,
+            getChangeOfRepresentation("Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
             callbackRequest.getCaseDetails());
 
-        assertThat(notificationRequest.getNotificationEmail(), is("testSolicitor3@test.com"));
-        assertThat(notificationRequest.getName(), is("TestSolicitor3 Name"));
+        assertThat(notificationRequest.getNotificationEmail(), is(TEST_SOLICITOR_EMAIL));
+        assertThat(notificationRequest.getName(), is(TEST_SOLICITOR_NAME));
         assertThat(notificationRequest.getCaseType(), is("contested"));
     }
 
-    private ChangeOfRepresentatives getChangeOfRepresentationApplicantSolicitor() {
+    @Test
+    public void givenRespondentSolicitorNoticeOfChangeOnContestedCaseWhenGetNotificationRequestForNoticeOfChangeCalledThenReturnNotificationRequestToAddedSolicitorOnLatestChangeOfRepresentation() {
+        CallbackRequest callbackRequest = getContestedCallbackRequest();
+        callbackRequest.getCaseDetails().getData().put(CHANGE_OF_REPRESENTATIVES,
+            getChangeOfRepresentation("Respondent", TEST_RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_EMAIL));
+
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
+            callbackRequest.getCaseDetails());
+
+        assertThat(notificationRequest.getNotificationEmail(), is(TEST_RESP_SOLICITOR_EMAIL));
+        assertThat(notificationRequest.getName(), is(TEST_RESP_SOLICITOR_NAME));
+        assertThat(notificationRequest.getCaseType(), is("contested"));
+    }
+
+    @Test
+    public void givenApplicantSolicitorNoticeOfChangeOnConsentedCaseWhenGetNotificationRequestForNoticeOfChangeCalledThenReturnNotificationRequestToAddedSolicitorOnLatestChangeOfRepresentation() {
+        CallbackRequest callbackRequest = getConsentedCallbackRequest();
+        callbackRequest.getCaseDetails().getData().put(CHANGE_OF_REPRESENTATIVES,
+            getChangeOfRepresentation("Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
+
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
+            callbackRequest.getCaseDetails());
+
+        assertThat(notificationRequest.getNotificationEmail(), is(TEST_SOLICITOR_EMAIL));
+        assertThat(notificationRequest.getName(), is(TEST_SOLICITOR_NAME));
+        assertThat(notificationRequest.getCaseType(), is("consented"));
+    }
+
+    @Test
+    public void givenRespondentSolicitorNoticeOfChangeOnConsentedCaseWhenGetNotificationRequestForNoticeOfChangeCalledThenReturnNotificationRequestToAddedSolicitorOnLatestChangeOfRepresentation() {
+        CallbackRequest callbackRequest = getConsentedCallbackRequest();
+        callbackRequest.getCaseDetails().getData().put(CHANGE_OF_REPRESENTATIVES,
+            getChangeOfRepresentation("Respondent", TEST_RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_EMAIL));
+
+        NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForNoticeOfChange(
+            callbackRequest.getCaseDetails());
+
+        assertThat(notificationRequest.getNotificationEmail(), is(TEST_RESP_SOLICITOR_EMAIL));
+        assertThat(notificationRequest.getName(), is(TEST_RESP_SOLICITOR_NAME));
+        assertThat(notificationRequest.getCaseType(), is("consented"));
+    }
+
+    private ChangeOfRepresentatives getChangeOfRepresentation(String party,
+                                                              String latestSolicitorName,
+                                                              String latestSolicitorEmail) {
         List<Element<ChangeOfRepresentation>> changeOfRepresentation = Stream.of(
             element(UUID.randomUUID(), ChangeOfRepresentation.builder()
-                .party("Applicant")
+                .party(party)
                 .clientName("TestClient Name")
                 .via("Notice of Change")
                 .by("TestSolicitor2 Name")
@@ -126,14 +174,14 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
                     .build())
                 .build()),
             element(UUID.randomUUID(), ChangeOfRepresentation.builder()
-                .party("Applicant")
+                .party(party)
                 .clientName("TestClient Name")
                 .via("Notice of Change")
-                .by("TestSolicitor3 Name")
+                .by(latestSolicitorName)
                 .date(LocalDate.now())
                 .added(ChangedRepresentative.builder()
-                    .email("testSolicitor3@test.com")
-                    .name("TestSolicitor3 Name")
+                    .email(latestSolicitorEmail)
+                    .name(latestSolicitorName)
                     .organisation(Organisation.builder().build())
                     .build())
                 .removed(ChangedRepresentative.builder()
@@ -142,9 +190,9 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
                     .organisation(Organisation.builder().build())
                     .build())
                 .build())
-            ).collect(Collectors.toList());
+        ).collect(Collectors.toList());
         return ChangeOfRepresentatives.builder()
             .changeOfRepresentation(changeOfRepresentation)
-                .build();
+            .build();
     }
 }
