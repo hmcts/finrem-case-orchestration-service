@@ -35,7 +35,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     NotificationRequestMapper notificationRequestMapper;
 
     @Test
-    public void shouldgetNotificationRequestForApplicantSolicitorForConsentedJourney() {
+    public void shouldGetNotificationRequestForApplicantSolicitorForConsentedJourney() {
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
             getConsentedCallbackRequest().getCaseDetails());
 
@@ -48,7 +48,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldgetNotificationRequestForApplicantSolicitorForContestedJourney() {
+    public void shouldGetNotificationRequestForApplicantSolicitorForContestedJourney() {
         CallbackRequest callbackRequest = getContestedCallbackRequest();
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForApplicantSolicitor(
@@ -64,7 +64,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldgetNotificationRequestForRespondentSolicitorForConsentedJourney() {
+    public void shouldGetNotificationRequestForRespondentSolicitorForConsentedJourney() {
         CallbackRequest callbackRequest = getConsentedCallbackRequest();
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForRespondentSolicitor(
             callbackRequest.getCaseDetails());
@@ -78,7 +78,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void shouldgetNotificationRequestForRespondentSolicitorForContestedJourney() {
+    public void shouldGetNotificationRequestForRespondentSolicitorForContestedJourney() {
         CallbackRequest callbackRequest = getContestedCallbackRequest();
 
         NotificationRequest notificationRequest = notificationRequestMapper.getNotificationRequestForRespondentSolicitor(
