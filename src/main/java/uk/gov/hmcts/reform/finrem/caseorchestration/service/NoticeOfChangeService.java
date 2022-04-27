@@ -77,7 +77,7 @@ public class NoticeOfChangeService {
         log.info("case details for caseID {}: ", caseDetails);
         final OrganisationPolicy orgPolicyToUpdate = getOrganisationPolicy(caseDetails);
         log.info("About to start noc as caseworker for caseID {}", caseDetails.getId());
-        log.info("Org policy before update: {}", getOrganisationPolicy(originalCaseDetails));
+        log.info("Org policy before update: {}", getOriginalOrgPolicy(originalCaseDetails));
         log.info("Org policy after update: {}", getOrganisationPolicy(caseDetails));
 
         caseData = updateChangeOfRepresentatives(caseDetails,
@@ -232,10 +232,16 @@ public class NoticeOfChangeService {
             .build());
     }
 
-    public OrganisationPolicy getOrganisationPolicy(CaseDetails caseDetails) {
+    private OrganisationPolicy getOrganisationPolicy(CaseDetails caseDetails) {
         return objectMapper.convertValue(caseDetails.getData().get((
             (String) caseDetails.getData().get(NOC_PARTY)).equalsIgnoreCase(APPLICANT)
             ? APPLICANT_ORGANISATION_POLICY : RESPONDENT_ORGANISATION_POLICY),
             new TypeReference<>() {});
     }
+
+    private OrganisationPolicy getOriginalOrgPolicy(CaseDetails caseDetails) {
+        return objectMapper.convertValue(caseDetails.getData().get(APPLICANT_ORGANISATION_POLICY),
+            new TypeReference<>() {});
+    }
+
 }

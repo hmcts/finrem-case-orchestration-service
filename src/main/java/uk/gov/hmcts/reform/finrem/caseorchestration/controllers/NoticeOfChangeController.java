@@ -47,6 +47,7 @@ public class NoticeOfChangeController implements BaseController {
 
 
         log.info("Received request to update representation on case with Case ID: {}", caseDetails.getId());
+        log.info("Authorisation token for invoker = {}", authToken);
         caseData = noticeOfChangeService.caseWorkerUpdatesRepresentation(caseDetails, authToken, originalCaseDetails);
         caseDetails.getData().putAll(caseData);
 
