@@ -28,6 +28,7 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.OrchestrationConstant
 public class NoticeOfChangeController implements BaseController {
 
     private final NoticeOfChangeService noticeOfChangeService;
+
     @PostMapping(path = "/representation-change", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Handles update Contested Case details where update includes a change in representation")
     @ApiResponses(value = {
