@@ -1,11 +1,5 @@
 package uk.gov.hmcts.reform.finrem.caseorchestration.mapper;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -16,10 +10,15 @@ import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.ChangedRepresentat
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Organisation;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_DIVORCE_CASE_NUMBER;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_EMAIL;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_RESP_SOLICITOR_NAME;
@@ -28,8 +27,6 @@ import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SO
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.TestConstants.TEST_SOLICITOR_REFERENCE;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CHANGE_OF_REPRESENTATIVES;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_EMAIL;
-import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.CCDConfigConstant.CONTESTED_SOLICITOR_NAME;
 import static uk.gov.hmcts.reform.finrem.caseorchestration.model.ccd.Element.element;
 
 public class NotificationRequestMapperTest extends BaseServiceTest {
@@ -97,7 +94,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenApplicantSolicitorNoticeOfChangeOnContestedCaseWhenGetNotificationRequestForNoticeOfChangeCalledThenReturnNotificationRequestToAddedSolicitorOnLatestChangeOfRepresentation() {
+    public void givenApplicantSolicitorNoticeOfChangeOnContestedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
         CallbackRequest callbackRequest = getContestedCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(CHANGE_OF_REPRESENTATIVES,
             getChangeOfRepresentation("Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
@@ -111,7 +108,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenRespondentSolicitorNoticeOfChangeOnContestedCaseWhenGetNotificationRequestForNoticeOfChangeCalledThenReturnNotificationRequestToAddedSolicitorOnLatestChangeOfRepresentation() {
+    public void givenRespondentSolicitorNoticeOfChangeOnContestedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
         CallbackRequest callbackRequest = getContestedCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(CHANGE_OF_REPRESENTATIVES,
             getChangeOfRepresentation("Respondent", TEST_RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_EMAIL));
@@ -125,7 +122,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenApplicantSolicitorNoticeOfChangeOnConsentedCaseWhenGetNotificationRequestForNoticeOfChangeCalledThenReturnNotificationRequestToAddedSolicitorOnLatestChangeOfRepresentation() {
+    public void givenApplicantSolicitorNoticeOfChangeOnConsentedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
         CallbackRequest callbackRequest = getConsentedCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(CHANGE_OF_REPRESENTATIVES,
             getChangeOfRepresentation("Applicant", TEST_SOLICITOR_NAME, TEST_SOLICITOR_EMAIL));
@@ -139,7 +136,7 @@ public class NotificationRequestMapperTest extends BaseServiceTest {
     }
 
     @Test
-    public void givenRespondentSolicitorNoticeOfChangeOnConsentedCaseWhenGetNotificationRequestForNoticeOfChangeCalledThenReturnNotificationRequestToAddedSolicitorOnLatestChangeOfRepresentation() {
+    public void givenRespondentSolicitorNoticeOfChangeOnConsentedWhenGetNotificationRequestCalledThenReturnNotificationRequestToAddedSolicitor() {
         CallbackRequest callbackRequest = getConsentedCallbackRequest();
         callbackRequest.getCaseDetails().getData().put(CHANGE_OF_REPRESENTATIVES,
             getChangeOfRepresentation("Respondent", TEST_RESP_SOLICITOR_NAME, TEST_RESP_SOLICITOR_EMAIL));

@@ -53,7 +53,9 @@ public class NotificationRequestMapper {
     }
 
     public NotificationRequest getNotificationRequestForNoticeOfChange(CaseDetails caseDetails) {
-        String solicitorReferenceKey, solicitorNameKey, solicitorEmailKey;
+        String solicitorReferenceKey;
+        String solicitorNameKey;
+        String solicitorEmailKey;
 
         if (isLastChangeOfRepresentationForRespondent(caseDetails)) {
             solicitorReferenceKey = RESP_SOLICITOR_REFERENCE;

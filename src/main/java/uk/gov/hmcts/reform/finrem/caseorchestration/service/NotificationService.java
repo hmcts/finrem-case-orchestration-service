@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.finrem.caseorchestration.config.NotificationServiceConfiguration;
 import uk.gov.hmcts.reform.finrem.caseorchestration.mapper.NotificationRequestMapper;
 import uk.gov.hmcts.reform.finrem.caseorchestration.model.notification.NotificationRequest;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
@@ -369,13 +368,13 @@ public class NotificationService {
 
     public void sendNoticeOfChangeEmail(CaseDetails caseDetails) {
         URI uri = getNoticeOfChangeUri(caseDetails);
-        sendNotificationEmail(notificationRequestMapper.
-            getNotificationRequestForNoticeOfChange(caseDetails), uri);
+        sendNotificationEmail(notificationRequestMapper
+            .getNotificationRequestForNoticeOfChange(caseDetails), uri);
     }
 
     private URI getNoticeOfChangeUri(CaseDetails caseDetails) {
-        return buildUri(caseDataService.isConsentedApplication(caseDetails) ?
-            notificationServiceConfiguration.getConsentedNoticeOfChange() :
-            notificationServiceConfiguration.getContestedNoticeOfChange());
+        return buildUri(caseDataService.isConsentedApplication(caseDetails)
+            ? notificationServiceConfiguration.getConsentedNoticeOfChange()
+            : notificationServiceConfiguration.getContestedNoticeOfChange());
     }
 }
