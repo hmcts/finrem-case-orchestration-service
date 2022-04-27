@@ -49,8 +49,8 @@ public class NotificationRequestMapper {
 
     public NotificationRequest getNotificationRequestForApplicantSolicitor(CaseDetails caseDetails) {
         return caseDataService.isConsentedApplication(caseDetails)
-            ? buildNotificationRequest(caseDetails, getConsentedCaseDataKeysForRespondentSolicitor())
-            : buildNotificationRequest(caseDetails, getContestedCaseDataKeysForRespondentSolicitor());
+            ? buildNotificationRequest(caseDetails, getConsentedCaseDataKeysForApplicantSolicitor())
+            : buildNotificationRequest(caseDetails, getContestedCaseDataKeysForApplicantSolicitor());
     }
 
     public NotificationRequest getNotificationRequestForNoticeOfChange(CaseDetails caseDetails) {
@@ -59,7 +59,7 @@ public class NotificationRequestMapper {
             : getNotificationRequestForApplicantSolicitor(caseDetails);
     }
 
-    private SolicitorCaseDataKeysWrapper getContestedCaseDataKeysForRespondentSolicitor() {
+    private SolicitorCaseDataKeysWrapper getContestedCaseDataKeysForApplicantSolicitor() {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(CONTESTED_SOLICITOR_EMAIL)
             .solicitorNameKey(CONTESTED_SOLICITOR_NAME)
@@ -67,7 +67,7 @@ public class NotificationRequestMapper {
             .build();
     }
 
-    private SolicitorCaseDataKeysWrapper getConsentedCaseDataKeysForRespondentSolicitor() {
+    private SolicitorCaseDataKeysWrapper getConsentedCaseDataKeysForApplicantSolicitor() {
         return SolicitorCaseDataKeysWrapper.builder()
             .solicitorEmailKey(SOLICITOR_EMAIL)
             .solicitorNameKey(CONSENTED_SOLICITOR_NAME)
